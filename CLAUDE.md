@@ -1,0 +1,22 @@
+# CLAUDE.md
+
+Szop is a web application for tracking shopping lists (groceries and general shopping). See `README.md` for the high-level description.
+
+## Project purpose (from the README disclaimer)
+
+This project is primarily a **learning project**. The owner wants to learn:
+
+- the superpowers workflow (brainstorming → spec → plan → implementation), and
+- popular web application technologies.
+
+How to work on it:
+
+- **Go step by step.** Every element of building the app is its own deliberate step that the owner wants to follow and understand: project setup and layout, architecture, technology choices, CI/CD, building, testing, deployment, and others. Do not bundle several of these into one change or make them silently.
+- **Use the superpowers workflow for everything**, not only for features. Setup, tooling, CI/CD and deployment decisions also go through brainstorming and approval.
+- **Record decisions in the project documentation.** Capture every decision about architecture, solution design, approaches and other crucial aspects of the implementation, along with the reasoning and the alternatives considered.
+- **Explain choices.** When proposing a technology or approach, say why and what the trade-offs are, since learning is a goal in itself.
+
+## Documentation
+
+- `docs/requirements/functional-requirements.md` — the living source of truth for functional requirements (FR IDs, use cases, MVP/Later slicing, future extensions). Keep it updated when behavior changes.
+- `docs/decisions/` — ADR-style decision records, numbered `NNNN-short-title.md`, each with context, options considered, the decision and its consequences. Add a new ADR for every significant decision (architecture, technology, tooling, process), and don't rewrite accepted ones: supersede them with a new ADR.
