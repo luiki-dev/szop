@@ -15,20 +15,20 @@ The frontend never touches the database. The backend never draws screens. The sh
 
 ## 2. Who is responsible for what
 
-| Piece | Where it runs | Responsible for | Not responsible for |
-|---|---|---|---|
-| **Vite** | your machine, at build time | Bundling the frontend source into static files; a fast development server | Anything at runtime — Vite is not present in production |
-| **React** | browser | Turning state into screens (components), reacting to clicks and typing | Fetching data, URLs, talking to the server |
-| **React Router** | browser | Mapping the URL (`/lists/42`) to the page component to show | Data |
-| **TanStack Query** | browser | Fetching server data, caching it, refreshing it, loading/error states, optimistic updates | Deciding *what* the URL or payload is — the API client does that |
-| **React Hook Form** | browser | Form field state, submission, showing validation errors | The validation rules themselves — Zod provides them |
-| **Better Auth client** | browser | Calling the login, registration and session endpoints | Storing passwords or sessions — the server does |
-| **Zod** (shared) | browser and server | Describing data shapes once; validating at runtime and producing TypeScript types from the same definition | — |
-| **Node.js** | server | Running JavaScript outside the browser: network, files, timers | Routing, validation — frameworks add those |
-| **Fastify** | server | Receiving HTTP requests, routing them to handlers, running hooks, validating and serializing via schemas, plugins | Business rules — our services hold those |
-| **Better Auth** | server | Users, password hashing, sessions, cookies, email verification and reset flows, anonymous users | What a user may do with a list — our access control |
-| **Drizzle** | server | Describing tables in TypeScript, building type-safe SQL queries, migrations | Business rules |
-| **PostgreSQL** | database server | Storing data durably, enforcing constraints, running queries, transactions | Anything about HTTP or users' sessions in the browser |
+| Piece | Docs | Where it runs | Responsible for | Not responsible for |
+|---|---|---|---|---|
+| **[Vite](https://vite.dev/)** | [Guide](https://vite.dev/guide/) | your machine, at build time | Bundling the frontend source into static files; a fast development server | Anything at runtime — Vite is not present in production |
+| **[React](https://react.dev/)** | [Reference](https://react.dev/reference/react) | browser | Turning state into screens (components), reacting to clicks and typing | Fetching data, URLs, talking to the server |
+| **[React Router](https://reactrouter.com/)** | [Docs](https://reactrouter.com/home) | browser | Mapping the URL (`/lists/42`) to the page component to show | Data |
+| **[TanStack Query](https://tanstack.com/query)** | [Docs](https://tanstack.com/query/latest/docs/framework/react/overview) | browser | Fetching server data, caching it, refreshing it, loading/error states, optimistic updates | Deciding *what* the URL or payload is — the API client does that |
+| **[React Hook Form](https://react-hook-form.com/)** | [Docs](https://react-hook-form.com/docs) | browser | Form field state, submission, showing validation errors | The validation rules themselves — Zod provides them |
+| **[Better Auth client](https://www.better-auth.com/)** | [Docs](https://www.better-auth.com/docs/concepts/client) | browser | Calling the login, registration and session endpoints | Storing passwords or sessions — the server does |
+| **[Zod](https://zod.dev/)** (shared) | [API](https://zod.dev/api) | browser and server | Describing data shapes once; validating at runtime and producing TypeScript types from the same definition | — |
+| **[Node.js](https://nodejs.org/)** | [API](https://nodejs.org/docs/latest/api/) | server | Running JavaScript outside the browser: network, files, timers | Routing, validation — frameworks add those |
+| **[Fastify](https://fastify.dev/)** | [Docs](https://fastify.dev/docs/latest/) | server | Receiving HTTP requests, routing them to handlers, running hooks, validating and serializing via schemas, plugins | Business rules — our services hold those |
+| **[Better Auth](https://www.better-auth.com/)** | [Docs](https://www.better-auth.com/docs/introduction) | server | Users, password hashing, sessions, cookies, email verification and reset flows, anonymous users | What a user may do with a list — our access control |
+| **[Drizzle](https://orm.drizzle.team/)** | [Docs](https://orm.drizzle.team/docs/overview) | server | Describing tables in TypeScript, building type-safe SQL queries, migrations | Business rules |
+| **[PostgreSQL](https://www.postgresql.org/)** | [Docs](https://www.postgresql.org/docs/current/) | database server | Storing data durably, enforcing constraints, running queries, transactions | Anything about HTTP or users' sessions in the browser |
 
 ## 3. Who talks to whom
 
