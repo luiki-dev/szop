@@ -7,7 +7,7 @@ Requirements are tagged:
 - **[MVP]** — part of the first release.
 - **[Later]** — planned core functionality, built after the MVP.
 
-Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md).
+Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md) and [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server). Acronyms are explained in the [glossary](../glossary.md).
 
 ## 1. General assumptions, actors, domain concepts
 
@@ -15,13 +15,13 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 
 - Szop is a web application for shopping lists of any kind (groceries, DIY, events, general shopping), used on phones in stores and on desktops for planning.
 - The UI is English only.
-- Account data requires an internet connection. Guest data lives in the browser.
+- The app requires an internet connection, for guests and registered users alike.
 - A user's workspace is private, except for lists they explicitly share.
 - Predefined content (catalog, categories, units) is seed data kept in the project repository. Each new workspace gets its own **copy**. Later changes to the seed data do not affect existing workspaces.
 
 ### Actors
 
-- **Guest** — no account. Has a *local workspace* stored in the browser. Can open shared lists via a share link, with the role the link grants.
+- **Guest** — no account. Works in an *anonymous workspace* stored on the server and tied to their browser by a session cookie; clearing the browser's cookies loses access to it. Can open shared lists via a share link, with the role the link grants.
 - **Registered user** — has an account. Their workspace is stored on the server and available on any device.
 - **List owner** — the user who created a list. Only the owner can rename, archive, delete, duplicate or share it.
 - **Collaborator** — someone a list is shared with, in one of two roles:
@@ -44,12 +44,13 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 
 ### Accounts and guest mode (ACC)
 
-- **ACC-1 [MVP]** A guest can use the app without registering. Their workspace is created in the browser from the seed data on the first visit.
-- **ACC-2 [MVP]** Register with email and password, with email verification. On registration, the guest's local workspace in that browser becomes the account's workspace. If there is none, a new workspace is created from the seed data.
+- **ACC-1 [MVP]** A guest can use the app without registering. On the first visit, an anonymous workspace is created from the seed data and tied to their browser.
+- **ACC-2 [MVP]** Register with email and password, with email verification. On registration, the guest's anonymous workspace in that browser becomes the account's workspace.
 - **ACC-3 [MVP]** Log in and log out. Reset a forgotten password via email. Change the password while logged in.
-- **ACC-4 [MVP]** When logging into an *existing* account in a browser that holds guest data, the app offers to import the guest's lists and templates or to discard them. Imported items are matched to the account's categories by name. Unmatched items become uncategorized.
+- **ACC-4 [MVP]** When logging into an *existing* account from a browser whose guest workspace holds data, the app offers to import the guest's lists and templates or to discard them. Imported items are matched to the account's categories by name. Unmatched items become uncategorized.
 - **ACC-5 [MVP]** Profile settings: display name and currency.
 - **ACC-6 [MVP]** Delete the account with all its data, after confirmation. Lists it shared disappear for collaborators.
+- **ACC-7 [MVP]** Anonymous (guest) workspaces inactive for 30 days are deleted automatically.
 
 ### Shopping lists (LST)
 
@@ -104,7 +105,7 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 ### Sharing (SHR)
 
 - **SHR-1 [Later]** The owner can share a list with a registered user by email, as **shopper** or **editor**. The list appears in that user's "Shared with me" view.
-- **SHR-2 [Later]** The owner can create a share link per role, and revoke or regenerate it. Anyone opening the link, including guests, gets that role. For a guest, the list is remembered in their browser.
+- **SHR-2 [Later]** The owner can create a share link per role, and revoke or regenerate it. Anyone opening the link, including guests, gets that role. For a guest, access is tied to their anonymous session in that browser.
 - **SHR-3 [Later]** The owner can change a collaborator's role or remove them. A collaborator can leave a shared list.
 - **SHR-4 [Later]** Only the owner can rename, archive, delete, duplicate or share the list.
 - **SHR-5 [Later]** A shared list uses the **owner's** category tree, category order and currency. An editor picks categories from the owner's tree. When an editor adds a product from their own catalog, its category is matched by name in the owner's tree, otherwise the item is uncategorized. "Save to catalog" saves to the editor's own catalog.
@@ -116,11 +117,11 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 
 ### Connectivity (NET)
 
-- **NET-1 [MVP]** When the connection is lost, the app clearly shows an offline state and blocks server-side changes rather than silently losing them. Guest local data keeps working.
+- **NET-1 [MVP]** When the connection is lost, the app clearly shows an offline state and blocks changes rather than silently losing them. This applies to guests and registered users alike.
 
 ## 3. Use cases
 
-- **UC-1 First visit as a guest** — A visitor opens Szop. A local workspace is created from the seed data. They create "Weekly groceries" and add items with the smart input.
+- **UC-1 First visit as a guest** — A visitor opens Szop. An anonymous workspace is created from the seed data. They create "Weekly groceries" and add items with the smart input.
 - **UC-2 Plan a grocery trip** — The user opens a list and types "mil". They pick "Milk", which is added with category Dairy and unit l. They type "birthday candles" and press enter. The item is added ad-hoc and the app offers "Save to catalog?", which they skip. They open the catalog browser, select 5 products under Vegetables and add them. The list sorts itself by category.
 - **UC-3 Shop in a store** — The user walks the store in category order, checking items off. Checked items move to the checked part of the list. They hide checked items to see only what is left. The totals show the spent and remaining amounts.
 - **UC-4 Reuse a weekly list** — After shopping, the user taps "Uncheck all" on "Weekly groceries" and reuses it next week.

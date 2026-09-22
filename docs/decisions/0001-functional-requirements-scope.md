@@ -1,6 +1,6 @@
 # ADR 0001 — Functional requirements scope
 
-- **Status:** Accepted
+- **Status:** Accepted — decision 1 superseded by [ADR 0002](0002-technical-architecture.md)
 - **Date:** 2026-09-21
 
 ## Context

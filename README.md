@@ -34,7 +34,18 @@ It is built for the phone in your hand in the store as much as for planning at a
 - More languages
 - Admin panel for maintaining the predefined catalog
 
+## Tech stack
+
+- **Frontend** — React single-page application built with Vite, React Router, TanStack Query and React Hook Form
+- **Backend** — Node.js with Fastify, REST API
+- **Shared** — Zod schemas and domain rules used by both frontend and backend, all in TypeScript
+- **Database** — PostgreSQL with Drizzle
+- **Authentication** — Better Auth, cookie-based sessions
+
 ## Documentation
 
 - [Functional requirements](docs/requirements/functional-requirements.md) — what Szop does, in detail
+- [Architecture](docs/architecture/architecture.md) — how Szop is built
+- [Stack overview](docs/architecture/stack-overview.md) — the technologies and concepts behind it, explained
+- [Glossary](docs/glossary.md) — acronyms and terms used in the docs
 - [Decisions](docs/decisions/) — records of the decisions behind the project and why they were made
