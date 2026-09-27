@@ -1,6 +1,6 @@
 # ADR 0002 — Technical architecture and technology choices
 
-- **Status:** Accepted
+- **Status:** Accepted — decision 8 refined by [ADR 0003](0003-abuse-protection.md)
 - **Date:** 2026-09-22
 - **Supersedes:** decision 1 of [ADR 0001](0001-functional-requirements-scope.md) (where guest data lives)
 

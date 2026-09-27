@@ -90,11 +90,26 @@ A versioned data file in `apps/api` holds the default catalog, category tree and
 
 ### Anonymous guests
 
-- Better Auth's anonymous plugin creates an anonymous user, and with it a seeded workspace, on a visitor's first request without a session (ACC-1).
+- **Lazy creation (ACC-1).** A visitor without a session has no user and no workspace. Read requests without a session get the **seed data** (catalog, categories, units), which the API keeps in memory, read-only, and an empty set of lists and templates. Nothing is written to the database.
+- On the visitor's **first change**, the frontend asks Better Auth's anonymous plugin for an anonymous session (rate-limited, see Abuse protection). Creating the anonymous user also creates its workspace by copying the seed data. The frontend then sends the original change.
 - When an anonymous user registers or logs in, Better Auth links them to the registered account. In that step the server either:
   - reassigns the anonymous workspace to the new account on registration (ACC-2), or
   - imports the guest's lists and templates into the existing account's workspace, or discards them, according to the user's choice (ACC-4).
-- A scheduled cleanup task inside the API process deletes anonymous users (and their workspaces) inactive for 30 days (ACC-7).
+- **Activity tracking.** Each workspace has a `last_active_at` timestamp, updated by the auth hook at most once an hour to avoid a database write on every request.
+- **Cleanup.** A scheduled task inside the API process deletes (ACC-7, ACC-8):
+  - anonymous users whose `last_active_at` is within 1 hour of creation, 3 days after creation;
+  - other anonymous users inactive for 30 days;
+  - registered users not verified within 7 days.
+
+### Abuse protection
+
+Anonymous users make writes cheap for anyone, so the design limits how much a script can cost us. The values are the defaults from LIM-1 to LIM-4, read from configuration.
+
+- **Lazy creation** (above): visits that change nothing — crawlers, uptime monitors, link previews — create nothing.
+- **Rate limits** with `@fastify/rate-limit`: anonymous-session creation and registration per IP address; all other API requests per session. IPv6 addresses are keyed by their /64 block, so one machine cannot rotate through addresses. Login attempts use Better Auth's built-in rate limiting, per IP address and per email address.
+- **Quotas**: services check a workspace's counts before inserting (lists, items per list or template, templates, products, categories and tree depth, units). Text lengths are part of the shared Zod schemas.
+- **Request size**: Fastify's default body limit (1 MB) stays on.
+- **Not in the application**: volumetric denial of service (floods of traffic) is handled at the infrastructure level (reverse proxy, content delivery network), decided with deployment. A bot challenge (such as Cloudflare Turnstile) on anonymous-session creation is an escalation option if abuse ever appears.
 
 ### Errors
 
@@ -103,9 +118,10 @@ One JSON error shape: `{ "error": { "code": "...", "message": "..." } }`.
 | Situation | Status |
 |---|---|
 | Invalid input (Zod validation) | 400 |
-| Not logged in (no session at all) | 401 |
+| No session, on a request that changes data | 401 |
 | Not found, or no access | 404 |
-| Conflict (e.g. editing an archived list) | 409 |
+| Conflict (e.g. editing an archived list), or a quota reached (`quota_exceeded`) | 409 |
+| Rate limit hit | 429 |
 | Anything unexpected | 500 — logged, no details sent to the browser |
 
 ## 3. Frontend (`apps/web`)
@@ -131,7 +147,9 @@ Feature folders mirroring the backend: `lists`, `items`, `catalog`, `categories`
 
 ### Startup
 
-The app asks Better Auth (through its React client) for the current session. If there is none, it creates an anonymous session, which seeds a workspace, and shows the lists. A first-time visitor lands directly in a working app.
+The app asks Better Auth (through its React client) for the current session. If there is none, the app works without one: it shows the (empty) lists and the read-only seed catalog and categories. On the visitor's first change, the API client creates an anonymous session and then sends the change, so a first-time visitor still lands directly in a working app — the workspace just appears when they first need it.
+
+The rate-limit (429) and quota (`quota_exceeded`) errors are shown as clear messages (LIM-3, LIM-4), never as generic failures.
 
 ### State
 

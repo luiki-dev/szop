@@ -52,9 +52,9 @@ Later: Fastify API ── WebSocket push ──► Browser ("list 42 changed")
 1. The browser requests `https://szop.app/` and receives a small HTML file that references the JavaScript bundle.
 2. The bundle loads; React starts and React Router looks at the URL to decide which page to show.
 3. The app asks Better Auth: "is there a session?" The browser sends the session cookie, if it has one.
-4. No session → the app asks for an **anonymous** one. The server creates an anonymous user and a workspace copied from the seed data, and sets a session cookie.
-5. The lists page mounts and calls `useLists()`. TanStack Query sees nothing cached, calls the API client, which sends `GET /api/lists`.
-6. The response arrives, TanStack Query caches it, React re-renders with the data.
+4. The lists page mounts and calls `useLists()`. TanStack Query sees nothing cached, calls the API client, which sends `GET /api/lists`.
+5. The response arrives, TanStack Query caches it, React re-renders with the data.
+6. A first-time visitor has no session, so step 5 returns an empty list and the catalog shows the read-only seed data — nothing has been stored for them yet. Only when they make their **first change** does the API client ask Better Auth for an **anonymous** session: the server creates an anonymous user and a workspace copied from the seed data, sets a session cookie, and the change is sent. This *lazy creation* means visits that change nothing (search engine crawlers, link previews) cost the database nothing — see [ADR 0003](../decisions/0003-abuse-protection.md).
 
 ## 5. Lifecycle of a request: checking an item off
 

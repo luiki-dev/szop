@@ -9,7 +9,9 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **ADR** | Architecture Decision Record | A short document recording one significant decision: its context, the options considered, the choice and its consequences. Ours live in `docs/decisions/`. |
 | **CI/CD** | Continuous Integration / Continuous Delivery (or Deployment) | Automatically building and testing every change (CI), and automatically releasing it (CD). |
 | **CORS** | Cross-Origin Resource Sharing | Browser rules deciding when a page from one domain may call an API on another domain. Not needed when frontend and API share one origin. |
+| **CDN** | Content Delivery Network | A network of servers around the world that serves static files close to users and can absorb or filter traffic floods in front of the application. |
 | **CRUD** | Create, Read, Update, Delete | The four basic operations on data. |
+| **DoS** | Denial of Service | An attack that makes a service unavailable, either by flooding it with traffic (volumetric) or by making it exhaust resources such as database space (resource exhaustion). |
 | **HTTPS** | HTTP Secure | HTTP encrypted with TLS. |
 | **JWT** | JSON Web Token | A signed token carrying claims about a user. An alternative to server-side sessions; not used in Szop. |
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
@@ -39,6 +41,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **SHR** | Sharing |
 | **SYN** | Live updates (synchronization) |
 | **NET** | Connectivity (network) |
+| **LIM** | Limits (quotas and rate limits) |
 | **UC** | Use case |
 | **FR** | Functional requirement (general name for any of the IDs above) |
 
@@ -55,11 +58,15 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Hook (React)** | A function starting with `use` (`useState`, `useList`) that lets a component use state or other React features. Unrelated to Fastify hooks despite the name. |
 | **IndexedDB** | A database built into the browser for storing structured data locally. Considered for guest workspaces, not used (see ADR 0002). |
 | **Migration** | A versioned script that changes the database schema; applied in order in every environment. |
+| **IPv6 /64 block** | The range of IPv6 addresses sharing their first 64 bits — typically what one household or device is given. Rate limits group addresses by it, since one machine can switch between billions of addresses inside its block. |
+| **Lazy creation** | Creating something only when it is first needed. Szop creates a guest's workspace on their first change, not on their first visit. |
 | **Minor units** | The smallest unit of a currency (cents, grosze). Szop stores money as integers in minor units. |
 | **Monorepo** | One repository holding several packages (here: `apps/web`, `apps/api`, `packages/shared`). |
 | **OpenAPI** | A standard, machine-readable description of a REST API, from which documentation and clients can be generated. |
 | **Optimistic update** | Updating the screen immediately as if a request succeeded, then correcting it if the server disagrees. |
 | **Origin** | The scheme, domain and port of a URL (`https://szop.app`). Cookies and browser security rules work per origin. |
+| **Quota** | A cap on how much data one workspace may hold (for example 200 lists). |
+| **Rate limit** | A cap on how many requests of a kind are accepted in a time window (for example 10 guest creations per hour per IP address); excess requests get HTTP status 429. |
 | **Seed data** | The predefined catalog, categories and units copied into every new workspace. |
 | **Server state** | Data in the frontend that is a cached copy of data owned by the server. |
 | **Session / session cookie** | The server's record of a logged-in (or anonymous) user, and the browser cookie that identifies it on each request. |

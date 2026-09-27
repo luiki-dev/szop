@@ -7,7 +7,7 @@ Requirements are tagged:
 - **[MVP]** — part of the first release.
 - **[Later]** — planned core functionality, built after the MVP.
 
-Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md) and [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server). Acronyms are explained in the [glossary](../glossary.md).
+Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server) and [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits). Acronyms are explained in the [glossary](../glossary.md).
 
 ## 1. General assumptions, actors, domain concepts
 
@@ -44,13 +44,16 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 
 ### Accounts and guest mode (ACC)
 
-- **ACC-1 [MVP]** A guest can use the app without registering. On the first visit, an anonymous workspace is created from the seed data and tied to their browser.
+- **ACC-1 [MVP]** A guest can use the app without registering. Until their first change, they see the default (seed) catalog, categories and units, read-only. Their first change (for example creating a list) creates an anonymous workspace from the seed data, tied to their browser.
 - **ACC-2 [MVP]** Register with email and password, with email verification. On registration, the guest's anonymous workspace in that browser becomes the account's workspace.
 - **ACC-3 [MVP]** Log in and log out. Reset a forgotten password via email. Change the password while logged in.
 - **ACC-4 [MVP]** When logging into an *existing* account from a browser whose guest workspace holds data, the app offers to import the guest's lists and templates or to discard them. Imported items are matched to the account's categories by name. Unmatched items become uncategorized.
 - **ACC-5 [MVP]** Profile settings: display name and currency.
 - **ACC-6 [MVP]** Delete the account with all its data, after confirmation. Lists it shared disappear for collaborators.
-- **ACC-7 [MVP]** Anonymous (guest) workspaces inactive for 30 days are deleted automatically.
+- **ACC-7 [MVP]** Anonymous (guest) workspaces are deleted automatically:
+  - after **3 days**, if they had no activity later than 1 hour after being created (used only briefly);
+  - otherwise after **30 days** of inactivity.
+- **ACC-8 [MVP]** Registered accounts whose email is not verified within **7 days** are deleted automatically.
 
 ### Shopping lists (LST)
 
@@ -115,13 +118,41 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 - **SYN-1 [Later]** Changes to a shared list appear for everyone viewing it within a few seconds, without reloading.
 - **SYN-2 [Later]** For concurrent edits, the last change wins, per item field.
 
+### Limits (LIM)
+
+All values below are configurable defaults, adjustable without code changes. They are the same for guests and registered users.
+
+- **LIM-1 [MVP]** Workspace quotas:
+
+  | What | Limit |
+  |---|---|
+  | Lists (active and archived together) | 200 |
+  | Items per list or template | 500 |
+  | Templates | 100 |
+  | Catalog products | 2,000 |
+  | Categories | 300, at most 5 levels deep |
+  | Units | 50 |
+
+- **LIM-2 [MVP]** Text lengths: names (list, item, product, category, template, unit) at most 100 characters; item notes at most 500 characters. Forms enforce the same limits.
+- **LIM-3 [MVP]** When a quota is reached, the app explains which limit was hit and how to make room (for example "You've reached the limit of 200 lists, archived ones included. Delete some to make room").
+- **LIM-4 [MVP]** Rate limits protect the service from abuse:
+
+  | What | Limit |
+  |---|---|
+  | Creating anonymous guests | 10 per hour per IP address |
+  | Registrations | 5 per hour per IP address |
+  | Login attempts | 10 per 15 minutes, per IP address and per email address |
+  | All other API requests | 300 per minute per session |
+
+  IPv6 addresses are grouped by their /64 block. When a limit is hit, the app asks the user to wait and try again.
+
 ### Connectivity (NET)
 
 - **NET-1 [MVP]** When the connection is lost, the app clearly shows an offline state and blocks changes rather than silently losing them. This applies to guests and registered users alike.
 
 ## 3. Use cases
 
-- **UC-1 First visit as a guest** — A visitor opens Szop. An anonymous workspace is created from the seed data. They create "Weekly groceries" and add items with the smart input.
+- **UC-1 First visit as a guest** — A visitor opens Szop and sees an empty lists page; the default catalog and categories are already browsable. They create "Weekly groceries" — this first change creates their anonymous workspace from the seed data — and add items with the smart input.
 - **UC-2 Plan a grocery trip** — The user opens a list and types "mil". They pick "Milk", which is added with category Dairy and unit l. They type "birthday candles" and press enter. The item is added ad-hoc and the app offers "Save to catalog?", which they skip. They open the catalog browser, select 5 products under Vegetables and add them. The list sorts itself by category.
 - **UC-3 Shop in a store** — The user walks the store in category order, checking items off. Checked items move to the checked part of the list. They hide checked items to see only what is left. The totals show the spent and remaining amounts.
 - **UC-4 Reuse a weekly list** — After shopping, the user taps "Uncheck all" on "Weekly groceries" and reuses it next week.
@@ -140,7 +171,7 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 
 ### MVP
 
-ACC, LST, ITM, ORD, CAT, PRD, UNT, TPL, NET: a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration.
+ACC, LST, ITM, ORD, CAT, PRD, UNT, TPL, LIM, NET: a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration.
 
 ### Later (planned core functionality)
 
