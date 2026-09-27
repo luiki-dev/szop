@@ -2,7 +2,7 @@
 
 Living description of how Szop is built. It implements the [functional requirements](../requirements/functional-requirements.md); requirement IDs (ACC-1, ORD-5, …) refer to that document. The decisions behind this design, with the alternatives considered, are in [ADR 0002](../decisions/0002-technical-architecture.md). For a gentler, concept-by-concept explanation of the stack, read the [stack overview](stack-overview.md). Acronyms and terms are explained in the [glossary](../glossary.md).
 
-The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md). Out of scope here, decided in later steps: testing strategy, continuous integration and delivery (CI/CD), hosting and deployment, visual design (including component library and styling).
+The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md). Out of scope here, decided in later steps: continuous integration and delivery (CI/CD), hosting and deployment, visual design (including component library and styling).
 
 ## 1. System overview
 
@@ -195,3 +195,4 @@ React Hook Form with the Zod resolver and the shared schemas: the browser and th
 - **Configuration:** environment variables, validated with a Zod schema at startup. A missing or invalid setting stops the app immediately with a clear error.
 - **Logging:** Fastify's built-in structured logger (pino), one JSON line per event.
 - **Email:** the `EmailSender` interface. A console implementation for development prints emails instead of sending them. The real provider is chosen with deployment.
+- **Testing:** most tests are API tests that send real HTTP requests (Fastify's `inject()`) through all three layers into a real PostgreSQL, with only the edges (email, clock) faked. For that, the app is assembled by one `buildApp(deps)` function that production and tests both call. Pure domain rules get unit and property tests, the frontend gets component tests with the network faked, and each use case gets an end-to-end journey in a real browser. Details in [ADR 0007](../decisions/0007-testing-strategy.md).
