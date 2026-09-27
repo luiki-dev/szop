@@ -2,7 +2,7 @@
 
 Living description of how Szop is built. It implements the [functional requirements](../requirements/functional-requirements.md); requirement IDs (ACC-1, ORD-5, …) refer to that document. The decisions behind this design, with the alternatives considered, are in [ADR 0002](../decisions/0002-technical-architecture.md). For a gentler, concept-by-concept explanation of the stack, read the [stack overview](stack-overview.md). Acronyms and terms are explained in the [glossary](../glossary.md).
 
-Out of scope here, decided in later steps: development environment and tooling, testing strategy, continuous integration and delivery (CI/CD), hosting and deployment, visual design (including component library and styling).
+The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md). Out of scope here, decided in later steps: testing strategy, continuous integration and delivery (CI/CD), hosting and deployment, visual design (including component library and styling).
 
 ## 1. System overview
 
@@ -31,7 +31,7 @@ Out of scope here, decided in later steps: development environment and tooling, 
 | **Email service** | Sends verification and password-reset emails. Hidden behind an `EmailSender` interface. The provider is chosen with deployment. |
 | **`packages/shared`** | Code used by both sides: Zod schemas (the API contract), TypeScript types inferred from them, and pure domain rules such as item ordering (ORD) and totals (ITM-8). |
 
-**Same origin.** The SPA and the API are served under one domain (for example `szop.app` and `szop.app/api`). Session cookies are therefore first-party and no Cross-Origin Resource Sharing (CORS) setup is needed. How this is achieved (reverse proxy, or the API serving the static files) is a deployment decision.
+**Same origin.** The SPA and the API are served under one domain (for example `szop.app` and `szop.app/api`). Session cookies are therefore first-party and no Cross-Origin Resource Sharing (CORS) setup is needed. How this is achieved (reverse proxy, or the API serving the static files) is a deployment decision. In development, the Vite dev server proxies `/api/*` to the API, so the same rules hold locally.
 
 **Monorepo layout.** One repository, three packages:
 
@@ -41,7 +41,7 @@ apps/api          Fastify API (Drizzle schema, migrations, seed data)
 packages/shared   Zod schemas, types, domain rules
 ```
 
-Tooling (package manager, workspace tool, build and lint setup) is decided in the development environment step.
+The packages are pnpm workspaces. `packages/shared` is consumed from its TypeScript source, with no build step of its own. The rest of the tooling is in [ADR 0005](../decisions/0005-development-environment.md).
 
 ## 2. Backend (`apps/api`)
 

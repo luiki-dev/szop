@@ -135,3 +135,5 @@ TypeScript types vanish at runtime, so they cannot protect the server from a mal
 ## 11. The monorepo
 
 One Git repository holds `apps/web`, `apps/api` and `packages/shared`. A change to a shared schema, the API route using it and the form using it can land in one commit and be checked together — which is the whole point of TypeScript end to end.
+
+The three packages are **pnpm workspaces**: pnpm links them to each other, so `apps/api` imports `packages/shared` like any installed library, except that it is the live source code in the same repository. The development tooling around the stack (pnpm, TypeScript configuration, tsx, ESLint, Prettier, Docker Compose) is decided in [ADR 0005](../decisions/0005-development-environment.md). Each tool gets its own explanatory page under `docs/development/tools/` when the development environment is set up.
