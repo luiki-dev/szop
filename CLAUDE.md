@@ -15,7 +15,7 @@ How to work on it:
 - **Use the superpowers workflow for everything**, not only for features. Setup, tooling, CI/CD and deployment decisions also go through brainstorming and approval.
 - **Record decisions in the project documentation.** Capture every decision about architecture, solution design, approaches and other crucial aspects of the implementation, along with the reasoning and the alternatives considered.
 - **Explain choices.** When proposing a technology or approach, say why and what the trade-offs are, since learning is a goal in itself.
-- **Follow the implementation process in [ADR 0004](docs/decisions/0004-implementation-process.md).** In short: foundation topics (development environment → testing strategy → hosting → CI/CD → visual design) settle direction only; then a living roadmap of phases, starting with a walking skeleton and continuing in vertical slices; each phase gets its own brainstorm, with details decided there, and meets the shared definition of done. The ADR also defines which document owns which facts (requirements, living docs, ADRs, roadmap, specs and plans).
+- **Follow the implementation process in [ADR 0004](docs/decisions/0004-implementation-process.md).** In short: foundation topics (development environment → testing strategy → hosting → git workflow → CI/CD → visual design, the git workflow added by [ADR 0006](docs/decisions/0006-git-workflow-topic.md)) settle direction only; then a living roadmap of phases, starting with a walking skeleton and continuing in vertical slices; each phase gets its own brainstorm, with details decided there, and meets the shared definition of done. The ADR also defines which document owns which facts (requirements, living docs, ADRs, roadmap, specs and plans).
 
 ## Documentation
 

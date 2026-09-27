@@ -1,6 +1,6 @@
 # ADR 0004 — Implementation process: foundation topics, roadmap and phases
 
-- **Status:** Accepted
+- **Status:** Accepted — decisions 2 and 3 extended by [ADR 0006](0006-git-workflow-topic.md) (git workflow added as a foundation topic)
 - **Date:** 2026-09-27
 
 ## Context
