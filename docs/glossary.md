@@ -50,7 +50,10 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | Term | Meaning |
 |---|---|
 | **Anonymous user** | A server-side user without email or password, created automatically for a guest. Registering links it to a real account. |
+| **Big design up front** | Designing a system in full detail before building any of it. Criticized because the decisions are made without feedback from working software. Szop decides direction up front and details per phase (see ADR 0004). |
 | **Bundle** | The JavaScript and CSS files a build tool (Vite) produces from the source code for the browser to download. |
+| **Definition of done** | The checklist every piece of work must meet before it counts as finished. Szop's is in ADR 0004: tests pass, CI green, deployed, docs updated. |
+| **Design tokens** | Named values for the basic visual choices — colors, spacing, font sizes — used everywhere instead of raw values, so the look can be changed in one place. |
 | **Dependency injection** | Handing a component the things it depends on (database client, email sender) from outside instead of it creating them. NestJS and Spring do it with a container; Szop passes dependencies explicitly. |
 | **Domain rules** | Business logic independent of HTTP and storage — e.g. how list items are ordered, how totals are computed. Szop keeps them in `packages/shared`. |
 | **Event bus** | An in-process publish/subscribe mechanism: code publishes "list 42 changed", listeners (such as the WebSocket hub) react. |
@@ -65,11 +68,15 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **OpenAPI** | A standard, machine-readable description of a REST API, from which documentation and clients can be generated. |
 | **Optimistic update** | Updating the screen immediately as if a request succeeded, then correcting it if the server disagrees. |
 | **Origin** | The scheme, domain and port of a URL (`https://szop.app`). Cookies and browser security rules work per origin. |
+| **Phase** | One step of the implementation roadmap, taken through its own brainstorm, design approval and implementation. |
 | **Quota** | A cap on how much data one workspace may hold (for example 200 lists). |
 | **Rate limit** | A cap on how many requests of a kind are accepted in a time window (for example 10 guest creations per hour per IP address); excess requests get HTTP status 429. |
 | **Seed data** | The predefined catalog, categories and units copied into every new workspace. |
 | **Server state** | Data in the frontend that is a cached copy of data owned by the server. |
 | **Session / session cookie** | The server's record of a logged-in (or anonymous) user, and the browser cookie that identifies it on each request. |
+| **Spec / implementation plan** | The two working documents of a larger phase: the spec describes the agreed design, the plan lists the steps to build it. Kept in `docs/superpowers/`. |
+| **Vertical slice** | A piece of work that delivers one capability through every layer at once (database, API, UI, tests, deployment), as opposed to building one layer at a time. |
+| **Walking skeleton** | The thinnest possible version of the whole system that runs end to end (here: SPA → API → database, built by CI and deployed) and does almost nothing yet. Built early to test the foundation decisions. |
 | **WebSocket** | A persistent two-way connection between browser and server, letting the server push messages (used for live updates). |
 | **Workspace** | Everything one user owns: lists, templates, catalog, categories, units, settings. |
 | **Zod** | A TypeScript library for defining data schemas that give both compile-time types and runtime validation. |
