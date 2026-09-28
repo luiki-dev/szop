@@ -1,6 +1,6 @@
 # ADR 0008 — Hosting: an on-demand demo environment on AWS
 
-- **Status:** Accepted
+- **Status:** Accepted — the versioning scheme left open by decision 13 is decided in [ADR 0009](0009-git-workflow.md) (SemVer, cut by release-please)
 - **Date:** 2026-09-28
 - **Refines:** decisions 5 and 7 of [ADR 0004](0004-implementation-process.md) (what "deployed" means); completes open points of [ADR 0003](0003-abuse-protection.md) (infrastructure-level protection), [ADR 0005](0005-development-environment.md) (production PostgreSQL version, production images, tooling) and [ADR 0007](0007-testing-strategy.md) (how the E2E environment shares one origin, load testing)
 

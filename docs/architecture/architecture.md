@@ -2,7 +2,7 @@
 
 Living description of how Szop is built. It implements the [functional requirements](../requirements/functional-requirements.md); requirement IDs (ACC-1, ORD-5, …) refer to that document. The decisions behind this design, with the alternatives considered, are in [ADR 0002](../decisions/0002-technical-architecture.md). For a gentler, concept-by-concept explanation of the stack, read the [stack overview](stack-overview.md). Acronyms and terms are explained in the [glossary](../glossary.md).
 
-The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md), hosting in [ADR 0008](../decisions/0008-hosting.md) (summarized in [section 5](#5-deployment)). Out of scope here, decided in later steps: continuous integration and delivery (CI/CD), visual design (including component library and styling).
+The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md), hosting in [ADR 0008](../decisions/0008-hosting.md) (summarized in [section 5](#5-deployment)), the git workflow in [ADR 0009](../decisions/0009-git-workflow.md). Out of scope here, decided in later steps: continuous integration and delivery (CI/CD), visual design (including component library and styling).
 
 ## 1. System overview
 
