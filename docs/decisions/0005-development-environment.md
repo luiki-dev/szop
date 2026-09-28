@@ -1,6 +1,6 @@
 # ADR 0005 — Development environment and tooling
 
-- **Status:** Accepted
+- **Status:** Accepted — extended by [ADR 0008](0008-hosting.md) (production PostgreSQL version and images; Terraform and AWS CLI added to the tooling)
 - **Date:** 2026-09-27
 
 ## Context

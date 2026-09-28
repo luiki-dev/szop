@@ -1,6 +1,6 @@
 # ADR 0004 — Implementation process: foundation topics, roadmap and phases
 
-- **Status:** Accepted — decisions 2 and 3 extended by [ADR 0006](0006-git-workflow-topic.md) (git workflow added as a foundation topic); decision 7 refined by [ADR 0007](0007-testing-strategy.md) (what "the tests pass" means)
+- **Status:** Accepted — decisions 2 and 3 extended by [ADR 0006](0006-git-workflow-topic.md) (git workflow added as a foundation topic); decision 7 refined by [ADR 0007](0007-testing-strategy.md) (what "the tests pass" means); decisions 5 and 7 refined by [ADR 0008](0008-hosting.md) (what "deployed" means for an on-demand demo environment)
 - **Date:** 2026-09-27
 
 ## Context

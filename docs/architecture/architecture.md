@@ -2,7 +2,7 @@
 
 Living description of how Szop is built. It implements the [functional requirements](../requirements/functional-requirements.md); requirement IDs (ACC-1, ORD-5, …) refer to that document. The decisions behind this design, with the alternatives considered, are in [ADR 0002](../decisions/0002-technical-architecture.md). For a gentler, concept-by-concept explanation of the stack, read the [stack overview](stack-overview.md). Acronyms and terms are explained in the [glossary](../glossary.md).
 
-The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md). Out of scope here, decided in later steps: continuous integration and delivery (CI/CD), hosting and deployment, visual design (including component library and styling).
+The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md), hosting in [ADR 0008](../decisions/0008-hosting.md) (summarized in [section 5](#5-deployment)). Out of scope here, decided in later steps: continuous integration and delivery (CI/CD), visual design (including component library and styling).
 
 ## 1. System overview
 
@@ -28,10 +28,10 @@ The development environment and tooling are decided in [ADR 0005](../decisions/0
 | **React single-page application (SPA)** | Built by Vite into static files. Renders everything in the browser. Talks to the API only over REST (and, later, a WebSocket). |
 | **Fastify API** | One Node.js process. Business logic, access control, persistence. Mounts Better Auth. Later hosts the WebSocket endpoint for live updates. |
 | **PostgreSQL** | The single source of truth for all data, including anonymous guests' workspaces. |
-| **Email service** | Sends verification and password-reset emails. Hidden behind an `EmailSender` interface. The provider is chosen with deployment. |
+| **Email service** | Sends verification and password-reset emails. Hidden behind an `EmailSender` interface. In AWS, Amazon Simple Email Service (SES). |
 | **`packages/shared`** | Code used by both sides: Zod schemas (the API contract), TypeScript types inferred from them, and pure domain rules such as item ordering (ORD) and totals (ITM-8). |
 
-**Same origin.** The SPA and the API are served under one domain (for example `szop.app` and `szop.app/api`). Session cookies are therefore first-party and no Cross-Origin Resource Sharing (CORS) setup is needed. How this is achieved (reverse proxy, or the API serving the static files) is a deployment decision. In development, the Vite dev server proxies `/api/*` to the API, so the same rules hold locally.
+**Same origin.** The SPA and the API are served under one domain (for example `szop.app` and `szop.app/api`). Session cookies are therefore first-party and no Cross-Origin Resource Sharing (CORS) setup is needed. The API achieves this by serving the built SPA's static files itself (see [Deployment](#5-deployment)). In development, the Vite dev server proxies `/api/*` to the API, so the same rules hold locally.
 
 **Monorepo layout.** One repository, three packages:
 
@@ -109,7 +109,7 @@ Anonymous users make writes cheap for anyone, so the design limits how much a sc
 - **Rate limits** with `@fastify/rate-limit`: anonymous-session creation and registration per IP address; all other API requests per session. IPv6 addresses are keyed by their /64 block, so one machine cannot rotate through addresses. Login attempts use Better Auth's built-in rate limiting, per IP address and per email address.
 - **Quotas**: services check a workspace's counts before inserting (lists, items per list or template, templates, products, categories and tree depth, units). Text lengths are part of the shared Zod schemas.
 - **Request size**: Fastify's default body limit (1 MB) stays on.
-- **Not in the application**: volumetric denial of service (floods of traffic) is handled at the infrastructure level (reverse proxy, content delivery network), decided with deployment. A bot challenge (such as Cloudflare Turnstile) on anonymous-session creation is an escalation option if abuse ever appears.
+- **Not in the application**: volumetric denial of service (floods of traffic) is handled at the infrastructure level. The demo environment relies on AWS Shield Standard, which protects its load balancer at no cost; a content delivery network and a web application firewall are the step up for an always-on service ([ADR 0008](../decisions/0008-hosting.md)). A bot challenge (such as Cloudflare Turnstile) on anonymous-session creation is an escalation option if abuse ever appears.
 
 ### Errors
 
@@ -188,11 +188,43 @@ React Hook Form with the Zod resolver and the shared schemas: the browser and th
 - A WebSocket endpoint at `/api/ws` (via `@fastify/websocket`). The browser subscribes to the list it is viewing.
 - After a change succeeds, the service publishes a small event ("list 42: item changed") on an **in-process event bus**. The WebSocket hub forwards it to that list's subscribers, and the browser tells TanStack Query to refetch the list. Pushing the changed data itself can come later if refetching proves too slow.
 - Edit requests send only the changed fields (`PATCH`), which gives "last change wins per field" (SYN-2).
-- The in-process bus works for a single server process. Several processes would need a shared channel (PostgreSQL `LISTEN/NOTIFY` or Redis), decided with deployment if needed.
+- The in-process bus works for a single server process, which is what the deployment runs. Several processes would need a shared channel (PostgreSQL `LISTEN/NOTIFY` or Redis).
 
 ### Cross-cutting
 
-- **Configuration:** environment variables, validated with a Zod schema at startup. A missing or invalid setting stops the app immediately with a clear error.
-- **Logging:** Fastify's built-in structured logger (pino), one JSON line per event.
-- **Email:** the `EmailSender` interface. A console implementation for development prints emails instead of sending them. The real provider is chosen with deployment.
+- **Configuration:** environment variables, validated with a Zod schema at startup. A missing or invalid setting stops the app immediately with a clear error. In AWS, secrets arrive the same way, injected by ECS from the secret stores; the configuration is never logged, and pino redacts secret fields.
+- **Logging:** Fastify's built-in structured logger (pino), one JSON line per event on standard output. In AWS, the lines go to CloudWatch Logs.
+- **Email:** the `EmailSender` interface. A console implementation for development prints emails instead of sending them. In AWS, an SES implementation sends them through the AWS SDK, authorized by the task's IAM role, with no API key.
 - **Testing:** most tests are API tests that send real HTTP requests (Fastify's `inject()`) through all three layers into a real PostgreSQL, with only the edges (email, clock) faked. For that, the app is assembled by one `buildApp(deps)` function that production and tests both call. Pure domain rules get unit and property tests, the frontend gets component tests with the network faked, and each use case gets an end-to-end journey in a real browser. Details in [ADR 0007](../decisions/0007-testing-strategy.md).
+
+## 5. Deployment
+
+Szop runs on AWS as an **on-demand demo environment**: created for a session, destroyed afterwards, starting each time with an empty database. There is no always-on production and no staging. Decisions and alternatives are in [ADR 0008](../decisions/0008-hosting.md); the AWS concepts are explained in the [stack overview](stack-overview.md#12-where-szop-runs).
+
+```
+ Internet
+    │ HTTPS  demo.<domain>  (Route 53 DNS, ACM certificate)
+    ▼
+┌─ VPC, eu-central-1, two availability zones ──────────────────────────┐
+│  public subnets                                                      │
+│   ┌───────────────────────────┐          ┌──────────────────────────┐│
+│   │ Application Load Balancer │ app port │ ECS Fargate task         ││
+│   │ 443 (80 redirects to 443) ├─────────►│ (exactly one)            ││
+│   └───────────────────────────┘          │ Fastify API + built SPA  ││
+│                                          └────────────┬─────────────┘│
+│  private subnets                                      │ 5432         │
+│   ┌───────────────────────────┐                       │              │
+│   │ RDS PostgreSQL            │◄──────────────────────┘              │
+│   └───────────────────────────┘                                      │
+└──────────────────────────────────────────────────────────────────────┘
+ The task also uses: ECR (its image), Parameter Store and Secrets Manager
+ (secrets), SES (email), CloudWatch Logs (logs).
+```
+
+- **One container** runs the Fastify API, which also serves the built SPA with `@fastify/static` (falling back to `index.html` for non-API paths), so the SPA and the API share one origin with no extra infrastructure.
+- **Exactly one instance** runs, so the in-process event bus and the cleanup task work as designed. The cleanup only matters while the environment is up, since all data disappears on teardown.
+- **Migrations** run when the container starts, before it accepts requests. **`GET /api/health`** checks the database connection and is used by the load balancer's health check.
+- **Security groups** chain the layers: the load balancer accepts traffic from anyone, the task only from the load balancer, the database only from the task. The database has no route to the internet.
+- **Secrets** (the Better Auth secret in Parameter Store, the RDS-managed database password in Secrets Manager) are injected by ECS as environment variables. Their values are never in git, the image, the task definition or Terraform state.
+- **Email** goes through SES in its sandbox, which delivers only to verified addresses.
+- **Infrastructure as code:** Terraform, in three root modules under `infra/`: `bootstrap` (state bucket, budget alerts), `base` (permanent: image registry, DNS zone, certificate, email identity, secrets, log group) and `demo` (created per session: network, load balancer, ECS, RDS). Images carry the commit hash and, when built from a version tag, the version.
