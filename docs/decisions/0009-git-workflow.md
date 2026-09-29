@@ -1,6 +1,6 @@
 # ADR 0009 — Git workflow
 
-- **Status:** Accepted
+- **Status:** Accepted — decision 1 revisited and confirmed by [ADR 0010](0010-ci-cd.md) (the repository stays public); the CI/CD items of the consequences answered by ADR 0010
 - **Date:** 2026-09-28
 - **Completes:** [ADR 0006](0006-git-workflow-topic.md) (the git workflow topic itself) and the open point of [ADR 0008](0008-hosting.md), decision 13 (the versioning scheme behind version tags)
 

@@ -109,7 +109,7 @@ Once CI exists, GitHub requires the branch to be up to date before merging, so w
 
 **Only the owner merges; the merge is the approval.** GitHub does not let an author approve their own PR, and every PR is authored by the owner's account, so there is no formal approving review.
 
-A phase PR is merged when the **definition of done** is met on the branch ([ADR 0004](../decisions/0004-implementation-process.md), decision 7): the tests pass, CI is green, the change was deployed to a demo environment from the branch's image and checked there ([ADR 0008](../decisions/0008-hosting.md), decision 29), and the living docs, including the roadmap status, are updated.
+A phase PR is merged when the **definition of done** is met on the branch ([ADR 0004](../decisions/0004-implementation-process.md), decision 7): the tests pass, CI is green, the change was deployed to a demo environment from the branch's image and checked there ([ADR 0008](../decisions/0008-hosting.md), decision 29; the `demo-up` workflow of [ADR 0010](../decisions/0010-ci-cd.md)), and the living docs, including the roadmap status, are updated.
 
 The only merge method is a **merge commit**. GitHub deletes the remote branch afterwards. Locally:
 
@@ -156,6 +156,8 @@ A version marks a state of the code; it deploys nothing. The demo environment ca
 | Secrets cannot be pushed | Secret scanning push protection | This ADR's merge |
 | Staged files formatted and linted | pre-commit hook | Development environment phase |
 | Commit messages follow Conventional Commits | commit-msg hook (commitlint) | Development environment phase |
-| CI green and branch up to date before merging | Ruleset for `main` (required status checks) | CI/CD phase |
+| Every commit of a PR follows Conventional Commits, even if the hook was skipped | CI check (commitlint) | CI/CD phase |
+| CI green and branch up to date before merging | Ruleset for `main` (required status checks `ci-ok` and the PR title check) | CI/CD phase |
+| No new high or critical code scanning alerts | Ruleset for `main` (code scanning results) | CI/CD phase |
 | PR title follows Conventional Commits | CI check | CI/CD phase |
 | Claude never merges a PR | `CLAUDE.md` only | This ADR's merge |
