@@ -1,6 +1,6 @@
 # ADR 0007 — Testing strategy
 
-- **Status:** Accepted — decisions 6 and 15 completed by [ADR 0008](0008-hosting.md) (load testing left out; the API serves the SPA, so the E2E environment is one process)
+- **Status:** Accepted — decisions 6 and 15 completed by [ADR 0008](0008-hosting.md) (load testing left out; the API serves the SPA, so the E2E environment is one process); CI's PostgreSQL service, Playwright browsers and the storage of failed runs' traces provided by [ADR 0010](0010-ci-cd.md)
 - **Date:** 2026-09-27
 - **Refines:** decision 7 of [ADR 0004](0004-implementation-process.md) (what "the tests pass" means in the definition of done)
 

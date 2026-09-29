@@ -153,7 +153,7 @@ Szop runs on **AWS** (Amazon Web Services), but not all the time: it is a **demo
 - Terraform remembers what it created in a **state** file. Szop keeps it in an S3 bucket (AWS's file storage), so every machine sees the same state.
 - A **provider** is the plugin that talks to one platform's API (here the AWS provider). A **root module** is one folder of configuration applied on its own, with its own state.
 
-Szop's configuration is split into three root modules by how long their resources live: **bootstrap** (created once: the state bucket and budget alerts), **base** (permanent and cheap: image registry, domain, certificate, email identity, secrets, logs) and **demo** (created for a session and destroyed after it: network, load balancer, container, database). Destroying the demo can never touch the other two.
+Szop's configuration is split into three root modules by how long their resources live: **bootstrap** (created once: the state bucket and budget alerts), **base** (permanent and cheap: image registry, domain, certificate, email identity, secrets, logs, IAM roles) and **demo** (created for a session and destroyed after it: network, load balancer, container, database). Destroying the demo can never touch the other two.
 
 ### The pieces, from the network inwards
 
@@ -174,8 +174,8 @@ Szop's configuration is split into three root modules by how long their resource
 
 ### A demo session, step by step
 
-1. **Build and push.** The Dockerfile builds the image; it is pushed to ECR, tagged with the commit hash.
+1. **Build and push.** The Dockerfile builds the image; it is pushed to ECR, tagged with the commit hash. The `demo-up` workflow runs this step (if the image is missing) and the next one at the press of a button ([ADR 0010](../decisions/0010-ci-cd.md)).
 2. **Spin up.** `terraform apply` in `infra/demo` creates the network, security groups, load balancer, database and ECS service, and points `demo.<domain>` at the load balancer. This takes 10–15 minutes, mostly for the database.
 3. **Start.** ECS pulls the image, reads the secrets and starts the task. The app runs its migrations, then starts serving. Once `/api/health` answers, the load balancer sends traffic to it.
 4. **Use.** The browser opens `https://demo.<domain>`: the same app as locally, with the same one-origin setup.
-5. **Tear down.** `terraform destroy` removes everything created in step 2. The logs stay in CloudWatch for a week. If a session is forgotten, a scheduled job destroys it (decided with CI/CD).
+5. **Tear down.** `terraform destroy` removes everything created in step 2. The logs stay in CloudWatch for a week. If a session is forgotten, the nightly `demo-down` workflow destroys it ([ADR 0010](../decisions/0010-ci-cd.md)).
