@@ -135,7 +135,7 @@ Anonymous users make writes cheap for anyone, so the design limits how much a sc
 
 - **Lazy creation** (above): visits that change nothing — crawlers, uptime monitors, link previews — create nothing.
 - **Rate limits** with `@fastify/rate-limit`: anonymous-session creation and registration per IP address; all other API requests per session. IPv6 addresses are keyed by their /64 block, so one machine cannot rotate through addresses. Login attempts use Better Auth's built-in rate limiting, per IP address and per email address.
-- **Quotas**: services check a workspace's counts before inserting (lists, items per list or template, templates, products, categories and tree depth, units). Text lengths are part of the shared Zod schemas.
+- **Quotas**: services check a workspace's counts before inserting (lists, items per list or template, templates, products, categories and tree depth, units). Two concurrent requests can both pass the check and exceed a quota by a few rows; with one instance and per-session rate limits that is harmless, so no locking is added for it. Text lengths are part of the shared Zod schemas.
 - **Request size**: Fastify's default body limit (1 MB) stays on.
 - **Not in the application**: volumetric denial of service (floods of traffic) is handled at the infrastructure level. The demo environment relies on AWS Shield Standard, which protects its load balancer at no cost; a content delivery network and a web application firewall are the step up for an always-on service ([ADR 0008](../decisions/0008-hosting.md)). A bot challenge (such as Cloudflare Turnstile) on anonymous-session creation is an escalation option if abuse ever appears.
 

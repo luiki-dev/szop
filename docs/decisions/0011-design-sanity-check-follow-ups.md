@@ -90,7 +90,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m14 | E2E suite exceeds the default rate limits | Deferred to the phase delivering LIM-4: [OP-046](../open-points.md#feature-phases) |
 | m15 | CLAUDE.md guardrails ambiguous or incomplete | Fixed in `CLAUDE.md`: the PR title sentence, the rule that Claude never triggers `demo-up` or `demo-down` (closing [OP-024](../open-points.md#closed)), no worktrees or local merges from superpowers skills, specs and plans only on the full path, and the stale README reference |
 | m16 | Units have no place in the frontend | Fixed: `architecture.md` has a `units` feature folder and a `/units` route; the UNT phase may move the page |
-| m17 | Bulk operations against quotas undefined | Pending |
+| m17 | Bulk operations against quotas undefined | Fixed in part: `architecture.md` states that concurrent requests may exceed a quota by a few rows, deliberately. Deferred: bulk actions, ITM-4 with different units and what an archived list allows, to the phases delivering them ([OP-047](../open-points.md#feature-phases)) |
 | m18 | Lazy creation: seed IDs versus workspace IDs | Pending |
 | m19 | Sharing semantics that affect its tables | Pending |
 | m20 | No non-functional requirements | Pending |
