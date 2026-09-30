@@ -102,6 +102,8 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### CRITICAL-2. The demo workflows can't be used before they are merged, which breaks the definition of done and the safety-net ordering
 
+> ✅ **Fixed** in [ADR 0011, decision 2](../decisions/0011-design-sanity-check-follow-ups.md#decisions) ([triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings)); the phase order is tracked as [OP-004](../open-points.md#before-the-roadmap).
+
 - **Where:**
   - ADR 0008, decision 26: the teardown safety net and budget alerts "come before the walking skeleton, so no demo runs without it".
   - ADR 0008, consequences: "The walking skeleton phase writes the Terraform code for all three groups".

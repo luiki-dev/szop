@@ -331,7 +331,7 @@ This is the target state. The pieces arrive in the phases that introduce them ([
 |---|---|
 | Now (ADR 0009 merged) | Branches, PRs, merge commits only, the `main` and `v*` rulesets, the PR template |
 | The development environment phase | The local loop of step 3, the pre-commit and commit-msg hooks |
-| The CI/CD phase(s) | CI checks and required status checks, `demo-up`/`demo-down` (the nightly teardown no later than the first `demo-up`), release-please, versioned images, Dependabot |
+| The CI/CD phase(s) | CI checks and required status checks, `demo-up`/`demo-down` (the nightly teardown and a placeholder `demo-up` merged before any demo, [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 2), release-please, versioned images, Dependabot |
 | After the walking skeleton | The first release, `v0.1.0` |
 | When the MVP is done | `1.0.0`, set with a `Release-As: 1.0.0` footer |
 
