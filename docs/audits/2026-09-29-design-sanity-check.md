@@ -447,6 +447,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
   > ⏳ **Deferred:** the line-length rules turned off and the types restricted when commitlint is set up ([OP-009](../open-points.md#development-environment-phase)); the trial on a Dependabot commit in the CI/CD phase ([OP-019](../open-points.md#cicd-phase)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m10. The `ci-ok` aggregator can pass when nothing ran.** If the change-detection job fails, every job that depends on it reports `skipped`, and a naive "nothing failed" check turns green. **Fix:** `ci-ok` requires the detection job to succeed, and treats `failure` or `cancelled` as failed.
+
+  > ⏳ **Deferred** to the CI/CD phase: [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m11. The ECR lifecycle policy would expire released images.** "Keeps only the most recent few" (ADR 0008, decision 12) also removes `v*`-tagged images. **Fix:** keep version-tagged images, and expire only images tagged with just a commit hash.
 - **m12. `infra-plan` on Dependabot PRs (inferred).** Dependabot-triggered runs get restricted tokens and probably no OIDC token, so Terraform provider bump PRs would show a failed plan job. **Fix:** skip the job for `dependabot[bot]`, or document that it is expected to fail.
 - **m13. Dependabot major-version PRs conflict with pinned versions.** Separate PRs for Node or PostgreSQL major versions (ADR 0010, decision 18) would break "pinned to the same major version as production" (ADR 0005, ADR 0008) and Node 24 in `.nvmrc` and `engines`. **Fix:** ignore major updates for those two, or coordinate them.
