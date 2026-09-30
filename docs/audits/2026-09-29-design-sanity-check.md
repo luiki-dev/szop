@@ -417,6 +417,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
   > ⏳ **Deferred:** DMARC and SPF to the phase that sets up SES in `infra/base`, a failed send to the phase delivering ACC-2: [OP-044](../open-points.md#walking-skeleton). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m3. "Secrets never enter Terraform state" has no fallback and no check.** ADR 0008 decision 22 leaves it to "where the provider supports them". ADR 0010 decision 14 says public plan output is acceptable *only* because of this rule. **Fix:** make it a hard rule: the Better Auth secret is created outside Terraform, or through an ephemeral resource with a write-only argument. Add a way to check it, and document how to rotate the secret.
+
+  > ⏳ **Deferred** to the phase that writes the Terraform code: [OP-016](../open-points.md#walking-skeleton), now a hard rule with a fallback, a check and rotation. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m4. Real-time updates (Later) need more design:**
   - Access is not re-checked when a collaborator is removed or a link revoked.
   - The load balancer's 60-second idle timeout drops quiet sockets unless there is a ping (inferred).

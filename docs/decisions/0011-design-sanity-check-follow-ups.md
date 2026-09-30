@@ -75,7 +75,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 |---|---|---|
 | m1 | Tag ruleset allows permanent mistakes | Fixed: decision 8 (creations restricted, only the release App bypasses); adding the App to the bypass list joins the owner's steps ([OP-003](../open-points.md#before-the-roadmap)) |
 | m2 | Email authentication covers DKIM only | Deferred: DMARC and SPF to the phase that sets up SES in `infra/base`, a failed send to the phase delivering ACC-2: [OP-044](../open-points.md#walking-skeleton) |
-| m3 | "Secrets never enter Terraform state" has no fallback or check | Pending |
+| m3 | "Secrets never enter Terraform state" has no fallback or check | Deferred to the phase that writes the Terraform code, as a hard rule with a fallback, a check and rotation: [OP-016](../open-points.md#walking-skeleton), linked to OP-037 |
 | m4 | Real-time updates need more design | Pending |
 | m5 | No `.gitignore` | Pending |
 | m6 | `infra/base` applied from a branch can drift from `main` | Pending |
