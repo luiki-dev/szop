@@ -115,7 +115,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | C10 | The release image is never demo-checked | Deferred to the CI/CD phase: [OP-019](../open-points.md#cicd-phase), with the risk stated in `ci-cd.md` |
 | C11 | Per-IP limits and shared addresses | Rejected: crowds sharing one address matter only with real public traffic, which the on-demand demo never has |
 | C12 | Node.js 26 LTS | Rejected: ADR 0005 chose Node 24, which is supported until April 2028, so Node 26 becoming LTS needs no separate decision |
-| C13 | API versioning for the future Android app | Pending |
+| C13 | API versioning for the future Android app | Rejected: the Android app is only a future idea and the SPA ships together with the API; with one client, versioning is decided when a second client is planned |
 | C14 | Unverified factual claims in the ADRs | Pending |
 
 ## Consequences

@@ -595,6 +595,9 @@ These are cheap to decide now and expensive to change after migrations exist.
     > ✖️ **Rejected:** ADR 0005 chose Node 24, supported until April 2028. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 13. **API versioning for the future Android app.** The web app ships together with the API, but an Android client won't. A `/api/v1` prefix, or a stated compatibility rule, is cheap now.
+
+    > ✖️ **Rejected:** with one client shipped together with the API, versioning waits until a second client is planned. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 14. **Unverified factual claims in the ADRs.** Re-check a few before relying on them:
     - App Runner closed to new customers on 30 April 2026 (ADR 0008)
     - Dependabot's default cooldown is 3 days (ADR 0010)
