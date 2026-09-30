@@ -48,6 +48,7 @@ It is built for the phone in your hand in the store as much as for planning at a
 - [Architecture](docs/architecture/architecture.md) — how Szop is built
 - [Stack overview](docs/architecture/stack-overview.md) — the technologies and concepts behind it, explained
 - [Glossary](docs/glossary.md) — acronyms and terms used in the docs
+- [Open points](docs/open-points.md) — what is still undecided or undone, and where it will be settled
 - [Git workflow](docs/development/git-workflow.md) — how changes reach `main` and how releases are cut
 - [GitHub settings](docs/development/github-settings.md) — the repository settings behind the workflow
 - [Decisions](docs/decisions/) — records of the decisions behind the project and why they were made

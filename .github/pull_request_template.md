@@ -9,6 +9,7 @@
 - Plan:
 - Requirement IDs:
 - ADRs:
+- Open points (closed, re-assigned or added):
 
 <!-- Write "none" for links that do not apply. -->
 
@@ -25,4 +26,5 @@
 - [ ] Deployed: the branch's image was built and pushed, a demo environment created from it, checked, and destroyed (ADR 0008, decision 29)
 - [ ] Living docs updated: architecture, stack overview, glossary, functional requirements (if behavior changed), roadmap status
 - [ ] Significant decisions have ADRs
+- [ ] Open points: this phase's entries in `docs/open-points.md` are closed or re-assigned, and anything newly deferred is added (ADR 0011, decision 1)
 - [ ] Commits follow Conventional Commits and, in a phase, the plan's tasks

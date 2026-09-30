@@ -4,6 +4,8 @@ A review of everything designed so far, done before the visual design topic and 
 
 This is a point-in-time report, not a living document. It changes nothing by itself. Each finding still has to be accepted, rejected or deferred by the owner, and most accepted ones become a requirement change, an ADR or a roadmap task (see [What to do with this](#what-to-do-with-this)).
 
+**Resolution markers.** The owner's triage of the findings is recorded in [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings). Each finding gets a marker added under it, linking there: ✅ fixed, ⏳ deferred (with its open point in [open-points.md](../open-points.md)) or ✖️ rejected. The markers are the only later change; the findings' text stays as it was on 2026-09-29.
+
 ## Scope and method
 
 **Reviewed:**

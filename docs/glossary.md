@@ -149,6 +149,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Multi-stage build** | A Dockerfile with several stages: one with the full toolchain compiles the app, and the final image copies only the result, staying small. |
 | **Mutation testing** | Changing the code on purpose (a *mutant*, for example `<` flipped to `<=`) and checking that some test fails. A mutant that no test notices shows a gap in the tests. Szop uses StrykerJS for it. |
 | **OpenAPI** | A standard, machine-readable description of a REST API, from which documentation and clients can be generated. |
+| **Open point** | Something still undecided or not yet done that has been left to a later topic or phase. Szop tracks every one in `docs/open-points.md`, with an `OP-` ID (see ADR 0011). |
 | **Optimistic update** | Updating the screen immediately as if a request succeeded, then correcting it if the server disagrees. |
 | **Origin** | The scheme, domain and port of a URL (`https://szop.app`). Cookies and browser security rules work per origin. |
 | **Phantom dependency** | A package your code imports without declaring it, working only because something else happened to install it. It breaks when that other package changes. pnpm prevents it. |
