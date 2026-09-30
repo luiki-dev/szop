@@ -113,7 +113,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | C8 | No lifecycle scripts in CI jobs holding AWS credentials | Deferred to the security baseline topic: [OP-037](../open-points.md#security-baseline-topic) |
 | C9 | Order the CodeQL rule last | Deferred to the CI/CD phase's settings: [OP-022](../open-points.md#cicd-phase) |
 | C10 | The release image is never demo-checked | Deferred to the CI/CD phase: [OP-019](../open-points.md#cicd-phase), with the risk stated in `ci-cd.md` |
-| C11 | Per-IP limits and shared addresses | Pending |
+| C11 | Per-IP limits and shared addresses | Rejected: crowds sharing one address matter only with real public traffic, which the on-demand demo never has |
 | C12 | Node.js 26 LTS | Pending |
 | C13 | API versioning for the future Android app | Pending |
 | C14 | Unverified factual claims in the ADRs | Pending |

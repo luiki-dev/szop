@@ -587,6 +587,9 @@ These are cheap to decide now and expensive to change after migrations exist.
     > ⏳ **Deferred** to the CI/CD phase: [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 11. **Per-IP limits and shared addresses.** ADR 0003 argues that a real person hits the guest limit "at most once per browser". But many people share one address behind mobile carrier-grade NAT or a shop's Wi-Fi, so a crowd shares 10 guests per hour. For a demo that doesn't matter; for an always-on service, add a global ceiling and revisit the per-IP value.
+
+    > ✖️ **Rejected:** it matters only with real public traffic, which the on-demand demo never has. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 12. **Node.js 26 becomes LTS in October 2026,** about when the development environment phase starts. Node 24 stays supported until 2028, so pinning 24 is fine. Just make it a conscious choice in that phase.
 13. **API versioning for the future Android app.** The web app ships together with the API, but an Android client won't. A `/api/v1` prefix, or a stated compatibility rule, is cheap now.
 14. **Unverified factual claims in the ADRs.** Re-check a few before relying on them:
