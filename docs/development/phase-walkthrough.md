@@ -213,7 +213,7 @@ The owner checks the phase's behavior in a browser on the demo, and reviews the 
 ```
 
 - **Redeploying** with the demo up does not rebuild everything: the ECS service replaces its tasks one by one (a rolling update).
-- `demo-up` and `demo-down` queue in one concurrency group and never cancel each other mid-Terraform.
+- `demo-up` and `demo-down` never run Terraform at the same time: each waits for the other's state lock, and neither cancels a running job. `demo-down` destroys with the Terraform code of the commit that was deployed, which `demo-up` records ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7).
 - The *Deployed* box of the [definition of done](definition-of-done.md) can now be ticked, with a link to this `demo-up` run: the image of the head that will be merged was built, deployed, checked and destroyed.
 - Szop has no *rollout* in the usual sense (getting a new version to users, often gradually, with canary releases or feature flags): there are no users, and the demo exists only for a session.
 

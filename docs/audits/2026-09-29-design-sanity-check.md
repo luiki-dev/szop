@@ -337,6 +337,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-12. The nightly destroy runs `main`'s Terraform, and "runs queue" isn't quite true
 
+> ✅ **Fixed** in [ADR 0011, decision 7](../decisions/0011-design-sanity-check-follow-ups.md#decisions); the mechanism details join [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:** ADR 0010, decision 13 ("`demo-up` and `demo-down` share one `concurrency` group that never cancels: runs queue"). ADR 0010, decisions 2 and 11 ("Any branch may deploy").
 - **Problem:**
   - **Wrong Terraform code (verified).** Scheduled runs use the default branch. If the demo was applied from a phase branch that changed `infra/demo` (a new provider version, a new module), destroying it with `main`'s older code can fail. The safety net then breaks exactly during infrastructure phases.
