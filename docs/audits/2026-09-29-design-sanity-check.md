@@ -128,6 +128,8 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### MAJOR-1. The docs describe two different products: a persistent public service and a disposable demo
 
+> ✅ **Fixed** in [ADR 0011, decision 5](../decisions/0011-design-sanity-check-follow-ups.md#decisions): the README's privacy sentence and a new assumption in the requirements. ⏳ **Deferred:** the always-on checklist ([OP-033](../open-points.md#unassigned)). ✖️ **Rejected:** the demo banner. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:**
   - README: "your lists, catalog and categories come with you to every device" and "everything stays in your browser".
   - Functional requirements: ACC-6 to ACC-8 and LIM-1 to LIM-4.

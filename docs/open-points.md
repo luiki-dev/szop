@@ -93,8 +93,9 @@ Points whose home is not clear yet. The roadmap brainstorm gives each one a grou
 
 | ID | Open point | Source | Status |
 |---|---|---|---|
-| OP-029 | **Optional learning phase: load testing** with k6 against the demo environment. The roadmap decides whether to include it. | [ADR 0008](decisions/0008-hosting.md), decision 32 | Open |
-| OP-030 | **Optional learning phase: supply-chain provenance**: signed attestations, a software bill of materials (SBOM) and an OpenSSF Scorecard. The roadmap decides whether to include it. | [ADR 0010](decisions/0010-ci-cd.md), decisions 19 and 24 | Open |
+| OP-029 | **Optional phase: load testing** with k6 against the demo environment. The roadmap decides whether to include it. | [ADR 0008](decisions/0008-hosting.md), decision 32 | Open |
+| OP-030 | **Optional phase: supply-chain provenance**: signed attestations, a software bill of materials (SBOM) and an OpenSSF Scorecard. The roadmap decides whether to include it. | [ADR 0010](decisions/0010-ci-cd.md), decisions 19 and 24 | Open |
+| OP-033 | **Before Szop ever runs always-on**, add what the demo deliberately does without: backups, a CDN with a web application firewall (WAF), alarms and error tracking, SES production access, a storage alarm, and a privacy notice. Only if an always-on deployment is ever planned. | [ADR 0008](decisions/0008-hosting.md), decision 32; [Audit, MAJOR-1](audits/2026-09-29-design-sanity-check.md#major-1-the-docs-describe-two-different-products-a-persistent-public-service-and-a-disposable-demo); [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 5 | Open |
 
 ## Closed
 

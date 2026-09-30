@@ -13,7 +13,7 @@ It is built for the phone in your hand in the store as much as for planning at a
 - **Your own catalog and categories** — Szop starts you off with a predefined product catalog and a category tree, and both are yours to change: add, rename, remove, and nest categories as deep as you like.
 - **Ordering that matches the store** — arrange your categories in the order you actually walk the aisles, and every list sorts itself that way. Prefer a plain list instead? Turn category sorting off and items stay in the order you added them.
 - **Templates** — keep reusable sets of items, like a camping trip or a weekly shop, and start a new list from one in a tap.
-- **Accounts and guest mode** — use Szop without signing up and everything stays in your browser. Create an account and your lists, catalog and categories come with you to every device.
+- **Accounts and guest mode** — use Szop without signing up: your lists are kept on our server and tied to this browser. Create an account and your lists, catalog and categories come with you to every device.
 
 ## Coming later
 

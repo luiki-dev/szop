@@ -43,6 +43,7 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 - The UI is English only.
 - The app requires an internet connection, for guests and registered users alike.
 - A user's workspace is private, except for lists they explicitly share.
+- The requirements describe Szop as a public, always-on service, including the parts that matter only for one, such as cleaning up guest workspaces (ACC-7) and unverified accounts (ACC-8) and the rate limits (LIM-4). Where and how it runs is decided separately: for now, only as an on-demand demo environment that starts empty ([ADR 0008](../decisions/0008-hosting.md)).
 - Predefined content (catalog, categories, units) is seed data kept in the project repository. Each new workspace gets its own **copy**. Later changes to the seed data do not affect existing workspaces.
 
 ### Actors
