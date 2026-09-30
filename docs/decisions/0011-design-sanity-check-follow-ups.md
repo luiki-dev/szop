@@ -97,7 +97,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m21 | README drift | Fixed: the README matches LIM-1's depth limit, SHR-4's editor role and the future extensions |
 | m22 | Stale structure and facts | Fixed in `architecture.md`, the stack overview and the glossary: the repository layout with `e2e/` and `infra/`, the task role's ECS Exec, which secret lives where, port 80 on the load balancer, `last_active_at` on the workspace. Already covered: the stack overview's CI/CD section ([OP-023](../open-points.md#cicd-phase)) |
 | m23 | ADR cross-references | Fixed: the status lines of ADR 0005 (completed by ADRs 0007, 0009 and 0010) and ADR 0001 (the superseded browser storage); the roadmap maps every phase name the ADRs use ([OP-031](../open-points.md#before-the-roadmap)). Already covered: when the PostgreSQL major version is chosen, in the development environment phase ([OP-006](../open-points.md#development-environment-phase)) |
-| m24 | Editorial nits | Pending |
+| m24 | Editorial nits | Fixed in the living docs: acronyms spelled out in `architecture.md`, seven acronyms added to the glossary and both its tables sorted, "ADR 0009's merge" in `git-workflow.md`, the citation in `github-settings.md`, the glossary's `ci-ok` wording, `example.com` instead of `szop.app`, and the scope rule clarified (listed scopes are examples; a phase PR title may name its feature area) with a subject that is no future extension. Rejected: editorial changes to accepted ADRs (acronyms in ADRs 0001 and 0010, € and $ in ADR 0008), which the glossary covers and which change no decision |
 
 ### Consider improving
 

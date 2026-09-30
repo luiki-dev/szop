@@ -54,10 +54,10 @@ The development environment and tooling are decided in [ADR 0005](../decisions/0
 | **React single-page application (SPA)** | Built by Vite into static files. Renders everything in the browser. Talks to the API only over REST (and, later, a WebSocket). |
 | **Fastify API** | One Node.js process. Business logic, access control, persistence. Mounts Better Auth. Later hosts the WebSocket endpoint for live updates. |
 | **PostgreSQL** | The single source of truth for all data, including anonymous guests' workspaces. |
-| **Email service** | Sends verification and password-reset emails. Hidden behind an `EmailSender` interface. In AWS, Amazon Simple Email Service (SES). |
+| **Email service** | Sends verification and password-reset emails, over the Simple Mail Transfer Protocol (SMTP) or an HTTP API. Hidden behind an `EmailSender` interface. In AWS, Amazon Simple Email Service (SES). |
 | **`packages/shared`** | Code used by both sides: Zod schemas (the API contract), TypeScript types inferred from them, and pure domain rules such as item ordering (ORD) and totals (ITM-8). |
 
-**Same origin.** The SPA and the API are served under one domain (for example `szop.app` and `szop.app/api`). Session cookies are therefore first-party and no Cross-Origin Resource Sharing (CORS) setup is needed. The API achieves this by serving the built SPA's static files itself (see [Deployment](#5-deployment)). In development, the Vite dev server proxies `/api/*` to the API, so the same rules hold locally.
+**Same origin.** The SPA and the API are served under one domain (for example `example.com` and `example.com/api`). Session cookies are therefore first-party and no Cross-Origin Resource Sharing (CORS) setup is needed. The API achieves this by serving the built SPA's static files itself (see [Deployment](#5-deployment)). In development, the Vite dev server proxies `/api/*` to the API, so the same rules hold locally.
 
 **Monorepo layout.** One repository: three packages, the end-to-end tests and the infrastructure code:
 
@@ -223,9 +223,9 @@ React Hook Form with the Zod resolver and the shared schemas: the browser and th
 
 ### Cross-cutting
 
-- **Configuration:** environment variables, validated with a Zod schema at startup. A missing or invalid setting stops the app immediately with a clear error. In AWS, secrets arrive the same way, injected by ECS from the secret stores; the configuration is never logged, and pino redacts secret fields.
+- **Configuration:** environment variables, validated with a Zod schema at startup. A missing or invalid setting stops the app immediately with a clear error. In AWS, secrets arrive the same way, injected by Elastic Container Service (ECS) from the secret stores; the configuration is never logged, and pino redacts secret fields.
 - **Logging:** Fastify's built-in structured logger (pino), one JSON line per event on standard output. In AWS, the lines go to CloudWatch Logs.
-- **Email:** the `EmailSender` interface. A console implementation for development prints emails instead of sending them. In AWS, an SES implementation sends them through the AWS SDK, authorized by the task's IAM role, with no API key.
+- **Email:** the `EmailSender` interface. A console implementation for development prints emails instead of sending them. In AWS, an SES implementation sends them through the AWS software development kit (SDK), authorized by the task's Identity and Access Management (IAM) role, with no API key.
 - **Testing:** most tests are API tests that send real HTTP requests (Fastify's `inject()`) through all three layers into a real PostgreSQL, with only the edges (email, clock) faked. For that, the app is assembled by one `buildApp(deps)` function that production and tests both call. Pure domain rules get unit and property tests, the frontend gets component tests with the network faked, and each use case gets an end-to-end journey in a real browser. Details in [ADR 0007](../decisions/0007-testing-strategy.md).
 
 ## 5. Deployment
@@ -251,6 +251,8 @@ Szop runs on AWS as an **on-demand demo environment**: created for a session, de
  The task also uses: ECR (its image), Parameter Store and Secrets Manager
  (secrets), SES (email), CloudWatch Logs (logs).
 ```
+
+In the diagram, the VPC (virtual private cloud) is the demo's own private network, ACM (AWS Certificate Manager) issues the HTTPS certificate, RDS (Relational Database Service) runs PostgreSQL and ECR (Elastic Container Registry) stores the images. The [stack overview](stack-overview.md#12-where-szop-runs) explains each.
 
 - **One container** runs the Fastify API, which also serves the built SPA with `@fastify/static` (falling back to `index.html` for non-API paths), so the SPA and the API share one origin with no extra infrastructure.
 - **Exactly one instance** runs, so the in-process event bus and the cleanup task work as designed. The cleanup only matters while the environment is up, since all data disappears on teardown.

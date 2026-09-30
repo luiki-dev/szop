@@ -67,7 +67,7 @@ Later: Fastify API ── WebSocket push ──► Browser ("list 42 changed")
 
 ## 4. Lifecycle of opening the app
 
-1. The browser requests `https://szop.app/` and receives a small HTML file that references the JavaScript bundle.
+1. The browser requests `https://example.com/` and receives a small HTML file that references the JavaScript bundle.
 2. The bundle loads; React starts and React Router looks at the URL to decide which page to show.
 3. The app asks Better Auth: "is there a session?" The browser sends the session cookie, if it has one.
 4. The lists page mounts and calls `useLists()`. TanStack Query sees nothing cached, calls the API client, which sends `GET /api/lists`.

@@ -67,14 +67,14 @@ Optional footers, such as BREAKING CHANGE: … or Co-Authored-By: …
 | `ci` | CI configuration | None |
 | `chore` | Anything else (tooling, housekeeping) | None |
 
-- **The scope is optional** and names a workspace or area: `web`, `api`, `shared`, `infra`, `adr`, `deps`.
+- **The scope is optional** and names a workspace or area, for example `web`, `api`, `shared`, `e2e`, `infra`, `adr`, `spec`, `plan` or `deps`. A phase's PR title may name its feature area instead (`feat(templates): add templates`), since the phase spans several workspaces.
 - **A breaking change** is marked with `!` after the type (`feat(api)!: …`) or a `BREAKING CHANGE:` footer. While Szop is in `0.x`, it raises MINOR.
-- **Subjects are imperative**: "add", not "added" or "adds". Read it as "this commit will… add item reordering".
+- **Subjects are imperative**: "add", not "added" or "adds". Read it as "this commit will… add list totals".
 
 Examples:
 
 ```
-feat(lists): add item reordering
+feat(web): add list totals
 fix(api): reject empty list names
 docs(adr): add ADR 0009 git workflow
 build(deps): bump vitest to 3.2
@@ -165,16 +165,16 @@ A version marks a state of the code; it deploys nothing. The demo environment ca
 
 | Rule | Enforced by | From |
 |---|---|---|
-| No direct pushes, force pushes or deletion of `main` | Ruleset for `main` | This ADR's merge |
-| Every change goes through a PR | Ruleset for `main` | This ADR's merge |
-| Merge commits only | Ruleset for `main` and repository settings | This ADR's merge |
-| Review conversations resolved before merging | Ruleset for `main` | This ADR's merge |
-| Version tags cannot be moved or deleted | Ruleset for `v*` tags | This ADR's merge |
-| Secrets cannot be pushed | Secret scanning push protection | This ADR's merge |
+| No direct pushes, force pushes or deletion of `main` | Ruleset for `main` | ADR 0009's merge |
+| Every change goes through a PR | Ruleset for `main` | ADR 0009's merge |
+| Merge commits only | Ruleset for `main` and repository settings | ADR 0009's merge |
+| Review conversations resolved before merging | Ruleset for `main` | ADR 0009's merge |
+| Version tags cannot be moved or deleted | Ruleset for `v*` tags | ADR 0009's merge |
+| Secrets cannot be pushed | Secret scanning push protection | ADR 0009's merge |
 | Staged files formatted and linted | pre-commit hook | Development environment phase |
 | Commit messages follow Conventional Commits | commit-msg hook (commitlint) | Development environment phase |
 | Every commit of a PR follows Conventional Commits, even if the hook was skipped | CI check (commitlint) | CI/CD phase |
 | CI green and branch up to date before merging | Ruleset for `main` (required status checks `ci-ok` and the PR title check) | CI/CD phase |
 | No new high or critical code scanning alerts | Ruleset for `main` (code scanning results) | CI/CD phase |
 | PR title follows Conventional Commits | CI check | CI/CD phase |
-| Claude never merges a PR | `CLAUDE.md` only | This ADR's merge |
+| Claude never merges a PR | `CLAUDE.md` only | ADR 0009's merge |

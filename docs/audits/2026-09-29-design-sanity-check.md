@@ -537,6 +537,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   - ADR 0008 mixes € and $.
   - The scope examples (`feat(lists)`) go beyond the listed scopes, and "add item reordering" is a future extension.
 
+  > ✅ **Fixed** in the living docs; the scope rule now says the listed scopes are examples. ✖️ **Rejected:** editorial changes to accepted ADRs. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 ---
 
 ## CONSIDER IMPROVING

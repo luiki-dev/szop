@@ -39,7 +39,7 @@ Before making the repository public, keep in mind that the whole history becomes
 | ↳ Default commit message (dropdown under it) | **Pull request title** | The merge commit's message is the Conventional Commits title of the PR, such as `feat(lists): add shopping lists (#12)`. ADR 0009, decision 14. |
 | **Allow squash merging** | Off | One merge method only. ADR 0009, decision 6. |
 | **Allow rebase merging** | Off | One merge method only. ADR 0009, decision 6. |
-| **Always suggest updating pull request branches** | On | Shows the *Update branch* button whenever `main` has moved, which merges `main` into the branch. ADR 0009, consequences. |
+| **Always suggest updating pull request branches** | On | Shows the *Update branch* button whenever `main` has moved, which merges `main` into the branch. ADR 0009, decision 14. |
 | **Automatically delete head branches** | On | A merged branch is deleted on GitHub, so finished branches do not pile up. ADR 0009, decision 14. |
 
 Leave **Allow auto-merge** off: the owner's manual merge is the approval (ADR 0009, decision 7).
