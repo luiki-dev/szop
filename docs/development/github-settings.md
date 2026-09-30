@@ -74,13 +74,12 @@ Leave every other rule off.
 |---|---|---|
 | Ruleset name | `version-tags` | — |
 | Enforcement status | **Active** | — |
-| Bypass list | **Empty** | — |
+| Bypass list | **Empty** until the release GitHub App exists; then **only that App** | release-please creates the tags through the App ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 8). The owner is not on the list: Claude pushes with the owner's credentials, so a bypass for the owner would be one for Claude too. |
 | Target tags | *Add target* → **Include by pattern** → `v*` | Every version tag, such as `v0.1.0`. |
+| **Restrict creations** | On | Only release-please, through the App on the bypass list, creates version tags. A stray `git push --tags` or a hand-made `v*` tag is refused, instead of becoming a tag that cannot be moved or deleted and that release-please later collides with. ADR 0011, decision 8. |
 | **Restrict updates** | On | A version tag can never be moved to another commit, matching the immutable image tags in ECR. ADR 0009, decision 13; ADR 0008, decision 13. |
 | **Restrict deletions** | On (default) | A published version can never disappear. |
 | **Block force pushes** | On (default) | — |
-
-**Restrict creations** stays off: release-please creates the tags.
 
 ## Security
 

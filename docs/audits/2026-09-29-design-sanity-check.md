@@ -411,6 +411,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 ### Security and operations
 
 - **m1. The tag ruleset allows permanent mistakes.** "Restrict creations" is off (`github-settings.md`), and updates and deletions are blocked with an empty bypass list. A stray `git push --tags`, or a `v*` tag pushed by hand, can then never be moved or deleted, and release-please fails when it later creates that version. **Fix:** restrict creations, with a bypass for the release App only.
+
+  > ✅ **Fixed** in [ADR 0011, decision 8](../decisions/0011-design-sanity-check-follow-ups.md#decisions); adding the App to the bypass list joins [OP-003](../open-points.md#before-the-roadmap). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m2. Email authentication covers DKIM only.** ADR 0008 decision 24 has no Sender Policy Framework (SPF) record, custom MAIL FROM or Domain-based Message Authentication, Reporting and Conformance (DMARC) policy, so the domain can be spoofed in "reset your password" phishing. Also undefined: what registration does when SES refuses to send to an unverified sandbox address. **Fix:** add SPF and DMARC to `infra/base`, and define how a failed send is handled.
 - **m3. "Secrets never enter Terraform state" has no fallback and no check.** ADR 0008 decision 22 leaves it to "where the provider supports them". ADR 0010 decision 14 says public plan output is acceptable *only* because of this rule. **Fix:** make it a hard rule: the Better Auth secret is created outside Terraform, or through an ephemeral resource with a write-only argument. Add a way to check it, and document how to rotate the secret.
 - **m4. Real-time updates (Later) need more design:**
