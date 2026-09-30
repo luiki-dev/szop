@@ -9,6 +9,32 @@ Requirements are tagged:
 
 Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server) and [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits). Acronyms are explained in the [glossary](../glossary.md).
 
+## Contents
+
+- [1. General assumptions, actors, domain concepts](#1-general-assumptions-actors-domain-concepts)
+  - [Assumptions](#assumptions)
+  - [Actors](#actors)
+  - [Domain concepts](#domain-concepts)
+- [2. Functional requirements](#2-functional-requirements)
+  - [Accounts and guest mode (ACC)](#accounts-and-guest-mode-acc)
+  - [Shopping lists (LST)](#shopping-lists-lst)
+  - [List items (ITM)](#list-items-itm)
+  - [List display and ordering (ORD)](#list-display-and-ordering-ord)
+  - [Categories (CAT)](#categories-cat)
+  - [Catalog (PRD)](#catalog-prd)
+  - [Units (UNT)](#units-unt)
+  - [Templates (TPL)](#templates-tpl)
+  - [Sharing (SHR)](#sharing-shr)
+  - [Live updates (SYN)](#live-updates-syn)
+  - [Limits (LIM)](#limits-lim)
+  - [Connectivity (NET)](#connectivity-net)
+- [3. Use cases](#3-use-cases)
+- [4. Release slicing and future extensions](#4-release-slicing-and-future-extensions)
+  - [MVP](#mvp)
+  - [Later (planned core functionality)](#later-planned-core-functionality)
+  - [Future extensions (ideas, not committed)](#future-extensions-ideas-not-committed)
+  - [Explicitly out of scope for now](#explicitly-out-of-scope-for-now)
+
 ## 1. General assumptions, actors, domain concepts
 
 ### Assumptions

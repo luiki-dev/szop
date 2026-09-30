@@ -162,6 +162,8 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Required status check** | A CI check that must pass before GitHub allows a PR to be merged. Szop requires `ci-ok`, which sums up every job of `ci.yml`, and the PR title check (see ADR 0010). |
 | **Region** | A geographic area where a cloud provider runs data centers, such as AWS's `eu-central-1` (Frankfurt). |
 | **Role (IAM)** | A set of AWS permissions assumed temporarily by a person or service, instead of permanent keys. ECS uses a **task execution role** (to pull the image and read secrets) and a **task role** (what the app itself may do). |
+| **Rolling update** | Replacing the running copies of an app one by one: a copy on the new version starts, passes its health check, then an old one stops, so the app stays up. How ECS redeploys Szop's demo with a new image. |
+| **Rollout** | Getting a new version to its users: releasing and deploying it, often gradually (to a few users first, or behind feature flags). Szop has no users and no permanent environment, so it has no rollout in this sense. |
 | **Root module (Terraform)** | A folder of Terraform configuration applied on its own, with its own state. Szop has three: `bootstrap`, `base` and `demo`. |
 | **Scale to zero** | A platform stopping all instances of an app when no requests arrive, and starting one on the next request. Cheap, but the first request waits. |
 | **Script injection** | A CI attack where attacker-controlled text, such as a PR title, is pasted into a shell script by `${{ … }}` and runs as code. Avoided by passing such values through environment variables. |

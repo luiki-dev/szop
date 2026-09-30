@@ -4,6 +4,17 @@ Every GitHub setting Szop's git workflow relies on: its value, where it lives in
 
 All paths start on the repository page (`github.com/luiki-dev/szop`) with the **Settings** tab. The Settings sidebar is grouped into sections; the paths below name the section, then the page. GitHub moves and renames settings from time to time. If a path no longer matches, look for the setting's name and update this page.
 
+## Contents
+
+- [Order of applying](#order-of-applying)
+- [Visibility](#visibility)
+- [Pull requests](#pull-requests)
+- [Ruleset for `main`](#ruleset-for-main)
+- [Ruleset for version tags](#ruleset-for-version-tags)
+- [Security](#security)
+- [Features](#features)
+- [Checking the settings](#checking-the-settings)
+
 ## Order of applying
 
 1. **Make the repository public first.** Rulesets are not enforced on private repositories on GitHub's Free plan, and some security features are free only for public repositories.
