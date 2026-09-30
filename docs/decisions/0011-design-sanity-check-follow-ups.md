@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-09-30
-- **Extends:** decision 7 of [ADR 0004](0004-implementation-process.md) (the definition of done, now kept in one page)
+- **Extends:** decisions 2 and 3 of [ADR 0004](0004-implementation-process.md) (a security baseline foundation topic, decision 6); decision 7 of ADR 0004 (the definition of done, now kept in one page)
 - **Replaces:** the document roles table of [ADR 0004](0004-implementation-process.md), decision 9 (decision 4)
 
 ## Context
@@ -25,6 +25,7 @@ Deferred findings, like everything else deferred, go to the new [open points reg
 | 3 | One definition of done (MAJOR-13) | Keep it in ADR 0004 and its refinements; git-workflow.md §6; the PR template alone; a page of its own | **One living page, [`docs/development/definition-of-done.md`](../development/definition-of-done.md), which the PR template mirrors and everything else links to.** It had been restated in ADR 0004, ADR 0009, `git-workflow.md`, the glossary and the PR template, and the copies disagreed; none listed the guides other ADRs make part of it, reviewing surviving mutants (ADR 0007, decision 19) or applying `infra/base` from the branch (ADR 0010, decision 14). The page lists every item with its meaning, its source and **who is responsible for it** (Claude, the owner, or CI; the owner verifies all of them when reviewing). Three rules are new. **N/A needs a reason** ("N/A: no image or infrastructure change"), instead of being allowed only before CI or hosting exist. **The demo check must cover the final head:** it counts only if no later commit changed anything that goes into the image or `infra/`, so a documentation-only update needs no new check but *Update branch* bringing a dependency bump does, and the PR links the `demo-up` run it relies on. **The demo check is required for phase PRs only**; for other PRs, Dependabot's included, it is the owner's call, and CI is to prove that the image starts (OP-032). git-workflow.md is about git, and the definition of done covers more; the PR template has no room to explain its items; ADRs cannot be edited as items are added. |
 | 4 | Roles of the documents, revisited (MAJOR-13) | Keep ADR 0004's table and add rows ADR by ADR; replace it with a complete table | **A complete table, replacing the one in ADR 0004, decision 9.** ADR 0004 described requirements, living docs, ADRs, the roadmap, specs and plans; since then guides, a runbook, the register and an audit appeared without a stated role. |
 | 5 | The product and where it runs (MAJOR-1) | The README says Szop runs only as a session demo; the README describes only the product; a "demo data is wiped" banner in the app | **The README and the requirements describe the product; deployment facts stay in ADR 0008 and `architecture.md`.** The README is the first thing a visitor of the repository reads, so it describes what Szop does, not how it is run today. Its false privacy statement is corrected: guest data has been kept on the server since ADR 0002, not "in your browser". The functional requirements gain one assumption: they describe Szop as a public, always-on service, including the parts that matter only for one (ACC-7, ACC-8, LIM-4), while it currently runs only as the on-demand demo of ADR 0008. What an always-on deployment would still need is an open point (OP-033). **No banner:** the demo is shown by the owner, who can say that its data is temporary. |
+| 6 | Security findings (CRITICAL-1, MAJOR-4, MAJOR-5, MAJOR-11) | Fix each in this ADR; settle them in the walking skeleton's brainstorm; a foundation topic of their own | **A new foundation topic, the security baseline, right after CI/CD and before visual design.** The order becomes: development environment → testing strategy → hosting → git workflow → CI/CD → **security baseline** → visual design. It settles, as direction and constraints: that every ID in a request is resolved within the session's workspace (CRITICAL-1); how the client IP is determined behind the load balancer, and the missing rate limits (MAJOR-4); protection against cross-site request forgery (CSRF), cookie settings, security headers, tokens in URLs, sessions and account enumeration (MAJOR-5); and who can use the deploy role, with the wording of ADR 0010 and the glossary corrected there (MAJOR-11). Later findings can be routed to it (for example m1–m3, C1, C6–C8, C11). The findings are cross-cutting rules that every endpoint and workflow inherits, which is what a foundation topic settles; the walking skeleton builds the first endpoint and the first deploy role, so they must be decided before it, and its brainstorm is already large. Fixing them one by one in this ADR would decide security in pieces, without the threat model that ties them together. Visual design does not depend on it, so it stays last. Like every foundation topic, it gets its own brainstorm, ADR and PR; details such as composite foreign keys or exact header values stay with the phases that build them. |
 
 ### Document roles
 
@@ -50,19 +51,19 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 
 | Finding | Summary | Outcome |
 |---|---|---|
-| CRITICAL-1 | Referenced IDs not checked against the workspace | Pending |
+| CRITICAL-1 | Referenced IDs not checked against the workspace | Deferred to the security baseline topic (decision 6): [OP-034](../open-points.md#security-baseline-topic) |
 | CRITICAL-2 | Demo workflows can't run before they are merged | Fixed: decision 2; the phase order is [OP-004](../open-points.md#before-the-roadmap) |
 | MAJOR-1 | Persistent public service versus disposable demo | Fixed: decision 5 (the README's privacy sentence, an assumption in the requirements). Deferred: what an always-on deployment would need ([OP-033](../open-points.md#unassigned)). Rejected: a "demo data is wiped" banner |
 | MAJOR-2 | Guest-to-account linking versus Better Auth's anonymous plugin | Pending |
 | MAJOR-3 | Guest data lifetime versus sessions and real use | Pending |
-| MAJOR-4 | Per-IP rate limits depend on an unmentioned client-IP setting | Pending |
-| MAJOR-5 | No web security baseline | Pending |
+| MAJOR-4 | Per-IP rate limits depend on an unmentioned client-IP setting | Deferred to the security baseline topic (decision 6): [OP-035](../open-points.md#security-baseline-topic) |
+| MAJOR-5 | No web security baseline | Deferred to the security baseline topic (decision 6): [OP-036](../open-points.md#security-baseline-topic) |
 | MAJOR-6 | Flaky connectivity underspecified; a library default contradicts NET-1 | Pending |
 | MAJOR-7 | Open domain and data-model rules that shape the schema | Pending |
 | MAJOR-8 | MVP access-control shape rewritten by sharing | Pending |
 | MAJOR-9 | Redeploys overlap two tasks and can skip migrations | Pending |
 | MAJOR-10 | release-please with merge commits | Pending |
-| MAJOR-11 | The `demo` environment is not a security boundary | Pending |
+| MAJOR-11 | The `demo` environment is not a security boundary | Deferred to the security baseline topic (decision 6): [OP-037](../open-points.md#security-baseline-topic) |
 | MAJOR-12 | Nightly destroy runs `main`'s Terraform; runs don't simply queue | Pending |
 | MAJOR-13 | Roadmap, phases and definition of done not ready | Fixed in part: decisions 3 and 4 (one definition of done, document roles). Deferred: splitting the skeleton and the CI/CD work into phases ([OP-031](../open-points.md#before-the-roadmap)), a CI job proving the image starts ([OP-032](../open-points.md#cicd-phase)). Already covered: the owner's steps (OP-003) and the list of phase obligations (the register, decision 1) |
 

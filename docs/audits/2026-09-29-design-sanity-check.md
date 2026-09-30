@@ -84,6 +84,8 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### CRITICAL-1. IDs the browser sends for related records are not checked against the workspace
 
+> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-034](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:** `architecture.md`, Access control: "Services always scope queries by the workspace ID taken from the **session**, never by an ID sent by the browser." ADR 0002, decision 16.
 - **Problem:** The rule protects the record being written, not the records it points to. Many writes carry other records' IDs:
   - `category_id` on items and products (ITM-1, PRD-1)
@@ -183,6 +185,8 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### MAJOR-4. The per-IP rate limits depend on a client-IP setting no document mentions
 
+> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-035](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:** LIM-4 ("per IP address"). `architecture.md`, Abuse protection: "`@fastify/rate-limit` … Login attempts use Better Auth's built-in rate limiting, per IP address and per email address". ADR 0008, decisions 16 and 18: an Application Load Balancer (ALB) sits in front of the task. No document mentions `trustProxy` or `X-Forwarded-For`.
 - **Problem:**
   - **Without `trustProxy`, everyone shares one bucket (inferred).** Fastify sees every request as coming from the load balancer. The 11th guest per hour and the 6th registration per hour are then refused *for the whole internet*.
@@ -198,6 +202,8 @@ Severity is judged against the design **as written**. The requirements and ADR 0
   - `inject()`-based tests can't catch a proxy misconfiguration, so add a test that sends a spoofed `X-Forwarded-For`.
 
 ### MAJOR-5. The web security baseline is not decided
+
+> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-036](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 No document mentions cross-site request forgery (CSRF), Origin checks, security headers, session revocation or account enumeration (verified by searching all the docs).
 
@@ -303,6 +309,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   Also document how `1.0.0` is cut: an empty commit with the footer, merged through a PR.
 
 ### MAJOR-11. The `demo` environment is not the security boundary ADR 0010 says it is
+
+> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-037](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:**
   - ADR 0010, decision 12: "The deploy role trusts only OIDC tokens from jobs in this environment, so no other workflow can assume it, even if edited", together with "Any branch may deploy" and "No required reviewer".
