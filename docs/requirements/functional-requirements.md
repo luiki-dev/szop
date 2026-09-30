@@ -4,8 +4,8 @@ Living source of truth for what Szop does. Technical and visual design are out o
 
 Requirements are tagged:
 
-- **[MVP]** — part of the first release.
-- **[Later]** — planned core functionality, built after the MVP.
+- **🎯 [MVP]** — part of the first release.
+- **🔜 [Later]** — planned core functionality, built after the MVP.
 
 Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server) and [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits). Acronyms are explained in the [glossary](../glossary.md).
 
@@ -71,85 +71,85 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 
 ### Accounts and guest mode (ACC)
 
-- **ACC-1 [MVP]** A guest can use the app without registering. Until their first change, they see the default (seed) catalog, categories and units, read-only. Their first change (for example creating a list) creates an anonymous workspace from the seed data, tied to their browser.
-- **ACC-2 [MVP]** Register with email and password, with email verification. On registration, the guest's anonymous workspace in that browser becomes the account's workspace.
-- **ACC-3 [MVP]** Log in and log out. Reset a forgotten password via email. Change the password while logged in.
-- **ACC-4 [MVP]** When logging into an *existing* account from a browser whose guest workspace holds data, the app offers to import the guest's lists and templates or to discard them. Imported items are matched to the account's categories by name. Unmatched items become uncategorized.
-- **ACC-5 [MVP]** Profile settings: display name and currency.
-- **ACC-6 [MVP]** Delete the account with all its data, after confirmation. Lists it shared disappear for collaborators.
-- **ACC-7 [MVP]** Anonymous (guest) workspaces are deleted automatically:
+- **ACC-1 🎯 [MVP]** A guest can use the app without registering. Until their first change, they see the default (seed) catalog, categories and units, read-only. Their first change (for example creating a list) creates an anonymous workspace from the seed data, tied to their browser.
+- **ACC-2 🎯 [MVP]** Register with email and password, with email verification. On registration, the guest's anonymous workspace in that browser becomes the account's workspace.
+- **ACC-3 🎯 [MVP]** Log in and log out. Reset a forgotten password via email. Change the password while logged in.
+- **ACC-4 🎯 [MVP]** When logging into an *existing* account from a browser whose guest workspace holds data, the app offers to import the guest's lists and templates or to discard them. Imported items are matched to the account's categories by name. Unmatched items become uncategorized.
+- **ACC-5 🎯 [MVP]** Profile settings: display name and currency.
+- **ACC-6 🎯 [MVP]** Delete the account with all its data, after confirmation. Lists it shared disappear for collaborators.
+- **ACC-7 🎯 [MVP]** Anonymous (guest) workspaces are deleted automatically:
   - after **3 days**, if they had no activity later than 1 hour after being created (used only briefly);
   - otherwise after **30 days** of inactivity.
-- **ACC-8 [MVP]** Registered accounts whose email is not verified within **7 days** are deleted automatically.
+- **ACC-8 🎯 [MVP]** Registered accounts whose email is not verified within **7 days** are deleted automatically.
 
 ### Shopping lists (LST)
 
-- **LST-1 [MVP]** Create, rename and delete a list. Deleting requires confirmation.
-- **LST-2 [MVP]** View all active lists. View archived lists separately.
-- **LST-3 [MVP]** Archive and unarchive a list. An archived list is read-only until unarchived.
-- **LST-4 [MVP]** Duplicate a list. The items are copied and all start unchecked. Shares are not copied.
-- **LST-5 [MVP]** "Uncheck all" resets every item on the list.
-- **LST-6 [MVP]** "Save as template" creates a template from the list's items.
+- **LST-1 🎯 [MVP]** Create, rename and delete a list. Deleting requires confirmation.
+- **LST-2 🎯 [MVP]** View all active lists. View archived lists separately.
+- **LST-3 🎯 [MVP]** Archive and unarchive a list. An archived list is read-only until unarchived.
+- **LST-4 🎯 [MVP]** Duplicate a list. The items are copied and all start unchecked. Shares are not copied.
+- **LST-5 🎯 [MVP]** "Uncheck all" resets every item on the list.
+- **LST-6 🎯 [MVP]** "Save as template" creates a template from the list's items.
 
 ### List items (ITM)
 
-- **ITM-1 [MVP]** An item has a name (required) and an optional category, quantity, unit, note and price per unit.
-- **ITM-2 [MVP]** Smart add input: while typing, the app suggests catalog products whose names match. Picking a suggestion adds the product with its defaults (category, unit, price). Pressing enter adds the typed text as an ad-hoc item.
-- **ITM-3 [MVP]** After an ad-hoc item is added, the app offers to save it to the catalog. The option is off by default and saving never happens automatically.
-- **ITM-4 [MVP]** If an unchecked item with the same name (case-insensitive) is already on the list, the app suggests increasing its quantity instead of adding a duplicate.
-- **ITM-5 [MVP]** Catalog browser: navigate the category tree, select multiple products and add them to the list at once.
-- **ITM-6 [MVP]** Edit any field of an item. Changes affect only that item, never the catalog.
-- **ITM-7 [MVP]** Check and uncheck an item. Remove an item.
-- **ITM-8 [MVP]** Totals: the list shows the sum of line totals for all items, for remaining (unchecked) items and for checked items. A line total is price × quantity, or just the price when there is no quantity. Items without a price are left out.
+- **ITM-1 🎯 [MVP]** An item has a name (required) and an optional category, quantity, unit, note and price per unit.
+- **ITM-2 🎯 [MVP]** Smart add input: while typing, the app suggests catalog products whose names match. Picking a suggestion adds the product with its defaults (category, unit, price). Pressing enter adds the typed text as an ad-hoc item.
+- **ITM-3 🎯 [MVP]** After an ad-hoc item is added, the app offers to save it to the catalog. The option is off by default and saving never happens automatically.
+- **ITM-4 🎯 [MVP]** If an unchecked item with the same name (case-insensitive) is already on the list, the app suggests increasing its quantity instead of adding a duplicate.
+- **ITM-5 🎯 [MVP]** Catalog browser: navigate the category tree, select multiple products and add them to the list at once.
+- **ITM-6 🎯 [MVP]** Edit any field of an item. Changes affect only that item, never the catalog.
+- **ITM-7 🎯 [MVP]** Check and uncheck an item. Remove an item.
+- **ITM-8 🎯 [MVP]** Totals: the list shows the sum of line totals for all items, for remaining (unchecked) items and for checked items. A line total is price × quantity, or just the price when there is no quantity. Items without a price are left out.
 
 ### List display and ordering (ORD)
 
-- **ORD-1 [MVP]** The list shows unchecked items first, then checked items.
-- **ORD-2 [MVP]** Within each of those two parts, items are sorted by the global category order, then alphabetically by name. Uncategorized items come last.
-- **ORD-3 [MVP]** Items labeled with a parent category come before items labeled with its subcategories.
-- **ORD-4 [MVP]** A toggle hides checked items.
-- **ORD-5 [MVP]** Each list has a "sort by category" setting, on by default. When it is off, items appear in the order they were added, and the unchecked/checked split (ORD-1) still applies. The owner and editors can change the setting.
+- **ORD-1 🎯 [MVP]** The list shows unchecked items first, then checked items.
+- **ORD-2 🎯 [MVP]** Within each of those two parts, items are sorted by the global category order, then alphabetically by name. Uncategorized items come last.
+- **ORD-3 🎯 [MVP]** Items labeled with a parent category come before items labeled with its subcategories.
+- **ORD-4 🎯 [MVP]** A toggle hides checked items.
+- **ORD-5 🎯 [MVP]** Each list has a "sort by category" setting, on by default. When it is off, items appear in the order they were added, and the unchecked/checked split (ORD-1) still applies. The owner and editors can change the setting.
 
 ### Categories (CAT)
 
-- **CAT-1 [MVP]** Create, rename and delete categories at any level of the tree. Move a category under a different parent.
-- **CAT-2 [MVP]** Reorder sibling categories.
-- **CAT-3 [MVP]** Deleting a category also deletes its subcategories. The confirmation shows how many products and items are affected. Catalog products and list items labeled with a deleted category become uncategorized.
+- **CAT-1 🎯 [MVP]** Create, rename and delete categories at any level of the tree. Move a category under a different parent.
+- **CAT-2 🎯 [MVP]** Reorder sibling categories.
+- **CAT-3 🎯 [MVP]** Deleting a category also deletes its subcategories. The confirmation shows how many products and items are affected. Catalog products and list items labeled with a deleted category become uncategorized.
 
 ### Catalog (PRD)
 
-- **PRD-1 [MVP]** Create, edit and delete catalog products (name, default category, default unit, default price).
-- **PRD-2 [MVP]** Browse the catalog by category, and search it by name.
-- **PRD-3 [MVP]** Deleting a product does not affect list items created from it.
+- **PRD-1 🎯 [MVP]** Create, edit and delete catalog products (name, default category, default unit, default price).
+- **PRD-2 🎯 [MVP]** Browse the catalog by category, and search it by name.
+- **PRD-3 🎯 [MVP]** Deleting a product does not affect list items created from it.
 
 ### Units (UNT)
 
-- **UNT-1 [MVP]** Add, rename and delete units. Items that already use a unit keep its label.
+- **UNT-1 🎯 [MVP]** Add, rename and delete units. Items that already use a unit keep its label.
 
 ### Templates (TPL)
 
-- **TPL-1 [MVP]** Create a template from scratch, or from a list (LST-6).
-- **TPL-2 [MVP]** Edit a template's name and items, the same way as a list but without checking items off.
-- **TPL-3 [MVP]** Create a new list from a template. Delete a template.
+- **TPL-1 🎯 [MVP]** Create a template from scratch, or from a list (LST-6).
+- **TPL-2 🎯 [MVP]** Edit a template's name and items, the same way as a list but without checking items off.
+- **TPL-3 🎯 [MVP]** Create a new list from a template. Delete a template.
 
 ### Sharing (SHR)
 
-- **SHR-1 [Later]** The owner can share a list with a registered user by email, as **shopper** or **editor**. The list appears in that user's "Shared with me" view.
-- **SHR-2 [Later]** The owner can create a share link per role, and revoke or regenerate it. Anyone opening the link, including guests, gets that role. For a guest, access is tied to their anonymous session in that browser.
-- **SHR-3 [Later]** The owner can change a collaborator's role or remove them. A collaborator can leave a shared list.
-- **SHR-4 [Later]** Only the owner can rename, archive, delete, duplicate or share the list.
-- **SHR-5 [Later]** A shared list uses the **owner's** category tree, category order and currency. An editor picks categories from the owner's tree. When an editor adds a product from their own catalog, its category is matched by name in the owner's tree, otherwise the item is uncategorized. "Save to catalog" saves to the editor's own catalog.
+- **SHR-1 🔜 [Later]** The owner can share a list with a registered user by email, as **shopper** or **editor**. The list appears in that user's "Shared with me" view.
+- **SHR-2 🔜 [Later]** The owner can create a share link per role, and revoke or regenerate it. Anyone opening the link, including guests, gets that role. For a guest, access is tied to their anonymous session in that browser.
+- **SHR-3 🔜 [Later]** The owner can change a collaborator's role or remove them. A collaborator can leave a shared list.
+- **SHR-4 🔜 [Later]** Only the owner can rename, archive, delete, duplicate or share the list.
+- **SHR-5 🔜 [Later]** A shared list uses the **owner's** category tree, category order and currency. An editor picks categories from the owner's tree. When an editor adds a product from their own catalog, its category is matched by name in the owner's tree, otherwise the item is uncategorized. "Save to catalog" saves to the editor's own catalog.
 
 ### Live updates (SYN)
 
-- **SYN-1 [Later]** Changes to a shared list appear for everyone viewing it within a few seconds, without reloading.
-- **SYN-2 [Later]** For concurrent edits, the last change wins, per item field.
+- **SYN-1 🔜 [Later]** Changes to a shared list appear for everyone viewing it within a few seconds, without reloading.
+- **SYN-2 🔜 [Later]** For concurrent edits, the last change wins, per item field.
 
 ### Limits (LIM)
 
 All values below are configurable defaults, adjustable without code changes. They are the same for guests and registered users.
 
-- **LIM-1 [MVP]** Workspace quotas:
+- **LIM-1 🎯 [MVP]** Workspace quotas:
 
   | What | Limit |
   |---|---|
@@ -160,9 +160,9 @@ All values below are configurable defaults, adjustable without code changes. The
   | Categories | 300, at most 5 levels deep |
   | Units | 50 |
 
-- **LIM-2 [MVP]** Text lengths: names (list, item, product, category, template, unit) at most 100 characters; item notes at most 500 characters. Forms enforce the same limits.
-- **LIM-3 [MVP]** When a quota is reached, the app explains which limit was hit and how to make room (for example "You've reached the limit of 200 lists, archived ones included. Delete some to make room").
-- **LIM-4 [MVP]** Rate limits protect the service from abuse:
+- **LIM-2 🎯 [MVP]** Text lengths: names (list, item, product, category, template, unit) at most 100 characters; item notes at most 500 characters. Forms enforce the same limits.
+- **LIM-3 🎯 [MVP]** When a quota is reached, the app explains which limit was hit and how to make room (for example "You've reached the limit of 200 lists, archived ones included. Delete some to make room").
+- **LIM-4 🎯 [MVP]** Rate limits protect the service from abuse:
 
   | What | Limit |
   |---|---|
@@ -175,7 +175,7 @@ All values below are configurable defaults, adjustable without code changes. The
 
 ### Connectivity (NET)
 
-- **NET-1 [MVP]** When the connection is lost, the app clearly shows an offline state and blocks changes rather than silently losing them. This applies to guests and registered users alike.
+- **NET-1 🎯 [MVP]** When the connection is lost, the app clearly shows an offline state and blocks changes rather than silently losing them. This applies to guests and registered users alike.
 
 ## 3. Use cases
 
@@ -188,9 +188,9 @@ All values below are configurable defaults, adjustable without code changes. The
 - **UC-7 Customize the catalog** — The user adds "Oat milk" under Dairy › Plant-based, with default unit l and a price. From then on it is suggested in the smart input.
 - **UC-8 Guest becomes a user** — A guest with 3 lists registers and verifies their email. The lists, catalog and categories are now in their account and available on their laptop.
 - **UC-9 Log in on a device with guest data** — A user logs in on a borrowed tablet that holds guest lists. The app asks whether to import or discard them. The user discards them.
-- **UC-10 Share with a household member [Later]** — The owner invites their partner by email as an editor. The partner sees the list in "Shared with me" and adds items. The owner sees them appear live.
-- **UC-11 Hand off shopping to someone without an account [Later]** — The owner creates a shopper link and sends it to a teenager. The teenager opens it as a guest and checks items off in the store. The owner sees progress live at home.
-- **UC-12 Revoke access [Later]** — The owner regenerates the share link. The old link stops working.
+- **UC-10 Share with a household member 🔜 [Later]** — The owner invites their partner by email as an editor. The partner sees the list in "Shared with me" and adds items. The owner sees them appear live.
+- **UC-11 Hand off shopping to someone without an account 🔜 [Later]** — The owner creates a shopper link and sends it to a teenager. The teenager opens it as a guest and checks items off in the store. The owner sees progress live at home.
+- **UC-12 Revoke access 🔜 [Later]** — The owner regenerates the share link. The old link stops working.
 - **UC-13 Archive after a project** — Once a renovation list is done, the owner archives it. It leaves the active view and stays read-only in the archive.
 - **UC-14 Delete an account** — The user deletes their account. All their data is removed, and lists they shared disappear for collaborators.
 
@@ -198,13 +198,15 @@ All values below are configurable defaults, adjustable without code changes. The
 
 ### MVP
 
-ACC, LST, ITM, ORD, CAT, PRD, UNT, TPL, LIM, NET: a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration.
+🎯 ACC, LST, ITM, ORD, CAT, PRD, UNT, TPL, LIM, NET: a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration.
 
 ### Later (planned core functionality)
 
-SHR (sharing, roles, links) and SYN (live updates).
+🔜 SHR (sharing, roles, links) and SYN (live updates).
 
 ### Future extensions (ideas, not committed)
+
+💡 Ideas that may become requirements later:
 
 - Themes
 - Android application
@@ -219,6 +221,8 @@ SHR (sharing, roles, links) and SYN (live updates).
 - Admin role and admin panel (defaults management, user management, moderation)
 
 ### Explicitly out of scope for now
+
+🚫 Not planned, for now:
 
 - "Remove checked items" action
 - Strict read-only viewer role
