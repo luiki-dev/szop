@@ -55,7 +55,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | CRITICAL-1 | Referenced IDs not checked against the workspace | Deferred to the security baseline topic (decision 6): [OP-034](../open-points.md#security-baseline-topic) |
 | CRITICAL-2 | Demo workflows can't run before they are merged | Fixed: decision 2; the phase order is [OP-004](../open-points.md#before-the-roadmap) |
 | MAJOR-1 | Persistent public service versus disposable demo | Fixed: decision 5 (the README's privacy sentence, an assumption in the requirements). Deferred: what an always-on deployment would need ([OP-033](../open-points.md#unassigned)). Rejected: a "demo data is wiped" banner |
-| MAJOR-2 | Guest-to-account linking versus Better Auth's anonymous plugin | Pending |
+| MAJOR-2 | Guest-to-account linking versus Better Auth's anonymous plugin | Deferred to the phase delivering ACC-2 and ACC-4, after a Better Auth spike: [OP-038](../open-points.md#feature-phases); `architecture.md` warns about it |
 | MAJOR-3 | Guest data lifetime versus sessions and real use | Pending |
 | MAJOR-4 | Per-IP rate limits depend on an unmentioned client-IP setting | Deferred to the security baseline topic (decision 6): [OP-035](../open-points.md#security-baseline-topic) |
 | MAJOR-5 | No web security baseline | Deferred to the security baseline topic (decision 6): [OP-036](../open-points.md#security-baseline-topic) |

@@ -157,6 +157,8 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### MAJOR-2. Moving a guest into an account doesn't fit how Better Auth's anonymous plugin links users
 
+> ⏳ **Deferred** to the phase delivering ACC-2 and ACC-4, after a Better Auth spike: [OP-038](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:** `architecture.md`, Anonymous guests: "When an anonymous user registers or logs in, Better Auth links them to the registered account. In that step the server either reassigns … or imports … or discards them, according to the user's choice (ACC-4)." ACC-2, ACC-4, ACC-8, UC-8 and UC-9.
 - **Problem:**
   - **(a) The anonymous user is deleted during sign-in.** Verified in the Better Auth anonymous plugin documentation: linking happens server-side inside the sign-in or sign-up request, the `onLinkAccount` callback runs then, and "the `anonymousUser` will be deleted by default". The ACC-4 choice is made in the UI *after* login. By then the anonymous user, and by cascade the guest workspace, is already gone.
