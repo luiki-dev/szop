@@ -2,7 +2,7 @@
 
 Szop is a web application for tracking shopping lists (groceries and general shopping). See `README.md` for the high-level description.
 
-## Project purpose (from the README disclaimer)
+## Project purpose
 
 This project is primarily a **learning project**. The owner wants to learn:
 
@@ -22,11 +22,13 @@ How to work on it:
 
 Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/development/git-workflow.md`. In short:
 
-- **Never commit to `main`.** Every change is made on a branch named `type/short-description` (`feat/shopping-lists`, `docs/adr-0010-ci-cd`) and reaches `main` through a pull request. A roadmap phase is one branch and one PR, holding its spec, plan and code.
-- **Commit messages follow Conventional Commits** (`type(scope): description`, imperative). Within a phase, commits follow the plan's tasks. So does the PR title, which becomes the merge commit's message.
+- **Never commit to `main`.** Every change is made on a branch named `type/short-description` (`feat/shopping-lists`, `docs/adr-0010-ci-cd`) and reaches `main` through a pull request. A roadmap phase is one branch and one PR, holding its code and, on the full path of ADR 0004, decision 8, its spec and plan.
+- **Commit messages follow Conventional Commits** (`type(scope): description`, imperative). Within a phase, commits follow the plan's tasks. The PR title follows Conventional Commits too, since it becomes the merge commit's message.
 - **Review your own changes before opening a PR, and fill in the PR template** (`.github/pull_request_template.md`).
 - **Address review comments with new commits** on the branch; don't rewrite history once a PR is open. Bring `main` in by merging it, not by rebasing.
 - **Never merge a PR**, including release-please's release PR. Only the owner merges; the merge is the approval.
+- **Never trigger `demo-up` or `demo-down`** unless the owner asks ([ADR 0010](docs/decisions/0010-ci-cd.md), consequences).
+- **When a superpowers skill offers a git worktree or a local merge, don't take it.** Work on a plain branch in the main checkout (ADR 0009, decision 5), and finish by pushing the branch and opening a PR.
 
 ## Documentation
 

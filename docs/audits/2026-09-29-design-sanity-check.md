@@ -468,6 +468,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   - "A roadmap phase … holding its spec, plan and code" ignores the bounded path of ADR 0004, decision 8, which has no spec or plan.
   - "(from the README disclaimer)" refers to a section the README no longer has. It was removed in commit `1f82330`.
 
+  > ✅ **Fixed** in `CLAUDE.md`, all five points; the `demo-up` rule closes [OP-024](../open-points.md#closed). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 ### Requirements and architecture
 
 - **m16. Units have no place in the frontend.** UNT-1 is MVP, and the backend has a `units` module. But `architecture.md`'s frontend folders ("mirroring the backend") and the routes table have no units page.
