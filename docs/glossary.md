@@ -14,28 +14,37 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **AZ** | Availability Zone | One of several separate data centers within an AWS region, with independent power and networking. |
 | **CalVer** | Calendar Versioning | Version numbers built from the release date, such as `2026.10.0`. Considered, not used (see ADR 0009). |
 | **CDK** | Cloud Development Kit | AWS's infrastructure-as-code tool in general-purpose languages such as TypeScript. Considered, not used (see ADR 0008). |
-| **CI/CD** | Continuous Integration / Continuous Delivery (or Deployment) | Automatically building and testing every change (CI), and automatically releasing it (CD). |
-| **CORS** | Cross-Origin Resource Sharing | Browser rules deciding when a page from one domain may call an API on another domain. Not needed when frontend and API share one origin. |
 | **CDN** | Content Delivery Network | A network of servers around the world that serves static files close to users and can absorb or filter traffic floods in front of the application. |
-| **CRUD** | Create, Read, Update, Delete | The four basic operations on data. |
+| **CI/CD** | Continuous Integration / Continuous Delivery (or Deployment) | Automatically building and testing every change (CI), and automatically releasing it (CD). |
+| **CLI** | Command-line interface | A program used by typing commands in a terminal, such as `git`, `gh`, `terraform` or the AWS CLI. |
+| **CORS** | Cross-Origin Resource Sharing | Browser rules deciding when a page from one domain may call an API on another domain. Not needed when frontend and API share one origin. |
 | **CRLF / LF** | Carriage Return + Line Feed / Line Feed | The two conventions for ending a line of text: Windows uses CRLF, Linux and macOS use LF. Szop's repository uses LF only. |
+| **CRUD** | Create, Read, Update, Delete | The four basic operations on data. |
+| **CSP** | Content Security Policy | An HTTP header telling the browser which sources a page may load scripts, styles and other content from, which limits the damage of an injected script. Not decided yet (see the 2026-09-29 audit). |
+| **CSRF** | Cross-Site Request Forgery | An attack where another site makes the victim's browser send a request, with the victim's cookies, that changes data. Countered by `SameSite` cookies and Origin checks. |
 | **DKIM** | DomainKeys Identified Mail | A signature on outgoing email, checked against a key published in DNS, proving the mail really comes from the domain. |
+| **DMARC** | Domain-based Message Authentication, Reporting and Conformance | A DNS record telling receiving mail servers what to do with mail that fails the SPF and DKIM checks, which stops others sending mail in the domain's name. |
 | **DNS** | Domain Name System | The internet's directory that turns names (`demo.example.com`) into addresses. |
+| **DOM** | Document Object Model | The browser's tree of objects representing a page; JavaScript reads and changes the page through it. |
 | **DoS** | Denial of Service | An attack that makes a service unavailable, either by flooding it with traffic (volumetric) or by making it exhaust resources such as database space (resource exhaustion). |
 | **E2E** | End-to-end | A test that drives the real app in a real browser, through every layer (SPA → API → database), the way a user would. Szop has one E2E journey per use case (see ADR 0007). |
+| **EC2** | Elastic Compute Cloud | AWS's virtual machines. Szop does not manage any: Fargate runs its container without them. |
 | **ECR** | Elastic Container Registry | AWS's storage for container images. |
 | **ECS** | Elastic Container Service | AWS's service for running containers. Szop's demo runs one ECS task on Fargate. |
 | **EKS** | Elastic Kubernetes Service | AWS's managed Kubernetes. Far more than Szop needs; not used (see ADR 0008). |
 | **ESM** | ECMAScript Modules | The standard JavaScript module system (`import` / `export`). Replaces CommonJS (`require`), the older Node-only format. Szop uses ESM everywhere. |
+| **GUI** | Graphical user interface | A program used through windows and buttons rather than typed commands, such as the AWS console. |
 | **HCL** | HashiCorp Configuration Language | The language Terraform configuration is written in. |
+| **HCP** | HashiCorp Cloud Platform | HashiCorp's hosted services; HCP Terraform stores Terraform state and runs Terraform remotely. Szop keeps state in its own S3 bucket instead. |
+| **HSTS** | HTTP Strict Transport Security | An HTTP header telling the browser to use only HTTPS for a domain from then on, so the first plain-HTTP request cannot be intercepted. |
 | **HTTPS** | HTTP Secure | HTTP encrypted with TLS. |
 | **IaC** | Infrastructure as Code | Describing servers, networks and databases in files kept in git, and letting a tool create them, instead of clicking in a console. Szop uses Terraform. |
 | **IAM** | Identity and Access Management | AWS's system of users, roles and permissions deciding who may do what. |
 | **JWT** | JSON Web Token | A signed token carrying claims about a user. An alternative to server-side sessions; not used in Szop. |
 | **LTS** | Long-Term Support | A release line that receives fixes for an extended period. Even-numbered Node.js releases (22, 24, …) become LTS. |
 | **MFA** | Multi-Factor Authentication | Logging in with a second proof besides the password, such as a code from an authenticator app. |
-| **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
 | **MSW** | Mock Service Worker | A library that intercepts the app's HTTP requests at the network level and answers them with fake responses. Szop's component tests use it, so the real API client runs unchanged. |
+| **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
 | **NAT** | Network Address Translation | Here: a NAT gateway lets resources in a private subnet reach the internet. Costs about $32 a month on AWS; not used (see ADR 0008). |
 | **OAuth / OIDC** | Open Authorization / OpenID Connect | Standards for logging in through another provider ("Sign in with Google"). Relevant for the social-login future extension. Also how CI logs in to AWS without stored keys: GitHub signs a token saying which workflow is running, and AWS exchanges it for short-lived credentials (see ADR 0010). |
 | **OpenSSF** | Open Source Security Foundation | A Linux Foundation project for open-source security. Its **Scorecard** rates a repository's security practices. Not used yet (see ADR 0010). |
@@ -43,16 +52,19 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **PaaS** | Platform as a Service | A hosting service where you hand over the app and the platform runs it (Render, Railway, Fly.io, Heroku). Considered, not used (see ADR 0008). |
 | **PAT** | Personal Access Token | A GitHub token that acts as the person who created it, with the permissions they chose. Considered for release-please, not used: Szop uses a GitHub App (see ADR 0010). |
 | **PR** | Pull Request | A request to merge a branch into another (usually `main`), where the change can be reviewed and checked by CI before it lands. |
+| **PWA** | Progressive Web App | A web app that can be installed on a phone's home screen and caches its files with a service worker, so it starts without a network. A future option for Szop. |
 | **RDS** | Relational Database Service | AWS's managed database servers. Szop's demo uses RDS for PostgreSQL. |
 | **REST** | Representational State Transfer | An API style where URLs name resources (`/api/lists/42`) and HTTP methods say what to do with them (`GET`, `POST`, `PATCH`, `DELETE`). |
+| **S3** | Simple Storage Service | AWS's file (object) storage. Holds Szop's Terraform state. |
 | **SBOM** | Software Bill of Materials | A machine-readable list of everything inside a piece of software, such as every package in a container image. Not produced yet (see ADR 0010). |
 | **SDK** | Software Development Kit | A library for calling a platform from code, such as the AWS SDK for JavaScript. |
-| **SEO** | Search Engine Optimization | Making pages rank well in search engines. Irrelevant for private data such as shopping lists. |
 | **SemVer** | Semantic Versioning | Version numbers of the form `MAJOR.MINOR.PATCH`, where each part says what kind of change a release holds. Szop uses one version for the whole repository, `0.x` until the MVP is complete (see ADR 0009). |
+| **SEO** | Search Engine Optimization | Making pages rank well in search engines. Irrelevant for private data such as shopping lists. |
 | **SES** | Simple Email Service | AWS's email-sending service. Szop's demo sends its emails through it. |
 | **SHA** | Secure Hash Algorithm | A family of hash functions. A git **commit SHA** is the commit's hash, the 40-character ID that names exactly one commit. Szop's workflows pin every action to one (see ADR 0010). |
 | **SMTP** | Simple Mail Transfer Protocol | The protocol for sending email. |
 | **SPA** | Single-Page Application | A web app where the browser loads one page once and JavaScript renders every screen after that, without full page reloads. Szop's frontend is one. |
+| **SPF** | Sender Policy Framework | A DNS record listing which servers may send mail for a domain. |
 | **SSM** | (AWS) Systems Manager | A family of AWS operations tools. Its **Parameter Store** holds Szop's app secrets; its Session Manager plugin powers ECS Exec. |
 | **SSO** | Single Sign-On | One login giving access to several systems. IAM Identity Center is AWS's SSO; it hands out short-lived credentials. |
 | **SSR** | Server-Side Rendering | Generating a page's HTML on the server for each request. The main strength of frameworks like Next.js; not used in Szop. |
@@ -64,6 +76,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **WAF** | Web Application Firewall | A filter in front of an app that blocks malicious or excessive requests. Not used by the demo (see ADR 0008). |
 | **WASM** | WebAssembly | A compact binary format that browsers and Node.js can run at near-native speed. PGlite is PostgreSQL compiled to it; considered for tests, not used (see ADR 0007). |
 | **WSL** | Windows Subsystem for Linux | A Linux environment running inside Windows. Szop is developed in WSL 2 with Ubuntu. |
+| **YAML** | YAML Ain't Markup Language | A text format for configuration, based on indentation. GitHub Actions workflows and `compose.yaml` are written in it. |
 
 ## Requirement ID prefixes
 
@@ -94,57 +107,58 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Anonymous user** | A server-side user without email or password, created automatically for a guest. Registering links it to a real account. |
 | **Bastion host** | A server kept only as an entry point for reaching private resources (such as a database) over SSH. Szop uses ECS Exec instead. |
 | **Big design up front** | Designing a system in full detail before building any of it. Criticized because the decisions are made without feedback from working software. Szop decides direction up front and details per phase (see ADR 0004). |
-| **Bundle** | The JavaScript and CSS files a build tool (Vite) produces from the source code for the browser to download. |
-| **Definition of done** | The checklist every piece of work must meet before it counts as finished. Szop's is in ADR 0004: tests pass, CI green, deployed, docs updated. |
-| **Dependabot** | GitHub's built-in bot that warns about vulnerable dependencies (alerts) and opens PRs updating them (version and security updates). |
-| **Design tokens** | Named values for the basic visual choices — colors, spacing, font sizes — used everywhere instead of raw values, so the look can be changed in one place. |
 | **Bisect (git)** | `git bisect` finds the commit that introduced a bug by binary search: it checks out commits between a known good and a known bad one, and you mark each as good or bad. |
 | **Branch protection / ruleset** | GitHub rules that guard branches or tags, for example "no direct pushes to `main`" or "a version tag can never move". **Rulesets** are the newer mechanism; Szop uses them (see ADR 0009). |
+| **Bundle** | The JavaScript and CSS files a build tool (Vite) produces from the source code for the browser to download. |
 | **Changelog** | A file (`CHANGELOG.md`) listing what changed in each released version. Szop's is written by release-please from the commit messages. |
 | **CodeQL** | GitHub's code analysis engine: it finds security vulnerabilities and coding errors in the code and in the workflows. Free for public repositories; Szop uses its default setup (see ADR 0010). |
-| **Composite action** | A reusable group of GitHub Actions steps kept in the repository (`.github/actions/<name>/action.yml`) and called from workflows like any action. |
-| **Cooldown (Dependabot)** | A waiting period before Dependabot proposes a new version of a dependency, so malicious releases are usually found and removed before they are offered. Szop uses 7 days (see ADR 0010). |
 | **Commitlint** | A tool that checks commit messages against a convention, here Conventional Commits, run by a `commit-msg` git hook. |
+| **Composite action** | A reusable group of GitHub Actions steps kept in the repository (`.github/actions/<name>/action.yml`) and called from workflows like any action. |
 | **Container / Docker** | A container packages a program with everything it needs and runs it isolated from the rest of the machine. Docker is the most common tool for building and running containers. Szop runs PostgreSQL in one during development. |
+| **Conventional Commits** | A convention for commit messages, `type(scope): description` (`feat(api): add list sharing`), that tells both people and tools what kind of change a commit is. Szop uses it (see ADR 0009). |
+| **Cooldown (Dependabot)** | A waiting period before Dependabot proposes a new version of a dependency, so malicious releases are usually found and removed before they are offered. Szop uses 7 days (see ADR 0010). |
+| **Definition of done** | The checklist every piece of work must meet before it counts as finished. Szop's is kept in `docs/development/definition-of-done.md`. |
+| **Dependabot** | GitHub's built-in bot that warns about vulnerable dependencies (alerts) and opens PRs updating them (version and security updates). |
+| **Dependency injection** | Handing a component the things it depends on (database client, email sender) from outside instead of it creating them. NestJS and Spring do it with a container; Szop passes dependencies explicitly. |
+| **Design tokens** | Named values for the basic visual choices — colors, spacing, font sizes — used everywhere instead of raw values, so the look can be changed in one place. |
 | **Dev container** | A development environment defined in the repository and run inside a container, so every machine gets identical tools. Considered for Szop, not used (see ADR 0005). |
 | **Docker Compose** | A Docker tool that starts a set of containers described in a `compose.yaml` file. A **named volume** in it keeps a container's data (such as the database files) when the container is recreated. |
-| **Conventional Commits** | A convention for commit messages, `type(scope): description` (`feat(api): add list sharing`), that tells both people and tools what kind of change a commit is. Szop uses it (see ADR 0009). |
-| **Dependency injection** | Handing a component the things it depends on (database client, email sender) from outside instead of it creating them. NestJS and Spring do it with a container; Szop passes dependencies explicitly. |
 | **Domain rules** | Business logic independent of HTTP and storage — e.g. how list items are ordered, how totals are computed. Szop keeps them in `packages/shared`. |
 | **ECS Exec** | Opening a shell inside a running ECS task (`aws ecs execute-command`). Szop's way to run `psql` against the demo database. |
 | **ECS task, task definition, service** | A **task definition** describes a container to run (image, CPU, memory, environment); a **task** is one running copy; an ECS **service** keeps the wanted number of tasks running and replaces failed ones. |
-| **Ephemeral environment** | An environment created on demand from infrastructure-as-code files and destroyed when no longer needed, paid for only while it exists. Szop's demo is one. |
 | **Environment (GitHub)** | A named deployment target in a repository (Szop: `demo`, `release`) with its own secrets, variables and rules, such as which branches may deploy to it. AWS roles can trust only jobs running in a given environment. |
+| **Ephemeral environment** | An environment created on demand from infrastructure-as-code files and destroyed when no longer needed, paid for only while it exists. Szop's demo is one. |
 | **Event bus** | An in-process publish/subscribe mechanism: code publishes "list 42 changed", listeners (such as the WebSocket hub) react. |
 | **Fargate** | AWS's way of running ECS tasks without managing servers: you state CPU and memory, AWS provides the machine. |
 | **Flaky test** | A test that sometimes passes and sometimes fails without any change to the code, usually because of timing or shared state. Treated as a bug in Szop. |
 | **Formatter** | A tool that rewrites code into one consistent layout (indentation, quotes, line breaks). Szop uses Prettier. |
-| **Git hook** | A script Git runs at a fixed moment, for example before a commit is created (a **pre-commit hook**). Szop's formats and lints the files being committed. |
-| **Health check** | A request a load balancer or orchestrator sends regularly (Szop: `GET /api/health`) to decide whether an instance should receive traffic or be replaced. |
 | **Git flow** | A branching model with long-lived `main` and `develop` branches plus `feature/*`, `release/*` and `hotfix/*` branches, made for software released in numbered versions. Considered, not used (see ADR 0009). |
-| **GitHub flow** | A branching model where `main` is always releasable and every change is made on a short-lived branch merged through a pull request. Szop uses it (see ADR 0009). |
+| **Git hook** | A script Git runs at a fixed moment, for example before a commit is created (a **pre-commit hook**). Szop's formats and lints the files being committed. |
 | **GitHub Actions: workflow, job, runner** | GitHub's CI/CD service. A **workflow** is a YAML file in `.github/workflows/` started by an event (a push, a PR, a schedule, a button); it holds **jobs**, which run in parallel unless one needs another, each on a fresh virtual machine, the **runner**. |
 | **GitHub App** | An integration registered on GitHub with its own identity (`name[bot]`) and narrowly chosen permissions; it gets tokens that expire within an hour. Szop's release-please runs as one (see ADR 0010). |
+| **GitHub flow** | A branching model where `main` is always releasable and every change is made on a short-lived branch merged through a pull request. Szop uses it (see ADR 0009). |
 | **GitOps** | Running infrastructure from git: merging a change to the main branch applies it automatically. Considered for `infra/base`, not used (see ADR 0010). |
+| **Health check** | A request a load balancer or orchestrator sends regularly (Szop: `GET /api/health`) to decide whether an instance should receive traffic or be replaced. |
 | **Hook (Fastify)** | A function Fastify calls at a fixed point of a request's lifecycle (`onRequest`, `preHandler`, …). |
 | **Hook (React)** | A function starting with `use` (`useState`, `useList`) that lets a component use state or other React features. Unrelated to Fastify hooks despite the name. |
 | **Hyperscaler** | One of the very large cloud providers offering hundreds of services worldwide: AWS, Microsoft Azure, Google Cloud. |
 | **Immutable tag** | A container image tag that, once pushed, can never point at a different image. Szop's registry enforces it, so a version always means the same code. |
 | **IndexedDB** | A database built into the browser for storing structured data locally. Considered for guest workspaces, not used (see ADR 0002). |
-| **Least privilege** | Giving every identity only the permissions it needs, so a leak or bug can do little harm. Szop's app role may only send email. |
-| **Merge commit, squash merge, rebase merge** | GitHub's three ways to merge a PR. A **merge commit** keeps the branch's commits and adds one commit joining the histories; a **squash merge** turns the whole branch into one new commit; a **rebase merge** replays each commit on top of `main`. Szop uses merge commits (see ADR 0009). |
-| **Migration** | A versioned script that changes the database schema; applied in order in every environment. |
 | **IPv6 /64 block** | The range of IPv6 addresses sharing their first 64 bits — typically what one household or device is given. Rate limits group addresses by it, since one machine can switch between billions of addresses inside its block. |
 | **jsdom** | A simulated browser DOM that runs inside Node.js, so component tests can render and click without a real browser. It has no layout engine. |
-| **Linter** | A tool that analyzes code for bugs and bad patterns without running it. Szop uses ESLint. |
 | **Lazy creation** | Creating something only when it is first needed. Szop creates a guest's workspace on their first change, not on their first visit. |
+| **Least privilege** | Giving every identity only the permissions it needs, so a leak or bug can do little harm. Szop's app role may only send email and accept ECS Exec sessions. |
+| **Linter** | A tool that analyzes code for bugs and bad patterns without running it. Szop uses ESLint. |
+| **Merge commit, squash merge, rebase merge** | GitHub's three ways to merge a PR. A **merge commit** keeps the branch's commits and adds one commit joining the histories; a **squash merge** turns the whole branch into one new commit; a **rebase merge** replays each commit on top of `main`. Szop uses merge commits (see ADR 0009). |
+| **Migration** | A versioned script that changes the database schema; applied in order in every environment. |
 | **Minor units** | The smallest unit of a currency (cents, grosze). Szop stores money as integers in minor units. |
-| **Monorepo** | One repository holding several packages (here: `apps/web`, `apps/api`, `packages/shared`). |
+| **Monorepo** | One repository holding several packages (here: `apps/web`, `apps/api`, `packages/shared` and the `e2e/` tests, plus the Terraform code in `infra/`). |
 | **Multi-stage build** | A Dockerfile with several stages: one with the full toolchain compiles the app, and the final image copies only the result, staying small. |
 | **Mutation testing** | Changing the code on purpose (a *mutant*, for example `<` flipped to `<=`) and checking that some test fails. A mutant that no test notices shows a gap in the tests. Szop uses StrykerJS for it. |
+| **Open point** | Something still undecided or not yet done that has been left to a later topic or phase. Szop tracks every one in `docs/open-points.md`, with an `OP-` ID (see ADR 0011). |
 | **OpenAPI** | A standard, machine-readable description of a REST API, from which documentation and clients can be generated. |
 | **Optimistic update** | Updating the screen immediately as if a request succeeded, then correcting it if the server disagrees. |
-| **Origin** | The scheme, domain and port of a URL (`https://szop.app`). Cookies and browser security rules work per origin. |
+| **Origin** | The scheme, domain and port of a URL (`https://example.com`). Cookies and browser security rules work per origin. |
 | **Phantom dependency** | A package your code imports without declaring it, working only because something else happened to install it. It breaks when that other package changes. pnpm prevents it. |
 | **Phase** | One step of the implementation roadmap, taken through its own brainstorm, design approval and implementation. |
 | **Property-based testing** | Testing a rule against hundreds of generated inputs instead of a few hand-picked examples, checking a property that must always hold ("a parent category always comes before its children"). Szop uses fast-check. |
@@ -152,9 +166,9 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Push protection** | A GitHub secret scanning feature that rejects a push containing a recognized secret, such as an access key, before it reaches the repository. |
 | **Quota** | A cap on how much data one workspace may hold (for example 200 lists). |
 | **Rate limit** | A cap on how many requests of a kind are accepted in a time window (for example 10 guest creations per hour per IP address); excess requests get HTTP status 429. |
-| **Release PR (release-please)** | A pull request that release-please keeps open, holding the next version number and changelog entry, computed from the Conventional Commits merged so far. Merging it creates the version tag and the GitHub Release. |
-| **Required status check** | A CI check that must pass before GitHub allows a PR to be merged. Szop requires `ci-ok`, which sums up every job of `ci.yml`, and the PR title check (see ADR 0010). |
 | **Region** | A geographic area where a cloud provider runs data centers, such as AWS's `eu-central-1` (Frankfurt). |
+| **Release PR (release-please)** | A pull request that release-please keeps open, holding the next version number and changelog entry, computed from the Conventional Commits merged so far. Merging it creates the version tag and the GitHub Release. |
+| **Required status check** | A CI check that must pass before GitHub allows a PR to be merged. Once CI exists, Szop requires `ci-ok`, which sums up every job of `ci.yml`, and the PR title check (see ADR 0010). |
 | **Role (IAM)** | A set of AWS permissions assumed temporarily by a person or service, instead of permanent keys. ECS uses a **task execution role** (to pull the image and read secrets) and a **task role** (what the app itself may do). |
 | **Rolling update** | Replacing the running copies of an app one by one: a copy on the new version starts, passes its health check, then an old one stops, so the app stays up. How ECS redeploys Szop's demo with a new image. |
 | **Rollout** | Getting a new version to its users: releasing and deploying it, often gradually (to a few users first, or behind feature flags). Szop has no users and no permanent environment, so it has no rollout in this sense. |
@@ -182,8 +196,8 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Vertical slice** | A piece of work that delivers one capability through every layer at once (database, API, UI, tests, deployment), as opposed to building one layer at a time. |
 | **Walking skeleton** | The thinnest possible version of the whole system that runs end to end (here: SPA → API → database, built by CI and deployed) and does almost nothing yet. Built early to test the foundation decisions. |
 | **WebSocket** | A persistent two-way connection between browser and server, letting the server push messages (used for live updates). |
-| **Worktree (git)** | An extra working directory of the same repository, with another branch checked out, so two branches can be worked on side by side. Not used by default in Szop (see ADR 0009). |
 | **Workspace** | Everything one user owns: lists, templates, catalog, categories, units, settings. |
-| **Workspace (pnpm)** | Unrelated to the above: one package of the monorepo (`apps/web`, `apps/api`, `packages/shared`) as pnpm manages it. pnpm links workspaces to each other so they can import one another. |
+| **Workspace (pnpm)** | Unrelated to the above: one package of the monorepo (`apps/web`, `apps/api`, `packages/shared`, `e2e/`) as pnpm manages it. pnpm links workspaces to each other so they can import one another. |
+| **Worktree (git)** | An extra working directory of the same repository, with another branch checked out, so two branches can be worked on side by side. Not used by default in Szop (see ADR 0009). |
 | **Write-only argument** | A Terraform resource setting whose value is sent to the provider but never saved in the state file. Used for secrets. |
 | **Zod** | A TypeScript library for defining data schemas that give both compile-time types and runtime validation. |

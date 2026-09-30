@@ -213,8 +213,8 @@ The owner checks the phase's behavior in a browser on the demo, and reviews the 
 ```
 
 - **Redeploying** with the demo up does not rebuild everything: the ECS service replaces its tasks one by one (a rolling update).
-- `demo-up` and `demo-down` queue in one concurrency group and never cancel each other mid-Terraform.
-- The *Deployed* box of the definition of done can now be ticked: the image of the head that will be merged was built, deployed, checked and destroyed.
+- `demo-up` and `demo-down` never run Terraform at the same time: each waits for the other's state lock, and neither cancels a running job. `demo-down` destroys with the Terraform code of the commit that was deployed, which `demo-up` records ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7).
+- The *Deployed* box of the [definition of done](definition-of-done.md) can now be ticked, with a link to this `demo-up` run: the image of the head that will be merged was built, deployed, checked and destroyed.
 - Szop has no *rollout* in the usual sense (getting a new version to users, often gradually, with canary releases or feature flags): there are no users, and the demo exists only for a session.
 
 ### Step 9 — The owner merges the phase
@@ -331,16 +331,16 @@ This is the target state. The pieces arrive in the phases that introduce them ([
 |---|---|
 | Now (ADR 0009 merged) | Branches, PRs, merge commits only, the `main` and `v*` rulesets, the PR template |
 | The development environment phase | The local loop of step 3, the pre-commit and commit-msg hooks |
-| The CI/CD phase(s) | CI checks and required status checks, `demo-up`/`demo-down` (the nightly teardown no later than the first `demo-up`), release-please, versioned images, Dependabot |
+| The CI/CD phase(s) | CI checks and required status checks, `demo-up`/`demo-down` (the nightly teardown and a placeholder `demo-up` merged before any demo, [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 2), release-please, versioned images, Dependabot |
 | After the walking skeleton | The first release, `v0.1.0` |
 | When the MVP is done | `1.0.0`, set with a `Release-As: 1.0.0` footer |
 
-Until a piece exists, its step is simply skipped, and the matching definition-of-done item in the PR is marked N/A.
+Until a piece exists, its step is simply skipped, and the matching [definition-of-done](definition-of-done.md) item in the PR is marked N/A, with the reason.
 
 ## Open points for the CI/CD phase
 
-Details this walkthrough runs into that the ADRs leave open. The roadmap's CI/CD phase picks them up.
+Details this walkthrough runs into that the ADRs leave open. They are tracked in the [open points register](../open-points.md#cicd-phase):
 
-- **Review fixes in the changelog.** A review fix such as commit 8 is a `fix(…)` commit, and release-please reads every commit that reaches `main`, including those a merge commit brings in. So `CHANGELOG.md` will probably list it as a bug fix, although it fixed code that was never released. Related: the task commits (`feat(api): …`, `feat(web): …`) and the merge commit's PR title (`feat(templates): …`) may all appear as separate features. To check how release-please treats merge commits, then choose: accept it; edit the release notes through release-please's `BEGIN_COMMIT_OVERRIDE` block in the PR description; or a commit convention for fixes to unreleased code.
-- **Image version tag format.** Agreed direction: `szop:0.4.0`, without the `v` of the git tag. To confirm when the release job is written.
-- **release-please's branch name.** `release-please--branches--main` is its default for a single-package repository; to confirm with the actual configuration, and to check it against the ruleset and branch naming.
+- **Review fixes and duplicate entries in the changelog** ([OP-025](../open-points.md#cicd-phase)). A review fix such as commit 8 is a `fix(…)` commit, and release-please reads every commit that reaches `main`, including those a merge commit brings in, so `CHANGELOG.md` will probably list it as a bug fix of code that was never released. The task commits and the merge commit's PR title may also appear as separate features.
+- **Image version tag format** ([OP-026](../open-points.md#cicd-phase)): agreed direction `szop:0.4.0`, without the `v` of the git tag.
+- **release-please's branch name** ([OP-027](../open-points.md#cicd-phase)): `release-please--branches--main` by default, to check against the ruleset and branch naming.

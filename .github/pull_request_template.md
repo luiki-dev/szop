@@ -9,6 +9,7 @@
 - Plan:
 - Requirement IDs:
 - ADRs:
+- Open points (closed, re-assigned or added):
 
 <!-- Write "none" for links that do not apply. -->
 
@@ -18,11 +19,15 @@
 
 ## Definition of done
 
-<!-- ADR 0004, decision 7. Mark items that do not apply yet (before CI or hosting exist) as N/A. -->
+<!-- What each item means, which PRs need which items, and when the demo check must be repeated: docs/development/definition-of-done.md. Mark an item that does not apply as "N/A: <reason>". In brackets: who makes the item true; the owner verifies all of them. -->
 
-- [ ] The tests pass, at the right layers (ADR 0007, decision 20)
-- [ ] CI is green
-- [ ] Deployed: the branch's image was built and pushed, a demo environment created from it, checked, and destroyed (ADR 0008, decision 29)
-- [ ] Living docs updated: architecture, stack overview, glossary, functional requirements (if behavior changed), roadmap status
-- [ ] Significant decisions have ADRs
-- [ ] Commits follow Conventional Commits and, in a phase, the plan's tasks
+- [ ] Tests pass, at the right layers (Claude)
+- [ ] Surviving mutants reviewed, when domain rules changed (Claude → owner)
+- [ ] CI is green (CI)
+- [ ] Deployed and checked on the demo, covering the final head (owner): <!-- link to the demo-up run, and the commit it deployed -->
+- [ ] `infra/base` changes applied from this branch (owner; applied again from `main` once the PR is merged or closed)
+- [ ] Living docs updated: architecture, stack overview, glossary, functional requirements, roadmap status (Claude)
+- [ ] Guides updated (Claude)
+- [ ] Significant decisions have ADRs (Claude → owner)
+- [ ] Open points closed, re-assigned or added in `docs/open-points.md` (Claude)
+- [ ] Commits and the PR title follow Conventional Commits; in a phase, commits follow the plan's tasks (Claude)

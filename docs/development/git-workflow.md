@@ -67,14 +67,14 @@ Optional footers, such as BREAKING CHANGE: … or Co-Authored-By: …
 | `ci` | CI configuration | None |
 | `chore` | Anything else (tooling, housekeeping) | None |
 
-- **The scope is optional** and names a workspace or area: `web`, `api`, `shared`, `infra`, `adr`, `deps`.
+- **The scope is optional** and names a workspace or area, for example `web`, `api`, `shared`, `e2e`, `infra`, `adr`, `spec`, `plan` or `deps`. A phase's PR title may name its feature area instead (`feat(templates): add templates`), since the phase spans several workspaces.
 - **A breaking change** is marked with `!` after the type (`feat(api)!: …`) or a `BREAKING CHANGE:` footer. While Szop is in `0.x`, it raises MINOR.
-- **Subjects are imperative**: "add", not "added" or "adds". Read it as "this commit will… add item reordering".
+- **Subjects are imperative**: "add", not "added" or "adds". Read it as "this commit will… add list totals".
 
 Examples:
 
 ```
-feat(lists): add item reordering
+feat(web): add list totals
 fix(api): reject empty list names
 docs(adr): add ADR 0009 git workflow
 build(deps): bump vitest to 3.2
@@ -126,7 +126,7 @@ Once CI exists, GitHub requires the branch to be up to date before merging, so w
 
 **Only the owner merges; the merge is the approval.** GitHub does not let an author approve their own PR, and every PR is authored by the owner's account, so there is no formal approving review.
 
-A phase PR is merged when the **definition of done** is met on the branch ([ADR 0004](../decisions/0004-implementation-process.md), decision 7): the tests pass, CI is green, the change was deployed to a demo environment from the branch's image and checked there ([ADR 0008](../decisions/0008-hosting.md), decision 29; the `demo-up` workflow of [ADR 0010](../decisions/0010-ci-cd.md)), and the living docs, including the roadmap status, are updated.
+A PR is merged when the [definition of done](definition-of-done.md) is met on the branch. For a phase, that includes a check on a demo environment created from the branch's image with the `demo-up` workflow ([ADR 0010](../decisions/0010-ci-cd.md)), covering the PR's final head.
 
 The only merge method is a **merge commit**. GitHub deletes the remote branch afterwards. Locally:
 
@@ -165,16 +165,18 @@ A version marks a state of the code; it deploys nothing. The demo environment ca
 
 | Rule | Enforced by | From |
 |---|---|---|
-| No direct pushes, force pushes or deletion of `main` | Ruleset for `main` | This ADR's merge |
-| Every change goes through a PR | Ruleset for `main` | This ADR's merge |
-| Merge commits only | Ruleset for `main` and repository settings | This ADR's merge |
-| Review conversations resolved before merging | Ruleset for `main` | This ADR's merge |
-| Version tags cannot be moved or deleted | Ruleset for `v*` tags | This ADR's merge |
-| Secrets cannot be pushed | Secret scanning push protection | This ADR's merge |
+| No direct pushes, force pushes or deletion of `main` | Ruleset for `main` | ADR 0009's merge |
+| Every change goes through a PR | Ruleset for `main` | ADR 0009's merge |
+| Merge commits only | Ruleset for `main` and repository settings | ADR 0009's merge |
+| Review conversations resolved before merging | Ruleset for `main` | ADR 0009's merge |
+| Version tags cannot be moved or deleted | Ruleset for `v*` tags | ADR 0009's merge |
+| Version tags are created only by release-please | Ruleset for `v*` tags (restrict creations; only the release App bypasses it) | ADR 0011's merge |
+| Secrets cannot be pushed | Secret scanning push protection | ADR 0009's merge |
 | Staged files formatted and linted | pre-commit hook | Development environment phase |
 | Commit messages follow Conventional Commits | commit-msg hook (commitlint) | Development environment phase |
 | Every commit of a PR follows Conventional Commits, even if the hook was skipped | CI check (commitlint) | CI/CD phase |
 | CI green and branch up to date before merging | Ruleset for `main` (required status checks `ci-ok` and the PR title check) | CI/CD phase |
 | No new high or critical code scanning alerts | Ruleset for `main` (code scanning results) | CI/CD phase |
 | PR title follows Conventional Commits | CI check | CI/CD phase |
-| Claude never merges a PR | `CLAUDE.md` only | This ADR's merge |
+| Claude never merges a PR | `CLAUDE.md` only | ADR 0009's merge |
+| Claude never triggers `demo-up` or `demo-down` unless asked | `CLAUDE.md` only | ADR 0011's merge |

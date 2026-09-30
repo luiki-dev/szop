@@ -67,7 +67,7 @@ Later: Fastify API ── WebSocket push ──► Browser ("list 42 changed")
 
 ## 4. Lifecycle of opening the app
 
-1. The browser requests `https://szop.app/` and receives a small HTML file that references the JavaScript bundle.
+1. The browser requests `https://example.com/` and receives a small HTML file that references the JavaScript bundle.
 2. The bundle loads; React starts and React Router looks at the URL to decide which page to show.
 3. The app asks Better Auth: "is there a session?" The browser sends the session cookie, if it has one.
 4. The lists page mounts and calls `useLists()`. TanStack Query sees nothing cached, calls the API client, which sends `GET /api/lists`.
@@ -152,9 +152,9 @@ TypeScript types vanish at runtime, so they cannot protect the server from a mal
 
 ## 11. The monorepo
 
-One Git repository holds `apps/web`, `apps/api` and `packages/shared`. A change to a shared schema, the API route using it and the form using it can land in one commit and be checked together — which is the whole point of TypeScript end to end.
+One Git repository holds `apps/web`, `apps/api` and `packages/shared`, plus the end-to-end tests in `e2e/` and the Terraform code in `infra/`. A change to a shared schema, the API route using it and the form using it can land in one commit and be checked together — which is the whole point of TypeScript end to end.
 
-The three packages are **pnpm workspaces**: pnpm links them to each other, so `apps/api` imports `packages/shared` like any installed library, except that it is the live source code in the same repository. The development tooling around the stack (pnpm, TypeScript configuration, tsx, ESLint, Prettier, Docker Compose) is decided in [ADR 0005](../decisions/0005-development-environment.md). Each tool gets its own explanatory page under `docs/development/tools/` when the development environment is set up.
+The three packages, and `e2e/`, are **pnpm workspaces**: pnpm links them to each other, so `apps/api` imports `packages/shared` like any installed library, except that it is the live source code in the same repository. The development tooling around the stack (pnpm, TypeScript configuration, tsx, ESLint, Prettier, Docker Compose) is decided in [ADR 0005](../decisions/0005-development-environment.md). Each tool gets its own explanatory page under `docs/development/tools/` when the development environment is set up.
 
 The testing tools (Vitest, Testing Library, Mock Service Worker, Playwright, fast-check, StrykerJS) and how the tests are layered are decided in [ADR 0007](../decisions/0007-testing-strategy.md). They get their own pages under `docs/development/tools/` too, next to a testing guide in `docs/development/testing.md`.
 
@@ -171,7 +171,7 @@ Szop runs on **AWS** (Amazon Web Services), but not all the time: it is a **demo
 - Terraform remembers what it created in a **state** file. Szop keeps it in an S3 bucket (AWS's file storage), so every machine sees the same state.
 - A **provider** is the plugin that talks to one platform's API (here the AWS provider). A **root module** is one folder of configuration applied on its own, with its own state.
 
-Szop's configuration is split into three root modules by how long their resources live: **bootstrap** (created once: the state bucket and budget alerts), **base** (permanent and cheap: image registry, domain, certificate, email identity, secrets, logs, IAM roles) and **demo** (created for a session and destroyed after it: network, load balancer, container, database). Destroying the demo can never touch the other two.
+Szop's configuration is split into three root modules by how long their resources live: **bootstrap** (created once: the state bucket and budget alerts), **base** (permanent and cheap: image registry, domain, certificate, email identity, the Better Auth secret, logs, IAM roles) and **demo** (created for a session and destroyed after it: network, load balancer, container, database with its RDS-managed password). Destroying the demo can never touch the other two.
 
 ### The pieces, from the network inwards
 
@@ -179,13 +179,13 @@ Szop's configuration is split into three root modules by how long their resource
 |---|---|---|
 | **Region, availability zone (AZ)** | A region is a geographic area (`eu-central-1` is Frankfurt) made of several **availability zones**: separate data centers with independent power and networking. | Everything runs in Frankfurt. The load balancer and the database require subnets in two AZs. |
 | **Virtual private cloud (VPC), subnets** | A private network in AWS, divided into **subnets**. A **public** subnet has a route to the internet (through an *internet gateway*); a **private** one does not. | The load balancer and the container sit in public subnets; the database in private ones, unreachable from the internet. |
-| **Security group** | A firewall attached to a resource, listing who may connect to it on which port. It can name another security group as the allowed source. | A chain: anyone → load balancer (443); only the load balancer → the container; only the container → the database (5432). |
+| **Security group** | A firewall attached to a resource, listing who may connect to it on which port. It can name another security group as the allowed source. | A chain: anyone → load balancer (443, and 80 only to redirect to HTTPS); only the load balancer → the container; only the container → the database (5432). |
 | **Application Load Balancer (ALB)** | Receives HTTPS traffic, decrypts it (TLS termination) and forwards requests to healthy targets, checking their health regularly. | Fronts the one container; redirects HTTP to HTTPS; calls `/api/health`. |
 | **Route 53, ACM** | Route 53 is AWS's DNS service (and domain registrar). AWS Certificate Manager (ACM) issues free TLS certificates for domains you control. | The domain, `demo.<domain>` pointing at the load balancer, and its certificate. |
 | **Container image, ECR** | An image is the packaged app with everything it needs to run. Elastic Container Registry (ECR) stores images. | One image with the API and the built SPA, tagged with the git commit (and the version, for releases). |
 | **ECS, Fargate** | Elastic Container Service (ECS) runs containers. A **task definition** describes one (image, CPU, memory, environment); a **task** is one running copy; a **service** keeps the wanted number of tasks running and replaces failed ones. **Fargate** runs tasks without servers to manage. | One service running exactly one task. |
 | **RDS** | Relational Database Service: a managed database server. AWS installs, patches and runs PostgreSQL; you connect to it like any other. | The smallest PostgreSQL instance, empty at every spin-up. |
-| **IAM, roles** | Identity and Access Management (IAM) decides who may do what in AWS. A **role** is a set of permissions that a person or a service *assumes* temporarily, instead of holding permanent keys. | ECS's **task execution role** pulls the image and reads secrets; the app's **task role** may only send email. People log in through IAM Identity Center with short-lived credentials. |
+| **IAM, roles** | Identity and Access Management (IAM) decides who may do what in AWS. A **role** is a set of permissions that a person or a service *assumes* temporarily, instead of holding permanent keys. | ECS's **task execution role** pulls the image and reads secrets; the app's **task role** may only send email and accept ECS Exec sessions. People log in through IAM Identity Center with short-lived credentials. |
 | **Parameter Store, Secrets Manager** | Encrypted stores for configuration values and secrets, readable only with the right IAM permissions. | The Better Auth secret; the database password, which RDS generates and keeps itself. ECS injects both as environment variables. |
 | **SES** | Simple Email Service: sends email. New accounts are in a *sandbox* that delivers only to verified addresses. | Verification and password-reset emails. |
 | **CloudWatch** | Logs and metrics. | The app's JSON log lines, kept for 7 days. |
