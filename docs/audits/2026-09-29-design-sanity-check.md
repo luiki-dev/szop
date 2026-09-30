@@ -456,6 +456,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
   > ⏳ **Deferred** to the CI/CD phase: [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m13. Dependabot major-version PRs conflict with pinned versions.** Separate PRs for Node or PostgreSQL major versions (ADR 0010, decision 18) would break "pinned to the same major version as production" (ADR 0005, ADR 0008) and Node 24 in `.nvmrc` and `engines`. **Fix:** ignore major updates for those two, or coordinate them.
+
+  > ⏳ **Deferred** to the CI/CD phase, ignoring majors of Node, `@types/node` and PostgreSQL: [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m14. The E2E suite exceeds the default rate limits.** About 14 journeys × 2 viewports, each as a fresh guest and some registering users, all from one IP, exceeds 10 guests and 5 registrations per hour. ADR 0007 decision 14 raises the limits only for the API tests. **Fix:** state the E2E server's rate-limit configuration explicitly.
 - **m15. CLAUDE.md guardrails are ambiguous or incomplete:**
   - "So does the PR title" reads as if the PR title follows the plan's tasks; it means Conventional Commits.
