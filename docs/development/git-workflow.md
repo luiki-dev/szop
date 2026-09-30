@@ -2,6 +2,19 @@
 
 How a change travels from an idea to `main`, and how releases are cut. The decisions and the alternatives behind them are in [ADR 0009](../decisions/0009-git-workflow.md); the GitHub settings that enforce them are listed in [github-settings.md](github-settings.md). Terms are explained in the [glossary](../glossary.md).
 
+## Contents
+
+- [The model in one picture](#the-model-in-one-picture)
+- [1. Start a branch](#1-start-a-branch)
+- [2. Commit](#2-commit)
+- [3. Open a pull request](#3-open-a-pull-request)
+- [4. Review](#4-review)
+- [5. Keep the branch up to date](#5-keep-the-branch-up-to-date)
+- [6. Merge](#6-merge)
+- [7. Read the history](#7-read-the-history)
+- [8. Release](#8-release)
+- [What is enforced, and by what](#what-is-enforced-and-by-what)
+
 ## The model in one picture
 
 Szop uses **GitHub flow**: `main` is the only long-lived branch and is always releasable. Every change is made on a short-lived branch and reaches `main` only through a pull request (PR).
@@ -12,6 +25,8 @@ main ──●─────────────────────●
          ● spec  ● plan  ● task 1 … task n    ● docs/fix-typo
          feat/shopping-lists                  (a small change outside a phase)
 ```
+
+For the whole journey of one example phase, from the first commit to the release and the demo, see the [phase walkthrough](phase-walkthrough.md).
 
 One **roadmap phase** is one branch and one PR. A change outside a phase (a foundation ADR, a typo fix, a dependency bump) gets its own small branch and PR.
 
@@ -66,6 +81,8 @@ build(deps): bump vitest to 3.2
 ```
 
 **Within a phase, commits follow the plan's tasks**, so the PR can be reviewed one task at a time.
+
+**One commit per task holds its tests and its code together**, made once the task's tests pass. Test-driven development (TDD, [ADR 0007](../decisions/0007-testing-strategy.md), decision 3) happens in the working tree: write a failing test, see it fail, write the code, see it pass, tidy up, then commit. The plan spells these steps out in each task. Committing the failing test separately would record the TDD cycle in the history, but leave commits that fail their own tests, which breaks `git bisect` and a demo built from such a commit. With test and code together, every commit passes its tests and the diff shows each test next to the code it drives.
 
 Two git hooks run on every commit, once the development environment phase has set them up: the **pre-commit** hook formats and lints the staged files ([ADR 0005](../decisions/0005-development-environment.md), decision 13), and the **commit-msg** hook runs commitlint, which rejects a message that does not follow the format.
 
