@@ -92,7 +92,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m16 | Units have no place in the frontend | Fixed: `architecture.md` has a `units` feature folder and a `/units` route; the UNT phase may move the page |
 | m17 | Bulk operations against quotas undefined | Fixed in part: `architecture.md` states that concurrent requests may exceed a quota by a few rows, deliberately. Deferred: bulk actions, ITM-4 with different units and what an archived list allows, to the phases delivering them ([OP-047](../open-points.md#feature-phases)) |
 | m18 | Lazy creation: seed IDs versus workspace IDs | Deferred to the phase delivering ACC-1, including the first change's own seed IDs and session creation across tabs: [OP-048](../open-points.md#feature-phases) |
-| m19 | Sharing semantics that affect its tables | Pending |
+| m19 | Sharing semantics that affect its tables | Deferred to the SHR brainstorm: [OP-049](../open-points.md#feature-phases) |
 | m20 | No non-functional requirements | Pending |
 | m21 | README drift | Pending |
 | m22 | Stale structure and facts | Pending |

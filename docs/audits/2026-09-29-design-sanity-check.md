@@ -491,6 +491,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   - What happens to shares when an anonymous owner's workspace expires is undefined.
 
   **Fix:** decide these in the SHR brainstorm. Link-bound versus user-bound access is the choice that changes the tables.
+
+  > ⏳ **Deferred** to the SHR brainstorm: [OP-049](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m20. There are no non-functional requirements:**
   - no stated browser support; iPhones run WebKit, and E2E runs Chromium only
   - no accessibility target, although axe runs
