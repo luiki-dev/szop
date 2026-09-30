@@ -473,6 +473,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 ### Requirements and architecture
 
 - **m16. Units have no place in the frontend.** UNT-1 is MVP, and the backend has a `units` module. But `architecture.md`'s frontend folders ("mirroring the backend") and the routes table have no units page.
+
+  > ✅ **Fixed:** `architecture.md` has a `units` feature folder and a `/units` route. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m17. Bulk operations against quotas are undefined.** Examples: importing 150 guest lists into an account that has 100 (ACC-4); multi-adding 30 products to a list with 480 items; duplicating a list that is at the limit. Is that all-or-nothing, or partial? Also undefined: ITM-4 when the units differ, and which actions still work on an archived list (LST-3). The "count before insert" quota check can be exceeded by concurrent requests. That is acceptable, but should be said.
 - **m18. Lazy creation: seed IDs versus workspace IDs.** The cache holds the in-memory seed catalog's IDs, and the new workspace's copies get new IDs, so requests right after creation can hit 404. Two quick changes, or two tabs, can each create an anonymous session, and the loser's workspace is orphaned. **Fix:** invalidate all queries after the session is created, and allow only one session creation at a time in the API client.
 - **m19. Sharing (Later) semantics that affect its tables:**

@@ -89,7 +89,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m13 | Dependabot major-version PRs versus pinned versions | Deferred to the CI/CD phase: `dependabot.yml` ignores majors of Node, `@types/node` and PostgreSQL ([OP-019](../open-points.md#cicd-phase)) |
 | m14 | E2E suite exceeds the default rate limits | Deferred to the phase delivering LIM-4: [OP-046](../open-points.md#feature-phases) |
 | m15 | CLAUDE.md guardrails ambiguous or incomplete | Fixed in `CLAUDE.md`: the PR title sentence, the rule that Claude never triggers `demo-up` or `demo-down` (closing [OP-024](../open-points.md#closed)), no worktrees or local merges from superpowers skills, specs and plans only on the full path, and the stale README reference |
-| m16 | Units have no place in the frontend | Pending |
+| m16 | Units have no place in the frontend | Fixed: `architecture.md` has a `units` feature folder and a `/units` route; the UNT phase may move the page |
 | m17 | Bulk operations against quotas undefined | Pending |
 | m18 | Lazy creation: seed IDs versus workspace IDs | Pending |
 | m19 | Sharing semantics that affect its tables | Pending |

@@ -156,7 +156,7 @@ One JSON error shape: `{ "error": { "code": "...", "message": "..." } }`.
 
 ### Code structure
 
-Feature folders mirroring the backend: `lists`, `items`, `catalog`, `categories`, `templates`, `account`. Each holds its pages, components and **data hooks** — small functions such as `useList(id)` or `useCheckItem()` that wrap TanStack Query. Components never call `fetch` directly. One typed **API client** module, built on the shared Zod schemas, does all HTTP calls. Cookies are sent automatically because everything is on the same origin.
+Feature folders mirroring the backend: `lists`, `items`, `catalog`, `categories`, `units`, `templates`, `account`. Each holds its pages, components and **data hooks** — small functions such as `useList(id)` or `useCheckItem()` that wrap TanStack Query. Components never call `fetch` directly. One typed **API client** module, built on the shared Zod schemas, does all HTTP calls. Cookies are sent automatically because everything is on the same origin.
 
 ### Routes (React Router)
 
@@ -168,6 +168,7 @@ Feature folders mirroring the backend: `lists`, `items`, `catalog`, `categories`
 | `/templates`, `/templates/:id` | Templates, a template |
 | `/catalog` | Catalog |
 | `/categories` | Category tree |
+| `/units` | Units |
 | `/settings` | Profile and account settings |
 | `/login`, `/register`, `/verify-email`, `/reset-password` | Account flows |
 | `/shared` *(Later)* | Shared with me |
