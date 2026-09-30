@@ -88,6 +88,7 @@ Leave every other rule off.
 | Setting | Value | Why |
 |---|---|---|
 | **Dependabot alerts** | Enabled | Warns when a dependency has a known vulnerability. Dependabot *version update* PRs are set up by the CI/CD phase. ADR 0009, decision 14. |
+| **Dependabot security updates** | Enabled | Opens a PR that upgrades a dependency with a known vulnerability, without waiting for the cooldown of version updates. It needs Dependabot alerts. ADR 0010, decision 18. |
 | **Secret Protection** (secret scanning) | Enabled | Finds secrets committed to the repository. ADR 0009, decision 14; ADR 0008, decision 22. |
 | ↳ **Push protection** | Enabled | Rejects a push that contains a recognized secret before it reaches GitHub. ADR 0009, decision 14. |
 
