@@ -137,7 +137,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Hyperscaler** | One of the very large cloud providers offering hundreds of services worldwide: AWS, Microsoft Azure, Google Cloud. |
 | **Immutable tag** | A container image tag that, once pushed, can never point at a different image. Szop's registry enforces it, so a version always means the same code. |
 | **IndexedDB** | A database built into the browser for storing structured data locally. Considered for guest workspaces, not used (see ADR 0002). |
-| **Least privilege** | Giving every identity only the permissions it needs, so a leak or bug can do little harm. Szop's app role may only send email. |
+| **Least privilege** | Giving every identity only the permissions it needs, so a leak or bug can do little harm. Szop's app role may only send email and accept ECS Exec sessions. |
 | **Merge commit, squash merge, rebase merge** | GitHub's three ways to merge a PR. A **merge commit** keeps the branch's commits and adds one commit joining the histories; a **squash merge** turns the whole branch into one new commit; a **rebase merge** replays each commit on top of `main`. Szop uses merge commits (see ADR 0009). |
 | **Migration** | A versioned script that changes the database schema; applied in order in every environment. |
 | **IPv6 /64 block** | The range of IPv6 addresses sharing their first 64 bits — typically what one household or device is given. Rate limits group addresses by it, since one machine can switch between billions of addresses inside its block. |
@@ -145,7 +145,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Linter** | A tool that analyzes code for bugs and bad patterns without running it. Szop uses ESLint. |
 | **Lazy creation** | Creating something only when it is first needed. Szop creates a guest's workspace on their first change, not on their first visit. |
 | **Minor units** | The smallest unit of a currency (cents, grosze). Szop stores money as integers in minor units. |
-| **Monorepo** | One repository holding several packages (here: `apps/web`, `apps/api`, `packages/shared`). |
+| **Monorepo** | One repository holding several packages (here: `apps/web`, `apps/api`, `packages/shared` and the `e2e/` tests, plus the Terraform code in `infra/`). |
 | **Multi-stage build** | A Dockerfile with several stages: one with the full toolchain compiles the app, and the final image copies only the result, staying small. |
 | **Mutation testing** | Changing the code on purpose (a *mutant*, for example `<` flipped to `<=`) and checking that some test fails. A mutant that no test notices shows a gap in the tests. Szop uses StrykerJS for it. |
 | **OpenAPI** | A standard, machine-readable description of a REST API, from which documentation and clients can be generated. |
@@ -191,6 +191,6 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **WebSocket** | A persistent two-way connection between browser and server, letting the server push messages (used for live updates). |
 | **Worktree (git)** | An extra working directory of the same repository, with another branch checked out, so two branches can be worked on side by side. Not used by default in Szop (see ADR 0009). |
 | **Workspace** | Everything one user owns: lists, templates, catalog, categories, units, settings. |
-| **Workspace (pnpm)** | Unrelated to the above: one package of the monorepo (`apps/web`, `apps/api`, `packages/shared`) as pnpm manages it. pnpm links workspaces to each other so they can import one another. |
+| **Workspace (pnpm)** | Unrelated to the above: one package of the monorepo (`apps/web`, `apps/api`, `packages/shared`, `e2e/`) as pnpm manages it. pnpm links workspaces to each other so they can import one another. |
 | **Write-only argument** | A Terraform resource setting whose value is sent to the provider but never saved in the state file. Used for secrets. |
 | **Zod** | A TypeScript library for defining data schemas that give both compile-time types and runtime validation. |

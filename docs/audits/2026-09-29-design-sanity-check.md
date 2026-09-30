@@ -517,6 +517,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   - The security-group chain in the stack overview omits port 80.
   - `last_active_at` is on the workspace in one sentence and on the user in the next.
   - The stack overview is missing the CI/CD section that ADR 0010 decision 22 promises.
+
+  > ✅ **Fixed** in `architecture.md`, the stack overview and the glossary; the CI/CD section was already [OP-023](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m23. ADR cross-references:**
   - When to choose the PostgreSQL major version: "the setup phase" (ADR 0005) versus "when the walking skeleton is built" (ADR 0008). `compose.yaml` comes first.
   - ADR 0005's status line doesn't mention ADRs 0007, 0009 and 0010, which complete it.

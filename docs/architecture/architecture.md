@@ -59,15 +59,17 @@ The development environment and tooling are decided in [ADR 0005](../decisions/0
 
 **Same origin.** The SPA and the API are served under one domain (for example `szop.app` and `szop.app/api`). Session cookies are therefore first-party and no Cross-Origin Resource Sharing (CORS) setup is needed. The API achieves this by serving the built SPA's static files itself (see [Deployment](#5-deployment)). In development, the Vite dev server proxies `/api/*` to the API, so the same rules hold locally.
 
-**Monorepo layout.** One repository, three packages:
+**Monorepo layout.** One repository: three packages, the end-to-end tests and the infrastructure code:
 
 ```
 apps/web          React SPA
 apps/api          Fastify API (Drizzle schema, migrations, seed data)
 packages/shared   Zod schemas, types, domain rules
+e2e/              Playwright end-to-end tests (ADR 0007)
+infra/            Terraform root modules (ADR 0008)
 ```
 
-The packages are pnpm workspaces. `packages/shared` is consumed from its TypeScript source, with no build step of its own. The rest of the tooling is in [ADR 0005](../decisions/0005-development-environment.md).
+The packages and `e2e/` are pnpm workspaces. `packages/shared` is consumed from its TypeScript source, with no build step of its own. The rest of the tooling is in [ADR 0005](../decisions/0005-development-environment.md).
 
 ## 2. Backend (`apps/api`)
 
@@ -125,7 +127,7 @@ A versioned data file in `apps/api` holds the default catalog, category tree and
   How this maps onto Better Auth's anonymous plugin is not settled: by default the plugin links and deletes the anonymous user inside the sign-in request, before the ACC-4 choice can be made ([OP-038](../open-points.md#feature-phases)).
 - **Activity tracking.** Each workspace has a `last_active_at` timestamp, updated by the auth hook at most once an hour to avoid a database write on every request.
 - **Cleanup.** A scheduled task inside the API process deletes (ACC-7, ACC-8):
-  - anonymous users whose `last_active_at` is within 1 hour of creation, 3 days after creation;
+  - anonymous users whose workspace's `last_active_at` is within 1 hour of creation, 3 days after creation;
   - other anonymous users inactive for 30 days;
   - registered users not verified within 7 days.
 
@@ -256,5 +258,5 @@ Szop runs on AWS as an **on-demand demo environment**: created for a session, de
 - **Security groups** chain the layers: the load balancer accepts traffic from anyone, the task only from the load balancer, the database only from the task. The database has no route to the internet.
 - **Secrets** (the Better Auth secret in Parameter Store, the RDS-managed database password in Secrets Manager) are injected by ECS as environment variables. Their values are never in git, the image, the task definition or Terraform state.
 - **Email** goes through SES in its sandbox, which delivers only to verified addresses.
-- **Infrastructure as code:** Terraform, in three root modules under `infra/`: `bootstrap` (state bucket, budget alerts), `base` (permanent: image registry, DNS zone, certificate, email identity, secrets, log group, the app's IAM roles, and the GitHub OIDC provider with CI's roles) and `demo` (created per session: network, load balancer, ECS, RDS). Images carry the commit hash and, when built from a version tag, the version.
+- **Infrastructure as code:** Terraform, in three root modules under `infra/`: `bootstrap` (state bucket, budget alerts), `base` (permanent: image registry, DNS zone, certificate, email identity, the Better Auth secret, log group, the app's IAM roles, and the GitHub OIDC provider with CI's roles) and `demo` (created per session: network, load balancer, ECS, RDS). Images carry the commit hash and, when built from a version tag, the version.
 - **Deployments are push-button:** GitHub Actions workflows build the image when it is missing, apply `infra/demo`, and destroy it on request and every night. CI reaches AWS through OpenID Connect (OIDC), with no stored keys. See [ADR 0010](../decisions/0010-ci-cd.md).
