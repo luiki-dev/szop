@@ -459,6 +459,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
   > ⏳ **Deferred** to the CI/CD phase, ignoring majors of Node, `@types/node` and PostgreSQL: [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m14. The E2E suite exceeds the default rate limits.** About 14 journeys × 2 viewports, each as a fresh guest and some registering users, all from one IP, exceeds 10 guests and 5 registrations per hour. ADR 0007 decision 14 raises the limits only for the API tests. **Fix:** state the E2E server's rate-limit configuration explicitly.
+
+  > ⏳ **Deferred** to the phase delivering LIM-4: [OP-046](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m15. CLAUDE.md guardrails are ambiguous or incomplete:**
   - "So does the PR title" reads as if the PR title follows the plan's tasks; it means Conventional Commits.
   - The rule "Claude never triggers `demo-up` or `demo-down`" (ADR 0010, consequences) is not added yet, although it costs nothing to add now.

@@ -87,7 +87,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m11 | ECR lifecycle policy would expire released images | Deferred to the phase that creates the ECR repository: [OP-013](../open-points.md#walking-skeleton) |
 | m12 | `infra-plan` on Dependabot PRs | Deferred to the CI/CD phase, to check and then skip or document: [OP-019](../open-points.md#cicd-phase) |
 | m13 | Dependabot major-version PRs versus pinned versions | Deferred to the CI/CD phase: `dependabot.yml` ignores majors of Node, `@types/node` and PostgreSQL ([OP-019](../open-points.md#cicd-phase)) |
-| m14 | E2E suite exceeds the default rate limits | Pending |
+| m14 | E2E suite exceeds the default rate limits | Deferred to the phase delivering LIM-4: [OP-046](../open-points.md#feature-phases) |
 | m15 | CLAUDE.md guardrails ambiguous or incomplete | Pending |
 | m16 | Units have no place in the frontend | Pending |
 | m17 | Bulk operations against quotas undefined | Pending |
