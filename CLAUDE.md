@@ -46,4 +46,14 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 ## Writing style for docs and explanations
 
 - Spell out niche acronyms on first use (for example "single-page application (SPA)") and add them to `docs/glossary.md`. Common ones like API, UI, HTTP, JSON and SQL need no expansion.
+- **Every written status or outcome gets its icon**, placed before the word, which stays (`✅ Accepted`, `⬜ Open`, `🎯 [MVP]`), so searching and screen readers still work. Legends list each icon with its word. No icons in headings: they change the heading's anchor. Use one vocabulary everywhere, and extend this list when a new status appears:
+  - ✅ done or in force: ADR accepted, open point closed, finding fixed, phase done
+  - ⬜ open or not started: open point open, phase not started
+  - 🚧 in progress: open point or phase being worked on
+  - ⏳ deferred or waiting: finding deferred to an open point
+  - ✖️ rejected or dropped: finding rejected, open point dropped without being done
+  - ❔ pending: not decided or triaged yet
+  - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
+  - ➖ not applicable: `➖ N/A: reason` in the definition of done and the PR template
+  - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
 - Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.
