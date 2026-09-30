@@ -426,6 +426,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   - Your own event triggers a refetch that can overwrite in-flight optimistic changes.
   - ITM-4's "increase quantity" is read-modify-write, so two concurrent increases lose one.
   - WebSocket testing is not in ADR 0007.
+
+  > ⏳ **Deferred** to the SYN brainstorm, and the atomic quantity increase to the phase delivering ITM-4: [OP-045](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m5. There is no `.gitignore` yet (verified).** ADR 0008 decision 7 relies on bootstrap's local state being "ignored by git", in a public repository. **Fix:** add `*.tfstate*` and `.terraform/` before anyone runs bootstrap. Only a global ignore rule currently covers `.claude/settings.local.json`.
 - **m6. `infra/base` applied from a branch can drift from `main`** (ADR 0010, decision 14) if the PR is reworked or abandoned. **Fix:** add a step: re-apply base from `main` after the merge, or after abandoning the PR.
 
