@@ -84,7 +84,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m8 | Undocumented ruleset parameter | Fixed: `github-settings.md` documents it, left on. GitHub's documentation shows it applies only to PRs Copilot opens under its own identity, not to commits from unlinked emails as the audit supposed |
 | m9 | commitlint versus Dependabot commits | Deferred: the two line-length rules turned off for everyone and `type-enum` limited to the nine types, when commitlint is set up ([OP-009](../open-points.md#development-environment-phase)); the `commits` job tried on a real Dependabot commit before `ci-ok` is required ([OP-019](../open-points.md#cicd-phase)) |
 | m10 | `ci-ok` can pass when nothing ran | Deferred to the CI/CD phase as a detail of `ci-ok`: [OP-019](../open-points.md#cicd-phase) |
-| m11 | ECR lifecycle policy would expire released images | Pending |
+| m11 | ECR lifecycle policy would expire released images | Deferred to the phase that creates the ECR repository: [OP-013](../open-points.md#walking-skeleton) |
 | m12 | `infra-plan` on Dependabot PRs | Pending |
 | m13 | Dependabot major-version PRs versus pinned versions | Pending |
 | m14 | E2E suite exceeds the default rate limits | Pending |
