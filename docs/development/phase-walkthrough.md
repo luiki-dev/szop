@@ -339,8 +339,8 @@ Until a piece exists, its step is simply skipped, and the matching definition-of
 
 ## Open points for the CI/CD phase
 
-Details this walkthrough runs into that the ADRs leave open. The roadmap's CI/CD phase picks them up.
+Details this walkthrough runs into that the ADRs leave open. They are tracked in the [open points register](../open-points.md#cicd-phase):
 
-- **Review fixes in the changelog.** A review fix such as commit 8 is a `fix(…)` commit, and release-please reads every commit that reaches `main`, including those a merge commit brings in. So `CHANGELOG.md` will probably list it as a bug fix, although it fixed code that was never released. Related: the task commits (`feat(api): …`, `feat(web): …`) and the merge commit's PR title (`feat(templates): …`) may all appear as separate features. To check how release-please treats merge commits, then choose: accept it; edit the release notes through release-please's `BEGIN_COMMIT_OVERRIDE` block in the PR description; or a commit convention for fixes to unreleased code.
-- **Image version tag format.** Agreed direction: `szop:0.4.0`, without the `v` of the git tag. To confirm when the release job is written.
-- **release-please's branch name.** `release-please--branches--main` is its default for a single-package repository; to confirm with the actual configuration, and to check it against the ruleset and branch naming.
+- **Review fixes and duplicate entries in the changelog** ([OP-025](../open-points.md#cicd-phase)). A review fix such as commit 8 is a `fix(…)` commit, and release-please reads every commit that reaches `main`, including those a merge commit brings in, so `CHANGELOG.md` will probably list it as a bug fix of code that was never released. The task commits and the merge commit's PR title may also appear as separate features.
+- **Image version tag format** ([OP-026](../open-points.md#cicd-phase)): agreed direction `szop:0.4.0`, without the `v` of the git tag.
+- **release-please's branch name** ([OP-027](../open-points.md#cicd-phase)): `release-please--branches--main` by default, to check against the ruleset and branch naming.
