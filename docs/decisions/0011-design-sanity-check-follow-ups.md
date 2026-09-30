@@ -96,7 +96,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m20 | No non-functional requirements | Deferred: browser support, the accessibility target and a performance budget to the visual design topic ([OP-001](../open-points.md#before-the-roadmap)); decimal-comma input with money and quantity ([OP-041](../open-points.md#feature-phases)); a guest deleting their own data to the phase delivering ACC-7 ([OP-039](../open-points.md#feature-phases)) |
 | m21 | README drift | Fixed: the README matches LIM-1's depth limit, SHR-4's editor role and the future extensions |
 | m22 | Stale structure and facts | Fixed in `architecture.md`, the stack overview and the glossary: the repository layout with `e2e/` and `infra/`, the task role's ECS Exec, which secret lives where, port 80 on the load balancer, `last_active_at` on the workspace. Already covered: the stack overview's CI/CD section ([OP-023](../open-points.md#cicd-phase)) |
-| m23 | ADR cross-references | Pending |
+| m23 | ADR cross-references | Fixed: the status lines of ADR 0005 (completed by ADRs 0007, 0009 and 0010) and ADR 0001 (the superseded browser storage); the roadmap maps every phase name the ADRs use ([OP-031](../open-points.md#before-the-roadmap)). Already covered: when the PostgreSQL major version is chosen, in the development environment phase ([OP-006](../open-points.md#development-environment-phase)) |
 | m24 | Editorial nits | Pending |
 
 ### Consider improving

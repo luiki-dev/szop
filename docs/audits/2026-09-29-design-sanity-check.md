@@ -524,6 +524,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   - ADR 0005's status line doesn't mention ADRs 0007, 0009 and 0010, which complete it.
   - ADR 0001's consequence "Guest mode requires local browser storage" is superseded without a note.
   - Phase names drift: "development environment setup phase", "development environment phase" and "the setup phase". ADR 0008 never defines "the implementation phase".
+
+  > ✅ **Fixed** in the status lines of ADRs 0005 and 0001; phase names are mapped by the roadmap ([OP-031](../open-points.md#before-the-roadmap)); the PostgreSQL version was already [OP-006](../open-points.md#development-environment-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m24. Editorial nits:**
   - Acronyms not spelled out on first use: in `architecture.md`, ECS, IAM, SDK, VPC, RDS, ECR, SMTP and ACM; in ADR 0010, E2E, RDS, ECR and SSO; in ADR 0001, CRUD.
   - Acronyms missing from the glossary: S3, EC2, DOM, HCP, and possibly YAML, CLI and GUI.

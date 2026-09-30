@@ -1,6 +1,6 @@
 # ADR 0001 — Functional requirements scope
 
-- **Status:** Accepted — decision 1 superseded by [ADR 0002](0002-technical-architecture.md)
+- **Status:** Accepted — decision 1 superseded by [ADR 0002](0002-technical-architecture.md), and with it the local browser storage in the guest-mode consequence (guest workspaces live on the server; the migration path into an account remains)
 - **Date:** 2026-09-21
 
 ## Context
