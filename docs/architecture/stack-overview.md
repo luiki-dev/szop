@@ -2,6 +2,24 @@
 
 A learning-oriented tour of the technologies behind Szop: what each piece is, what it is responsible for, who talks to whom, and how a request travels through the system. The binding design lives in [architecture.md](architecture.md); this document explains the ideas behind it. Unfamiliar acronyms and terms are in the [glossary](../glossary.md).
 
+## Contents
+
+- [1. The big picture](#1-the-big-picture)
+- [2. Who is responsible for what](#2-who-is-responsible-for-what)
+- [3. Who talks to whom](#3-who-talks-to-whom)
+- [4. Lifecycle of opening the app](#4-lifecycle-of-opening-the-app)
+- [5. Lifecycle of a request: checking an item off](#5-lifecycle-of-a-request-checking-an-item-off)
+- [6. Node.js, Express, Fastify and NestJS — how they relate](#6-nodejs-express-fastify-and-nestjs--how-they-relate)
+- [7. Kinds of state in a frontend](#7-kinds-of-state-in-a-frontend)
+- [8. The shared package and Zod](#8-the-shared-package-and-zod)
+- [9. Data access: Drizzle and PostgreSQL](#9-data-access-drizzle-and-postgresql)
+- [10. Authentication: sessions and cookies](#10-authentication-sessions-and-cookies)
+- [11. The monorepo](#11-the-monorepo)
+- [12. Where Szop runs](#12-where-szop-runs)
+  - [Infrastructure as code and Terraform](#infrastructure-as-code-and-terraform)
+  - [The pieces, from the network inwards](#the-pieces-from-the-network-inwards)
+  - [A demo session, step by step](#a-demo-session-step-by-step)
+
 ## 1. The big picture
 
 Szop is three running things plus one shared library:

@@ -4,6 +4,32 @@ Living description of how Szop is built. It implements the [functional requireme
 
 The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md), hosting in [ADR 0008](../decisions/0008-hosting.md) (summarized in [section 5](#5-deployment)), the git workflow in [ADR 0009](../decisions/0009-git-workflow.md), continuous integration and delivery (CI/CD) in [ADR 0010](../decisions/0010-ci-cd.md). Out of scope here, decided in a later step: visual design (including component library and styling).
 
+## Contents
+
+- [1. System overview](#1-system-overview)
+- [2. Backend (`apps/api`)](#2-backend-appsapi)
+  - [Code structure](#code-structure)
+  - [Request lifecycle](#request-lifecycle)
+  - [Access control](#access-control)
+  - [Data model highlights](#data-model-highlights)
+  - [Seed data](#seed-data)
+  - [Anonymous guests](#anonymous-guests)
+  - [Abuse protection](#abuse-protection)
+  - [Errors](#errors)
+- [3. Frontend (`apps/web`)](#3-frontend-appsweb)
+  - [Code structure](#code-structure-1)
+  - [Routes (React Router)](#routes-react-router)
+  - [Startup](#startup)
+  - [State](#state)
+  - [Optimistic updates](#optimistic-updates)
+  - [Offline (NET-1)](#offline-net-1)
+  - [Forms](#forms)
+- [4. Later features and cross-cutting concerns](#4-later-features-and-cross-cutting-concerns)
+  - [Sharing (SHR)](#sharing-shr)
+  - [Live updates (SYN)](#live-updates-syn)
+  - [Cross-cutting](#cross-cutting)
+- [5. Deployment](#5-deployment)
+
 ## 1. System overview
 
 ```

@@ -2,6 +2,19 @@
 
 How a change travels from an idea to `main`, and how releases are cut. The decisions and the alternatives behind them are in [ADR 0009](../decisions/0009-git-workflow.md); the GitHub settings that enforce them are listed in [github-settings.md](github-settings.md). Terms are explained in the [glossary](../glossary.md).
 
+## Contents
+
+- [The model in one picture](#the-model-in-one-picture)
+- [1. Start a branch](#1-start-a-branch)
+- [2. Commit](#2-commit)
+- [3. Open a pull request](#3-open-a-pull-request)
+- [4. Review](#4-review)
+- [5. Keep the branch up to date](#5-keep-the-branch-up-to-date)
+- [6. Merge](#6-merge)
+- [7. Read the history](#7-read-the-history)
+- [8. Release](#8-release)
+- [What is enforced, and by what](#what-is-enforced-and-by-what)
+
 ## The model in one picture
 
 Szop uses **GitHub flow**: `main` is the only long-lived branch and is always releasable. Every change is made on a short-lived branch and reaches `main` only through a pull request (PR).

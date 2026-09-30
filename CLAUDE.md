@@ -41,3 +41,4 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 ## Writing style for docs and explanations
 
 - Spell out niche acronyms on first use (for example "single-page application (SPA)") and add them to `docs/glossary.md`. Common ones like API, UI, HTTP, JSON and SQL need no expansion.
+- Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.
