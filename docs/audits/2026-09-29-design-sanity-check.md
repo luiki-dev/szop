@@ -174,6 +174,8 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### MAJOR-3. Guest data lifetime doesn't match how guests use a shopping list
 
+> ⏳ **Deferred:** the session lifetime to the phase delivering ACC-1, the retention rule to the phase delivering ACC-7: [OP-039](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:** ACC-7 ("after **3 days**, if they had no activity later than 1 hour after being created"; "otherwise after **30 days** of inactivity"). The Guest actor ("tied to their browser by a session cookie"). No document sets a session lifetime.
 - **Problem:**
   - **Sessions expire first.** Verified: Better Auth sessions expire after 7 days by default and are extended once a day while used. A guest who comes back after 10 days has a dead cookie. Their workspace still exists but can never be reached again, and their next change quietly creates a brand-new one. The 30-day promise is really 7 days.
