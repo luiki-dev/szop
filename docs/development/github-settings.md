@@ -60,6 +60,7 @@ Leave **Allow auto-merge** off: the owner's manual merge is the approval (ADR 00
 | ↳ Required approvals | **0** | GitHub does not let an author approve their own PR, and every PR is authored by the owner's account. The owner's merge is the approval. ADR 0009, decision 7. |
 | ↳ Require conversation resolution before merging | On | No review comment can be skipped by accident. ADR 0009, decision 13. |
 | ↳ Allowed merge methods | **Merge** only | Matches the repository setting above. ADR 0009, decision 6. |
+| ↳ Require an additional approval for unattributed Copilot pull requests | On (GitHub's default) | Applies only to PRs that Copilot opens under its own app identity, not on behalf of a person; those need one approval more than configured. Szop's PRs are opened by the owner's account, so it never applies, and if Copilot ever opened a PR by itself, the owner's approval would be asked for. The API calls it `require_extra_approval_for_unattributed_changes`. |
 | **Require status checks to pass** | **Off for now** | Turned on by the CI/CD phase, with *Require branches to be up to date before merging* and the CI checks listed. Until CI exists there is nothing to require. ADR 0009, decision 13. |
 | **Require linear history** | Off | It forbids merge commits. ADR 0009, decision 18. |
 | **Require signed commits** | Off | One person pushes from one machine. ADR 0009, decision 18. |

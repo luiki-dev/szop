@@ -81,7 +81,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m5 | No `.gitignore` | Fixed: a `.gitignore` for Terraform state and Claude Code's local settings, which only the owner's global ignore file covered; the development environment phase adds its tools' entries ([OP-005](../open-points.md#development-environment-phase)) |
 | m6 | `infra/base` applied from a branch can drift from `main` | Fixed: decision 9 (base applied again from `main` after the PR is merged or closed; item 5 of the definition of done) |
 | m7 | Dependabot security updates are off | Fixed: `github-settings.md` lists the setting ADR 0010, decision 18 relies on, and the owner turns it on |
-| m8 | Undocumented ruleset parameter | Pending |
+| m8 | Undocumented ruleset parameter | Fixed: `github-settings.md` documents it, left on. GitHub's documentation shows it applies only to PRs Copilot opens under its own identity, not to commits from unlinked emails as the audit supposed |
 | m9 | commitlint versus Dependabot commits | Pending |
 | m10 | `ci-ok` can pass when nothing ran | Pending |
 | m11 | ECR lifecycle policy would expire released images | Pending |
