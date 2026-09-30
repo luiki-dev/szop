@@ -103,7 +103,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 
 | Finding | Summary | Outcome |
 |---|---|---|
-| C1 | A threat model page | Pending |
+| C1 | A threat model page | Deferred to the security baseline topic, as its starting point: [OP-050](../open-points.md#security-baseline-topic) |
 | C2 | A progressive web app with an app-shell cache | Pending |
 | C3 | Undo for mis-taps | Pending |
 | C4 | Test migrations against existing data | Pending |
