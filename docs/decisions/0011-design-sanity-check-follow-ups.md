@@ -60,7 +60,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | MAJOR-4 | Per-IP rate limits depend on an unmentioned client-IP setting | Deferred to the security baseline topic (decision 6): [OP-035](../open-points.md#security-baseline-topic) |
 | MAJOR-5 | No web security baseline | Deferred to the security baseline topic (decision 6): [OP-036](../open-points.md#security-baseline-topic) |
 | MAJOR-6 | Flaky connectivity underspecified; a library default contradicts NET-1 | Deferred to the phases that build the first changes from the SPA and NET-1, client-generated IDs to the first data phase, and moving offline check-off to Later to the roadmap brainstorm: [OP-040](../open-points.md#feature-phases) |
-| MAJOR-7 | Open domain and data-model rules that shape the schema | Pending |
+| MAJOR-7 | Open domain and data-model rules that shape the schema | Deferred: shared schema conventions to the first data phase, area rules to the phases building them: [OP-041](../open-points.md#feature-phases) |
 | MAJOR-8 | MVP access-control shape rewritten by sharing | Pending |
 | MAJOR-9 | Redeploys overlap two tasks and can skip migrations | Pending |
 | MAJOR-10 | release-please with merge commits | Deferred to a trial in a throwaway repository before the phase that sets up release-please: [OP-025](../open-points.md#cicd-phase) |

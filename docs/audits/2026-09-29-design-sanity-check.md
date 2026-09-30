@@ -253,6 +253,8 @@ No document mentions cross-site request forgery (CSRF), Origin checks, security 
 
 ### MAJOR-7. Domain rules and the data model leave decisions open that shape the schema
 
+> ⏳ **Deferred:** shared schema conventions to the first data phase, area rules to the phases building them: [OP-041](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 These are cheap to decide now and expensive to change after migrations exist.
 
 - **"Order added" isn't deterministic.** `architecture.md` derives ORD-5's order from a timestamp. PostgreSQL's `now()` is the *transaction start* time, so multi-add (ITM-5), duplicate (LST-4), list from template (TPL-3), save as template (LST-6) and the ACC-4 import all insert rows with identical timestamps. Their order is then random and can change between requests. Add a `position` or sequence tiebreaker; manual reordering, a future extension, needs one anyway.
