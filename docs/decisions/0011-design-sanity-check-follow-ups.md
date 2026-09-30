@@ -77,7 +77,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m2 | Email authentication covers DKIM only | Deferred: DMARC and SPF to the phase that sets up SES in `infra/base`, a failed send to the phase delivering ACC-2: [OP-044](../open-points.md#walking-skeleton) |
 | m3 | "Secrets never enter Terraform state" has no fallback or check | Deferred to the phase that writes the Terraform code, as a hard rule with a fallback, a check and rotation: [OP-016](../open-points.md#walking-skeleton), linked to OP-037 |
 | m4 | Real-time updates need more design | Deferred to the SYN brainstorm, and the atomic quantity increase to the phase delivering ITM-4: [OP-045](../open-points.md#feature-phases) |
-| m5 | No `.gitignore` | Pending |
+| m5 | No `.gitignore` | Fixed: a `.gitignore` for Terraform state and Claude Code's local settings, which only the owner's global ignore file covered; the development environment phase adds its tools' entries ([OP-005](../open-points.md#development-environment-phase)) |
 | m6 | `infra/base` applied from a branch can drift from `main` | Pending |
 | m7 | Dependabot security updates are off | Pending |
 | m8 | Undocumented ruleset parameter | Pending |
