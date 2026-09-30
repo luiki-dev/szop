@@ -591,6 +591,9 @@ These are cheap to decide now and expensive to change after migrations exist.
     > ✖️ **Rejected:** it matters only with real public traffic, which the on-demand demo never has. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 12. **Node.js 26 becomes LTS in October 2026,** about when the development environment phase starts. Node 24 stays supported until 2028, so pinning 24 is fine. Just make it a conscious choice in that phase.
+
+    > ✖️ **Rejected:** ADR 0005 chose Node 24, supported until April 2028. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 13. **API versioning for the future Android app.** The web app ships together with the API, but an Android client won't. A `/api/v1` prefix, or a stated compatibility rule, is cheap now.
 14. **Unverified factual claims in the ADRs.** Re-check a few before relying on them:
     - App Runner closed to new customers on 30 April 2026 (ADR 0008)
