@@ -275,6 +275,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-8. The MVP's access-control shape will have to be rewritten for sharing
 
+> ⏳ **Deferred** to the security baseline foundation topic, together with CRITICAL-1: [OP-042](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:**
   - `architecture.md`: queries are scoped by "the workspace ID taken from the **session**", and `requireListAccess` arrives only "with sharing (Later)".
   - `stack-overview.md` §5: flat item routes (`PATCH /api/items/7`).
