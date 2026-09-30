@@ -231,6 +231,8 @@ No document mentions cross-site request forgery (CSRF), Origin checks, security 
 
 ### MAJOR-6. Flaky connectivity in the store is underspecified, and a library default contradicts the decision
 
+> ⏳ **Deferred** to the phases that build the first changes from the SPA and NET-1; client-generated IDs to the first data phase; offline check-off to the roadmap brainstorm: [OP-040](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:**
   - README: "built for the phone in your hand in the store".
   - NET-1: "blocks changes rather than silently losing them".
