@@ -109,7 +109,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | C4 | Test migrations against existing data | Deferred to the first phase whose migration changes an existing table: [OP-052](../open-points.md#feature-phases) |
 | C5 | Test the seed data | Deferred to the first data phase, where the seed data is written: [OP-052](../open-points.md#feature-phases) |
 | C6 | Container and database hardening | Deferred to the walking-skeleton work building each piece: the non-root user with the Dockerfile ([OP-015](../open-points.md#walking-skeleton)), TLS to RDS with the connection string ([OP-017](../open-points.md#walking-skeleton)), the state bucket's protections with bootstrap ([OP-013](../open-points.md#walking-skeleton)) |
-| C7 | Password policy | Pending |
+| C7 | Password policy | Deferred to the security baseline topic: [OP-036](../open-points.md#security-baseline-topic) |
 | C8 | No lifecycle scripts in CI jobs holding AWS credentials | Pending |
 | C9 | Order the CodeQL rule last | Pending |
 | C10 | The release image is never demo-checked | Pending |

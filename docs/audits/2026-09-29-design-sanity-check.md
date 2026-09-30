@@ -571,6 +571,9 @@ These are cheap to decide now and expensive to change after migrations exist.
    > ⏳ **Deferred** to the walking-skeleton work building each piece: [OP-015](../open-points.md#walking-skeleton), [OP-017](../open-points.md#walking-skeleton) and [OP-013](../open-points.md#walking-skeleton). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 7. **Password policy.** Record the minimum length, and consider Better Auth's breached-password check. Keep Better Auth's cookie cache off unless there's a reason for it.
+
+   > ⏳ **Deferred** to the security baseline foundation topic: [OP-036](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 8. **CI jobs that hold AWS credentials** should not run dependency lifecycle scripts, or should rely on pnpm's script allowlist, and say so.
 9. **Order the CodeQL rule last.** Turn on "Require code scanning results" only after CodeQL has run successfully on `main`. With an empty bypass list, a CodeQL that can't run blocks every merge. Check that the SHA-pinning policy doesn't block CodeQL's default setup or Dependabot's own workflows.
 10. **The release image is never demo-checked,** and the "re-tag if ECR already has it" path will almost never apply, since the release commit is a new merge commit. Say so in ADR 0010's successor. Also make sure the privileged `release` job doesn't restore caches written by PR runs (cache poisoning).
