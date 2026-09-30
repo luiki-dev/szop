@@ -62,7 +62,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | MAJOR-7 | Open domain and data-model rules that shape the schema | Pending |
 | MAJOR-8 | MVP access-control shape rewritten by sharing | Pending |
 | MAJOR-9 | Redeploys overlap two tasks and can skip migrations | Pending |
-| MAJOR-10 | release-please with merge commits | Pending |
+| MAJOR-10 | release-please with merge commits | Deferred to a trial in a throwaway repository before the phase that sets up release-please: [OP-025](../open-points.md#cicd-phase) |
 | MAJOR-11 | The `demo` environment is not a security boundary | Deferred to the security baseline topic (decision 6): [OP-037](../open-points.md#security-baseline-topic) |
 | MAJOR-12 | Nightly destroy runs `main`'s Terraform; runs don't simply queue | Pending |
 | MAJOR-13 | Roadmap, phases and definition of done not ready | Fixed in part: decisions 3 and 4 (one definition of done, document roles). Deferred: splitting the skeleton and the CI/CD work into phases ([OP-031](../open-points.md#before-the-roadmap)), a CI job proving the image starts ([OP-032](../open-points.md#cicd-phase)). Already covered: the owner's steps (OP-003) and the list of phase obligations (the register, decision 1) |

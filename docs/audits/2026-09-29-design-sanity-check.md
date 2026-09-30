@@ -295,6 +295,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-10. release-please doesn't work well with merge commits
 
+> ⏳ **Deferred** to a trial in a throwaway repository before the phase that sets up release-please: [OP-025](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:** ADR 0009, decisions 6, 11 and 14. ADR 0010, decisions 7 and 17. Verified live: the merge commit title is the PR title and its body is blank.
 - **Problem:**
   - **Duplicate entries (verified).** release-please's README "highly recommends" squash merges. With merge commits, each phase adds its PR-title merge commit (`feat(lists): add shopping lists`) *and* every task commit (`feat(api): …`, `feat(web): …`). The changelog lists overlapping entries (release-please issue #2476).
