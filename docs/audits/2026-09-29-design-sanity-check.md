@@ -508,6 +508,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   - "nest categories as deep as you like", against LIM-1's 5 levels
   - "editor (change the list)", against SHR-4, where only the owner renames, archives or shares
   - future ideas omit "Full offline editing" and narrow the admin panel
+
+  > ✅ **Fixed** in the README. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m22. Stale structure and facts:**
   - "One repository, three packages" (`architecture.md`, `stack-overview.md`, the glossary) omits the `e2e/` workspace (ADR 0007) and `infra/` (ADR 0008).
   - The app's task role "may only send email" (`stack-overview.md`, the glossary), but ADR 0008 also gives it ECS Exec.
