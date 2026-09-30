@@ -1,6 +1,6 @@
 # ADR 0006 — Git workflow as a foundation topic
 
-- **Status:** Accepted — completed by [ADR 0009](0009-git-workflow.md) (the git workflow itself; direct commits to `main` end with it)
+- **Status:** ✅ Accepted — completed by [ADR 0009](0009-git-workflow.md) (the git workflow itself; direct commits to `main` end with it)
 - **Date:** 2026-09-27
 - **Extends:** decisions 2 and 3 of [ADR 0004](0004-implementation-process.md) (foundation topics and their order)
 
