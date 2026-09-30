@@ -579,6 +579,9 @@ These are cheap to decide now and expensive to change after migrations exist.
    > ⏳ **Deferred** to the security baseline foundation topic: [OP-037](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 9. **Order the CodeQL rule last.** Turn on "Require code scanning results" only after CodeQL has run successfully on `main`. With an empty bypass list, a CodeQL that can't run blocks every merge. Check that the SHA-pinning policy doesn't block CodeQL's default setup or Dependabot's own workflows.
+
+   > ⏳ **Deferred** to the CI/CD phase's settings: [OP-022](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 10. **The release image is never demo-checked,** and the "re-tag if ECR already has it" path will almost never apply, since the release commit is a new merge commit. Say so in ADR 0010's successor. Also make sure the privileged `release` job doesn't restore caches written by PR runs (cache poisoning).
 11. **Per-IP limits and shared addresses.** ADR 0003 argues that a real person hits the guest limit "at most once per browser". But many people share one address behind mobile carrier-grade NAT or a shop's Wi-Fi, so a crowd shares 10 guests per hour. For a demo that doesn't matter; for an always-on service, add a global ceiling and revisit the per-IP value.
 12. **Node.js 26 becomes LTS in October 2026,** about when the development environment phase starts. Node 24 stays supported until 2028, so pinning 24 is fine. Just make it a conscious choice in that phase.

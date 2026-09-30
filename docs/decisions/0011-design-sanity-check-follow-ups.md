@@ -111,7 +111,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | C6 | Container and database hardening | Deferred to the walking-skeleton work building each piece: the non-root user with the Dockerfile ([OP-015](../open-points.md#walking-skeleton)), TLS to RDS with the connection string ([OP-017](../open-points.md#walking-skeleton)), the state bucket's protections with bootstrap ([OP-013](../open-points.md#walking-skeleton)) |
 | C7 | Password policy | Deferred to the security baseline topic: [OP-036](../open-points.md#security-baseline-topic) |
 | C8 | No lifecycle scripts in CI jobs holding AWS credentials | Deferred to the security baseline topic: [OP-037](../open-points.md#security-baseline-topic) |
-| C9 | Order the CodeQL rule last | Pending |
+| C9 | Order the CodeQL rule last | Deferred to the CI/CD phase's settings: [OP-022](../open-points.md#cicd-phase) |
 | C10 | The release image is never demo-checked | Pending |
 | C11 | Per-IP limits and shared addresses | Pending |
 | C12 | Node.js 26 LTS | Pending |
