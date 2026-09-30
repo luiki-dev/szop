@@ -289,6 +289,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-9. The single-instance guarantee doesn't hold during a redeploy, and branch redeploys can skip migrations
 
+> ⏳ **Deferred** to the phase that builds the ECS service and migrations: [OP-043](../open-points.md#walking-skeleton); locking for several instances joins [OP-033](../open-points.md#unassigned). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **Where:**
   - ADR 0008, decision 14: "With exactly one instance nothing can race."
   - ADR 0010, decision 11: "Running it again with the demo up redeploys another commit".

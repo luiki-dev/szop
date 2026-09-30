@@ -62,7 +62,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | MAJOR-6 | Flaky connectivity underspecified; a library default contradicts NET-1 | Deferred to the phases that build the first changes from the SPA and NET-1, client-generated IDs to the first data phase, and moving offline check-off to Later to the roadmap brainstorm: [OP-040](../open-points.md#feature-phases) |
 | MAJOR-7 | Open domain and data-model rules that shape the schema | Deferred: shared schema conventions to the first data phase, area rules to the phases building them: [OP-041](../open-points.md#feature-phases) |
 | MAJOR-8 | MVP access-control shape rewritten by sharing | Deferred to the security baseline topic, together with OP-034: [OP-042](../open-points.md#security-baseline-topic) |
-| MAJOR-9 | Redeploys overlap two tasks and can skip migrations | Pending |
+| MAJOR-9 | Redeploys overlap two tasks and can skip migrations | Deferred to the phase that builds the ECS service and migrations: [OP-043](../open-points.md#walking-skeleton); locking for several instances joins [OP-033](../open-points.md#unassigned) |
 | MAJOR-10 | release-please with merge commits | Deferred to a trial in a throwaway repository before the phase that sets up release-please: [OP-025](../open-points.md#cicd-phase) |
 | MAJOR-11 | The `demo` environment is not a security boundary | Deferred to the security baseline topic (decision 6): [OP-037](../open-points.md#security-baseline-topic) |
 | MAJOR-12 | Nightly destroy runs `main`'s Terraform; runs don't simply queue | Fixed: decision 7; the mechanism details join [OP-019](../open-points.md#cicd-phase) |
