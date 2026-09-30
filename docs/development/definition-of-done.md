@@ -4,18 +4,27 @@ The checklist a piece of work must meet before its PR is merged. This page is it
 
 ## The checklist
 
-| # | Item | What it means | Source |
-|---|---|---|---|
-| 1 | **Tests pass, at the right layers** | New behavior has tests at the lowest layer that can prove it; a phase that completes a use case adds its E2E journey; every bug fix has a regression test; every suite is green. | ADR 0007, decisions 16 and 20 |
-| 2 | **Surviving mutants reviewed** | When the phase changes domain rules in `packages/shared`, mutation testing (`pnpm test:mutation`) was run and each surviving mutant was either killed by a new test or accepted with a reason in the PR. | ADR 0007, decision 19 |
-| 3 | **CI is green** | Every required check passed on the PR's final head. | ADR 0010, decision 8 |
-| 4 | **Deployed and checked** | A demo environment was created from the image of a commit on the branch, its health check passed, the phase's behavior worked in a browser, and the environment was destroyed. The PR links the `demo-up` run and names the commit it deployed. The check must cover the final head: see [when the demo check must be repeated](#when-the-demo-check-must-be-repeated). | ADR 0008, decision 29; ADR 0010, decision 2 |
-| 5 | **`infra/base` changes applied from the branch** | If the phase changes `infra/base`, the owner applied it from the branch before the demo check, since the demo depends on it. | ADR 0010, decision 14 |
-| 6 | **Living docs updated** | Architecture, stack overview and glossary; the functional requirements when behavior changed; the roadmap status. | ADR 0004, decision 7 |
-| 7 | **Guides updated** | Every guide the change affects: `setup.md` and the tool pages, `testing.md`, the runbook, `ci-cd.md`, `git-workflow.md`, `github-settings.md`, and this page. | ADR 0005, decision 15; ADR 0007, decision 22; ADR 0008, decision 31; ADR 0009, decisions 15 and 17; ADR 0010, decision 22 |
-| 8 | **Significant decisions have ADRs** | A decision about architecture, technology, tooling or process is recorded in a new ADR, with the options considered. | ADR 0004, decision 7 |
-| 9 | **Open points handled** | The phase's entries in [open-points.md](../open-points.md) are closed or re-assigned with a reason, and anything newly deferred is added. | ADR 0011, decision 1 |
-| 10 | **Commits follow the convention** | Commit messages and the PR title follow Conventional Commits; in a phase, commits follow the plan's tasks. | ADR 0009, decisions 3 and 9 |
+**Who** names who makes the item true:
+
+- **Claude** does the work: writes the tests, code, docs and commits, and fixes what fails.
+- **Claude → owner**: Claude prepares it (runs mutation testing and proposes what to do with each survivor, drafts the ADR), and the owner decides.
+- **Owner**: only the owner can do it. The owner presses `demo-up` and `demo-down` and checks the demo (Claude triggers them only when asked), and applies `infra/base` with their own AWS credentials.
+- **CI** runs the checks; Claude fixes what it reports.
+
+Whoever made an item true, **the owner verifies every item when reviewing the PR**, and the merge is the approval.
+
+| # | Item | Who | What it means | Source |
+|---|---|---|---|---|
+| 1 | **Tests pass, at the right layers** | Claude | New behavior has tests at the lowest layer that can prove it; a phase that completes a use case adds its E2E journey; every bug fix has a regression test; every suite is green. | ADR 0007, decisions 16 and 20 |
+| 2 | **Surviving mutants reviewed** | Claude → owner | When the phase changes domain rules in `packages/shared`, mutation testing (`pnpm test:mutation`) was run and each surviving mutant was either killed by a new test or accepted with a reason in the PR. | ADR 0007, decision 19 |
+| 3 | **CI is green** | CI | Every required check passed on the PR's final head. | ADR 0010, decision 8 |
+| 4 | **Deployed and checked** | Owner | A demo environment was created from the image of a commit on the branch, its health check passed, the phase's behavior worked in a browser, and the environment was destroyed. The PR links the `demo-up` run and names the commit it deployed. The check must cover the final head: see [when the demo check must be repeated](#when-the-demo-check-must-be-repeated). | ADR 0008, decision 29; ADR 0010, decision 2 |
+| 5 | **`infra/base` changes applied from the branch** | Owner | If the phase changes `infra/base`, the owner applied it from the branch before the demo check, since the demo depends on it. | ADR 0010, decision 14 |
+| 6 | **Living docs updated** | Claude | Architecture, stack overview and glossary; the functional requirements when behavior changed; the roadmap status. | ADR 0004, decision 7 |
+| 7 | **Guides updated** | Claude | Every guide the change affects: `setup.md` and the tool pages, `testing.md`, the runbook, `ci-cd.md`, `git-workflow.md`, `github-settings.md`, and this page. | ADR 0005, decision 15; ADR 0007, decision 22; ADR 0008, decision 31; ADR 0009, decisions 15 and 17; ADR 0010, decision 22 |
+| 8 | **Significant decisions have ADRs** | Claude → owner | A decision about architecture, technology, tooling or process is recorded in a new ADR, with the options considered. | ADR 0004, decision 7 |
+| 9 | **Open points handled** | Claude | The phase's entries in [open-points.md](../open-points.md) are closed or re-assigned with a reason, and anything newly deferred is added. | ADR 0011, decision 1 |
+| 10 | **Commits follow the convention** | Claude | Commit messages and the PR title follow Conventional Commits; in a phase, commits follow the plan's tasks. | ADR 0009, decisions 3 and 9 |
 
 ## Items that don't apply: N/A with a reason
 
