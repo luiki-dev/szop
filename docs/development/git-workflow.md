@@ -13,6 +13,8 @@ main ──●─────────────────────●
          feat/shopping-lists                  (a small change outside a phase)
 ```
 
+For the whole journey of one example phase, from the first commit to the release and the demo, see the [phase walkthrough](phase-walkthrough.md).
+
 One **roadmap phase** is one branch and one PR. A change outside a phase (a foundation ADR, a typo fix, a dependency bump) gets its own small branch and PR.
 
 ## 1. Start a branch
