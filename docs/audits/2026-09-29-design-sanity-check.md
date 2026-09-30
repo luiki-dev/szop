@@ -560,6 +560,9 @@ These are cheap to decide now and expensive to change after migrations exist.
    > ⏳ **Deferred** to the first phase whose migration changes an existing table: [OP-052](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 5. **Test the seed data.** Check that it satisfies the quotas, the depth limit and uniqueness, and see how much of the 300-category quota it uses.
+
+   > ⏳ **Deferred** to the first data phase: [OP-052](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 6. **Container and database hardening.**
    - Run the container as a non-root user.
    - Connect to RDS over TLS with full certificate verification.

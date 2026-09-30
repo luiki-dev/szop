@@ -107,7 +107,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | C2 | A progressive web app with an app-shell cache | Rejected: NET-1 blocks changes offline, so a cached shell alone gains little in the store, and a service worker adds the risk of an outdated SPA talking to a newer API after a redeploy. Whether offline check-off moves to Later stays a roadmap question ([OP-040](../open-points.md#feature-phases)) |
 | C3 | Undo for mis-taps | Deferred to the phases delivering item removal and "Uncheck all": [OP-051](../open-points.md#feature-phases) |
 | C4 | Test migrations against existing data | Deferred to the first phase whose migration changes an existing table: [OP-052](../open-points.md#feature-phases) |
-| C5 | Test the seed data | Pending |
+| C5 | Test the seed data | Deferred to the first data phase, where the seed data is written: [OP-052](../open-points.md#feature-phases) |
 | C6 | Container and database hardening | Pending |
 | C7 | Password policy | Pending |
 | C8 | No lifecycle scripts in CI jobs holding AWS credentials | Pending |
