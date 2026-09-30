@@ -1,6 +1,6 @@
 # ADR 0009 — Git workflow
 
-- **Status:** Accepted — decision 1 revisited and confirmed by [ADR 0010](0010-ci-cd.md) (the repository stays public); the CI/CD items of the consequences answered by ADR 0010
+- **Status:** Accepted — decision 1 revisited and confirmed by [ADR 0010](0010-ci-cd.md) (the repository stays public); the CI/CD items of the consequences answered by ADR 0010; the definition of done restated in decision 8 is kept in `docs/development/definition-of-done.md` ([ADR 0011](0011-design-sanity-check-follow-ups.md), decision 3)
 - **Date:** 2026-09-28
 - **Completes:** [ADR 0006](0006-git-workflow-topic.md) (the git workflow topic itself) and the open point of [ADR 0008](0008-hosting.md), decision 13 (the versioning scheme behind version tags)
 

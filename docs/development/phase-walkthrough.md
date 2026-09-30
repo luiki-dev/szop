@@ -214,7 +214,7 @@ The owner checks the phase's behavior in a browser on the demo, and reviews the 
 
 - **Redeploying** with the demo up does not rebuild everything: the ECS service replaces its tasks one by one (a rolling update).
 - `demo-up` and `demo-down` queue in one concurrency group and never cancel each other mid-Terraform.
-- The *Deployed* box of the definition of done can now be ticked: the image of the head that will be merged was built, deployed, checked and destroyed.
+- The *Deployed* box of the [definition of done](definition-of-done.md) can now be ticked, with a link to this `demo-up` run: the image of the head that will be merged was built, deployed, checked and destroyed.
 - Szop has no *rollout* in the usual sense (getting a new version to users, often gradually, with canary releases or feature flags): there are no users, and the demo exists only for a session.
 
 ### Step 9 — The owner merges the phase
@@ -335,7 +335,7 @@ This is the target state. The pieces arrive in the phases that introduce them ([
 | After the walking skeleton | The first release, `v0.1.0` |
 | When the MVP is done | `1.0.0`, set with a `Release-As: 1.0.0` footer |
 
-Until a piece exists, its step is simply skipped, and the matching definition-of-done item in the PR is marked N/A.
+Until a piece exists, its step is simply skipped, and the matching [definition-of-done](definition-of-done.md) item in the PR is marked N/A, with the reason.
 
 ## Open points for the CI/CD phase
 

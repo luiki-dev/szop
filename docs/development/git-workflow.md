@@ -126,7 +126,7 @@ Once CI exists, GitHub requires the branch to be up to date before merging, so w
 
 **Only the owner merges; the merge is the approval.** GitHub does not let an author approve their own PR, and every PR is authored by the owner's account, so there is no formal approving review.
 
-A phase PR is merged when the **definition of done** is met on the branch ([ADR 0004](../decisions/0004-implementation-process.md), decision 7): the tests pass, CI is green, the change was deployed to a demo environment from the branch's image and checked there ([ADR 0008](../decisions/0008-hosting.md), decision 29; the `demo-up` workflow of [ADR 0010](../decisions/0010-ci-cd.md)), and the living docs, including the roadmap status, are updated.
+A PR is merged when the [definition of done](definition-of-done.md) is met on the branch. For a phase, that includes a check on a demo environment created from the branch's image with the `demo-up` workflow ([ADR 0010](../decisions/0010-ci-cd.md)), covering the PR's final head.
 
 The only merge method is a **merge commit**. GitHub deletes the remote branch afterwards. Locally:
 

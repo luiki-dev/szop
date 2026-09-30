@@ -338,6 +338,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-13. Roadmap, phases and the definition of done are not ready for the roadmap brainstorm
 
+> ✅ **Fixed in part** in [ADR 0011, decisions 3 and 4](../decisions/0011-design-sanity-check-follow-ups.md#decisions): one [definition of done](../development/definition-of-done.md) and the document roles. ⏳ **Deferred:** the phase split ([OP-031](../open-points.md#before-the-roadmap)) and a CI job proving the image starts ([OP-032](../open-points.md#cicd-phase)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 - **The walking skeleton reads as one very large phase.** ADR 0008's consequences put all Terraform, the Dockerfile, the static serving, `/api/health`, migrations, the SES sender, the runbook and tool pages into it. ADR 0009 expects `v0.1.0` after it, which needs release-please, the GitHub App and the `release` environment. That contradicts "the roadmap keeps phases small enough to review" (ADR 0009, decision 3) and "Do not bundle several of these into one change" (CLAUDE.md).
 - **There is no single "CI/CD phase".**
   - ADR 0009, git-workflow.md and github-settings.md talk about "the CI/CD phase".

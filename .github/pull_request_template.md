@@ -19,12 +19,15 @@
 
 ## Definition of done
 
-<!-- ADR 0004, decision 7. Mark items that do not apply yet (before CI or hosting exist) as N/A. -->
+<!-- What each item means, which PRs need which items, and when the demo check must be repeated: docs/development/definition-of-done.md. Mark an item that does not apply as "N/A: <reason>". -->
 
-- [ ] The tests pass, at the right layers (ADR 0007, decision 20)
+- [ ] Tests pass, at the right layers
+- [ ] Surviving mutants reviewed (when domain rules changed)
 - [ ] CI is green
-- [ ] Deployed: the branch's image was built and pushed, a demo environment created from it, checked, and destroyed (ADR 0008, decision 29)
-- [ ] Living docs updated: architecture, stack overview, glossary, functional requirements (if behavior changed), roadmap status
+- [ ] Deployed and checked on the demo, covering the final head: <!-- link to the demo-up run, and the commit it deployed -->
+- [ ] `infra/base` changes applied from this branch
+- [ ] Living docs updated: architecture, stack overview, glossary, functional requirements, roadmap status
+- [ ] Guides updated
 - [ ] Significant decisions have ADRs
-- [ ] Open points: this phase's entries in `docs/open-points.md` are closed or re-assigned, and anything newly deferred is added (ADR 0011, decision 1)
-- [ ] Commits follow Conventional Commits and, in a phase, the plan's tasks
+- [ ] Open points closed, re-assigned or added in `docs/open-points.md`
+- [ ] Commits and the PR title follow Conventional Commits; in a phase, commits follow the plan's tasks

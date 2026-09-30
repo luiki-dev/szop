@@ -2,7 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-09-30
-- **Extends:** decisions 7 and 9 of [ADR 0004](0004-implementation-process.md) (the definition of done, and the document roles)
+- **Extends:** decision 7 of [ADR 0004](0004-implementation-process.md) (the definition of done, now kept in one page)
+- **Replaces:** the document roles table of [ADR 0004](0004-implementation-process.md), decision 9 (decision 4)
 
 ## Context
 
@@ -21,6 +22,24 @@ Deferred findings, like everything else deferred, go to the new [open points reg
 |---|-------|--------------------|------------------------|
 | 1 | Where deferred work is tracked | Inside each ADR and guide, where it came up; a triage file next to the audit; one central register | **One central register, `docs/open-points.md`.** Every point that is still undecided or not yet done, and has been left to a later topic or phase, gets an entry with a stable ID (`OP-001`, …), its source, where it will be settled and its status. Until the roadmap exists, entries are grouped by the topic or kind of phase the ADRs name; the roadmap brainstorm then assigns each one to a real phase. Closed entries stay, with a link to where they were settled. **It joins ADR 0004's document roles** (decision 9): the register owns *what is still open and where it will be settled*; the roadmap keeps the order and status of phases, and ADRs keep the reasons. **It joins the definition of done** (ADR 0004, decision 7): a phase closes its open points, or explicitly re-assigns them, and adds anything it defers. Each topic or phase brainstorm starts from its open points. Before this, deferrals were scattered across ADR consequences ("the CI/CD phase writes…", "decided in the implementation phase"), guides and the audit, and the roadmap brainstorm would have had to collect them by reading everything again; some would have been missed. A triage file next to the audit would have covered only the audit's findings. |
 | 2 | Order of the teardown safety net and the deploy workflows (CRITICAL-2) | A bootstrap exception: the phase adding the workflows is checked on the demo right after its merge, from `main`; the safety net and a registered `demo-up` merged first, in an earlier PR | **The safety net and a registered `demo-up` are merged first, before any demo exists.** GitHub runs a manual (`workflow_dispatch`) or scheduled workflow only if its file exists on the default branch. A manual run started on a branch then uses **that branch's** version of the file, while scheduled runs always use `main`'s. As ADRs 0008 and 0010 were written, the phase adding `demo-up.yml` could not press its own button before merging, so it could not meet the definition of done, and a `demo-down` merged "together with" `demo-up` protected nothing before the merge. So: (1) `infra/bootstrap` (state bucket, budget alerts) and `infra/base` (the OIDC provider and the deploy role) are applied from the owner's machine, as ADR 0010, decision 14 already has it. (2) **A PR merges the real `demo-down.yml`** (by hand and nightly), **`infra/demo` with only its backend and provider** (so a destroy has nothing to do) and **a placeholder `demo-up.yml`** that only registers the button and fails with a message. After the merge, one run of `demo-down` is seen succeeding. (3) **The phase that writes the real `demo-up.yml` and `infra/demo` presses `demo-up` on its own branch**; GitHub runs the branch's version, so that phase meets the definition of done like any other, with the nightly net already active. **ADR 0010, decision 23's "before or together with" becomes "before"**, and ADR 0008, decision 26's "before the walking skeleton" means "before any demo runs": the net needs base's deploy role, so it cannot come earlier than base. **Local `terraform apply` of `infra/demo`** from the owner's machine, the normal way to try Terraform code while writing it, **is allowed only once the nightly net is on `main`, and every such demo is destroyed the same day**; the nightly run and the budget alerts are the backstops. The bootstrap exception is simpler, but the one phase whose whole purpose is deploying would be merged without a deploy, and a broken first deploy would be fixed on `main` afterwards. The placeholder costs one short-lived file, and registering a manual workflow on the default branch first is a common GitHub pattern worth knowing. Destroying a demo created from a branch with `main`'s older Terraform code is a separate finding (MAJOR-12). |
+| 3 | One definition of done (MAJOR-13) | Keep it in ADR 0004 and its refinements; git-workflow.md §6; the PR template alone; a page of its own | **One living page, [`docs/development/definition-of-done.md`](../development/definition-of-done.md), which the PR template mirrors and everything else links to.** It had been restated in ADR 0004, ADR 0009, `git-workflow.md`, the glossary and the PR template, and the copies disagreed; none listed the guides other ADRs make part of it, reviewing surviving mutants (ADR 0007, decision 19) or applying `infra/base` from the branch (ADR 0010, decision 14). The page lists every item with its meaning and source. Three rules are new. **N/A needs a reason** ("N/A: no image or infrastructure change"), instead of being allowed only before CI or hosting exist. **The demo check must cover the final head:** it counts only if no later commit changed anything that goes into the image or `infra/`, so a documentation-only update needs no new check but *Update branch* bringing a dependency bump does, and the PR links the `demo-up` run it relies on. **The demo check is required for phase PRs only**; for other PRs, Dependabot's included, it is the owner's call, and CI is to prove that the image starts (OP-032). git-workflow.md is about git, and the definition of done covers more; the PR template has no room to explain its items; ADRs cannot be edited as items are added. |
+| 4 | Roles of the documents, revisited (MAJOR-13) | Keep ADR 0004's table and add rows ADR by ADR; replace it with a complete table | **A complete table, replacing the one in ADR 0004, decision 9.** ADR 0004 described requirements, living docs, ADRs, the roadmap, specs and plans; since then guides, a runbook, the register and an audit appeared without a stated role. |
+
+### Document roles
+
+Decision 4 replaces the table of ADR 0004, decision 9. Each fact still has one home; other documents link to it.
+
+| Document | Answers | Lifecycle |
+|---|---|---|
+| **Functional requirements** (`docs/requirements/`) | What Szop does | Living; updated when behavior changes |
+| **Architecture, stack overview, glossary** (`docs/architecture/`, `docs/glossary.md`) | How Szop is built *now*, and the concepts behind it | Living; updated by every phase that changes them |
+| **Guides** (`docs/development/`: git workflow, phase walkthrough, GitHub settings, definition of done; later setup, testing, CI/CD and one page per tool) | How to work on Szop *now*: steps, commands, settings, checklists | Living; updated by the change that alters what they describe (definition of done, item 7) |
+| **Runbook** (`docs/operations/`) | How to run the demo environment: account setup, spinning up, tearing down, debugging | Living, from the phase that creates it |
+| **ADRs** (`docs/decisions/`) | Why a significant decision was made, and what else was considered | Never rewritten once accepted; superseded or refined by a new ADR, noted in the status line |
+| **Roadmap** (`docs/roadmap.md`) | What is built in which order, and how far along it is | Living; status updated as phases finish |
+| **Open points** (`docs/open-points.md`) | What is still undecided or undone, and where it will be settled | Living; entries closed with a link, never deleted (decision 1) |
+| **Specs and plans** (`docs/superpowers/specs/`, `docs/superpowers/plans/`) | The detailed design of one phase, and the steps to build it | Working papers for one phase; kept afterwards as history, not updated |
+| **Audits** (`docs/audits/`) | What a review of the design found at one point in time | Point-in-time; never updated apart from resolution markers; the triage of the findings is recorded in an ADR |
 
 ## Triage of the findings
 
@@ -44,7 +63,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | MAJOR-10 | release-please with merge commits | Pending |
 | MAJOR-11 | The `demo` environment is not a security boundary | Pending |
 | MAJOR-12 | Nightly destroy runs `main`'s Terraform; runs don't simply queue | Pending |
-| MAJOR-13 | Roadmap, phases and definition of done not ready | Pending |
+| MAJOR-13 | Roadmap, phases and definition of done not ready | Fixed in part: decisions 3 and 4 (one definition of done, document roles). Deferred: splitting the skeleton and the CI/CD work into phases ([OP-031](../open-points.md#before-the-roadmap)), a CI job proving the image starts ([OP-032](../open-points.md#cicd-phase)). Already covered: the owner's steps (OP-003) and the list of phase obligations (the register, decision 1) |
 
 ### Minor
 
@@ -96,5 +115,6 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 
 ## Consequences
 
+- `docs/development/definition-of-done.md` is a new living document. The PR template mirrors it; `git-workflow.md`, the glossary, the phase walkthrough, `CLAUDE.md` and the README link to it (decision 3).
 - `docs/open-points.md` is a new living document. `CLAUDE.md`, the README's documentation list, the glossary and the PR template point to it; the PR template's definition of done gains the open-points item (decision 1).
 - The [audit report](../audits/2026-09-29-design-sanity-check.md) gets a resolution marker under each finding as it is triaged: ✅ fixed, ⏳ deferred (with its open point), ✖️ rejected, each linking to the triage table above.

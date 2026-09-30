@@ -50,5 +50,6 @@ It is built for the phone in your hand in the store as much as for planning at a
 - [Glossary](docs/glossary.md) — acronyms and terms used in the docs
 - [Open points](docs/open-points.md) — what is still undecided or undone, and where it will be settled
 - [Git workflow](docs/development/git-workflow.md) — how changes reach `main` and how releases are cut
+- [Definition of done](docs/development/definition-of-done.md) — what every PR must meet before it is merged
 - [GitHub settings](docs/development/github-settings.md) — the repository settings behind the workflow
 - [Decisions](docs/decisions/) — records of the decisions behind the project and why they were made
