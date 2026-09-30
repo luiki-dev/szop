@@ -116,7 +116,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | C11 | Per-IP limits and shared addresses | Rejected: crowds sharing one address matter only with real public traffic, which the on-demand demo never has |
 | C12 | Node.js 26 LTS | Rejected: ADR 0005 chose Node 24, which is supported until April 2028, so Node 26 becoming LTS needs no separate decision |
 | C13 | API versioning for the future Android app | Rejected: the Android app is only a future idea and the SPA ships together with the API; with one client, versioning is decided when a second client is planned |
-| C14 | Unverified factual claims in the ADRs | Pending |
+| C14 | Unverified factual claims in the ADRs | Fixed: all three verified on 2026-09-30: App Runner closed to new customers on 30 April 2026 ([AWS](https://docs.aws.amazon.com/apprunner/latest/relnotes/welcome.html)); Dependabot's default cooldown is 3 days, since 14 July 2026 ([GitHub changelog](https://github.blog/changelog/2026-07-14-dependabot-version-updates-introduce-default-package-cooldown/)); SHA-pinning enforcement arrived on 15 August 2025 ([GitHub changelog](https://github.blog/changelog/2025-08-15-github-actions-policy-now-supports-blocking-and-sha-pinning-actions/)). The ADRs stay as written |
 
 ## Consequences
 

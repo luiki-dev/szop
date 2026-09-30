@@ -605,6 +605,8 @@ These are cheap to decide now and expensive to change after migrations exist.
 
     They are plausible, but they came from brainstorming, not from sources recorded in the ADRs.
 
+    > ✅ **Fixed:** all three claims verified, with sources in the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 ---
 
 ## What to do with this
