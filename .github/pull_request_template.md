@@ -25,7 +25,7 @@
 - [ ] Surviving mutants reviewed, when domain rules changed (Claude → owner)
 - [ ] CI is green (CI)
 - [ ] Deployed and checked on the demo, covering the final head (owner): <!-- link to the demo-up run, and the commit it deployed -->
-- [ ] `infra/base` changes applied from this branch (owner)
+- [ ] `infra/base` changes applied from this branch (owner; applied again from `main` once the PR is merged or closed)
 - [ ] Living docs updated: architecture, stack overview, glossary, functional requirements, roadmap status (Claude)
 - [ ] Guides updated (Claude)
 - [ ] Significant decisions have ADRs (Claude → owner)

@@ -433,6 +433,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   > ✅ **Fixed:** a `.gitignore` for Terraform state and `.claude/settings.local.json`; the development environment phase adds its tools' entries ([OP-005](../open-points.md#development-environment-phase)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m6. `infra/base` applied from a branch can drift from `main`** (ADR 0010, decision 14) if the PR is reworked or abandoned. **Fix:** add a step: re-apply base from `main` after the merge, or after abandoning the PR.
 
+  > ✅ **Fixed** in [ADR 0011, decision 9](../decisions/0011-design-sanity-check-follow-ups.md#decisions) and item 5 of the [definition of done](../development/definition-of-done.md). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 ### Process and CI
 
 - **m7. Dependabot security updates are off (verified: `automated-security-fixes` → `enabled: false`).** ADR 0010 decision 18 says they "are on". Neither `github-settings.md` nor the owner's steps in ADR 0010 decision 23 list them. **Fix:** add the setting to both, then turn it on.
