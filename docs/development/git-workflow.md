@@ -170,6 +170,7 @@ A version marks a state of the code; it deploys nothing. The demo environment ca
 | Merge commits only | Ruleset for `main` and repository settings | ADR 0009's merge |
 | Review conversations resolved before merging | Ruleset for `main` | ADR 0009's merge |
 | Version tags cannot be moved or deleted | Ruleset for `v*` tags | ADR 0009's merge |
+| Version tags are created only by release-please | Ruleset for `v*` tags (restrict creations; only the release App bypasses it) | ADR 0011's merge |
 | Secrets cannot be pushed | Secret scanning push protection | ADR 0009's merge |
 | Staged files formatted and linted | pre-commit hook | Development environment phase |
 | Commit messages follow Conventional Commits | commit-msg hook (commitlint) | Development environment phase |
@@ -178,3 +179,4 @@ A version marks a state of the code; it deploys nothing. The demo environment ca
 | No new high or critical code scanning alerts | Ruleset for `main` (code scanning results) | CI/CD phase |
 | PR title follows Conventional Commits | CI check | CI/CD phase |
 | Claude never merges a PR | `CLAUDE.md` only | ADR 0009's merge |
+| Claude never triggers `demo-up` or `demo-down` unless asked | `CLAUDE.md` only | ADR 0011's merge |
