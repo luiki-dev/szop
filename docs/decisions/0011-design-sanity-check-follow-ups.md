@@ -93,7 +93,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | m17 | Bulk operations against quotas undefined | Fixed in part: `architecture.md` states that concurrent requests may exceed a quota by a few rows, deliberately. Deferred: bulk actions, ITM-4 with different units and what an archived list allows, to the phases delivering them ([OP-047](../open-points.md#feature-phases)) |
 | m18 | Lazy creation: seed IDs versus workspace IDs | Deferred to the phase delivering ACC-1, including the first change's own seed IDs and session creation across tabs: [OP-048](../open-points.md#feature-phases) |
 | m19 | Sharing semantics that affect its tables | Deferred to the SHR brainstorm: [OP-049](../open-points.md#feature-phases) |
-| m20 | No non-functional requirements | Pending |
+| m20 | No non-functional requirements | Deferred: browser support, the accessibility target and a performance budget to the visual design topic ([OP-001](../open-points.md#before-the-roadmap)); decimal-comma input with money and quantity ([OP-041](../open-points.md#feature-phases)); a guest deleting their own data to the phase delivering ACC-7 ([OP-039](../open-points.md#feature-phases)) |
 | m21 | README drift | Pending |
 | m22 | Stale structure and facts | Pending |
 | m23 | ADR cross-references | Pending |

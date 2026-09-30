@@ -500,6 +500,8 @@ These are cheap to decide now and expensive to change after migrations exist.
   - no decimal-comma input ("0,5")
   - no way for a guest to delete their own data
 
+  > ⏳ **Deferred:** browsers, accessibility and performance to the visual design topic ([OP-001](../open-points.md#before-the-roadmap)); decimal commas to [OP-041](../open-points.md#feature-phases); guest data deletion to [OP-039](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 ### Documentation consistency
 
 - **m21. README drift:**
