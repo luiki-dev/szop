@@ -104,7 +104,7 @@ Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an ope
 | Finding | Summary | Outcome |
 |---|---|---|
 | C1 | A threat model page | Deferred to the security baseline topic, as its starting point: [OP-050](../open-points.md#security-baseline-topic) |
-| C2 | A progressive web app with an app-shell cache | Pending |
+| C2 | A progressive web app with an app-shell cache | Rejected: NET-1 blocks changes offline, so a cached shell alone gains little in the store, and a service worker adds the risk of an outdated SPA talking to a newer API after a redeploy. Whether offline check-off moves to Later stays a roadmap question ([OP-040](../open-points.md#feature-phases)) |
 | C3 | Undo for mis-taps | Pending |
 | C4 | Test migrations against existing data | Pending |
 | C5 | Test the seed data | Pending |

@@ -548,6 +548,9 @@ These are cheap to decide now and expensive to change after migrations exist.
    > ⏳ **Deferred** to the security baseline foundation topic, as its starting point: [OP-050](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 2. **A progressive web app (PWA) with an app-shell cache.** An installable app that caches its shell helps the in-store scenario, and it is the base for the offline extension.
+
+   > ✖️ **Rejected:** with changes blocked offline (NET-1), a cached shell gains little, and a service worker risks an outdated SPA after a redeploy; offline use stays a roadmap question ([OP-040](../open-points.md#feature-phases)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+
 3. **Undo for mis-taps on a phone.** "Remove item" and "Uncheck all" are easy to trigger by accident in a store. An undo message costs little.
 4. **Test migrations against existing data.** Every environment starts empty, so a migration that breaks on existing rows is never exercised. That is a learning gap for a project that wants to learn migrations. Add a test that migrates from the previous schema with fixture data.
 5. **Test the seed data.** Check that it satisfies the quotas, the depth limit and uniqueness, and see how much of the 300-category quota it uses.
