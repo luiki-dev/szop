@@ -190,7 +190,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Goal:** CI reaches AWS without stored keys. PRs touching `infra/` get a `terraform plan` comment, and `demo-down` destroys the demo by hand and every night, before any demo can exist.
 - **Delivers:** in `infra/base`, the GitHub OpenID Connect (OIDC) provider and the `szop-ci-plan` and `szop-ci-deploy` roles, checked by IAM Access Analyzer ([ADR 0010](decisions/0010-ci-cd.md), decisions 15 and 16; [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 17); `infra-plan.yml`; the real `demo-down.yml` in the `demo-teardown` environment; `infra/demo` with only its backend and provider; a placeholder `demo-up.yml` ([ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 2).
 - **Depends on:** nothing beyond the order, but no demo runs, and no local apply of `infra/demo` happens, before it is merged ([ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 2).
-- **Owner steps:** create the `demo-teardown` environment (no reviewer, `main` only); apply `infra/base` from the branch, and again from `main` after the merge; after the merge, run `demo-down` once and see it succeed.
+- **Owner steps:** create the `demo-teardown` environment (no reviewer, `main` only); apply `infra/base` from the branch, and again from `main` after the merge; store the plan and deploy roles' ARNs as GitHub variables; after the merge, run `demo-down` once and see it succeed.
 - **Expected path:** full.
 - **Open points:** [PH-11](open-points.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net).
 
@@ -208,7 +208,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Goal:** merging release-please's PR tags a version, publishes a GitHub Release and pushes the versioned image. The walking skeleton is released as `v0.1.0`.
 - **Delivers:** `release-please.yml` and its configuration ([ADR 0009](decisions/0009-git-workflow.md); [ADR 0010](decisions/0010-ci-cd.md), decision 17); the `szop-ci-release` role; the versioned image.
 - **Depends on:** the trial of release-please with merge commits in a throwaway repository, before the brainstorm.
-- **Owner steps:** run that trial; create the `szop-release` GitHub App, install it on the repository and put it on the `version-tags` ruleset's bypass list; create the `release` environment; merge the first release PR.
+- **Owner steps:** run that trial; create the `release` environment; create the `szop-release` GitHub App, install it on the repository, store its private key in the `release` environment and put the App on the `version-tags` ruleset's bypass list; store the release role's ARN as a GitHub variable; merge the first release PR.
 - **Expected path:** full.
 - **Open points:** [PH-13](open-points.md#ph-13-releases).
 
