@@ -111,7 +111,7 @@ Dark mode **follows the system setting** (`prefers-color-scheme`) through Tailwi
 
 - **Changes are optimistic**: checking, adding and editing show at once, with no spinner; a failure rolls the change back and says so ([architecture](architecture.md#optimistic-updates)).
 - **Messages are toasts** (Base UI Toast) that say what happened and what to do. Never a generic "Something went wrong"; limits explain themselves ([LIM-3](../requirements/functional-requirements.md#lim-3), [LIM-4](../requirements/functional-requirements.md#lim-4)).
-- **Undo rather than "Are you sure?"** for reversible actions; a confirmation dialog only for what cannot be undone, such as deleting an account. Which actions get undo is decided by their phases ([OP-051](../open-points.md#feature-phases)).
+- **Undo rather than "Are you sure?"** for reversible actions; a confirmation dialog only for what cannot be undone, such as deleting an account. Which actions get undo is decided by their phases ([OP-051](../open-points.md#op-051)).
 - **Loading:** skeleton placeholders shaped like the content on a page's first load, never a full-screen spinner.
 - **Empty states:** every empty page says what it is for and offers the next action ("No lists yet" with "New list"). An illustration is optional.
 - **Offline ([NET-1](../requirements/functional-requirements.md#net-1)):** an amber `warning` banner stays at the top while offline; controls that change data are disabled with a visible reason.

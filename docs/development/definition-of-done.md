@@ -38,7 +38,7 @@ An item that doesn't apply is marked **"➖ N/A: *reason*"**, never a bare N/A, 
 ## Which PRs need which items
 
 - **A phase PR** meets every item, or marks it N/A with a reason.
-- **Any other PR** (a foundation ADR, a documentation fix, a Dependabot update, the release PR) meets items 1, 3 and 10, and items 6–9 and 11 when it changes what they cover. **The demo check (item 4) is the owner's call**: requiring it would mean a 10–15 minute spin-up for each of the week's Dependabot PRs. Those are covered by CI instead (see [OP-032](../open-points.md#cicd-phase)).
+- **Any other PR** (a foundation ADR, a documentation fix, a Dependabot update, the release PR) meets items 1, 3 and 10, and items 6–9 and 11 when it changes what they cover. **The demo check (item 4) is the owner's call**: requiring it would mean a 10–15 minute spin-up for each of the week's Dependabot PRs. Those are covered by CI instead (see [OP-032](../open-points.md#op-032)).
 
 ## When the demo check must be repeated
 
