@@ -33,10 +33,11 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 
 ## Documentation
 
-- `docs/requirements/functional-requirements.md` — the living source of truth for functional requirements (FR IDs, use cases, MVP/Later slicing, future extensions). Keep it updated when behavior changes.
+- `docs/requirements/functional-requirements.md` — the living source of truth for functional requirements (FR IDs, use cases, MVP/Later slicing, future extensions) and the non-functional requirements (NFR IDs: browsers, accessibility, performance). Keep it updated when behavior changes.
 - `docs/architecture/architecture.md` — the living technical architecture (components, layering, data model highlights, frontend state, later features). Keep it updated when the design changes.
 - `docs/architecture/stack-overview.md` — a learning-oriented explanation of the stack and its concepts. Extend it when a new technology or concept enters the project.
 - `docs/architecture/threat-model.md` — what Szop protects, who can act through which path, and what guards each entry point. Keep it updated when an actor or entry point is added.
+- `docs/architecture/visual-design.md` — the living design system: the look, design tokens, typography, brand, and the layout and interaction principles every screen follows, with the approved mockups in `docs/architecture/visual-design/`. Keep it updated when the design system changes.
 - `docs/glossary.md` — acronyms and terms used in the docs.
 - `docs/open-points.md` — the register of everything still undecided or undone, and where it will be settled. Keep it updated whenever something is deferred or settled.
 - `docs/development/git-workflow.md` — the day-to-day git workflow: branches, commits, PRs, review, merging and releases.
