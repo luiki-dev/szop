@@ -1,6 +1,6 @@
 # ADR 0011 — Follow-ups to the 2026-09-29 design sanity check
 
-- **Status:** Accepted
+- **Status:** ✅ Accepted
 - **Date:** 2026-09-30
 - **Extends:** decisions 2 and 3 of [ADR 0004](0004-implementation-process.md) (a security baseline foundation topic, decision 6); decision 7 of ADR 0004 (the definition of done, now kept in one page)
 - **Replaces:** the document roles table of [ADR 0004](0004-implementation-process.md), decision 9 (decision 4)
@@ -48,75 +48,75 @@ Decision 4 replaces the table of ADR 0004, decision 9. Each fact still has one h
 
 ## Triage of the findings
 
-Outcomes: **fixed** (resolved in this ADR or a doc change), **deferred** (an open point, with where it will be settled), **rejected** (with the reason), or **pending** (not triaged yet).
+Outcomes: ✅ **fixed** (resolved in this ADR or a doc change), ⏳ **deferred** (an open point, with where it will be settled), ✖️ **rejected** (with the reason), or ❔ **pending** (not triaged yet).
 
 ### Critical and major
 
 | Finding | Summary | Outcome |
 |---|---|---|
-| CRITICAL-1 | Referenced IDs not checked against the workspace | Deferred to the security baseline topic (decision 6): [OP-034](../open-points.md#security-baseline-topic) |
-| CRITICAL-2 | Demo workflows can't run before they are merged | Fixed: decision 2; the phase order is [OP-004](../open-points.md#before-the-roadmap) |
-| MAJOR-1 | Persistent public service versus disposable demo | Fixed: decision 5 (the README's privacy sentence, an assumption in the requirements). Deferred: what an always-on deployment would need ([OP-033](../open-points.md#unassigned)). Rejected: a "demo data is wiped" banner |
-| MAJOR-2 | Guest-to-account linking versus Better Auth's anonymous plugin | Deferred to the phase delivering ACC-2 and ACC-4, after a Better Auth spike: [OP-038](../open-points.md#feature-phases); `architecture.md` warns about it |
-| MAJOR-3 | Guest data lifetime versus sessions and real use | Deferred: the session lifetime to the phase delivering ACC-1, the retention rule to the phase delivering ACC-7: [OP-039](../open-points.md#feature-phases) |
-| MAJOR-4 | Per-IP rate limits depend on an unmentioned client-IP setting | Deferred to the security baseline topic (decision 6): [OP-035](../open-points.md#security-baseline-topic) |
-| MAJOR-5 | No web security baseline | Deferred to the security baseline topic (decision 6): [OP-036](../open-points.md#security-baseline-topic) |
-| MAJOR-6 | Flaky connectivity underspecified; a library default contradicts NET-1 | Deferred to the phases that build the first changes from the SPA and NET-1, client-generated IDs to the first data phase, and moving offline check-off to Later to the roadmap brainstorm: [OP-040](../open-points.md#feature-phases) |
-| MAJOR-7 | Open domain and data-model rules that shape the schema | Deferred: shared schema conventions to the first data phase, area rules to the phases building them: [OP-041](../open-points.md#feature-phases) |
-| MAJOR-8 | MVP access-control shape rewritten by sharing | Deferred to the security baseline topic, together with OP-034: [OP-042](../open-points.md#security-baseline-topic) |
-| MAJOR-9 | Redeploys overlap two tasks and can skip migrations | Deferred to the phase that builds the ECS service and migrations: [OP-043](../open-points.md#walking-skeleton); locking for several instances joins [OP-033](../open-points.md#unassigned) |
-| MAJOR-10 | release-please with merge commits | Deferred to a trial in a throwaway repository before the phase that sets up release-please: [OP-025](../open-points.md#cicd-phase) |
-| MAJOR-11 | The `demo` environment is not a security boundary | Deferred to the security baseline topic (decision 6): [OP-037](../open-points.md#security-baseline-topic) |
-| MAJOR-12 | Nightly destroy runs `main`'s Terraform; runs don't simply queue | Fixed: decision 7; the mechanism details join [OP-019](../open-points.md#cicd-phase) |
-| MAJOR-13 | Roadmap, phases and definition of done not ready | Fixed in part: decisions 3 and 4 (one definition of done, document roles). Deferred: splitting the skeleton and the CI/CD work into phases ([OP-031](../open-points.md#before-the-roadmap)), a CI job proving the image starts ([OP-032](../open-points.md#cicd-phase)). Already covered: the owner's steps (OP-003) and the list of phase obligations (the register, decision 1) |
+| CRITICAL-1 | Referenced IDs not checked against the workspace | ⏳ Deferred to the security baseline topic (decision 6): [OP-034](../open-points.md#security-baseline-topic) |
+| CRITICAL-2 | Demo workflows can't run before they are merged | ✅ Fixed: decision 2; the phase order is [OP-004](../open-points.md#before-the-roadmap) |
+| MAJOR-1 | Persistent public service versus disposable demo | ✅ Fixed: decision 5 (the README's privacy sentence, an assumption in the requirements). ⏳ Deferred: what an always-on deployment would need ([OP-033](../open-points.md#unassigned)). ✖️ Rejected: a "demo data is wiped" banner |
+| MAJOR-2 | Guest-to-account linking versus Better Auth's anonymous plugin | ⏳ Deferred to the phase delivering ACC-2 and ACC-4, after a Better Auth spike: [OP-038](../open-points.md#feature-phases); `architecture.md` warns about it |
+| MAJOR-3 | Guest data lifetime versus sessions and real use | ⏳ Deferred: the session lifetime to the phase delivering ACC-1, the retention rule to the phase delivering ACC-7: [OP-039](../open-points.md#feature-phases) |
+| MAJOR-4 | Per-IP rate limits depend on an unmentioned client-IP setting | ⏳ Deferred to the security baseline topic (decision 6): [OP-035](../open-points.md#security-baseline-topic) |
+| MAJOR-5 | No web security baseline | ⏳ Deferred to the security baseline topic (decision 6): [OP-036](../open-points.md#security-baseline-topic) |
+| MAJOR-6 | Flaky connectivity underspecified; a library default contradicts NET-1 | ⏳ Deferred to the phases that build the first changes from the SPA and NET-1, client-generated IDs to the first data phase, and moving offline check-off to Later to the roadmap brainstorm: [OP-040](../open-points.md#feature-phases) |
+| MAJOR-7 | Open domain and data-model rules that shape the schema | ⏳ Deferred: shared schema conventions to the first data phase, area rules to the phases building them: [OP-041](../open-points.md#feature-phases) |
+| MAJOR-8 | MVP access-control shape rewritten by sharing | ⏳ Deferred to the security baseline topic, together with OP-034: [OP-042](../open-points.md#security-baseline-topic) |
+| MAJOR-9 | Redeploys overlap two tasks and can skip migrations | ⏳ Deferred to the phase that builds the ECS service and migrations: [OP-043](../open-points.md#walking-skeleton); locking for several instances joins [OP-033](../open-points.md#unassigned) |
+| MAJOR-10 | release-please with merge commits | ⏳ Deferred to a trial in a throwaway repository before the phase that sets up release-please: [OP-025](../open-points.md#cicd-phase) |
+| MAJOR-11 | The `demo` environment is not a security boundary | ⏳ Deferred to the security baseline topic (decision 6): [OP-037](../open-points.md#security-baseline-topic) |
+| MAJOR-12 | Nightly destroy runs `main`'s Terraform; runs don't simply queue | ✅ Fixed: decision 7; the mechanism details join [OP-019](../open-points.md#cicd-phase) |
+| MAJOR-13 | Roadmap, phases and definition of done not ready | ✅ Fixed in part: decisions 3 and 4 (one definition of done, document roles). ⏳ Deferred: splitting the skeleton and the CI/CD work into phases ([OP-031](../open-points.md#before-the-roadmap)), a CI job proving the image starts ([OP-032](../open-points.md#cicd-phase)). Already covered: the owner's steps (OP-003) and the list of phase obligations (the register, decision 1) |
 
 ### Minor
 
 | Finding | Summary | Outcome |
 |---|---|---|
-| m1 | Tag ruleset allows permanent mistakes | Fixed: decision 8 (creations restricted, only the release App bypasses); adding the App to the bypass list joins the owner's steps ([OP-003](../open-points.md#before-the-roadmap)) |
-| m2 | Email authentication covers DKIM only | Deferred: DMARC and SPF to the phase that sets up SES in `infra/base`, a failed send to the phase delivering ACC-2: [OP-044](../open-points.md#walking-skeleton) |
-| m3 | "Secrets never enter Terraform state" has no fallback or check | Deferred to the phase that writes the Terraform code, as a hard rule with a fallback, a check and rotation: [OP-016](../open-points.md#walking-skeleton), linked to OP-037 |
-| m4 | Real-time updates need more design | Deferred to the SYN brainstorm, and the atomic quantity increase to the phase delivering ITM-4: [OP-045](../open-points.md#feature-phases) |
-| m5 | No `.gitignore` | Fixed: a `.gitignore` for Terraform state and Claude Code's local settings, which only the owner's global ignore file covered; the development environment phase adds its tools' entries ([OP-005](../open-points.md#development-environment-phase)) |
-| m6 | `infra/base` applied from a branch can drift from `main` | Fixed: decision 9 (base applied again from `main` after the PR is merged or closed; item 5 of the definition of done) |
-| m7 | Dependabot security updates are off | Fixed: `github-settings.md` lists the setting ADR 0010, decision 18 relies on, and the owner turns it on |
-| m8 | Undocumented ruleset parameter | Fixed: `github-settings.md` documents it, left on. GitHub's documentation shows it applies only to PRs Copilot opens under its own identity, not to commits from unlinked emails as the audit supposed |
-| m9 | commitlint versus Dependabot commits | Deferred: the two line-length rules turned off for everyone and `type-enum` limited to the nine types, when commitlint is set up ([OP-009](../open-points.md#development-environment-phase)); the `commits` job tried on a real Dependabot commit before `ci-ok` is required ([OP-019](../open-points.md#cicd-phase)) |
-| m10 | `ci-ok` can pass when nothing ran | Deferred to the CI/CD phase as a detail of `ci-ok`: [OP-019](../open-points.md#cicd-phase) |
-| m11 | ECR lifecycle policy would expire released images | Deferred to the phase that creates the ECR repository: [OP-013](../open-points.md#walking-skeleton) |
-| m12 | `infra-plan` on Dependabot PRs | Deferred to the CI/CD phase, to check and then skip or document: [OP-019](../open-points.md#cicd-phase) |
-| m13 | Dependabot major-version PRs versus pinned versions | Deferred to the CI/CD phase: `dependabot.yml` ignores majors of Node, `@types/node` and PostgreSQL ([OP-019](../open-points.md#cicd-phase)) |
-| m14 | E2E suite exceeds the default rate limits | Deferred to the phase delivering LIM-4: [OP-046](../open-points.md#feature-phases) |
-| m15 | CLAUDE.md guardrails ambiguous or incomplete | Fixed in `CLAUDE.md`: the PR title sentence, the rule that Claude never triggers `demo-up` or `demo-down` (closing [OP-024](../open-points.md#closed)), no worktrees or local merges from superpowers skills, specs and plans only on the full path, and the stale README reference |
-| m16 | Units have no place in the frontend | Fixed: `architecture.md` has a `units` feature folder and a `/units` route; the UNT phase may move the page |
-| m17 | Bulk operations against quotas undefined | Fixed in part: `architecture.md` states that concurrent requests may exceed a quota by a few rows, deliberately. Deferred: bulk actions, ITM-4 with different units and what an archived list allows, to the phases delivering them ([OP-047](../open-points.md#feature-phases)) |
-| m18 | Lazy creation: seed IDs versus workspace IDs | Deferred to the phase delivering ACC-1, including the first change's own seed IDs and session creation across tabs: [OP-048](../open-points.md#feature-phases) |
-| m19 | Sharing semantics that affect its tables | Deferred to the SHR brainstorm: [OP-049](../open-points.md#feature-phases) |
-| m20 | No non-functional requirements | Deferred: browser support, the accessibility target and a performance budget to the visual design topic ([OP-001](../open-points.md#before-the-roadmap)); decimal-comma input with money and quantity ([OP-041](../open-points.md#feature-phases)); a guest deleting their own data to the phase delivering ACC-7 ([OP-039](../open-points.md#feature-phases)) |
-| m21 | README drift | Fixed: the README matches LIM-1's depth limit, SHR-4's editor role and the future extensions |
-| m22 | Stale structure and facts | Fixed in `architecture.md`, the stack overview and the glossary: the repository layout with `e2e/` and `infra/`, the task role's ECS Exec, which secret lives where, port 80 on the load balancer, `last_active_at` on the workspace. Already covered: the stack overview's CI/CD section ([OP-023](../open-points.md#cicd-phase)) |
-| m23 | ADR cross-references | Fixed: the status lines of ADR 0005 (completed by ADRs 0007, 0009 and 0010) and ADR 0001 (the superseded browser storage); the roadmap maps every phase name the ADRs use ([OP-031](../open-points.md#before-the-roadmap)). Already covered: when the PostgreSQL major version is chosen, in the development environment phase ([OP-006](../open-points.md#development-environment-phase)) |
-| m24 | Editorial nits | Fixed in the living docs: acronyms spelled out in `architecture.md`, seven acronyms added to the glossary and both its tables sorted, "ADR 0009's merge" in `git-workflow.md`, the citation in `github-settings.md`, the glossary's `ci-ok` wording, `example.com` instead of `szop.app`, and the scope rule clarified (listed scopes are examples; a phase PR title may name its feature area) with a subject that is no future extension. Rejected: editorial changes to accepted ADRs (acronyms in ADRs 0001 and 0010, € and $ in ADR 0008), which the glossary covers and which change no decision |
+| m1 | Tag ruleset allows permanent mistakes | ✅ Fixed: decision 8 (creations restricted, only the release App bypasses); adding the App to the bypass list joins the owner's steps ([OP-003](../open-points.md#before-the-roadmap)) |
+| m2 | Email authentication covers DKIM only | ⏳ Deferred: DMARC and SPF to the phase that sets up SES in `infra/base`, a failed send to the phase delivering ACC-2: [OP-044](../open-points.md#walking-skeleton) |
+| m3 | "Secrets never enter Terraform state" has no fallback or check | ⏳ Deferred to the phase that writes the Terraform code, as a hard rule with a fallback, a check and rotation: [OP-016](../open-points.md#walking-skeleton), linked to OP-037 |
+| m4 | Real-time updates need more design | ⏳ Deferred to the SYN brainstorm, and the atomic quantity increase to the phase delivering ITM-4: [OP-045](../open-points.md#feature-phases) |
+| m5 | No `.gitignore` | ✅ Fixed: a `.gitignore` for Terraform state and Claude Code's local settings, which only the owner's global ignore file covered; the development environment phase adds its tools' entries ([OP-005](../open-points.md#development-environment-phase)) |
+| m6 | `infra/base` applied from a branch can drift from `main` | ✅ Fixed: decision 9 (base applied again from `main` after the PR is merged or closed; item 5 of the definition of done) |
+| m7 | Dependabot security updates are off | ✅ Fixed: `github-settings.md` lists the setting ADR 0010, decision 18 relies on, and the owner turns it on |
+| m8 | Undocumented ruleset parameter | ✅ Fixed: `github-settings.md` documents it, left on. GitHub's documentation shows it applies only to PRs Copilot opens under its own identity, not to commits from unlinked emails as the audit supposed |
+| m9 | commitlint versus Dependabot commits | ⏳ Deferred: the two line-length rules turned off for everyone and `type-enum` limited to the nine types, when commitlint is set up ([OP-009](../open-points.md#development-environment-phase)); the `commits` job tried on a real Dependabot commit before `ci-ok` is required ([OP-019](../open-points.md#cicd-phase)) |
+| m10 | `ci-ok` can pass when nothing ran | ⏳ Deferred to the CI/CD phase as a detail of `ci-ok`: [OP-019](../open-points.md#cicd-phase) |
+| m11 | ECR lifecycle policy would expire released images | ⏳ Deferred to the phase that creates the ECR repository: [OP-013](../open-points.md#walking-skeleton) |
+| m12 | `infra-plan` on Dependabot PRs | ⏳ Deferred to the CI/CD phase, to check and then skip or document: [OP-019](../open-points.md#cicd-phase) |
+| m13 | Dependabot major-version PRs versus pinned versions | ⏳ Deferred to the CI/CD phase: `dependabot.yml` ignores majors of Node, `@types/node` and PostgreSQL ([OP-019](../open-points.md#cicd-phase)) |
+| m14 | E2E suite exceeds the default rate limits | ⏳ Deferred to the phase delivering LIM-4: [OP-046](../open-points.md#feature-phases) |
+| m15 | CLAUDE.md guardrails ambiguous or incomplete | ✅ Fixed in `CLAUDE.md`: the PR title sentence, the rule that Claude never triggers `demo-up` or `demo-down` (closing [OP-024](../open-points.md#closed)), no worktrees or local merges from superpowers skills, specs and plans only on the full path, and the stale README reference |
+| m16 | Units have no place in the frontend | ✅ Fixed: `architecture.md` has a `units` feature folder and a `/units` route; the UNT phase may move the page |
+| m17 | Bulk operations against quotas undefined | ✅ Fixed in part: `architecture.md` states that concurrent requests may exceed a quota by a few rows, deliberately. ⏳ Deferred: bulk actions, ITM-4 with different units and what an archived list allows, to the phases delivering them ([OP-047](../open-points.md#feature-phases)) |
+| m18 | Lazy creation: seed IDs versus workspace IDs | ⏳ Deferred to the phase delivering ACC-1, including the first change's own seed IDs and session creation across tabs: [OP-048](../open-points.md#feature-phases) |
+| m19 | Sharing semantics that affect its tables | ⏳ Deferred to the SHR brainstorm: [OP-049](../open-points.md#feature-phases) |
+| m20 | No non-functional requirements | ⏳ Deferred: browser support, the accessibility target and a performance budget to the visual design topic ([OP-001](../open-points.md#before-the-roadmap)); decimal-comma input with money and quantity ([OP-041](../open-points.md#feature-phases)); a guest deleting their own data to the phase delivering ACC-7 ([OP-039](../open-points.md#feature-phases)) |
+| m21 | README drift | ✅ Fixed: the README matches LIM-1's depth limit, SHR-4's editor role and the future extensions |
+| m22 | Stale structure and facts | ✅ Fixed in `architecture.md`, the stack overview and the glossary: the repository layout with `e2e/` and `infra/`, the task role's ECS Exec, which secret lives where, port 80 on the load balancer, `last_active_at` on the workspace. Already covered: the stack overview's CI/CD section ([OP-023](../open-points.md#cicd-phase)) |
+| m23 | ADR cross-references | ✅ Fixed: the status lines of ADR 0005 (completed by ADRs 0007, 0009 and 0010) and ADR 0001 (the superseded browser storage); the roadmap maps every phase name the ADRs use ([OP-031](../open-points.md#before-the-roadmap)). Already covered: when the PostgreSQL major version is chosen, in the development environment phase ([OP-006](../open-points.md#development-environment-phase)) |
+| m24 | Editorial nits | ✅ Fixed in the living docs: acronyms spelled out in `architecture.md`, seven acronyms added to the glossary and both its tables sorted, "ADR 0009's merge" in `git-workflow.md`, the citation in `github-settings.md`, the glossary's `ci-ok` wording, `example.com` instead of `szop.app`, and the scope rule clarified (listed scopes are examples; a phase PR title may name its feature area) with a subject that is no future extension. ✖️ Rejected: editorial changes to accepted ADRs (acronyms in ADRs 0001 and 0010, € and $ in ADR 0008), which the glossary covers and which change no decision |
 
 ### Consider improving
 
 | Finding | Summary | Outcome |
 |---|---|---|
-| C1 | A threat model page | Deferred to the security baseline topic, as its starting point: [OP-050](../open-points.md#security-baseline-topic) |
-| C2 | A progressive web app with an app-shell cache | Rejected: NET-1 blocks changes offline, so a cached shell alone gains little in the store, and a service worker adds the risk of an outdated SPA talking to a newer API after a redeploy. Whether offline check-off moves to Later stays a roadmap question ([OP-040](../open-points.md#feature-phases)) |
-| C3 | Undo for mis-taps | Deferred to the phases delivering item removal and "Uncheck all": [OP-051](../open-points.md#feature-phases) |
-| C4 | Test migrations against existing data | Deferred to the first phase whose migration changes an existing table: [OP-052](../open-points.md#feature-phases) |
-| C5 | Test the seed data | Deferred to the first data phase, where the seed data is written: [OP-052](../open-points.md#feature-phases) |
-| C6 | Container and database hardening | Deferred to the walking-skeleton work building each piece: the non-root user with the Dockerfile ([OP-015](../open-points.md#walking-skeleton)), TLS to RDS with the connection string ([OP-017](../open-points.md#walking-skeleton)), the state bucket's protections with bootstrap ([OP-013](../open-points.md#walking-skeleton)) |
-| C7 | Password policy | Deferred to the security baseline topic: [OP-036](../open-points.md#security-baseline-topic) |
-| C8 | No lifecycle scripts in CI jobs holding AWS credentials | Deferred to the security baseline topic: [OP-037](../open-points.md#security-baseline-topic) |
-| C9 | Order the CodeQL rule last | Deferred to the CI/CD phase's settings: [OP-022](../open-points.md#cicd-phase) |
-| C10 | The release image is never demo-checked | Deferred to the CI/CD phase: [OP-019](../open-points.md#cicd-phase), with the risk stated in `ci-cd.md` |
-| C11 | Per-IP limits and shared addresses | Rejected: crowds sharing one address matter only with real public traffic, which the on-demand demo never has |
-| C12 | Node.js 26 LTS | Rejected: ADR 0005 chose Node 24, which is supported until April 2028, so Node 26 becoming LTS needs no separate decision |
-| C13 | API versioning for the future Android app | Rejected: the Android app is only a future idea and the SPA ships together with the API; with one client, versioning is decided when a second client is planned |
-| C14 | Unverified factual claims in the ADRs | Fixed: all three verified on 2026-09-30: App Runner closed to new customers on 30 April 2026 ([AWS](https://docs.aws.amazon.com/apprunner/latest/relnotes/welcome.html)); Dependabot's default cooldown is 3 days, since 14 July 2026 ([GitHub changelog](https://github.blog/changelog/2026-07-14-dependabot-version-updates-introduce-default-package-cooldown/)); SHA-pinning enforcement arrived on 15 August 2025 ([GitHub changelog](https://github.blog/changelog/2025-08-15-github-actions-policy-now-supports-blocking-and-sha-pinning-actions/)). The ADRs stay as written |
+| C1 | A threat model page | ⏳ Deferred to the security baseline topic, as its starting point: [OP-050](../open-points.md#security-baseline-topic) |
+| C2 | A progressive web app with an app-shell cache | ✖️ Rejected: NET-1 blocks changes offline, so a cached shell alone gains little in the store, and a service worker adds the risk of an outdated SPA talking to a newer API after a redeploy. Whether offline check-off moves to Later stays a roadmap question ([OP-040](../open-points.md#feature-phases)) |
+| C3 | Undo for mis-taps | ⏳ Deferred to the phases delivering item removal and "Uncheck all": [OP-051](../open-points.md#feature-phases) |
+| C4 | Test migrations against existing data | ⏳ Deferred to the first phase whose migration changes an existing table: [OP-052](../open-points.md#feature-phases) |
+| C5 | Test the seed data | ⏳ Deferred to the first data phase, where the seed data is written: [OP-052](../open-points.md#feature-phases) |
+| C6 | Container and database hardening | ⏳ Deferred to the walking-skeleton work building each piece: the non-root user with the Dockerfile ([OP-015](../open-points.md#walking-skeleton)), TLS to RDS with the connection string ([OP-017](../open-points.md#walking-skeleton)), the state bucket's protections with bootstrap ([OP-013](../open-points.md#walking-skeleton)) |
+| C7 | Password policy | ⏳ Deferred to the security baseline topic: [OP-036](../open-points.md#security-baseline-topic) |
+| C8 | No lifecycle scripts in CI jobs holding AWS credentials | ⏳ Deferred to the security baseline topic: [OP-037](../open-points.md#security-baseline-topic) |
+| C9 | Order the CodeQL rule last | ⏳ Deferred to the CI/CD phase's settings: [OP-022](../open-points.md#cicd-phase) |
+| C10 | The release image is never demo-checked | ⏳ Deferred to the CI/CD phase: [OP-019](../open-points.md#cicd-phase), with the risk stated in `ci-cd.md` |
+| C11 | Per-IP limits and shared addresses | ✖️ Rejected: crowds sharing one address matter only with real public traffic, which the on-demand demo never has |
+| C12 | Node.js 26 LTS | ✖️ Rejected: ADR 0005 chose Node 24, which is supported until April 2028, so Node 26 becoming LTS needs no separate decision |
+| C13 | API versioning for the future Android app | ✖️ Rejected: the Android app is only a future idea and the SPA ships together with the API; with one client, versioning is decided when a second client is planned |
+| C14 | Unverified factual claims in the ADRs | ✅ Fixed: all three verified on 2026-09-30: App Runner closed to new customers on 30 April 2026 ([AWS](https://docs.aws.amazon.com/apprunner/latest/relnotes/welcome.html)); Dependabot's default cooldown is 3 days, since 14 July 2026 ([GitHub changelog](https://github.blog/changelog/2026-07-14-dependabot-version-updates-introduce-default-package-cooldown/)); SHA-pinning enforcement arrived on 15 August 2025 ([GitHub changelog](https://github.blog/changelog/2025-08-15-github-actions-policy-now-supports-blocking-and-sha-pinning-actions/)). The ADRs stay as written |
 
 ## Consequences
 
