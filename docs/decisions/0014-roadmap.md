@@ -56,7 +56,7 @@ ADRs written before the roadmap name phases by what they do. They map to the roa
 ## Consequences
 
 - **[`docs/roadmap.md`](../roadmap.md) exists** with the 33 phases and the candidates. `CLAUDE.md` and the README's documentation list point to it.
-- **The open points register is regrouped by stage and phase.** An entry that spans several phases sits under the first one and says which part belongs to which phase; the other phases point to it, and each phase moves it on once its part is done. **Every entry gets its own anchor** (`open-points.md#op-041`), so links survive when an entry moves; the links in the ADRs, the audit's resolution markers and the guides now use them. **OP-002, OP-003, OP-004, OP-031 and OP-061 are closed**, and OP-040's roadmap question is answered.
+- **The open points register is regrouped by stage and phase.** An entry that spans several phases sits under the first one and says which part belongs to which phase; the other phases point to it, and each phase moves it on once its part is done. **Every entry becomes a heading of its own** (`open-points.md#op-041`), so links survive when an entry moves; the links in the ADRs, the audit's resolution markers and the guides now use them. **OP-002, OP-003, OP-004, OP-031 and OP-061 are closed**, and OP-040's roadmap question is answered.
 - **The functional requirements and the README** list an installable app among the future extensions.
 - **The status lines** of ADR 0004, ADR 0005, ADR 0007, ADR 0008, ADR 0010 and ADR 0013 note this ADR.
 - **The guides** (`git-workflow.md`, `phase-walkthrough.md`, `github-settings.md`) name the roadmap's phases instead of "the development environment phase" and "the CI/CD phase".
