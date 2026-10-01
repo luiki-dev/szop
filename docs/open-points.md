@@ -51,9 +51,9 @@ Everything that is still undecided or not yet done and has been left to a later 
 - **One entry per open point**, with a stable ID (`OP-001`, `OP-002`, …) that ADRs, specs, plans, PRs and commits can refer to. IDs are never reused. **Every entry is a heading of its own** (`#### OP-041`), so a link to it (`open-points.md#op-041`) keeps working when the entry moves to another group, on GitHub and in an editor's preview alike.
 - **Each entry says** what is open, where it came from (a link to the ADR decision, guide or audit finding) and its status: ⬜ **open**, or 🚧 **in progress** with a link to the branch or PR working on it.
 - **Entries are grouped by the [roadmap](roadmap.md)'s stages and phases**, under the phase that will settle them. Points for optional work sit under [Candidates](#candidates).
-- **An entry that spans several phases** sits under the first of them, and its **Parts** say which part each phase takes. The other phases list it under **Also**. When a phase has done its part, it marks that part ✅ with its PR and moves the entry to the next phase's group.
+- **An entry that spans several phases** sits under the first of them, and its **Parts** say which part each phase takes. The other phases list it on their "Also" line. When a phase has done its part, it marks that part ✅ with its PR and moves the entry to the next phase's group.
 - **Adding:** whenever a topic, phase or review defers something, it adds an entry here with the next free ID, under the phase that will settle it, in addition to mentioning it where it came up.
-- **Using:** each phase brainstorm starts from its group, including the entries listed under **Also**. Before its PR is merged, the phase closes its entries or its parts of them, or moves them to another group with a note why (the [definition of done](development/definition-of-done.md), item 9).
+- **Using:** each phase brainstorm starts from its group, including the entries on its "Also" line. Before its PR is merged, the phase closes its entries or its parts of them, or moves them to another group with a note why (the [definition of done](development/definition-of-done.md), item 9).
 - **Closing:** a settled entry moves to [Closed](#closed) with a link to what settled it (an ADR, a commit, a PR). Its status becomes ✅ **closed**, or ✖️ **dropped** when it was dropped without being done, saying why. Closed and dropped entries stay as a record.
 
 ## Stage 1: Local foundations
@@ -138,8 +138,7 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
 ### PH-04 Database
 
 Roadmap entry: [PH-04](roadmap.md#ph-04-database).
-
-**Also:** [OP-005](#op-005), [OP-012](#op-012), [OP-013](#op-013).
+Also: [OP-005](#op-005), [OP-012](#op-012), [OP-013](#op-013).
 
 #### OP-006
 
@@ -158,14 +157,12 @@ Roadmap entry: [PH-04](roadmap.md#ph-04-database).
 ### PH-05 SPA skeleton
 
 Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).
-
-**Also:** [OP-010](#op-010), [OP-012](#op-012).
+Also: [OP-010](#op-010), [OP-012](#op-012).
 
 ### PH-06 Production build and web baseline
 
 Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
-
-**Also:** [OP-013](#op-013).
+Also: [OP-013](#op-013).
 
 #### OP-007
 
@@ -198,8 +195,7 @@ Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 ### PH-07 First E2E journey
 
 Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
-
-**Also:** [OP-010](#op-010), [OP-012](#op-012).
+Also: [OP-010](#op-010), [OP-012](#op-012).
 
 #### OP-057
 
@@ -211,8 +207,7 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 ### PH-08 Container image
 
 Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
-
-**Also:** [OP-013](#op-013).
+Also: [OP-013](#op-013).
 
 #### OP-015
 
@@ -240,8 +235,7 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 ### PH-09 AWS account and Terraform bootstrap
 
 Roadmap entry: [PH-09](roadmap.md#ph-09-aws-account-and-terraform-bootstrap).
-
-**Also:** [OP-013](#op-013), [OP-023](#op-023).
+Also: [OP-013](#op-013), [OP-023](#op-023).
 
 #### OP-018
 
@@ -253,8 +247,7 @@ Roadmap entry: [PH-09](roadmap.md#ph-09-aws-account-and-terraform-bootstrap).
 ### PH-10 Domain and base infrastructure
 
 Roadmap entry: [PH-10](roadmap.md#ph-10-domain-and-base-infrastructure).
-
-**Also:** [OP-013](#op-013).
+Also: [OP-013](#op-013).
 
 #### OP-016
 
@@ -273,8 +266,7 @@ Roadmap entry: [PH-10](roadmap.md#ph-10-domain-and-base-infrastructure).
 ### PH-11 CI access to AWS and the teardown safety net
 
 Roadmap entry: [PH-11](roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net).
-
-**Also:** [OP-018](#op-018), [OP-019](#op-019), [OP-023](#op-023).
+Also: [OP-018](#op-018), [OP-019](#op-019), [OP-023](#op-023).
 
 #### OP-020
 
@@ -286,8 +278,7 @@ Roadmap entry: [PH-11](roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety
 ### PH-12 First deploy
 
 Roadmap entry: [PH-12](roadmap.md#ph-12-first-deploy).
-
-**Also:** [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018), [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023), [OP-053](#op-053).
+Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018), [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023), [OP-053](#op-053).
 
 #### OP-014
 
@@ -313,8 +304,7 @@ Roadmap entry: [PH-12](roadmap.md#ph-12-first-deploy).
 ### PH-13 Releases
 
 Roadmap entry: [PH-13](roadmap.md#ph-13-releases).
-
-**Also:** [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023).
+Also: [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023).
 
 #### OP-025
 
@@ -353,8 +343,7 @@ Roadmap entry: [PH-14](roadmap.md#ph-14-app-shell-and-design-system).
 ### PH-15 Seed catalog, read-only
 
 Roadmap entry: [PH-15](roadmap.md#ph-15-seed-catalog-read-only).
-
-**Also:** [OP-010](#op-010), [OP-019](#op-019).
+Also: [OP-010](#op-010), [OP-019](#op-019).
 
 #### OP-052
 
@@ -412,8 +401,7 @@ Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
 ### PH-17 List items
 
 Roadmap entry: [PH-17](roadmap.md#ph-17-list-items).
-
-**Also:** [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
+Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 
 #### OP-051
 
@@ -425,8 +413,7 @@ Roadmap entry: [PH-17](roadmap.md#ph-17-list-items).
 ### PH-18 Registration and login
 
 Roadmap entry: [PH-18](roadmap.md#ph-18-registration-and-login).
-
-**Also:** [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044).
+Also: [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044).
 
 #### OP-028
 
@@ -445,14 +432,12 @@ Roadmap entry: [PH-18](roadmap.md#ph-18-registration-and-login).
 ### PH-19 Guest data on login
 
 Roadmap entry: [PH-19](roadmap.md#ph-19-guest-data-on-login).
-
-**Also:** [OP-038](#op-038), [OP-041](#op-041).
+Also: [OP-038](#op-038), [OP-041](#op-041).
 
 ### PH-20 Quotas and rate limits
 
 Roadmap entry: [PH-20](roadmap.md#ph-20-quotas-and-rate-limits).
-
-**Also:** [OP-055](#op-055).
+Also: [OP-055](#op-055).
 
 #### OP-046
 
@@ -471,20 +456,17 @@ Roadmap entry: [PH-20](roadmap.md#ph-20-quotas-and-rate-limits).
 ### PH-21 Shop in a store
 
 Roadmap entry: [PH-21](roadmap.md#ph-21-shop-in-a-store).
-
-**Also:** [OP-041](#op-041), [OP-051](#op-051).
+Also: [OP-041](#op-041), [OP-051](#op-051).
 
 ### PH-22 Offline state
 
 Roadmap entry: [PH-22](roadmap.md#ph-22-offline-state).
-
-**Also:** [OP-040](#op-040).
+Also: [OP-040](#op-040).
 
 ### PH-23 Smart input
 
 Roadmap entry: [PH-23](roadmap.md#ph-23-smart-input).
-
-**Also:** [OP-041](#op-041), [OP-047](#op-047).
+Also: [OP-041](#op-041), [OP-047](#op-047).
 
 #### OP-045
 
@@ -496,58 +478,49 @@ Roadmap entry: [PH-23](roadmap.md#ph-23-smart-input).
 ### PH-24 Catalog browser
 
 Roadmap entry: [PH-24](roadmap.md#ph-24-catalog-browser).
-
-**Also:** [OP-047](#op-047).
+Also: [OP-047](#op-047).
 
 ### PH-25 Archive and duplicate
 
 Roadmap entry: [PH-25](roadmap.md#ph-25-archive-and-duplicate).
-
-**Also:** [OP-047](#op-047).
+Also: [OP-047](#op-047).
 
 ### PH-26 Catalog and units
 
 Roadmap entry: [PH-26](roadmap.md#ph-26-catalog-and-units).
-
-**Also:** [OP-041](#op-041).
+Also: [OP-041](#op-041).
 
 ### PH-27 Categories
 
 Roadmap entry: [PH-27](roadmap.md#ph-27-categories).
-
-**Also:** [OP-041](#op-041).
+Also: [OP-041](#op-041).
 
 ### PH-28 Templates
 
 Roadmap entry: [PH-28](roadmap.md#ph-28-templates).
-
-**Also:** [OP-041](#op-041), [OP-047](#op-047).
+Also: [OP-041](#op-041), [OP-047](#op-047).
 
 ### PH-29 Password reset and change
 
 Roadmap entry: [PH-29](roadmap.md#ph-29-password-reset-and-change).
-
-**Also:** [OP-055](#op-055).
+Also: [OP-055](#op-055).
 
 ### PH-30 Settings and account deletion
 
 Roadmap entry: [PH-30](roadmap.md#ph-30-settings-and-account-deletion).
-
-**Also:** [OP-041](#op-041), [OP-055](#op-055).
+Also: [OP-041](#op-041), [OP-055](#op-055).
 
 ### PH-31 Automatic cleanup
 
 Roadmap entry: [PH-31](roadmap.md#ph-31-automatic-cleanup).
-
-**Also:** [OP-039](#op-039).
+Also: [OP-039](#op-039).
 
 ## Stage 5: Later
 
 ### PH-32 Sharing
 
 Roadmap entry: [PH-32](roadmap.md#ph-32-sharing).
-
-**Also:** [OP-041](#op-041).
+Also: [OP-041](#op-041).
 
 #### OP-049
 
@@ -559,8 +532,7 @@ Roadmap entry: [PH-32](roadmap.md#ph-32-sharing).
 ### PH-33 Live updates
 
 Roadmap entry: [PH-33](roadmap.md#ph-33-live-updates).
-
-**Also:** [OP-045](#op-045).
+Also: [OP-045](#op-045).
 
 ## Candidates
 
