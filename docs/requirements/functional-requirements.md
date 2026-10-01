@@ -72,11 +72,11 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 ### Accounts and guest mode (ACC)
 
 - **ACC-1 🎯 [MVP]** A guest can use the app without registering. Until their first change, they see the default (seed) catalog, categories and units, read-only. Their first change (for example creating a list) creates an anonymous workspace from the seed data, tied to their browser.
-- **ACC-2 🎯 [MVP]** Register with email and password, with email verification. On registration, the guest's anonymous workspace in that browser becomes the account's workspace.
-- **ACC-3 🎯 [MVP]** Log in and log out. Reset a forgotten password via email. Change the password while logged in.
+- **ACC-2 🎯 [MVP]** Register with email and password, with email verification. On registration, the guest's anonymous workspace in that browser becomes the account's workspace. Passwords are 15 to 128 characters, with no rules about which characters they must contain, and are refused if they appear in known data breaches. The app never reveals whether an email address already has an account: registration always asks the user to check their inbox, and an address that already has an account receives an email saying so, with links to log in or reset the password.
+- **ACC-3 🎯 [MVP]** Log in and log out. Reset a forgotten password via email. Change the password while logged in. A failed login, a reset request and a request to resend the verification email answer the same way whether or not the address has an account. Changing or resetting the password logs out every other session.
 - **ACC-4 🎯 [MVP]** When logging into an *existing* account from a browser whose guest workspace holds data, the app offers to import the guest's lists and templates or to discard them. Imported items are matched to the account's categories by name. Unmatched items become uncategorized.
 - **ACC-5 🎯 [MVP]** Profile settings: display name and currency.
-- **ACC-6 🎯 [MVP]** Delete the account with all its data, after confirmation. Lists it shared disappear for collaborators.
+- **ACC-6 🎯 [MVP]** Delete the account with all its data, after confirming with the current password. Lists it shared disappear for collaborators.
 - **ACC-7 🎯 [MVP]** Anonymous (guest) workspaces are deleted automatically:
   - after **3 days**, if they had no activity later than 1 hour after being created (used only briefly);
   - otherwise after **30 days** of inactivity.
@@ -167,11 +167,14 @@ All values below are configurable defaults, adjustable without code changes. The
   | What | Limit |
   |---|---|
   | Creating anonymous guests | 10 per hour per IP address |
-  | Registrations | 5 per hour per IP address |
-  | Login attempts | 10 per 15 minutes, per IP address and per email address |
+  | Registrations | 5 per hour per IP address, and 3 per hour per email address registered |
+  | Login attempts | 10 per 15 minutes per IP address; 10 failed attempts per 15 minutes per email address |
+  | Password-reset and verification-resend requests | 5 per hour per IP address, and 3 per hour per email address |
+  | Requests without a session | 300 per minute per IP address |
   | All other API requests | 300 per minute per session |
+  | Emails sent, in total | a daily cap, set below the email service's sending quota |
 
-  IPv6 addresses are grouped by their /64 block. When a limit is hit, the app asks the user to wait and try again.
+  IPv6 addresses are grouped by their /64 block. When a limit is hit, the app asks the user to wait and try again. The per-email limits and the daily email cap are the exception: registration, reset and resend requests then answer as usual and send no email, so the answer never reveals anything about the address (ACC-2, ACC-3).
 
 ### Connectivity (NET)
 

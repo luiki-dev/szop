@@ -154,14 +154,15 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
  owner: Actions ▶ demo-up ▶ ref = feat/templates
           │
           ├─ resolve ref → full commit hash of 7 (a1b2c3d…)
+          ├─ ⏸ image and deploy jobs (environment "demo") wait → owner: Review deployments ▶ Approve
           ├─ image job:  ECR has szop:a1b2c3d? no → build and push szop:a1b2c3d
-          ├─ deploy job (environment "demo"): terraform apply infra/demo   ~10–15 min (RDS)
+          ├─ deploy job: terraform apply infra/demo   ~10–15 min (RDS)
           │                                   migrations run as the container starts
           ├─ re-enable the nightly demo-down schedule
           └─ wait for https://demo.<domain>/api/health → summary: URL, commit, image
 ```
 
-The owner checks the phase's behavior in a browser on the demo, and reviews the PR commit by commit.
+The approval is the owner confirming that they started this run: a deploy nobody pressed, for example from a workflow a branch added, waits there and is rejected ([ADR 0012](../decisions/0012-security-baseline.md), decision 16). The owner then checks the phase's behavior in a browser on the demo, and reviews the PR commit by commit.
 
 ### Step 6 — Review comments and a fix
 
@@ -200,7 +201,7 @@ The owner checks the phase's behavior in a browser on the demo, and reviews the 
 *Where: GitHub Actions → AWS.*
 
 ```
- owner: demo-up ▶ ref = feat/templates → hash of 9 (e4f5a6b…)
+ owner: demo-up ▶ ref = feat/templates → hash of 9 (e4f5a6b…) ▶ Approve
           ├─ build and push szop:e4f5a6b
           └─ terraform apply: only the ECS service's image changes
                 → ECS rolling update: starts a task on the new image, waits for it to be healthy,
@@ -208,8 +209,9 @@ The owner checks the phase's behavior in a browser on the demo, and reviews the 
 
  owner checks the demo again … done
 
- owner: demo-down ▶ terraform destroy infra/demo      (by hand, right away)
+ owner: demo-down ▶ ref = main ▶ terraform destroy infra/demo   (by hand, right away; no approval)
         safety net: demo-down also runs every night at 01:17 UTC, and does nothing if there is no demo
+        both run in the environment "demo-teardown", which only main may use
 ```
 
 - **Redeploying** with the demo up does not rebuild everything: the ECS service replaces its tasks one by one (a rolling update).

@@ -2,7 +2,7 @@
 
 Living description of how Szop is built. It implements the [functional requirements](../requirements/functional-requirements.md); requirement IDs (ACC-1, ORD-5, …) refer to that document. The decisions behind this design, with the alternatives considered, are in [ADR 0002](../decisions/0002-technical-architecture.md). For a gentler, concept-by-concept explanation of the stack, read the [stack overview](stack-overview.md). Acronyms and terms are explained in the [glossary](../glossary.md).
 
-The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md), hosting in [ADR 0008](../decisions/0008-hosting.md) (summarized in [section 5](#5-deployment)), the git workflow in [ADR 0009](../decisions/0009-git-workflow.md), continuous integration and delivery (CI/CD) in [ADR 0010](../decisions/0010-ci-cd.md). Out of scope here, decided in later steps: the security baseline ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 6) and visual design (including component library and styling).
+The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md), hosting in [ADR 0008](../decisions/0008-hosting.md) (summarized in [section 5](#5-deployment)), the git workflow in [ADR 0009](../decisions/0009-git-workflow.md), continuous integration and delivery (CI/CD) in [ADR 0010](../decisions/0010-ci-cd.md), the security baseline in [ADR 0012](../decisions/0012-security-baseline.md). Who can act on Szop, and what guards each way in, is in the [threat model](threat-model.md). Out of scope here, decided in a later step: visual design (including component library and styling).
 
 ## Contents
 
@@ -15,6 +15,7 @@ The development environment and tooling are decided in [ADR 0005](../decisions/0
   - [Seed data](#seed-data)
   - [Anonymous guests](#anonymous-guests)
   - [Abuse protection](#abuse-protection)
+  - [Web security](#web-security)
   - [Errors](#errors)
 - [3. Frontend (`apps/web`)](#3-frontend-appsweb)
   - [Code structure](#code-structure-1)
@@ -90,8 +91,8 @@ Dependencies (database client, email sender, clock) are passed in explicitly whe
 1. The request reaches Fastify.
 2. An auth hook asks Better Auth for the session and attaches the user (possibly anonymous) to the request.
 3. Zod validates the path parameters, query and body (via `fastify-type-provider-zod`).
-4. The route handler calls the service.
-5. The service checks access, applies business rules, and calls the repository (inside a transaction when several writes belong together).
+4. The route handler gets the workspace context from the access layer (see Access control) and calls the service with it.
+5. The service resolves every referenced ID within that workspace, applies business rules, and calls the repository (inside a transaction when several writes belong together).
 6. The repository runs Drizzle queries against PostgreSQL.
 7. The response is serialized through its Zod schema, so nothing outside the contract leaks out.
 
@@ -100,13 +101,19 @@ The same Zod route schemas generate an OpenAPI description of the API (via `@fas
 ### Access control
 
 - Every user, anonymous or registered, has exactly **one workspace**.
-- Services always scope queries by the workspace ID taken from the **session**, never by an ID sent by the browser.
-- With sharing (Later), one central check — `requireListAccess(user, list, "shopper" | "editor" | "owner")` — decides access to a list.
-- "Not found" and "not allowed" both return **404**, so nobody can probe whether another user's list exists.
+- **Every ID in a request is resolved within the workspace the request acts in**: the record itself and every record it points to (`category_id`, a new parent category, product IDs in a multi-add, a template, a unit), in the path, the query and the body ([ADR 0012](../decisions/0012-security-baseline.md), decision 3).
+- **An access layer gives services the workspace they act in**; services never read the session. It returns a context `{ user, workspaceId, role }` from one of two functions:
+  - `ownWorkspace(user)`: the session's own workspace, for one's own data (categories, catalog, units, templates, settings, the list overview);
+  - `requireListAccess(user, listId, minRole)`: for anything reached through a list, the **list owner's** workspace and the caller's role. In the MVP the only role is owner; sharing (Later) adds shopper and editor here, without changing services or queries.
+- **Item routes nest under their list** (`/api/lists/:listId/items/:itemId`), and an item is looked up within that list.
+- **Every repository function takes `workspaceId` as a required parameter**; there is no lookup by ID alone, so a forgotten scope is a TypeScript error.
+- "Not found", "not allowed" and a reference into another workspace all return **404**, so nobody can probe whether another user's records exist.
+- **Tests:** for every field that references another record, an API test checks that a reference into another workspace returns 404; a schema test checks that every workspace-owned table and every reference to one follows the composite-key rule below.
 
 ### Data model highlights
 
 - **Users, sessions, accounts:** Better Auth's tables, including the anonymous-user flag. `workspaces` is 1:1 with users and holds settings (currency).
+- **Workspace keys:** every workspace-owned table has `workspace_id NOT NULL` and `UNIQUE (workspace_id, id)`, and every reference to such a table is a **composite foreign key** on `(workspace_id, …)`, so PostgreSQL refuses a reference into another workspace even if a service check is missing. A nullable reference that becomes null when its target is deleted uses `ON DELETE SET NULL (column)`, which needs PostgreSQL 15 or newer ([ADR 0012](../decisions/0012-security-baseline.md), decision 6). Copying data between workspaces, as when a guest's lists are imported (ACC-4), must remap every reference.
 - **Category tree:** each category stores `parent_id` and its `position` among siblings. Trees are small, so the API loads a workspace's whole tree and the shared domain rules compute the depth-first, parent-first order (ORD-2, ORD-3). Deleting a category cascades to its subcategories in the database. Catalog products and list items pointing to a deleted category get `category_id = null` (CAT-3).
 - **Money:** stored as integers in minor units (cents, grosze) to avoid floating-point rounding errors. **Quantity:** decimal.
 - **List items:** copy their catalog defaults when added (ITM-6, PRD-3) and record when they were added, which gives the "order added" sort (ORD-5).
@@ -136,10 +143,24 @@ A versioned data file in `apps/api` holds the default catalog, category tree and
 Anonymous users make writes cheap for anyone, so the design limits how much a script can cost us. The values are the defaults from LIM-1 to LIM-4, read from configuration.
 
 - **Lazy creation** (above): visits that change nothing — crawlers, uptime monitors, link previews — create nothing.
-- **Rate limits** with `@fastify/rate-limit`: anonymous-session creation and registration per IP address; all other API requests per session. IPv6 addresses are keyed by their /64 block, so one machine cannot rotate through addresses. Login attempts use Better Auth's built-in rate limiting, per IP address and per email address.
+- **Rate limits** with `@fastify/rate-limit`: anonymous-session creation, registration, requests without a session, and password-reset and verification-resend requests per IP address; registration, reset and resend also per target email; all other API requests per session. IPv6 addresses are keyed by their /64 block, so one machine cannot rotate through addresses. Login attempts use Better Auth's built-in rate limiting per IP address, plus custom code limiting failed attempts per email address. A daily cap on outgoing emails, below SES's quota, protects the quota from an attack spread over many addresses ([ADR 0012](../decisions/0012-security-baseline.md), decision 14).
+- **The client IP** is the address the load balancer saw: Fastify trusts exactly the number of proxy hops in `TRUSTED_PROXY_HOPS` (one in AWS, none locally), never `trustProxy: true`, which would let a client forge `X-Forwarded-For`. Better Auth is handed the same address (decision 13).
+- **Counters live in memory**, for both limiters; that is valid because exactly one instance runs.
 - **Quotas**: services check a workspace's counts before inserting (lists, items per list or template, templates, products, categories and tree depth, units). Two concurrent requests can both pass the check and exceed a quota by a few rows; with one instance and per-session rate limits that is harmless, so no locking is added for it. Text lengths are part of the shared Zod schemas.
 - **Request size**: Fastify's default body limit (1 MB) stays on.
 - **Not in the application**: volumetric denial of service (floods of traffic) is handled at the infrastructure level. The demo environment relies on AWS Shield Standard, which protects its load balancer at no cost; a content delivery network and a web application firewall are the step up for an always-on service ([ADR 0008](../decisions/0008-hosting.md)). A bot challenge (such as Cloudflare Turnstile) on anonymous-session creation is an escalation option if abuse ever appears.
+
+### Web security
+
+The application's baseline, production grade even on the demo ([ADR 0012](../decisions/0012-security-baseline.md), decisions 7–12):
+
+- **Session cookie:** `HttpOnly`, `Secure`, `SameSite=Lax`, no `Domain` attribute, `__Host-` prefix where Better Auth allows it (otherwise `__Secure-`). Better Auth's session cookie cache stays off, so a revoked session stops working at once.
+- **Cross-site request forgery (CSRF):** GET never changes anything. Every POST, PUT, PATCH and DELETE, on every route, must carry `Sec-Fetch-Site: same-origin` (or, as a fallback, the app's `Origin`), otherwise 403, and a JSON body. Better Auth's `trustedOrigins` lists exactly the app's origin. The WebSocket (Later) checks `Origin` on connect.
+- **Security headers** with `@fastify/helmet`: a strict Content Security Policy (CSP) allowing only the app's own files (`default-src 'self'`, `object-src 'none'`, `base-uri 'none'`, `form-action 'self'`, `frame-ancestors 'none'`), with no inline scripts or `<style>` elements; HTTP Strict Transport Security (HSTS) for one year, without preload; `Referrer-Policy: no-referrer`.
+- **Tokens in URLs** (verification, reset, later share links): single-use and expiring; stripped from logged URLs by the request log's serializer; removed from the address bar by the SPA once used.
+- **Passwords:** 15 to 128 characters, no composition rules; checked against breached passwords with Better Auth's Have I Been Pwned plugin, failing open if it cannot be reached; hashed with scrypt.
+- **Sessions:** a password change or reset revokes every other session; deleting an account requires the current password.
+- **No account enumeration:** login, registration, password reset and verification resend answer the same whether or not an account exists; registration with an existing address sends that address an email instead.
 
 ### Errors
 
@@ -211,7 +232,7 @@ React Hook Form with the Zod resolver and the shared schemas: the browser and th
 
 - Tables: `list_shares` (list, user, role) and `share_links` (list, role, token). Link tokens are random and stored **hashed**, so a database leak does not hand out working links. "Regenerate" revokes the old link and creates a new one.
 - A guest opening a share link already has an anonymous user, so the share is recorded against that user. Access stays tied to their session (SHR-2).
-- All list access goes through `requireListAccess` (see Access control).
+- All list access goes through `requireListAccess` (see Access control), which gains the shopper and editor roles. Editors reach the owner's category tree through the list (SHR-5); the route is chosen by the sharing phase.
 - Matching an editor's catalog product to the owner's categories by name (SHR-5) lives in the items service.
 
 ### Live updates (SYN)
