@@ -28,6 +28,7 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 - **Address review comments with new commits** on the branch; don't rewrite history once a PR is open. Bring `main` in by merging it, not by rebasing.
 - **Never merge a PR**, including release-please's release PR. Only the owner merges; the merge is the approval.
 - **Never trigger `demo-up` or `demo-down`** unless the owner asks ([ADR 0010](docs/decisions/0010-ci-cd.md), consequences).
+- **Don't work around the deny rules in `.claude/settings.json`** ([ADR 0012](docs/decisions/0012-security-baseline.md), decision 19). They back the rules above; if one blocks something the owner asked for, say so and let the owner run it.
 - **When a superpowers skill offers a git worktree or a local merge, don't take it.** Work on a plain branch in the main checkout (ADR 0009, decision 5), and finish by pushing the branch and opening a PR.
 
 ## Documentation
@@ -35,6 +36,7 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 - `docs/requirements/functional-requirements.md` — the living source of truth for functional requirements (FR IDs, use cases, MVP/Later slicing, future extensions). Keep it updated when behavior changes.
 - `docs/architecture/architecture.md` — the living technical architecture (components, layering, data model highlights, frontend state, later features). Keep it updated when the design changes.
 - `docs/architecture/stack-overview.md` — a learning-oriented explanation of the stack and its concepts. Extend it when a new technology or concept enters the project.
+- `docs/architecture/threat-model.md` — what Szop protects, who can act through which path, and what guards each entry point. Keep it updated when an actor or entry point is added.
 - `docs/glossary.md` — acronyms and terms used in the docs.
 - `docs/open-points.md` — the register of everything still undecided or undone, and where it will be settled. Keep it updated whenever something is deferred or settled.
 - `docs/development/git-workflow.md` — the day-to-day git workflow: branches, commits, PRs, review, merging and releases.

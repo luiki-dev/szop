@@ -19,13 +19,14 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
   - [Infrastructure as code and Terraform](#infrastructure-as-code-and-terraform)
   - [The pieces, from the network inwards](#the-pieces-from-the-network-inwards)
   - [A demo session, step by step](#a-demo-session-step-by-step)
+- [13. Web security in the browser](#13-web-security-in-the-browser)
 
 ## 1. The big picture
 
 Szop is three running things plus one shared library:
 
 1. **The frontend** — a React single-page application (SPA). The browser downloads it once as static files (HTML, JavaScript, CSS); from then on, JavaScript draws every screen and switches between them without full page reloads.
-2. **The backend** — a Node.js program built with Fastify. It exposes a REST API: URLs such as `GET /api/lists/42` or `PATCH /api/items/7` that accept and return JSON.
+2. **The backend** — a Node.js program built with Fastify. It exposes a REST API: URLs such as `GET /api/lists/42` or `PATCH /api/lists/42/items/7` that accept and return JSON.
 3. **The database** — PostgreSQL, where all data lives.
 4. **The shared package** — TypeScript code that both the frontend and the backend import: the data shapes (Zod schemas) and pure rules (how to sort a list, how to compute totals).
 
@@ -76,12 +77,12 @@ Later: Fastify API ── WebSocket push ──► Browser ("list 42 changed")
 
 ## 5. Lifecycle of a request: checking an item off
 
-1. **Click.** The checkbox component calls `checkItem.mutate({ id: 7, checked: true })` (a TanStack Query mutation from the `useCheckItem()` hook).
+1. **Click.** The checkbox component calls `checkItem.mutate({ listId: 42, id: 7, checked: true })` (a TanStack Query mutation from the `useCheckItem()` hook).
 2. **Optimistic update.** Before the server answers, the hook updates the cached list: item 7 becomes checked and the shared ordering rules move it to the checked part. The screen updates instantly.
-3. **HTTP request.** The API client sends `PATCH /api/items/7` with `{ "checked": true }` and the session cookie.
+3. **HTTP request.** The API client sends `PATCH /api/lists/42/items/7` with `{ "checked": true }` and the session cookie.
 4. **Fastify hooks.** The request passes through Fastify's lifecycle: `onRequest` (our auth hook asks Better Auth for the session and attaches the user) → body parsing → **validation** against the Zod schema (invalid input is rejected with 400 here, before our code runs) → `preHandler` → the **route handler**.
-5. **Service.** The handler calls `itemsService.update(user, 7, { checked: true })`. The service loads the item scoped to the user's workspace (not theirs → 404), checks the list is not archived (→ 409), and asks the repository to save it.
-6. **Repository and database.** Drizzle builds `UPDATE list_items SET checked = true WHERE id = 7 …` and PostgreSQL executes it.
+5. **Access layer and service.** The handler asks the access layer whether this user may work on list 42: `requireListAccess(user, 42, "shopper")` returns the list owner's workspace, or 404 if the list is not theirs (in the MVP, only the owner passes). It then calls `itemsService.update(ctx, 42, 7, { checked: true })`. The service loads item 7 within list 42 and that workspace (not there → 404), checks the list is not archived (→ 409), and asks the repository to save it.
+6. **Repository and database.** Drizzle builds `UPDATE list_items SET checked = true WHERE workspace_id = … AND list_id = 42 AND id = 7` and PostgreSQL executes it.
 7. **Response.** The updated item is serialized through the response schema and sent back as JSON.
 8. **Reconciliation.** TanStack Query replaces its optimistic guess with the server's answer. If the request failed, it rolls the cache back and the app shows a message.
 
@@ -141,12 +142,13 @@ TypeScript types vanish at runtime, so they cannot protect the server from a mal
 
 - **PostgreSQL** is a relational database: tables, rows, foreign keys between them, transactions that make several changes succeed or fail together.
 - **Drizzle** is a TypeScript *object-relational mapper (ORM)* that stays close to SQL. Tables are declared in TypeScript; queries read like SQL (`db.select().from(items).where(eq(items.listId, 42))`) and are fully typed from the table definitions.
+- **Composite foreign keys** make the database itself keep workspaces apart. Every workspace-owned table has a unique key on `(workspace_id, id)`, and an item points at its category through both columns: `(workspace_id, category_id) → categories (workspace_id, id)`. An item can then only point at a category of its own workspace; PostgreSQL refuses anything else, even if the application forgets to check. A plain foreign key on `category_id` alone would accept any workspace's category.
 - **Migrations** are versioned SQL files that evolve the database schema step by step. Drizzle generates them from changes to the table definitions; they are committed and applied in order on every environment.
 
 ## 10. Authentication: sessions and cookies
 
 - On login, Better Auth creates a **session** row in the database and sends the browser a **cookie** holding the session's identifier.
-- The cookie is `HttpOnly` (JavaScript cannot read it, so injected scripts cannot steal it), `Secure` (sent only over HTTPS) and `SameSite` (not sent on requests triggered by other sites).
+- The cookie is `HttpOnly` (JavaScript cannot read it, so injected scripts cannot steal it), `Secure` (sent only over HTTPS) and `SameSite=Lax`. `Lax` withholds the cookie from requests other sites trigger in the background (a form posted to us, an image, a script's `fetch`), but still sends it when the user follows a link to us from elsewhere, so they arrive logged in. "Site" means the registrable domain, so every subdomain of the same domain counts as the same site. `SameSite` alone is therefore not a full defence against cross-site request forgery; see [section 13](#13-web-security-in-the-browser).
 - The browser attaches the cookie to every request to our domain automatically. The server looks the session up and knows who is asking. Logging out, or revoking a session, simply deletes the row.
 - **Anonymous users** are real users with a flag: they get a session and a workspace without email or password, until they register.
 
@@ -197,3 +199,13 @@ Szop's configuration is split into three root modules by how long their resource
 3. **Start.** ECS pulls the image, reads the secrets and starts the task. The app runs its migrations, then starts serving. Once `/api/health` answers, the load balancer sends traffic to it.
 4. **Use.** The browser opens `https://demo.<domain>`: the same app as locally, with the same one-origin setup.
 5. **Tear down.** `terraform destroy` removes everything created in step 2. The logs stay in CloudWatch for a week. If a session is forgotten, the nightly `demo-down` workflow destroys it ([ADR 0010](../decisions/0010-ci-cd.md)).
+
+## 13. Web security in the browser
+
+A browser runs code from many sites side by side and sends each site's cookies automatically. Most web attacks abuse one of those two facts. The rules Szop follows are in [ADR 0012](../decisions/0012-security-baseline.md) and `architecture.md`; who they stop is in the [threat model](threat-model.md).
+
+- **Cross-site request forgery (CSRF).** A page on another site makes the victim's browser send a request to Szop, for example a hidden form posting "delete this list". The browser attaches the victim's cookie, so without a defence the request runs in their name. Szop refuses every request that changes data unless the browser says it came from Szop's own pages: browsers add a `Sec-Fetch-Site` header that page scripts cannot forge, with the older `Origin` header as a fallback. Changes must also be sent as JSON, which a plain HTML form on another site cannot produce.
+- **Content Security Policy (CSP).** A response header listing where the page may load scripts, styles, images and frames from. Szop allows only its own files and no inline scripts, so even if an attacker managed to inject HTML into a page, the browser would refuse to run their script. `frame-ancestors 'none'` stops other sites from showing Szop inside a frame, which defeats *clickjacking*: tricking a user into clicking a button they cannot see.
+- **HTTP Strict Transport Security (HSTS).** A response header telling the browser to use only HTTPS for this domain for a year. After the first visit, a typed `http://` address never goes out unencrypted, so nobody on the network can intercept that first request.
+- **`Referrer-Policy: no-referrer`.** Browsers normally tell the next site which page the user came from, in the `Referer` header. A password-reset link carries its token in the URL, so Szop asks the browser never to send it.
+- **`@fastify/helmet`** sets all these headers in one place, with safe defaults for the smaller ones.

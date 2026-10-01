@@ -1,6 +1,6 @@
 # ADR 0011 — Follow-ups to the 2026-09-29 design sanity check
 
-- **Status:** ✅ Accepted
+- **Status:** ✅ Accepted — the document roles table of decision 4 extended by [ADR 0012](0012-security-baseline.md) (the threat model)
 - **Date:** 2026-09-30
 - **Extends:** decisions 2 and 3 of [ADR 0004](0004-implementation-process.md) (a security baseline foundation topic, decision 6); decision 7 of ADR 0004 (the definition of done, now kept in one page)
 - **Replaces:** the document roles table of [ADR 0004](0004-implementation-process.md), decision 9 (decision 4)

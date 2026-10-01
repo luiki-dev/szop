@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(gh pr merge*)",
+      "Bash(gh workflow run*)",
+      "Bash(git push --force*)",
+      "Bash(git push * --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * -f*)",
+      "Bash(git push * +*)",
+      "Bash(git push --delete*)",
+      "Bash(git push * --delete*)",
+      "Bash(git push -d*)",
+      "Bash(git push * -d*)",
+      "Bash(git push * :*)",
+      "Bash(git push --tags*)",
+      "Bash(git push * --tags*)"
+    ]
+  }
+}
