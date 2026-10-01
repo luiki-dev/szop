@@ -1,6 +1,6 @@
 # Szop — Functional Requirements
 
-Living source of truth for what Szop does. Technical and visual design are out of scope here and are documented separately.
+Living source of truth for what Szop does, and the qualities it must have while doing it ([section 3](#3-non-functional-requirements): browsers, accessibility, performance). Technical and visual design are out of scope here and are documented separately.
 
 Requirements are tagged:
 
@@ -9,7 +9,7 @@ Requirements are tagged:
 
 Every requirement and use case has its own heading, so its ID can be linked directly, for example [`functional-requirements.md#acc-1`](#acc-1) or [`#uc-3-shop-in-a-store`](#uc-3-shop-in-a-store). Other documents refer to requirements and use cases by these links rather than by plain IDs.
 
-Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server) and [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits). Acronyms are explained in the [glossary](../glossary.md).
+Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server), [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits) and [ADR 0013](../decisions/0013-visual-design.md) (the non-functional requirements). Acronyms are explained in the [glossary](../glossary.md).
 
 ## Contents
 
@@ -30,8 +30,9 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
   - [Live updates (SYN)](#live-updates-syn)
   - [Limits (LIM)](#limits-lim)
   - [Connectivity (NET)](#connectivity-net)
-- [3. Use cases](#3-use-cases)
-- [4. Release slicing and future extensions](#4-release-slicing-and-future-extensions)
+- [3. Non-functional requirements](#3-non-functional-requirements)
+- [4. Use cases](#4-use-cases)
+- [5. Release slicing and future extensions](#5-release-slicing-and-future-extensions)
   - [MVP](#mvp)
   - [Later (planned core functionality)](#later-planned-core-functionality)
   - [Future extensions (ideas, not committed)](#future-extensions-ideas-not-committed)
@@ -317,7 +318,23 @@ IPv6 addresses are grouped by their /64 block. When a limit is hit, the app asks
 
 🎯 [MVP] When the connection is lost, the app clearly shows an offline state and blocks changes rather than silently losing them. This applies to guests and registered users alike.
 
-## 3. Use cases
+## 3. Non-functional requirements
+
+The qualities every part of Szop must have. The reasoning and the alternatives are in [ADR 0013](../decisions/0013-visual-design.md); how they are met is described in the [visual design](../architecture/visual-design.md) and [architecture](../architecture/architecture.md) documents.
+
+#### NFR-1
+
+🎯 [MVP] **Browsers:** Szop supports the current versions of Chrome, Edge and Firefox on the desktop, and Chrome on Android. Safari and iOS are not supported: Szop may work there, but it is not tested.
+
+#### NFR-2
+
+🎯 [MVP] **Accessibility:** Szop meets the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA, in light and dark mode.
+
+#### NFR-3
+
+🎯 [MVP] **Performance:** on a mid-range phone with a slow 4G connection, as Lighthouse's default mobile profile simulates it, Szop's Core Web Vitals are in the "good" range: the main content appears within 2.5 seconds (Largest Contentful Paint), taps get a visible response within 200 milliseconds (Interaction to Next Paint), and content does not jump around while loading (Cumulative Layout Shift at most 0.1). The JavaScript needed for the first screen is at most 200 KB compressed.
+
+## 4. Use cases
 
 #### UC-1 First visit as a guest
 
@@ -375,11 +392,11 @@ Once a renovation list is done, the owner archives it. It leaves the active view
 
 The user deletes their account. All their data is removed, and lists they shared disappear for collaborators.
 
-## 4. Release slicing and future extensions
+## 5. Release slicing and future extensions
 
 ### MVP
 
-🎯 [ACC](#accounts-and-guest-mode-acc), [LST](#shopping-lists-lst), [ITM](#list-items-itm), [ORD](#list-display-and-ordering-ord), [CAT](#categories-cat), [PRD](#catalog-prd), [UNT](#units-unt), [TPL](#templates-tpl), [LIM](#limits-lim), [NET](#connectivity-net): a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration.
+🎯 [ACC](#accounts-and-guest-mode-acc), [LST](#shopping-lists-lst), [ITM](#list-items-itm), [ORD](#list-display-and-ordering-ord), [CAT](#categories-cat), [PRD](#catalog-prd), [UNT](#units-unt), [TPL](#templates-tpl), [LIM](#limits-lim), [NET](#connectivity-net): a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration, meeting the [NFR](#3-non-functional-requirements) qualities.
 
 ### Later (planned core functionality)
 
@@ -389,7 +406,7 @@ The user deletes their account. All their data is removed, and lists they shared
 
 💡 Ideas that may become requirements later:
 
-- Themes
+- Themes, including a manual choice between light and dark mode (dark mode itself follows the system setting)
 - Android application
 - Advanced functionality for subscribers only
 - AI-driven list creation for recipes, events, projects and other multi-product shopping

@@ -20,6 +20,8 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
   - [The pieces, from the network inwards](#the-pieces-from-the-network-inwards)
   - [A demo session, step by step](#a-demo-session-step-by-step)
 - [13. Web security in the browser](#13-web-security-in-the-browser)
+- [14. Styling: Tailwind, components and design tokens](#14-styling-tailwind-components-and-design-tokens)
+- [15. How fast is fast enough](#15-how-fast-is-fast-enough)
 
 ## 1. The big picture
 
@@ -40,6 +42,9 @@ The frontend never touches the database. The backend never draws screens. The sh
 | **[React](https://react.dev/)** | [Reference](https://react.dev/reference/react) | browser | Turning state into screens (components), reacting to clicks and typing | Fetching data, URLs, talking to the server |
 | **[React Router](https://reactrouter.com/)** | [Docs](https://reactrouter.com/home) | browser | Mapping the URL (`/lists/42`) to the page component to show | Data |
 | **[TanStack Query](https://tanstack.com/query)** | [Docs](https://tanstack.com/query/latest/docs/framework/react/overview) | browser | Fetching server data, caching it, refreshing it, loading/error states, optimistic updates | Deciding *what* the URL or payload is — the API client does that |
+| **[Tailwind CSS](https://tailwindcss.com/)** | [Docs](https://tailwindcss.com/docs) | your machine, at build time | Turning the utility classes used in the code into one stylesheet | Components — it only produces CSS |
+| **[shadcn/ui](https://ui.shadcn.com/)** | [Docs](https://ui.shadcn.com/docs) | your machine, when a component is added | Copying styled component source (buttons, dialogs, menus) into `apps/web/src/components/ui/` | Anything at runtime — after copying, the code is ours |
+| **[Base UI](https://base-ui.com/)** | [Docs](https://base-ui.com/react/overview/quick-start) | browser | Components' behavior and accessibility: focus, keyboard use, dialogs, menus, toasts | Looks — Tailwind classes in shadcn's components do that |
 | **[React Hook Form](https://react-hook-form.com/)** | [Docs](https://react-hook-form.com/docs) | browser | Form field state, submission, showing validation errors | The validation rules themselves — Zod provides them |
 | **[Better Auth client](https://www.better-auth.com/)** | [Docs](https://www.better-auth.com/docs/concepts/client) | browser | Calling the login, registration and session endpoints | Storing passwords or sessions — the server does |
 | **[Zod](https://zod.dev/)** (shared) | [API](https://zod.dev/api) | browser and server | Describing data shapes once; validating at runtime and producing TypeScript types from the same definition | — |
@@ -209,3 +214,21 @@ A browser runs code from many sites side by side and sends each site's cookies a
 - **HTTP Strict Transport Security (HSTS).** A response header telling the browser to use only HTTPS for this domain for a year. After the first visit, a typed `http://` address never goes out unencrypted, so nobody on the network can intercept that first request.
 - **`Referrer-Policy: no-referrer`.** Browsers normally tell the next site which page the user came from, in the `Referer` header. A password-reset link carries its token in the URL, so Szop asks the browser never to send it.
 - **`@fastify/helmet`** sets all these headers in one place, with safe defaults for the smaller ones.
+
+## 14. Styling: Tailwind, components and design tokens
+
+What Szop looks like is described in [visual-design.md](visual-design.md) and decided in [ADR 0013](../decisions/0013-visual-design.md). This section explains the ideas behind the tools.
+
+- **Where styles can come from.** A browser applies CSS from three places: a stylesheet file (`<link rel="stylesheet">`), a `<style>` element in the page, or a `style` attribute on an element. Libraries that write styles in JavaScript (CSS-in-JS) create `<style>` elements while the app runs. Szop's Content Security Policy ([section 13](#13-web-security-in-the-browser)) allows only stylesheet files from its own origin, which shuts that door, so every style must exist before the app runs.
+- **Tailwind CSS builds that stylesheet.** Instead of naming a class and writing its CSS elsewhere (`.item-row { padding: 12px 16px; }`), you write small classes that each do one thing straight in the markup: `<li class="px-4 py-3 min-h-14 border-t">`. At build time Tailwind scans the source files and generates CSS for exactly the classes it finds, nothing else, so the stylesheet stays small however large Tailwind's vocabulary is. Variants prefix a class with a condition: `dark:bg-gray-900` applies only in dark mode, `lg:flex` only from 1024 px wide, `motion-safe:transition` only when the user hasn't asked for reduced motion. The price is long class lists, which is why they live inside components, written once.
+- **Headless components carry the hard part.** A dialog looks simple, but it must move keyboard focus into itself, keep it there, close on Escape, hide the page behind it from screen readers and give focus back when it closes. A **headless** library such as Base UI does all of that and draws nothing; the app supplies the looks. **shadcn/ui** then supplies looks for Base UI's components, as source code copied into the project rather than a package: you can open `button.tsx` and change it, which is also how you learn what it does.
+- **Design tokens keep it consistent.** A token is a named value: `--primary` instead of `#0f766e`. Szop's tokens come in two tiers. The **palette** is Tailwind's colors (`teal-700`, `gray-500`); the **semantic roles** (`primary`, `muted-foreground`, `border`, `warning`) say what a color is *for*, and point into the palette. Components use only roles (`bg-primary`), so dark mode is just a second set of role values, and a new brand color changes one line.
+
+## 15. How fast is fast enough
+
+"Fast" becomes testable once it is a number. Szop's numbers are [NFR-3](../requirements/functional-requirements.md#nfr-3); this section explains them.
+
+- **Core Web Vitals** are Google's three measures of how a page *feels*: **LCP** (Largest Contentful Paint, when the main content appears), **INP** (Interaction to Next Paint, how fast a tap gets a visible response) and **CLS** (Cumulative Layout Shift, how much content jumps around while loading). Each has a "good" threshold.
+- **Lighthouse**, built into Chrome's DevTools, loads a page while simulating a mid-range phone on a slow 4G connection and reports these numbers. Its results vary a little from run to run, so Szop runs it by hand during the demo check rather than as a CI gate.
+- **A performance budget** stops slowness creeping in. The JavaScript needed for the first screen is the main *cause* of a slow start on a phone, and its size is the same on every build, so CI fails a PR that pushes it over 200 KB compressed. A library that would quietly double it is caught in review, not by a user.
+- **Compression and caching do the rest.** The build writes Brotli and gzip copies of every file, and the server sends the smallest the browser accepts. Vite puts a hash of each file's content in its name (`index-3f9a1c.js`), so such files can be cached for a year: a changed file gets a new name. Only `index.html`, which names them, is never cached.

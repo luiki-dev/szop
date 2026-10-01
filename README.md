@@ -23,7 +23,7 @@ It is built for the phone in your hand in the store as much as for planning at a
 
 ## Future ideas
 
-- Themes
+- Themes, including choosing light or dark mode yourself (for now, Szop follows your device's setting)
 - Android application
 - Advanced functionality for subscribers
 - AI-driven list creation for recipes, events and projects
@@ -36,7 +36,7 @@ It is built for the phone in your hand in the store as much as for planning at a
 
 ## Tech stack
 
-- **Frontend** — React single-page application built with Vite, React Router, TanStack Query and React Hook Form
+- **Frontend** — React single-page application built with Vite, React Router, TanStack Query and React Hook Form, styled with Tailwind CSS and shadcn/ui components on Base UI
 - **Backend** — Node.js with Fastify, REST API
 - **Shared** — Zod schemas and domain rules used by both frontend and backend, all in TypeScript
 - **Database** — PostgreSQL with Drizzle
@@ -48,6 +48,7 @@ It is built for the phone in your hand in the store as much as for planning at a
 - [Architecture](docs/architecture/architecture.md) — how Szop is built
 - [Stack overview](docs/architecture/stack-overview.md) — the technologies and concepts behind it, explained
 - [Threat model](docs/architecture/threat-model.md) — what Szop protects, from whom, and how
+- [Visual design](docs/architecture/visual-design.md) — what Szop looks like, and the design system its screens are built from
 - [Glossary](docs/glossary.md) — acronyms and terms used in the docs
 - [Open points](docs/open-points.md) — what is still undecided or undone, and where it will be settled
 - [Git workflow](docs/development/git-workflow.md) — how changes reach `main` and how releases are cut

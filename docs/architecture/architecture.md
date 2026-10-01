@@ -2,7 +2,7 @@
 
 Living description of how Szop is built. It implements the [functional requirements](../requirements/functional-requirements.md); requirement IDs ([ACC-1](../requirements/functional-requirements.md#acc-1), [ORD-5](../requirements/functional-requirements.md#ord-5), …) refer to that document. The decisions behind this design, with the alternatives considered, are in [ADR 0002](../decisions/0002-technical-architecture.md). For a gentler, concept-by-concept explanation of the stack, read the [stack overview](stack-overview.md). Acronyms and terms are explained in the [glossary](../glossary.md).
 
-The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md), hosting in [ADR 0008](../decisions/0008-hosting.md) (summarized in [section 5](#5-deployment)), the git workflow in [ADR 0009](../decisions/0009-git-workflow.md), continuous integration and delivery (CI/CD) in [ADR 0010](../decisions/0010-ci-cd.md), the security baseline in [ADR 0012](../decisions/0012-security-baseline.md). Who can act on Szop, and what guards each way in, is in the [threat model](threat-model.md). Out of scope here, decided in a later step: visual design (including component library and styling).
+The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md), hosting in [ADR 0008](../decisions/0008-hosting.md) (summarized in [section 5](#5-deployment)), the git workflow in [ADR 0009](../decisions/0009-git-workflow.md), continuous integration and delivery (CI/CD) in [ADR 0010](../decisions/0010-ci-cd.md), the security baseline in [ADR 0012](../decisions/0012-security-baseline.md), and the visual design in [ADR 0013](../decisions/0013-visual-design.md). Who can act on Szop, and what guards each way in, is in the [threat model](threat-model.md). What Szop looks like, its design tokens and the layout and interaction principles every screen follows are in the [visual design](visual-design.md) doc; this document covers only how styling and components fit into the frontend ([Styling and components](#styling-and-components)).
 
 ## Contents
 
@@ -19,6 +19,7 @@ The development environment and tooling are decided in [ADR 0005](../decisions/0
   - [Errors](#errors)
 - [3. Frontend (`apps/web`)](#3-frontend-appsweb)
   - [Code structure](#code-structure-1)
+  - [Styling and components](#styling-and-components)
   - [Routes (React Router)](#routes-react-router)
   - [Startup](#startup)
   - [State](#state)
@@ -52,7 +53,7 @@ The development environment and tooling are decided in [ADR 0005](../decisions/0
 
 | Component | Responsibility |
 |---|---|
-| **React single-page application (SPA)** | Built by Vite into static files. Renders everything in the browser. Talks to the API only over REST (and, later, a WebSocket). |
+| **React single-page application (SPA)** | Built by Vite into static files, styled with Tailwind CSS and built from shadcn/ui components. Renders everything in the browser. Talks to the API only over REST (and, later, a WebSocket). |
 | **Fastify API** | One Node.js process. Business logic, access control, persistence. Mounts Better Auth. Later hosts the WebSocket endpoint for live updates. |
 | **PostgreSQL** | The single source of truth for all data, including anonymous guests' workspaces. |
 | **Email service** | Sends verification and password-reset emails, over the Simple Mail Transfer Protocol (SMTP) or an HTTP API. Hidden behind an `EmailSender` interface. In AWS, Amazon Simple Email Service (SES). |
@@ -181,6 +182,16 @@ One JSON error shape: `{ "error": { "code": "...", "message": "..." } }`.
 
 Feature folders mirroring the backend: `lists`, `items`, `catalog`, `categories`, `units`, `templates`, `account`. Each holds its pages, components and **data hooks** — small functions such as `useList(id)` or `useCheckItem()` that wrap TanStack Query. Components never call `fetch` directly. One typed **API client** module, built on the shared Zod schemas, does all HTTP calls. Cookies are sent automatically because everything is on the same origin.
 
+### Styling and components
+
+Decided in [ADR 0013](../decisions/0013-visual-design.md); the design system itself is described in [visual-design.md](visual-design.md).
+
+- **Components:** shadcn/ui's components, built on Base UI, are copied into `apps/web/src/components/ui/` as phases need them and are ours to change. Feature folders compose them; they don't restyle them page by page.
+- **Styling:** Tailwind CSS v4 through `@tailwindcss/vite`, compiled at build time into one stylesheet. The design tokens are CSS custom properties in two tiers (Tailwind's palette, and semantic roles such as `--primary` that components use), all in `apps/web`. Dark mode follows the system setting through Tailwind's `dark:` variant.
+- **Under the CSP:** nothing injects `<style>` elements at run time ([Web security](#web-security)). Base UI runs with `disableStyleElements`, toasts use Base UI's Toast, and every E2E journey fails on a CSP violation.
+- **Assets:** the Figtree font (`@fontsource-variable/figtree`) and Lucide's icons are bundled by Vite, so everything is served from the app's own origin.
+- **Budget:** the JavaScript needed for the first screen stays within 200 KB compressed, checked in CI ([NFR-3](../requirements/functional-requirements.md#nfr-3)).
+
 ### Routes (React Router)
 
 | Path | Page |
@@ -276,6 +287,7 @@ Szop runs on AWS as an **on-demand demo environment**: created for a session, de
 In the diagram, the VPC (virtual private cloud) is the demo's own private network, ACM (AWS Certificate Manager) issues the HTTPS certificate, RDS (Relational Database Service) runs PostgreSQL and ECR (Elastic Container Registry) stores the images. The [stack overview](stack-overview.md#12-where-szop-runs) explains each.
 
 - **One container** runs the Fastify API, which also serves the built SPA with `@fastify/static` (falling back to `index.html` for non-API paths), so the SPA and the API share one origin with no extra infrastructure.
+- **Static files are compressed and cached** ([ADR 0013](../decisions/0013-visual-design.md), decision 5): the build writes Brotli and gzip copies of every file and `@fastify/static` serves them (`preCompressed`); fingerprinted assets are cached for a year as `immutable`, while `index.html` is never cached, so a new deploy reaches the browser at once. With no CDN, every byte comes from Frankfurt.
 - **Exactly one instance** runs, so the in-process event bus and the cleanup task work as designed. The cleanup only matters while the environment is up, since all data disappears on teardown.
 - **Migrations** run when the container starts, before it accepts requests. **`GET /api/health`** checks the database connection and is used by the load balancer's health check.
 - **Security groups** chain the layers: the load balancer accepts traffic from anyone, the task only from the load balancer, the database only from the task. The database has no route to the internet.

@@ -4,3 +4,6 @@
 
 # Claude Code: personal settings and permissions
 .claude/settings.local.json
+
+# Superpowers brainstorming companion: mockups and session state
+.superpowers/

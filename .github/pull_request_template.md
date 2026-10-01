@@ -24,10 +24,11 @@
 - [ ] Tests pass, at the right layers (Claude)
 - [ ] Surviving mutants reviewed, when domain rules changed (Claude → owner)
 - [ ] CI is green (CI)
-- [ ] Deployed and checked on the demo, covering the final head (owner): <!-- link to the demo-up run, and the commit it deployed -->
+- [ ] Deployed and checked on the demo, covering the final head, with a Lighthouse run when the UI changed (owner): <!-- link to the demo-up run, and the commit it deployed -->
 - [ ] `infra/base` changes applied from this branch (owner; applied again from `main` once the PR is merged or closed)
-- [ ] Living docs updated: architecture, stack overview, glossary, threat model, functional requirements, roadmap status (Claude)
+- [ ] Living docs updated: architecture, stack overview, glossary, threat model, visual design, functional requirements, roadmap status (Claude)
 - [ ] Guides updated (Claude)
 - [ ] Significant decisions have ADRs (Claude → owner)
 - [ ] Open points closed, re-assigned or added in `docs/open-points.md` (Claude)
 - [ ] Commits and the PR title follow Conventional Commits; in a phase, commits follow the plan's tasks (Claude)
+- [ ] UI changes shown: screenshots of phone (light and dark) and desktop (light) (Claude)
