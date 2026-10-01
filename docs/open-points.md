@@ -137,7 +137,7 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
 
 ### PH-04 Database
 
-Roadmap entry: [PH-04](roadmap.md#ph-04-database).
+Roadmap entry: [PH-04](roadmap.md#ph-04-database).\
 Also: [OP-005](#op-005), [OP-012](#op-012), [OP-013](#op-013).
 
 #### OP-006
@@ -156,12 +156,12 @@ Also: [OP-005](#op-005), [OP-012](#op-012), [OP-013](#op-013).
 
 ### PH-05 SPA skeleton
 
-Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).
+Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).\
 Also: [OP-010](#op-010), [OP-012](#op-012).
 
 ### PH-06 Production build and web baseline
 
-Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
+Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).\
 Also: [OP-013](#op-013).
 
 #### OP-007
@@ -194,7 +194,7 @@ Also: [OP-013](#op-013).
 
 ### PH-07 First E2E journey
 
-Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
+Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).\
 Also: [OP-010](#op-010), [OP-012](#op-012).
 
 #### OP-057
@@ -206,7 +206,7 @@ Also: [OP-010](#op-010), [OP-012](#op-012).
 
 ### PH-08 Container image
 
-Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
+Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).\
 Also: [OP-013](#op-013).
 
 #### OP-015
@@ -234,7 +234,7 @@ Also: [OP-013](#op-013).
 
 ### PH-09 AWS account and Terraform bootstrap
 
-Roadmap entry: [PH-09](roadmap.md#ph-09-aws-account-and-terraform-bootstrap).
+Roadmap entry: [PH-09](roadmap.md#ph-09-aws-account-and-terraform-bootstrap).\
 Also: [OP-013](#op-013), [OP-023](#op-023).
 
 #### OP-018
@@ -246,7 +246,7 @@ Also: [OP-013](#op-013), [OP-023](#op-023).
 
 ### PH-10 Domain and base infrastructure
 
-Roadmap entry: [PH-10](roadmap.md#ph-10-domain-and-base-infrastructure).
+Roadmap entry: [PH-10](roadmap.md#ph-10-domain-and-base-infrastructure).\
 Also: [OP-013](#op-013).
 
 #### OP-016
@@ -265,7 +265,7 @@ Also: [OP-013](#op-013).
 
 ### PH-11 CI access to AWS and the teardown safety net
 
-Roadmap entry: [PH-11](roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net).
+Roadmap entry: [PH-11](roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net).\
 Also: [OP-018](#op-018), [OP-019](#op-019), [OP-023](#op-023).
 
 #### OP-020
@@ -277,7 +277,7 @@ Also: [OP-018](#op-018), [OP-019](#op-019), [OP-023](#op-023).
 
 ### PH-12 First deploy
 
-Roadmap entry: [PH-12](roadmap.md#ph-12-first-deploy).
+Roadmap entry: [PH-12](roadmap.md#ph-12-first-deploy).\
 Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018), [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023), [OP-053](#op-053).
 
 #### OP-014
@@ -303,7 +303,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 
 ### PH-13 Releases
 
-Roadmap entry: [PH-13](roadmap.md#ph-13-releases).
+Roadmap entry: [PH-13](roadmap.md#ph-13-releases).\
 Also: [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023).
 
 #### OP-025
@@ -342,7 +342,7 @@ Roadmap entry: [PH-14](roadmap.md#ph-14-app-shell-and-design-system).
 
 ### PH-15 Seed catalog, read-only
 
-Roadmap entry: [PH-15](roadmap.md#ph-15-seed-catalog-read-only).
+Roadmap entry: [PH-15](roadmap.md#ph-15-seed-catalog-read-only).\
 Also: [OP-010](#op-010), [OP-019](#op-019).
 
 #### OP-052
@@ -400,7 +400,7 @@ Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
 
 ### PH-17 List items
 
-Roadmap entry: [PH-17](roadmap.md#ph-17-list-items).
+Roadmap entry: [PH-17](roadmap.md#ph-17-list-items).\
 Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 
 #### OP-051
@@ -412,7 +412,7 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 
 ### PH-18 Registration and login
 
-Roadmap entry: [PH-18](roadmap.md#ph-18-registration-and-login).
+Roadmap entry: [PH-18](roadmap.md#ph-18-registration-and-login).\
 Also: [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044).
 
 #### OP-028
@@ -431,12 +431,12 @@ Also: [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044).
 
 ### PH-19 Guest data on login
 
-Roadmap entry: [PH-19](roadmap.md#ph-19-guest-data-on-login).
+Roadmap entry: [PH-19](roadmap.md#ph-19-guest-data-on-login).\
 Also: [OP-038](#op-038), [OP-041](#op-041).
 
 ### PH-20 Quotas and rate limits
 
-Roadmap entry: [PH-20](roadmap.md#ph-20-quotas-and-rate-limits).
+Roadmap entry: [PH-20](roadmap.md#ph-20-quotas-and-rate-limits).\
 Also: [OP-055](#op-055).
 
 #### OP-046
@@ -455,17 +455,17 @@ Also: [OP-055](#op-055).
 
 ### PH-21 Shop in a store
 
-Roadmap entry: [PH-21](roadmap.md#ph-21-shop-in-a-store).
+Roadmap entry: [PH-21](roadmap.md#ph-21-shop-in-a-store).\
 Also: [OP-041](#op-041), [OP-051](#op-051).
 
 ### PH-22 Offline state
 
-Roadmap entry: [PH-22](roadmap.md#ph-22-offline-state).
+Roadmap entry: [PH-22](roadmap.md#ph-22-offline-state).\
 Also: [OP-040](#op-040).
 
 ### PH-23 Smart input
 
-Roadmap entry: [PH-23](roadmap.md#ph-23-smart-input).
+Roadmap entry: [PH-23](roadmap.md#ph-23-smart-input).\
 Also: [OP-041](#op-041), [OP-047](#op-047).
 
 #### OP-045
@@ -477,49 +477,49 @@ Also: [OP-041](#op-041), [OP-047](#op-047).
 
 ### PH-24 Catalog browser
 
-Roadmap entry: [PH-24](roadmap.md#ph-24-catalog-browser).
+Roadmap entry: [PH-24](roadmap.md#ph-24-catalog-browser).\
 Also: [OP-047](#op-047).
 
 ### PH-25 Archive and duplicate
 
-Roadmap entry: [PH-25](roadmap.md#ph-25-archive-and-duplicate).
+Roadmap entry: [PH-25](roadmap.md#ph-25-archive-and-duplicate).\
 Also: [OP-047](#op-047).
 
 ### PH-26 Catalog and units
 
-Roadmap entry: [PH-26](roadmap.md#ph-26-catalog-and-units).
+Roadmap entry: [PH-26](roadmap.md#ph-26-catalog-and-units).\
 Also: [OP-041](#op-041).
 
 ### PH-27 Categories
 
-Roadmap entry: [PH-27](roadmap.md#ph-27-categories).
+Roadmap entry: [PH-27](roadmap.md#ph-27-categories).\
 Also: [OP-041](#op-041).
 
 ### PH-28 Templates
 
-Roadmap entry: [PH-28](roadmap.md#ph-28-templates).
+Roadmap entry: [PH-28](roadmap.md#ph-28-templates).\
 Also: [OP-041](#op-041), [OP-047](#op-047).
 
 ### PH-29 Password reset and change
 
-Roadmap entry: [PH-29](roadmap.md#ph-29-password-reset-and-change).
+Roadmap entry: [PH-29](roadmap.md#ph-29-password-reset-and-change).\
 Also: [OP-055](#op-055).
 
 ### PH-30 Settings and account deletion
 
-Roadmap entry: [PH-30](roadmap.md#ph-30-settings-and-account-deletion).
+Roadmap entry: [PH-30](roadmap.md#ph-30-settings-and-account-deletion).\
 Also: [OP-041](#op-041), [OP-055](#op-055).
 
 ### PH-31 Automatic cleanup
 
-Roadmap entry: [PH-31](roadmap.md#ph-31-automatic-cleanup).
+Roadmap entry: [PH-31](roadmap.md#ph-31-automatic-cleanup).\
 Also: [OP-039](#op-039).
 
 ## Stage 5: Later
 
 ### PH-32 Sharing
 
-Roadmap entry: [PH-32](roadmap.md#ph-32-sharing).
+Roadmap entry: [PH-32](roadmap.md#ph-32-sharing).\
 Also: [OP-041](#op-041).
 
 #### OP-049
@@ -531,7 +531,7 @@ Also: [OP-041](#op-041).
 
 ### PH-33 Live updates
 
-Roadmap entry: [PH-33](roadmap.md#ph-33-live-updates).
+Roadmap entry: [PH-33](roadmap.md#ph-33-live-updates).\
 Also: [OP-045](#op-045).
 
 ## Candidates
