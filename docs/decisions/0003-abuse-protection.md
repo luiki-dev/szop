@@ -1,6 +1,6 @@
 # ADR 0003 — Abuse protection: lazy guest workspaces, rate limits and quotas
 
-- **Status:** ✅ Accepted — infrastructure-level protection decided in [ADR 0008](0008-hosting.md)
+- **Status:** ✅ Accepted — infrastructure-level protection decided in [ADR 0008](0008-hosting.md); decision 2 refined by [ADR 0012](0012-security-baseline.md), decisions 13–15 (the client IP behind the load balancer; limits per target email, on password-reset and verification-resend requests and on requests without a session; a daily email cap; counters in memory)
 - **Date:** 2026-09-27
 - **Refines:** decision 8 of [ADR 0002](0002-technical-architecture.md) (anonymous server-side guests)
 

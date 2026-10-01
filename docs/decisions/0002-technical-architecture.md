@@ -1,6 +1,6 @@
 # ADR 0002 — Technical architecture and technology choices
 
-- **Status:** ✅ Accepted — decision 8 refined by [ADR 0003](0003-abuse-protection.md)
+- **Status:** ✅ Accepted — decision 8 refined by [ADR 0003](0003-abuse-protection.md); decisions 7 and 16 refined by [ADR 0012](0012-security-baseline.md), decisions 3–7 (the cookie's attributes and protection against cross-site request forgery; every referenced ID resolved within the workspace, through an access layer and scoped repositories, backed by composite foreign keys)
 - **Date:** 2026-09-22
 - **Supersedes:** decision 1 of [ADR 0001](0001-functional-requirements-scope.md) (where guest data lives)
 
