@@ -87,19 +87,19 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 
 | Prefix | Area |
 |---|---|
-| **ACC** | Accounts and guest mode |
-| **LST** | Shopping lists |
-| **ITM** | List items |
-| **ORD** | List display and ordering |
-| **CAT** | Categories |
-| **PRD** | Catalog (products) |
-| **UNT** | Units |
-| **TPL** | Templates |
-| **SHR** | Sharing |
-| **SYN** | Live updates (synchronization) |
-| **NET** | Connectivity (network) |
-| **LIM** | Limits (quotas and rate limits) |
-| **UC** | Use case |
+| **[ACC](requirements/functional-requirements.md#accounts-and-guest-mode-acc)** | Accounts and guest mode |
+| **[LST](requirements/functional-requirements.md#shopping-lists-lst)** | Shopping lists |
+| **[ITM](requirements/functional-requirements.md#list-items-itm)** | List items |
+| **[ORD](requirements/functional-requirements.md#list-display-and-ordering-ord)** | List display and ordering |
+| **[CAT](requirements/functional-requirements.md#categories-cat)** | Categories |
+| **[PRD](requirements/functional-requirements.md#catalog-prd)** | Catalog (products) |
+| **[UNT](requirements/functional-requirements.md#units-unt)** | Units |
+| **[TPL](requirements/functional-requirements.md#templates-tpl)** | Templates |
+| **[SHR](requirements/functional-requirements.md#sharing-shr)** | Sharing |
+| **[SYN](requirements/functional-requirements.md#live-updates-syn)** | Live updates (synchronization) |
+| **[NET](requirements/functional-requirements.md#connectivity-net)** | Connectivity (network) |
+| **[LIM](requirements/functional-requirements.md#limits-lim)** | Limits (quotas and rate limits) |
+| **[UC](requirements/functional-requirements.md#3-use-cases)** | Use case |
 | **FR** | Functional requirement (general name for any of the IDs above) |
 
 ## Terms
