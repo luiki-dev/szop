@@ -415,6 +415,7 @@ The user deletes their account. All their data is removed, and lists they shared
 - Manual reordering of items on a list
 - Offline check-off with sync on reconnect
 - Full offline editing
+- Installable app: a web app manifest and a home-screen icon, together with offline use
 - Internationalization (such as Polish)
 - Admin role and admin panel (defaults management, user management, moderation)
 

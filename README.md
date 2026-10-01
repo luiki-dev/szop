@@ -31,6 +31,7 @@ It is built for the phone in your hand in the store as much as for planning at a
 - Multiple store layouts to pick from per list
 - Manual ordering of items on a list
 - Offline use: checking items off at first, full editing later, with changes syncing when you are back online
+- Installing Szop on your phone's home screen, like an app
 - More languages
 - An admin panel for the predefined catalog, users and moderation
 
@@ -50,6 +51,7 @@ It is built for the phone in your hand in the store as much as for planning at a
 - [Threat model](docs/architecture/threat-model.md) — what Szop protects, from whom, and how
 - [Visual design](docs/architecture/visual-design.md) — what Szop looks like, and the design system its screens are built from
 - [Glossary](docs/glossary.md) — acronyms and terms used in the docs
+- [Roadmap](docs/roadmap.md) — what is built in which order, and how far along it is
 - [Open points](docs/open-points.md) — what is still undecided or undone, and where it will be settled
 - [Git workflow](docs/development/git-workflow.md) — how changes reach `main` and how releases are cut
 - [Definition of done](docs/development/definition-of-done.md) — what every PR must meet before it is merged

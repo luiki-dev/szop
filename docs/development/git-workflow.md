@@ -84,7 +84,7 @@ build(deps): bump vitest to 3.2
 
 **One commit per task holds its tests and its code together**, made once the task's tests pass. Test-driven development (TDD, [ADR 0007](../decisions/0007-testing-strategy.md), decision 3) happens in the working tree: write a failing test, see it fail, write the code, see it pass, tidy up, then commit. The plan spells these steps out in each task. Committing the failing test separately would record the TDD cycle in the history, but leave commits that fail their own tests, which breaks `git bisect` and a demo built from such a commit. With test and code together, every commit passes its tests and the diff shows each test next to the code it drives.
 
-Two git hooks run on every commit, once the development environment phase has set them up: the **pre-commit** hook formats and lints the staged files ([ADR 0005](../decisions/0005-development-environment.md), decision 13), and the **commit-msg** hook runs commitlint, which rejects a message that does not follow the format.
+Two git hooks run on every commit, once [PH-01](../roadmap.md#ph-01-monorepo-and-toolchain) has set them up: the **pre-commit** hook formats and lints the staged files ([ADR 0005](../decisions/0005-development-environment.md), decision 13), and the **commit-msg** hook runs commitlint, which rejects a message that does not follow the format.
 
 ## 3. Open a pull request
 
@@ -155,9 +155,9 @@ Szop uses **Semantic Versioning (SemVer)**, `MAJOR.MINOR.PATCH`, with one versio
 - **`0.x` until the MVP is complete.** A `feat` raises MINOR, a `fix` raises PATCH, and a breaking change also raises only MINOR.
 - **`1.0.0` marks the finished MVP.**
 
-Releases are cut by **release-please**, set up in the CI/CD phase. It reads the commits on `main` and keeps an open **release PR** titled like `chore(main): release 0.3.0`, holding the next version and the new `CHANGELOG.md` entry. The PR updates itself as more changes are merged.
+Releases are cut by **release-please**, set up in [PH-13](../roadmap.md#ph-13-releases). It reads the commits on `main` and keeps an open **release PR** titled like `chore(main): release 0.3.0`, holding the next version and the new `CHANGELOG.md` entry. The PR updates itself as more changes are merged.
 
-**Merging the release PR is the release.** It creates the `v0.3.0` tag and a GitHub Release, and CI builds the image tagged with that version. Merge it when a milestone is worth marking, typically after a phase. The first release, `v0.1.0`, is expected after the walking skeleton.
+**Merging the release PR is the release.** It creates the `v0.3.0` tag and a GitHub Release, and CI builds the image tagged with that version. Merge it when a milestone is worth marking, typically after a phase. The first release, `v0.1.0`, comes with [PH-13](../roadmap.md#ph-13-releases), at the end of the walking skeleton.
 
 A version marks a state of the code; it deploys nothing. The demo environment can be created from any image, versioned or not ([ADR 0008](../decisions/0008-hosting.md), decision 13).
 
@@ -172,13 +172,13 @@ A version marks a state of the code; it deploys nothing. The demo environment ca
 | Version tags cannot be moved or deleted | Ruleset for `v*` tags | ADR 0009's merge |
 | Version tags are created only by release-please | Ruleset for `v*` tags (restrict creations; only the release App bypasses it) | ADR 0011's merge |
 | Secrets cannot be pushed | Secret scanning push protection | ADR 0009's merge |
-| Staged files formatted and linted | pre-commit hook | Development environment phase |
-| Commit messages follow Conventional Commits | commit-msg hook (commitlint) | Development environment phase |
-| Every commit of a PR follows Conventional Commits, even if the hook was skipped | CI check (commitlint) | CI/CD phase |
-| CI green and branch up to date before merging | Ruleset for `main` (required status checks `ci-ok` and the PR title check) | CI/CD phase |
-| No new high or critical code scanning alerts | Ruleset for `main` (code scanning results) | CI/CD phase |
-| PR title follows Conventional Commits | CI check | CI/CD phase |
+| Staged files formatted and linted | pre-commit hook | [PH-01](../roadmap.md#ph-01-monorepo-and-toolchain) |
+| Commit messages follow Conventional Commits | commit-msg hook (commitlint) | [PH-01](../roadmap.md#ph-01-monorepo-and-toolchain) |
+| Every commit of a PR follows Conventional Commits, even if the hook was skipped | CI check (commitlint) | [PH-02](../roadmap.md#ph-02-ci-checks) |
+| CI green and branch up to date before merging | Ruleset for `main` (required status checks `ci-ok` and the PR title check) | [PH-02](../roadmap.md#ph-02-ci-checks) |
+| No new high or critical code scanning alerts | Ruleset for `main` (code scanning results) | [PH-02](../roadmap.md#ph-02-ci-checks) |
+| PR title follows Conventional Commits | CI check | [PH-02](../roadmap.md#ph-02-ci-checks) |
 | Claude never merges a PR | `CLAUDE.md`, backed by a deny rule in `.claude/settings.json` | ADR 0009's merge; the deny rule from ADR 0012's merge |
 | Claude never triggers `demo-up` or `demo-down` unless asked | `CLAUDE.md`, backed by a deny rule in `.claude/settings.json` | ADR 0011's merge; the deny rule from ADR 0012's merge |
 | Claude never force-pushes, deletes remote branches or pushes tags | Deny rules in `.claude/settings.json` (and the rulesets, for `main` and `v*` tags) | ADR 0012's merge |
-| Every deploy is approved by the owner | Required reviewer on the `demo` environment; the teardown's `demo-teardown` environment is usable from `main` only | CI/CD phase |
+| Every deploy is approved by the owner | Required reviewer on the `demo` environment; the teardown's `demo-teardown` environment is usable from `main` only | [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12](../roadmap.md#ph-12-first-deploy) |
