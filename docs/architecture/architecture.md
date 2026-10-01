@@ -1,6 +1,6 @@
 # Szop — Technical Architecture
 
-Living description of how Szop is built. It implements the [functional requirements](../requirements/functional-requirements.md); requirement IDs (ACC-1, ORD-5, …) refer to that document. The decisions behind this design, with the alternatives considered, are in [ADR 0002](../decisions/0002-technical-architecture.md). For a gentler, concept-by-concept explanation of the stack, read the [stack overview](stack-overview.md). Acronyms and terms are explained in the [glossary](../glossary.md).
+Living description of how Szop is built. It implements the [functional requirements](../requirements/functional-requirements.md); requirement IDs ([ACC-1](../requirements/functional-requirements.md#acc-1), [ORD-5](../requirements/functional-requirements.md#ord-5), …) refer to that document. The decisions behind this design, with the alternatives considered, are in [ADR 0002](../decisions/0002-technical-architecture.md). For a gentler, concept-by-concept explanation of the stack, read the [stack overview](stack-overview.md). Acronyms and terms are explained in the [glossary](../glossary.md).
 
 The development environment and tooling are decided in [ADR 0005](../decisions/0005-development-environment.md), the testing strategy in [ADR 0007](../decisions/0007-testing-strategy.md), hosting in [ADR 0008](../decisions/0008-hosting.md) (summarized in [section 5](#5-deployment)), the git workflow in [ADR 0009](../decisions/0009-git-workflow.md), continuous integration and delivery (CI/CD) in [ADR 0010](../decisions/0010-ci-cd.md), the security baseline in [ADR 0012](../decisions/0012-security-baseline.md). Who can act on Szop, and what guards each way in, is in the [threat model](threat-model.md). Out of scope here, decided in a later step: visual design (including component library and styling).
 
@@ -56,7 +56,7 @@ The development environment and tooling are decided in [ADR 0005](../decisions/0
 | **Fastify API** | One Node.js process. Business logic, access control, persistence. Mounts Better Auth. Later hosts the WebSocket endpoint for live updates. |
 | **PostgreSQL** | The single source of truth for all data, including anonymous guests' workspaces. |
 | **Email service** | Sends verification and password-reset emails, over the Simple Mail Transfer Protocol (SMTP) or an HTTP API. Hidden behind an `EmailSender` interface. In AWS, Amazon Simple Email Service (SES). |
-| **`packages/shared`** | Code used by both sides: Zod schemas (the API contract), TypeScript types inferred from them, and pure domain rules such as item ordering (ORD) and totals (ITM-8). |
+| **`packages/shared`** | Code used by both sides: Zod schemas (the API contract), TypeScript types inferred from them, and pure domain rules such as item ordering ([ORD](../requirements/functional-requirements.md#list-display-and-ordering-ord)) and totals ([ITM-8](../requirements/functional-requirements.md#itm-8)). |
 
 **Same origin.** The SPA and the API are served under one domain (for example `example.com` and `example.com/api`). Session cookies are therefore first-party and no Cross-Origin Resource Sharing (CORS) setup is needed. The API achieves this by serving the built SPA's static files itself (see [Deployment](#5-deployment)). In development, the Vite dev server proxies `/api/*` to the API, so the same rules hold locally.
 
@@ -113,10 +113,10 @@ The same Zod route schemas generate an OpenAPI description of the API (via `@fas
 ### Data model highlights
 
 - **Users, sessions, accounts:** Better Auth's tables, including the anonymous-user flag. `workspaces` is 1:1 with users and holds settings (currency).
-- **Workspace keys:** every workspace-owned table has `workspace_id NOT NULL` and `UNIQUE (workspace_id, id)`, and every reference to such a table is a **composite foreign key** on `(workspace_id, …)`, so PostgreSQL refuses a reference into another workspace even if a service check is missing. A nullable reference that becomes null when its target is deleted uses `ON DELETE SET NULL (column)`, which needs PostgreSQL 15 or newer ([ADR 0012](../decisions/0012-security-baseline.md), decision 6). Copying data between workspaces, as when a guest's lists are imported (ACC-4), must remap every reference.
-- **Category tree:** each category stores `parent_id` and its `position` among siblings. Trees are small, so the API loads a workspace's whole tree and the shared domain rules compute the depth-first, parent-first order (ORD-2, ORD-3). Deleting a category cascades to its subcategories in the database. Catalog products and list items pointing to a deleted category get `category_id = null` (CAT-3).
+- **Workspace keys:** every workspace-owned table has `workspace_id NOT NULL` and `UNIQUE (workspace_id, id)`, and every reference to such a table is a **composite foreign key** on `(workspace_id, …)`, so PostgreSQL refuses a reference into another workspace even if a service check is missing. A nullable reference that becomes null when its target is deleted uses `ON DELETE SET NULL (column)`, which needs PostgreSQL 15 or newer ([ADR 0012](../decisions/0012-security-baseline.md), decision 6). Copying data between workspaces, as when a guest's lists are imported ([ACC-4](../requirements/functional-requirements.md#acc-4)), must remap every reference.
+- **Category tree:** each category stores `parent_id` and its `position` among siblings. Trees are small, so the API loads a workspace's whole tree and the shared domain rules compute the depth-first, parent-first order ([ORD-2](../requirements/functional-requirements.md#ord-2), [ORD-3](../requirements/functional-requirements.md#ord-3)). Deleting a category cascades to its subcategories in the database. Catalog products and list items pointing to a deleted category get `category_id = null` ([CAT-3](../requirements/functional-requirements.md#cat-3)).
 - **Money:** stored as integers in minor units (cents, grosze) to avoid floating-point rounding errors. **Quantity:** decimal.
-- **List items:** copy their catalog defaults when added (ITM-6, PRD-3) and record when they were added, which gives the "order added" sort (ORD-5).
+- **List items:** copy their catalog defaults when added ([ITM-6](../requirements/functional-requirements.md#itm-6), [PRD-3](../requirements/functional-requirements.md#prd-3)) and record when they were added, which gives the "order added" sort ([ORD-5](../requirements/functional-requirements.md#ord-5)).
 - **Templates:** `templates` and `template_items`, the same shape as lists and items without checked state.
 
 ### Seed data
@@ -125,22 +125,22 @@ A versioned data file in `apps/api` holds the default catalog, category tree and
 
 ### Anonymous guests
 
-- **Lazy creation (ACC-1).** A visitor without a session has no user and no workspace. Read requests without a session get the **seed data** (catalog, categories, units), which the API keeps in memory, read-only, and an empty set of lists and templates. Nothing is written to the database.
+- **Lazy creation ([ACC-1](../requirements/functional-requirements.md#acc-1)).** A visitor without a session has no user and no workspace. Read requests without a session get the **seed data** (catalog, categories, units), which the API keeps in memory, read-only, and an empty set of lists and templates. Nothing is written to the database.
 - On the visitor's **first change**, the frontend asks Better Auth's anonymous plugin for an anonymous session (rate-limited, see Abuse protection). Creating the anonymous user also creates its workspace by copying the seed data. The frontend then sends the original change.
 - When an anonymous user registers or logs in, Better Auth links them to the registered account. In that step the server either:
-  - reassigns the anonymous workspace to the new account on registration (ACC-2), or
-  - imports the guest's lists and templates into the existing account's workspace, or discards them, according to the user's choice (ACC-4).
+  - reassigns the anonymous workspace to the new account on registration ([ACC-2](../requirements/functional-requirements.md#acc-2)), or
+  - imports the guest's lists and templates into the existing account's workspace, or discards them, according to the user's choice ([ACC-4](../requirements/functional-requirements.md#acc-4)).
 
-  How this maps onto Better Auth's anonymous plugin is not settled: by default the plugin links and deletes the anonymous user inside the sign-in request, before the ACC-4 choice can be made ([OP-038](../open-points.md#feature-phases)).
+  How this maps onto Better Auth's anonymous plugin is not settled: by default the plugin links and deletes the anonymous user inside the sign-in request, before the [ACC-4](../requirements/functional-requirements.md#acc-4) choice can be made ([OP-038](../open-points.md#feature-phases)).
 - **Activity tracking.** Each workspace has a `last_active_at` timestamp, updated by the auth hook at most once an hour to avoid a database write on every request.
-- **Cleanup.** A scheduled task inside the API process deletes (ACC-7, ACC-8):
+- **Cleanup.** A scheduled task inside the API process deletes ([ACC-7](../requirements/functional-requirements.md#acc-7), [ACC-8](../requirements/functional-requirements.md#acc-8)):
   - anonymous users whose workspace's `last_active_at` is within 1 hour of creation, 3 days after creation;
   - other anonymous users inactive for 30 days;
   - registered users not verified within 7 days.
 
 ### Abuse protection
 
-Anonymous users make writes cheap for anyone, so the design limits how much a script can cost us. The values are the defaults from LIM-1 to LIM-4, read from configuration.
+Anonymous users make writes cheap for anyone, so the design limits how much a script can cost us. The values are the defaults from [LIM-1](../requirements/functional-requirements.md#lim-1) to [LIM-4](../requirements/functional-requirements.md#lim-4), read from configuration.
 
 - **Lazy creation** (above): visits that change nothing — crawlers, uptime monitors, link previews — create nothing.
 - **Rate limits** with `@fastify/rate-limit`: anonymous-session creation, registration, requests without a session, and password-reset and verification-resend requests per IP address; registration, reset and resend also per target email; all other API requests per session. IPv6 addresses are keyed by their /64 block, so one machine cannot rotate through addresses. Login attempts use Better Auth's built-in rate limiting per IP address, plus custom code limiting failed attempts per email address. A daily cap on outgoing emails, below SES's quota, protects the quota from an attack spread over many addresses ([ADR 0012](../decisions/0012-security-baseline.md), decision 14).
@@ -201,7 +201,7 @@ Feature folders mirroring the backend: `lists`, `items`, `catalog`, `categories`
 
 The app asks Better Auth (through its React client) for the current session. If there is none, the app works without one: it shows the (empty) lists and the read-only seed catalog and categories. On the visitor's first change, the API client creates an anonymous session and then sends the change, so a first-time visitor still lands directly in a working app — the workspace just appears when they first need it.
 
-The rate-limit (429) and quota (`quota_exceeded`) errors are shown as clear messages (LIM-3, LIM-4), never as generic failures.
+The rate-limit (429) and quota (`quota_exceeded`) errors are shown as clear messages ([LIM-3](../requirements/functional-requirements.md#lim-3), [LIM-4](../requirements/functional-requirements.md#lim-4)), never as generic failures.
 
 ### State
 
@@ -210,7 +210,7 @@ The rate-limit (429) and quota (`quota_exceeded`) errors are shown as clear mess
 | **Server state** | lists, items, catalog, categories | TanStack Query (fetching, caching, refreshing) |
 | **URL state** | which list is open | React Router |
 | **Local UI state** | an open dialog, text typed in an input | the component (`useState`) |
-| **Device preference** | "hide checked items" toggle (ORD-4) | `localStorage` |
+| **Device preference** | "hide checked items" toggle ([ORD-4](../requirements/functional-requirements.md#ord-4)) | `localStorage` |
 
 There is no global client-state library (Redux, Zustand). One is added only when a real need appears.
 
@@ -231,15 +231,15 @@ React Hook Form with the Zod resolver and the shared schemas: the browser and th
 ### Sharing (SHR)
 
 - Tables: `list_shares` (list, user, role) and `share_links` (list, role, token). Link tokens are random and stored **hashed**, so a database leak does not hand out working links. "Regenerate" revokes the old link and creates a new one.
-- A guest opening a share link already has an anonymous user, so the share is recorded against that user. Access stays tied to their session (SHR-2).
-- All list access goes through `requireListAccess` (see Access control), which gains the shopper and editor roles. Editors reach the owner's category tree through the list (SHR-5); the route is chosen by the sharing phase.
-- Matching an editor's catalog product to the owner's categories by name (SHR-5) lives in the items service.
+- A guest opening a share link already has an anonymous user, so the share is recorded against that user. Access stays tied to their session ([SHR-2](../requirements/functional-requirements.md#shr-2)).
+- All list access goes through `requireListAccess` (see Access control), which gains the shopper and editor roles. Editors reach the owner's category tree through the list ([SHR-5](../requirements/functional-requirements.md#shr-5)); the route is chosen by the sharing phase.
+- Matching an editor's catalog product to the owner's categories by name ([SHR-5](../requirements/functional-requirements.md#shr-5)) lives in the items service.
 
 ### Live updates (SYN)
 
 - A WebSocket endpoint at `/api/ws` (via `@fastify/websocket`). The browser subscribes to the list it is viewing.
 - After a change succeeds, the service publishes a small event ("list 42: item changed") on an **in-process event bus**. The WebSocket hub forwards it to that list's subscribers, and the browser tells TanStack Query to refetch the list. Pushing the changed data itself can come later if refetching proves too slow.
-- Edit requests send only the changed fields (`PATCH`), which gives "last change wins per field" (SYN-2).
+- Edit requests send only the changed fields (`PATCH`), which gives "last change wins per field" ([SYN-2](../requirements/functional-requirements.md#syn-2)).
 - The in-process bus works for a single server process, which is what the deployment runs. Several processes would need a shared channel (PostgreSQL `LISTEN/NOTIFY` or Redis).
 
 ### Cross-cutting
