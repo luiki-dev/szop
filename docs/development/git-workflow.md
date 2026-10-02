@@ -67,7 +67,7 @@ Optional footers, such as BREAKING CHANGE: … or Co-Authored-By: …
 | `ci` | CI configuration | None |
 | `chore` | Anything else (tooling, housekeeping) | None |
 
-- **The scope is optional** and names a workspace or area, for example `web`, `api`, `shared`, `e2e`, `infra`, `adr`, `spec`, `plan` or `deps`. A phase's PR title may name its feature area instead (`feat(templates): add templates`), since the phase spans several workspaces.
+- **The scope is optional**, and when given it must be on the allow-list in `commitlint.config.js` ([ADR 0016](../decisions/0016-toolchain-details.md)): a workspace or test layer (`web`, `api`, `shared`, `e2e`), a feature area, one per requirement area (`lists`, `templates`, …), a kind of doc (`adr`, `spec`, `plan`, `requirements`, `audit`, `roadmap`) or tooling (`infra`, `deps`, `main` for release-please, `claude`). A phase's PR title may name its feature area (`feat(templates): add templates`), since the phase spans several workspaces. A PR that needs a new scope adds it to the list.
 - **A breaking change** is marked with `!` after the type (`feat(api)!: …`) or a `BREAKING CHANGE:` footer. While Szop is in `0.x`, it raises MINOR.
 - **Subjects are imperative**: "add", not "added" or "adds". Read it as "this commit will… add list totals".
 

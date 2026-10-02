@@ -920,11 +920,11 @@ Expected: back on the phase branch with a clean tree; the scratch branch is gone
 - Consumes: husky's `.husky/` from Task 5.
 - Produces: the scope allow-list in `commitlint.config.js`, which later PRs extend.
 
-- [ ] **Step 1: Add commitlint**
+- [x] **Step 1: Add commitlint**
 
 Run: `pnpm add -D -w @commitlint/cli@^21 @commitlint/config-conventional@^21`
 
-- [ ] **Step 2: Write `commitlint.config.js`**
+- [x] **Step 2: Write `commitlint.config.js`**
 
 ```js
 // Checks every commit message (the commit-msg hook in .husky/).
@@ -992,13 +992,13 @@ export default {
 };
 ```
 
-- [ ] **Step 3: Write `.husky/commit-msg`**
+- [x] **Step 3: Write `.husky/commit-msg`**
 
 ```sh
 pnpm exec commitlint --edit "$1"
 ```
 
-- [ ] **Step 4: Check the rejected messages**
+- [x] **Step 4: Check the rejected messages**
 
 Run each; commitlint reads the message from stdin:
 
@@ -1011,7 +1011,7 @@ echo "style: reformat" | pnpm exec commitlint; echo "exit $?"
 
 Expected: each fails with a non-zero exit, naming `type-enum`, `scope-enum`, `subject-empty`/`type-empty`, and `type-enum` respectively.
 
-- [ ] **Step 5: Check the accepted messages (Review Focus 4)**
+- [x] **Step 5: Check the accepted messages (Review Focus 4)**
 
 ```bash
 echo "feat(api): add health check" | pnpm exec commitlint; echo "exit $?"
@@ -1022,7 +1022,7 @@ printf 'docs(adr): add ADR 0016 toolchain details\n\nWhy, in a body line.\n\nCo-
 
 Expected: each exits 0.
 
-- [ ] **Step 6: Update the scope rule in `docs/development/git-workflow.md`**
+- [x] **Step 6: Update the scope rule in `docs/development/git-workflow.md`**
 
 Replace line 70 (it starts with `- **The scope is optional**`) with:
 
@@ -1030,7 +1030,7 @@ Replace line 70 (it starts with `- **The scope is optional**`) with:
 - **The scope is optional**, and when given it must be on the allow-list in `commitlint.config.js` ([ADR 0016](../decisions/0016-toolchain-details.md)): a workspace or test layer (`web`, `api`, `shared`, `e2e`), a feature area, one per requirement area (`lists`, `templates`, …), a kind of doc (`adr`, `spec`, `plan`, `requirements`, `audit`, `roadmap`) or tooling (`infra`, `deps`, `main` for release-please, `claude`). A phase's PR title may name its feature area (`feat(templates): add templates`), since the phase spans several workspaces. A PR that needs a new scope adds it to the list.
 ```
 
-- [ ] **Step 7: Write `docs/development/tools/commitlint.md`**
+- [x] **Step 7: Write `docs/development/tools/commitlint.md`**
 
 Follow the template. It must say:
 - commitlint checks each commit message against Conventional Commits, in the `commit-msg` hook.
@@ -1039,7 +1039,7 @@ Follow the template. It must say:
 - Everyday use: what a rejected commit looks like and how to fix it (the message is in `.git/COMMIT_EDITMSG`; `git commit -e -F .git/COMMIT_EDITMSG`); checking a message without committing: `echo "msg" | pnpm exec commitlint`; CI checks every commit of a PR from PH-02.
 - Official docs: `https://commitlint.js.org/`, `https://commitlint.js.org/reference/rules.html`, `https://www.conventionalcommits.org/`.
 
-- [ ] **Step 8: Commit (both hooks check this commit)**
+- [x] **Step 8: Commit (both hooks check this commit)**
 
 ```bash
 git add commitlint.config.js .husky/commit-msg package.json pnpm-lock.yaml docs/development/git-workflow.md docs/development/tools/commitlint.md

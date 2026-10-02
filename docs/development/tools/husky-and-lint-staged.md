@@ -11,7 +11,7 @@ husky installs **git hooks** (see the [glossary](../../glossary.md)) from files 
 
 **`package.json`** has `"prepare": "husky"`. pnpm runs the `prepare` script after every full `pnpm install`, and `husky` sets the git setting `core.hooksPath` to `.husky/_`. From then on, git looks for its hooks in that folder, and the small scripts husky generates there call the ones in `.husky/`. The folder `.husky/_` is generated and ignored by git.
 
-**`.husky/pre-commit`** holds one line, `pnpm exec lint-staged`, which git runs before it creates a commit. A non-zero exit stops the commit. `.husky/commit-msg`, which checks the commit message, is added with commitlint (see the commitlint page, added in the next task of PH-01).
+**`.husky/pre-commit`** holds one line, `pnpm exec lint-staged`, which git runs before it creates a commit. A non-zero exit stops the commit. `.husky/commit-msg`, which checks the commit message, is added with commitlint (see [commitlint](commitlint.md)).
 
 **`lint-staged.config.js`** maps a file pattern to the commands run on the staged files that match:
 
