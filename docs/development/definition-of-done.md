@@ -29,7 +29,7 @@ Whoever made an item true, **the owner verifies every item when reviewing the PR
 
 ## Items that don't apply: N/A with a reason
 
-An item that doesn't apply is marked **"➖ N/A: *reason*"**, never a bare N/A, so the reviewer sees it was considered. For example:
+An item that doesn't apply is marked **"➖ N/A: *reason*"**, never a bare N/A, so the reviewer sees it was considered. **Its checkbox stays unchecked:** a tick means the item was done, and ➖ is an outcome of its own, so the reason goes after the item's text, as in `- [ ] CI is green (CI): ➖ N/A: CI does not exist yet`. For example:
 
 - "➖ N/A: CI does not exist yet"
 - "➖ N/A: no image or infrastructure change"
