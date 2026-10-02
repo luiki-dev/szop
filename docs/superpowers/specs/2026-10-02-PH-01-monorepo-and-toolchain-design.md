@@ -89,7 +89,7 @@ commitlint.config.js
 .claude/hooks/          guard-git-push.ts, guard-git-push.test.ts
 ```
 
-- **`package.json`:** `"private": true`, `"type": "module"`, `engines.node` `>=24 <25`, `packageManager` with the exact pnpm version (the latest 12.x when the task runs). Scripts:
+- **`package.json`:** `"private": true`, `"type": "module"`, `engines.node` `>=24.2 <25`, `packageManager` with the exact pnpm version (the latest 12.x when the task runs). Scripts:
   - `lint`: `eslint .`
   - `typecheck`: `tsc --noEmit` (the workspace packages join it as they arrive)
   - `format`: `prettier --write .`

@@ -9,7 +9,7 @@ Node.js is the JavaScript runtime that runs Szop's API, its development tools an
 ## Configuration
 
 - **`.nvmrc`** (repository root) holds `24`: the major version only. `nvm install` and `nvm use` read it and pick the latest 24.x, so a security fix needs no change in the repository. The setup-node action of continuous integration (CI) reads the same file from PH-02 on.
-- **`engines.node`** in `package.json` is `>=24 <25`: any Node 24, nothing older or newer. pnpm enforces it through `engineStrict: true` in `pnpm-workspace.yaml` (see [pnpm](pnpm.md)), so `pnpm install` fails with `Unsupported engine` on another major version.
+- **`engines.node`** in `package.json` is `>=24.2 <25`: Node 24 from 24.2 on, nothing older or newer. The push hook relies on `import.meta.main`, which Node added in 24.2.0; on an older 24.x the hook would silently allow every push. pnpm enforces it through `engineStrict: true` in `pnpm-workspace.yaml` (see [pnpm](pnpm.md)), so `pnpm install` fails with `Unsupported engine` on another major version.
 
 The two files say the same thing for different readers: `.nvmrc` tells nvm which version to install, `engines` tells pnpm which versions are acceptable.
 

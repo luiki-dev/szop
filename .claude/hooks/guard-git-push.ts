@@ -124,6 +124,7 @@ export function findViolation(command: string): string | null {
   return null;
 }
 
+// import.meta.main needs Node 24.2 or later (engines in package.json).
 if (import.meta.main) {
   const input = JSON.parse(readFileSync(0, "utf8")) as HookInput;
   const violation = findViolation(input.tool_input?.command ?? "");

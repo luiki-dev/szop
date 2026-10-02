@@ -30,7 +30,7 @@
 
 - Branch `feat/monorepo-toolchain`, already created; never commit to `main`; no worktree (CLAUDE.md, git workflow).
 - **Execution: subagent-driven, with a fresh reviewer per task.** After a task's review passes and it is committed, push the branch (`git push`) and **pause** until the owner has reviewed that task's changes; start the next task only when the owner says so.
-- Node: `engines.node` is `>=24 <25`; `.nvmrc` is `24`.
+- Node: `engines.node` is `>=24.2 <25` (the hook's `import.meta.main` needs Node 24.2); `.nvmrc` is `24`.
 - pnpm: `packageManager` is `pnpm@12.8.1`; root dev dependencies are added with `pnpm add -D -w` (pnpm refuses to add to the workspace root without `-w`).
 - **TypeScript is pinned to `~6.0.3`, not 7.** typescript-eslint 8.71 supports `typescript >=4.8.4 <6.1.0`; TypeScript 7 (the native port) is not supported yet. `@types/node` is `^24`, matching Node 24.
 - `allowBuilds: {}` in `pnpm-workspace.yaml`: no dependency runs install scripts. If an install fails with `ERR_PNPM_IGNORED_BUILDS`, stop and ask the owner; never run `pnpm approve-builds` on your own ([ADR 0012](../../decisions/0012-security-baseline.md), decision 18).
@@ -123,7 +123,7 @@ Expected: a pnpm version (any 10.x or later) and `v24.x.y`.
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24 <25"
+    "node": ">=24.2 <25"
   },
   "packageManager": "pnpm@12.8.1",
   "scripts": {}
@@ -207,7 +207,7 @@ Expected: only the new and modified files of this task are listed; no existing f
 Follow the [tool page template](#tool-page-template). It must say:
 - Node is the JavaScript runtime for the API, the tools and the push hook; nvm installs and switches Node versions per user, without `sudo`.
 - Why: [ADR 0005](../../decisions/0005-development-environment.md), decision 3 (nvm, the current LTS, Node 24); the alternatives fnm, Volta and mise.
-- Configuration: `.nvmrc` (`24`: the major only; `nvm install` and `nvm use` pick the latest 24.x; CI's setup-node reads the same file from PH-02); `engines.node` in `package.json` (`>=24 <25`), enforced by pnpm's `engineStrict`.
+- Configuration: `.nvmrc` (`24`: the major only; `nvm install` and `nvm use` pick the latest 24.x; CI's setup-node reads the same file from PH-02); `engines.node` in `package.json` (`>=24.2 <25`: the hook's `import.meta.main` arrived in Node 24.2.0), enforced by pnpm's `engineStrict`.
 - Everyday use: `nvm install`, `nvm use`, `node --version`; Node 24 runs `.ts` files directly by stripping types (the push hook), with a link to the glossary's "Type stripping".
 - Official docs: nvm's README (`https://github.com/nvm-sh/nvm`), Node's release schedule (`https://nodejs.org/en/about/previous-releases`), Node's TypeScript page (`https://nodejs.org/api/typescript.html`).
 
@@ -1164,7 +1164,7 @@ Over 100 lines, so it starts with a `## Contents`. Steps only, each linking its 
 | 2 | Installing pnpm | `npm install -g pnpm` and pnpm's own version switching; Corepack; pnpm's standalone installer | **`npm install -g pnpm` once per Node version; pnpm then runs the version in `packageManager` by itself** (tried: 11.28.2 and 12.7.0 both ran the pinned 12.8.1). Corepack is still experimental and no longer bundled from Node 25. The standalone installer pipes a script from the internet into the shell. |
 | 3 | pnpm's settings | — | **`engineStrict: true` and `allowBuilds: {}` in `pnpm-workspace.yaml`.** Without `engineStrict`, pnpm 12 installed with an unsupported Node. `allowBuilds` is pnpm 12's name for the install-script allowlist ([ADR 0012](0012-security-baseline.md), decision 18): a dependency with a build script must be listed as allowed or denied, or the install fails, and the owner decides. |
 | 4 | TypeScript version | 7.0 (the native port); 6.0 | **6.0 (`~6.0.3`), with `@types/node` 24.** typescript-eslint, which type-aware linting needs, supports TypeScript below 6.1 only. Moving to 7 is [OP-064](../open-points.md#op-064). |
-| 5 | The push hook's language | TypeScript run by Node's type stripping; JavaScript checked through JSDoc; JavaScript, not type-checked | **TypeScript, run directly by Node 24.** With no packages, it is the only real code, so it is what makes "strict TypeScript" true now. It keeps no build step and no dependencies. ADR 0005, decision 9 turned type stripping down for the API because of workspace imports, which a standalone file does not have. |
+| 5 | The push hook's language | TypeScript run by Node's type stripping; JavaScript checked through JSDoc; JavaScript, not type-checked | **TypeScript, run directly by Node 24.** With no packages, it is the only real code, so it is what makes "strict TypeScript" true now. It keeps no build step and no dependencies. ADR 0005, decision 9 turned type stripping down for the API because of workspace imports, which a standalone file does not have. Its entry point uses `import.meta.main`, added in Node 24.2.0, so `engines.node` is `>=24.2 <25`: on an older 24.x the hook would silently allow every push. |
 | 6 | Running the hook's tests | `pnpm test` runs `node --test` until Vitest arrives; a permanent `pnpm test:hooks` | **`pnpm test` runs Node's test runner until PH-03 moves the tests into Vitest** ([OP-062](../open-points.md#op-062)). `pnpm test` keeps meaning "every test". Until then, ESLint's `no-floating-promises` allows `node:test`'s `test()`, typescript-eslint's documented setting for it. |
 | 7 | ESLint strictness | `strictTypeChecked`; `recommendedTypeChecked`; `strictTypeChecked` with `stylisticTypeChecked` | **`strictTypeChecked`.** Beyond bugs, it flags code that is probably wrong. Loosening later is easy, tightening an existing codebase is not. Style is Prettier's job. |
 | 8 | Prettier and Markdown | A one-off reformat of all docs; formatting docs when touched; code only | **Code only: `*.md` is in `.prettierignore`.** On a copy of the docs, Prettier padded every table to its widest cell: the glossary grew from 39 KB to 93 KB, each row of ADR 0011's decision table to 2,583 characters, and an edit to one long cell rewrites the whole table in the diff. Prettier cannot turn table alignment off. A Markdown linter that does not reformat is [OP-063](../open-points.md#op-063). |
