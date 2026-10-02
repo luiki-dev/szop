@@ -158,6 +158,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **GitOps** | Running infrastructure from git: merging a change to the main branch applies it automatically. Considered for `infra/base`, not used (see ADR 0010). |
 | **Headless component library** | A library providing components' behavior and accessibility (focus, keyboard, dialogs) without any looks, styled by the app. Szop uses Base UI. |
 | **Health check** | A request a load balancer or orchestrator sends regularly (Szop: `GET /api/health`) to decide whether an instance should receive traffic or be replaced. |
+| **Hook (Claude Code)** | A command Claude Code runs at a fixed moment, for example before a tool call (a `PreToolUse` hook), configured in `settings.json`. It can block the call by exiting with code 2. Szop's refuses force pushes, deletions and tag pushes (see ADR 0015). Unrelated to git hooks despite the name. |
 | **Hook (Fastify)** | A function Fastify calls at a fixed point of a request's lifecycle (`onRequest`, `preHandler`, …). |
 | **Hook (React)** | A function starting with `use` (`useState`, `useList`) that lets a component use state or other React features. Unrelated to Fastify hooks despite the name. |
 | **Hyperscaler** | One of the very large cloud providers offering hundreds of services worldwide: AWS, Microsoft Azure, Google Cloud. |

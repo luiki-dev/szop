@@ -83,9 +83,17 @@ Roadmap entry: [PH-01](roadmap.md#ph-01-monorepo-and-toolchain).
 - **Source:** [ADR 0009](decisions/0009-git-workflow.md), decision 16 and consequences; [Audit, m9](audits/2026-09-29-design-sanity-check.md#process-and-ci)
 - **Status:** ⬜ Open
 
+#### OP-062
+
+**Bring the Claude Code push hook into the toolchain and CI.** `.claude/hooks/guard-git-push.mjs` and its tests were written before there was any toolchain: they are plain Node, run by hand with `node --test .claude/hooks/guard-git-push.test.mjs`. **Parts:** **PH-01:** ESLint and Prettier cover `.claude/hooks/`, and the test runs through a `pnpm` script (with Node's runner or moved to Vitest, decided there); **PH-02:** `ci.yml` runs it, so a broken hook fails CI instead of silently letting pushes through.
+
+- **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences
+- **Status:** ⬜ Open
+
 ### PH-02 CI checks
 
-Roadmap entry: [PH-02](roadmap.md#ph-02-ci-checks).
+Roadmap entry: [PH-02](roadmap.md#ph-02-ci-checks).\
+Also: [OP-062](#op-062).
 
 #### OP-019
 
