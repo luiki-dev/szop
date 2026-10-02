@@ -1129,7 +1129,7 @@ The owner checks in the editor (PR "How it was tested"): the extensions are reco
 **Interfaces:**
 - Consumes: every file and script of Tasks 1–7; the tool pages' paths.
 
-- [ ] **Step 1: Write `docs/development/setup.md`**
+- [x] **Step 1: Write `docs/development/setup.md`**
 
 Over 100 lines, so it starts with a `## Contents`. Steps only, each linking its tool page instead of explaining. Sections, in order, with these commands:
 
@@ -1143,7 +1143,7 @@ Over 100 lines, so it starts with a `## Contents`. Steps only, each linking its 
 8. **What the git hooks do** — two sentences, linking [husky-and-lint-staged.md](tools/husky-and-lint-staged.md) and [commitlint.md](tools/commitlint.md).
 9. **Coming later** — Docker Desktop and the database (PH-04), running the app (PH-03).
 
-- [ ] **Step 2: Write `docs/decisions/0016-toolchain-details.md`**
+- [x] **Step 2: Write `docs/decisions/0016-toolchain-details.md`**
 
 ```markdown
 # ADR 0016 — Toolchain details
@@ -1181,7 +1181,7 @@ Over 100 lines, so it starts with a `## Contents`. Steps only, each linking its 
 - **The living docs are updated:** the README's "Development" section, `CLAUDE.md`'s documentation list, the glossary, `git-workflow.md` (the scope rule, the hook's path) and `phase-walkthrough.md` (the file names).
 ```
 
-- [ ] **Step 3: Add the status-line pointers to the refined ADRs**
+- [x] **Step 3: Add the status-line pointers to the refined ADRs**
 
 Each is a mechanical status change (CLAUDE.md allows it). Append to the end of each `- **Status:**` line:
 - `0005-development-environment.md`: `; decision 12 refined by [ADR 0016](0016-toolchain-details.md) (Markdown left out of Prettier)`
@@ -1191,11 +1191,11 @@ Each is a mechanical status change (CLAUDE.md allows it). Append to the end of e
 
 Read each status line first and match its punctuation (`—` before the first refinement, `;` between refinements).
 
-- [ ] **Step 4: Fix the pipe in ADR 0015's table**
+- [x] **Step 4: Fix the pipe in ADR 0015's table**
 
 In `docs/decisions/0015-git-push-guard-hook.md`, decision 1, replace `` `;`, `&`, `|` and newlines `` with `` `;`, `&`, `\|` and newlines ``. A `|` inside a table cell splits the cell on GitHub, even inside backticks.
 
-- [ ] **Step 5: Update `phase-walkthrough.md`**
+- [x] **Step 5: Update `phase-walkthrough.md`**
 
 - Line 62: `docs/superpowers/specs/2026-10-05-templates-design.md` → `docs/superpowers/specs/2026-10-05-PH-28-templates-design.md`
 - Line 63: `docs/superpowers/plans/2026-10-05-templates.md` → `docs/superpowers/plans/2026-10-05-PH-28-templates.md`
@@ -1203,7 +1203,7 @@ In `docs/decisions/0015-git-push-guard-hook.md`, decision 1, replace `` `;`, `&`
 
 Check with `grep -n "superpowers/specs\|superpowers/plans" docs/development/phase-walkthrough.md` that no other example uses the old form.
 
-- [ ] **Step 6: Update the README and `CLAUDE.md`**
+- [x] **Step 6: Update the README and `CLAUDE.md`**
 
 README: add a section before `## Documentation`:
 
@@ -1227,7 +1227,7 @@ and add to the `## Documentation` list, after "GitHub settings":
 - `docs/development/tools/` — one page per development tool: what it is, why it was chosen, its configuration explained. Keep a tool's page updated when its configuration changes.
 ```
 
-- [ ] **Step 7: Update the glossary**
+- [x] **Step 7: Update the glossary**
 
 Add, in alphabetical order, to the terms table (check first that none exists; extend an existing entry instead):
 - **Flat config** — ESLint's configuration format since version 9: one `eslint.config.js` exporting an array of config objects, applied in order.
@@ -1237,7 +1237,7 @@ Add, in alphabetical order, to the terms table (check first that none exists; ex
 
 And in the acronyms table, if missing: **LTS** (Long-Term Support).
 
-- [ ] **Step 8: Update `docs/open-points.md`**
+- [x] **Step 8: Update `docs/open-points.md`**
 
 - **OP-005:** in its Parts, mark `**PH-01:** … ✅ ([#PR](…))` once the PR number is known (set it after the PR opens, step 11); move the entry under `### PH-04 Database`; remove `[OP-005](#op-005)` from PH-04's "Also" line (it now sits there) and add it to the "Also" line of no other phase.
 - **OP-008, OP-009:** move to `## Closed`, status `✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#PR](…))`.
@@ -1246,7 +1246,7 @@ And in the acronyms table, if missing: **LTS** (Long-Term Support).
 - **New OP-064** under `## Candidates`: "**Move to TypeScript 7** (the native compiler) once typescript-eslint supports it; until then TypeScript is pinned to 6.0. Source: ADR 0016, decision 4. Status: ⬜ Open."
 - Update the Contents if a heading changed.
 
-- [ ] **Step 9: Check the links**
+- [x] **Step 9: Check the links**
 
 Run:
 
@@ -1270,12 +1270,12 @@ EOF
 
 Expected: `all relative links resolve`.
 
-- [ ] **Step 10: Run every check once more**
+- [x] **Step 10: Run every check once more**
 
 Run: `rm -rf node_modules && pnpm install && pnpm lint && pnpm typecheck && pnpm test && pnpm exec prettier --check .`
 Expected: all pass.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add -A

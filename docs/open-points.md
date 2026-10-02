@@ -62,38 +62,16 @@ Everything that is still undecided or not yet done and has been left to a later 
 
 Roadmap entry: [PH-01](roadmap.md#ph-01-monorepo-and-toolchain).
 
-#### OP-005
+### PH-02 CI checks
 
-**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`onlyBuiltDependencies`) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-01:** everything except `compose.yaml` and the `.env` files; **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database.
-
-- **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
-- **Status:** ⬜ Open
-
-#### OP-008
-
-**Give the README a short "Development" section** pointing to `docs/development/`.
-
-- **Source:** [ADR 0005](decisions/0005-development-environment.md), consequences
-- **Status:** ⬜ Open
-
-#### OP-009
-
-**Add commitlint** with `@commitlint/config-conventional` and husky's `commit-msg` hook. Two changes to the preset, agreed in the triage of m9: `body-max-line-length` and `footer-max-line-length` are turned off for everyone, since Dependabot's commit bodies hold links longer than 100 characters (and so may people's), which would fail every Dependabot PR in CI; and `type-enum` allows only the nine types of [ADR 0009](decisions/0009-git-workflow.md), decision 9, not the preset's `style` and `revert`.
-
-- **Source:** [ADR 0009](decisions/0009-git-workflow.md), decision 16 and consequences; [Audit, m9](audits/2026-09-29-design-sanity-check.md#process-and-ci)
-- **Status:** ⬜ Open
+Roadmap entry: [PH-02](roadmap.md#ph-02-ci-checks).
 
 #### OP-062
 
-**Bring the Claude Code push hook into the toolchain and CI.** `.claude/hooks/guard-git-push.mjs` and its tests were written before there was any toolchain: they are plain Node, run by hand with `node --test .claude/hooks/guard-git-push.test.mjs`. **Parts:** **PH-01:** ESLint and Prettier cover `.claude/hooks/`, and the test runs through a `pnpm` script (with Node's runner or moved to Vitest, decided there); **PH-02:** `ci.yml` runs it, so a broken hook fails CI instead of silently letting pushes through.
+**Bring the Claude Code push hook into the toolchain and CI.** The hook is now `.claude/hooks/guard-git-push.ts`: ESLint lints it, Prettier formats it, `tsc` type-checks it and `pnpm test` runs its tests with Node's test runner. **Parts:** **PH-01:** ✅ ([#PR](…)); **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through; **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`.
 
-- **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences
+- **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences; [ADR 0016](decisions/0016-toolchain-details.md), decision 6
 - **Status:** ⬜ Open
-
-### PH-02 CI checks
-
-Roadmap entry: [PH-02](roadmap.md#ph-02-ci-checks).\
-Also: [OP-062](#op-062).
 
 #### OP-019
 
@@ -120,7 +98,8 @@ Also: [OP-062](#op-062).
 
 ### PH-03 API skeleton
 
-Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
+Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).\
+Also: [OP-062](#op-062).
 
 #### OP-010
 
@@ -146,7 +125,14 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
 ### PH-04 Database
 
 Roadmap entry: [PH-04](roadmap.md#ph-04-database).\
-Also: [OP-005](#op-005), [OP-012](#op-012), [OP-013](#op-013).
+Also: [OP-012](#op-012), [OP-013](#op-013).
+
+#### OP-005
+
+**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`onlyBuiltDependencies`) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-01:** everything except `compose.yaml` and the `.env` files ✅ ([#PR](…)); **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database.
+
+- **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
+- **Status:** ⬜ Open
 
 #### OP-006
 
@@ -574,6 +560,20 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 20
 - **Status:** ⬜ Open
 
+#### OP-063
+
+**Lint the Markdown docs without reformatting them.** Prettier stays out of Markdown because it pads tables ([ADR 0016](decisions/0016-toolchain-details.md), decision 8). A linter such as markdownlint could check headings, lists and links without touching table layout.
+
+- **Source:** [ADR 0016](decisions/0016-toolchain-details.md), decision 8
+- **Status:** ⬜ Open
+
+#### OP-064
+
+**Move to TypeScript 7** (the native compiler) once typescript-eslint supports it; until then TypeScript is pinned to 6.0.
+
+- **Source:** [ADR 0016](decisions/0016-toolchain-details.md), decision 4
+- **Status:** ⬜ Open
+
 ## Closed
 
 #### OP-001
@@ -603,6 +603,20 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decision 26; [ADR 0010](decisions/0010-ci-cd.md), decision 23; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 2
 - **Status:** ✅ Closed: `infra/bootstrap` and the permanent part of `infra/base` are applied in PH-09 and PH-10, the safety net is merged in PH-11, and the real `demo-up` comes with PH-12 ([ADR 0014](decisions/0014-roadmap.md), decision 8)
+
+#### OP-008
+
+**Give the README a short "Development" section** pointing to `docs/development/`.
+
+- **Source:** [ADR 0005](decisions/0005-development-environment.md), consequences
+- **Status:** ✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#PR](…))
+
+#### OP-009
+
+**Add commitlint** with `@commitlint/config-conventional` and husky's `commit-msg` hook. Two changes to the preset, agreed in the triage of m9: `body-max-line-length` and `footer-max-line-length` are turned off for everyone, since Dependabot's commit bodies hold links longer than 100 characters (and so may people's), which would fail every Dependabot PR in CI; and `type-enum` allows only the nine types of [ADR 0009](decisions/0009-git-workflow.md), decision 9, not the preset's `style` and `revert`.
+
+- **Source:** [ADR 0009](decisions/0009-git-workflow.md), decision 16 and consequences; [Audit, m9](audits/2026-09-29-design-sanity-check.md#process-and-ci)
+- **Status:** ✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#PR](…))
 
 #### OP-024
 

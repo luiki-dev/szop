@@ -43,6 +43,10 @@ It is built for the phone in your hand in the store as much as for planning at a
 - **Database** — PostgreSQL with Drizzle
 - **Authentication** — Better Auth, cookie-based sessions
 
+## Development
+
+Szop is a pnpm monorepo in TypeScript, developed in WSL. To set up a machine and run the checks, follow the [setup guide](docs/development/setup.md); every tool has its own page in [docs/development/tools](docs/development/tools/).
+
 ## Documentation
 
 - [Functional requirements](docs/requirements/functional-requirements.md) — what Szop does, in detail
@@ -56,4 +60,6 @@ It is built for the phone in your hand in the store as much as for planning at a
 - [Git workflow](docs/development/git-workflow.md) — how changes reach `main` and how releases are cut
 - [Definition of done](docs/development/definition-of-done.md) — what every PR must meet before it is merged
 - [GitHub settings](docs/development/github-settings.md) — the repository settings behind the workflow
+- [Setup guide](docs/development/setup.md) — from a clean Windows machine to passing checks
+- [Tool pages](docs/development/tools/) — each development tool, why it was chosen and its configuration explained
 - [Decisions](docs/decisions/) — records of the decisions behind the project and why they were made
