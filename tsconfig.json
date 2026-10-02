@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "checkJs": true,
+    "types": ["node"]
+  },
+  "include": ["*.js", ".claude/hooks/**/*.ts"]
+}
