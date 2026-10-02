@@ -2,7 +2,7 @@
 
 - **Status:** ✅ Accepted
 - **Date:** 2026-10-02
-- **Refines:** [ADR 0005](0005-development-environment.md), decision 12 (Markdown left out of Prettier); [ADR 0007](0007-testing-strategy.md), decision 18 (`pnpm test` runs Node's test runner until Vitest arrives); [ADR 0009](0009-git-workflow.md), decision 9 (an allow-list of scopes); [ADR 0015](0015-git-push-guard-hook.md), decision 3 (the push hook in TypeScript)
+- **Refines:** [ADR 0005](0005-development-environment.md), decision 12 (Markdown left out of Prettier); [ADR 0007](0007-testing-strategy.md), decision 18 (`pnpm test` runs Node's test runner until Vitest arrives); [ADR 0009](0009-git-workflow.md), decision 9 (an allow-list of scopes); [ADR 0012](0012-security-baseline.md), decision 18 (pnpm 12's `allowBuilds` replaces `onlyBuiltDependencies`, and an unlisted build script now fails the install instead of being skipped; see decision 3); [ADR 0015](0015-git-push-guard-hook.md), decision 3 (the push hook in TypeScript)
 
 ## Context
 

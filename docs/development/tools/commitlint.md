@@ -11,15 +11,22 @@ commitlint checks every commit message against the Conventional Commits conventi
 
 ## Configuration
 
-**`commitlint.config.js`** extends `@commitlint/config-conventional`, the preset with the usual Conventional Commits rules, and overrides these rules. Each rule is `[level, "always", value]`: level `2` means an error, `0` means off.
+**`commitlint.config.js`** extends `@commitlint/config-conventional`, the preset with the usual Conventional Commits rules, and overrides these rules. A rule is written `[level, "always", value]`: level `2` means an error, `0` means off. A rule that is off needs only its level, so `[0]` is enough.
 
 - `"body-max-line-length": [0]` and `"footer-max-line-length": [0]`: no line-length limit in the body or footer, for the long links above and our `Claude-Session` trailer.
 - `"type-enum"`: the type must be one of `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`.
 - `"scope-enum"`: when a scope is given, it must be one of the list, grouped in the file by comment: workspaces and test layers, one feature per requirement area, docs, tooling. A commit without a scope is fine.
 
+**Why the scope is optional, and how to combine scopes:** the preset sets no `scope-empty` rule, which is the rule that would demand a scope, and `scope-enum` passes when there is no scope. One scope slot may also hold several allow-listed values, separated by `/`, `\` or `,` (a comma may be followed by one space): `feat(web,api): …`, `feat(web/api): …` and `feat(web, api): …` all pass. Each part must be on the list, so `feat(web,aip)` fails.
+
 **Adding a scope:** a pull request that needs a new scope adds it to the `scope-enum` list in the same PR, in the group it belongs to. The rule then accepts it from that commit on.
 
-**Merge commits** (`Merge branch 'main' into …`) are ignored by commitlint's default ignore rules, so bringing `main` into a branch passes without a type.
+**Merge commits** (`Merge branch 'main' into …`) are ignored by commitlint's default ignore rules, so bringing `main` into a branch passes without a type. The same goes for the messages git writes for a revert (`Revert "feat: add thing"`).
+
+**Rules the preset keeps:** the overrides above leave the rest of `@commitlint/config-conventional` in force, and two of its rules reject messages in everyday use:
+
+- `subject-case`: the subject must not be in sentence case, start case, Pascal case or upper case. `feat: Add thing` and `docs(adr): ADR 0016` are rejected, `feat: add thing` passes.
+- `header-max-length`: the first line, `type(scope): subject`, is at most 100 characters.
 
 **`.husky/commit-msg`** holds one line, `pnpm exec commitlint --edit "$1"`. Git passes the path of the file holding the message as the first argument (`$1`), and `--edit` tells commitlint to read the message from it. A non-zero exit stops the commit. See [husky and lint-staged](husky-and-lint-staged.md) for how the hook runs.
 
@@ -32,7 +39,7 @@ git commit -e -F .git/COMMIT_EDITMSG    # reopen the rejected message in the edi
 echo "feat(api): add health check" | pnpm exec commitlint    # check a message without committing; exit 0 means it passes
 ```
 
-- The rule name tells what to change: `type-enum` (use one of the nine types), `scope-enum` (use a listed scope or none), `subject-empty` and `type-empty` (the subject must look like `type: description`).
+- The rule name tells what to change: `type-enum` (use one of the nine types), `scope-enum` (use a listed scope or none), `subject-case` (start the subject in lower case, so `feat: add thing`), `header-max-length` (shorten the first line to 100 characters), `subject-empty` and `type-empty` (the subject must look like `type: description`).
 - From PH-02, CI checks every commit of a pull request, and the PR title, with the same rules.
 
 ## Official documentation

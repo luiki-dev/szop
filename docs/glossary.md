@@ -48,10 +48,10 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **LTS** | Long-Term Support | A release line that receives fixes for an extended period. Even-numbered Node.js releases (22, 24, …) become LTS. |
 | **MFA** | Multi-Factor Authentication | Logging in with a second proof besides the password, such as a code from an authenticator app. |
 | **MSW** | Mock Service Worker | A library that intercepts the app's HTTP requests at the network level and answers them with fake responses. Szop's component tests use it, so the real API client runs unchanged. |
-| **nvm** | Node Version Manager | A tool that installs and switches Node.js versions per user. Szop's `.nvmrc` tells it which one to use. |
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
 | **NAT** | Network Address Translation | Here: a NAT gateway lets resources in a private subnet reach the internet. Costs about $32 a month on AWS; not used (see ADR 0008). |
 | **NFR** | Non-functional requirement | A quality the system must have rather than something it does: supported browsers, accessibility, performance. Szop's are [NFR-1 to NFR-3](requirements/functional-requirements.md#3-non-functional-requirements). |
+| **nvm** | Node Version Manager | A tool that installs and switches Node.js versions per user. Szop's `.nvmrc` tells it which one to use. |
 | **OAuth / OIDC** | Open Authorization / OpenID Connect | Standards for logging in through another provider ("Sign in with Google"). Relevant for the social-login future extension. Also how CI logs in to AWS without stored keys: GitHub signs a token saying which repository the job belongs to and which environment, branch or PR event it runs for, and AWS exchanges it for short-lived credentials (see ADR 0010 and ADR 0012). |
 | **OpenSSF** | Open Source Security Foundation | A Linux Foundation project for open-source security. Its **Scorecard** rates a repository's security practices. Not used yet (see ADR 0010). |
 | **ORM** | Object-Relational Mapper | A library that maps database tables to objects or types in code and builds queries. Drizzle is ours. |
@@ -153,7 +153,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Flat config** | ESLint's configuration format since version 9: one `eslint.config.js` exporting an array of config objects, applied in order. |
 | **Formatter** | A tool that rewrites code into one consistent layout (indentation, quotes, line breaks). Szop uses Prettier. |
 | **Git flow** | A branching model with long-lived `main` and `develop` branches plus `feature/*`, `release/*` and `hotfix/*` branches, made for software released in numbered versions. Considered, not used (see ADR 0009). |
-| **Git hook** | A script Git runs at a fixed moment, for example before a commit is created (a **pre-commit hook**). Szop's formats and lints the files being committed. Szop's hooks are managed by husky: the pre-commit hook runs lint-staged and the commit-msg hook runs commitlint. |
+| **Git hook** | A script Git runs at a fixed moment, for example before a commit is created (a **pre-commit hook**). Szop's hooks, managed by husky, format and lint the staged files (pre-commit, lint-staged) and check the message (commit-msg, commitlint). |
 | **GitHub Actions: workflow, job, runner** | GitHub's CI/CD service. A **workflow** is a YAML file in `.github/workflows/` started by an event (a push, a PR, a schedule, a button); it holds **jobs**, which run in parallel unless one needs another, each on a fresh virtual machine, the **runner**. |
 | **GitHub App** | An integration registered on GitHub with its own identity (`name[bot]`) and narrowly chosen permissions; it gets tokens that expire within an hour. Szop's release-please runs as one (see ADR 0010). |
 | **GitHub flow** | A branching model where `main` is always releasable and every change is made on a short-lived branch merged through a pull request. Szop uses it (see ADR 0009). |

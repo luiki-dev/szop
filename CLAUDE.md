@@ -40,7 +40,7 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 - `docs/architecture/threat-model.md` — what Szop protects, who can act through which path, and what guards each entry point. Keep it updated when an actor or entry point is added.
 - `docs/architecture/visual-design.md` — the living design system: the look, design tokens, typography, brand, and the layout and interaction principles every screen follows, with the approved mockups in `docs/architecture/visual-design/`. Keep it updated when the design system changes.
 - `docs/glossary.md` — acronyms and terms used in the docs.
-- `docs/roadmap.md` — the phases in order, grouped into stages, each with its goal, what it delivers, the owner's steps and its status. Keep a phase's row updated when its PR opens and before it is merged.
+- `docs/roadmap.md` — the phases in order, grouped into stages, each with its goal, what it delivers, the owner's steps and its status. Keep a phase's row updated when its work starts, when its PR opens and before it is merged.
 - `docs/open-points.md` — the register of everything still undecided or undone, grouped by the roadmap's phases. Keep it updated whenever something is deferred or settled.
 - `docs/development/git-workflow.md` — the day-to-day git workflow: branches, commits, PRs, review, merging and releases.
 - `docs/development/definition-of-done.md` — the one definition of done: every item, what it means, which PRs need it, and when the demo check must be repeated. The PR template mirrors it.

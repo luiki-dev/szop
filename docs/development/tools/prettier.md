@@ -26,7 +26,7 @@ The Tailwind CSS class-sorting plugin arrives with the styling in PH-14.
 ## Everyday use
 
 ```bash
-pnpm format                      # prettier --write .: rewrite every file in the repository
+pnpm format                      # prettier --write .: rewrite every file Prettier supports that `.prettierignore` and `.gitignore` do not exclude
 pnpm exec prettier --check .     # only report files that are not formatted, change nothing
 ```
 

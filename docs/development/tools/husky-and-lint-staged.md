@@ -28,6 +28,7 @@ On `git commit`, the hook runs lint-staged, which runs the commands above on the
 
 - If every command passes, the commit goes ahead. Files the hook reformatted are staged again automatically, so the commit holds the formatted version.
 - If a command fails, for example on an ESLint finding it cannot fix, git prints the finding followed by `husky - pre-commit script failed` and creates no commit. Fix the file, stage it and commit again.
+- If ESLint reports `Parsing error: … was not found by the project service`, a staged code file lies outside every tsconfig. Add its folder to the `include` list of `tsconfig.json`; [ESLint](eslint.md) explains why.
 - `git commit --no-verify` skips the hooks. It exists for emergencies, but from PH-02 CI runs the same checks, so skipping only delays the failure to the pull request.
 - After cloning the repository, `pnpm install` sets the hooks up through the `prepare` script. Nothing else is needed.
 

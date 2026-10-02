@@ -45,7 +45,7 @@ It is built for the phone in your hand in the store as much as for planning at a
 
 ## Development
 
-Szop is a pnpm monorepo in TypeScript, developed in WSL. To set up a machine and run the checks, follow the [setup guide](docs/development/setup.md); every tool has its own page in [docs/development/tools](docs/development/tools/).
+Szop is a pnpm monorepo in TypeScript, developed in Windows Subsystem for Linux (WSL). To set up a machine and run the checks, follow the [setup guide](docs/development/setup.md); every tool has its own page in [docs/development/tools](docs/development/tools/).
 
 ## Documentation
 

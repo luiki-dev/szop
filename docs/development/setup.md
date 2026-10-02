@@ -33,7 +33,7 @@ git config --global user.email "you@example.com"
 git config --global core.autocrlf false
 ```
 
-`core.autocrlf false` because the repository's `.gitattributes` already handles line endings: LF everywhere.
+`core.autocrlf false` because the repository's `.gitattributes` already handles line endings: line feed (LF) everywhere.
 
 ## 3. nvm and Node
 
@@ -64,14 +64,17 @@ More in [VS Code](tools/vscode.md).
 
 ## 6. Clone and install
 
+Clone into the Linux file system (your home directory, for example `~/workspace`), not under `/mnt/c`, which is slow.
+
 ```bash
+mkdir -p ~/workspace && cd ~/workspace
 git clone https://github.com/luiki-dev/szop.git
 cd szop
 nvm use
 pnpm install
 ```
 
-Clone into the Linux file system (your home directory, for example `~/workspace`), not under `/mnt/c`, which is slow. `pnpm install` also sets up the git hooks. If it stops with `ERR_PNPM_IGNORED_BUILDS`, a dependency wants to run an install script; see [pnpm](tools/pnpm.md) before allowing it.
+`pnpm install` also sets up the git hooks. Pushing over HTTPS needs credentials: run `gh auth login` (GitHub CLI) or set up Git Credential Manager. If it stops with `ERR_PNPM_IGNORED_BUILDS`, a dependency wants to run an install script; see [pnpm](tools/pnpm.md) before allowing it.
 
 ## 7. Check that everything works
 

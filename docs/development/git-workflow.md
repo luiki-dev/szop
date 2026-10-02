@@ -84,7 +84,7 @@ build(deps): bump vitest to 3.2
 
 **One commit per task holds its tests and its code together**, made once the task's tests pass. Test-driven development (TDD, [ADR 0007](../decisions/0007-testing-strategy.md), decision 3) happens in the working tree: write a failing test, see it fail, write the code, see it pass, tidy up, then commit. The plan spells these steps out in each task. Committing the failing test separately would record the TDD cycle in the history, but leave commits that fail their own tests, which breaks `git bisect` and a demo built from such a commit. With test and code together, every commit passes its tests and the diff shows each test next to the code it drives.
 
-Two git hooks run on every commit, once [PH-01](../roadmap.md#ph-01-monorepo-and-toolchain) has set them up: the **pre-commit** hook formats and lints the staged files ([ADR 0005](../decisions/0005-development-environment.md), decision 13), and the **commit-msg** hook runs commitlint, which rejects a message that does not follow the format.
+Two git hooks run on every commit: the **pre-commit** hook formats and lints the staged files ([ADR 0005](../decisions/0005-development-environment.md), decision 13; see [husky and lint-staged](tools/husky-and-lint-staged.md)), and the **commit-msg** hook runs commitlint, which rejects a message that does not follow the format ([ADR 0009](../decisions/0009-git-workflow.md), decision 9; see [commitlint](tools/commitlint.md)).
 
 ## 3. Open a pull request
 
