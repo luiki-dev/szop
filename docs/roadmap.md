@@ -67,7 +67,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 | Phase | Status | Spec | Plan | PR |
 |---|---|---|---|---|
-| [PH-01 Monorepo and toolchain](#ph-01-monorepo-and-toolchain) | ⬜ Not started | — | — | — |
+| [PH-01 Monorepo and toolchain](#ph-01-monorepo-and-toolchain) | 🚧 In progress | [Spec](superpowers/specs/2026-10-02-PH-01-monorepo-and-toolchain-design.md) | [Plan](superpowers/plans/2026-10-02-PH-01-monorepo-and-toolchain.md) | — |
 | [PH-02 CI checks](#ph-02-ci-checks) | ⬜ Not started | — | — | — |
 
 ### PH-01 Monorepo and toolchain
