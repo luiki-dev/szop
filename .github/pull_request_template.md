@@ -19,7 +19,7 @@
 
 ## Definition of done
 
-<!-- What each item means, which PRs need which items, and when the demo check must be repeated: docs/development/definition-of-done.md. Mark an item that does not apply as "➖ N/A: <reason>". In brackets: who makes the item true; the owner verifies all of them. -->
+<!-- What each item means, which PRs need which items, and when the demo check must be repeated: docs/development/definition-of-done.md. Mark an item that does not apply as "➖ N/A: <reason>" after its text, and leave its box unchecked. In brackets: who makes the item true; the owner verifies all of them. -->
 
 - [ ] Tests pass, at the right layers (Claude)
 - [ ] Surviving mutants reviewed, when domain rules changed (Claude → owner)

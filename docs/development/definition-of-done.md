@@ -29,7 +29,7 @@ Whoever made an item true, **the owner verifies every item when reviewing the PR
 
 ## Items that don't apply: N/A with a reason
 
-An item that doesn't apply is marked **"➖ N/A: *reason*"**, never a bare N/A, so the reviewer sees it was considered. For example:
+An item that doesn't apply is marked **"➖ N/A: *reason*"**, never a bare N/A, so the reviewer sees it was considered. **Its checkbox stays unchecked:** a tick means the item was done, and ➖ is an outcome of its own, so the reason goes after the item's text, as in `- [ ] CI is green (CI): ➖ N/A: CI does not exist yet`. For example:
 
 - "➖ N/A: CI does not exist yet"
 - "➖ N/A: no image or infrastructure change"
@@ -38,7 +38,7 @@ An item that doesn't apply is marked **"➖ N/A: *reason*"**, never a bare N/A, 
 ## Which PRs need which items
 
 - **A phase PR** meets every item, or marks it N/A with a reason.
-- **Any other PR** (a foundation ADR, a documentation fix, a Dependabot update, the release PR) meets items 1, 3 and 10, and items 6–9 and 11 when it changes what they cover. **The demo check (item 4) is the owner's call**: requiring it would mean a 10–15 minute spin-up for each of the week's Dependabot PRs. Those are covered by CI instead (see [OP-032](../open-points.md#cicd-phase)).
+- **Any other PR** (a foundation ADR, a documentation fix, a Dependabot update, the release PR) meets items 1, 3 and 10, and items 6–9 and 11 when it changes what they cover. **The demo check (item 4) is the owner's call**: requiring it would mean a 10–15 minute spin-up for each of the week's Dependabot PRs. Those are covered by CI instead (see [OP-032](../open-points.md#op-032)).
 
 ## When the demo check must be repeated
 

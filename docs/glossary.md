@@ -183,7 +183,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Origin** | The scheme, domain and port of a URL (`https://example.com`). Cookies and browser security rules work per origin. |
 | **Performance budget** | Limits a project agrees not to exceed so it stays fast as it grows, such as "at most 200 KB of JavaScript" or "LCP at most 2.5 s". |
 | **Phantom dependency** | A package your code imports without declaring it, working only because something else happened to install it. It breaks when that other package changes. pnpm prevents it. |
-| **Phase** | One step of the implementation roadmap, taken through its own brainstorm, design approval and implementation. |
+| **Phase** | One step of the implementation roadmap (`docs/roadmap.md`), with a `PH-` ID, taken through its own brainstorm, design approval and implementation, on one branch and in one PR. Phases are grouped into stages (see ADR 0014). |
 | **Property-based testing** | Testing a rule against hundreds of generated inputs instead of a few hand-picked examples, checking a property that must always hold ("a parent category always comes before its children"). Szop uses fast-check. |
 | **Proxy (dev server)** | The Vite dev server forwarding requests for `/api/*` to the API, so the browser sees a single origin during development. |
 | **Push protection** | A GitHub secret scanning feature that rejects a push containing a recognized secret, such as an access key, before it reaches the repository. |
@@ -195,6 +195,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Required status check** | A CI check that must pass before GitHub allows a PR to be merged. Once CI exists, Szop requires `ci-ok`, which sums up every job of `ci.yml`, and the PR title check (see ADR 0010). |
 | **Role (IAM)** | A set of AWS permissions assumed temporarily by a person or service, instead of permanent keys. ECS uses a **task execution role** (to pull the image and read secrets) and a **task role** (what the app itself may do). |
 | **Rolling update** | Replacing the running copies of an app one by one: a copy on the new version starts, passes its health check, then an old one stops, so the app stays up. How ECS redeploys Szop's demo with a new image. |
+| **Rolling-wave planning** | Planning near work in detail and far work only roughly, refining the far part as it comes closer. Szop's roadmap splits the stages up to the MVP into phases and keeps the Later stage rough (see ADR 0014). |
 | **Rollout** | Getting a new version to its users: releasing and deploying it, often gradually (to a few users first, or behind feature flags). Szop has no users and no permanent environment, so it has no rollout in this sense. |
 | **Root module (Terraform)** | A folder of Terraform configuration applied on its own, with its own state. Szop has three: `bootstrap`, `base` and `demo`. |
 | **Scale to zero** | A platform stopping all instances of an app when no requests arrive, and starting one on the next request. Cheap, but the first request waits. |
@@ -209,6 +210,8 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Skeleton placeholder** | Gray shapes in the layout of the content that is still loading, shown instead of a spinner. |
 | **Snapshot test** | A test that saves the output (for example rendered HTML) on its first run and fails when later output differs. Szop avoids them for rendered markup, because updating a snapshot without reading it is too easy. |
 | **Spec / implementation plan** | The two working documents of a larger phase: the spec describes the agreed design, the plan lists the steps to build it. Kept in `docs/superpowers/`. |
+| **Spike** | A short, time-boxed investigation that answers one question, such as whether a library works as hoped. Its output is an answer, not code to keep; in Szop it runs before the brainstorm of the phase that needs it (see ADR 0014). |
+| **Stage** | A milestone on Szop's roadmap with an exit criterion, such as "every MVP requirement delivered, `1.0.0` released". It groups phases and has no branch or PR of its own (see ADR 0014). |
 | **Storybook** | A separate local web app for building and reviewing components on their own, in all their states. Not used by Szop for now. |
 | **Subnet (public, private)** | A slice of a VPC's addresses. A public subnet has a route to the internet; a private one does not. |
 | **Supply-chain attack** | Attacking software through something it depends on, such as a hijacked npm package or GitHub action, instead of attacking it directly. |

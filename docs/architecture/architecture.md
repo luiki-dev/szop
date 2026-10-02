@@ -132,7 +132,7 @@ A versioned data file in `apps/api` holds the default catalog, category tree and
   - reassigns the anonymous workspace to the new account on registration ([ACC-2](../requirements/functional-requirements.md#acc-2)), or
   - imports the guest's lists and templates into the existing account's workspace, or discards them, according to the user's choice ([ACC-4](../requirements/functional-requirements.md#acc-4)).
 
-  How this maps onto Better Auth's anonymous plugin is not settled: by default the plugin links and deletes the anonymous user inside the sign-in request, before the [ACC-4](../requirements/functional-requirements.md#acc-4) choice can be made ([OP-038](../open-points.md#feature-phases)).
+  How this maps onto Better Auth's anonymous plugin is not settled: by default the plugin links and deletes the anonymous user inside the sign-in request, before the [ACC-4](../requirements/functional-requirements.md#acc-4) choice can be made ([OP-038](../open-points.md#op-038)).
 - **Activity tracking.** Each workspace has a `last_active_at` timestamp, updated by the auth hook at most once an hour to avoid a database write on every request.
 - **Cleanup.** A scheduled task inside the API process deletes ([ACC-7](../requirements/functional-requirements.md#acc-7), [ACC-8](../requirements/functional-requirements.md#acc-8)):
   - anonymous users whose workspace's `last_active_at` is within 1 hour of creation, 3 days after creation;

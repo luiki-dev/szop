@@ -1,6 +1,6 @@
 # ADR 0007 — Testing strategy
 
-- **Status:** ✅ Accepted — decisions 6 and 15 completed by [ADR 0008](0008-hosting.md) (load testing left out; the API serves the SPA, so the E2E environment is one process); CI's PostgreSQL service, Playwright browsers and the storage of failed runs' traces provided by [ADR 0010](0010-ci-cd.md); decisions 5 and 6 extended by [ADR 0013](0013-visual-design.md) (a Firefox desktop project; axe's WCAG 2.2 AA rule sets in light and dark; journeys fail on a CSP violation)
+- **Status:** ✅ Accepted — decisions 6 and 15 completed by [ADR 0008](0008-hosting.md) (load testing left out; the API serves the SPA, so the E2E environment is one process); CI's PostgreSQL service, Playwright browsers and the storage of failed runs' traces provided by [ADR 0010](0010-ci-cd.md); decisions 5 and 6 extended by [ADR 0013](0013-visual-design.md) (a Firefox desktop project; axe's WCAG 2.2 AA rule sets in light and dark; journeys fail on a CSP violation); its consequences refined by [ADR 0014](0014-roadmap.md), decision 7 (each test tool arrives with its first use, not in the development environment phase)
 - **Date:** 2026-09-27
 - **Refines:** decision 7 of [ADR 0004](0004-implementation-process.md) (what "the tests pass" means in the definition of done)
 

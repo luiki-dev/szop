@@ -84,7 +84,7 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### CRITICAL-1. IDs the browser sends for related records are not checked against the workspace
 
-> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-034](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-034](../open-points.md#op-034). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:** `architecture.md`, Access control: "Services always scope queries by the workspace ID taken from the **session**, never by an ID sent by the browser." ADR 0002, decision 16.
 - **Problem:** The rule protects the record being written, not the records it points to. Many writes carry other records' IDs:
@@ -104,7 +104,7 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### CRITICAL-2. The demo workflows can't be used before they are merged, which breaks the definition of done and the safety-net ordering
 
-> ✅ **Fixed** in [ADR 0011, decision 2](../decisions/0011-design-sanity-check-follow-ups.md#decisions) ([triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings)); the phase order is tracked as [OP-004](../open-points.md#before-the-roadmap).
+> ✅ **Fixed** in [ADR 0011, decision 2](../decisions/0011-design-sanity-check-follow-ups.md#decisions) ([triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings)); the phase order is tracked as [OP-004](../open-points.md#op-004).
 
 - **Where:**
   - ADR 0008, decision 26: the teardown safety net and budget alerts "come before the walking skeleton, so no demo runs without it".
@@ -130,7 +130,7 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### MAJOR-1. The docs describe two different products: a persistent public service and a disposable demo
 
-> ✅ **Fixed** in [ADR 0011, decision 5](../decisions/0011-design-sanity-check-follow-ups.md#decisions): the README's privacy sentence and a new assumption in the requirements. ⏳ **Deferred:** the always-on checklist ([OP-033](../open-points.md#unassigned)). ✖️ **Rejected:** the demo banner. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ✅ **Fixed** in [ADR 0011, decision 5](../decisions/0011-design-sanity-check-follow-ups.md#decisions): the README's privacy sentence and a new assumption in the requirements. ⏳ **Deferred:** the always-on checklist ([OP-033](../open-points.md#op-033)). ✖️ **Rejected:** the demo banner. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:**
   - README: "your lists, catalog and categories come with you to every device" and "everything stays in your browser".
@@ -157,7 +157,7 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### MAJOR-2. Moving a guest into an account doesn't fit how Better Auth's anonymous plugin links users
 
-> ⏳ **Deferred** to the phase delivering ACC-2 and ACC-4, after a Better Auth spike: [OP-038](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred** to the phase delivering ACC-2 and ACC-4, after a Better Auth spike: [OP-038](../open-points.md#op-038). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:** `architecture.md`, Anonymous guests: "When an anonymous user registers or logs in, Better Auth links them to the registered account. In that step the server either reassigns … or imports … or discards them, according to the user's choice (ACC-4)." ACC-2, ACC-4, ACC-8, UC-8 and UC-9.
 - **Problem:**
@@ -174,7 +174,7 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### MAJOR-3. Guest data lifetime doesn't match how guests use a shopping list
 
-> ⏳ **Deferred:** the session lifetime to the phase delivering ACC-1, the retention rule to the phase delivering ACC-7: [OP-039](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred:** the session lifetime to the phase delivering ACC-1, the retention rule to the phase delivering ACC-7: [OP-039](../open-points.md#op-039). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:** ACC-7 ("after **3 days**, if they had no activity later than 1 hour after being created"; "otherwise after **30 days** of inactivity"). The Guest actor ("tied to their browser by a session cookie"). No document sets a session lifetime.
 - **Problem:**
@@ -189,7 +189,7 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### MAJOR-4. The per-IP rate limits depend on a client-IP setting no document mentions
 
-> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-035](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-035](../open-points.md#op-035). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:** LIM-4 ("per IP address"). `architecture.md`, Abuse protection: "`@fastify/rate-limit` … Login attempts use Better Auth's built-in rate limiting, per IP address and per email address". ADR 0008, decisions 16 and 18: an Application Load Balancer (ALB) sits in front of the task. No document mentions `trustProxy` or `X-Forwarded-For`.
 - **Problem:**
@@ -207,7 +207,7 @@ Severity is judged against the design **as written**. The requirements and ADR 0
 
 ### MAJOR-5. The web security baseline is not decided
 
-> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-036](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-036](../open-points.md#op-036). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 No document mentions cross-site request forgery (CSRF), Origin checks, security headers, session revocation or account enumeration (verified by searching all the docs).
 
@@ -231,7 +231,7 @@ No document mentions cross-site request forgery (CSRF), Origin checks, security 
 
 ### MAJOR-6. Flaky connectivity in the store is underspecified, and a library default contradicts the decision
 
-> ⏳ **Deferred** to the phases that build the first changes from the SPA and NET-1; client-generated IDs to the first data phase; offline check-off to the roadmap brainstorm: [OP-040](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred** to the phases that build the first changes from the SPA and NET-1; client-generated IDs to the first data phase; offline check-off to the roadmap brainstorm: [OP-040](../open-points.md#op-040). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:**
   - README: "built for the phone in your hand in the store".
@@ -253,7 +253,7 @@ No document mentions cross-site request forgery (CSRF), Origin checks, security 
 
 ### MAJOR-7. Domain rules and the data model leave decisions open that shape the schema
 
-> ⏳ **Deferred:** shared schema conventions to the first data phase, area rules to the phases building them: [OP-041](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred:** shared schema conventions to the first data phase, area rules to the phases building them: [OP-041](../open-points.md#op-041). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 These are cheap to decide now and expensive to change after migrations exist.
 
@@ -275,7 +275,7 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-8. The MVP's access-control shape will have to be rewritten for sharing
 
-> ⏳ **Deferred** to the security baseline foundation topic, together with CRITICAL-1: [OP-042](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred** to the security baseline foundation topic, together with CRITICAL-1: [OP-042](../open-points.md#op-042). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:**
   - `architecture.md`: queries are scoped by "the workspace ID taken from the **session**", and `requireListAccess` arrives only "with sharing (Later)".
@@ -289,7 +289,7 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-9. The single-instance guarantee doesn't hold during a redeploy, and branch redeploys can skip migrations
 
-> ⏳ **Deferred** to the phase that builds the ECS service and migrations: [OP-043](../open-points.md#walking-skeleton); locking for several instances joins [OP-033](../open-points.md#unassigned). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred** to the phase that builds the ECS service and migrations: [OP-043](../open-points.md#op-043); locking for several instances joins [OP-033](../open-points.md#op-033). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:**
   - ADR 0008, decision 14: "With exactly one instance nothing can race."
@@ -307,7 +307,7 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-10. release-please doesn't work well with merge commits
 
-> ⏳ **Deferred** to a trial in a throwaway repository before the phase that sets up release-please: [OP-025](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred** to a trial in a throwaway repository before the phase that sets up release-please: [OP-025](../open-points.md#op-025). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:** ADR 0009, decisions 6, 11 and 14. ADR 0010, decisions 7 and 17. Verified live: the merge commit title is the PR title and its body is blank.
 - **Problem:**
@@ -324,7 +324,7 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-11. The `demo` environment is not the security boundary ADR 0010 says it is
 
-> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-037](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ⏳ **Deferred** to the security baseline foundation topic ([ADR 0011, decision 6](../decisions/0011-design-sanity-check-follow-ups.md#decisions)): [OP-037](../open-points.md#op-037). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:**
   - ADR 0010, decision 12: "The deploy role trusts only OIDC tokens from jobs in this environment, so no other workflow can assume it, even if edited", together with "Any branch may deploy" and "No required reviewer".
@@ -349,7 +349,7 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-12. The nightly destroy runs `main`'s Terraform, and "runs queue" isn't quite true
 
-> ✅ **Fixed** in [ADR 0011, decision 7](../decisions/0011-design-sanity-check-follow-ups.md#decisions); the mechanism details join [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ✅ **Fixed** in [ADR 0011, decision 7](../decisions/0011-design-sanity-check-follow-ups.md#decisions); the mechanism details join [OP-019](../open-points.md#op-019). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **Where:** ADR 0010, decision 13 ("`demo-up` and `demo-down` share one `concurrency` group that never cancels: runs queue"). ADR 0010, decisions 2 and 11 ("Any branch may deploy").
 - **Problem:**
@@ -364,7 +364,7 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 ### MAJOR-13. Roadmap, phases and the definition of done are not ready for the roadmap brainstorm
 
-> ✅ **Fixed in part** in [ADR 0011, decisions 3 and 4](../decisions/0011-design-sanity-check-follow-ups.md#decisions): one [definition of done](../development/definition-of-done.md) and the document roles. ⏳ **Deferred:** the phase split ([OP-031](../open-points.md#before-the-roadmap)) and a CI job proving the image starts ([OP-032](../open-points.md#cicd-phase)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+> ✅ **Fixed in part** in [ADR 0011, decisions 3 and 4](../decisions/0011-design-sanity-check-follow-ups.md#decisions): one [definition of done](../development/definition-of-done.md) and the document roles. ⏳ **Deferred:** the phase split ([OP-031](../open-points.md#op-031)) and a CI job proving the image starts ([OP-032](../open-points.md#op-032)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 - **The walking skeleton reads as one very large phase.** ADR 0008's consequences put all Terraform, the Dockerfile, the static serving, `/api/health`, migrations, the SES sender, the runbook and tool pages into it. ADR 0009 expects `v0.1.0` after it, which needs release-please, the GitHub App and the `release` environment. That contradicts "the roadmap keeps phases small enough to review" (ADR 0009, decision 3) and "Do not bundle several of these into one change" (CLAUDE.md).
 - **There is no single "CI/CD phase".**
@@ -412,13 +412,13 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 - **m1. The tag ruleset allows permanent mistakes.** "Restrict creations" is off (`github-settings.md`), and updates and deletions are blocked with an empty bypass list. A stray `git push --tags`, or a `v*` tag pushed by hand, can then never be moved or deleted, and release-please fails when it later creates that version. **Fix:** restrict creations, with a bypass for the release App only.
 
-  > ✅ **Fixed** in [ADR 0011, decision 8](../decisions/0011-design-sanity-check-follow-ups.md#decisions); adding the App to the bypass list joins [OP-003](../open-points.md#before-the-roadmap). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ✅ **Fixed** in [ADR 0011, decision 8](../decisions/0011-design-sanity-check-follow-ups.md#decisions); adding the App to the bypass list joins [OP-003](../open-points.md#op-003). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m2. Email authentication covers DKIM only.** ADR 0008 decision 24 has no Sender Policy Framework (SPF) record, custom MAIL FROM or Domain-based Message Authentication, Reporting and Conformance (DMARC) policy, so the domain can be spoofed in "reset your password" phishing. Also undefined: what registration does when SES refuses to send to an unverified sandbox address. **Fix:** add SPF and DMARC to `infra/base`, and define how a failed send is handled.
 
-  > ⏳ **Deferred:** DMARC and SPF to the phase that sets up SES in `infra/base`, a failed send to the phase delivering ACC-2: [OP-044](../open-points.md#walking-skeleton). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred:** DMARC and SPF to the phase that sets up SES in `infra/base`, a failed send to the phase delivering ACC-2: [OP-044](../open-points.md#op-044). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m3. "Secrets never enter Terraform state" has no fallback and no check.** ADR 0008 decision 22 leaves it to "where the provider supports them". ADR 0010 decision 14 says public plan output is acceptable *only* because of this rule. **Fix:** make it a hard rule: the Better Auth secret is created outside Terraform, or through an ephemeral resource with a write-only argument. Add a way to check it, and document how to rotate the secret.
 
-  > ⏳ **Deferred** to the phase that writes the Terraform code: [OP-016](../open-points.md#walking-skeleton), now a hard rule with a fallback, a check and rotation. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred** to the phase that writes the Terraform code: [OP-016](../open-points.md#op-016), now a hard rule with a fallback, a check and rotation. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m4. Real-time updates (Later) need more design:**
   - Access is not re-checked when a collaborator is removed or a link revoked.
   - The load balancer's 60-second idle timeout drops quiet sockets unless there is a ping (inferred).
@@ -427,10 +427,10 @@ These are cheap to decide now and expensive to change after migrations exist.
   - ITM-4's "increase quantity" is read-modify-write, so two concurrent increases lose one.
   - WebSocket testing is not in ADR 0007.
 
-  > ⏳ **Deferred** to the SYN brainstorm, and the atomic quantity increase to the phase delivering ITM-4: [OP-045](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred** to the SYN brainstorm, and the atomic quantity increase to the phase delivering ITM-4: [OP-045](../open-points.md#op-045). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m5. There is no `.gitignore` yet (verified).** ADR 0008 decision 7 relies on bootstrap's local state being "ignored by git", in a public repository. **Fix:** add `*.tfstate*` and `.terraform/` before anyone runs bootstrap. Only a global ignore rule currently covers `.claude/settings.local.json`.
 
-  > ✅ **Fixed:** a `.gitignore` for Terraform state and `.claude/settings.local.json`; the development environment phase adds its tools' entries ([OP-005](../open-points.md#development-environment-phase)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ✅ **Fixed:** a `.gitignore` for Terraform state and `.claude/settings.local.json`; the development environment phase adds its tools' entries ([OP-005](../open-points.md#op-005)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m6. `infra/base` applied from a branch can drift from `main`** (ADR 0010, decision 14) if the PR is reworked or abandoned. **Fix:** add a step: re-apply base from `main` after the merge, or after abandoning the PR.
 
   > ✅ **Fixed** in [ADR 0011, decision 9](../decisions/0011-design-sanity-check-follow-ups.md#decisions) and item 5 of the [definition of done](../development/definition-of-done.md). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
@@ -445,22 +445,22 @@ These are cheap to decide now and expensive to change after migrations exist.
   > ✅ **Fixed:** documented in `github-settings.md` and left on. It applies only to PRs that Copilot opens under its own identity, not to commits from unlinked emails. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m9. commitlint will probably reject Dependabot commits (inferred).** `@commitlint/config-conventional` treats body and footer lines over 100 characters as errors. Dependabot's commit bodies routinely contain longer lines. The `commits` job would then fail, `ci-ok` would stay red, and the empty bypass list would block every Dependabot PR. **Fix:** ignore bot-authored commits or relax those two rules, and test against a real Dependabot commit before making `ci-ok` required. Also restrict `type-enum` to the nine documented types: config-conventional also accepts `style` and `revert`.
 
-  > ⏳ **Deferred:** the line-length rules turned off and the types restricted when commitlint is set up ([OP-009](../open-points.md#development-environment-phase)); the trial on a Dependabot commit in the CI/CD phase ([OP-019](../open-points.md#cicd-phase)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred:** the line-length rules turned off and the types restricted when commitlint is set up ([OP-009](../open-points.md#op-009)); the trial on a Dependabot commit in the CI/CD phase ([OP-019](../open-points.md#op-019)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m10. The `ci-ok` aggregator can pass when nothing ran.** If the change-detection job fails, every job that depends on it reports `skipped`, and a naive "nothing failed" check turns green. **Fix:** `ci-ok` requires the detection job to succeed, and treats `failure` or `cancelled` as failed.
 
-  > ⏳ **Deferred** to the CI/CD phase: [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred** to the CI/CD phase: [OP-019](../open-points.md#op-019). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m11. The ECR lifecycle policy would expire released images.** "Keeps only the most recent few" (ADR 0008, decision 12) also removes `v*`-tagged images. **Fix:** keep version-tagged images, and expire only images tagged with just a commit hash.
 
-  > ⏳ **Deferred** to the phase that creates the ECR repository: [OP-013](../open-points.md#walking-skeleton). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred** to the phase that creates the ECR repository: [OP-013](../open-points.md#op-013). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m12. `infra-plan` on Dependabot PRs (inferred).** Dependabot-triggered runs get restricted tokens and probably no OIDC token, so Terraform provider bump PRs would show a failed plan job. **Fix:** skip the job for `dependabot[bot]`, or document that it is expected to fail.
 
-  > ⏳ **Deferred** to the CI/CD phase: [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred** to the CI/CD phase: [OP-019](../open-points.md#op-019). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m13. Dependabot major-version PRs conflict with pinned versions.** Separate PRs for Node or PostgreSQL major versions (ADR 0010, decision 18) would break "pinned to the same major version as production" (ADR 0005, ADR 0008) and Node 24 in `.nvmrc` and `engines`. **Fix:** ignore major updates for those two, or coordinate them.
 
-  > ⏳ **Deferred** to the CI/CD phase, ignoring majors of Node, `@types/node` and PostgreSQL: [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred** to the CI/CD phase, ignoring majors of Node, `@types/node` and PostgreSQL: [OP-019](../open-points.md#op-019). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m14. The E2E suite exceeds the default rate limits.** About 14 journeys × 2 viewports, each as a fresh guest and some registering users, all from one IP, exceeds 10 guests and 5 registrations per hour. ADR 0007 decision 14 raises the limits only for the API tests. **Fix:** state the E2E server's rate-limit configuration explicitly.
 
-  > ⏳ **Deferred** to the phase delivering LIM-4: [OP-046](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred** to the phase delivering LIM-4: [OP-046](../open-points.md#op-046). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m15. CLAUDE.md guardrails are ambiguous or incomplete:**
   - "So does the PR title" reads as if the PR title follows the plan's tasks; it means Conventional Commits.
   - The rule "Claude never triggers `demo-up` or `demo-down`" (ADR 0010, consequences) is not added yet, although it costs nothing to add now.
@@ -468,7 +468,7 @@ These are cheap to decide now and expensive to change after migrations exist.
   - "A roadmap phase … holding its spec, plan and code" ignores the bounded path of ADR 0004, decision 8, which has no spec or plan.
   - "(from the README disclaimer)" refers to a section the README no longer has. It was removed in commit `1f82330`.
 
-  > ✅ **Fixed** in `CLAUDE.md`, all five points; the `demo-up` rule closes [OP-024](../open-points.md#closed). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ✅ **Fixed** in `CLAUDE.md`, all five points; the `demo-up` rule closes [OP-024](../open-points.md#op-024). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 ### Requirements and architecture
 
@@ -477,10 +477,10 @@ These are cheap to decide now and expensive to change after migrations exist.
   > ✅ **Fixed:** `architecture.md` has a `units` feature folder and a `/units` route. See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m17. Bulk operations against quotas are undefined.** Examples: importing 150 guest lists into an account that has 100 (ACC-4); multi-adding 30 products to a list with 480 items; duplicating a list that is at the limit. Is that all-or-nothing, or partial? Also undefined: ITM-4 when the units differ, and which actions still work on an archived list (LST-3). The "count before insert" quota check can be exceeded by concurrent requests. That is acceptable, but should be said.
 
-  > ✅ **Fixed in part:** `architecture.md` now says it. ⏳ **Deferred:** the rest, to the phases delivering those actions: [OP-047](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ✅ **Fixed in part:** `architecture.md` now says it. ⏳ **Deferred:** the rest, to the phases delivering those actions: [OP-047](../open-points.md#op-047). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m18. Lazy creation: seed IDs versus workspace IDs.** The cache holds the in-memory seed catalog's IDs, and the new workspace's copies get new IDs, so requests right after creation can hit 404. Two quick changes, or two tabs, can each create an anonymous session, and the loser's workspace is orphaned. **Fix:** invalidate all queries after the session is created, and allow only one session creation at a time in the API client.
 
-  > ⏳ **Deferred** to the phase delivering ACC-1: [OP-048](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred** to the phase delivering ACC-1: [OP-048](../open-points.md#op-048). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m19. Sharing (Later) semantics that affect its tables:**
   - "A guest opening a share link already has an anonymous user" contradicts lazy creation: opening a link is not a change.
   - If a redeemed link becomes a `list_shares` row, "regenerate" (UC-12) doesn't remove people who already joined.
@@ -492,7 +492,7 @@ These are cheap to decide now and expensive to change after migrations exist.
 
   **Fix:** decide these in the SHR brainstorm. Link-bound versus user-bound access is the choice that changes the tables.
 
-  > ⏳ **Deferred** to the SHR brainstorm: [OP-049](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred** to the SHR brainstorm: [OP-049](../open-points.md#op-049). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m20. There are no non-functional requirements:**
   - no stated browser support; iPhones run WebKit, and E2E runs Chromium only
   - no accessibility target, although axe runs
@@ -500,7 +500,7 @@ These are cheap to decide now and expensive to change after migrations exist.
   - no decimal-comma input ("0,5")
   - no way for a guest to delete their own data
 
-  > ⏳ **Deferred:** browsers, accessibility and performance to the visual design topic ([OP-001](../open-points.md#before-the-roadmap)); decimal commas to [OP-041](../open-points.md#feature-phases); guest data deletion to [OP-039](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ⏳ **Deferred:** browsers, accessibility and performance to the visual design topic ([OP-001](../open-points.md#op-001)); decimal commas to [OP-041](../open-points.md#op-041); guest data deletion to [OP-039](../open-points.md#op-039). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 ### Documentation consistency
 
@@ -518,14 +518,14 @@ These are cheap to decide now and expensive to change after migrations exist.
   - `last_active_at` is on the workspace in one sentence and on the user in the next.
   - The stack overview is missing the CI/CD section that ADR 0010 decision 22 promises.
 
-  > ✅ **Fixed** in `architecture.md`, the stack overview and the glossary; the CI/CD section was already [OP-023](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ✅ **Fixed** in `architecture.md`, the stack overview and the glossary; the CI/CD section was already [OP-023](../open-points.md#op-023). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m23. ADR cross-references:**
   - When to choose the PostgreSQL major version: "the setup phase" (ADR 0005) versus "when the walking skeleton is built" (ADR 0008). `compose.yaml` comes first.
   - ADR 0005's status line doesn't mention ADRs 0007, 0009 and 0010, which complete it.
   - ADR 0001's consequence "Guest mode requires local browser storage" is superseded without a note.
   - Phase names drift: "development environment setup phase", "development environment phase" and "the setup phase". ADR 0008 never defines "the implementation phase".
 
-  > ✅ **Fixed** in the status lines of ADRs 0005 and 0001; phase names are mapped by the roadmap ([OP-031](../open-points.md#before-the-roadmap)); the PostgreSQL version was already [OP-006](../open-points.md#development-environment-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+  > ✅ **Fixed** in the status lines of ADRs 0005 and 0001; phase names are mapped by the roadmap ([OP-031](../open-points.md#op-031)); the PostgreSQL version was already [OP-006](../open-points.md#op-006). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 - **m24. Editorial nits:**
   - Acronyms not spelled out on first use: in `architecture.md`, ECS, IAM, SDK, VPC, RDS, ECR, SMTP and ACM; in ADR 0010, E2E, RDS, ECR and SSO; in ADR 0001, CRUD.
   - Acronyms missing from the glossary: S3, EC2, DOM, HCP, and possibly YAML, CLI and GUI.
@@ -545,46 +545,46 @@ These are cheap to decide now and expensive to change after migrations exist.
 
 1. **A threat model page.** One short page listing who can do what: the owner, Claude Code acting as the owner, Dependabot, forks, anonymous visitors. It would have caught MAJOR-11 and m1 directly. It fits the security baseline topic of MAJOR-5.
 
-   > ⏳ **Deferred** to the security baseline foundation topic, as its starting point: [OP-050](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+   > ⏳ **Deferred** to the security baseline foundation topic, as its starting point: [OP-050](../open-points.md#op-050). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 2. **A progressive web app (PWA) with an app-shell cache.** An installable app that caches its shell helps the in-store scenario, and it is the base for the offline extension.
 
-   > ✖️ **Rejected:** with changes blocked offline (NET-1), a cached shell gains little, and a service worker risks an outdated SPA after a redeploy; offline use stays a roadmap question ([OP-040](../open-points.md#feature-phases)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+   > ✖️ **Rejected:** with changes blocked offline (NET-1), a cached shell gains little, and a service worker risks an outdated SPA after a redeploy; offline use stays a roadmap question ([OP-040](../open-points.md#op-040)). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 3. **Undo for mis-taps on a phone.** "Remove item" and "Uncheck all" are easy to trigger by accident in a store. An undo message costs little.
 
-   > ⏳ **Deferred** to the phases delivering those actions: [OP-051](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+   > ⏳ **Deferred** to the phases delivering those actions: [OP-051](../open-points.md#op-051). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 4. **Test migrations against existing data.** Every environment starts empty, so a migration that breaks on existing rows is never exercised. That is a learning gap for a project that wants to learn migrations. Add a test that migrates from the previous schema with fixture data.
 
-   > ⏳ **Deferred** to the first phase whose migration changes an existing table: [OP-052](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+   > ⏳ **Deferred** to the first phase whose migration changes an existing table: [OP-052](../open-points.md#op-052). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 5. **Test the seed data.** Check that it satisfies the quotas, the depth limit and uniqueness, and see how much of the 300-category quota it uses.
 
-   > ⏳ **Deferred** to the first data phase: [OP-052](../open-points.md#feature-phases). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+   > ⏳ **Deferred** to the first data phase: [OP-052](../open-points.md#op-052). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 6. **Container and database hardening.**
    - Run the container as a non-root user.
    - Connect to RDS over TLS with full certificate verification.
    - Turn on versioning, the public-access block and a TLS-only policy for the state bucket.
 
-   > ⏳ **Deferred** to the walking-skeleton work building each piece: [OP-015](../open-points.md#walking-skeleton), [OP-017](../open-points.md#walking-skeleton) and [OP-013](../open-points.md#walking-skeleton). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+   > ⏳ **Deferred** to the walking-skeleton work building each piece: [OP-015](../open-points.md#op-015), [OP-017](../open-points.md#op-017) and [OP-013](../open-points.md#op-013). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 7. **Password policy.** Record the minimum length, and consider Better Auth's breached-password check. Keep Better Auth's cookie cache off unless there's a reason for it.
 
-   > ⏳ **Deferred** to the security baseline foundation topic: [OP-036](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+   > ⏳ **Deferred** to the security baseline foundation topic: [OP-036](../open-points.md#op-036). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 8. **CI jobs that hold AWS credentials** should not run dependency lifecycle scripts, or should rely on pnpm's script allowlist, and say so.
 
-   > ⏳ **Deferred** to the security baseline foundation topic: [OP-037](../open-points.md#security-baseline-topic). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+   > ⏳ **Deferred** to the security baseline foundation topic: [OP-037](../open-points.md#op-037). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 9. **Order the CodeQL rule last.** Turn on "Require code scanning results" only after CodeQL has run successfully on `main`. With an empty bypass list, a CodeQL that can't run blocks every merge. Check that the SHA-pinning policy doesn't block CodeQL's default setup or Dependabot's own workflows.
 
-   > ⏳ **Deferred** to the CI/CD phase's settings: [OP-022](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+   > ⏳ **Deferred** to the CI/CD phase's settings: [OP-022](../open-points.md#op-022). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 10. **The release image is never demo-checked,** and the "re-tag if ECR already has it" path will almost never apply, since the release commit is a new merge commit. Say so in ADR 0010's successor. Also make sure the privileged `release` job doesn't restore caches written by PR runs (cache poisoning).
 
-    > ⏳ **Deferred** to the CI/CD phase: [OP-019](../open-points.md#cicd-phase). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
+    > ⏳ **Deferred** to the CI/CD phase: [OP-019](../open-points.md#op-019). See the [triage](../decisions/0011-design-sanity-check-follow-ups.md#triage-of-the-findings).
 
 11. **Per-IP limits and shared addresses.** ADR 0003 argues that a real person hits the guest limit "at most once per browser". But many people share one address behind mobile carrier-grade NAT or a shop's Wi-Fi, so a crowd shares 10 guests per hour. For a demo that doesn't matter; for an always-on service, add a global ceiling and revisit the per-IP value.
 

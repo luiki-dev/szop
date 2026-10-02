@@ -24,7 +24,7 @@ One example phase, from the first commit to the release, showing where each thin
 - [Where each thing lives](#where-each-thing-lives)
 - [What runs on which event](#what-runs-on-which-event)
 - [When this all exists](#when-this-all-exists)
-- [Open points for the CI/CD phase](#open-points-for-the-cicd-phase)
+- [Open points for the releases phase](#open-points-for-the-releases-phase)
 
 ## Who and what takes part
 
@@ -298,7 +298,7 @@ The highest bump wins: a `feat` and three `fix`es since `v0.3.0` make `0.4.0`. A
 | Phase branch | GitHub, deleted after the merge | `type/short-description`: `feat/templates` |
 | Branch outside a phase | GitHub | `docs/fix-typo`, `chore/bump-vitest` |
 | Dependabot branch | GitHub | `dependabot/npm_and_yarn/…` |
-| Release branch | GitHub, kept up to date by release-please | `release-please--branches--main` (to be confirmed, see [open points](#open-points-for-the-cicd-phase)) |
+| Release branch | GitHub, kept up to date by release-please | `release-please--branches--main` (to be confirmed, see [open points](#open-points-for-the-releases-phase)) |
 | Commit message | Every commit | `type(scope): imperative description` |
 | PR title → merge commit | `main` | `feat(templates): add templates (#12)` |
 | Update-branch merge | The PR branch | `Merge branch 'main' into feat/templates` |
@@ -327,22 +327,22 @@ The highest bump wins: a `feat` and three `fix`es since `v0.3.0` make `0.4.0`. A
 
 ## When this all exists
 
-This is the target state. The pieces arrive in the phases that introduce them ([ADR 0009](../decisions/0009-git-workflow.md), decision 16; [ADR 0010](../decisions/0010-ci-cd.md), decision 23):
+This is the target state. The pieces arrive in the [roadmap](../roadmap.md)'s phases that introduce them ([ADR 0009](../decisions/0009-git-workflow.md), decision 16; [ADR 0010](../decisions/0010-ci-cd.md), decision 23):
 
 | From | What works |
 |---|---|
 | Now (ADR 0009 merged) | Branches, PRs, merge commits only, the `main` and `v*` rulesets, the PR template |
-| The development environment phase | The local loop of step 3, the pre-commit and commit-msg hooks |
-| The CI/CD phase(s) | CI checks and required status checks, `demo-up`/`demo-down` (the nightly teardown and a placeholder `demo-up` merged before any demo, [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 2), release-please, versioned images, Dependabot |
-| After the walking skeleton | The first release, `v0.1.0` |
+| [PH-01](../roadmap.md#ph-01-monorepo-and-toolchain) | The local loop of step 3, the pre-commit and commit-msg hooks |
+| [PH-02](../roadmap.md#ph-02-ci-checks), [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy) and [PH-13](../roadmap.md#ph-13-releases) | CI checks and required status checks, `demo-up`/`demo-down` (the nightly teardown and a placeholder `demo-up` merged before any demo, [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 2), release-please, versioned images, Dependabot |
+| [PH-13](../roadmap.md#ph-13-releases), the end of the walking skeleton | The first release, `v0.1.0` |
 | When the MVP is done | `1.0.0`, set with a `Release-As: 1.0.0` footer |
 
 Until a piece exists, its step is simply skipped, and the matching [definition-of-done](definition-of-done.md) item in the PR is marked N/A, with the reason.
 
-## Open points for the CI/CD phase
+## Open points for the releases phase
 
-Details this walkthrough runs into that the ADRs leave open. They are tracked in the [open points register](../open-points.md#cicd-phase):
+Details this walkthrough runs into that the ADRs leave open. They belong to [PH-13](../roadmap.md#ph-13-releases) and are tracked in the [open points register](../open-points.md#ph-13-releases):
 
-- **Review fixes and duplicate entries in the changelog** ([OP-025](../open-points.md#cicd-phase)). A review fix such as commit 8 is a `fix(…)` commit, and release-please reads every commit that reaches `main`, including those a merge commit brings in, so `CHANGELOG.md` will probably list it as a bug fix of code that was never released. The task commits and the merge commit's PR title may also appear as separate features.
-- **Image version tag format** ([OP-026](../open-points.md#cicd-phase)): agreed direction `szop:0.4.0`, without the `v` of the git tag.
-- **release-please's branch name** ([OP-027](../open-points.md#cicd-phase)): `release-please--branches--main` by default, to check against the ruleset and branch naming.
+- **Review fixes and duplicate entries in the changelog** ([OP-025](../open-points.md#op-025)). A review fix such as commit 8 is a `fix(…)` commit, and release-please reads every commit that reaches `main`, including those a merge commit brings in, so `CHANGELOG.md` will probably list it as a bug fix of code that was never released. The task commits and the merge commit's PR title may also appear as separate features.
+- **Image version tag format** ([OP-026](../open-points.md#op-026)): agreed direction `szop:0.4.0`, without the `v` of the git tag.
+- **release-please's branch name** ([OP-027](../open-points.md#op-027)): `release-please--branches--main` by default, to check against the ruleset and branch naming.

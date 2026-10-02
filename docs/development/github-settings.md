@@ -61,7 +61,7 @@ Leave **Allow auto-merge** off: the owner's manual merge is the approval (ADR 00
 | ↳ Require conversation resolution before merging | On | No review comment can be skipped by accident. ADR 0009, decision 13. |
 | ↳ Allowed merge methods | **Merge** only | Matches the repository setting above. ADR 0009, decision 6. |
 | ↳ Require an additional approval for unattributed Copilot pull requests | On (GitHub's default) | Applies only to PRs that Copilot opens under its own app identity, not on behalf of a person; those need one approval more than configured. Szop's PRs are opened by the owner's account, so it never applies, and if Copilot ever opened a PR by itself, the owner's approval would be asked for. The API calls it `require_extra_approval_for_unattributed_changes`. |
-| **Require status checks to pass** | **Off for now** | Turned on by the CI/CD phase, with *Require branches to be up to date before merging* and the CI checks listed. Until CI exists there is nothing to require. ADR 0009, decision 13. |
+| **Require status checks to pass** | **Off for now** | Turned on by [PH-02](../roadmap.md#ph-02-ci-checks), with *Require branches to be up to date before merging* and the CI checks listed. Until CI exists there is nothing to require. ADR 0009, decision 13. |
 | **Require linear history** | Off | It forbids merge commits. ADR 0009, decision 18. |
 | **Require signed commits** | Off | One person pushes from one machine. ADR 0009, decision 18. |
 
@@ -88,7 +88,7 @@ Leave every other rule off.
 
 | Setting | Value | Why |
 |---|---|---|
-| **Dependabot alerts** | Enabled | Warns when a dependency has a known vulnerability. Dependabot *version update* PRs are set up by the CI/CD phase. ADR 0009, decision 14. |
+| **Dependabot alerts** | Enabled | Warns when a dependency has a known vulnerability. Dependabot *version update* PRs are set up by [PH-02](../roadmap.md#ph-02-ci-checks). ADR 0009, decision 14. |
 | **Dependabot security updates** | Enabled | Opens a PR that upgrades a dependency with a known vulnerability, without waiting for the cooldown of version updates. It needs Dependabot alerts. ADR 0010, decision 18. |
 | **Secret Protection** (secret scanning) | Enabled | Finds secrets committed to the repository. ADR 0009, decision 14; ADR 0008, decision 22. |
 | ↳ **Push protection** | Enabled | Rejects a push that contains a recognized secret before it reaches GitHub. ADR 0009, decision 14. |
@@ -97,7 +97,7 @@ For public repositories some of these may already be on.
 
 ## Features
 
-*Settings → General* → section **Features**. Nothing is changed. **Issues** stay available to visitors, but they are not used for planning: the roadmap (`docs/roadmap.md`, written after the foundation topics) is the tracker (ADR 0009, decision 14).
+*Settings → General* → section **Features**. Nothing is changed. **Issues** stay available to visitors, but they are not used for planning: the [roadmap](../roadmap.md) is the tracker (ADR 0009, decision 14).
 
 ## Checking the settings
 
