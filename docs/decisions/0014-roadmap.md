@@ -1,6 +1,6 @@
 # ADR 0014 — Roadmap: stages, phases and their order
 
-- **Status:** ✅ Accepted
+- **Status:** ✅ Accepted — decision 4 refined by [ADR 0017](0017-readme-roadmap-diagram.md) (the README's roadmap diagram mirrors the stage tables)
 - **Date:** 2026-10-02
 - **Extends:** [ADR 0004](0004-implementation-process.md), decisions 5, 6 and 8 (the roadmap's structure, the size of a phase and the order of the phases); [ADR 0010](0010-ci-cd.md), decision 23 (the rollout, decided here)
 - **Refines:** the consequences of [ADR 0005](0005-development-environment.md), [ADR 0007](0007-testing-strategy.md) and [ADR 0008](0008-hosting.md) (the test tooling, `compose.yaml` and the SES email sender arrive with their first use, decision 7) and of [ADR 0013](0013-visual-design.md) (the UI foundation opens the MVP, decision 9)

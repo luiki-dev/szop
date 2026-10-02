@@ -4,6 +4,41 @@ Szop is a web application for tracking shopping lists — not only groceries, bu
 
 It is built for the phone in your hand in the store as much as for planning at a desk, and you can start using it right away, without creating an account.
 
+## Roadmap
+
+Szop is built in phases, grouped into stages. The road below shows how far along it is; the [roadmap](docs/roadmap.md) has each phase's name, goal and details.
+
+```text
+  START
+  ║
+  ║ Stage 1 · Local foundations
+  ║  PH-01   PH-02
+  ╚════●───────○───────────────────────────────────────────────────────────╮
+                                                                           │
+                              Stage 2 · Walking skeleton, running locally  │
+                             PH-08   PH-07   PH-06   PH-05   PH-04   PH-03 │
+  ╭────────────────────────────○───────○───────○───────○───────○───────○───╯
+  │
+  │ Stage 3 · Walking skeleton, deployed and released
+  │  PH-09   PH-10   PH-11   PH-12   PH-13
+  ╰────○───────○───────○───────○───────○───────────────────────────────────╮
+                                                                           │
+                                                            Stage 4 · MVP  │
+     PH-22   PH-21   PH-20   PH-19   PH-18   PH-17   PH-16   PH-15   PH-14 │
+  ╭────○───────○───────○───────○───────○───────○───────○───────○───────○───╯
+  │
+  │
+  │  PH-23   PH-24   PH-25   PH-26   PH-27   PH-28   PH-29   PH-30   PH-31
+  ╰────○───────○───────○───────○───────○───────○───────○───────○───────○───╮
+                                                                           │
+                                                          Stage 5 · Later  │
+                                                             PH-33   PH-32 │
+                                                       DONE ───○───────○───╯
+
+
+  ● done   ◐ in progress   ○ not started   ✕ dropped   ═ road travelled
+```
+
 ## Features
 
 - **Shopping lists** — create, rename and delete lists. Archive the ones you are done with, duplicate an existing list, or uncheck everything to reuse the same list next week.
