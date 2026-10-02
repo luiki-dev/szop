@@ -719,11 +719,11 @@ EOF
 **Interfaces:**
 - Produces: script `format` (`prettier --write .`); `.prettierignore` honoured by Task 5's lint-staged config and by the editor (Task 7).
 
-- [ ] **Step 1: Add Prettier**
+- [x] **Step 1: Add Prettier**
 
 Run: `pnpm add -D -w prettier@^3`
 
-- [ ] **Step 2: Write `.prettierrc.json` and `.prettierignore`**
+- [x] **Step 2: Write `.prettierrc.json` and `.prettierignore`**
 
 `.prettierrc.json`:
 
@@ -742,7 +742,7 @@ Run: `pnpm add -D -w prettier@^3`
 pnpm-lock.yaml
 ```
 
-- [ ] **Step 3: Add the script**
+- [x] **Step 3: Add the script**
 
 In `package.json` `"scripts"`, add after `lint`:
 
@@ -750,17 +750,17 @@ In `package.json` `"scripts"`, add after `lint`:
     "format": "prettier --write .",
 ```
 
-- [ ] **Step 4: Format and check**
+- [x] **Step 4: Format and check**
 
 Run: `pnpm format && pnpm exec prettier --check .`
 Expected: `All matched files use Prettier code style!`
 
-- [ ] **Step 5: Check that no Markdown file changed and everything still passes**
+- [x] **Step 5: Check that no Markdown file changed and everything still passes**
 
 Run: `git status --short -- '*.md' && pnpm lint && pnpm typecheck && pnpm test`
 Expected: the first command lists nothing (no Markdown file was reformatted); lint, typecheck and tests pass.
 
-- [ ] **Step 6: Write `docs/development/tools/prettier.md`**
+- [x] **Step 6: Write `docs/development/tools/prettier.md`**
 
 Follow the template. It must say:
 - Prettier rewrites code into one consistent layout, so formatting is never discussed in review.
@@ -769,7 +769,7 @@ Follow the template. It must say:
 - Everyday use: `pnpm format`, `pnpm exec prettier --check .`; format on save in VS Code (Task 7); the pre-commit hook formats staged files (Task 5).
 - Official docs: `https://prettier.io/docs/configuration`, `https://prettier.io/docs/ignore`, `https://prettier.io/docs/integrating-with-linters`.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A
