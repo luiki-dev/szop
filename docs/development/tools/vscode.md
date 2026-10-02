@@ -23,8 +23,8 @@ The WSL extension is installed on the Windows side and is not in the list: it is
 - `"editor.defaultFormatter": "esbenp.prettier-vscode"`: Prettier formats every file it supports.
 - `"editor.formatOnSave": true`: saving a file formats it. Markdown is not formatted, because Prettier skips what `.prettierignore` lists, and that includes `*.md`.
 - `"editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" }`: saving also applies ESLint's automatic fixes. `explicit` means on a manual save only, not on auto-save, so the editor does not rewrite code while you are still typing.
-- `"typescript.tsdk": "node_modules/typescript/lib"`: the editor uses the TypeScript version installed by `pnpm install` (see [TypeScript](typescript.md)), not the one bundled in VS Code, so what the editor reports matches `pnpm typecheck`.
-- `"typescript.enablePromptUseWorkspaceTsdk": true`: asks you once to switch to that version, instead of switching silently.
+- `"js/ts.tsdk.path": "node_modules/typescript/lib"`: the editor uses the TypeScript version installed by `pnpm install` (see [TypeScript](typescript.md)), not the one bundled in VS Code, so what the editor reports matches `pnpm typecheck`. This setting and the next one replaced the older `typescript.tsdk` and `typescript.enablePromptUseWorkspaceTsdk`, which VS Code now marks as deprecated; tutorials may still use the old names.
+- `"js/ts.tsdk.promptToUseWorkspaceVersion": true`: asks you once to switch to that version, instead of switching silently.
 
 ## Everyday use
 
