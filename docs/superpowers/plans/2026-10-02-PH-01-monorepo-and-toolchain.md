@@ -106,16 +106,16 @@ Every page in `docs/development/tools/` follows this shape ([ADR 0005](../../dec
 **Interfaces:**
 - Produces: `package.json` with `"type": "module"`, `engines`, `packageManager` and an empty `scripts` object that later tasks extend; `pnpm-workspace.yaml` with the settings below.
 
-- [ ] **Step 1: Ask the owner before installing pnpm globally**
+- [x] **Step 1: Ask the owner before installing pnpm globally**
 
 `npm install -g pnpm` changes the owner's machine (the global packages of the current Node version). Ask: "Task 1 installs pnpm globally with `npm install -g pnpm`, as `setup.md` will tell you to. OK to run it, or do you want to run it yourself (`! npm install -g pnpm`)?" Wait for the answer.
 
-- [ ] **Step 2: Install pnpm and check the Node version**
+- [x] **Step 2: Install pnpm and check the Node version**
 
 Run: `npm install -g pnpm && pnpm --version && node --version`
 Expected: a pnpm version (any 10.x or later) and `v24.x.y`.
 
-- [ ] **Step 3: Write `package.json`**
+- [x] **Step 3: Write `package.json`**
 
 ```json
 {
@@ -130,7 +130,7 @@ Expected: a pnpm version (any 10.x or later) and `v24.x.y`.
 }
 ```
 
-- [ ] **Step 4: Write `pnpm-workspace.yaml`, `.nvmrc` and `.gitattributes`**
+- [x] **Step 4: Write `pnpm-workspace.yaml`, `.nvmrc` and `.gitattributes`**
 
 `pnpm-workspace.yaml`:
 
@@ -171,7 +171,7 @@ allowBuilds: {}
 *.webp binary
 ```
 
-- [ ] **Step 5: Add `node_modules/` to `.gitignore`**
+- [x] **Step 5: Add `node_modules/` to `.gitignore`**
 
 Append to `.gitignore`:
 
@@ -181,12 +181,12 @@ Append to `.gitignore`:
 node_modules/
 ```
 
-- [ ] **Step 6: Install and check that pnpm switched to the pinned version**
+- [x] **Step 6: Install and check that pnpm switched to the pinned version**
 
 Run: `pnpm install && pnpm --version`
 Expected: install succeeds and creates `pnpm-lock.yaml`; the version printed is `12.8.1`, whatever the global version was.
 
-- [ ] **Step 7: Check that the wrong Node major is refused**
+- [x] **Step 7: Check that the wrong Node major is refused**
 
 Run:
 
@@ -197,12 +197,12 @@ git checkout package.json && rm -rf node_modules && pnpm install
 
 Expected: the first install fails with `Unsupported engine … wanted: {"node":">=25"}` and a non-zero exit; after restoring, the install succeeds.
 
-- [ ] **Step 8: Check that `.gitattributes` changed no file**
+- [x] **Step 8: Check that `.gitattributes` changed no file**
 
 Run: `git add --renormalize . && git status --short`
 Expected: only the new and modified files of this task are listed; no existing file shows as modified by renormalizing.
 
-- [ ] **Step 9: Write `docs/development/tools/node-and-nvm.md`**
+- [x] **Step 9: Write `docs/development/tools/node-and-nvm.md`**
 
 Follow the [tool page template](#tool-page-template). It must say:
 - Node is the JavaScript runtime for the API, the tools and the push hook; nvm installs and switches Node versions per user, without `sudo`.
@@ -211,7 +211,7 @@ Follow the [tool page template](#tool-page-template). It must say:
 - Everyday use: `nvm install`, `nvm use`, `node --version`; Node 24 runs `.ts` files directly by stripping types (the push hook), with a link to the glossary's "Type stripping".
 - Official docs: nvm's README (`https://github.com/nvm-sh/nvm`), Node's release schedule (`https://nodejs.org/en/about/previous-releases`), Node's TypeScript page (`https://nodejs.org/api/typescript.html`).
 
-- [ ] **Step 10: Write `docs/development/tools/pnpm.md`**
+- [x] **Step 10: Write `docs/development/tools/pnpm.md`**
 
 Follow the template. It must say:
 - pnpm installs the dependencies and runs scripts across the workspace; strict about **phantom dependencies** (link the glossary).
@@ -220,7 +220,7 @@ Follow the template. It must say:
 - Everyday use: `pnpm install`, `pnpm add -D -w <pkg>` (why `-w`), `pnpm <script>`, `pnpm exec <bin>`, `pnpm -r <script>` and `pnpm --filter <pkg> <script>` once packages exist; "Already up to date" skips lifecycle scripts and engine checks, so `rm -rf node_modules && pnpm install` forces a full install.
 - Official docs: `https://pnpm.io/motivation`, `https://pnpm.io/workspaces`, `https://pnpm.io/settings`, `https://pnpm.io/cli/approve-builds`.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add package.json pnpm-workspace.yaml pnpm-lock.yaml .nvmrc .gitattributes .gitignore docs/development/tools/node-and-nvm.md docs/development/tools/pnpm.md
@@ -249,12 +249,12 @@ EOF
 - Consumes: `package.json` from Task 1.
 - Produces: `findViolation(command: string): string | null` exported from `.claude/hooks/guard-git-push.ts`; scripts `typecheck` (`tsc --noEmit`) and `test` (`node --test ".claude/hooks/*.test.ts"`); `tsconfig.json` whose `include` covers `*.js` and `.claude/hooks/**/*.ts` (Task 3's type-aware linting relies on it).
 
-- [ ] **Step 1: Add TypeScript and Node's types**
+- [x] **Step 1: Add TypeScript and Node's types**
 
 Run: `pnpm add -D -w typescript@~6.0.3 @types/node@^24`
 Expected: both added to `devDependencies`; no `ERR_PNPM_IGNORED_BUILDS`.
 
-- [ ] **Step 2: Write `tsconfig.base.json`**
+- [x] **Step 2: Write `tsconfig.base.json`**
 
 ```json
 {
@@ -274,7 +274,7 @@ Expected: both added to `devDependencies`; no `ERR_PNPM_IGNORED_BUILDS`.
 }
 ```
 
-- [ ] **Step 3: Write `tsconfig.json`**
+- [x] **Step 3: Write `tsconfig.json`**
 
 ```json
 {
@@ -291,7 +291,7 @@ Expected: both added to `devDependencies`; no `ERR_PNPM_IGNORED_BUILDS`.
 }
 ```
 
-- [ ] **Step 4: Add the scripts**
+- [x] **Step 4: Add the scripts**
 
 In `package.json`, set `"scripts"` to:
 
@@ -302,7 +302,7 @@ In `package.json`, set `"scripts"` to:
   },
 ```
 
-- [ ] **Step 5: Rename the test and write its TypeScript version**
+- [x] **Step 5: Rename the test and write its TypeScript version**
 
 Run: `git mv .claude/hooks/guard-git-push.test.mjs .claude/hooks/guard-git-push.test.ts`
 
@@ -387,12 +387,12 @@ test("hook exits 0 for an allowed command", () => {
 });
 ```
 
-- [ ] **Step 6: Run the tests to see them fail**
+- [x] **Step 6: Run the tests to see them fail**
 
 Run: `pnpm test`
 Expected: FAIL with `ERR_MODULE_NOT_FOUND` for `guard-git-push.ts` (the hook is still `.mjs`).
 
-- [ ] **Step 7: Rename the hook and write its TypeScript version**
+- [x] **Step 7: Rename the hook and write its TypeScript version**
 
 Run: `git mv .claude/hooks/guard-git-push.mjs .claude/hooks/guard-git-push.ts`
 
@@ -538,7 +538,7 @@ if (import.meta.main) {
 }
 ```
 
-- [ ] **Step 8: Point Claude Code at the `.ts` hook**
+- [x] **Step 8: Point Claude Code at the `.ts` hook**
 
 In `.claude/settings.json`, change the hook's command to:
 
@@ -548,7 +548,7 @@ In `.claude/settings.json`, change the hook's command to:
 
 In `docs/development/git-workflow.md`, replace `.claude/hooks/guard-git-push.mjs` with `.claude/hooks/guard-git-push.ts` (the guardrails table).
 
-- [ ] **Step 9: Run the tests and the type check**
+- [x] **Step 9: Run the tests and the type check**
 
 Run: `pnpm test && pnpm typecheck`
 Expected: `ℹ pass 36`, `ℹ fail 0`; `tsc --noEmit` prints nothing and exits 0.
@@ -561,7 +561,7 @@ mv node_modules ../szop-node_modules.off && node --test ".claude/hooks/*.test.ts
 
 Expected: `ℹ pass 36` without `node_modules`.
 
-- [ ] **Step 10: Check that a type error fails**
+- [x] **Step 10: Check that a type error fails**
 
 Run:
 
@@ -571,7 +571,7 @@ printf 'export const n: number = "x";\n' > .claude/hooks/scratch-type-error.ts &
 
 Expected: `error TS2322: Type 'string' is not assignable to type 'number'` and a non-zero exit.
 
-- [ ] **Step 11: Check the live hook in Claude Code**
+- [x] **Step 11: Check the live hook in Claude Code**
 
 Run each as its own Bash call (they only print usage; the hook must refuse them first):
 - `git push -h :x` → refused by the hook, naming `guard-git-push.ts`
@@ -580,7 +580,7 @@ Run each as its own Bash call (they only print usage; the hook must refuse them 
 
 If Claude Code has not reloaded the settings, ask the owner to restart the session and retry.
 
-- [ ] **Step 12: Write `docs/development/tools/typescript.md`**
+- [x] **Step 12: Write `docs/development/tools/typescript.md`**
 
 Follow the template. It must say:
 - TypeScript adds static types to JavaScript; `tsc` checks them, other tools (tsx, Vite, Node's type stripping) run the code.
@@ -589,7 +589,7 @@ Follow the template. It must say:
 - Everyday use: `pnpm typecheck`; running a single `.ts` file with `node file.ts`; why imports name `.ts` files.
 - Official docs: `https://www.typescriptlang.org/tsconfig/`, `https://www.typescriptlang.org/docs/handbook/modules/reference.html`, `https://nodejs.org/api/typescript.html`.
 
-- [ ] **Step 13: Commit**
+- [x] **Step 13: Commit**
 
 ```bash
 git add tsconfig.base.json tsconfig.json package.json pnpm-lock.yaml .claude docs/development/git-workflow.md docs/development/tools/typescript.md
@@ -616,12 +616,12 @@ EOF
 - Consumes: `tsconfig.json` from Task 2 (`projectService` finds each file's tsconfig through its `include`).
 - Produces: script `lint` (`eslint .`), used by Task 5's lint-staged config and by CI in PH-02.
 
-- [ ] **Step 1: Add ESLint and its configs**
+- [x] **Step 1: Add ESLint and its configs**
 
 Run: `pnpm add -D -w eslint@^10 @eslint/js@^10 typescript-eslint@^8.71 eslint-config-prettier@^10`
 Expected: added; a peer-dependency warning about `typescript` must not appear (TypeScript 6.0.3 is in range).
 
-- [ ] **Step 2: Write `eslint.config.js`**
+- [x] **Step 2: Write `eslint.config.js`**
 
 ```js
 // @ts-check
@@ -664,7 +664,7 @@ export default defineConfig(
 );
 ```
 
-- [ ] **Step 3: Add the script**
+- [x] **Step 3: Add the script**
 
 In `package.json` `"scripts"`, add as the first entry:
 
@@ -672,12 +672,12 @@ In `package.json` `"scripts"`, add as the first entry:
     "lint": "eslint .",
 ```
 
-- [ ] **Step 4: Run the linter**
+- [x] **Step 4: Run the linter**
 
 Run: `pnpm lint`
 Expected: no output from ESLint, exit 0. If it reports findings in the hook or the configs, fix the code (do not disable rules) and rerun; note each fix in the commit body.
 
-- [ ] **Step 5: Check that a floating promise fails**
+- [x] **Step 5: Check that a floating promise fails**
 
 Run:
 
@@ -687,7 +687,7 @@ printf 'async function f(): Promise<void> {}\nf();\n' > .claude/hooks/scratch-fl
 
 Expected: `@typescript-eslint/no-floating-promises` reported and a non-zero exit.
 
-- [ ] **Step 6: Write `docs/development/tools/eslint.md`**
+- [x] **Step 6: Write `docs/development/tools/eslint.md`**
 
 Follow the template. It must say:
 - ESLint finds bugs and bad patterns without running the code; with typescript-eslint it uses type information (a **type-aware** rule such as `no-floating-promises` knows a call returns a promise).
@@ -696,7 +696,7 @@ Follow the template. It must say:
 - Everyday use: `pnpm lint`, `pnpm exec eslint --fix <file>`; reading a rule's name and looking it up; disabling a rule for one line with a reason, as a last resort.
 - Official docs: `https://eslint.org/docs/latest/use/configure/configuration-files`, `https://typescript-eslint.io/getting-started/typed-linting`, `https://typescript-eslint.io/users/configs#strict-type-checked`.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add eslint.config.js package.json pnpm-lock.yaml docs/development/tools/eslint.md
