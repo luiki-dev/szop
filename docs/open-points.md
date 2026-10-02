@@ -89,7 +89,7 @@ Roadmap entry: [PH-02](roadmap.md#ph-02-ci-checks).
 
 #### OP-062
 
-**Bring the Claude Code push hook into the toolchain and CI.** The hook is now `.claude/hooks/guard-git-push.ts`: ESLint lints it, Prettier formats it, `tsc` type-checks it and `pnpm test` runs its tests with Node's test runner. **Parts:** **PH-01:** ✅ Done ([#PR](…)); **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through; **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`.
+**Bring the Claude Code push hook into the toolchain and CI.** The hook is now `.claude/hooks/guard-git-push.ts`: ESLint lints it, Prettier formats it, `tsc` type-checks it and `pnpm test` runs its tests with Node's test runner. **Parts:** **PH-01:** ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11)); **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through; **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`.
 
 - **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences; [ADR 0016](decisions/0016-toolchain-details.md), decision 6
 - **Status:** ⬜ Open
@@ -136,7 +136,7 @@ Also: [OP-012](#op-012), [OP-013](#op-013).
 
 #### OP-005
 
-**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`allowBuilds` in pnpm 12, [ADR 0016](decisions/0016-toolchain-details.md), decision 3) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#PR](…)); **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database.
+**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`allowBuilds` in pnpm 12, [ADR 0016](decisions/0016-toolchain-details.md), decision 3) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11)); **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database.
 
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
 - **Status:** ⬜ Open
@@ -616,14 +616,14 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Give the README a short "Development" section** pointing to `docs/development/`.
 
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), consequences
-- **Status:** ✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#PR](…))
+- **Status:** ✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#11](https://github.com/luiki-dev/szop/pull/11))
 
 #### OP-009
 
 **Add commitlint** with `@commitlint/config-conventional` and husky's `commit-msg` hook. Two changes to the preset, agreed in the triage of m9: `body-max-line-length` and `footer-max-line-length` are turned off for everyone, since Dependabot's commit bodies hold links longer than 100 characters (and so may people's), which would fail every Dependabot PR in CI; and `type-enum` allows only the nine types of [ADR 0009](decisions/0009-git-workflow.md), decision 9, not the preset's `style` and `revert`.
 
 - **Source:** [ADR 0009](decisions/0009-git-workflow.md), decision 16 and consequences; [Audit, m9](audits/2026-09-29-design-sanity-check.md#process-and-ci)
-- **Status:** ✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#PR](…))
+- **Status:** ✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#11](https://github.com/luiki-dev/szop/pull/11))
 
 #### OP-024
 
