@@ -798,11 +798,11 @@ Check the `git status --short` output before committing: only `.prettierrc.json`
 - Consumes: `eslint` (Task 3) and `prettier` with `.prettierignore` (Task 4).
 - Produces: script `prepare` (`husky`), which sets `core.hooksPath` to `.husky/_` on every full `pnpm install`; `.husky/` where Task 6 adds `commit-msg`.
 
-- [ ] **Step 1: Add husky and lint-staged**
+- [x] **Step 1: Add husky and lint-staged**
 
 Run: `pnpm add -D -w husky@^9 lint-staged@^17`
 
-- [ ] **Step 2: Add the `prepare` script and run it**
+- [x] **Step 2: Add the `prepare` script and run it**
 
 In `package.json` `"scripts"`, add as the last entry:
 
@@ -813,13 +813,13 @@ In `package.json` `"scripts"`, add as the last entry:
 Run: `pnpm run prepare && git config core.hooksPath`
 Expected: `.husky/_`
 
-- [ ] **Step 3: Write `.husky/pre-commit`**
+- [x] **Step 3: Write `.husky/pre-commit`**
 
 ```sh
 pnpm exec lint-staged
 ```
 
-- [ ] **Step 4: Write `lint-staged.config.js`**
+- [x] **Step 4: Write `lint-staged.config.js`**
 
 ```js
 // Runs on the staged files of every commit (the pre-commit hook in .husky/).
@@ -838,7 +838,7 @@ export default {
 Run: `pnpm lint && pnpm exec prettier --check .`
 Expected: both pass (the new config is linted and formatted too).
 
-- [ ] **Step 5: Write `docs/development/tools/husky-and-lint-staged.md`**
+- [x] **Step 5: Write `docs/development/tools/husky-and-lint-staged.md`**
 
 Follow the template. It must say:
 - husky installs **git hooks** (link the glossary) from the repository; lint-staged runs commands on the staged files only.
@@ -847,7 +847,7 @@ Follow the template. It must say:
 - Everyday use: what happens on `git commit`; a blocked commit (fix and commit again; files the hook reformatted are re-staged automatically); `git commit --no-verify` exists but CI runs the same checks from PH-02, so skipping only delays the failure; after cloning, `pnpm install` sets the hooks up.
 - Official docs: `https://typicode.github.io/husky/`, `https://github.com/lint-staged/lint-staged#readme`.
 
-- [ ] **Step 6: Commit (the new pre-commit hook checks this commit)**
+- [x] **Step 6: Commit (the new pre-commit hook checks this commit)**
 
 ```bash
 git add .husky/pre-commit lint-staged.config.js package.json pnpm-lock.yaml docs/development/tools/husky-and-lint-staged.md
@@ -859,13 +859,13 @@ Claude-Session: https://claude.ai/code/session_01RtEwNsCiAQ5Tfp5ckcTSnE
 EOF
 ```
 
-- [ ] **Step 7: Switch to a throwaway branch for the checks**
+- [x] **Step 7: Switch to a throwaway branch for the checks**
 
 Run: `git switch -c scratch/hooks-check`
 
 The checks below commit; they happen on this branch, made from the task's commit so the hooks are in place, and deleted in step 11. If a check fails, fix it on the phase branch in a new commit and rerun the checks.
 
-- [ ] **Step 8: Check that a badly formatted file is formatted on commit**
+- [x] **Step 8: Check that a badly formatted file is formatted on commit**
 
 Run:
 
@@ -883,7 +883,7 @@ printf 'async function f(): Promise<void> {}\nf();\n' > .claude/hooks/scratch-li
 
 Expected: `no-floating-promises` reported, `husky - pre-commit script failed`, a non-zero exit, nothing committed.
 
-- [ ] **Step 9: Check that a Markdown-only commit passes untouched (Review Focus 3)**
+- [x] **Step 9: Check that a Markdown-only commit passes untouched (Review Focus 3)**
 
 Run:
 
@@ -893,7 +893,7 @@ printf '| a | b |\n|---|---|\n| 1 | 2 |\n' > scratch.md && git add scratch.md &&
 
 Expected: the commit succeeds and the table is exactly as written (`|---|---|`, not padded).
 
-- [ ] **Step 10: Check that an `.mjs` file is linted (Review Focus 5)**
+- [x] **Step 10: Check that an `.mjs` file is linted (Review Focus 5)**
 
 Run:
 
@@ -903,7 +903,7 @@ printf 'const unused = 1;\n' > scratch.mjs && git add scratch.mjs && git commit 
 
 Expected: ESLint reports `no-unused-vars` for `scratch.mjs` (or a typed-linting error because the file is outside every tsconfig); either way a non-zero exit and nothing committed. If it is the typed-linting error, note it in the PR description: it means a new file type also needs a tsconfig `include`, which the phase adding it will do.
 
-- [ ] **Step 11: Return to the phase branch and delete the throwaway branch**
+- [x] **Step 11: Return to the phase branch and delete the throwaway branch**
 
 Run: `git switch feat/monorepo-toolchain && git branch -D scratch/hooks-check && git status --short`
 Expected: back on the phase branch with a clean tree; the scratch branch is gone (it was never pushed).

@@ -31,7 +31,7 @@ pnpm exec prettier --check .     # only report files that are not formatted, cha
 ```
 
 - In VS Code, the file is formatted on save (set up in the VS Code settings task of PH-01).
-- The pre-commit hook formats the staged files, so an unformatted file does not get committed (see the husky and lint-staged setup, added in the next task of PH-01).
+- The pre-commit hook formats the staged files, so an unformatted file does not get committed (see [husky and lint-staged](husky-and-lint-staged.md)).
 
 ## Official documentation
 
