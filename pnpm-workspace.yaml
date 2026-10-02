@@ -1,0 +1,13 @@
+# The workspace packages. None exist yet: apps/api arrives in PH-03,
+# apps/web in PH-05, packages/shared with the first shared code.
+packages:
+  - apps/*
+  - packages/*
+
+# Refuse to install with a Node version outside package.json's engines.
+engineStrict: true
+
+# Dependencies allowed to run install scripts: none (ADR 0012, decision 18).
+# pnpm 12 fails the install when a dependency with a build script is not
+# listed here; the owner then decides between true and false.
+allowBuilds: {}

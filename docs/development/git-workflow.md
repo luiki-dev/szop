@@ -67,7 +67,7 @@ Optional footers, such as BREAKING CHANGE: … or Co-Authored-By: …
 | `ci` | CI configuration | None |
 | `chore` | Anything else (tooling, housekeeping) | None |
 
-- **The scope is optional** and names a workspace or area, for example `web`, `api`, `shared`, `e2e`, `infra`, `adr`, `spec`, `plan` or `deps`. A phase's PR title may name its feature area instead (`feat(templates): add templates`), since the phase spans several workspaces.
+- **The scope is optional**, and when given it must be on the allow-list in `commitlint.config.js` ([ADR 0016](../decisions/0016-toolchain-details.md)): a workspace or test layer (`web`, `api`, `shared`, `e2e`), a feature area, one per requirement area (`lists`, `templates`, …), a kind of doc (`adr`, `spec`, `plan`, `requirements`, `audit`, `roadmap`) or tooling (`infra`, `deps`, `main` for release-please, `claude`). A phase's PR title may name its feature area (`feat(templates): add templates`), since the phase spans several workspaces. A PR that needs a new scope adds it to the list.
 - **A breaking change** is marked with `!` after the type (`feat(api)!: …`) or a `BREAKING CHANGE:` footer. While Szop is in `0.x`, it raises MINOR.
 - **Subjects are imperative**: "add", not "added" or "adds". Read it as "this commit will… add list totals".
 
@@ -84,7 +84,7 @@ build(deps): bump vitest to 3.2
 
 **One commit per task holds its tests and its code together**, made once the task's tests pass. Test-driven development (TDD, [ADR 0007](../decisions/0007-testing-strategy.md), decision 3) happens in the working tree: write a failing test, see it fail, write the code, see it pass, tidy up, then commit. The plan spells these steps out in each task. Committing the failing test separately would record the TDD cycle in the history, but leave commits that fail their own tests, which breaks `git bisect` and a demo built from such a commit. With test and code together, every commit passes its tests and the diff shows each test next to the code it drives.
 
-Two git hooks run on every commit, once [PH-01](../roadmap.md#ph-01-monorepo-and-toolchain) has set them up: the **pre-commit** hook formats and lints the staged files ([ADR 0005](../decisions/0005-development-environment.md), decision 13), and the **commit-msg** hook runs commitlint, which rejects a message that does not follow the format.
+Two git hooks run on every commit: the **pre-commit** hook formats and lints the staged files ([ADR 0005](../decisions/0005-development-environment.md), decision 13; see [husky and lint-staged](tools/husky-and-lint-staged.md)), and the **commit-msg** hook runs commitlint, which rejects a message that does not follow the format ([ADR 0009](../decisions/0009-git-workflow.md), decision 9; see [commitlint](tools/commitlint.md)).
 
 ## 3. Open a pull request
 
@@ -180,5 +180,5 @@ A version marks a state of the code; it deploys nothing. The demo environment ca
 | PR title follows Conventional Commits | CI check | [PH-02](../roadmap.md#ph-02-ci-checks) |
 | Claude never merges a PR | `CLAUDE.md`, backed by a deny rule in `.claude/settings.json` | ADR 0009's merge; the deny rule from ADR 0012's merge |
 | Claude never triggers `demo-up` or `demo-down` unless asked | `CLAUDE.md`, backed by a deny rule in `.claude/settings.json` | ADR 0011's merge; the deny rule from ADR 0012's merge |
-| Claude never force-pushes, deletes remote branches or pushes tags | Deny rules in `.claude/settings.json` and the `.claude/hooks/guard-git-push.mjs` hook for the forms they miss (and the rulesets, for `main` and `v*` tags) | ADR 0012's merge; the hook from ADR 0015's merge |
+| Claude never force-pushes, deletes remote branches or pushes tags | Deny rules in `.claude/settings.json` and the `.claude/hooks/guard-git-push.ts` hook for the forms they miss (and the rulesets, for `main` and `v*` tags) | ADR 0012's merge; the hook from ADR 0015's merge |
 | Every deploy is approved by the owner | Required reviewer on the `demo` environment; the teardown's `demo-teardown` environment is usable from `main` only | [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12](../roadmap.md#ph-12-first-deploy) |

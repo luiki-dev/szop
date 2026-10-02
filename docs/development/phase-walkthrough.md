@@ -59,8 +59,8 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
 
 | # | Branch | Commit message | Why it is there |
 |---|---|---|---|
-| 1 | `feat/templates` | `docs(spec): add templates design` | The approved spec, `docs/superpowers/specs/2026-10-05-templates-design.md` |
-| 2 | `feat/templates` | `docs(plan): add templates implementation plan` | The approved plan, `docs/superpowers/plans/2026-10-05-templates.md` |
+| 1 | `feat/templates` | `docs(spec): add templates design` | The approved spec, `docs/superpowers/specs/2026-10-05-PH-28-templates-design.md` |
+| 2 | `feat/templates` | `docs(plan): add templates implementation plan` | The approved plan, `docs/superpowers/plans/2026-10-05-PH-28-templates.md` |
 | 3 | `feat/templates` | `feat(shared): add template schema` | Plan task 1: the schema and its tests (TDD) |
 | 4 | `feat/templates` | `feat(api): add templates endpoints` | Plan task 2: the routes, services and their tests (TDD) |
 | 5 | `feat/templates` | `feat(web): start a list from a template` | Plan task 3: the page and its component tests (test-after) |
@@ -307,7 +307,7 @@ The highest bump wins: a `feat` and three `fix`es since `v0.3.0` make `0.4.0`. A
 | GitHub Release | GitHub | `v0.4.0`, body = the changelog entry |
 | Image for any deploy | ECR, immutable | `szop:<commit hash>` |
 | Image of a release | ECR, immutable, the same image | `szop:<hash of M14>` and `szop:0.4.0` |
-| Spec / plan | The phase branch, then `main` | `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`, `docs/superpowers/plans/YYYY-MM-DD-<topic>.md` |
+| Spec / plan | The phase branch, then `main` | `docs/superpowers/specs/YYYY-MM-DD-PH-NN-<topic>-design.md`, `docs/superpowers/plans/YYYY-MM-DD-PH-NN-<topic>.md` (the phase ID in uppercase; work outside phases leaves it out) |
 | Demo | AWS, only during a session | `https://demo.<domain>` |
 
 ## What runs on which event

@@ -1,6 +1,6 @@
 # ADR 0005 — Development environment and tooling
 
-- **Status:** ✅ Accepted — extended by [ADR 0008](0008-hosting.md) (production PostgreSQL version and images; Terraform and AWS CLI added to the tooling); completed by [ADR 0007](0007-testing-strategy.md) (the test tooling), [ADR 0009](0009-git-workflow.md) (commitlint) and [ADR 0010](0010-ci-cd.md) (type checks and tests run in CI); decisions 12 and 14 extended by [ADR 0013](0013-visual-design.md) (the Tailwind Prettier plugin and editor extension); its consequences refined by [ADR 0014](0014-roadmap.md), decision 7 (`compose.yaml` and the `.env` files arrive with the database, PH-04)
+- **Status:** ✅ Accepted — extended by [ADR 0008](0008-hosting.md) (production PostgreSQL version and images; Terraform and AWS CLI added to the tooling); completed by [ADR 0007](0007-testing-strategy.md) (the test tooling), [ADR 0009](0009-git-workflow.md) (commitlint) and [ADR 0010](0010-ci-cd.md) (type checks and tests run in CI); decisions 12 and 14 extended by [ADR 0013](0013-visual-design.md) (the Tailwind Prettier plugin and editor extension); its consequences refined by [ADR 0014](0014-roadmap.md), decision 7 (`compose.yaml` and the `.env` files arrive with the database, PH-04); decision 12 refined by [ADR 0016](0016-toolchain-details.md) (Markdown left out of Prettier)
 - **Date:** 2026-09-27
 
 ## Context

@@ -7,3 +7,6 @@
 
 # Superpowers brainstorming companion: mockups and session state
 .superpowers/
+
+# Dependencies installed by pnpm
+node_modules/

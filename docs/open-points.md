@@ -62,42 +62,13 @@ Everything that is still undecided or not yet done and has been left to a later 
 
 Roadmap entry: [PH-01](roadmap.md#ph-01-monorepo-and-toolchain).
 
-#### OP-005
-
-**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`onlyBuiltDependencies`) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-01:** everything except `compose.yaml` and the `.env` files; **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database.
-
-- **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
-- **Status:** ⬜ Open
-
-#### OP-008
-
-**Give the README a short "Development" section** pointing to `docs/development/`.
-
-- **Source:** [ADR 0005](decisions/0005-development-environment.md), consequences
-- **Status:** ⬜ Open
-
-#### OP-009
-
-**Add commitlint** with `@commitlint/config-conventional` and husky's `commit-msg` hook. Two changes to the preset, agreed in the triage of m9: `body-max-line-length` and `footer-max-line-length` are turned off for everyone, since Dependabot's commit bodies hold links longer than 100 characters (and so may people's), which would fail every Dependabot PR in CI; and `type-enum` allows only the nine types of [ADR 0009](decisions/0009-git-workflow.md), decision 9, not the preset's `style` and `revert`.
-
-- **Source:** [ADR 0009](decisions/0009-git-workflow.md), decision 16 and consequences; [Audit, m9](audits/2026-09-29-design-sanity-check.md#process-and-ci)
-- **Status:** ⬜ Open
-
-#### OP-062
-
-**Bring the Claude Code push hook into the toolchain and CI.** `.claude/hooks/guard-git-push.mjs` and its tests were written before there was any toolchain: they are plain Node, run by hand with `node --test .claude/hooks/guard-git-push.test.mjs`. **Parts:** **PH-01:** ESLint and Prettier cover `.claude/hooks/`, and the test runs through a `pnpm` script (with Node's runner or moved to Vitest, decided there); **PH-02:** `ci.yml` runs it, so a broken hook fails CI instead of silently letting pushes through.
-
-- **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences
-- **Status:** ⬜ Open
-
 ### PH-02 CI checks
 
-Roadmap entry: [PH-02](roadmap.md#ph-02-ci-checks).\
-Also: [OP-062](#op-062).
+Roadmap entry: [PH-02](roadmap.md#ph-02-ci-checks).
 
 #### OP-019
 
-**Write the workflows**: `ci.yml`, `pr-title.yml`, `infra-plan.yml`, `demo-up.yml`, `demo-down.yml`, `release-please.yml` and `mutation.yml`, the composite setup action, `dependabot.yml` and the release-please configuration (`bump-minor-pre-major`; `1.0.0` through a `Release-As` footer). Add the `lint` and `typecheck` scripts if earlier phases have not. For `demo-up` and `demo-down`, settle the details of [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7: the output recording the deployed commit, how `demo-down` reads it and checks that commit out, the concurrency groups and the lock timeout. Details from the design sanity check: the `commits` job is tried on a real Dependabot commit before `ci-ok` becomes a required check (m9, with the commitlint rules of OP-009); `ci-ok` requires the change-detection job to have succeeded and fails if any job reports `failure` or `cancelled`, since a failed detection job leaves every other job `skipped` (m10), which a PR that makes detection fail can prove; check whether `infra-plan` gets an OIDC token on Dependabot PRs, and if not, skip it for them by testing the PR's author (`github.event.pull_request.user.login`), not `github.actor`, which becomes whoever re-runs the job, and plan provider bumps locally instead (m12); `dependabot.yml` ignores major updates of the Node image, `@types/node` (whose major follows Node's) and the PostgreSQL image, so a major upgrade is a deliberate change of `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version together, keeping development on production's major version (m13); the release image is built from the release commit and never demo-checked, and the "re-tag if ECR already has it" path will rarely apply, which `ci-cd.md` (OP-023) states as a known, small risk (the release commit changes only the version and the changelog, and OP-032 covers whether the image starts), and the privileged `release` job restores no cache (C10). From [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 18: `demo-up`'s jobs declare `environment: demo` and `demo-down`'s declare `demo-teardown`; `id-token: write` is granted per job, never per workflow; jobs holding AWS credentials run no `pnpm install` and no project scripts on the runner. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-02:** `ci.yml` (with the `commits` and `ci-ok` details above), `pr-title.yml`, the composite setup action and `dependabot.yml`, whose ecosystems and ignore rules are added by the phases that introduce them; **PH-11:** `infra-plan.yml` and `demo-down.yml`; **PH-12:** `demo-up.yml`; **PH-13:** `release-please.yml` and its configuration; **PH-15:** `mutation.yml`.
+**Write the workflows**: `ci.yml`, `pr-title.yml`, `infra-plan.yml`, `demo-up.yml`, `demo-down.yml`, `release-please.yml` and `mutation.yml`, the composite setup action, `dependabot.yml` and the release-please configuration (`bump-minor-pre-major`; `1.0.0` through a `Release-As` footer). Add the `lint` and `typecheck` scripts if earlier phases have not. For `demo-up` and `demo-down`, settle the details of [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7: the output recording the deployed commit, how `demo-down` reads it and checks that commit out, the concurrency groups and the lock timeout. Details from the design sanity check: the `commits` job is tried on a real Dependabot commit before `ci-ok` becomes a required check (m9, with the commitlint rules of OP-009); `ci-ok` requires the change-detection job to have succeeded and fails if any job reports `failure` or `cancelled`, since a failed detection job leaves every other job `skipped` (m10), which a PR that makes detection fail can prove; check whether `infra-plan` gets an OIDC token on Dependabot PRs, and if not, skip it for them by testing the PR's author (`github.event.pull_request.user.login`), not `github.actor`, which becomes whoever re-runs the job, and plan provider bumps locally instead (m12); `dependabot.yml` ignores major updates of the Node image, `@types/node` (whose major follows Node's) and the PostgreSQL image, so a major upgrade is a deliberate change of `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version together, keeping development on production's major version (m13); the release image is built from the release commit and never demo-checked, and the "re-tag if ECR already has it" path will rarely apply, which `ci-cd.md` (OP-023) states as a known, small risk (the release commit changes only the version and the changelog, and OP-032 covers whether the image starts), and the privileged `release` job restores no cache (C10). From [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 18: `demo-up`'s jobs declare `environment: demo` and `demo-down`'s declare `demo-teardown`; `id-token: write` is granted per job, never per workflow; jobs holding AWS credentials run no `pnpm install` and no project scripts on the runner. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-02:** `ci.yml` (with the `commits` and `ci-ok` details above), `pr-title.yml`, the composite setup action and `dependabot.yml`, whose ecosystems and ignore rules are added by the phases that introduce them (Dependabot writes `build(deps-dev): …` for devDependencies, which `scope-enum` rejects, so `dependabot.yml` and the scope list in `commitlint.config.js` are aligned in PH-02); **PH-11:** `infra-plan.yml` and `demo-down.yml`; **PH-12:** `demo-up.yml`; **PH-13:** `release-please.yml` and its configuration; **PH-15:** `mutation.yml`.
 
 - **Source:** [ADR 0009](decisions/0009-git-workflow.md), consequences; [ADR 0010](decisions/0010-ci-cd.md), decisions 5–18 and consequences; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7; [Audit, Process and CI](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C10](audits/2026-09-29-design-sanity-check.md#consider-improving); [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 18
 - **Status:** ⬜ Open
@@ -116,11 +87,19 @@ Also: [OP-062](#op-062).
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 22 and consequences
 - **Status:** ⬜ Open
 
+#### OP-062
+
+**Bring the Claude Code push hook into the toolchain and CI.** The hook is now `.claude/hooks/guard-git-push.ts`: ESLint lints it, Prettier formats it, `tsc` type-checks it and `pnpm test` runs its tests with Node's test runner. **Parts:** **PH-01:** ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11)); **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through; **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`.
+
+- **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences; [ADR 0016](decisions/0016-toolchain-details.md), decision 6
+- **Status:** ⬜ Open
+
 ## Stage 2: Walking skeleton, running locally
 
 ### PH-03 API skeleton
 
-Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
+Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).\
+Also: [OP-062](#op-062).
 
 #### OP-010
 
@@ -143,10 +122,24 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
 - **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ⬜ Open
 
+#### OP-065
+
+**Set `tsconfigRootDir` in `eslint.config.js`.** When the workspaces add their own `tsconfig.json` files, set `tsconfigRootDir: import.meta.dirname` next to `projectService`, as typescript-eslint's typed-linting guide does. Without it, typescript-estree can fail with "multiple candidate TSConfigRootDirs".
+
+- **Source:** PH-01 final review
+- **Status:** ⬜ Open
+
 ### PH-04 Database
 
 Roadmap entry: [PH-04](roadmap.md#ph-04-database).\
-Also: [OP-005](#op-005), [OP-012](#op-012), [OP-013](#op-013).
+Also: [OP-012](#op-012), [OP-013](#op-013).
+
+#### OP-005
+
+**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`allowBuilds` in pnpm 12, [ADR 0016](decisions/0016-toolchain-details.md), decision 3) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11)); **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database.
+
+- **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
+- **Status:** ⬜ Open
 
 #### OP-006
 
@@ -574,6 +567,20 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 20
 - **Status:** ⬜ Open
 
+#### OP-063
+
+**Lint the Markdown docs without reformatting them.** Prettier stays out of Markdown because it pads tables ([ADR 0016](decisions/0016-toolchain-details.md), decision 8). A linter such as markdownlint could check headings, lists and links without touching table layout.
+
+- **Source:** [ADR 0016](decisions/0016-toolchain-details.md), decision 8
+- **Status:** ⬜ Open
+
+#### OP-064
+
+**Move to TypeScript 7** (the native compiler) once typescript-eslint supports it; until then TypeScript is pinned to 6.0.
+
+- **Source:** [ADR 0016](decisions/0016-toolchain-details.md), decision 4
+- **Status:** ⬜ Open
+
 ## Closed
 
 #### OP-001
@@ -603,6 +610,20 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decision 26; [ADR 0010](decisions/0010-ci-cd.md), decision 23; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 2
 - **Status:** ✅ Closed: `infra/bootstrap` and the permanent part of `infra/base` are applied in PH-09 and PH-10, the safety net is merged in PH-11, and the real `demo-up` comes with PH-12 ([ADR 0014](decisions/0014-roadmap.md), decision 8)
+
+#### OP-008
+
+**Give the README a short "Development" section** pointing to `docs/development/`.
+
+- **Source:** [ADR 0005](decisions/0005-development-environment.md), consequences
+- **Status:** ✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#11](https://github.com/luiki-dev/szop/pull/11))
+
+#### OP-009
+
+**Add commitlint** with `@commitlint/config-conventional` and husky's `commit-msg` hook. Two changes to the preset, agreed in the triage of m9: `body-max-line-length` and `footer-max-line-length` are turned off for everyone, since Dependabot's commit bodies hold links longer than 100 characters (and so may people's), which would fail every Dependabot PR in CI; and `type-enum` allows only the nine types of [ADR 0009](decisions/0009-git-workflow.md), decision 9, not the preset's `style` and `revert`.
+
+- **Source:** [ADR 0009](decisions/0009-git-workflow.md), decision 16 and consequences; [Audit, m9](audits/2026-09-29-design-sanity-check.md#process-and-ci)
+- **Status:** ✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#11](https://github.com/luiki-dev/szop/pull/11))
 
 #### OP-024
 

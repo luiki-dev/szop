@@ -49,7 +49,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 - **A stage** is a milestone with an exit criterion. It only groups phases: it has no brainstorm, branch or PR of its own.
 - **A phase** is the work item: one brainstorm, one branch, one PR, merged when it meets the [definition of done](development/definition-of-done.md). Its ID (`PH-01`, `PH-02`, …) never changes and is never reused; the order is the order on this page.
-- **Status lives only in each stage's table:** ⬜ Not started, 🚧 In progress, ✅ Done, ✖️ Dropped (with the reason). When a phase's PR is opened, its row gets 🚧 and the links to the spec, the plan and the PR (a bounded phase has no spec or plan: "➖ N/A: bounded"). Before the merge, the PR sets the row to ✅, which becomes true when the owner merges it.
+- **Status lives only in each stage's table:** ⬜ Not started, 🚧 In progress, ✅ Done, ✖️ Dropped (with the reason). When a phase's work starts, its row gets 🚧 and the links to the spec and the plan as they are committed (a bounded phase has no spec or plan: "➖ N/A: bounded"); the PR link follows when the PR opens. Before the merge, the PR sets the row to ✅, which becomes true when the owner merges it.
 - **Each phase entry** says:
   - **Goal:** what works when the phase is done. It is also what the demo check looks at.
   - **Delivers:** the requirements and use cases it implements, as links, marked "part" when it delivers only part of one; for tooling and infrastructure, what it builds and the ADRs behind it.
@@ -67,7 +67,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 | Phase | Status | Spec | Plan | PR |
 |---|---|---|---|---|
-| [PH-01 Monorepo and toolchain](#ph-01-monorepo-and-toolchain) | ⬜ Not started | — | — | — |
+| [PH-01 Monorepo and toolchain](#ph-01-monorepo-and-toolchain) | ✅ Done | [Spec](superpowers/specs/2026-10-02-PH-01-monorepo-and-toolchain-design.md) | [Plan](superpowers/plans/2026-10-02-PH-01-monorepo-and-toolchain.md) | [#11](https://github.com/luiki-dev/szop/pull/11) |
 | [PH-02 CI checks](#ph-02-ci-checks) | ⬜ Not started | — | — | — |
 
 ### PH-01 Monorepo and toolchain

@@ -1,0 +1,10 @@
+# Store and check out text files with LF line endings, whatever the OS.
+* text=auto eol=lf
+
+# Images are binary: never convert their line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary

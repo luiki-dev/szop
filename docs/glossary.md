@@ -51,6 +51,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
 | **NAT** | Network Address Translation | Here: a NAT gateway lets resources in a private subnet reach the internet. Costs about $32 a month on AWS; not used (see ADR 0008). |
 | **NFR** | Non-functional requirement | A quality the system must have rather than something it does: supported browsers, accessibility, performance. Szop's are [NFR-1 to NFR-3](requirements/functional-requirements.md#3-non-functional-requirements). |
+| **nvm** | Node Version Manager | A tool that installs and switches Node.js versions per user. Szop's `.nvmrc` tells it which one to use. |
 | **OAuth / OIDC** | Open Authorization / OpenID Connect | Standards for logging in through another provider ("Sign in with Google"). Relevant for the social-login future extension. Also how CI logs in to AWS without stored keys: GitHub signs a token saying which repository the job belongs to and which environment, branch or PR event it runs for, and AWS exchanges it for short-lived credentials (see ADR 0010 and ADR 0012). |
 | **OpenSSF** | Open Source Security Foundation | A Linux Foundation project for open-source security. Its **Scorecard** rates a repository's security practices. Not used yet (see ADR 0010). |
 | **ORM** | Object-Relational Mapper | A library that maps database tables to objects or types in code and builds queries. Drizzle is ours. |
@@ -149,9 +150,10 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Event bus** | An in-process publish/subscribe mechanism: code publishes "list 42 changed", listeners (such as the WebSocket hub) react. |
 | **Fargate** | AWS's way of running ECS tasks without managing servers: you state CPU and memory, AWS provides the machine. |
 | **Flaky test** | A test that sometimes passes and sometimes fails without any change to the code, usually because of timing or shared state. Treated as a bug in Szop. |
+| **Flat config** | ESLint's configuration format since version 9: one `eslint.config.js` exporting an array of config objects, applied in order. |
 | **Formatter** | A tool that rewrites code into one consistent layout (indentation, quotes, line breaks). Szop uses Prettier. |
 | **Git flow** | A branching model with long-lived `main` and `develop` branches plus `feature/*`, `release/*` and `hotfix/*` branches, made for software released in numbered versions. Considered, not used (see ADR 0009). |
-| **Git hook** | A script Git runs at a fixed moment, for example before a commit is created (a **pre-commit hook**). Szop's formats and lints the files being committed. |
+| **Git hook** | A script Git runs at a fixed moment, for example before a commit is created (a **pre-commit hook**). Szop's hooks, managed by husky, format and lint the staged files (pre-commit, lint-staged) and check the message (commit-msg, commitlint). |
 | **GitHub Actions: workflow, job, runner** | GitHub's CI/CD service. A **workflow** is a YAML file in `.github/workflows/` started by an event (a push, a PR, a schedule, a button); it holds **jobs**, which run in parallel unless one needs another, each on a fresh virtual machine, the **runner**. |
 | **GitHub App** | An integration registered on GitHub with its own identity (`name[bot]`) and narrowly chosen permissions; it gets tokens that expire within an hour. Szop's release-please runs as one (see ADR 0010). |
 | **GitHub flow** | A branching model where `main` is always releasable and every change is made on a short-lived branch merged through a pull request. Szop uses it (see ADR 0009). |
@@ -170,6 +172,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Lazy creation** | Creating something only when it is first needed. Szop creates a guest's workspace on their first change, not on their first visit. |
 | **Least privilege** | Giving every identity only the permissions it needs, so a leak or bug can do little harm. Szop's app role may only send email and accept ECS Exec sessions. |
 | **Lighthouse** | Google's tool, built into Chrome, that loads a page while simulating a slow phone and reports performance, accessibility and other scores. |
+| **lint-staged** | A tool that runs commands (here ESLint and Prettier) only on the files staged for a commit. |
 | **Linter** | A tool that analyzes code for bugs and bad patterns without running it. Szop uses ESLint. |
 | **Merge commit, squash merge, rebase merge** | GitHub's three ways to merge a PR. A **merge commit** keeps the branch's commits and adds one commit joining the histories; a **squash merge** turns the whole branch into one new commit; a **rebase merge** replays each commit on top of `main`. Szop uses merge commits (see ADR 0009). |
 | **Migration** | A versioned script that changes the database schema; applied in order in every environment. |
@@ -226,7 +229,8 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Toast** | A short message that appears briefly at the edge of the screen and goes away by itself, optionally with an action such as Undo. |
 | **Trunk-based development** | A branching model where everyone commits to `main` (the trunk) directly or through branches living less than a day. Needs strong automated tests. Considered, not used (see ADR 0009). |
 | **Trust policy (IAM)** | The part of an IAM role that says who may assume it. Szop's CI roles trust only OIDC tokens for a given environment or PR event, such as jobs in the `demo` environment; the token does not say which workflow file runs, so the environment's own rules (a required reviewer, allowed branches) decide who gets that far (see ADR 0012). |
-| **Type stripping** | Running TypeScript by deleting the type annotations instead of compiling it, which Node.js can now do itself. It does not check types. Szop uses tsx instead (see ADR 0005). |
+| **Type-aware linting** | Linting that uses TypeScript's type information, so a rule can know, for example, that a call returns a promise. |
+| **Type stripping** | Running TypeScript by deleting the type annotations instead of compiling it, which Node.js can now do itself. It does not check types. The API uses tsx instead (see ADR 0005); the Claude Code push hook runs by type stripping (see ADR 0016). |
 | **Utility class** | A CSS class that does one thing, such as `p-4` for padding. Tailwind CSS is built on them. |
 | **V8** | The JavaScript engine inside Chrome and Node.js. Vitest measures test coverage with V8's built-in instrumentation. |
 | **Variable font** | One font file containing every weight (and sometimes width), instead of one file per weight. |
