@@ -1,6 +1,6 @@
 # ADR 0012 — Security baseline: threat model, access control, web baseline, rate limits and delivery
 
-- **Status:** ✅ Accepted
+- **Status:** ✅ Accepted — decision 19 refined by [ADR 0015](0015-git-push-guard-hook.md) (a hook catches the pushes the deny rules miss; the broken `:branch` rule removed)
 - **Date:** 2026-10-01
 - **Refines:** [ADR 0002](0002-technical-architecture.md), decisions 7 (the cookie's attributes, protection against cross-site request forgery) and 16 (every referenced ID resolved within the workspace, through an access layer, backed by the database); [ADR 0003](0003-abuse-protection.md), decision 2 (the client IP behind the load balancer, new limits, a daily email cap); [ADR 0010](0010-ci-cd.md), decisions 12 (a required reviewer on `demo`, a `demo-teardown` environment) and 16 (the deploy role trusts both environments; the plan role cannot read log contents)
 - **Extends:** the document roles table of [ADR 0011](0011-design-sanity-check-follow-ups.md), decision 4 (the threat model)

@@ -29,7 +29,7 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 - **Address review comments with new commits** on the branch; don't rewrite history once a PR is open. Bring `main` in by merging it, not by rebasing.
 - **Never merge a PR**, including release-please's release PR. Only the owner merges; the merge is the approval.
 - **Never trigger `demo-up` or `demo-down`** unless the owner asks ([ADR 0010](docs/decisions/0010-ci-cd.md), consequences).
-- **Don't work around the deny rules in `.claude/settings.json`** ([ADR 0012](docs/decisions/0012-security-baseline.md), decision 19). They back the rules above; if one blocks something the owner asked for, say so and let the owner run it.
+- **Don't work around the deny rules in `.claude/settings.json` or the push hook in `.claude/hooks/`** ([ADR 0012](docs/decisions/0012-security-baseline.md), decision 19; [ADR 0015](docs/decisions/0015-git-push-guard-hook.md)). They back the rules above; if one blocks something the owner asked for, say so and let the owner run it.
 - **When a superpowers skill offers a git worktree or a local merge, don't take it.** Work on a plain branch in the main checkout (ADR 0009, decision 5), and finish by pushing the branch and opening a PR.
 
 ## Documentation

@@ -180,5 +180,5 @@ A version marks a state of the code; it deploys nothing. The demo environment ca
 | PR title follows Conventional Commits | CI check | [PH-02](../roadmap.md#ph-02-ci-checks) |
 | Claude never merges a PR | `CLAUDE.md`, backed by a deny rule in `.claude/settings.json` | ADR 0009's merge; the deny rule from ADR 0012's merge |
 | Claude never triggers `demo-up` or `demo-down` unless asked | `CLAUDE.md`, backed by a deny rule in `.claude/settings.json` | ADR 0011's merge; the deny rule from ADR 0012's merge |
-| Claude never force-pushes, deletes remote branches or pushes tags | Deny rules in `.claude/settings.json` (and the rulesets, for `main` and `v*` tags) | ADR 0012's merge |
+| Claude never force-pushes, deletes remote branches or pushes tags | Deny rules in `.claude/settings.json` and the `.claude/hooks/guard-git-push.mjs` hook for the forms they miss (and the rulesets, for `main` and `v*` tags) | ADR 0012's merge; the hook from ADR 0015's merge |
 | Every deploy is approved by the owner | Required reviewer on the `demo` environment; the teardown's `demo-teardown` environment is usable from `main` only | [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12](../roadmap.md#ph-12-first-deploy) |
