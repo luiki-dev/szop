@@ -29,6 +29,7 @@
 ## Global Constraints
 
 - Branch `feat/monorepo-toolchain`, already created; never commit to `main`; no worktree (CLAUDE.md, git workflow).
+- **Execution: subagent-driven, with a fresh reviewer per task.** After a task's review passes and it is committed, push the branch (`git push`) and **pause** until the owner has reviewed that task's changes; start the next task only when the owner says so.
 - Node: `engines.node` is `>=24 <25`; `.nvmrc` is `24`.
 - pnpm: `packageManager` is `pnpm@12.8.1`; root dev dependencies are added with `pnpm add -D -w` (pnpm refuses to add to the workspace root without `-w`).
 - **TypeScript is pinned to `~6.0.3`, not 7.** typescript-eslint 8.71 supports `typescript >=4.8.4 <6.1.0`; TypeScript 7 (the native port) is not supported yet. `@types/node` is `^24`, matching Node 24.
