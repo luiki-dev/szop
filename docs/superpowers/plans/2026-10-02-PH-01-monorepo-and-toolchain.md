@@ -1064,7 +1064,7 @@ EOF
 **Interfaces:**
 - Consumes: Prettier (Task 4), ESLint (Task 3), TypeScript (Task 2) from `node_modules`.
 
-- [ ] **Step 1: Write `.vscode/extensions.json`**
+- [x] **Step 1: Write `.vscode/extensions.json`**
 
 ```json
 {
@@ -1076,7 +1076,7 @@ EOF
 }
 ```
 
-- [ ] **Step 2: Write `.vscode/settings.json`**
+- [x] **Step 2: Write `.vscode/settings.json`**
 
 ```json
 {
@@ -1090,12 +1090,12 @@ EOF
 }
 ```
 
-- [ ] **Step 3: Check formatting**
+- [x] **Step 3: Check formatting**
 
 Run: `pnpm exec prettier --check .vscode`
 Expected: passes.
 
-- [ ] **Step 4: Write `docs/development/tools/vscode.md`**
+- [x] **Step 4: Write `docs/development/tools/vscode.md`**
 
 Follow the template. It must say:
 - VS Code is the editor, connected to WSL through the WSL extension; the repository shares its settings and recommended extensions.
@@ -1104,7 +1104,7 @@ Follow the template. It must say:
 - Everyday use: open the repository from WSL with `code .`; accept the recommended extensions; accept "Use Workspace Version" for TypeScript; what format on save and ESLint fixes on save do.
 - Official docs: `https://code.visualstudio.com/docs/remote/wsl`, `https://code.visualstudio.com/docs/configure/settings#_workspace-settings`, `https://code.visualstudio.com/docs/typescript/typescript-compiling#_using-the-workspace-version-of-typescript`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .vscode docs/development/tools/vscode.md

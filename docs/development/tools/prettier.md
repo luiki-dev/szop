@@ -30,7 +30,7 @@ pnpm format                      # prettier --write .: rewrite every file in the
 pnpm exec prettier --check .     # only report files that are not formatted, change nothing
 ```
 
-- In VS Code, the file is formatted on save (set up in the VS Code settings task of PH-01).
+- In VS Code, the file is formatted on save (see [VS Code](vscode.md)).
 - The pre-commit hook formats the staged files, so an unformatted file does not get committed (see [husky and lint-staged](husky-and-lint-staged.md)).
 
 ## Official documentation
