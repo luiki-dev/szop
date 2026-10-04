@@ -74,29 +74,52 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
 
 #### OP-010
 
-**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer; **PH-05:** Testing Library and MSW; **PH-07:** Playwright with axe; **PH-15:** fast-check and StrykerJS. Each tool's editor extension and tool page come with it.
+**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer
+  - **PH-05:** Testing Library and MSW
+  - **PH-07:** Playwright with axe
+  - **PH-15:** fast-check and StrykerJS
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
 - **Status:** ⬜ Open
 
 #### OP-012
 
-**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-03:** the first API test; **PH-04:** the first test against the database; **PH-05:** the first component test; **PH-07:** the first E2E journey on both viewports.
+**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** the first API test
+  - **PH-04:** the first test against the database
+  - **PH-05:** the first component test
+  - **PH-07:** the first E2E journey on both viewports
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
 - **Status:** ⬜ Open
 
 #### OP-013
 
-**Build what the demo runs on**: the Terraform code for `infra/bootstrap`, `infra/base` and `infra/demo`, the multi-stage Dockerfile, serving the SPA with `@fastify/static`, `GET /api/health`, migrations at startup and the SES `EmailSender`. ECR's lifecycle policy must not expire released images (m11): a higher-priority rule selects `v*`-tagged images with a count limit never reached, which shields them from the lower-priority rule keeping only the last few of the rest, since ECR has no "keep" action. Bootstrap's state bucket has versioning, the public-access block and a policy that allows only TLS (C6). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-03:** `GET /api/health`; **PH-04:** migrations at startup; **PH-06:** serving the SPA with `@fastify/static`; **PH-08:** the multi-stage Dockerfile; **PH-09:** `infra/bootstrap`, with the state bucket's protections; **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy; **PH-12:** `infra/demo`; **PH-18:** the SES `EmailSender`.
+**Build what the demo runs on**: the Terraform code for `infra/bootstrap`, `infra/base` and `infra/demo`, the multi-stage Dockerfile, serving the SPA with `@fastify/static`, `GET /api/health`, migrations at startup and the SES `EmailSender`. ECR's lifecycle policy must not expire released images (m11): a higher-priority rule selects `v*`-tagged images with a count limit never reached, which shields them from the lower-priority rule keeping only the last few of the rest, since ECR has no "keep" action. Bootstrap's state bucket has versioning, the public-access block and a policy that allows only TLS (C6).
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** `GET /api/health`
+  - **PH-04:** migrations at startup
+  - **PH-06:** serving the SPA with `@fastify/static`
+  - **PH-08:** the multi-stage Dockerfile
+  - **PH-09:** `infra/bootstrap`, with the state bucket's protections
+  - **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy
+  - **PH-12:** `infra/demo`
+  - **PH-18:** the SES `EmailSender`
 - **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ⬜ Open
 
 #### OP-062
 
-**Bring the Claude Code push hook into the toolchain and CI.** The hook is now `.claude/hooks/guard-git-push.ts`: ESLint lints it, Prettier formats it, `tsc` type-checks it and `pnpm test` runs its tests with Node's test runner. **Parts:** **PH-01:** ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11)); **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14)); **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`.
+**Bring the Claude Code push hook into the toolchain and CI.** The hook is now `.claude/hooks/guard-git-push.ts`: ESLint lints it, Prettier formats it, `tsc` type-checks it and `pnpm test` runs its tests with Node's test runner.
 
+- **Parts:**
+  - **PH-01:** ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
+  - **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14))
+  - **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`
 - **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences; [ADR 0016](decisions/0016-toolchain-details.md), decision 6
 - **Status:** ⬜ Open
 
@@ -121,8 +144,11 @@ Also: [OP-012](#op-012), [OP-013](#op-013).
 
 #### OP-005
 
-**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`allowBuilds` in pnpm 12, [ADR 0016](decisions/0016-toolchain-details.md), decision 3) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11)); **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database.
+**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`allowBuilds` in pnpm 12, [ADR 0016](decisions/0016-toolchain-details.md), decision 3) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18).
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
+  - **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
 - **Status:** ⬜ Open
 
@@ -142,8 +168,12 @@ Also: [OP-012](#op-012), [OP-013](#op-013).
 
 #### OP-068
 
-**Add Dependabot's other ecosystems.** **Parts:** **PH-04:** `docker-compose` (PostgreSQL in `compose.yaml`), ignoring its major updates; **PH-08:** `docker` (the Node base image), ignoring its major updates; **PH-09:** `terraform` (the AWS provider). Majors of Node and PostgreSQL change on purpose, together with `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version (audit m13).
+**Add Dependabot's other ecosystems.** Majors of Node and PostgreSQL change on purpose, together with `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version (audit m13).
 
+- **Parts:**
+  - **PH-04:** `docker-compose` (PostgreSQL in `compose.yaml`), ignoring its major updates
+  - **PH-08:** `docker` (the Node base image), ignoring its major updates
+  - **PH-09:** `terraform` (the AWS provider)
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 18; [Audit, m13](audits/2026-09-29-design-sanity-check.md#process-and-ci); [ADR 0018](decisions/0018-ci-details.md)
 - **Status:** ⬜ Open
 
@@ -166,8 +196,11 @@ Also: [OP-013](#op-013).
 
 #### OP-053
 
-**Build the app-wide web baseline** with the first endpoints: `@fastify/helmet` with the CSP, HSTS and `Referrer-Policy: no-referrer`; the `Sec-Fetch-Site` or `Origin` check and JSON-only bodies on every unsafe method; `TRUSTED_PROXY_HOPS` in the configuration, and how Better Auth is handed the same client IP; the request log's URL serializer that strips tokens; the API test with a forged `X-Forwarded-For`, and the one-time manual check on the demo that the log shows the real address. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-06:** everything except the demo check; **PH-12:** the one-time check on the demo that the log shows the real address.
+**Build the app-wide web baseline** with the first endpoints: `@fastify/helmet` with the CSP, HSTS and `Referrer-Policy: no-referrer`; the `Sec-Fetch-Site` or `Origin` check and JSON-only bodies on every unsafe method; `TRUSTED_PROXY_HOPS` in the configuration, and how Better Auth is handed the same client IP; the request log's URL serializer that strips tokens; the API test with a forged `X-Forwarded-For`, and the one-time manual check on the demo that the log shows the real address.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-06:** everything except the demo check
+  - **PH-12:** the one-time check on the demo that the log shows the real address
 - **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13
 - **Status:** ⬜ Open
 
@@ -211,8 +244,11 @@ Also: [OP-013](#op-013), [OP-068](#op-068).
 
 #### OP-017
 
-**Decide how the configuration assembles the database connection string** from the password injected by ECS. The connection to RDS uses TLS with full certificate verification, which needs the RDS certificate authority bundle in the image. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-08:** the RDS certificate authority bundle in the image; **PH-12:** assembling the connection string from the injected password, with full certificate verification.
+**Decide how the configuration assembles the database connection string** from the password injected by ECS. The connection to RDS uses TLS with full certificate verification, which needs the RDS certificate authority bundle in the image.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-08:** the RDS certificate authority bundle in the image
+  - **PH-12:** assembling the connection string from the injected password, with full certificate verification
 - **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ⬜ Open
 
@@ -232,15 +268,24 @@ Also: [OP-013](#op-013), [OP-068](#op-068).
 
 #### OP-018
 
-**Write the runbook** `docs/operations/demo-environment.md` and the tool pages `terraform.md` and `aws-cli.md`; add the Terraform CLI, AWS CLI and Session Manager plugin to the setup guide. `CLAUDE.md` and the README then point to `docs/operations/`. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-09:** the runbook's account setup, the tool pages and the setup guide, and the pointers in `CLAUDE.md` and the README; **PH-11:** tearing down with `demo-down`; **PH-12:** spinning up, tearing down and debugging, and the message of OP-043.
+**Write the runbook** `docs/operations/demo-environment.md` and the tool pages `terraform.md` and `aws-cli.md`; add the Terraform CLI, AWS CLI and Session Manager plugin to the setup guide. `CLAUDE.md` and the README then point to `docs/operations/`.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-09:** the runbook's account setup, the tool pages and the setup guide, and the pointers in `CLAUDE.md` and the README
+  - **PH-11:** tearing down with `demo-down`
+  - **PH-12:** spinning up, tearing down and debugging, and the message of OP-043
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decisions 30 and 31, consequences
 - **Status:** ⬜ Open
 
 #### OP-023
 
-**Write the CI/CD docs**: `docs/development/ci-cd.md`, tool pages for GitHub Actions, release-please, Dependabot, tflint, actionlint and zizmor, the buttons as the runbook's primary path, and a CI/CD section in the stack overview. `CLAUDE.md` then points to `ci-cd.md`. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-02:** `ci-cd.md`, the pages for GitHub Actions, Dependabot, actionlint and zizmor, and the stack overview's CI/CD section ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14)); **PH-09:** the tflint page; **PH-11 and PH-12:** the buttons as the runbook's primary path; **PH-13:** the release-please page.
+**Write the CI/CD docs**: `docs/development/ci-cd.md`, tool pages for GitHub Actions, release-please, Dependabot, tflint, actionlint and zizmor, the buttons as the runbook's primary path, and a CI/CD section in the stack overview. `CLAUDE.md` then points to `ci-cd.md`.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-02:** `ci-cd.md`, the pages for GitHub Actions, Dependabot, actionlint and zizmor, and the stack overview's CI/CD section ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14))
+  - **PH-09:** the tflint page
+  - **PH-11 and PH-12:** the buttons as the runbook's primary path
+  - **PH-13:** the release-please page
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 22 and consequences
 - **Status:** ⬜ Open
 
@@ -251,15 +296,21 @@ Also: [OP-013](#op-013).
 
 #### OP-016
 
-**Make "secret values never enter Terraform state" a hard rule, with a fallback and a check.** Confirm it resource by resource, using write-only arguments where the provider supports them (they need Terraform 1.11 or later, so the version is pinned to match); where it does not, the secret is created outside Terraform, for example the owner creates the Better Auth secret with one AWS CLI command and Terraform refers only to its name. Add a way to check it (for example searching the state for the secret's value once after the first apply) and document how the secret is rotated. Plan output already masks values marked sensitive; the exposure the rule guards against is the state itself, which the plan role can read from any branch (OP-037). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-10:** the rule, the Terraform version pin, the Better Auth secret created outside Terraform, the check and the rotation; **PH-12:** confirming it for the RDS-managed database password.
+**Make "secret values never enter Terraform state" a hard rule, with a fallback and a check.** Confirm it resource by resource, using write-only arguments where the provider supports them (they need Terraform 1.11 or later, so the version is pinned to match); where it does not, the secret is created outside Terraform, for example the owner creates the Better Auth secret with one AWS CLI command and Terraform refers only to its name. Add a way to check it (for example searching the state for the secret's value once after the first apply) and document how the secret is rotated. Plan output already masks values marked sensitive; the exposure the rule guards against is the state itself, which the plan role can read from any branch (OP-037).
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-10:** the rule, the Terraform version pin, the Better Auth secret created outside Terraform, the check and the rotation
+  - **PH-12:** confirming it for the RDS-managed database password
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decision 22; [ADR 0010](decisions/0010-ci-cd.md), decision 14; [Audit, m3](audits/2026-09-29-design-sanity-check.md#security-and-operations)
 - **Status:** ⬜ Open
 
 #### OP-044
 
-**Protect the domain against spoofed email, and decide what a failed send does.** **The phase that sets up SES in `infra/base`** adds a DMARC record with `p=reject` (the record that tells receivers to refuse mail pretending to come from the domain; SES's DKIM signature already aligns with the domain, so Szop's own mail passes) and `v=spf1 -all` on the domain, which sends nothing itself; a custom MAIL FROM subdomain with its own SPF record is optional, since with SES's default the envelope sender is `amazonses.com` and the domain's SPF is not checked. **The phase delivering [ACC-2](requirements/functional-requirements.md#acc-2)** decides what registration, password reset and verification resend do when SES refuses to send, as the sandbox does for unverified addresses: what the user sees, weighed against revealing which emails are registered (OP-036). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-10:** the DMARC and SPF records; **PH-18:** what a failed send does.
+**Protect the domain against spoofed email, and decide what a failed send does.** **The phase that sets up SES in `infra/base`** adds a DMARC record with `p=reject` (the record that tells receivers to refuse mail pretending to come from the domain; SES's DKIM signature already aligns with the domain, so Szop's own mail passes) and `v=spf1 -all` on the domain, which sends nothing itself; a custom MAIL FROM subdomain with its own SPF record is optional, since with SES's default the envelope sender is `amazonses.com` and the domain's SPF is not checked. **The phase delivering [ACC-2](requirements/functional-requirements.md#acc-2)** decides what registration, password reset and verification resend do when SES refuses to send, as the sandbox does for unverified addresses: what the user sees, weighed against revealing which emails are registered (OP-036).
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-10:** the DMARC and SPF records
+  - **PH-18:** what a failed send does
 - **Source:** [Audit, m2](audits/2026-09-29-design-sanity-check.md#security-and-operations); [ADR 0008](decisions/0008-hosting.md), decision 24
 - **Status:** ⬜ Open
 
@@ -270,15 +321,25 @@ Also: [OP-018](#op-018), [OP-023](#op-023).
 
 #### OP-019
 
-**Write the workflows**: `ci.yml`, `pr-title.yml`, `infra-plan.yml`, `demo-up.yml`, `demo-down.yml`, `release-please.yml` and `mutation.yml`, the composite setup action, `dependabot.yml` and the release-please configuration (`bump-minor-pre-major`; `1.0.0` through a `Release-As` footer). Add the `lint` and `typecheck` scripts if earlier phases have not. For `demo-up` and `demo-down`, settle the details of [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7: the output recording the deployed commit, how `demo-down` reads it and checks that commit out, the concurrency groups and the lock timeout. Details from the design sanity check: the `commits` job is tried on a real Dependabot commit before `ci-ok` becomes a required check (m9, with the commitlint rules of OP-009); `ci-ok` requires the change-detection job to have succeeded and fails if any job reports `failure` or `cancelled`, since a failed detection job leaves every other job `skipped` (m10), which a PR that makes detection fail can prove; check whether `infra-plan` gets an OIDC token on Dependabot PRs, and if not, skip it for them by testing the PR's author (`github.event.pull_request.user.login`), not `github.actor`, which becomes whoever re-runs the job, and plan provider bumps locally instead (m12); `dependabot.yml` ignores major updates of the Node image, `@types/node` (whose major follows Node's) and the PostgreSQL image, so a major upgrade is a deliberate change of `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version together, keeping development on production's major version (m13); the release image is built from the release commit and never demo-checked, and the "re-tag if ECR already has it" path will rarely apply, which `ci-cd.md` (OP-023) states as a known, small risk (the release commit changes only the version and the changelog, and OP-032 covers whether the image starts), and the privileged `release` job restores no cache (C10). From [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 18: `demo-up`'s jobs declare `environment: demo` and `demo-down`'s declare `demo-teardown`; `id-token: write` is granted per job, never per workflow; jobs holding AWS credentials run no `pnpm install` and no project scripts on the runner. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-02:** `ci.yml` (with the `commits` and `ci-ok` details above), `pr-title.yml`, the composite setup action and `dependabot.yml`, whose ecosystems and ignore rules are added by the phases that introduce them (Dependabot writes `build(deps-dev): …` for devDependencies, which `scope-enum` rejects, so `dependabot.yml` and the scope list in `commitlint.config.js` are aligned in PH-02) ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14)), with the `ci-ok` (m10) and m9 details: commitlint accepted a real Dependabot commit message, locally and in CI's `commits` job on the proof PR [#15](https://github.com/luiki-dev/szop/pull/15) ([ADR 0018](decisions/0018-ci-details.md), decision 9); real Dependabot PRs follow in [OP-067](#op-067); **PH-11:** `infra-plan.yml` and `demo-down.yml`; **PH-12:** `demo-up.yml`; **PH-13:** `release-please.yml` and its configuration; **PH-15:** `mutation.yml`.
+**Write the workflows**: `ci.yml`, `pr-title.yml`, `infra-plan.yml`, `demo-up.yml`, `demo-down.yml`, `release-please.yml` and `mutation.yml`, the composite setup action, `dependabot.yml` and the release-please configuration (`bump-minor-pre-major`; `1.0.0` through a `Release-As` footer). Add the `lint` and `typecheck` scripts if earlier phases have not. For `demo-up` and `demo-down`, settle the details of [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7: the output recording the deployed commit, how `demo-down` reads it and checks that commit out, the concurrency groups and the lock timeout. Details from the design sanity check: the `commits` job is tried on a real Dependabot commit before `ci-ok` becomes a required check (m9, with the commitlint rules of OP-009); `ci-ok` requires the change-detection job to have succeeded and fails if any job reports `failure` or `cancelled`, since a failed detection job leaves every other job `skipped` (m10), which a PR that makes detection fail can prove; check whether `infra-plan` gets an OIDC token on Dependabot PRs, and if not, skip it for them by testing the PR's author (`github.event.pull_request.user.login`), not `github.actor`, which becomes whoever re-runs the job, and plan provider bumps locally instead (m12); `dependabot.yml` ignores major updates of the Node image, `@types/node` (whose major follows Node's) and the PostgreSQL image, so a major upgrade is a deliberate change of `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version together, keeping development on production's major version (m13); the release image is built from the release commit and never demo-checked, and the "re-tag if ECR already has it" path will rarely apply, which `ci-cd.md` (OP-023) states as a known, small risk (the release commit changes only the version and the changelog, and OP-032 covers whether the image starts), and the privileged `release` job restores no cache (C10). From [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 18: `demo-up`'s jobs declare `environment: demo` and `demo-down`'s declare `demo-teardown`; `id-token: write` is granted per job, never per workflow; jobs holding AWS credentials run no `pnpm install` and no project scripts on the runner.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-02:** `ci.yml` (with the `commits` and `ci-ok` details above), `pr-title.yml`, the composite setup action and `dependabot.yml`, whose ecosystems and ignore rules are added by the phases that introduce them (Dependabot writes `build(deps-dev): …` for devDependencies, which `scope-enum` rejects, so `dependabot.yml` and the scope list in `commitlint.config.js` are aligned in PH-02) ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14)), with the `ci-ok` (m10) and m9 details: commitlint accepted a real Dependabot commit message, locally and in CI's `commits` job on the proof PR [#15](https://github.com/luiki-dev/szop/pull/15) ([ADR 0018](decisions/0018-ci-details.md), decision 9); real Dependabot PRs follow in [OP-067](#op-067)
+  - **PH-11:** `infra-plan.yml` and `demo-down.yml`
+  - **PH-12:** `demo-up.yml`
+  - **PH-13:** `release-please.yml` and its configuration
+  - **PH-15:** `mutation.yml`
 - **Source:** [ADR 0009](decisions/0009-git-workflow.md), consequences; [ADR 0010](decisions/0010-ci-cd.md), decisions 5–18 and consequences; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7; [Audit, Process and CI](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C10](audits/2026-09-29-design-sanity-check.md#consider-improving); [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 18
 - **Status:** ⬜ Open
 
 #### OP-020
 
-**Create the AWS side of CI** in `infra/base`: the GitHub OIDC provider, the three CI roles and the app's two roles, with the policies checked by IAM Access Analyzer's policy validation. From [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 17: `szop-ci-deploy` trusts the subjects of both `demo` and `demo-teardown`; `szop-ci-plan` is denied `logs:GetLogEvents`, `logs:FilterLogEvents`, `logs:StartQuery` and `logs:StartLiveTail`. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-11:** the OIDC provider, `szop-ci-plan` and `szop-ci-deploy`; **PH-12:** the app's two roles; **PH-13:** `szop-ci-release`.
+**Create the AWS side of CI** in `infra/base`: the GitHub OIDC provider, the three CI roles and the app's two roles, with the policies checked by IAM Access Analyzer's policy validation. From [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 17: `szop-ci-deploy` trusts the subjects of both `demo` and `demo-teardown`; `szop-ci-plan` is denied `logs:GetLogEvents`, `logs:FilterLogEvents`, `logs:StartQuery` and `logs:StartLiveTail`.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-11:** the OIDC provider, `szop-ci-plan` and `szop-ci-deploy`
+  - **PH-12:** the app's two roles
+  - **PH-13:** `szop-ci-release`
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decisions 15 and 16; [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 17
 - **Status:** ⬜ Open
 
@@ -375,8 +436,11 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
 
 #### OP-052
 
-**Test the data the demo never has.** Every environment starts empty, so a migration that breaks on existing rows is never run against any. **The first phase whose migration changes an existing table** adds a test that migrates to the previous version, inserts fixture data, then applies the new migration; the first data phase has nothing to migrate from. **The first data phase**, where the seed data is written, tests that it satisfies [LIM-1](requirements/functional-requirements.md#lim-1)'s quotas, the depth limit and uniqueness, and reports how much of the 300-category quota it uses. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-15:** the seed data tests; the first phase whose migration changes an existing table (probably PH-17): the migration test with fixture data.
+**Test the data the demo never has.** Every environment starts empty, so a migration that breaks on existing rows is never run against any. **The first phase whose migration changes an existing table** adds a test that migrates to the previous version, inserts fixture data, then applies the new migration; the first data phase has nothing to migrate from. **The first data phase**, where the seed data is written, tests that it satisfies [LIM-1](requirements/functional-requirements.md#lim-1)'s quotas, the depth limit and uniqueness, and reports how much of the 300-category quota it uses.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-15:** the seed data tests
+  - the first phase whose migration changes an existing table (probably PH-17): the migration test with fixture data
 - **Source:** [Audit, C4 and C5](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ⬜ Open
 
@@ -386,29 +450,52 @@ Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
 
 #### OP-038
 
-**Decide how a guest's workspace moves into an account ([ACC-2](requirements/functional-requirements.md#acc-2), [ACC-4](requirements/functional-requirements.md#acc-4))**, starting with a short spike on Better Auth's anonymous plugin before the brainstorm of PH-16, the phase that first creates anonymous users ([ADR 0014](decisions/0014-roadmap.md), decision 10). By default the plugin links inside the sign-in or sign-up request and then deletes the anonymous user, and with it the guest workspace, before the app can ask [ACC-4](requirements/functional-requirements.md#acc-4)'s question. The spike checks `onLinkAccount`, `disableDeleteAnonymousUser`, and how linking behaves with `requireEmailVerification`: whether sign-up returns a session, and whether opening the verification link (possibly in another browser) links anything. Options to compare: keep the anonymous user until the choice is made; ask the question before signing in; let the app reassign the workspace in its own sign-up hook, in the browser that registered. The brainstorm also decides, as requirement changes: how long a registered but unverified user's former guest data lives ([ACC-8](requirements/functional-requirements.md#acc-8)'s 7 days against [ACC-7](requirements/functional-requirements.md#acc-7)'s 30), and what an unverified user can do (log in, correct a mistyped email, and whether a stranger's email can be blocked for 7 days). **The phase that first creates anonymous users ([ACC-1](requirements/functional-requirements.md#acc-1))** creates workspaces explicitly, not in a user-creation hook, so a later sign-up does not create a second workspace. Whatever the option, copying the guest's lists and templates into another workspace ([ACC-4](requirements/functional-requirements.md#acc-4)) remaps every reference, such as categories and units, to the target workspace's records; the composite foreign keys of [ADR 0012](decisions/0012-security-baseline.md), decision 6 refuse anything else. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): the spike before PH-16's brainstorm; **PH-16:** workspaces created explicitly; **PH-18:** the option for registration, and what an unverified user can do; **PH-19:** copying into the account's workspace with every reference remapped.
+**Decide how a guest's workspace moves into an account ([ACC-2](requirements/functional-requirements.md#acc-2), [ACC-4](requirements/functional-requirements.md#acc-4))**, starting with a short spike on Better Auth's anonymous plugin before the brainstorm of PH-16, the phase that first creates anonymous users ([ADR 0014](decisions/0014-roadmap.md), decision 10). By default the plugin links inside the sign-in or sign-up request and then deletes the anonymous user, and with it the guest workspace, before the app can ask [ACC-4](requirements/functional-requirements.md#acc-4)'s question. The spike checks `onLinkAccount`, `disableDeleteAnonymousUser`, and how linking behaves with `requireEmailVerification`: whether sign-up returns a session, and whether opening the verification link (possibly in another browser) links anything. Options to compare: keep the anonymous user until the choice is made; ask the question before signing in; let the app reassign the workspace in its own sign-up hook, in the browser that registered. The brainstorm also decides, as requirement changes: how long a registered but unverified user's former guest data lives ([ACC-8](requirements/functional-requirements.md#acc-8)'s 7 days against [ACC-7](requirements/functional-requirements.md#acc-7)'s 30), and what an unverified user can do (log in, correct a mistyped email, and whether a stranger's email can be blocked for 7 days). **The phase that first creates anonymous users ([ACC-1](requirements/functional-requirements.md#acc-1))** creates workspaces explicitly, not in a user-creation hook, so a later sign-up does not create a second workspace. Whatever the option, copying the guest's lists and templates into another workspace ([ACC-4](requirements/functional-requirements.md#acc-4)) remaps every reference, such as categories and units, to the target workspace's records; the composite foreign keys of [ADR 0012](decisions/0012-security-baseline.md), decision 6 refuse anything else.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - the spike before PH-16's brainstorm
+  - **PH-16:** workspaces created explicitly
+  - **PH-18:** the option for registration, and what an unverified user can do
+  - **PH-19:** copying into the account's workspace with every reference remapped
 - **Source:** [Audit, MAJOR-2](audits/2026-09-29-design-sanity-check.md#major-2-moving-a-guest-into-an-account-doesnt-fit-how-better-auths-anonymous-plugin-links-users); [ADR 0012](decisions/0012-security-baseline.md), decision 6
 - **Status:** ⬜ Open
 
 #### OP-039
 
-**Make guest data live as long as [ACC-7](requirements/functional-requirements.md#acc-7) promises.** Better Auth sessions expire after 7 days by default, so a guest returning after 10 days has lost access to a workspace [ACC-7](requirements/functional-requirements.md#acc-7) keeps for 30. **The phase that first creates anonymous sessions ([ACC-1](requirements/functional-requirements.md#acc-1))** sets the session lifetime so it outlives guest retention (for example one sliding lifetime of at least 30 days for all users, as Better Auth's `expiresIn` is global), and decides whether inactivity is measured by the session or by the workspace's `last_active_at`, so the two cannot drift apart. It tests expiry too, for example by moving `expires_at` back in the database, since Better Auth does not read the app's controllable clock. **The phase delivering [ACC-7](requirements/functional-requirements.md#acc-7)** revisits the 3-day tier, which deletes a list built on Monday in one sitting before it is used in the store on Friday: lengthen the window (for example to 7 days) rather than exempt workspaces with items, which a script gets around with one request and which would undo the tier's purpose ([ADR 0003](decisions/0003-abuse-protection.md), decision 4); a change is recorded in an ADR. It also decides what a returning guest sees when their workspace is gone, and how guests learn how long their data lasts ("Register to keep this list"), and whether a guest can delete their own data at once, which a privacy notice would also want (OP-033, m20). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-16:** the session lifetime and its expiry test; **PH-31:** the 3-day tier, a returning guest, how guests learn how long their data lasts, and deleting one's own guest data.
+**Make guest data live as long as [ACC-7](requirements/functional-requirements.md#acc-7) promises.** Better Auth sessions expire after 7 days by default, so a guest returning after 10 days has lost access to a workspace [ACC-7](requirements/functional-requirements.md#acc-7) keeps for 30. **The phase that first creates anonymous sessions ([ACC-1](requirements/functional-requirements.md#acc-1))** sets the session lifetime so it outlives guest retention (for example one sliding lifetime of at least 30 days for all users, as Better Auth's `expiresIn` is global), and decides whether inactivity is measured by the session or by the workspace's `last_active_at`, so the two cannot drift apart. It tests expiry too, for example by moving `expires_at` back in the database, since Better Auth does not read the app's controllable clock. **The phase delivering [ACC-7](requirements/functional-requirements.md#acc-7)** revisits the 3-day tier, which deletes a list built on Monday in one sitting before it is used in the store on Friday: lengthen the window (for example to 7 days) rather than exempt workspaces with items, which a script gets around with one request and which would undo the tier's purpose ([ADR 0003](decisions/0003-abuse-protection.md), decision 4); a change is recorded in an ADR. It also decides what a returning guest sees when their workspace is gone, and how guests learn how long their data lasts ("Register to keep this list"), and whether a guest can delete their own data at once, which a privacy notice would also want (OP-033, m20).
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-16:** the session lifetime and its expiry test
+  - **PH-31:** the 3-day tier, a returning guest, how guests learn how long their data lasts, and deleting one's own guest data
 - **Source:** [Audit, MAJOR-3](audits/2026-09-29-design-sanity-check.md#major-3-guest-data-lifetime-doesnt-match-how-guests-use-a-shopping-list)
 - **Status:** ⬜ Open
 
 #### OP-040
 
-**Handle a weak connection in the store, not only a lost one ([NET-1](requirements/functional-requirements.md#net-1)).** **The phase that builds the first change the SPA sends:** sets `networkMode: 'always'` for mutations, since TanStack Query's default `'online'` pauses a mutation started while offline and sends it on reconnect, a queue that [NET-1](requirements/functional-requirements.md#net-1) rules out; puts a timeout on every request (for example `AbortSignal.timeout`), because a weak signal still counts as online and a request can hang for minutes; shows a visible "not saved" state; and refetches after a failed change, not only rolls it back, since a lost response rolls back a change the server has applied. Checking and unchecking send an explicit value (`checked: true`) rather than a toggle. **The first data phase**, together with the ID type (OP-041), decides on IDs generated by the browser (for example UUIDv7), so a repeated create returns the existing row instead of a duplicate and optimistic adds need no temporary ID; a create whose ID exists in another workspace answers as if nothing were there (OP-034). **The phase delivering [NET-1](requirements/functional-requirements.md#net-1)** adds an E2E journey with the network cut or slowed; journeys follow use cases ([ADR 0007](decisions/0007-testing-strategy.md), decision 4), and [NET-1](requirements/functional-requirements.md#net-1) has none. **Settled by the roadmap:** "offline check-off" stays a future extension ([ADR 0014](decisions/0014-roadmap.md), decision 13). **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-16:** the first change the SPA sends, and IDs generated by the browser; **PH-17:** checking and unchecking with an explicit value; **PH-22:** the E2E journey with the network cut or slowed.
+**Handle a weak connection in the store, not only a lost one ([NET-1](requirements/functional-requirements.md#net-1)).** **The phase that builds the first change the SPA sends:** sets `networkMode: 'always'` for mutations, since TanStack Query's default `'online'` pauses a mutation started while offline and sends it on reconnect, a queue that [NET-1](requirements/functional-requirements.md#net-1) rules out; puts a timeout on every request (for example `AbortSignal.timeout`), because a weak signal still counts as online and a request can hang for minutes; shows a visible "not saved" state; and refetches after a failed change, not only rolls it back, since a lost response rolls back a change the server has applied. Checking and unchecking send an explicit value (`checked: true`) rather than a toggle. **The first data phase**, together with the ID type (OP-041), decides on IDs generated by the browser (for example UUIDv7), so a repeated create returns the existing row instead of a duplicate and optimistic adds need no temporary ID; a create whose ID exists in another workspace answers as if nothing were there (OP-034). **The phase delivering [NET-1](requirements/functional-requirements.md#net-1)** adds an E2E journey with the network cut or slowed; journeys follow use cases ([ADR 0007](decisions/0007-testing-strategy.md), decision 4), and [NET-1](requirements/functional-requirements.md#net-1) has none. **Settled by the roadmap:** "offline check-off" stays a future extension ([ADR 0014](decisions/0014-roadmap.md), decision 13).
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-16:** the first change the SPA sends, and IDs generated by the browser
+  - **PH-17:** checking and unchecking with an explicit value
+  - **PH-22:** the E2E journey with the network cut or slowed
 - **Source:** [Audit, MAJOR-6](audits/2026-09-29-design-sanity-check.md#major-6-flaky-connectivity-in-the-store-is-underspecified-and-a-library-default-contradicts-the-decision)
 - **Status:** ⬜ Open
 
 #### OP-041
 
-**Settle the data-model rules that shape the schema**, and record them in `architecture.md`, "Data model highlights". The directions below are where the brainstorms start, not decisions. **The first data phase**, as conventions every later migration follows: the ID type (with OP-040); `created_at` as `timestamptz` on every table ([ACC-7](requirements/functional-requirements.md#acc-7) and [ACC-8](requirements/functional-requirements.md#acc-8) depend on creation times); how uniqueness constraints are named and chosen; how money and quantity are stored and calculated, so client and server totals agree (for example quantity as an integer in thousandths next to money in minor units, each line total rounded once and totals summed from rounded lines, all in `packages/shared`; or a decimal library on both sides, since Drizzle returns `numeric` as a string); and one way to compare text: displayed order always from one shared function (for example `Intl.Collator('pl')`), so the database's collation matters only for search and uniqueness, and Unicode NFC plus case folding for "same name" checks ([ITM-4](requirements/functional-requirements.md#itm-4)); and whether quantities and prices accept a decimal comma ("0,5") as well as a point (m20). **The phases building each area:** a server-assigned `position` on list and template items, following the order of a batch request, since rows inserted in one transaction share `now()` and "order added" ([ORD-5](requirements/functional-requirements.md#ord-5)) becomes random, and manual reordering needs it anyway; category moves ([CAT-1](requirements/functional-requirements.md#cat-1)) that refuse a move under a descendant and keep parent depth plus subtree height within 5 ([LIM-1](requirements/functional-requirements.md#lim-1)), with the workspace's tree locked during a move so two concurrent moves cannot form a cycle, and moves included in the fast-check property tests; units ([UNT-1](requirements/functional-requirements.md#unt-1)): items copy the unit's label, a product's default unit is cleared when the unit is deleted; currency ([ACC-5](requirements/functional-requirements.md#acc-5)): only currencies with 2 decimal places, a change converts no amounts, and a default for guests; matching categories by name ([ACC-4](requirements/functional-requirements.md#acc-4), [SHR-5](requirements/functional-requirements.md#shr-5)) by full path, falling back to the leaf name only when it is unique; [CAT-3](requirements/functional-requirements.md#cat-3)'s "uncategorize" covering `template_items` too. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-16:** the conventions (ID type, `created_at`, uniqueness constraints, comparing text); **PH-17:** `position`, how money and quantity are stored and calculated, the decimal comma; **PH-19:** matching categories by full path for [ACC-4](requirements/functional-requirements.md#acc-4); **PH-21:** a default currency for guests; **PH-23:** "same name" checks for [ITM-4](requirements/functional-requirements.md#itm-4); **PH-26:** units; **PH-27:** category moves; **PH-28:** [CAT-3](requirements/functional-requirements.md#cat-3)'s "uncategorize" for `template_items`; **PH-30:** the currency setting; **PH-32:** matching categories for [SHR-5](requirements/functional-requirements.md#shr-5).
+**Settle the data-model rules that shape the schema**, and record them in `architecture.md`, "Data model highlights". The directions below are where the brainstorms start, not decisions. **The first data phase**, as conventions every later migration follows: the ID type (with OP-040); `created_at` as `timestamptz` on every table ([ACC-7](requirements/functional-requirements.md#acc-7) and [ACC-8](requirements/functional-requirements.md#acc-8) depend on creation times); how uniqueness constraints are named and chosen; how money and quantity are stored and calculated, so client and server totals agree (for example quantity as an integer in thousandths next to money in minor units, each line total rounded once and totals summed from rounded lines, all in `packages/shared`; or a decimal library on both sides, since Drizzle returns `numeric` as a string); and one way to compare text: displayed order always from one shared function (for example `Intl.Collator('pl')`), so the database's collation matters only for search and uniqueness, and Unicode NFC plus case folding for "same name" checks ([ITM-4](requirements/functional-requirements.md#itm-4)); and whether quantities and prices accept a decimal comma ("0,5") as well as a point (m20). **The phases building each area:** a server-assigned `position` on list and template items, following the order of a batch request, since rows inserted in one transaction share `now()` and "order added" ([ORD-5](requirements/functional-requirements.md#ord-5)) becomes random, and manual reordering needs it anyway; category moves ([CAT-1](requirements/functional-requirements.md#cat-1)) that refuse a move under a descendant and keep parent depth plus subtree height within 5 ([LIM-1](requirements/functional-requirements.md#lim-1)), with the workspace's tree locked during a move so two concurrent moves cannot form a cycle, and moves included in the fast-check property tests; units ([UNT-1](requirements/functional-requirements.md#unt-1)): items copy the unit's label, a product's default unit is cleared when the unit is deleted; currency ([ACC-5](requirements/functional-requirements.md#acc-5)): only currencies with 2 decimal places, a change converts no amounts, and a default for guests; matching categories by name ([ACC-4](requirements/functional-requirements.md#acc-4), [SHR-5](requirements/functional-requirements.md#shr-5)) by full path, falling back to the leaf name only when it is unique; [CAT-3](requirements/functional-requirements.md#cat-3)'s "uncategorize" covering `template_items` too.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-16:** the conventions (ID type, `created_at`, uniqueness constraints, comparing text)
+  - **PH-17:** `position`, how money and quantity are stored and calculated, the decimal comma
+  - **PH-19:** matching categories by full path for [ACC-4](requirements/functional-requirements.md#acc-4)
+  - **PH-21:** a default currency for guests
+  - **PH-23:** "same name" checks for [ITM-4](requirements/functional-requirements.md#itm-4)
+  - **PH-26:** units
+  - **PH-27:** category moves
+  - **PH-28:** [CAT-3](requirements/functional-requirements.md#cat-3)'s "uncategorize" for `template_items`
+  - **PH-30:** the currency setting
+  - **PH-32:** matching categories for [SHR-5](requirements/functional-requirements.md#shr-5)
 - **Source:** [Audit, MAJOR-7](audits/2026-09-29-design-sanity-check.md#major-7-domain-rules-and-the-data-model-leave-decisions-open-that-shape-the-schema)
 - **Status:** ⬜ Open
 
@@ -433,8 +520,11 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 
 #### OP-051
 
-**Decide whether mis-taps can be undone.** "Remove item" and "Uncheck all" are easy to trigger by accident on a phone in a store. The phases delivering them consider an undo message: with IDs generated by the browser (OP-040), undoing a removal re-creates the item with the same ID, with no soft-delete column; undoing "Uncheck all" re-checks the items the client knows were checked. A confirmation dialog is the cheaper alternative for "Uncheck all" alone. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-17:** removing an item; **PH-21:** "Uncheck all".
+**Decide whether mis-taps can be undone.** "Remove item" and "Uncheck all" are easy to trigger by accident on a phone in a store. The phases delivering them consider an undo message: with IDs generated by the browser (OP-040), undoing a removal re-creates the item with the same ID, with no soft-delete column; undoing "Uncheck all" re-checks the items the client knows were checked. A confirmation dialog is the cheaper alternative for "Uncheck all" alone.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-17:** removing an item
+  - **PH-21:** "Uncheck all"
 - **Source:** [Audit, C3](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ⬜ Open
 
@@ -452,8 +542,13 @@ Also: [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044).
 
 #### OP-055
 
-**Apply the session, password and account rules** in the phases delivering [ACC-2](requirements/functional-requirements.md#acc-2), [ACC-3](requirements/functional-requirements.md#acc-3) and [ACC-6](requirements/functional-requirements.md#acc-6): the session cookie's name and `__Host-` prefix (or `__Secure-`, if Better Auth does not allow it), with the cookie cache off; revoking other sessions on a password change or reset; 15 to 128 characters and the Have I Been Pwned plugin, failing open; login, registration, reset and resend that never reveal whether an account exists, and the Better Auth hooks that need; the per-email limits, the limit on requests without a session and the daily email cap; the current password required for deleting an account. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-18:** the session cookie, the password policy, and no enumeration on registration, login and resend; **PH-20:** the per-email limits, the limit on requests without a session and the daily email cap; **PH-29:** revoking other sessions, and no enumeration on reset; **PH-30:** the current password for deleting an account.
+**Apply the session, password and account rules** in the phases delivering [ACC-2](requirements/functional-requirements.md#acc-2), [ACC-3](requirements/functional-requirements.md#acc-3) and [ACC-6](requirements/functional-requirements.md#acc-6): the session cookie's name and `__Host-` prefix (or `__Secure-`, if Better Auth does not allow it), with the cookie cache off; revoking other sessions on a password change or reset; 15 to 128 characters and the Have I Been Pwned plugin, failing open; login, registration, reset and resend that never reveal whether an account exists, and the Better Auth hooks that need; the per-email limits, the limit on requests without a session and the daily email cap; the current password required for deleting an account.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-18:** the session cookie, the password policy, and no enumeration on registration, login and resend
+  - **PH-20:** the per-email limits, the limit on requests without a session and the daily email cap
+  - **PH-29:** revoking other sessions, and no enumeration on reset
+  - **PH-30:** the current password for deleting an account
 - **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 10–12 and 14
 - **Status:** ⬜ Open
 
@@ -476,8 +571,14 @@ Also: [OP-055](#op-055).
 
 #### OP-047
 
-**Define bulk actions against quotas, and what an archived list allows.** The phases delivering [ACC-4](requirements/functional-requirements.md#acc-4) (importing guest lists), [ITM-5](requirements/functional-requirements.md#itm-5) (multi-add), [LST-4](requirements/functional-requirements.md#lst-4) (duplicating a list) and [LST-6](requirements/functional-requirements.md#lst-6) or [TPL-3](requirements/functional-requirements.md#tpl-3) (templates) decide whether an action that would cross a quota fails entirely or partly; the suggested direction is all or nothing, in one transaction, with [LIM-3](requirements/functional-requirements.md#lim-3)'s message. The phase delivering [ITM-4](requirements/functional-requirements.md#itm-4) decides what happens when the units differ; suggested: offer to increase the quantity only when the units match or neither item has one. The phase delivering [LST-3](requirements/functional-requirements.md#lst-3) lists what still works on an archived list; suggested: unarchive, delete, duplicate and save as template, which change nothing on the list itself. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-20:** the rule for bulk actions against quotas, applied to the import of [ACC-4](requirements/functional-requirements.md#acc-4); **PH-23:** [ITM-4](requirements/functional-requirements.md#itm-4) with different units; **PH-24:** multi-add; **PH-25:** duplicating, and what an archived list allows; **PH-28:** templates.
+**Define bulk actions against quotas, and what an archived list allows.** The phases delivering [ACC-4](requirements/functional-requirements.md#acc-4) (importing guest lists), [ITM-5](requirements/functional-requirements.md#itm-5) (multi-add), [LST-4](requirements/functional-requirements.md#lst-4) (duplicating a list) and [LST-6](requirements/functional-requirements.md#lst-6) or [TPL-3](requirements/functional-requirements.md#tpl-3) (templates) decide whether an action that would cross a quota fails entirely or partly; the suggested direction is all or nothing, in one transaction, with [LIM-3](requirements/functional-requirements.md#lim-3)'s message. The phase delivering [ITM-4](requirements/functional-requirements.md#itm-4) decides what happens when the units differ; suggested: offer to increase the quantity only when the units match or neither item has one. The phase delivering [LST-3](requirements/functional-requirements.md#lst-3) lists what still works on an archived list; suggested: unarchive, delete, duplicate and save as template, which change nothing on the list itself.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-20:** the rule for bulk actions against quotas, applied to the import of [ACC-4](requirements/functional-requirements.md#acc-4)
+  - **PH-23:** [ITM-4](requirements/functional-requirements.md#itm-4) with different units
+  - **PH-24:** multi-add
+  - **PH-25:** duplicating, and what an archived list allows
+  - **PH-28:** templates
 - **Source:** [Audit, m17](audits/2026-09-29-design-sanity-check.md#requirements-and-architecture)
 - **Status:** ⬜ Open
 
@@ -498,8 +599,11 @@ Also: [OP-041](#op-041), [OP-047](#op-047).
 
 #### OP-045
 
-**Design live updates ([SYN](requirements/functional-requirements.md#live-updates-syn)) for real connections.** **The [SYN](requirements/functional-requirements.md#live-updates-syn) brainstorm:** re-check access when forwarding events, or close a socket when its user's access to the list is removed or a link is revoked; a ping (for example every 30 seconds) so the load balancer's 60-second idle timeout does not drop quiet sockets; a refetch on reconnect, since mobile browsers drop sockets in the background; not letting the refetch triggered by one's own change overwrite changes still in flight (skip one's own events, or wait until they settle); and how WebSockets are tested, which [ADR 0007](decisions/0007-testing-strategy.md) does not cover. **The phase delivering [ITM-4](requirements/functional-requirements.md#itm-4)**, already in the MVP: "increase quantity" is an atomic update in the database (`SET quantity = quantity + $1`), not read-modify-write, since two tabs or a double tap lose an increase even without live updates. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-23:** the atomic increase for [ITM-4](requirements/functional-requirements.md#itm-4); **PH-33:** the design of live updates.
+**Design live updates ([SYN](requirements/functional-requirements.md#live-updates-syn)) for real connections.** **The [SYN](requirements/functional-requirements.md#live-updates-syn) brainstorm:** re-check access when forwarding events, or close a socket when its user's access to the list is removed or a link is revoked; a ping (for example every 30 seconds) so the load balancer's 60-second idle timeout does not drop quiet sockets; a refetch on reconnect, since mobile browsers drop sockets in the background; not letting the refetch triggered by one's own change overwrite changes still in flight (skip one's own events, or wait until they settle); and how WebSockets are tested, which [ADR 0007](decisions/0007-testing-strategy.md) does not cover. **The phase delivering [ITM-4](requirements/functional-requirements.md#itm-4)**, already in the MVP: "increase quantity" is an atomic update in the database (`SET quantity = quantity + $1`), not read-modify-write, since two tabs or a double tap lose an increase even without live updates.
 
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-23:** the atomic increase for [ITM-4](requirements/functional-requirements.md#itm-4)
+  - **PH-33:** the design of live updates
 - **Source:** [Audit, m4](audits/2026-09-29-design-sanity-check.md#security-and-operations)
 - **Status:** ⬜ Open
 
