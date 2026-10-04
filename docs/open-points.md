@@ -109,7 +109,7 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
 
 #### OP-067
 
-**Confirm CI on its first real PRs after PH-02's merge.** (1) Ask Dependabot for updates (*Insights → Dependency graph → Dependabot → Check for updates*); its PRs must pass `commits` (audit m9 on a real commit) and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green. (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it.
+**Confirm CI on its first real PRs after PH-02's merge.** (1) Ask Dependabot for updates (*Insights → Dependency graph → Dependabot → Check for updates*); its PRs must pass `commits` (audit m9 on a real commit) and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
 
 - **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
 - **Status:** ⬜ Open
@@ -294,6 +294,13 @@ Also: [OP-018](#op-018), [OP-023](#op-023).
 **Refer to the setup action with `$/`.** Once actionlint accepts GitHub's self-repository syntax (rhysd/actionlint#732), change `uses: ./.github/actions/setup` to `uses: $/.github/actions/setup`, re-enable zizmor's `self-repository` audit in `.github/zizmor.yml`, check that Dependabot and CodeQL still read the workflows, and consider moving the checkout into the setup action.
 
 - **Source:** [ADR 0018](decisions/0018-ci-details.md), decision 12
+- **Status:** ⬜ Open
+
+#### OP-070
+
+**Let zizmor report even when actionlint fails.** In the `workflows` job, zizmor's step runs only if actionlint's step passed, so a workflow with both kinds of problem shows only actionlint's first. The PH-02 gate proofs showed it: an untrusted `${{ github.event.pull_request.title }}` in a `run:` script was caught by actionlint, and zizmor never ran ([#15](https://github.com/luiki-dev/szop/pull/15)). Add `if: success() || failure()` to the zizmor step, so both tools report in one run while a cancelled run still stops; consider the same for `pnpm format:check` after `pnpm lint` in the `lint` job.
+
+- **Source:** PH-02 gate proofs ([#14](https://github.com/luiki-dev/szop/pull/14)); [ADR 0018](decisions/0018-ci-details.md), decision 5
 - **Status:** ⬜ Open
 
 ### PH-12 First deploy
