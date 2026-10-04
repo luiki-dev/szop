@@ -68,7 +68,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | Phase | Status | Spec | Plan | PR |
 |---|---|---|---|---|
 | [PH-01 Monorepo and toolchain](#ph-01-monorepo-and-toolchain) | ✅ Done | [Spec](superpowers/specs/2026-10-02-PH-01-monorepo-and-toolchain-design.md) | [Plan](superpowers/plans/2026-10-02-PH-01-monorepo-and-toolchain.md) | [#11](https://github.com/luiki-dev/szop/pull/11) |
-| [PH-02 CI checks](#ph-02-ci-checks) | 🚧 In progress | [Spec](superpowers/specs/2026-10-04-PH-02-ci-checks-design.md) | [Plan](superpowers/plans/2026-10-04-PH-02-ci-checks.md) | [#14](https://github.com/luiki-dev/szop/pull/14) |
+| [PH-02 CI checks](#ph-02-ci-checks) | ✅ Done | [Spec](superpowers/specs/2026-10-04-PH-02-ci-checks-design.md) | [Plan](superpowers/plans/2026-10-04-PH-02-ci-checks.md) | [#14](https://github.com/luiki-dev/szop/pull/14) |
 
 ### PH-01 Monorepo and toolchain
 

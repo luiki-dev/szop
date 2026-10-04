@@ -151,4 +151,4 @@ Expected:
 - `sha_pinning_required` is `true`.
 - `default_workflow_permissions` is `read` and `can_approve_pull_request_reviews` is `false`.
 - `approval_policy` is `all_external_contributors`.
-- CodeQL's `state` is `configured`, with `actions` among its `languages`.
+- CodeQL's `state` is `configured`, with `actions` among its `languages` once the workflows are on `main` (until then, only the JavaScript and TypeScript entries; [OP-067](../open-points.md#op-067)).

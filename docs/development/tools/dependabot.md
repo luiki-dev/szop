@@ -1,6 +1,6 @@
 # Dependabot
 
-Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for new versions of Szop's npm packages and GitHub Actions and opens pull requests for them: one grouped PR for the minor and patch updates of each, and one PR per major update, and it warns about dependencies with known vulnerabilities.
+Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for new versions of Szop's npm packages and GitHub Actions and opens pull requests for them (one grouped PR for the minor and patch updates of each ecosystem, and one PR per major update), and it warns about dependencies with known vulnerabilities.
 
 ## Why Szop uses it
 
