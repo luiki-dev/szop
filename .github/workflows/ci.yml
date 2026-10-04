@@ -43,7 +43,6 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
         run: |
-          exit 1
           if [ "$EVENT" != pull_request ]; then
             echo "Push to main: every check runs."
             code=true
