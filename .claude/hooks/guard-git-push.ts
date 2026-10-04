@@ -136,3 +136,5 @@ if (import.meta.main) {
     process.exit(2);
   }
 }
+const n: number = "x";
+void n;
