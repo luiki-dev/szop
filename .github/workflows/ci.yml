@@ -1,0 +1,118 @@
+# Every quality check, on every PR to main and every push to main
+# (ADR 0010, decisions 5-8; details in ADR 0018). The required check is ci-ok.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  # A newer push to a PR replaces the older run; runs on main always finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      code: ${{ steps.detect.outputs.code }}
+      workflows: ${{ steps.detect.outputs.workflows }}
+    steps:
+      # On a PR, the checkout is GitHub's test merge of the branch into main:
+      # HEAD^1 is main, so the diff is exactly what the PR changes.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - id: detect
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" != pull_request ]; then
+            echo "Push to main: every check runs."
+            code=true
+            workflows=true
+          else
+            # --no-renames lists both names of a renamed file.
+            files=$(git diff --name-only --no-renames HEAD^1 HEAD)
+            printf 'Changed files:\n%s\n' "$files"
+            # Code is anything that is not Markdown, so new file types are checked by default.
+            # Here-strings, not pipes: with pipefail, an early grep -q exit could fail the pipe.
+            if grep -qv '\.md$' <<<"$files"; then code=true; else code=false; fi
+            if grep -qE '^\.github/(workflows|actions)/' <<<"$files"; then workflows=true; else workflows=false; fi
+          fi
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "workflows=$workflows" >> "$GITHUB_OUTPUT"
+          echo "code=$code, workflows=$workflows"
+
+  lint:
+    name: lint
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm lint
+      - run: pnpm format:check
+
+  typecheck:
+    name: typecheck
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm typecheck
+
+  test:
+    name: test
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm test
+
+  ci-ok:
+    name: ci-ok
+    needs: [changes, lint, typecheck, test]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      # Passes when changes succeeded and every other job succeeded or was
+      # skipped. A failed changes job leaves the rest skipped (audit m10).
+      - id: check
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+          jq -e '.changes.result == "success" and all(.[]; .result == "success" or .result == "skipped")' <<<"$NEEDS" > /dev/null
