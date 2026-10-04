@@ -48,7 +48,7 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 - `docs/development/github-settings.md` — every GitHub setting the workflow relies on, where it lives in GitHub, and why. Keep it updated when a setting changes.
 - `docs/development/setup.md` — the setup guide, from a clean Windows machine to passing checks. Keep it updated when a tool or a step changes.
 - `docs/development/tools/` — one page per development tool: what it is, why it was chosen, its configuration explained. Keep a tool's page updated when its configuration changes.
-- `docs/decisions/` — ADR-style decision records, numbered `NNNN-short-title.md`, each with context, options considered, the decision and its consequences. Add a new ADR for every significant decision (architecture, technology, tooling, process), and don't rewrite accepted ones: supersede them with a new ADR. Mechanical changes that keep the meaning (status lines, status icons, links) are allowed.
+- `docs/decisions/` — ADR-style decision records, numbered `NNNN-short-title.md`, each with context, options considered, the decision and its consequences. Add a new ADR for every significant decision (architecture, technology, tooling, process), and don't rewrite accepted ones: supersede them with a new ADR. Mechanical changes that keep the meaning (status lines, status icons, links) are allowed. When a new ADR supersedes, refines, extends, completes or revisits a decision of an earlier one, note it in three places: the new ADR's header (`Refines:`, `Extends:` …), the earlier ADR's status line, and, when it names a decision, a line at the bottom of that decision's cell (`<br>✏️ **Refined by [ADR NNNN](…), decision N:** …`, oldest first). These notes count as mechanical changes.
 
 ## Writing style for docs and explanations
 
@@ -61,6 +61,7 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
   - ✖️ rejected or dropped: finding rejected, open point dropped without being done
   - ❔ pending: not decided or triaged yet
   - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
+  - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell
   - ➖ not applicable: `➖ N/A: reason` in the definition of done and the PR template
   - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
 - **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/functional-requirements.md#acc-1)`, `[UC-3](../requirements/functional-requirements.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/functional-requirements.md#sharing-shr)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
