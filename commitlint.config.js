@@ -55,6 +55,8 @@ export default {
         // Tooling
         "infra",
         "deps",
+        // Dependabot's scope for devDependencies (ADR 0018).
+        "deps-dev",
         "main",
         "claude",
       ],

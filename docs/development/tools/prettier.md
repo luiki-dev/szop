@@ -27,7 +27,7 @@ The Tailwind CSS class-sorting plugin arrives with the styling in PH-14.
 
 ```bash
 pnpm format                      # prettier --write .: rewrite every file Prettier supports that `.prettierignore` and `.gitignore` do not exclude
-pnpm exec prettier --check .     # only report files that are not formatted, change nothing
+pnpm format:check                # only report files that are not formatted, change nothing; CI's lint job runs it
 ```
 
 - In VS Code, the file is formatted on save (see [VS Code](vscode.md)).
