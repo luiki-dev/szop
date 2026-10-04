@@ -136,3 +136,4 @@ if (import.meta.main) {
     process.exit(2);
   }
 }
+export const unused = (x: any) => x;
