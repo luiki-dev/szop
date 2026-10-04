@@ -122,7 +122,8 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
  pnpm test:watch             Vitest re-runs the affected tests on every save
  pnpm test                   all unit, API and component tests
  pnpm test:e2e               Playwright on a production build, both viewports
- pnpm typecheck / lint / format:check   what CI's typecheck and lint jobs run
+ pnpm typecheck              what CI's typecheck job runs
+ pnpm lint / format:check    what CI's lint job runs
 ```
 
 - CI runs the same scripts, so a green local run predicts a green CI run.

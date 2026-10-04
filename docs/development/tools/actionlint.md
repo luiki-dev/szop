@@ -1,6 +1,6 @@
 # actionlint
 
-actionlint is a static checker for GitHub Actions workflow files: it finds syntax errors, unknown keys, mistyped `${{ … }}` expressions, `needs:` pointing at jobs that don't exist, and, through shellcheck, bugs in the shell scripts of `run:` steps. In Szop it runs in CI's `workflows` job whenever a workflow or the setup action changes.
+actionlint is a static checker for GitHub Actions workflow files: it finds syntax errors, unknown keys, mistyped `${{ … }}` expressions, `needs:` pointing at jobs that don't exist, and, through shellcheck, bugs in the shell scripts of `run:` steps. In Szop it runs in CI's `workflows` job, which runs whenever a workflow, the setup action, `.github/dependabot.yml` or `.github/zizmor.yml` changes ([Change detection](../ci-cd.md#change-detection)).
 
 ## Why Szop uses it
 

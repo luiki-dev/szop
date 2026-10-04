@@ -20,8 +20,8 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
 
 1. **Make the repository public first.** Rulesets are not enforced on private repositories on GitHub's Free plan, and some security features are free only for public repositories.
 2. Then the pull request settings, the two rulesets and the security settings, in any order.
-3. The CI settings, in this order, while the [PH-02](../roadmap.md#ph-02-ci-checks) PR is open ([ADR 0018](../decisions/0018-ci-details.md), decision 9):
-   1. The [Actions](#actions) settings, before the PR opens, so its first run already obeys them.
+3. The CI settings, in this order, around the [PH-02](../roadmap.md#ph-02-ci-checks) PR: the Actions settings just before it opens, the rest while it is open ([ADR 0018](../decisions/0018-ci-details.md), decision 9):
+   1. The [Actions](#actions) settings, just before the PR opens, so its first run already obeys them.
    2. CodeQL's default setup (see [Security](#security)), once the PR's checks have reported.
    3. The required status checks in the [ruleset for `main`](#ruleset-for-main).
    4. The *Require code scanning results* rule last, after CodeQL has succeeded on `main`. The bypass list is empty, so a rule that asks for results CodeQL cannot produce would block every merge.
@@ -56,11 +56,11 @@ Leave **Allow auto-merge** off: the owner's manual merge is the approval (ADR 00
 
 | Setting | Value | Why |
 |---|---|---|
-| **Actions permissions** | **Allow all actions and reusable workflows** | GitHub's default. Every action is pinned to a reviewed commit (next row), so an allow-list would add little. [ADR 0010](../decisions/0010-ci-cd.md), decision 21. |
+| **Actions permissions** | **Allow all actions and reusable workflows** | GitHub's default. Every action is pinned to a reviewed commit (next row), so an allow-list would add little. |
 | ↳ **Require actions to be pinned to a full-length commit SHA** | On | A workflow that refers to an action by a tag or branch fails to start, so a moved tag can never swap the code that runs. ADR 0010, decision 21. |
 | **Approval for running fork pull request workflows from contributors** | **Require approval for all external contributors** | A PR from anyone outside the repository runs no workflow until the owner approves it. ADR 0010, decision 21. |
 | **Workflow permissions** | **Read repository contents and packages permissions** | The default `GITHUB_TOKEN` can only read; a job that needs more asks for it in its `permissions:`. ADR 0010, decision 21. |
-| ↳ **Allow GitHub Actions to create and approve pull requests** | Off | No workflow opens or approves PRs in this phase; release-please uses its own GitHub App ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 8). ADR 0010, decision 21. |
+| ↳ **Allow GitHub Actions to create and approve pull requests** | Off | No workflow uses `GITHUB_TOKEN` to open or approve PRs; release-please uses its own GitHub App ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 8). ADR 0010, decision 21. |
 
 ## Ruleset for `main`
 

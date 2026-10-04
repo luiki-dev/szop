@@ -26,13 +26,13 @@ The checks run the PR's own code and configuration: its workflows, its `package.
 | A push to `main` (every merge) | `ci.yml` and CodeQL |
 | Every Monday | Dependabot looks for updates and opens PRs, which then run like any PR |
 
-`ci.yml` keeps one run per PR: a new push to the PR cancels the run still going for the previous push. On `main`, a running run is never cancelled, so every merge is checked. GitHub keeps at most one run waiting behind it, so when several merges land in quick succession, a newer one may replace a run that has not started yet.
+`ci.yml` keeps one run per PR: a new push to the PR cancels the run still going for the previous push. On `main`, a running run is never cancelled, but a run still waiting to start can be replaced by a newer push: GitHub keeps at most one run waiting, so when several merges land in quick succession, not every merge necessarily gets its own run.
 
 CodeQL's default setup also scans `main` once a week on its own schedule.
 
 ## The jobs
 
-`ci.yml` holds the quality checks, as parallel jobs. Each job starts on a fresh runner, checks the repository out and, if it needs Node, runs the shared setup action (`.github/actions/setup`: pnpm, Node from `.nvmrc`, `pnpm install --frozen-lockfile`, with the pnpm store cached).
+`ci.yml` holds the quality checks, as parallel jobs. Each job starts on a fresh runner; each job that needs the repository checks it out and, if it needs Node, runs the shared setup action (`.github/actions/setup`: pnpm, Node from `.nvmrc`, `pnpm install --frozen-lockfile`, with the pnpm store cached).
 
 | Job | Runs when | What it runs | Locally |
 |---|---|---|---|
@@ -41,7 +41,7 @@ CodeQL's default setup also scans `main` once a week on its own schedule.
 | `typecheck` | code changed | TypeScript, without emitting files | `pnpm typecheck` |
 | `test` | code changed | The tests; today the push hook's tests on Node's test runner | `pnpm test` |
 | `commits` | every PR, never on `main` | commitlint on every commit of the branch that is not on `main`, from `HEAD^1` to `HEAD^2` (see [The merge ref](#the-merge-ref)) | `pnpm exec commitlint --from origin/main --to HEAD` |
-| `workflows` | a file under `.github/workflows/` or `.github/actions/` changed | [actionlint](tools/actionlint.md), then [zizmor](tools/zizmor.md) | see their tool pages |
+| `workflows` | a file under `.github/workflows/` or `.github/actions/`, or `.github/dependabot.yml` or `.github/zizmor.yml`, changed | [actionlint](tools/actionlint.md), then [zizmor](tools/zizmor.md) | see their tool pages |
 | `ci-ok` | always, after all the others | Sums up the results ([below](#ci-ok-and-the-required-checks)) | — |
 
 `pr-title.yml` has one job, **`pr-title`**: it pipes the PR title into commitlint, with the same rules as every commit, because the title becomes the merge commit's message. Check a title locally with `echo "feat(api): add health check" | pnpm exec commitlint`. It is a workflow of its own so that editing the title reruns only this check, not the whole of `ci.yml`.
@@ -60,7 +60,7 @@ The `main` ruleset requires two status checks: **`ci-ok`** and **`pr-title`**. I
 
 Why one aggregating job instead of requiring every job:
 
-- A workflow skipped by a `paths:` filter never starts, so it never reports a status, and a required check on it would leave the PR waiting forever. That is why `ci.yml` always runs and skips jobs with `if:` instead. A job skipped by its `if:` does report, and GitHub counts it as passed. So `ci-ok` must itself fail when `changes` fails: otherwise a broken detection, which leaves every other job skipped, would let the PR through. `ci-ok` always runs (`if: always()`) and always reports.
+- Requiring every job would not work well. Each new job would need the ruleset edited too, and a required job that is skipped passes anyway: a job skipped by its `if:` reports, and GitHub counts it as passed. (Skipping with a `paths:` filter instead is worse: a workflow skipped that way never starts and never reports, and a required check on it leaves the PR waiting forever. That is why `ci.yml` always runs and skips jobs with `if:`.) One job that sees every result is the single place to decide. It always runs (`if: always()`), always reports, and fails when `changes` fails: otherwise a broken detection, which leaves every other job skipped, would let the PR through.
 - Adding a job later means adding it to `ci-ok`'s `needs:` list, without touching the ruleset.
 
 **`ci-ok`'s rule:** it passes only when `changes` succeeded and every other job either succeeded or was skipped. A job that failed or was cancelled fails it. The first condition matters: when `changes` fails, every job that needs it is skipped, and "everything skipped" alone would look green.
@@ -74,7 +74,7 @@ Why one aggregating job instead of requiring every job:
 The `changes` job decides which jobs a PR needs, from the list of files it changes:
 
 - **Code** is any file that is not Markdown (`*.md`). A PR that changes only Markdown skips `lint`, `typecheck` and `test`; `ci-ok` stays green. Counting everything else as code is the safe way round: a new file type or configuration file is checked without anyone remembering to add it.
-- **Workflows:** a change under `.github/workflows/` or `.github/actions/` runs the `workflows` job.
+- **Workflows:** a change under `.github/workflows/` or `.github/actions/`, or to `.github/dependabot.yml` or `.github/zizmor.yml`, runs the `workflows` job. zizmor audits the Dependabot configuration too, and its own configuration file changes what it reports, so a change to either can turn the check red.
 - `commits` runs on every PR, whatever it changes.
 - **A push to `main` runs every job**, whatever it changes.
 

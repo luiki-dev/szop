@@ -1,6 +1,6 @@
 # zizmor
 
-zizmor is a security linter for GitHub Actions: it reads the workflow files and finds the mistakes behind most published CI attacks, such as template injection, excessive token permissions, actions not pinned to a commit SHA and impostor commits. In Szop it runs in CI's `workflows` job whenever a workflow or the setup action changes, and any finding fails the job.
+zizmor is a security linter for GitHub Actions: it audits the workflow files, composite actions and `dependabot.yml`, and finds the mistakes behind most published CI attacks, such as template injection, excessive token permissions, actions not pinned to a commit SHA and impostor commits. In Szop it runs in CI's `workflows` job whenever a workflow, the setup action, `.github/dependabot.yml` or zizmor's own `.github/zizmor.yml` changes, and any finding fails the job.
 
 ## Why Szop uses it
 
