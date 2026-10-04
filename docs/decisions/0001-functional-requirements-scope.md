@@ -11,7 +11,7 @@ The README gives a high-level description of Szop. Before any technical or visua
 
 | # | Topic | Options considered | Decision |
 |---|-------|--------------------|----------|
-| 1 | Guest (no account) capabilities | Local-only guest workspace; read-only guest via shared link only; both | **Both**: a local workspace in the browser, plus opening shared lists via link. Guest data is taken over on registration. |
+| 1 | Guest (no account) capabilities | Local-only guest workspace; read-only guest via shared link only; both | **Both**: a local workspace in the browser, plus opening shared lists via link. Guest data is taken over on registration. <br>🔁 **Superseded by [ADR 0002](0002-technical-architecture.md), decision 8:** guest workspaces live on the server as anonymous accounts; the migration path into an account remains. |
 | 2 | Sharing model | Invite + link with roles; link-only with everyone editing; invite-only | **Invite registered users by email + share links**, each with a role. The owner can revoke or regenerate. |
 | 3 | Share roles | Shopper + editor; viewer + shopper + editor | **Shopper** (view, check/uncheck) and **editor** (full item editing). "Read-only" means no content changes, but checking off is still allowed. Only the owner manages the list itself. |
 | 4 | Sync of shared lists | Live updates; refresh to see changes | **Live updates**. Last change wins per item field. |

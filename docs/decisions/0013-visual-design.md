@@ -2,7 +2,7 @@
 
 - **Status:** ✅ Accepted — its consequences refined by [ADR 0014](0014-roadmap.md), decision 9 (the UI foundation comes with the first MVP phase, PH-14, rather than the first phase that builds UI)
 - **Date:** 2026-10-01
-- **Extends:** [ADR 0007](0007-testing-strategy.md), decisions 5 and 6 (a Firefox E2E project; axe's rule sets, both color schemes, and journeys that fail on a CSP violation); [ADR 0005](0005-development-environment.md), decisions 12 and 14 (the Tailwind Prettier plugin and editor extension); the document roles table of [ADR 0011](0011-design-sanity-check-follow-ups.md), decision 4 (the visual design doc); the definition of done (UI screenshots, a Lighthouse run at the demo check)
+- **Extends:** [ADR 0007](0007-testing-strategy.md), decisions 5 and 6 (a Firefox E2E project; axe's rule sets, both color schemes, and journeys that fail on a CSP violation); [ADR 0005](0005-development-environment.md), decisions 12 and 14 (the Tailwind Prettier plugin and editor extension); the document roles table of [ADR 0011](0011-design-sanity-check-follow-ups.md), decision 4 (the visual design doc); the definition of done of [ADR 0004](0004-implementation-process.md), decision 7 (UI screenshots, a Lighthouse run at the demo check)
 
 ## Context
 
