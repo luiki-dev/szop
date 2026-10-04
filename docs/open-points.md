@@ -296,6 +296,13 @@ Also: [OP-018](#op-018), [OP-023](#op-023).
 - **Source:** [ADR 0018](decisions/0018-ci-details.md), decision 12
 - **Status:** ⬜ Open
 
+#### OP-070
+
+**Let zizmor report even when actionlint fails.** In the `workflows` job, zizmor's step runs only if actionlint's step passed, so a workflow with both kinds of problem shows only actionlint's first. The PH-02 gate proofs showed it: an untrusted `${{ github.event.pull_request.title }}` in a `run:` script was caught by actionlint, and zizmor never ran ([#15](https://github.com/luiki-dev/szop/pull/15)). Add `if: success() || failure()` to the zizmor step, so both tools report in one run while a cancelled run still stops; consider the same for `pnpm format:check` after `pnpm lint` in the `lint` job.
+
+- **Source:** PH-02 gate proofs ([#14](https://github.com/luiki-dev/szop/pull/14)); [ADR 0018](decisions/0018-ci-details.md), decision 5
+- **Status:** ⬜ Open
+
 ### PH-12 First deploy
 
 Roadmap entry: [PH-12](roadmap.md#ph-12-first-deploy).\
