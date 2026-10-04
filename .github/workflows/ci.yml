@@ -10,9 +10,15 @@ on:
 
 permissions: {}
 
+# Every run: step uses bash with -e and -o pipefail; without this, GitHub's default is bash -e only.
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
-  # A newer push to a PR replaces the older run; runs on main always finish.
+  # A newer push to a PR cancels the older run. A running run on main is never
+  # cancelled; a waiting one can be replaced by a newer push.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -46,9 +52,10 @@ jobs:
             files=$(git diff --name-only --no-renames HEAD^1 HEAD)
             printf 'Changed files:\n%s\n' "$files"
             # Code is anything that is not Markdown, so new file types are checked by default.
-            # Here-strings, not pipes: with pipefail, an early grep -q exit could fail the pipe.
+            # Here-strings, not pipes: with pipefail (set by defaults above), an early
+            # grep -q exit could fail the pipe.
             if grep -qv '\.md$' <<<"$files"; then code=true; else code=false; fi
-            if grep -qE '^\.github/(workflows|actions)/' <<<"$files"; then workflows=true; else workflows=false; fi
+            if grep -qE '^\.github/(workflows/|actions/|dependabot\.ya?ml$|zizmor\.ya?ml$)' <<<"$files"; then workflows=true; else workflows=false; fi
           fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "workflows=$workflows" >> "$GITHUB_OUTPUT"

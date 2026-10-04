@@ -5,9 +5,15 @@ name: PR title
 
 on:
   pull_request:
+    branches: [main]
     types: [opened, edited, synchronize, reopened]
 
 permissions: {}
+
+# Every run: step uses bash with -e and -o pipefail; without this, GitHub's default is bash -e only.
+defaults:
+  run:
+    shell: bash
 
 concurrency:
   group: pr-title-${{ github.event.pull_request.number }}
