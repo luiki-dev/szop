@@ -72,5 +72,5 @@ test("hook exits 2 with the reason on stderr for a blocked push", () => {
 
 test("hook exits 0 for an allowed command", () => {
   const result = runHook("git push -u origin feat/x");
-  assert.equal(result.status, 1);
+  assert.equal(result.status, 0);
 });
