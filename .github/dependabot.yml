@@ -1,0 +1,43 @@
+# Weekly version updates (ADR 0010, decision 18; details in ADR 0018).
+# Later phases add the docker-compose, docker and terraform ecosystems (OP-068).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    # A new version is proposed only once it is a week old; security updates skip this.
+    cooldown:
+      default-days: 7
+    # Minor and patch updates in one PR; each major update in its own.
+    groups:
+      npm:
+        update-types: [minor, patch]
+    # build(deps): … for dependencies, build(deps-dev): … for devDependencies.
+    commit-message:
+      prefix: build
+      prefix-development: build
+      include: scope
+    ignore:
+      # Its major follows Node's, which changes on purpose with .nvmrc (audit m13).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    # The workflows, and the composite action, which is not scanned by default.
+    directories:
+      - /
+      - /.github/actions/setup
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        update-types: [minor, patch]
+    # ci(deps): …
+    commit-message:
+      prefix: ci
+      include: scope

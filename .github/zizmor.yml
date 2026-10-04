@@ -1,0 +1,7 @@
+# zizmor's settings (docs/development/tools/zizmor.md).
+rules:
+  # GitHub's self-repository syntax ($/) is safer than ./ for local actions,
+  # but actionlint 1.7.12 rejects it (rhysd/actionlint#732). Switch and
+  # re-enable this audit together: OP-069.
+  self-repository:
+    disable: true

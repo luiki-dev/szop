@@ -81,15 +81,17 @@ pnpm install
 ```bash
 pnpm lint
 pnpm typecheck
+pnpm format:check
 pnpm test
 ```
 
 Success looks like this:
 
 - `pnpm lint` (ESLint) and `pnpm typecheck` (the TypeScript compiler) print only the command they ran and exit with no errors or warnings.
+- `pnpm format:check` (Prettier) lists the files Prettier would change and exits with an error if there are any; when all is well it prints `All matched files use Prettier code style!`.
 - `pnpm test` ends with a summary that shows `fail 0` and every test under `pass`.
 
-What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md) and [Prettier](tools/prettier.md). To see the formatting check as well, run `pnpm exec prettier --check .`.
+What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md) and [Prettier](tools/prettier.md). These are the scripts CI runs.
 
 ## 8. What the git hooks do
 

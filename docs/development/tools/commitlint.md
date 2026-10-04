@@ -15,7 +15,7 @@ commitlint checks every commit message against the Conventional Commits conventi
 
 - `"body-max-line-length": [0]` and `"footer-max-line-length": [0]`: no line-length limit in the body or footer, for the long links above and our `Claude-Session` trailer.
 - `"type-enum"`: the type must be one of `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`.
-- `"scope-enum"`: when a scope is given, it must be one of the list, grouped in the file by comment: workspaces and test layers, one feature per requirement area, docs, tooling. A commit without a scope is fine.
+- `"scope-enum"`: when a scope is given, it must be one of the list, grouped in the file by comment: workspaces and test layers, one feature per requirement area, docs, tooling. A commit without a scope is fine. The list also carries `deps-dev`, Dependabot's own scope for a devDependency (it writes `build(deps-dev): …`, and `build(deps): …` for a production dependency), which cannot be renamed ([ADR 0018](../../decisions/0018-ci-details.md), decision 8).
 
 **Why the scope is optional, and how to combine scopes:** the preset sets no `scope-empty` rule, which is the rule that would demand a scope, and `scope-enum` passes when there is no scope. One scope slot may also hold several allow-listed values, separated by `/`, `\` or `,` (a comma may be followed by one space): `feat(web,api): …`, `feat(web/api): …` and `feat(web, api): …` all pass. Each part must be on the list, so `feat(web,aip)` fails.
 
@@ -40,7 +40,7 @@ echo "feat(api): add health check" | pnpm exec commitlint    # check a message w
 ```
 
 - The rule name tells what to change: `type-enum` (use one of the nine types), `scope-enum` (use a listed scope or none), `subject-case` (start the subject in lower case, so `feat: add thing`), `header-max-length` (shorten the first line to 100 characters), `subject-empty` and `type-empty` (the subject must look like `type: description`).
-- From PH-02, CI checks every commit of a pull request, and the PR title, with the same rules.
+- CI runs commitlint on every commit of a PR (the `commits` job) and on the PR title (`pr-title`), so a commit made with `--no-verify` is still caught; see [CI/CD](../ci-cd.md).
 
 ## Official documentation
 

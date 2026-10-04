@@ -33,7 +33,7 @@ One example phase, from the first commit to the release, showing where each thin
 | **Claude** | The owner's machine, the branch | Writes the spec, plan, tests and code; commits; pushes; opens the PR; answers review comments. Never merges, never presses `demo-up`/`demo-down` unless asked. |
 | **Owner** | The owner's machine, GitHub | Approves the design and the plan, tries the app locally, reviews, presses `demo-up`/`demo-down`, merges PRs (the merge is the approval). |
 | **CI** (`ci.yml`, `pr-title.yml`, CodeQL) | GitHub Actions | Checks every push to a branch with an open PR, and every push to `main`. |
-| **Dependabot** | GitHub | Opens `build(deps)`/`ci(deps)` PRs on Mondays. |
+| **Dependabot** | GitHub | Opens `build(deps)`, `build(deps-dev)` and `ci(deps)` PRs on Mondays. |
 | **release-please** (`szop-release[bot]`) | GitHub Actions on `main` | Keeps the release PR up to date; on its merge, tags the version and publishes the GitHub Release. |
 | **`demo-up` / `demo-down`** | GitHub Actions → AWS | Build the image if missing, create or update the demo; destroy it (by hand or nightly). |
 
@@ -122,7 +122,8 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
  pnpm test:watch             Vitest re-runs the affected tests on every save
  pnpm test                   all unit, API and component tests
  pnpm test:e2e               Playwright on a production build, both viewports
- pnpm typecheck / lint       what CI's typecheck and lint jobs run
+ pnpm typecheck              what CI's typecheck job runs
+ pnpm lint / format:check    what CI's lint job runs
 ```
 
 - CI runs the same scripts, so a green local run predicts a green CI run.
@@ -145,6 +146,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
 - Claude reviews its own diff first, then opens the PR with the **template** filled in.
 - The **PR title** matters most: it becomes the merge commit's message on `main`, and release-please reads it.
 - CI tests `refs/pull/12/merge`: what `main` would look like after the merge. A newer push cancels the older run.
+- Until a check's phase lands, `ci.yml` simply has no such job; the jobs today are listed in [CI/CD](ci-cd.md).
 
 ### Step 5 — Deploy the branch to the demo
 
@@ -333,7 +335,8 @@ This is the target state. The pieces arrive in the [roadmap](../roadmap.md)'s ph
 |---|---|
 | Now (ADR 0009 merged) | Branches, PRs, merge commits only, the `main` and `v*` rulesets, the PR template |
 | [PH-01](../roadmap.md#ph-01-monorepo-and-toolchain) | The local loop of step 3, the pre-commit and commit-msg hooks |
-| [PH-02](../roadmap.md#ph-02-ci-checks), [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy) and [PH-13](../roadmap.md#ph-13-releases) | CI checks and required status checks, `demo-up`/`demo-down` (the nightly teardown and a placeholder `demo-up` merged before any demo, [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 2), release-please, versioned images, Dependabot |
+| [PH-02](../roadmap.md#ph-02-ci-checks) | CI checks (`ci.yml`, `pr-title.yml`), the required status checks, CodeQL and Dependabot |
+| [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy) and [PH-13](../roadmap.md#ph-13-releases) | `demo-up`/`demo-down` (the nightly teardown and a placeholder `demo-up` merged before any demo, [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 2), release-please, versioned images |
 | [PH-13](../roadmap.md#ph-13-releases), the end of the walking skeleton | The first release, `v0.1.0` |
 | When the MVP is done | `1.0.0`, set with a `Release-As: 1.0.0` footer |
 

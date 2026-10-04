@@ -9,6 +9,7 @@
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "node --test \".claude/hooks/*.test.ts\"",
     "prepare": "husky"

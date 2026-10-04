@@ -67,7 +67,7 @@ Optional footers, such as BREAKING CHANGE: … or Co-Authored-By: …
 | `ci` | CI configuration | None |
 | `chore` | Anything else (tooling, housekeeping) | None |
 
-- **The scope is optional**, and when given it must be on the allow-list in `commitlint.config.js` ([ADR 0016](../decisions/0016-toolchain-details.md)): a workspace or test layer (`web`, `api`, `shared`, `e2e`), a feature area, one per requirement area (`lists`, `templates`, …), a kind of doc (`adr`, `spec`, `plan`, `requirements`, `audit`, `roadmap`) or tooling (`infra`, `deps`, `main` for release-please, `claude`). A phase's PR title may name its feature area (`feat(templates): add templates`), since the phase spans several workspaces. A PR that needs a new scope adds it to the list.
+- **The scope is optional**, and when given it must be on the allow-list in `commitlint.config.js` ([ADR 0016](../decisions/0016-toolchain-details.md)): a workspace or test layer (`web`, `api`, `shared`, `e2e`), a feature area, one per requirement area (`lists`, `templates`, …), a kind of doc (`adr`, `spec`, `plan`, `requirements`, `audit`, `roadmap`) or tooling (`infra`, `deps` and `deps-dev` for Dependabot, `main` for release-please, `claude`). A phase's PR title may name its feature area (`feat(templates): add templates`), since the phase spans several workspaces. A PR that needs a new scope adds it to the list.
 - **A breaking change** is marked with `!` after the type (`feat(api)!: …`) or a `BREAKING CHANGE:` footer. While Szop is in `0.x`, it raises MINOR.
 - **Subjects are imperative**: "add", not "added" or "adds". Read it as "this commit will… add list totals".
 
@@ -78,6 +78,7 @@ feat(web): add list totals
 fix(api): reject empty list names
 docs(adr): add ADR 0009 git workflow
 build(deps): bump vitest to 3.2
+build(deps-dev): bump eslint to 10.12
 ```
 
 **Within a phase, commits follow the plan's tasks**, so the PR can be reviewed one task at a time.
@@ -101,6 +102,8 @@ gh pr create --title "feat(lists): add shopping lists"
 - **The description follows the PR template** (`.github/pull_request_template.md`): what and why, links to the roadmap phase, spec, plan, requirement IDs and ADRs, how it was tested, and the definition-of-done checklist.
 - A phase's spec and plan are already on the branch, so the PR shows the design next to the code.
 
+CI then checks the PR: what runs and how to read a failed run are in [CI/CD](ci-cd.md).
+
 ## 4. Review
 
 The owner reviews; Claude addresses the comments.
@@ -120,7 +123,7 @@ git merge main
 
 Rebasing the branch onto `main` would also work, but it gives every commit a new hash; merging keeps them.
 
-Once CI exists, GitHub requires the branch to be up to date before merging, so what lands on `main` is exactly what CI tested.
+GitHub requires the branch to be up to date before merging (the `main` ruleset, [PH-02](../roadmap.md#ph-02-ci-checks)), so what lands on `main` is exactly what CI tested.
 
 ## 6. Merge
 
@@ -178,6 +181,7 @@ A version marks a state of the code; it deploys nothing. The demo environment ca
 | CI green and branch up to date before merging | Ruleset for `main` (required status checks `ci-ok` and the PR title check) | [PH-02](../roadmap.md#ph-02-ci-checks) |
 | No new high or critical code scanning alerts | Ruleset for `main` (code scanning results) | [PH-02](../roadmap.md#ph-02-ci-checks) |
 | PR title follows Conventional Commits | CI check | [PH-02](../roadmap.md#ph-02-ci-checks) |
+| Workflow files are correct and free of known security mistakes | CI checks (actionlint, zizmor) and CodeQL | [PH-02](../roadmap.md#ph-02-ci-checks) |
 | Claude never merges a PR | `CLAUDE.md`, backed by a deny rule in `.claude/settings.json` | ADR 0009's merge; the deny rule from ADR 0012's merge |
 | Claude never triggers `demo-up` or `demo-down` unless asked | `CLAUDE.md`, backed by a deny rule in `.claude/settings.json` | ADR 0011's merge; the deny rule from ADR 0012's merge |
 | Claude never force-pushes, deletes remote branches or pushes tags | Deny rules in `.claude/settings.json` and the `.claude/hooks/guard-git-push.ts` hook for the forms they miss (and the rulesets, for `main` and `v*` tags) | ADR 0012's merge; the hook from ADR 0015's merge |
