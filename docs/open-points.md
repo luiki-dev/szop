@@ -109,7 +109,7 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
 
 #### OP-067
 
-**Confirm CI on its first real PRs after PH-02's merge.** (1) Ask Dependabot for updates (*Insights → Dependency graph → Dependabot → Check for updates*); its PRs must pass `commits` (audit m9 on a real commit) and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green. (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it.
+**Confirm CI on its first real PRs after PH-02's merge.** (1) Ask Dependabot for updates (*Insights → Dependency graph → Dependabot → Check for updates*); its PRs must pass `commits` (audit m9 on a real commit) and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
 
 - **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
 - **Status:** ⬜ Open
