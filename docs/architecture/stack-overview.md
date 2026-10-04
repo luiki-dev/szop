@@ -22,6 +22,7 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
 - [13. Web security in the browser](#13-web-security-in-the-browser)
 - [14. Styling: Tailwind, components and design tokens](#14-styling-tailwind-components-and-design-tokens)
 - [15. How fast is fast enough](#15-how-fast-is-fast-enough)
+- [16. CI/CD: checking every change](#16-cicd-checking-every-change)
 
 ## 1. The big picture
 
@@ -232,3 +233,19 @@ What Szop looks like is described in [visual-design.md](visual-design.md) and de
 - **Lighthouse**, built into Chrome's DevTools, loads a page while simulating a mid-range phone on a slow 4G connection and reports these numbers. Its results vary a little from run to run, so Szop runs it by hand during the demo check rather than as a CI gate.
 - **A performance budget** stops slowness creeping in. The JavaScript needed for the first screen is the main *cause* of a slow start on a phone, and its size is the same on every build, so CI fails a PR that pushes it over 200 KB compressed. A library that would quietly double it is caught in review, not by a user.
 - **Compression and caching do the rest.** The build writes Brotli and gzip copies of every file, and the server sends the smallest the browser accepts. Vite puts a hash of each file's content in its name (`index-3f9a1c.js`), so such files can be cached for a year: a changed file gets a new name. Only `index.html`, which names them, is never cached.
+
+## 16. CI/CD: checking every change
+
+**Continuous integration (CI)** means every change is built and checked automatically, as soon as it is proposed, so a broken change is found within minutes rather than after it is merged. **Continuous delivery (CD)** goes one step further: every change that passes the checks can be released or deployed at the push of a button. Szop runs both in GitHub Actions. The decisions are in [ADR 0010](../decisions/0010-ci-cd.md) and [ADR 0018](../decisions/0018-ci-details.md); the day-to-day guide is [CI/CD](../development/ci-cd.md). This section explains the concepts.
+
+- **A pipeline of workflows, jobs and steps.** A **workflow** is a YAML file started by an event, such as a pull request. It holds **jobs**, which run side by side unless one waits for another, and each job is a list of **steps**: shell commands or ready-made **actions**. Every job runs on a **runner**, a fresh virtual machine that is thrown away afterwards, so no job can leave anything behind for the next one.
+- **CI tests the merge, not the branch.** For a pull request, GitHub prepares a test merge of the branch into the current `main`, the **merge ref**, and the checks run on that. A branch that passes on its own can still break `main` when combined with someone else's newly merged change. That is also why a branch must be **up to date** with `main` before merging: once `main` moves, the tested merge is out of date, and the checks run again on a new one.
+- **Required status checks** are the checks GitHub insists on before the merge button works. A check that never runs never reports, so Szop requires one job, `ci-ok`, that always runs and sums up the others; jobs a change does not need, such as the code checks on a docs-only PR, are skipped without blocking anything.
+- **Supply-chain security.** An action is someone else's code running inside your pipeline, with your token. Szop limits what a compromised or careless action could do:
+  - **Actions are pinned to commit SHAs,** not version tags. A tag can be moved to other code; a commit cannot. In March 2025, attackers moved the version tags of the popular `tj-actions/changed-files` action to code that printed workflows' secrets into their logs. Projects that had pinned it to a SHA kept running the old, safe code.
+  - **Tokens are read-only.** Each job gets only the permissions it needs, here only reading the repository.
+  - **Untrusted text never reaches a shell through `${{ }}`.** GitHub pastes a `${{ … }}` value into a script before the shell runs it, so a PR title containing shell code would run as code (**template injection**). Such values go through environment variables instead, which the shell treats as plain text.
+  - **Tools look for these mistakes:** zizmor checks every workflow change, and CodeQL scans the workflows and the code.
+- **Dependabot keeps the pins and packages current.** Every Monday it proposes updates, with a **cooldown**: a new version is proposed only once it is a week old, since malicious releases are usually found and removed within days.
+
+OpenID Connect (OIDC), which lets a workflow reach AWS without stored keys, GitHub environments, and deploying arrive with [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12](../roadmap.md#ph-12-first-deploy).

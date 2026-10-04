@@ -15,7 +15,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **CalVer** | Calendar Versioning | Version numbers built from the release date, such as `2026.10.0`. Considered, not used (see ADR 0009). |
 | **CDK** | Cloud Development Kit | AWS's infrastructure-as-code tool in general-purpose languages such as TypeScript. Considered, not used (see ADR 0008). |
 | **CDN** | Content Delivery Network | A network of servers around the world that serves static files close to users and can absorb or filter traffic floods in front of the application. |
-| **CI/CD** | Continuous Integration / Continuous Delivery (or Deployment) | Automatically building and testing every change (CI), and automatically releasing it (CD). |
+| **CI/CD** | Continuous Integration / Continuous Delivery (or Deployment) | **CI:** every change is built and checked automatically, here by GitHub Actions on every PR. **CD:** every change that passes the checks can be released or deployed at the push of a button; continuous *deployment* goes further and deploys every change by itself. |
 | **CLI** | Command-line interface | A program used by typing commands in a terminal, such as `git`, `gh`, `terraform` or the AWS CLI. |
 | **CLS** | Cumulative Layout Shift | A Core Web Vital: how much visible content jumps around while a page loads. "Good" is at most 0.1 ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
 | **CORS** | Cross-Origin Resource Sharing | Browser rules deciding when a page from one domain may call an API on another domain. Not needed when frontend and API share one origin. |
@@ -115,6 +115,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | Term | Meaning |
 |---|---|
 | **Accessibility check (axe)** | An automated scan of a page for barriers to people using assistive technology, such as a missing label or low contrast. axe-core is the common engine; Szop runs it in the E2E journeys. |
+| **actionlint** | A static checker for GitHub Actions workflow files: syntax, expressions, `needs:` and, through shellcheck, the shell scripts of `run:` steps. Runs in CI's `workflows` job. |
 | **Anonymous user** | A server-side user without email or password, created automatically for a guest. Registering links it to a real account. |
 | **Baseline (web features)** | A label for web features that work in all major browsers. "Widely available" means they have done so for at least 30 months; Vite's default build target is based on it. |
 | **Bastion host** | A server kept only as an entry point for reaching private resources (such as a database) over SSH. Szop uses ECS Exec instead. |
@@ -127,7 +128,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Clickjacking** | Showing a site inside an invisible frame on another page, so that the user clicks its buttons without knowing. Prevented by the CSP's `frame-ancestors 'none'`. |
 | **CodeQL** | GitHub's code analysis engine: it finds security vulnerabilities and coding errors in the code and in the workflows. Free for public repositories; Szop uses its default setup (see ADR 0010). |
 | **Commitlint** | A tool that checks commit messages against a convention, here Conventional Commits, run by a `commit-msg` git hook. |
-| **Composite action** | A reusable group of GitHub Actions steps kept in the repository (`.github/actions/<name>/action.yml`) and called from workflows like any action. |
+| **Composite action** | A reusable group of GitHub Actions steps kept in the repository (`.github/actions/<name>/action.yml`) and called from workflows like any action. Szop's `setup` action installs pnpm, Node and the dependencies for every CI job. |
 | **Composite foreign key** | A foreign key made of several columns. In Szop, references between workspace-owned tables include `workspace_id`, such as `(workspace_id, category_id) → categories (workspace_id, id)`, so the database refuses a reference into another workspace (see ADR 0012). |
 | **Container / Docker** | A container packages a program with everything it needs and runs it isolated from the rest of the machine. Docker is the most common tool for building and running containers. Szop runs PostgreSQL in one during development. |
 | **Conventional Commits** | A convention for commit messages, `type(scope): description` (`feat(api): add list sharing`), that tells both people and tools what kind of change a commit is. Szop uses it (see ADR 0009). |
@@ -175,6 +176,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **lint-staged** | A tool that runs commands (here ESLint and Prettier) only on the files staged for a commit. |
 | **Linter** | A tool that analyzes code for bugs and bad patterns without running it. Szop uses ESLint. |
 | **Merge commit, squash merge, rebase merge** | GitHub's three ways to merge a PR. A **merge commit** keeps the branch's commits and adds one commit joining the histories; a **squash merge** turns the whole branch into one new commit; a **rebase merge** replays each commit on top of `main`. Szop uses merge commits (see ADR 0009). |
+| **Merge ref** | `refs/pull/<N>/merge`, a hidden branch where GitHub keeps a test merge of a PR's branch into the current `main`. CI checks this merge commit, so it tests what `main` would look like after the merge. |
 | **Migration** | A versioned script that changes the database schema; applied in order in every environment. |
 | **Minor units** | The smallest unit of a currency (cents, grosze). Szop stores money as integers in minor units. |
 | **Monorepo** | One repository holding several packages (here: `apps/web`, `apps/api`, `packages/shared` and the `e2e/` tests, plus the Terraform code in `infra/`). |
@@ -196,12 +198,13 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Region** | A geographic area where a cloud provider runs data centers, such as AWS's `eu-central-1` (Frankfurt). |
 | **Release PR (release-please)** | A pull request that release-please keeps open, holding the next version number and changelog entry, computed from the Conventional Commits merged so far. Merging it creates the version tag and the GitHub Release. |
 | **Repository (pattern)** | In the backend, the layer that is the only one talking to the database (`repository.ts` in each feature module), offering functions such as "find this item" and hiding the SQL. Not to be confused with a git repository. In Szop every repository function requires the workspace ID (see ADR 0012). |
-| **Required status check** | A CI check that must pass before GitHub allows a PR to be merged. Once CI exists, Szop requires `ci-ok`, which sums up every job of `ci.yml`, and the PR title check (see ADR 0010). |
+| **Required status check** | A CI check that must pass before GitHub allows a PR to be merged. GitHub matches it by job name. Szop requires `ci-ok`, which sums up every job of `ci.yml`, and `pr-title` (see ADR 0010 and ADR 0018). |
 | **Role (IAM)** | A set of AWS permissions assumed temporarily by a person or service, instead of permanent keys. ECS uses a **task execution role** (to pull the image and read secrets) and a **task role** (what the app itself may do). |
 | **Rolling update** | Replacing the running copies of an app one by one: a copy on the new version starts, passes its health check, then an old one stops, so the app stays up. How ECS redeploys Szop's demo with a new image. |
 | **Rolling-wave planning** | Planning near work in detail and far work only roughly, refining the far part as it comes closer. Szop's roadmap splits the stages up to the MVP into phases and keeps the Later stage rough (see ADR 0014). |
 | **Rollout** | Getting a new version to its users: releasing and deploying it, often gradually (to a few users first, or behind feature flags). Szop has no users and no permanent environment, so it has no rollout in this sense. |
 | **Root module (Terraform)** | A folder of Terraform configuration applied on its own, with its own state. Szop has three: `bootstrap`, `base` and `demo`. |
+| **Runner** | The machine that runs one CI job. Szop uses GitHub-hosted runners: a fresh `ubuntu-24.04` virtual machine for every job, thrown away afterwards. |
 | **Scale to zero** | A platform stopping all instances of an app when no requests arrive, and starting one on the next request. Cheap, but the first request waits. |
 | **Script injection** | A CI attack where attacker-controlled text, such as a PR title, is pasted into a shell script by `${{ … }}` and runs as code. Avoided by passing such values through environment variables. |
 | **Security group** | A firewall attached to an AWS resource, listing who may connect on which port. Can allow another security group as the source. |
@@ -222,6 +225,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Tabular figures** | Digits that all have the same width (the `tnum` font feature, `tabular-nums` in Tailwind), so numbers line up in columns. |
 | **Tailwind CSS** | A styling tool where small single-purpose classes (`px-4`, `text-base`) are written in the markup and compiled at build time into a stylesheet holding only the classes used. |
 | **Template database** | A PostgreSQL database used as a pattern for creating others (`CREATE DATABASE … TEMPLATE`). Szop's tests migrate one template, then copy it for each test worker. |
+| **Template injection** | zizmor's name for script injection: a `${{ … }}` expression inside a `run:` script is pasted into the script before the shell runs it, so attacker-controlled text such as a PR title runs as code. Fixed by passing the value through `env:`. |
 | **Terraform, Terraform state** | The infrastructure-as-code tool Szop uses. It records what it created in a **state** file, kept in S3, and compares it with the configuration to decide what to create, change or delete. |
 | **Test double / fake** | Anything standing in for a real dependency in a test. A **fake** is a simple working implementation (an email sender that records emails instead of sending them); a **mock** is preprogrammed to expect certain calls. |
 | **Testing pyramid / testing trophy** | Two shapes for a test suite. The pyramid puts most tests at the bottom as unit tests with mocked collaborators. The trophy puts most tests in the middle as integration tests against real components, such as a real database. Szop's suite is trophy-shaped (see ADR 0007). |
@@ -243,4 +247,5 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Worktree (git)** | An extra working directory of the same repository, with another branch checked out, so two branches can be worked on side by side. Not used by default in Szop (see ADR 0009). |
 | **Write-only argument** | A Terraform resource setting whose value is sent to the provider but never saved in the state file. Used for secrets. |
 | **X-Forwarded-For** | An HTTP header listing the addresses a request passed through. Each proxy appends the address it saw, but the client can write anything at the start, so only entries added by trusted proxies count. Szop trusts exactly one, the load balancer (see ADR 0012). |
+| **zizmor** | A security linter for GitHub Actions workflows: it finds template injection, excessive token permissions, unpinned actions and impostor commits. Runs in CI's `workflows` job. |
 | **Zod** | A TypeScript library for defining data schemas that give both compile-time types and runtime validation. |
