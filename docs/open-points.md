@@ -71,28 +71,28 @@ Roadmap entry: [PH-02](roadmap.md#ph-02-ci-checks).
 **Write the workflows**: `ci.yml`, `pr-title.yml`, `infra-plan.yml`, `demo-up.yml`, `demo-down.yml`, `release-please.yml` and `mutation.yml`, the composite setup action, `dependabot.yml` and the release-please configuration (`bump-minor-pre-major`; `1.0.0` through a `Release-As` footer). Add the `lint` and `typecheck` scripts if earlier phases have not. For `demo-up` and `demo-down`, settle the details of [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7: the output recording the deployed commit, how `demo-down` reads it and checks that commit out, the concurrency groups and the lock timeout. Details from the design sanity check: the `commits` job is tried on a real Dependabot commit before `ci-ok` becomes a required check (m9, with the commitlint rules of OP-009); `ci-ok` requires the change-detection job to have succeeded and fails if any job reports `failure` or `cancelled`, since a failed detection job leaves every other job `skipped` (m10), which a PR that makes detection fail can prove; check whether `infra-plan` gets an OIDC token on Dependabot PRs, and if not, skip it for them by testing the PR's author (`github.event.pull_request.user.login`), not `github.actor`, which becomes whoever re-runs the job, and plan provider bumps locally instead (m12); `dependabot.yml` ignores major updates of the Node image, `@types/node` (whose major follows Node's) and the PostgreSQL image, so a major upgrade is a deliberate change of `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version together, keeping development on production's major version (m13); the release image is built from the release commit and never demo-checked, and the "re-tag if ECR already has it" path will rarely apply, which `ci-cd.md` (OP-023) states as a known, small risk (the release commit changes only the version and the changelog, and OP-032 covers whether the image starts), and the privileged `release` job restores no cache (C10). From [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 18: `demo-up`'s jobs declare `environment: demo` and `demo-down`'s declare `demo-teardown`; `id-token: write` is granted per job, never per workflow; jobs holding AWS credentials run no `pnpm install` and no project scripts on the runner. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-02:** `ci.yml` (with the `commits` and `ci-ok` details above), `pr-title.yml`, the composite setup action and `dependabot.yml`, whose ecosystems and ignore rules are added by the phases that introduce them (Dependabot writes `build(deps-dev): …` for devDependencies, which `scope-enum` rejects, so `dependabot.yml` and the scope list in `commitlint.config.js` are aligned in PH-02); **PH-11:** `infra-plan.yml` and `demo-down.yml`; **PH-12:** `demo-up.yml`; **PH-13:** `release-please.yml` and its configuration; **PH-15:** `mutation.yml`.
 
 - **Source:** [ADR 0009](decisions/0009-git-workflow.md), consequences; [ADR 0010](decisions/0010-ci-cd.md), decisions 5–18 and consequences; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7; [Audit, Process and CI](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C10](audits/2026-09-29-design-sanity-check.md#consider-improving); [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 18
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress: the PH-02 part, on [`ci/ci-checks`](https://github.com/luiki-dev/szop/tree/ci/ci-checks)
 
 #### OP-022
 
 **Apply and record the GitHub settings**: the required checks (`ci-ok` and the PR title check, with branches up to date), the code scanning rule, SHA pinning, read-only default token permissions and approval for outside contributors' runs. Update `github-settings.md`. The code scanning rule comes last, only after CodeQL has run successfully on `main`, since with an empty bypass list a CodeQL that cannot run would block every merge; and check that the SHA-pinning policy does not block CodeQL's default setup or Dependabot's own workflows (C9).
 
 - **Source:** [ADR 0009](decisions/0009-git-workflow.md), decision 13; [ADR 0010](decisions/0010-ci-cd.md), decisions 8 and 21; [Audit, C9](audits/2026-09-29-design-sanity-check.md#consider-improving)
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress, on [`ci/ci-checks`](https://github.com/luiki-dev/szop/tree/ci/ci-checks)
 
 #### OP-023
 
 **Write the CI/CD docs**: `docs/development/ci-cd.md`, tool pages for GitHub Actions, release-please, Dependabot, tflint, actionlint and zizmor, the buttons as the runbook's primary path, and a CI/CD section in the stack overview. `CLAUDE.md` then points to `ci-cd.md`. **Parts** ([ADR 0014](decisions/0014-roadmap.md)): **PH-02:** `ci-cd.md`, the pages for GitHub Actions, Dependabot, actionlint and zizmor, and the stack overview's CI/CD section; **PH-09:** the tflint page; **PH-11 and PH-12:** the buttons as the runbook's primary path; **PH-13:** the release-please page.
 
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 22 and consequences
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress: the PH-02 part, on [`ci/ci-checks`](https://github.com/luiki-dev/szop/tree/ci/ci-checks)
 
 #### OP-062
 
 **Bring the Claude Code push hook into the toolchain and CI.** The hook is now `.claude/hooks/guard-git-push.ts`: ESLint lints it, Prettier formats it, `tsc` type-checks it and `pnpm test` runs its tests with Node's test runner. **Parts:** **PH-01:** ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11)); **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through; **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`.
 
 - **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences; [ADR 0016](decisions/0016-toolchain-details.md), decision 6
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress: the PH-02 part, on [`ci/ci-checks`](https://github.com/luiki-dev/szop/tree/ci/ci-checks)
 
 ## Stage 2: Walking skeleton, running locally
 
