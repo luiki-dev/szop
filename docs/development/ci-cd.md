@@ -60,7 +60,7 @@ The `main` ruleset requires two status checks: **`ci-ok`** and **`pr-title`**. I
 
 Why one aggregating job instead of requiring every job:
 
-- A skipped job or workflow never reports a status, so a required check on it would leave a Markdown-only PR waiting forever. `ci-ok` always runs (`if: always()`) and always reports.
+- A workflow skipped by a `paths:` filter never starts, so it never reports a status, and a required check on it would leave the PR waiting forever. That is why `ci.yml` always runs and skips jobs with `if:` instead. A job skipped by its `if:` does report, and GitHub counts it as passed. So `ci-ok` must itself fail when `changes` fails: otherwise a broken detection, which leaves every other job skipped, would let the PR through. `ci-ok` always runs (`if: always()`) and always reports.
 - Adding a job later means adding it to `ci-ok`'s `needs:` list, without touching the ruleset.
 
 **`ci-ok`'s rule:** it passes only when `changes` succeeded and every other job either succeeded or was skipped. A job that failed or was cancelled fails it. The first condition matters: when `changes` fails, every job that needs it is skipped, and "everything skipped" alone would look green.
