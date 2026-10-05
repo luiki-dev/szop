@@ -11,12 +11,14 @@ ESLint reads the code without running it and reports bugs and bad patterns. With
 
 **`eslint.config.js`** is a **flat config** (see the [glossary](../../glossary.md)): ESLint's current format, a plain JavaScript array of config blocks that apply in order, the later ones overriding the earlier. `defineConfig` builds the array. The blocks:
 
-- `globalIgnores(["docs/", ".superpowers/"])`: the docs hold no code, and `.superpowers/` holds the brainstorm companion's untracked files.
+- `globalIgnores(["docs/", ".superpowers/", "coverage/"])`: the docs hold no code, `.superpowers/` holds the brainstorm companion's untracked files, and `coverage/` holds the generated coverage report, whose JavaScript is not ours to lint.
 - `js.configs.recommended`: ESLint's own rules for plain JavaScript mistakes (unused variables, unreachable code).
 - `tseslint.configs.strictTypeChecked`: typescript-eslint's strictest preset, with the rules that need type information.
-- `projectService: true`: gives those rules their types. Each file is linted with the `tsconfig.json` that includes it, so a file no tsconfig includes is an error. That is why the root `tsconfig.json` lists `*.js` and `.claude/hooks/`.
-- The `node:test` exception, only for `.claude/hooks/**/*.test.ts`: `no-floating-promises` stays on, but a call to `test` from `node:test` may go unawaited, because the test runner awaits it itself. It goes away when the tests move to Vitest in PH-03 ([OP-062](../../open-points.md#op-062)).
+- `projectService: true`: gives those rules their types. Each file is linted with the `tsconfig.json` that includes it, so a file no tsconfig includes is an error. That is why the root `tsconfig.json` lists `*.js`, `*.ts` and `.claude/hooks/`, and each package's lists its own files.
+- `tsconfigRootDir: import.meta.dirname`: the folder the `tsconfig.json` lookup starts from, the folder of `eslint.config.js`. With several tsconfigs (the root's and each package's), typescript-eslint must be told where to look them up from; otherwise it starts from whatever folder the command was run in.
 - `eslint-config-prettier`, last: turns off the rules that would fight Prettier over formatting.
+
+There is no exception for the test runner any more: the `node:test` one, which let `test()` go unawaited, left with the hook's tests when they moved to Vitest in PH-03 ([OP-062](../../open-points.md#op-062)); Vitest's `it` needs none.
 
 The React Hooks rules come with `apps/web` in PH-05.
 

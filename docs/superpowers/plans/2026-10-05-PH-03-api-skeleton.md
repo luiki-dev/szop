@@ -837,7 +837,7 @@ EOF
 - Consumes: the files of Tasks 1–5, described as committed.
 - Produces: `docs/development/testing.md`, which `CLAUDE.md`, ADR 0019 and Task 7's docs link to.
 
-- [ ] **Step 1: Write `docs/development/testing.md`**
+- [x] **Step 1: Write `docs/development/testing.md`**
 
 The living guide to how Szop is tested now ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 22). It will pass 100 lines, so it starts with `## Contents`. Sections:
 
@@ -849,7 +849,7 @@ The living guide to how Szop is tested now ([ADR 0007](../../decisions/0007-test
 6. `## Rules`: [ADR 0007](../decisions/0007-testing-strategy.md), decision 16 in short: test at the lowest layer that proves the behavior; no `vi.mock` of our own modules, fakes go in through `buildApp(deps)`; no snapshot tests of markup; flaky tests are bugs. Decision 3: TDD for domain rules, services and routes, and every bug fix starts with a failing test. Plus: **entry points are checked by hand** (`server.ts` only reads the environment, listens and shuts down; everything it calls is tested; the checks are in the phase's PR), [ADR 0019](../decisions/0019-api-skeleton-details.md), decision 10.
 7. `## Coverage`: measured, never gated ([ADR 0007](../decisions/0007-testing-strategy.md), decision 19); what the table's columns mean; files no test loads show at 0% because the config lists them; fully covered files are hidden from the terminal table but present in the HTML report; CI's job summary shows the same numbers ([CI/CD](ci-cd.md)).
 
-- [ ] **Step 2: Write the three tool pages**
+- [x] **Step 2: Write the three tool pages**
 
 Each follows the [tool page template](#tool-page-template).
 
@@ -857,7 +857,7 @@ Each follows the [tool page template](#tool-page-template).
 - `tsx.md`: what tsx is (runs TypeScript files directly by compiling them with esbuild on the fly; `watch` restarts on change); why ([ADR 0005](../../decisions/0005-development-environment.md), decision 9; Node's type stripping and `tsc` then run considered); *Configuration*: none of its own; the `dev` script explained part by part (`watch`, `--env-file=.env` passed on to Node, `| pino-pretty`); tsx does not check types, `pnpm typecheck` does; esbuild's install script is denied in `allowBuilds` and why; *Everyday use*: `pnpm dev`, what a restart looks like in the log (`[tsx] change in … Restarting...`, SIGTERM, graceful shutdown), typing `rs` + Enter does not apply (pnpm's parallel mode has no input), running a file once with `pnpm exec tsx --env-file=.env src/server.ts` from `apps/api`.
 - `pino-pretty.md`: what it is (turns pino's JSON lines into coloured, readable ones); why ([ADR 0019](../../decisions/0019-api-skeleton-details.md), decision 3: a pipe in the `dev` script only, so the app always writes JSON and production gets exactly what CloudWatch reads; the transport setting and raw JSON considered); *Configuration*: none; *Everyday use*: what an `incoming request` / `request completed` pair shows (`reqId`, method, URL, status, response time); seeing the raw JSON by running without the pipe (`pnpm exec tsx --env-file=.env src/server.ts` from `apps/api`); changing the level with `LOG_LEVEL` in `.env`.
 
-- [ ] **Step 3: Update the existing tool pages**
+- [x] **Step 3: Update the existing tool pages**
 
 - `pnpm.md`: in its `allowBuilds` part, the first entry: `esbuild: false`, why (tsx's esbuild; the binary comes from the optional platform package), and that `ERR_PNPM_IGNORED_BUILDS` asks the owner for each new one. Also the workspace commands now in use: `pnpm -r <script>`, `pnpm --filter @szop/api add <pkg>`, `pnpm add -Dw <pkg>` for root tools.
 - `eslint.md`: `tsconfigRootDir` (why: with several tsconfigs, typescript-eslint needs to know where to look them up from), `coverage/` in the ignores, and the removed `node:test` exception.
@@ -865,18 +865,18 @@ Each follows the [tool page template](#tool-page-template).
 - `vscode.md`: the Vitest extension in the recommendations, and what it gives.
 - `prettier.md`: `coverage/` in `.prettierignore`.
 
-- [ ] **Step 4: Update `setup.md`**
+- [x] **Step 4: Update `setup.md`**
 
 - Section 6, after `pnpm install`: `cp apps/api/.env.example apps/api/.env`, with a sentence: the API's local configuration; every variable is required; `.env` is git-ignored and never committed.
 - Section 7: `pnpm test` now ends with Vitest's `Test Files … passed` and `Tests … passed` lines; add [Vitest](tools/vitest.md) to the list of tool pages.
 - A new section after 7, `## 8. Run the API`: `pnpm dev`, then `curl http://127.0.0.1:3000/api/health` → `{"status":"ok"}`; what the log lines are; Ctrl+C stops it; editing a file restarts it; if it stops with `Invalid configuration`, compare `.env` with `.env.example`; links to [tsx](tools/tsx.md), [pino-pretty](tools/pino-pretty.md) and [testing](testing.md). Renumber "What the git hooks do" and "Coming later" to 9 and 10, and update `## Contents`.
 - "Coming later": remove the "Running the app" line; keep Docker Desktop and the database (PH-04); add "the web app, in [PH-05](../roadmap.md#ph-05-spa-skeleton)".
 
-- [ ] **Step 5: Update `CLAUDE.md`**
+- [x] **Step 5: Update `CLAUDE.md`**
 
 - In `## Documentation`, after the `docs/development/ci-cd.md` line: `` - `docs/development/testing.md` — how Szop is tested: the layers, running the suites, writing each kind of test, and the rules. Read it before writing or changing tests, and keep it updated when a test layer or tool changes. ``
 
-- [ ] **Step 6: Verify links and contents**
+- [x] **Step 6: Verify links and contents**
 
 ```bash
 for f in docs/development/testing.md docs/development/tools/{vitest,tsx,pino-pretty,pnpm,eslint,typescript,vscode,prettier}.md docs/development/setup.md; do
@@ -886,7 +886,7 @@ done; echo "link check done"
 
 Expected: `link check done`, with no `BROKEN` line except links to `docs/decisions/0019-api-skeleton-details.md`, which Task 7 creates. Check by eye that `testing.md`'s and `setup.md`'s Contents list every `##` and `###` heading.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add docs/development/testing.md docs/development/tools/vitest.md docs/development/tools/tsx.md docs/development/tools/pino-pretty.md docs/development/tools/pnpm.md docs/development/tools/eslint.md docs/development/tools/typescript.md docs/development/tools/vscode.md docs/development/tools/prettier.md docs/development/setup.md CLAUDE.md docs/superpowers/plans/2026-10-05-PH-03-api-skeleton.md

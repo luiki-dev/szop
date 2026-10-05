@@ -9,7 +9,7 @@ TypeScript adds static types to JavaScript, and Szop writes all its code in it, 
 
 ## Configuration
 
-**`tsconfig.base.json`** holds the settings every package will extend (from PH-03, when the first packages arrive):
+**`tsconfig.base.json`** holds the settings every package extends, the root included:
 
 - `strict`: switches on all of TypeScript's strict checks (`null` and `undefined` are separate types, no implicit `any`, and more).
 - `noUncheckedIndexedAccess`: reading `arr[0]` or `record[key]` gives `T | undefined`, because the item may not exist, so you must handle that case.
@@ -30,16 +30,26 @@ TypeScript adds static types to JavaScript, and Szop writes all its code in it, 
 - `allowImportingTsExtensions`: lets a file import `./guard-git-push.ts` by its real name (see below).
 - `allowJs` and `checkJs`: the root's `.js` configuration files are type-checked too.
 - `types: ["node"]`: only Node's types (`@types/node`) are global, not every `@types/*` package that happens to be installed.
-- `include`: the root's `*.js` files and everything under `.claude/hooks/`.
+- `include`: the root's `*.js` and `*.ts` files (such as `vitest.config.ts`) and everything under `.claude/hooks/`.
+
+**`apps/api/tsconfig.json`**: each package has a `tsconfig.json` of its own that extends the base, so a package can add what only it needs. The API's:
+
+- `noEmit`, `erasableSyntaxOnly`, `allowImportingTsExtensions`: the same three as the root's, for the same reasons. The API is run by [tsx](tsx.md) and tested by [Vitest](vitest.md), so nothing is compiled into files.
+- `types: ["node"]`: only Node's types are global.
+- `include: ["src", "vitest.config.ts"]`: the API's source, its tests (they sit in `src`) and its Vitest config. Nothing outside the package.
+
+Why each package has its own file: `apps/web` will add browser (DOM) types and JSX in PH-05, which the API must not see.
 
 ## Everyday use
 
 ```bash
-pnpm typecheck       # tsc --noEmit: check the types, write nothing
+pnpm typecheck       # check the root, then every package: tsc --noEmit && pnpm -r typecheck
 node file.ts         # run a single .ts file; Node strips the types
 ```
 
-Imports name the `.ts` file (`import { findViolation } from "./guard-git-push.ts"`), because Node loads exactly the file named and does not try other extensions. `allowImportingTsExtensions` makes `tsc` accept those `.ts` names, and `verbatimModuleSyntax` keeps type-only imports explicit (`import type`), which Node's type stripping needs.
+`pnpm typecheck` chains two commands: `tsc --noEmit` checks the root's own files, then `pnpm -r typecheck` runs each package's `typecheck` script (`tsc --noEmit` in the package's folder, with the package's `tsconfig.json`). If the first fails, the second does not run ([ADR 0019](../../decisions/0019-api-skeleton-details.md), decision 4).
+
+Imports name the `.ts` file (`import { findViolation } from "./guard-git-push.ts"`, `import { buildApp } from "./app.ts"`), in every package ([ADR 0019](../../decisions/0019-api-skeleton-details.md), decision 6), because Node loads exactly the file named and does not try other extensions. `allowImportingTsExtensions` makes `tsc` accept those `.ts` names, and `verbatimModuleSyntax` keeps type-only imports explicit (`import type`), which Node's type stripping needs.
 
 The push hook, `.claude/hooks/guard-git-push.ts`, is run this way: Node 24 strips its types, so it needs no build step and no dependencies.
 
