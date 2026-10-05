@@ -95,7 +95,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | Phase | Status | Spec | Plan | PR |
 |---|---|---|---|---|
 | [PH-03 API skeleton](#ph-03-api-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md) | [Plan](superpowers/plans/2026-10-05-PH-03-api-skeleton.md) | [#18](https://github.com/luiki-dev/szop/pull/18) |
-| [PH-04 Database](#ph-04-database) | 🚧 In progress | [Spec](superpowers/specs/2026-10-05-PH-04-database-design.md) | — | — |
+| [PH-04 Database](#ph-04-database) | 🚧 In progress | [Spec](superpowers/specs/2026-10-05-PH-04-database-design.md) | [Plan](superpowers/plans/2026-10-05-PH-04-database.md) | — |
 | [PH-05 SPA skeleton](#ph-05-spa-skeleton) | ⬜ Not started | — | — | — |
 | [PH-06 Production build and web baseline](#ph-06-production-build-and-web-baseline) | ⬜ Not started | — | — | — |
 | [PH-07 First E2E journey](#ph-07-first-e2e-journey) | ⬜ Not started | — | — | — |
