@@ -96,10 +96,11 @@ From the terminal, `gh pr checks` shows the PR's checks and `gh run view --log-f
 
 Dependabot ([tool page](tools/dependabot.md)) opens update PRs every Monday:
 
-- **Groups:** one PR for all minor and patch updates of the npm packages, one for those of the GitHub Actions, and a separate PR for each major version.
+- **Groups:** one PR for all minor and patch updates of the npm packages, one for those of the GitHub Actions, one for those of the images in `compose.yaml`, and a separate PR for each major version.
 - **Cooldown:** a version is proposed only once it is at least 7 days old; security updates skip the wait.
 - **Commit messages:** `build(deps): …` for a dependency, `build(deps-dev): …` for a devDependency, `ci(deps): …` for an action. They pass commitlint like any commit.
 - **`@types/node`'s major updates are ignored**, since its major version follows Node's, which changes on purpose together with `.nvmrc`.
+- **PostgreSQL's major updates are ignored** the same way: the major version changes on purpose, together with RDS and `compose.yaml`.
 
 A Dependabot PR is reviewed and merged by the owner like any other PR; nothing merges by itself. Merging one makes the others out of date, so each needs *Update branch* and a new CI run before it can be merged.
 

@@ -10,10 +10,11 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
 - [4. pnpm](#4-pnpm)
 - [5. VS Code](#5-vs-code)
 - [6. Clone and install](#6-clone-and-install)
-- [7. Check that everything works](#7-check-that-everything-works)
-- [8. Run the API](#8-run-the-api)
-- [9. What the git hooks do](#9-what-the-git-hooks-do)
-- [10. Coming later](#10-coming-later)
+- [7. Docker Desktop and the database](#7-docker-desktop-and-the-database)
+- [8. Check that everything works](#8-check-that-everything-works)
+- [9. Run the API](#9-run-the-api)
+- [10. What the git hooks do](#10-what-the-git-hooks-do)
+- [11. Coming later](#11-coming-later)
 
 ## 1. Windows: WSL and Ubuntu
 
@@ -80,7 +81,17 @@ cp apps/api/.env.example apps/api/.env
 
 `pnpm install` also sets up the git hooks. Pushing over HTTPS needs credentials: run `gh auth login` (GitHub CLI) or set up Git Credential Manager. If it stops with `ERR_PNPM_IGNORED_BUILDS`, a dependency wants to run an install script; see [pnpm](tools/pnpm.md) before allowing it.
 
-## 7. Check that everything works
+## 7. Docker Desktop and the database
+
+Install Docker Desktop for Windows (not in Ubuntu): <https://docs.docker.com/desktop/setup/install/windows-install/>. In *Settings → Resources → WSL integration*, turn it on for the Ubuntu distribution, and keep Docker Desktop running. Then, from the repository root:
+
+```bash
+docker compose up -d --wait
+```
+
+It downloads the PostgreSQL image the first time, starts the database and ends with `Container szop-postgres-1 Healthy`. The database keeps running across restarts of Docker Desktop until `docker compose stop`, and its data survives `docker compose down`. Details, and how to open `psql`, are in [Docker Compose and PostgreSQL](tools/docker-compose.md).
+
+## 8. Check that everything works
 
 ```bash
 pnpm lint
@@ -97,7 +108,7 @@ Success looks like this:
 
 What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md), [Prettier](tools/prettier.md) and [Vitest](tools/vitest.md). CI runs the same scripts, except that it runs `pnpm test:coverage`, which is `pnpm test --coverage`: the same tests, plus coverage.
 
-## 8. Run the API
+## 9. Run the API
 
 ```bash
 pnpm dev
@@ -117,13 +128,12 @@ It answers `{"status":"ok"}`. In the first terminal the log shows a `Server list
 
 More in [tsx](tools/tsx.md) (what restarts the API), [pino-pretty](tools/pino-pretty.md) (what makes the log readable) and the [testing guide](testing.md).
 
-## 9. What the git hooks do
+## 10. What the git hooks do
 
 On every commit, a pre-commit hook formats and lints the staged files, and a commit-msg hook checks that the message follows Conventional Commits. See [husky and lint-staged](tools/husky-and-lint-staged.md) and [commitlint](tools/commitlint.md).
 
-## 10. Coming later
+## 11. Coming later
 
-- **Docker Desktop and the database**, in [PH-04](../roadmap.md#ph-04-database).
 - **The web app**, in [PH-05](../roadmap.md#ph-05-spa-skeleton).
 
 This guide grows with those phases.
