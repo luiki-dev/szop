@@ -568,13 +568,13 @@ EOF
   - from `apps/api/src/app.ts`: `interface AppDeps { config: Config }` and `function buildApp(deps: AppDeps): FastifyInstance`, which returns the app without listening;
   - from `apps/api/src/health/routes.ts`: `function healthRoutes(app: FastifyInstance): void`, a Fastify plugin registering `GET /health`.
 
-- [ ] **Step 1: Install Fastify**
+- [x] **Step 1: Install Fastify**
 
 ```bash
 pnpm --filter @szop/api add fastify@^5.12.5
 ```
 
-- [ ] **Step 2: Write the failing API test**
+- [x] **Step 2: Write the failing API test**
 
 `apps/api/src/health/routes.test.ts`:
 
@@ -609,12 +609,12 @@ describe("GET /api/health", () => {
 
 `inject()` sends a request through Fastify without opening a port; `host` and `port` in the test config are never used.
 
-- [ ] **Step 3: Run it and see it fail**
+- [x] **Step 3: Run it and see it fail**
 
 Run: `pnpm test --project api`
 Expected: FAIL in `health/routes.test.ts`, the module `../app.ts` not found.
 
-- [ ] **Step 4: Write `buildApp` with an empty app, and see the route's absence fail**
+- [x] **Step 4: Write `buildApp` with an empty app, and see the route's absence fail**
 
 `apps/api/src/app.ts`:
 
@@ -637,7 +637,7 @@ export function buildApp({ config }: AppDeps): FastifyInstance {
 Run: `pnpm test --project api`
 Expected: FAIL with `expected 404 to be 200`: the app builds, the route is missing.
 
-- [ ] **Step 5: Add the health route**
+- [x] **Step 5: Add the health route**
 
 `apps/api/src/health/routes.ts`:
 
@@ -662,12 +662,12 @@ import { healthRoutes } from "./health/routes.ts";
   app.register(healthRoutes, { prefix: "/api" });
 ```
 
-- [ ] **Step 6: Run the tests and see them pass**
+- [x] **Step 6: Run the tests and see them pass**
 
 Run: `pnpm test`
 Expected: PASS, `Test Files  3 passed (3)`, including `|api| src/health/routes.test.ts > GET /api/health > answers 200 with status ok`.
 
-- [ ] **Step 7: Checks and commit**
+- [x] **Step 7: Checks and commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck
