@@ -135,7 +135,7 @@ apps/api/
 |---|---|---|
 | `test` | `vitest run` | Every project. |
 | `test:watch` | `vitest` | |
-| `test:coverage` | `vitest run --coverage` | `@vitest/coverage-v8`, measured and not gated (decision 19), into a git-ignored `coverage/`. CI's `test` job runs this one. |
+| `test:coverage` | `pnpm test --coverage` | Runs `test` with Vitest's `--coverage` flag (pnpm passes the flag on), so both scripts always run the same tests. `@vitest/coverage-v8`, measured and not gated (decision 19), into a git-ignored `coverage/`. CI's `test` job runs this one. |
 
 `test:e2e` and `test:mutation` arrive with Playwright (PH-07) and StrykerJS (PH-15).
 
