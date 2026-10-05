@@ -82,7 +82,7 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
   - **PH-07:** Playwright with axe
   - **PH-15:** fast-check and StrykerJS
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
 
 #### OP-012
 
@@ -94,7 +94,7 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
   - **PH-05:** the first component test
   - **PH-07:** the first E2E journey on both viewports
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
 
 #### OP-013
 
@@ -110,7 +110,7 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
   - **PH-12:** `infra/demo`
   - **PH-18:** the SES `EmailSender`
 - **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
 
 #### OP-062
 
@@ -121,14 +121,14 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
   - **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14))
   - **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`
 - **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences; [ADR 0016](decisions/0016-toolchain-details.md), decision 6
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
 
 #### OP-065
 
 **Set `tsconfigRootDir` in `eslint.config.js`.** When the workspaces add their own `tsconfig.json` files, set `tsconfigRootDir: import.meta.dirname` next to `projectService`, as typescript-eslint's typed-linting guide does. Without it, typescript-estree can fail with "multiple candidate TSConfigRootDirs".
 
 - **Source:** PH-01 final review
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
 
 #### OP-067
 
