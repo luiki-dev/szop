@@ -23,6 +23,7 @@
 - [Task 4: buildApp and the health route](#task-4-buildapp-and-the-health-route)
 - [Task 5: Running the API](#task-5-running-the-api)
 - [Task 6: Testing guide, tool pages and setup](#task-6-testing-guide-tool-pages-and-setup)
+- [Task 6a: Log startup and shutdown failures](#task-6a-log-startup-and-shutdown-failures)
 - [Task 7: ADR 0019, living docs and registers](#task-7-adr-0019-living-docs-and-registers)
 - [After tasks 1–7: open the PR](#after-tasks-17-open-the-pr)
 
@@ -892,6 +893,72 @@ Expected: `link check done`, with no `BROKEN` line except links to `docs/decisio
 git add docs/development/testing.md docs/development/tools/vitest.md docs/development/tools/tsx.md docs/development/tools/pino-pretty.md docs/development/tools/pnpm.md docs/development/tools/eslint.md docs/development/tools/typescript.md docs/development/tools/vscode.md docs/development/tools/prettier.md docs/development/setup.md CLAUDE.md docs/superpowers/plans/2026-10-05-PH-03-api-skeleton.md
 git commit -F - <<'EOF'
 docs: add the testing guide and the API's tool pages
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_014eEZKtPSDhj66gViQinsbL
+EOF
+```
+
+---
+
+### Task 6a: Log startup and shutdown failures
+
+Added during execution, on the owner's decision after Task 5's review: a taken port printed Node's raw unhandled-rejection stack instead of a log line, and a failing `app.close()` would have been an unhandled rejection. Both now go through the app's logger and exit with code 1.
+
+**Files:**
+- Modify: `apps/api/src/server.ts`, `docs/development/tools/tsx.md` (line 35), `docs/development/setup.md` (line 116)
+
+**Interfaces:**
+- Consumes: `server.ts` from Task 5.
+- Produces: no new interface. ADR 0019, decision 8 (Task 7) describes this behavior.
+
+- [x] **Step 1: Handle a failed shutdown**
+
+In `apps/api/src/server.ts`, replace `void app.close().then(() => process.exit(0));` with:
+
+```ts
+    app.close().then(
+      () => process.exit(0),
+      (error: unknown) => {
+        app.log.error(error, "shutdown failed");
+        process.exit(1);
+      },
+    );
+```
+
+- [x] **Step 2: Handle a failed start**
+
+Replace the last line, `await app.listen({ host: config.host, port: config.port });`, with:
+
+```ts
+// A failed start, such as a port already in use, is logged like everything
+// else, then the process exits with code 1.
+try {
+  await app.listen({ host: config.host, port: config.port });
+} catch (error) {
+  app.log.error(error, "startup failed");
+  process.exit(1);
+}
+```
+
+- [x] **Step 3: Check it by hand**
+
+- With `pnpm dev` running, run `cd apps/api && pnpm exec tsx --env-file=.env src/server.ts | pnpm exec pino-pretty` in a second shell (with `timeout 20`). Expected: one `ERROR` line `startup failed` whose `err` shows `code: "EADDRINUSE"`, the process exits (`echo ${PIPESTATUS[0]}` prints `1`), and the first server still answers `curl -s http://127.0.0.1:3000/api/health`.
+- Without the pipe, the same command prints one JSON line with `"level":50`, `"msg":"startup failed"` and `"err":{…"code":"EADDRINUSE"…}`, and no other stack trace.
+- `pnpm dev`, then Ctrl+C (SIGINT to the terminal's process group): still `shutting down` with `signal: "SIGINT"` and pnpm's `Done`, no process left. The failed-shutdown branch is not reachable by hand; it is reviewed by reading.
+
+- [x] **Step 4: Update the two docs that describe a taken port**
+
+- `docs/development/tools/tsx.md`, line 35: ``(the port is taken, shown as Node's raw error)`` → ``(the port is taken: logged as `startup failed` with the error's code)``.
+- `docs/development/setup.md`, line 116: ``an `EADDRINUSE` error means`` → ``a `startup failed` line with `EADDRINUSE` means``.
+
+- [x] **Step 5: Checks and commit**
+
+```bash
+pnpm lint && pnpm format:check && pnpm typecheck && pnpm test
+git add apps/api/src/server.ts docs/development/tools/tsx.md docs/development/setup.md docs/superpowers/plans/2026-10-05-PH-03-api-skeleton.md
+git commit -F - <<'EOF'
+fix(api): log startup and shutdown failures
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_014eEZKtPSDhj66gViQinsbL

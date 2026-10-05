@@ -32,7 +32,7 @@ cd apps/api && pnpm exec tsx --env-file=.env src/server.ts   # run it once, with
 - **A restart** after saving a file looks like this in the log: tsx prints `[tsx] change in ./src/app.ts Restarting...`, the old server logs `shutting down` with `signal: "SIGTERM"`, and the new one logs `Server listening`.
 - **Stop with Ctrl+C.** The server logs `shutting down` with `signal: "SIGINT"` and pnpm prints `Done`.
 - **Typing `rs` and Enter, nodemon's way of forcing a restart, does not work:** `pnpm -r --parallel` gives its scripts no input.
-- **A failed start does not exit `pnpm dev`.** With a missing `.env`, a taken port or an invalid setting, `tsx watch` prints the error and then waits for a file change; fix the cause and save, or press Ctrl+C. Run once, the same server does exit: code 1 for an invalid setting or `EADDRINUSE` (the port is taken, shown as Node's raw error), and code 9 with `node: .env: not found` for a missing `.env`.
+- **A failed start does not exit `pnpm dev`.** With a missing `.env`, a taken port or an invalid setting, `tsx watch` prints the error and then waits for a file change; fix the cause and save, or press Ctrl+C. Run once, the same server does exit: code 1 for an invalid setting or `EADDRINUSE` (the port is taken: logged as `startup failed` with the error's code), and code 9 with `node: .env: not found` for a missing `.env`.
 - **`Invalid configuration`** lists each wrong or missing variable by name; compare `.env` with `.env.example`.
 
 ## Official documentation

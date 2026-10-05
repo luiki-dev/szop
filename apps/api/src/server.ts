@@ -18,8 +18,21 @@ const app = buildApp({ config });
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.once(signal, () => {
     app.log.info({ signal }, "shutting down");
-    void app.close().then(() => process.exit(0));
+    app.close().then(
+      () => process.exit(0),
+      (error: unknown) => {
+        app.log.error(error, "shutdown failed");
+        process.exit(1);
+      },
+    );
   });
 }
 
-await app.listen({ host: config.host, port: config.port });
+// A failed start, such as a port already in use, is logged like everything
+// else, then the process exits with code 1.
+try {
+  await app.listen({ host: config.host, port: config.port });
+} catch (error) {
+  app.log.error(error, "startup failed");
+  process.exit(1);
+}
