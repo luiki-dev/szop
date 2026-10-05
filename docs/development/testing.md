@@ -116,5 +116,5 @@ Coverage tells you which lines the tests ran. It is **measured, never gated**: n
 
 - **The terminal table** has one row per file and these columns: `% Stmts` (statements run), `% Branch` (the sides of `if`s and other decisions taken), `% Funcs` (functions called) and `% Lines` (lines run), then `Uncovered Line #s`, the line numbers no test reached.
 - **Files no test loads show at 0%.** The root `vitest.config.ts` lists the folders to measure, so `server.ts`, which no test imports, appears at 0% instead of silently missing. That is the honest picture of an entry point checked by hand.
-- **Fully covered files may be left out of the terminal table** (Vitest then says `N files fully covered`). They are all in `coverage/index.html`, which you can click through down to the line, and in CI's table.
+- **Every file gets a row in the terminal table**, fully covered ones included. Vitest hides fully covered files only when it detects that an AI agent is running it, so the table may look shorter in an agent's output. The same numbers are in `coverage/index.html`, which you can click through down to the line, and in CI's table.
 - **CI shows the same numbers.** The `test` job runs `pnpm test:coverage` and writes a table of every file to the job's summary ([CI/CD](ci-cd.md)).
