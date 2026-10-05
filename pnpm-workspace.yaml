@@ -10,4 +10,7 @@ engineStrict: true
 # Dependencies allowed to run install scripts: none (ADR 0012, decision 18).
 # pnpm 12 fails the install when a dependency with a build script is not
 # listed here; the owner then decides between true and false.
-allowBuilds: {}
+allowBuilds:
+  # tsx's esbuild: its postinstall only checks the binary that the optional
+  # @esbuild/<platform> package already installs (ADR 0019).
+  esbuild: false

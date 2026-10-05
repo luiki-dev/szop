@@ -692,7 +692,7 @@ EOF
 - Consumes: `loadConfig`, `Config` (Task 3); `buildApp` (Task 4).
 - Produces: `pnpm dev` at the root, starting every package's `dev` script; `apps/api/.env.example`, documented in Task 6.
 
-- [ ] **Step 1: Install tsx and pino-pretty, and ask the owner about esbuild**
+- [x] **Step 1: Install tsx and pino-pretty, and ask the owner about esbuild**
 
 ```bash
 pnpm --filter @szop/api add -D tsx@^4.23.15 pino-pretty@^13.1.3
@@ -715,7 +715,7 @@ allowBuilds:
 
 (with `true` and an adjusted comment if the owner chose so), then run `pnpm install`. Expected: it finishes with no error.
 
-- [ ] **Step 2: Write the entry point**
+- [x] **Step 2: Write the entry point**
 
 `apps/api/src/server.ts`:
 
@@ -747,7 +747,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
 await app.listen({ host: config.host, port: config.port });
 ```
 
-- [ ] **Step 3: Add the scripts and `.env.example`**
+- [x] **Step 3: Add the scripts and `.env.example`**
 
 `apps/api/package.json` scripts:
 
@@ -782,7 +782,7 @@ LOG_LEVEL=info
 
 Then `cp apps/api/.env.example apps/api/.env`. `git status` must not list `.env`.
 
-- [ ] **Step 4: Run it**
+- [x] **Step 4: Run it**
 
 In one terminal: `pnpm dev`. In another:
 
@@ -792,12 +792,12 @@ curl -si http://127.0.0.1:3000/api/health
 
 Expected: `HTTP/1.1 200 OK`, `content-type: application/json; charset=utf-8`, body `{"status":"ok"}`. The first terminal shows, prefixed with `apps/api dev:`, `Server listening at http://127.0.0.1:3000`, then `incoming request` (with `reqId`, `method`, `url`) and `request completed` (with `statusCode: 200` and `responseTime`) as pretty-printed lines.
 
-- [ ] **Step 5: Restart and shutdown**
+- [x] **Step 5: Restart and shutdown**
 
 - Save `apps/api/src/app.ts` unchanged (`touch` it). Expected: `[tsx] change in ./src/app.ts Restarting...`, `shutting down` with `signal: "SIGTERM"`, then `Server listening` again; `curl` still answers.
 - Press Ctrl+C. Expected: `shutting down` with `signal: "SIGINT"`, pnpm's `Done`, the prompt back, and `pgrep -fa "tsx|pino-pretty"` lists nothing from this repository.
 
-- [ ] **Step 6: The unhappy paths (Review Focus 3–5)**
+- [x] **Step 6: The unhappy paths (Review Focus 3–5)**
 
 - **Unknown path:** with `pnpm dev` running, `curl -s http://127.0.0.1:3000/api/nope` → `{"message":"Route GET:/api/nope not found","error":"Not Found","statusCode":404}`, logged as a request with `statusCode: 404`; the server keeps running.
 - **Port taken:** with `pnpm dev` running, in a second terminal run `cd apps/api && pnpm exec tsx --env-file=.env src/server.ts`. Expected: it fails with `EADDRINUSE` and exits; the first server still answers.
@@ -812,7 +812,7 @@ Expected: `HTTP/1.1 200 OK`, `content-type: application/json; charset=utf-8`, bo
 
 Record the outputs of steps 4–6 for the PR's *How it was tested*.
 
-- [ ] **Step 7: Checks and commit**
+- [x] **Step 7: Checks and commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test
