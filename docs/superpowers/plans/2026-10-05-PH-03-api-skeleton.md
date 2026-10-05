@@ -307,7 +307,7 @@ EOF
 - Consumes: Task 1's root `vitest.config.ts` and `test` script.
 - Produces: `pnpm test:coverage`, writing `coverage/coverage-summary.json` (read by CI), `coverage/index.html` and a table in the terminal; the `test` job's job summary with Vitest's test report and a coverage table.
 
-- [ ] **Step 1: Configure coverage**
+- [x] **Step 1: Configure coverage**
 
 ```bash
 pnpm add -Dw @vitest/coverage-v8@^5.0.3
@@ -331,7 +331,7 @@ In the root `package.json` scripts, after `test:watch`:
 "test:coverage": "pnpm test --coverage",
 ```
 
-- [ ] **Step 2: Try it**
+- [x] **Step 2: Try it**
 
 ```bash
 pnpm test:coverage && ls coverage
@@ -339,7 +339,7 @@ pnpm test:coverage && ls coverage
 
 Expected: the tests pass, the terminal shows a `Coverage report from v8` table listing `.claude/hooks/guard-git-push.ts`, and `coverage/` holds `index.html` and `coverage-summary.json`. `git status` does not list `coverage/`.
 
-- [ ] **Step 3: Show coverage in CI's job summary**
+- [x] **Step 3: Show coverage in CI's job summary**
 
 In `.github/workflows/ci.yml`, in the `test` job, replace `- run: pnpm test` with:
 
@@ -361,7 +361,7 @@ In `.github/workflows/ci.yml`, in the `test` job, replace `- run: pnpm test` wit
           } >> "$GITHUB_STEP_SUMMARY"
 ```
 
-- [ ] **Step 4: Try the summary step locally**
+- [x] **Step 4: Try the summary step locally**
 
 From the repository root, after step 2:
 
@@ -375,11 +375,11 @@ print(next(s['run'] for s in steps if s.get('name') == 'Coverage summary'))")" &
 
 Expected: `## Coverage`, then a Markdown table whose rows are `total` and `.claude/hooks/guard-git-push.ts`, with repository-relative paths (no `/home/…`).
 
-- [ ] **Step 5: Lint gate and checks**
+- [x] **Step 5: Lint gate and checks**
 
 Run the [lint gate](#scratch-tools), then `pnpm lint && pnpm format:check && pnpm typecheck`. Expected: `LINT GATE: clean` and no errors.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add vitest.config.ts package.json pnpm-lock.yaml .github/workflows/ci.yml docs/superpowers/plans/2026-10-05-PH-03-api-skeleton.md
