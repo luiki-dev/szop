@@ -17,7 +17,7 @@ Visual Studio Code (VS Code) is the editor Szop is developed in. The repository 
 - `vitest.explorer`: Vitest, which lists the tests in the editor's Testing view and runs or debugs one from the arrow next to it, with a failure shown on the line that failed.
 - `ms-azuretools.vscode-containers`: Container Tools, for working with Docker containers and images from the editor (Docker arrives with the database in PH-04 and the container image in PH-08).
 
-The WSL extension is installed on the Windows side and is not in the list: it is needed before the repository can be opened at all. The other test tool extensions arrive with their tools (PH-05 and PH-07), and Tailwind CSS IntelliSense with the styling in PH-14.
+The WSL extension is installed on the Windows side and is not in the list: it is needed before the repository can be opened at all. The Playwright Test extension arrives with Playwright in PH-07 ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 21), and Tailwind CSS IntelliSense with the styling in PH-14.
 
 **`.vscode/settings.json`** holds the workspace settings, which apply to this repository only:
 

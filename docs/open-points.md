@@ -82,7 +82,8 @@ Roadmap entry: [PH-04](roadmap.md#ph-04-database).
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
-  - **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database
+  - **PH-03:** `apps/api/.env.example` and the `.env` copy step ✅ Done ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
+  - **PH-04:** `compose.yaml` and the database's settings in `.env.example`
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
 - **Status:** ⬜ Open
 

@@ -27,7 +27,7 @@ Vitest is the test runner: it finds the test files, runs them and reports which 
 ## Everyday use
 
 ```bash
-pnpm test                    # run everything once; this is what CI runs
+pnpm test                    # run everything once; the same tests CI runs (CI adds `--coverage`)
 pnpm test:watch              # stay running, re-run what a change affects
 pnpm test --project api      # only the api project
 pnpm test health             # only files whose path contains "health"

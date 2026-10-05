@@ -33,7 +33,7 @@ Layers still to come:
 All commands run from the repository root.
 
 ```bash
-pnpm test                       # every project once, exactly as CI runs it
+pnpm test                       # every project once, the same tests CI runs (CI adds `--coverage`)
 pnpm test:watch                 # stays running and re-runs the tests a change affects, on every save
 pnpm test --project api         # one project only: api or hooks
 pnpm test health                # only the files whose path contains "health"
@@ -108,7 +108,7 @@ These follow [ADR 0007](../decisions/0007-testing-strategy.md), decision 16, unl
 - **No snapshot tests of markup.** Too easy to "update the snapshot" without reading it.
 - **Flaky tests are bugs.** Fix or delete them promptly; never just re-run.
 - **Test-driven development (TDD) for domain rules, services and routes**, and every bug fix starts with a failing test that reproduces it ([ADR 0007](../decisions/0007-testing-strategy.md), decision 3).
-- **Entry points are checked by hand.** `server.ts` only reads the environment, listens and shuts down. Everything it calls is tested, so what is left untested is a few lines of wiring; the manual checks (a missing setting, a taken port, Ctrl+C) are recorded in the phase's pull request ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 10).
+- **Entry points are checked by hand.** `server.ts` only reads the environment, listens and shuts down. Everything it calls is tested, so what is left untested is a few lines of wiring; the manual checks (it starts and `/api/health` answers, a missing or invalid setting stops it with a message naming the variable, a taken port, Ctrl+C shuts it down gracefully, an edit restarts it) are recorded in the phase's pull request ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 10).
 
 ## Coverage
 
