@@ -82,7 +82,7 @@ Roadmap entry: [PH-04](roadmap.md#ph-04-database).
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
-  - **PH-03:** `apps/api/.env.example` and the `.env` copy step ✅ Done ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
+  - **PH-03:** `apps/api/.env.example` and the `.env` copy step ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
   - **PH-04:** `compose.yaml` and the database's settings in `.env.example`
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
 - **Status:** ⬜ Open
@@ -106,7 +106,7 @@ Roadmap entry: [PH-04](roadmap.md#ph-04-database).
 **Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** the first API test ✅ Done ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
+  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
   - **PH-04:** the first test against the database
   - **PH-05:** the first component test
   - **PH-07:** the first E2E journey on both viewports
@@ -118,7 +118,7 @@ Roadmap entry: [PH-04](roadmap.md#ph-04-database).
 **Build what the demo runs on**: the Terraform code for `infra/bootstrap`, `infra/base` and `infra/demo`, the multi-stage Dockerfile, serving the SPA with `@fastify/static`, `GET /api/health`, migrations at startup and the SES `EmailSender`. ECR's lifecycle policy must not expire released images (m11): a higher-priority rule selects `v*`-tagged images with a count limit never reached, which shields them from the lower-priority rule keeping only the last few of the rest, since ECR has no "keep" action. Bootstrap's state bucket has versioning, the public-access block and a policy that allows only TLS (C6).
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** `GET /api/health` ✅ Done ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
+  - **PH-03:** `GET /api/health` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
   - **PH-04:** migrations at startup
   - **PH-06:** serving the SPA with `@fastify/static`
   - **PH-08:** the multi-stage Dockerfile
@@ -157,7 +157,7 @@ Also: [OP-012](#op-012).
 **Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
+  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
   - **PH-05:** Testing Library and MSW
   - **PH-07:** Playwright with axe
   - **PH-15:** fast-check and StrykerJS
@@ -829,13 +829,13 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Parts:**
   - **PH-01:** ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
   - **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14))
-  - **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js` ✅ Done ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
+  - **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
 - **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences; [ADR 0016](decisions/0016-toolchain-details.md), decision 6
-- **Status:** ✅ Closed: the hook's tests are a Vitest project and the `node:test` exception is gone ([ADR 0019](decisions/0019-api-skeleton-details.md), decision 5; [`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
+- **Status:** ✅ Closed: the hook's tests are a Vitest project and the `node:test` exception is gone ([ADR 0019](decisions/0019-api-skeleton-details.md), decision 5; [#18](https://github.com/luiki-dev/szop/pull/18))
 
 #### OP-065
 
 **Set `tsconfigRootDir` in `eslint.config.js`.** When the workspaces add their own `tsconfig.json` files, set `tsconfigRootDir: import.meta.dirname` next to `projectService`, as typescript-eslint's typed-linting guide does. Without it, typescript-estree can fail with "multiple candidate TSConfigRootDirs".
 
 - **Source:** PH-01 final review
-- **Status:** ✅ Closed: set in `eslint.config.js` with the first workspace `tsconfig.json` ([`feat/api-skeleton`](https://github.com/luiki-dev/szop/tree/feat/api-skeleton))
+- **Status:** ✅ Closed: set in `eslint.config.js` with the first workspace `tsconfig.json` ([#18](https://github.com/luiki-dev/szop/pull/18))
