@@ -977,7 +977,7 @@ EOF
 - Consumes: everything above.
 - Produces: the records the PR links to.
 
-- [ ] **Step 1: Write ADR 0019**
+- [x] **Step 1: Write ADR 0019**
 
 `docs/decisions/0019-api-skeleton-details.md`, in ADR 0018's shape:
 
@@ -988,7 +988,7 @@ EOF
   - `| 12 | Coverage in CI | Vitest's job summary reporter; a json-summary report turned into a table by jq; no coverage in CI yet | **A json-summary report and a jq step** in the test job, after pnpm test:coverage. Vitest's GitHub Actions reporter writes the test results to the job summary but not coverage. Deferring would leave ADR 0010, decision 7 unmet while coverage already exists locally. test:coverage is pnpm test --coverage, so CI and local runs run the same tests. |` (format scripts and file names as code in the real cell).
 - `## Consequences`: `apps/api` exists and `pnpm dev` runs it; `pnpm test` runs Vitest and CI shows coverage; each later dependency of the app joins `AppDeps`; the open points ([OP-010](../open-points.md#op-010), [OP-012](../open-points.md#op-012), [OP-013](../open-points.md#op-013) PH-03 parts done; [OP-062](../open-points.md#op-062), [OP-065](../open-points.md#op-065) closed; new [OP-071](../open-points.md#op-071), [OP-072](../open-points.md#op-072)); the living docs (`testing.md`, three tool pages, `setup.md`, the architecture, the stack overview, `ci-cd.md`, `CLAUDE.md`).
 
-- [ ] **Step 2: Note the refinements in the earlier ADRs**
+- [x] **Step 2: Note the refinements in the earlier ADRs**
 
 Each in the three places `CLAUDE.md` asks for (ADR 0019's header is step 1):
 
@@ -996,7 +996,7 @@ Each in the three places `CLAUDE.md` asks for (ADR 0019's header is step 1):
 - ADR 0007, status line: append `; decision 8 completed by [ADR 0019](0019-api-skeleton-details.md) (the Vitest projects' layout)`. Decision 8's cell: `<br>🧩 **Completed by [ADR 0019](0019-api-skeleton-details.md), decision 5:** a root vitest.config.ts lists each package's own config and an inline project for the push hook; no globals.`
 - ADR 0016, status line: append `; decision 6 completed by [ADR 0019](0019-api-skeleton-details.md) (Vitest replaces Node's test runner)`. Decision 6's cell: `<br>🧩 **Completed by [ADR 0019](0019-api-skeleton-details.md), decision 5:** the push hook's tests moved to Vitest in PH-03, and the ESLint exception for node:test is gone.`
 
-- [ ] **Step 3: Update the architecture and the stack overview**
+- [x] **Step 3: Update the architecture and the stack overview**
 
 `docs/architecture/architecture.md`:
 - In 1, the monorepo paragraph: packages are named `@szop/api`, `@szop/web`, `@szop/shared`; imports keep their `.ts` extension ([ADR 0019](../decisions/0019-api-skeleton-details.md), decisions 6 and 7).
@@ -1005,13 +1005,13 @@ Each in the three places `CLAUDE.md` asks for (ADR 0019's header is step 1):
 
 `docs/architecture/stack-overview.md`, in section 6 after the request-lifecycle paragraph, a paragraph **"How Szop's API is put together"**: a Fastify *instance* is the app; a *plugin* is a function receiving the instance (and options) that adds routes or hooks; *encapsulation* means what a plugin adds stays inside it unless it says otherwise; `buildApp` is a factory that creates the instance and registers the plugins, which is how tests get the same app with fakes; `inject()` runs a fake HTTP request through the whole app without a network. And in section 11 (the monorepo), one or two sentences: `apps/api` is the first package; the `@szop/` scope; `pnpm -r` runs a script in each package; Vitest runs every package's tests from the root. Link [ADR 0019](../decisions/0019-api-skeleton-details.md) and [testing](../development/testing.md).
 
-- [ ] **Step 4: Update `ci-cd.md`, the glossary and the README**
+- [x] **Step 4: Update `ci-cd.md`, the glossary and the README**
 
 - `docs/development/ci-cd.md`, the `test` row of the jobs table: `The tests: every Vitest project (pnpm test:coverage), with Vitest's test report and a coverage table in the job summary` and the local script `pnpm test` (or `pnpm test:coverage`). In *Reading a failed run*, a line: the job summary (the run's *Summary* page) lists the failed tests and the coverage.
 - `docs/glossary.md`: under `## Acronyms`, alphabetically, **SIGINT** and **SIGTERM** (signals: interrupt, sent by Ctrl+C; terminate, sent by tsx on a restart and by ECS when it stops a task; the API closes gracefully on both). Under `## Terms`: **Encapsulation (Fastify)**, **Graceful shutdown**, **Job summary**, **Plugin (Fastify)**, **Test coverage**, **Vitest project**, each one or two sentences in the existing style. Check first that none exists already (`grep -n "^| \*\*<term>" docs/glossary.md`).
 - `README.md`, the *Development* section, a second paragraph: `pnpm dev` starts the API (after copying `apps/api/.env.example` to `apps/api/.env`), `pnpm test` runs every test; link [testing](docs/development/testing.md).
 
-- [ ] **Step 5: Update the open points**
+- [x] **Step 5: Update the open points**
 
 In `docs/open-points.md`:
 - **OP-010:** the PH-03 part gets `✅ Done (PR link)` (the PR number is known in [After tasks 1–7](#after-tasks-17-open-the-pr); until then link the branch); the status goes back to `⬜ Open`; the entry moves under `### PH-05 SPA skeleton`, and PH-03's group keeps no copy.
@@ -1022,11 +1022,11 @@ In `docs/open-points.md`:
 - New, under `### PH-12 First deploy`: `#### OP-072` **Quieten the health route's request logs.** The load balancer calls `GET /api/health` every few seconds, which would fill CloudWatch with two lines per check; for example, the route's `logLevel` set to `warn`. Source: the [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope). Status ⬜ Open.
 - Keep `## Contents` in sync if it lists entries.
 
-- [ ] **Step 6: Update the roadmap**
+- [x] **Step 6: Update the roadmap**
 
 `docs/roadmap.md`, PH-03's row already links the spec and the plan (the plan's own commit added it). Check that it still reads `🚧 In progress`; the README diagram stays as it is (◐) until the PR sets ✅ ([After tasks 1–7](#after-tasks-17-open-the-pr)). Nothing to commit here if both are right.
 
-- [ ] **Step 7: Verify links and contents**
+- [x] **Step 7: Verify links and contents**
 
 ```bash
 for f in docs/decisions/0019-api-skeleton-details.md docs/decisions/000{5,7}-*.md docs/decisions/0016-*.md docs/architecture/architecture.md docs/architecture/stack-overview.md docs/development/ci-cd.md docs/development/testing.md docs/open-points.md docs/roadmap.md README.md; do
@@ -1037,7 +1037,7 @@ grep -c "^#### OP-07[12]$" docs/open-points.md
 
 Expected: `link check done` with no `BROKEN` line, and `2`. Walk through the [definition of done](../../development/definition-of-done.md) and note each item's state for the PR.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add docs/decisions/0019-api-skeleton-details.md docs/decisions/0005-development-environment.md docs/decisions/0007-testing-strategy.md docs/decisions/0016-toolchain-details.md docs/architecture/architecture.md docs/architecture/stack-overview.md docs/development/ci-cd.md docs/glossary.md README.md docs/open-points.md docs/roadmap.md docs/superpowers/plans/2026-10-05-PH-03-api-skeleton.md

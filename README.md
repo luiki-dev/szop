@@ -82,6 +82,8 @@ Szop is built in phases, grouped into stages. The road below shows how far along
 
 Szop is a pnpm monorepo in TypeScript, developed in Windows Subsystem for Linux (WSL). To set up a machine and run the checks, follow the [setup guide](docs/development/setup.md); every tool has its own page in [docs/development/tools](docs/development/tools/).
 
+`pnpm dev` starts the API, after you copy `apps/api/.env.example` to `apps/api/.env`, and `pnpm test` runs every test; see the [testing guide](docs/development/testing.md).
+
 ## Documentation
 
 - [Functional requirements](docs/requirements/functional-requirements.md) — what Szop does, in detail

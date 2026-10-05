@@ -119,6 +119,8 @@ A Java analogy, if it helps:
 
 **Fastify's request lifecycle**, in order: `onRequest` → `preParsing` → (body parsed) → `preValidation` → (schema validation) → `preHandler` → **handler** → `preSerialization` → (response serialized) → `onSend` → `onResponse`. `onError` runs if anything throws. Hooks registered inside a plugin apply only to that plugin's routes (encapsulation) — that is how, for example, "all routes in this module require a registered user" can be expressed.
 
+**How Szop's API is put together.** A Fastify *instance* is the app. A *plugin* is a function that receives the instance (and options) and adds routes or hooks to it. *Encapsulation* means that what a plugin adds stays inside it unless the plugin says otherwise. Szop's `buildApp` is a factory: it creates the instance and registers the plugins, one per feature, handing each the services it needs as options. That is how a test gets the same app as production, only with fakes passed in. `inject()` then runs a fake HTTP request through the whole app, with no network involved. The reasons are in [ADR 0019](../decisions/0019-api-skeleton-details.md), decision 1; the tests are described in the [testing guide](../development/testing.md).
+
 ## 7. Kinds of state in a frontend
 
 "State" is any data that can change while the app runs and that the screen depends on. The key to a clean frontend is knowing **who owns each piece**:
@@ -162,7 +164,7 @@ TypeScript types vanish at runtime, so they cannot protect the server from a mal
 
 One Git repository holds `apps/web`, `apps/api` and `packages/shared`, plus the end-to-end tests in `e2e/` and the Terraform code in `infra/`. A change to a shared schema, the API route using it and the form using it can land in one commit and be checked together — which is the whole point of TypeScript end to end.
 
-The three packages, and `e2e/`, are **pnpm workspaces**: pnpm links them to each other, so `apps/api` imports `packages/shared` like any installed library, except that it is the live source code in the same repository. The development tooling around the stack (pnpm, TypeScript configuration, tsx, ESLint, Prettier, Docker Compose) is decided in [ADR 0005](../decisions/0005-development-environment.md). The [setup guide](../development/setup.md) installs them, and each tool has its own explanatory page in [`docs/development/tools/`](../development/tools/).
+The three packages, and `e2e/`, are **pnpm workspaces**: pnpm links them to each other, so `apps/api` imports `packages/shared` like any installed library, except that it is the live source code in the same repository. `apps/api` is the first package that exists. Its name is `@szop/api`: the `@szop/` scope cannot clash with a package on the npm registry ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 7). `pnpm -r` runs a script in every package, and Vitest runs every package's tests from the root. The development tooling around the stack (pnpm, TypeScript configuration, tsx, ESLint, Prettier, Docker Compose) is decided in [ADR 0005](../decisions/0005-development-environment.md). The [setup guide](../development/setup.md) installs them, and each tool has its own explanatory page in [`docs/development/tools/`](../development/tools/).
 
 The testing tools (Vitest, Testing Library, Mock Service Worker, Playwright, fast-check, StrykerJS) and how the tests are layered are decided in [ADR 0007](../decisions/0007-testing-strategy.md). They get their own pages under `docs/development/tools/` too, next to a testing guide in `docs/development/testing.md`.
 
