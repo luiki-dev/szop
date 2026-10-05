@@ -141,7 +141,7 @@ Every page in `docs/development/tools/` follows this shape ([ADR 0005](../../dec
 - Consumes: nothing.
 - Produces: the workspace package `@szop/api` with a `typecheck` script; the Vitest projects `api` (`apps/api/src/**/*.test.ts`) and `hooks`; root scripts `typecheck` (chained), `test`, `test:watch`. Later tasks add files under `apps/api/src/` and they are type-checked, linted and tested with no further setup.
 
-- [ ] **Step 1: Create the package**
+- [x] **Step 1: Create the package**
 
 `apps/api/package.json`:
 
@@ -195,7 +195,7 @@ pnpm --filter @szop/api add -D @types/node@^24.19.0
 
 Expected: both finish without `ERR_PNPM_IGNORED_BUILDS`.
 
-- [ ] **Step 2: Add the root Vitest config and scripts**
+- [x] **Step 2: Add the root Vitest config and scripts**
 
 `vitest.config.ts` at the root:
 
@@ -229,7 +229,7 @@ In the root `package.json`, set these scripts (keep `lint`, `format`, `format:ch
 
 In the root `tsconfig.json`, change `"include": ["*.js", ".claude/hooks/**/*.ts"]` to `"include": ["*.js", "*.ts", ".claude/hooks/**/*.ts"]`, so `vitest.config.ts` is type-checked and linted.
 
-- [ ] **Step 3: Move the push hook's tests to Vitest**
+- [x] **Step 3: Move the push hook's tests to Vitest**
 
 In `.claude/hooks/guard-git-push.test.ts`:
 
@@ -250,7 +250,7 @@ test.each(blocked)("blocks: %s", (command, reason) => {
 
 The `allowed` and `blocked` lists stay exactly as they are.
 
-- [ ] **Step 4: Update ESLint, the ignores and the editor**
+- [x] **Step 4: Update ESLint, the ignores and the editor**
 
 `eslint.config.js`:
 - `globalIgnores(["docs/", ".superpowers/"])` → `globalIgnores(["docs/", ".superpowers/", "coverage/"])`, and extend the comment above it: `// … coverage/ holds Vitest's generated report.`
@@ -271,7 +271,7 @@ coverage/
 
 `pnpm-workspace.yaml`: replace the first two comment lines with `# The workspace packages: apps/api since PH-03; apps/web arrives in PH-05,` and `# packages/shared with the first shared code.`
 
-- [ ] **Step 5: Run every check**
+- [x] **Step 5: Run every check**
 
 ```bash
 pnpm test && pnpm lint && pnpm format:check && pnpm typecheck
@@ -279,12 +279,12 @@ pnpm test && pnpm lint && pnpm format:check && pnpm typecheck
 
 Expected: Vitest prints `Test Files  1 passed (1)` and `Tests  36 passed (36)`, every test labelled `|hooks|`; ESLint and `tsc` print only their commands; Prettier prints `All matched files use Prettier code style!`. `pnpm typecheck` prints `tsc --noEmit` twice (the root, then `apps/api`).
 
-- [ ] **Step 6: Prove the checks bite**
+- [x] **Step 6: Prove the checks bite**
 
 - Change `toBeNull()` to `not.toBeNull()` in the hook test and run `pnpm test`: expect the 13 `allows:` tests to fail and a non-zero exit code. Undo the change.
 - Create `apps/api/src/bad.ts` holding `export const x: number = "a";`, run `pnpm typecheck`: expect `error TS2322` from `apps/api` and a non-zero exit. Delete the file.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/api/package.json apps/api/tsconfig.json apps/api/vitest.config.ts vitest.config.ts package.json pnpm-lock.yaml tsconfig.json eslint.config.js .claude/hooks/guard-git-push.test.ts .gitignore .prettierignore .vscode/extensions.json pnpm-workspace.yaml docs/superpowers/plans/2026-10-05-PH-03-api-skeleton.md
