@@ -1,5 +1,5 @@
-# The workspace packages. None exist yet: apps/api arrives in PH-03,
-# apps/web in PH-05, packages/shared with the first shared code.
+# The workspace packages: apps/api since PH-03; apps/web arrives in PH-05,
+# packages/shared with the first shared code.
 packages:
   - apps/*
   - packages/*
@@ -10,4 +10,7 @@ engineStrict: true
 # Dependencies allowed to run install scripts: none (ADR 0012, decision 18).
 # pnpm 12 fails the install when a dependency with a build script is not
 # listed here; the owner then decides between true and false.
-allowBuilds: {}
+allowBuilds:
+  # tsx's esbuild: its postinstall only checks the binary that the optional
+  # @esbuild/<platform> package already installs (ADR 0019).
+  esbuild: false

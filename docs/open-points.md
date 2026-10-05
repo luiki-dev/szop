@@ -72,75 +72,9 @@ Roadmap entry: [PH-02](roadmap.md#ph-02-ci-checks).
 
 Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
 
-#### OP-010
-
-**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer
-  - **PH-05:** Testing Library and MSW
-  - **PH-07:** Playwright with axe
-  - **PH-15:** fast-check and StrykerJS
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
-- **Status:** ⬜ Open
-
-#### OP-012
-
-**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** the first API test
-  - **PH-04:** the first test against the database
-  - **PH-05:** the first component test
-  - **PH-07:** the first E2E journey on both viewports
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
-- **Status:** ⬜ Open
-
-#### OP-013
-
-**Build what the demo runs on**: the Terraform code for `infra/bootstrap`, `infra/base` and `infra/demo`, the multi-stage Dockerfile, serving the SPA with `@fastify/static`, `GET /api/health`, migrations at startup and the SES `EmailSender`. ECR's lifecycle policy must not expire released images (m11): a higher-priority rule selects `v*`-tagged images with a count limit never reached, which shields them from the lower-priority rule keeping only the last few of the rest, since ECR has no "keep" action. Bootstrap's state bucket has versioning, the public-access block and a policy that allows only TLS (C6).
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** `GET /api/health`
-  - **PH-04:** migrations at startup
-  - **PH-06:** serving the SPA with `@fastify/static`
-  - **PH-08:** the multi-stage Dockerfile
-  - **PH-09:** `infra/bootstrap`, with the state bucket's protections
-  - **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy
-  - **PH-12:** `infra/demo`
-  - **PH-18:** the SES `EmailSender`
-- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
-- **Status:** ⬜ Open
-
-#### OP-062
-
-**Bring the Claude Code push hook into the toolchain and CI.** The hook is now `.claude/hooks/guard-git-push.ts`: ESLint lints it, Prettier formats it, `tsc` type-checks it and `pnpm test` runs its tests with Node's test runner.
-
-- **Parts:**
-  - **PH-01:** ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
-  - **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14))
-  - **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`
-- **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences; [ADR 0016](decisions/0016-toolchain-details.md), decision 6
-- **Status:** ⬜ Open
-
-#### OP-065
-
-**Set `tsconfigRootDir` in `eslint.config.js`.** When the workspaces add their own `tsconfig.json` files, set `tsconfigRootDir: import.meta.dirname` next to `projectService`, as typescript-eslint's typed-linting guide does. Without it, typescript-estree can fail with "multiple candidate TSConfigRootDirs".
-
-- **Source:** PH-01 final review
-- **Status:** ⬜ Open
-
-#### OP-067
-
-**Confirm CI on its first real PRs after PH-02's merge.** (1) Ask Dependabot for updates (*Insights → Dependency graph → Dependabot → Check for updates*); its PRs must pass `commits` (audit m9 on a real commit) and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
-
-- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
-- **Status:** ⬜ Open
-
 ### PH-04 Database
 
-Roadmap entry: [PH-04](roadmap.md#ph-04-database).\
-Also: [OP-012](#op-012), [OP-013](#op-013).
+Roadmap entry: [PH-04](roadmap.md#ph-04-database).
 
 #### OP-005
 
@@ -148,7 +82,8 @@ Also: [OP-012](#op-012), [OP-013](#op-013).
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
-  - **PH-04:** `compose.yaml`, `.env` and `.env.example`, which arrive with the database
+  - **PH-03:** `apps/api/.env.example` and the `.env` copy step ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** `compose.yaml` and the database's settings in `.env.example`
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
 - **Status:** ⬜ Open
 
@@ -166,6 +101,41 @@ Also: [OP-012](#op-012), [OP-013](#op-013).
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 12 and 13
 - **Status:** ⬜ Open
 
+#### OP-012
+
+**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** the first test against the database
+  - **PH-05:** the first component test
+  - **PH-07:** the first E2E journey on both viewports
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
+- **Status:** ⬜ Open
+
+#### OP-013
+
+**Build what the demo runs on**: the Terraform code for `infra/bootstrap`, `infra/base` and `infra/demo`, the multi-stage Dockerfile, serving the SPA with `@fastify/static`, `GET /api/health`, migrations at startup and the SES `EmailSender`. ECR's lifecycle policy must not expire released images (m11): a higher-priority rule selects `v*`-tagged images with a count limit never reached, which shields them from the lower-priority rule keeping only the last few of the rest, since ECR has no "keep" action. Bootstrap's state bucket has versioning, the public-access block and a policy that allows only TLS (C6).
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** `GET /api/health` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** migrations at startup
+  - **PH-06:** serving the SPA with `@fastify/static`
+  - **PH-08:** the multi-stage Dockerfile
+  - **PH-09:** `infra/bootstrap`, with the state bucket's protections
+  - **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy
+  - **PH-12:** `infra/demo`
+  - **PH-18:** the SES `EmailSender`
+- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
+- **Status:** ⬜ Open
+
+#### OP-067
+
+**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
+
+- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
+- **Status:** ⬜ Open
+
 #### OP-068
 
 **Add Dependabot's other ecosystems.** Majors of Node and PostgreSQL change on purpose, together with `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version (audit m13).
@@ -180,7 +150,19 @@ Also: [OP-012](#op-012), [OP-013](#op-013).
 ### PH-05 SPA skeleton
 
 Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).\
-Also: [OP-010](#op-010), [OP-012](#op-012).
+Also: [OP-012](#op-012).
+
+#### OP-010
+
+**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-05:** Testing Library and MSW
+  - **PH-07:** Playwright with axe
+  - **PH-15:** fast-check and StrykerJS
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
+- **Status:** ⬜ Open
 
 ### PH-06 Production build and web baseline
 
@@ -390,6 +372,13 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 - **Source:** [Audit, MAJOR-9](audits/2026-09-29-design-sanity-check.md#major-9-the-single-instance-guarantee-doesnt-hold-during-a-redeploy-and-branch-redeploys-can-skip-migrations)
 - **Status:** ⬜ Open
 
+#### OP-072
+
+**Quieten the health route's request logs.** The load balancer calls `GET /api/health` every few seconds, which would fill CloudWatch with two lines per check; for example, the route's `logLevel` set to `warn`.
+
+- **Source:** [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope)
+- **Status:** ⬜ Open
+
 ### PH-13 Releases
 
 Roadmap entry: [PH-13](roadmap.md#ph-13-releases).\
@@ -442,6 +431,13 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
   - **PH-15:** the seed data tests
   - the first phase whose migration changes an existing table (probably PH-17): the migration test with fixture data
 - **Source:** [Audit, C4 and C5](audits/2026-09-29-design-sanity-check.md#consider-improving)
+- **Status:** ⬜ Open
+
+#### OP-071
+
+**Add the JSON error shape and a not-found handler.** The architecture's error shape (`{ "error": { "code", "message" } }`, [architecture, Errors](architecture/architecture.md#errors)) for validation errors, unknown routes and unexpected errors, with `setErrorHandler` and `setNotFoundHandler`, when the first route that can fail arrives; until then unknown routes return Fastify's default 404 body.
+
+- **Source:** [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
 ### PH-16 Guest workspace and lists
@@ -825,3 +821,21 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 23
 - **Status:** ✅ Closed: an installable app is a feature idea, now listed among the [future extensions](requirements/functional-requirements.md#future-extensions-ideas-not-committed) next to offline use ([ADR 0014](decisions/0014-roadmap.md), decision 13)
+
+#### OP-062
+
+**Bring the Claude Code push hook into the toolchain and CI.** The hook is now `.claude/hooks/guard-git-push.ts`: ESLint lints it, Prettier formats it, `tsc` type-checks it and `pnpm test` runs its tests with Node's test runner.
+
+- **Parts:**
+  - **PH-01:** ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
+  - **PH-02:** `ci.yml` runs `pnpm test`, so a broken hook fails CI instead of silently letting pushes through ✅ Done ([#14](https://github.com/luiki-dev/szop/pull/14))
+  - **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+- **Source:** [ADR 0015](decisions/0015-git-push-guard-hook.md), consequences; [ADR 0016](decisions/0016-toolchain-details.md), decision 6
+- **Status:** ✅ Closed: the hook's tests are a Vitest project and the `node:test` exception is gone ([ADR 0019](decisions/0019-api-skeleton-details.md), decision 5; [#18](https://github.com/luiki-dev/szop/pull/18))
+
+#### OP-065
+
+**Set `tsconfigRootDir` in `eslint.config.js`.** When the workspaces add their own `tsconfig.json` files, set `tsconfigRootDir: import.meta.dirname` next to `projectService`, as typescript-eslint's typed-linting guide does. Without it, typescript-estree can fail with "multiple candidate TSConfigRootDirs".
+
+- **Source:** PH-01 final review
+- **Status:** ✅ Closed: set in `eslint.config.js` with the first workspace `tsconfig.json` ([#18](https://github.com/luiki-dev/szop/pull/18))

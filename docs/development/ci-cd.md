@@ -39,7 +39,7 @@ CodeQL's default setup also scans `main` once a week on its own schedule.
 | `changes` | always | Lists the files the PR changes and decides which jobs are needed ([Change detection](#change-detection)) | — |
 | `lint` | code changed | ESLint, then Prettier in check mode | `pnpm lint` and `pnpm format:check` |
 | `typecheck` | code changed | TypeScript, without emitting files | `pnpm typecheck` |
-| `test` | code changed | The tests; today the push hook's tests on Node's test runner | `pnpm test` |
+| `test` | code changed | The tests: every Vitest project (`pnpm test:coverage`), with Vitest's test report and a coverage table in the job summary | `pnpm test` (or `pnpm test:coverage`) |
 | `commits` | every PR, never on `main` | commitlint on every commit of the branch that is not on `main`, from `HEAD^1` to `HEAD^2` (see [The merge ref](#the-merge-ref)) | `pnpm exec commitlint --from origin/main --to HEAD` |
 | `workflows` | a file under `.github/workflows/` or `.github/actions/`, or `.github/dependabot.yml` or `.github/zizmor.yml`, changed | [actionlint](tools/actionlint.md), then [zizmor](tools/zizmor.md) | see their tool pages |
 | `ci-ok` | always, after all the others | Sums up the results ([below](#ci-ok-and-the-required-checks)) | — |
@@ -88,6 +88,7 @@ The job prints the changed files and its two answers (`code=…, workflows=…`)
 4. Reproduce the failure locally with the command in the [jobs table](#the-jobs), fix it, commit and push. Don't rewrite the history of an open PR; a fix is a new commit.
 5. **A red `ci-ok`** never fails on its own account: another job failed or was cancelled. Its log lists every job and its result. When `changes` failed, the jobs that need it show as skipped, not red, so look at `changes` first.
 6. **A job that failed for no reason of yours** (a network error while downloading, a GitHub outage): rerun it with *Re-run jobs → Re-run failed jobs* on the run's page.
+7. **The job summary** (the run's *Summary* page) lists the failed tests of the `test` job and, on a green run, its coverage table (the coverage step is skipped when tests fail).
 
 From the terminal, `gh pr checks` shows the PR's checks and `gh run view --log-failed` prints the logs of the failed steps; see the [GitHub Actions page](tools/github-actions.md#everyday-use).
 

@@ -105,7 +105,21 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
-      - run: pnpm test
+      # Vitest adds its own test report to the job summary when it runs in
+      # GitHub Actions.
+      - run: pnpm test:coverage
+      # Coverage is shown, never gated (ADR 0007, decision 19).
+      - name: Coverage summary
+        run: |
+          {
+            echo "## Coverage"
+            echo
+            jq -r --arg root "$PWD/" '
+              "| File | Statements | Branches | Functions | Lines |",
+              "|---|---:|---:|---:|---:|",
+              (to_entries[] | "| \(.key | ltrimstr($root)) | \(.value.statements.pct)% | \(.value.branches.pct)% | \(.value.functions.pct)% | \(.value.lines.pct)% |")
+            ' coverage/coverage-summary.json
+          } >> "$GITHUB_STEP_SUMMARY"
 
   commits:
     name: commits

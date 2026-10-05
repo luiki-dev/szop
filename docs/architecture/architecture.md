@@ -71,7 +71,7 @@ e2e/              Playwright end-to-end tests (ADR 0007)
 infra/            Terraform root modules (ADR 0008)
 ```
 
-The packages and `e2e/` are pnpm workspaces. `packages/shared` is consumed from its TypeScript source, with no build step of its own. The rest of the tooling is in [ADR 0005](../decisions/0005-development-environment.md).
+The packages and `e2e/` are pnpm workspaces. The packages are named `@szop/api`, `@szop/web` and `@szop/shared`, and imports keep their `.ts` extension ([ADR 0019](../decisions/0019-api-skeleton-details.md), decisions 6 and 7). `packages/shared` is consumed from its TypeScript source, with no build step of its own. The rest of the tooling is in [ADR 0005](../decisions/0005-development-environment.md).
 
 ## 2. Backend (`apps/api`)
 
@@ -86,6 +86,8 @@ Feature modules — `lists`, `items`, `categories`, `catalog`, `units`, `templat
 | `repository.ts` | Persistence | Drizzle queries | business rules |
 
 Dependencies (database client, email sender, clock) are passed in explicitly when the app is assembled. There is no dependency-injection container. Tests pass fakes the same way.
+
+**Assembly.** `buildApp(deps)` in `app.ts` creates Fastify and registers each feature's routes as a plugin under `/api`, passing the services it needs as plugin options; there are no decorators for dependencies ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 1). `server.ts` is the entry point: it reads the configuration, calls `buildApp`, listens, and on SIGINT or SIGTERM closes the app so that requests in flight finish.
 
 ### Request lifecycle
 
@@ -255,8 +257,8 @@ React Hook Form with the Zod resolver and the shared schemas: the browser and th
 
 ### Cross-cutting
 
-- **Configuration:** environment variables, validated with a Zod schema at startup. A missing or invalid setting stops the app immediately with a clear error. In AWS, secrets arrive the same way, injected by Elastic Container Service (ECS) from the secret stores; the configuration is never logged, and pino redacts secret fields.
-- **Logging:** Fastify's built-in structured logger (pino), one JSON line per event on standard output. In AWS, the lines go to CloudWatch Logs.
+- **Configuration:** environment variables, validated with a Zod schema at startup. A missing or invalid setting stops the app immediately with a clear error. Every variable is required, with no defaults; locally, `apps/api/.env` (copied from `.env.example`, git-ignored) is loaded by Node's `--env-file`, and the error names each bad variable, never its value ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 2). In AWS, secrets arrive the same way, injected by Elastic Container Service (ECS) from the secret stores; the configuration is never logged, and pino redacts secret fields.
+- **Logging:** Fastify's built-in structured logger (pino), one JSON line per event on standard output. Fastify logs each request (`incoming request` and `request completed`, with a request ID). In development the output is piped through pino-pretty; the app itself always writes JSON ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 3). In AWS, the lines go to CloudWatch Logs.
 - **Email:** the `EmailSender` interface. A console implementation for development prints emails instead of sending them. In AWS, an SES implementation sends them through the AWS software development kit (SDK), authorized by the task's Identity and Access Management (IAM) role, with no API key.
 - **Testing:** most tests are API tests that send real HTTP requests (Fastify's `inject()`) through all three layers into a real PostgreSQL, with only the edges (email, clock) faked. For that, the app is assembled by one `buildApp(deps)` function that production and tests both call. Pure domain rules get unit and property tests, the frontend gets component tests with the network faked, and each use case gets an end-to-end journey in a real browser. Details in [ADR 0007](../decisions/0007-testing-strategy.md).
 

@@ -13,11 +13,11 @@ Szop is built in phases, grouped into stages. The road below shows how far along
   ║
   ║ Stage 1 · Local foundations
   ║  PH-01   PH-02
-  ╚════●═══════●───────────────────────────────────────────────────────────╮
-                                                                           │
-                              Stage 2 · Walking skeleton, running locally  │
-                             PH-08   PH-07   PH-06   PH-05   PH-04   PH-03 │
-  ╭────────────────────────────○───────○───────○───────○───────○───────○───╯
+  ╚════●═══════●═══════════════════════════════════════════════════════════╗
+                                                                           ║
+                              Stage 2 · Walking skeleton, running locally  ║
+                             PH-08   PH-07   PH-06   PH-05   PH-04   PH-03 ║
+  ╭────────────────────────────○───────○───────○───────○───────○───────●═══╝
   │
   │ Stage 3 · Walking skeleton, deployed and released
   │  PH-09   PH-10   PH-11   PH-12   PH-13
@@ -81,6 +81,8 @@ Szop is built in phases, grouped into stages. The road below shows how far along
 ## Development
 
 Szop is a pnpm monorepo in TypeScript, developed in Windows Subsystem for Linux (WSL). To set up a machine and run the checks, follow the [setup guide](docs/development/setup.md); every tool has its own page in [docs/development/tools](docs/development/tools/).
+
+`pnpm dev` starts the API, after you copy `apps/api/.env.example` to `apps/api/.env`, and `pnpm test` runs every test; see the [testing guide](docs/development/testing.md).
 
 ## Documentation
 

@@ -13,9 +13,9 @@ pnpm is Szop's package manager: it installs the dependencies and runs scripts ac
 
 **`pnpm-workspace.yaml`:**
 
-- `packages`: where the workspace's packages live (`apps/*` and `packages/*`). None exist yet; they arrive with their first real code.
+- `packages`: where the workspace's packages live (`apps/*` and `packages/*`). `apps/api` (`@szop/api`) is the first; `apps/web` arrives in PH-05 and `packages/shared` with the first shared code.
 - `engineStrict: true`: installing with a Node version outside `engines` fails instead of warning (see [Node and nvm](node-and-nvm.md)).
-- `allowBuilds: {}`: the dependencies allowed to run install scripts. Empty means none ([ADR 0012](../../decisions/0012-security-baseline.md), decision 18). When a dependency wants to run a build script, the install fails with `ERR_PNPM_IGNORED_BUILDS`. The owner then decides whether to allow it (`true`) or not (`false`); do not run `pnpm approve-builds` without asking.
+- `allowBuilds`: the dependencies allowed to run install scripts. Nothing is allowed ([ADR 0012](../../decisions/0012-security-baseline.md), decision 18). When a dependency wants to run a build script and is not listed, the install fails with `ERR_PNPM_IGNORED_BUILDS`. The owner then decides for each one whether to allow it (`true`) or not (`false`); do not run `pnpm approve-builds` without asking. The first entry is `esbuild: false`: esbuild is the compiler inside [tsx](tsx.md), and its install script only checks the binary that the optional platform package (`@esbuild/<platform>`) already installs, so denying it breaks nothing and avoids running code from the internet at install time ([ADR 0019](../../decisions/0019-api-skeleton-details.md), decision 11).
 
 **`pnpm-lock.yaml`** records the exact version of every dependency. It is committed and never edited by hand. It also records the pinned pnpm version.
 
@@ -23,14 +23,15 @@ pnpm is Szop's package manager: it installs the dependencies and runs scripts ac
 
 ```bash
 pnpm install              # install everything the lockfile lists
-pnpm add -D -w <pkg>      # add a dev dependency to the workspace root
+pnpm add -Dw <pkg>        # add a dev dependency to the workspace root (a root tool)
+pnpm --filter @szop/api add <pkg>   # add a dependency to one package, here the API
 pnpm <script>             # run a script from package.json, for example pnpm lint
 pnpm exec <bin>           # run a binary installed in the project
-pnpm -r <script>          # once packages exist: run a script in every package
-pnpm --filter <pkg> <script>   # once packages exist: run it in one package
+pnpm -r <script>          # run a script in every package that has it, for example pnpm -r typecheck
+pnpm --filter <pkg> <script>   # run a script in one package
 ```
 
-`-w` is required to add to the workspace root; without it pnpm refuses, so a dependency does not land in the root by accident.
+`-w` (workspace root) is required to add to the root; without it pnpm refuses, so a dependency does not land in the root by accident. `--filter` takes a package's name from its `package.json`: `@szop/api`.
 
 When "Already up to date" is printed, pnpm skips lifecycle scripts and the engine check. To force a full install, run `rm -rf node_modules && pnpm install`.
 

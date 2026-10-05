@@ -119,6 +119,12 @@ A Java analogy, if it helps:
 
 **Fastify's request lifecycle**, in order: `onRequest` → `preParsing` → (body parsed) → `preValidation` → (schema validation) → `preHandler` → **handler** → `preSerialization` → (response serialized) → `onSend` → `onResponse`. `onError` runs if anything throws. Hooks registered inside a plugin apply only to that plugin's routes (encapsulation) — that is how, for example, "all routes in this module require a registered user" can be expressed.
 
+**How Szop's API is put together.** A Fastify *instance* is the app. A *plugin* is a function that receives the instance (and options) and adds routes or hooks to it. *Encapsulation* means that what a plugin adds stays inside it unless the plugin says otherwise. Szop's `buildApp` is a factory: it creates the instance and registers the plugins, one per feature, handing each the services it needs as options. That is how a test gets the same app as production, only with fakes passed in. `inject()` then runs a fake HTTP request through the whole app, with no network involved. The reasons are in [ADR 0019](../decisions/0019-api-skeleton-details.md), decision 1; the tests are described in the [testing guide](../development/testing.md).
+
+**pino, the logger.** Fastify's built-in logger is pino, which writes one JSON object per line for every event, so a log aggregator can search the fields instead of parsing prose. Szop's API logs every request twice, as `incoming request` and `request completed`, both carrying the same request ID, which is how you follow one request through the log. JSON is hard to read in a terminal, so only the `dev` script pipes the output through pino-pretty; the app itself always writes JSON, and so does production ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 3).
+
+**tsx, running TypeScript in development.** In development, `tsx` runs the API's `.ts` files directly, with no compile step, and `tsx watch` restarts the API whenever a file changes. Node 24 can strip types itself, but rejects some TypeScript syntax and has rough edges with workspace packages, which is why Szop uses tsx ([ADR 0005](../decisions/0005-development-environment.md), decision 9). Neither of them checks types: `pnpm typecheck` runs the TypeScript compiler for that. A production build is a later phase ([PH-06](../roadmap.md#ph-06-production-build-and-web-baseline)).
+
 ## 7. Kinds of state in a frontend
 
 "State" is any data that can change while the app runs and that the screen depends on. The key to a clean frontend is knowing **who owns each piece**:
@@ -144,6 +150,8 @@ ItemPatch.parse(body);                         // a runtime check that throws on
 
 TypeScript types vanish at runtime, so they cannot protect the server from a malformed request; Zod checks can. Defining schemas once in `packages/shared` means the form, the API client, the Fastify route and the OpenAPI description all agree by construction.
 
+The API already uses Zod for one job of its own: checking its **configuration**. At startup, `loadConfig` in `apps/api/src/config.ts` validates the environment variables against a Zod schema and returns a typed config object, so `port` is a number from there on. Every variable is required, with no defaults, and a bad or missing one stops startup with a message that names the variable and never shows its value, since a value might be a secret ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 2).
+
 ## 9. Data access: Drizzle and PostgreSQL
 
 - **PostgreSQL** is a relational database: tables, rows, foreign keys between them, transactions that make several changes succeed or fail together.
@@ -162,7 +170,7 @@ TypeScript types vanish at runtime, so they cannot protect the server from a mal
 
 One Git repository holds `apps/web`, `apps/api` and `packages/shared`, plus the end-to-end tests in `e2e/` and the Terraform code in `infra/`. A change to a shared schema, the API route using it and the form using it can land in one commit and be checked together — which is the whole point of TypeScript end to end.
 
-The three packages, and `e2e/`, are **pnpm workspaces**: pnpm links them to each other, so `apps/api` imports `packages/shared` like any installed library, except that it is the live source code in the same repository. The development tooling around the stack (pnpm, TypeScript configuration, tsx, ESLint, Prettier, Docker Compose) is decided in [ADR 0005](../decisions/0005-development-environment.md). The [setup guide](../development/setup.md) installs them, and each tool has its own explanatory page in [`docs/development/tools/`](../development/tools/).
+The three packages, and `e2e/`, are **pnpm workspaces**: pnpm links them to each other, so `apps/api` imports `packages/shared` like any installed library, except that it is the live source code in the same repository. `apps/api` is the first package that exists. Its name is `@szop/api`: the `@szop/` scope cannot clash with a package on the npm registry ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 7). `pnpm -r` runs a script in every package, and Vitest runs every package's tests from the root: it treats each package (and the push hook) as a **project**, today `api` and `hooks`, so one `pnpm test` runs them all, and `pnpm test:coverage` adds the coverage report. How the tests are written and run is in the [testing guide](../development/testing.md); the project layout is [ADR 0019](../decisions/0019-api-skeleton-details.md), decision 5. The development tooling around the stack (pnpm, TypeScript configuration, tsx, ESLint, Prettier, Docker Compose) is decided in [ADR 0005](../decisions/0005-development-environment.md). The [setup guide](../development/setup.md) installs them, and each tool has its own explanatory page in [`docs/development/tools/`](../development/tools/).
 
 The testing tools (Vitest, Testing Library, Mock Service Worker, Playwright, fast-check, StrykerJS) and how the tests are layered are decided in [ADR 0007](../decisions/0007-testing-strategy.md). They get their own pages under `docs/development/tools/` too, next to a testing guide in `docs/development/testing.md`.
 

@@ -10,3 +10,7 @@
 
 # Dependencies installed by pnpm
 node_modules/
+
+# Local configuration (copied from .env.example) and test coverage reports
+.env
+coverage/

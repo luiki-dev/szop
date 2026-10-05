@@ -1,8 +1,7 @@
 // Tests for guard-git-push.ts. Run with: pnpm test
-import { test } from "node:test";
-import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { expect, test } from "vitest";
 import { findViolation } from "./guard-git-push.ts";
 
 const allowed: string[] = [
@@ -45,17 +44,13 @@ const blocked: [command: string, reason: string][] = [
   ["git push -- origin :feat/x", "delete"],
 ];
 
-for (const command of allowed) {
-  test(`allows: ${command}`, () => {
-    assert.equal(findViolation(command), null);
-  });
-}
+test.each(allowed)("allows: %s", (command) => {
+  expect(findViolation(command)).toBeNull();
+});
 
-for (const [command, reason] of blocked) {
-  test(`blocks: ${command}`, () => {
-    assert.match(findViolation(command) ?? "", new RegExp(reason));
-  });
-}
+test.each(blocked)("blocks: %s", (command, reason) => {
+  expect(findViolation(command)).toMatch(reason);
+});
 
 const script = fileURLToPath(new URL("./guard-git-push.ts", import.meta.url));
 const runHook = (command: string) =>
@@ -66,11 +61,11 @@ const runHook = (command: string) =>
 
 test("hook exits 2 with the reason on stderr for a blocked push", () => {
   const result = runHook("git push -uf origin feat/x");
-  assert.equal(result.status, 2);
-  assert.match(result.stderr, /force/);
+  expect(result.status).toBe(2);
+  expect(result.stderr).toMatch(/force/);
 });
 
 test("hook exits 0 for an allowed command", () => {
   const result = runHook("git push -u origin feat/x");
-  assert.equal(result.status, 0);
+  expect(result.status).toBe(0);
 });

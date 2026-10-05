@@ -1,12 +1,10 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
     "erasableSyntaxOnly": true,
     "allowImportingTsExtensions": true,
-    "allowJs": true,
-    "checkJs": true,
     "types": ["node"]
   },
-  "include": ["*.js", "*.ts", ".claude/hooks/**/*.ts"]
+  "include": ["src", "vitest.config.ts"]
 }
