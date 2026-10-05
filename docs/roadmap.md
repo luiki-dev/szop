@@ -94,7 +94,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 | Phase | Status | Spec | Plan | PR |
 |---|---|---|---|---|
-| [PH-03 API skeleton](#ph-03-api-skeleton) | 🚧 In progress | [Spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md) | — | — |
+| [PH-03 API skeleton](#ph-03-api-skeleton) | 🚧 In progress | [Spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md) | [Plan](superpowers/plans/2026-10-05-PH-03-api-skeleton.md) | — |
 | [PH-04 Database](#ph-04-database) | ⬜ Not started | — | — | — |
 | [PH-05 SPA skeleton](#ph-05-spa-skeleton) | ⬜ Not started | — | — | — |
 | [PH-06 Production build and web baseline](#ph-06-production-build-and-web-baseline) | ⬜ Not started | — | — | — |
