@@ -405,13 +405,13 @@ EOF
   - `interface Config { host: string; port: number; logLevel: "fatal" | "error" | "warn" | "info" | "debug" | "trace" | "silent" }` (the `logLevel` type is inferred from the schema's enum)
   - `function loadConfig(env: Record<string, string | undefined>): Config`, which throws an `Error` whose message starts with `Invalid configuration:` and has one line per problem, `  NAME: missing` or `  NAME: <Zod's message>`.
 
-- [ ] **Step 1: Install Zod**
+- [x] **Step 1: Install Zod**
 
 ```bash
 pnpm --filter @szop/api add zod@^4.6.5
 ```
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 `apps/api/src/config.test.ts`:
 
@@ -485,12 +485,12 @@ describe("loadConfig", () => {
 });
 ```
 
-- [ ] **Step 3: Run them and see them fail**
+- [x] **Step 3: Run them and see them fail**
 
 Run: `pnpm test --project api`
 Expected: FAIL, `Failed to load url ./config.ts` (or `Cannot find module`), since `config.ts` does not exist yet.
 
-- [ ] **Step 4: Write `config.ts`**
+- [x] **Step 4: Write `config.ts`**
 
 `apps/api/src/config.ts`:
 
@@ -536,12 +536,12 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
 }
 ```
 
-- [ ] **Step 5: Run the tests and see them pass**
+- [x] **Step 5: Run the tests and see them pass**
 
 Run: `pnpm test`
 Expected: PASS, `Test Files  2 passed (2)`; the `|api|` tests include `names PORT when it is missing`, `rejects PORT="3000.5"`, `rejects LOG_LEVEL="INFO"` and `never puts a value in the error`.
 
-- [ ] **Step 6: Checks and commit**
+- [x] **Step 6: Checks and commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck
