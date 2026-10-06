@@ -34,6 +34,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **ECS** | Elastic Container Service | AWS's service for running containers. Szop's demo runs one ECS task on Fargate. |
 | **EKS** | Elastic Kubernetes Service | AWS's managed Kubernetes. Far more than Szop needs; not used (see ADR 0008). |
 | **ESM** | ECMAScript Modules | The standard JavaScript module system (`import` / `export`). Replaces CommonJS (`require`), the older Node-only format. Szop uses ESM everywhere. |
+| **GHSA** | GitHub Security Advisory | An entry in GitHub's advisory database describing a vulnerability in a package, such as `GHSA-67mh-4wv8-2f99`; `pnpm audit` and Dependabot report them. |
 | **GUI** | Graphical user interface | A program used through windows and buttons rather than typed commands, such as the AWS console. |
 | **HCL** | HashiCorp Configuration Language | The language Terraform configuration is written in. |
 | **HCP** | HashiCorp Cloud Platform | HashiCorp's hosted services; HCP Terraform stores Terraform state and runs Terraform remotely. Szop keeps state in its own S3 bucket instead. |
@@ -128,11 +129,13 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Brotli** | A compression format for web files, smaller than gzip. Szop's build writes Brotli and gzip copies of every file, and the server sends whichever the browser accepts. |
 | **Bundle** | The JavaScript and CSS files a build tool (Vite) produces from the source code for the browser to download. |
 | **Changelog** | A file (`CHANGELOG.md`) listing what changed in each released version. Szop's is written by release-please from the commit messages. |
+| **Checkpoint (PostgreSQL)** | The moment PostgreSQL writes all changed data from memory to disk. `DROP DATABASE` waits for one, so Szop's tests run their drops together and share it (see ADR 0020). |
 | **Clickjacking** | Showing a site inside an invisible frame on another page, so that the user clicks its buttons without knowing. Prevented by the CSP's `frame-ancestors 'none'`. |
 | **CodeQL** | GitHub's code analysis engine: it finds security vulnerabilities and coding errors in the code and in the workflows. Free for public repositories; Szop uses its default setup (see ADR 0010). |
 | **Commitlint** | A tool that checks commit messages against a convention, here Conventional Commits, run by a `commit-msg` git hook. |
 | **Composite action** | A reusable group of GitHub Actions steps kept in the repository (`.github/actions/<name>/action.yml`) and called from workflows like any action. Szop's `setup` action installs pnpm, Node and the dependencies for every CI job. |
 | **Composite foreign key** | A foreign key made of several columns. In Szop, references between workspace-owned tables include `workspace_id`, such as `(workspace_id, category_id) → categories (workspace_id, id)`, so the database refuses a reference into another workspace (see ADR 0012). |
+| **Connection pool** | A set of open database connections that the app lends to queries and takes back, so each query does not pay for opening a new connection. node-postgres's `Pool` is one; Szop's API creates it in `createDatabase`. |
 | **Container / Docker** | A container packages a program with everything it needs and runs it isolated from the rest of the machine. Docker is the most common tool for building and running containers. Szop runs PostgreSQL in one during development. |
 | **Conventional Commits** | A convention for commit messages, `type(scope): description` (`feat(api): add list sharing`), that tells both people and tools what kind of change a commit is. Szop uses it (see ADR 0009). |
 | **Cookie prefix** | A cookie name starting with `__Host-` or `__Secure-`, which the browser accepts only with matching attributes. `__Host-` requires `Secure`, the path `/` and no `Domain`, so no other subdomain can set or overwrite the cookie. |
@@ -188,6 +191,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Monorepo** | One repository holding several packages (here: `apps/web`, `apps/api`, `packages/shared` and the `e2e/` tests, plus the Terraform code in `infra/`). |
 | **Multi-stage build** | A Dockerfile with several stages: one with the full toolchain compiles the app, and the final image copies only the result, staying small. |
 | **Mutation testing** | Changing the code on purpose (a *mutant*, for example `<` flipped to `<=`) and checking that some test fails. A mutant that no test notices shows a gap in the tests. Szop uses StrykerJS for it. |
+| **Named volume** | Storage that Docker keeps apart from any container, so data survives the container's removal. PostgreSQL's data lives in one (`postgres-data` in `compose.yaml`); `docker compose down -v` deletes it. |
 | **Nonce (CSP)** | A random value the server puts in the Content Security Policy and on the inline scripts or styles it allows, new for every response. Szop serves a static `index.html`, so it uses none. |
 | **Open point** | Something still undecided or not yet done that has been left to a later topic or phase. Szop tracks every one in `docs/open-points.md`, with an `OP-` ID (see ADR 0011). |
 | **OpenAPI** | A standard, machine-readable description of a REST API, from which documentation and clients can be generated. |

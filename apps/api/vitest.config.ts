@@ -6,5 +6,7 @@ export default defineProject({
     name: "api",
     environment: "node",
     include: ["src/**/*.test.ts"],
+    // Creates the test databases once per run (src/test/global-setup.ts).
+    globalSetup: ["src/test/global-setup.ts"],
   },
 });

@@ -95,7 +95,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | Phase | Status | Spec | Plan | PR |
 |---|---|---|---|---|
 | [PH-03 API skeleton](#ph-03-api-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md) | [Plan](superpowers/plans/2026-10-05-PH-03-api-skeleton.md) | [#18](https://github.com/luiki-dev/szop/pull/18) |
-| [PH-04 Database](#ph-04-database) | ⬜ Not started | — | — | — |
+| [PH-04 Database](#ph-04-database) | ✅ Done | [Spec](superpowers/specs/2026-10-05-PH-04-database-design.md) | [Plan](superpowers/plans/2026-10-05-PH-04-database.md) | [#20](https://github.com/luiki-dev/szop/pull/20) |
 | [PH-05 SPA skeleton](#ph-05-spa-skeleton) | ⬜ Not started | — | — | — |
 | [PH-06 Production build and web baseline](#ph-06-production-build-and-web-baseline) | ⬜ Not started | — | — | — |
 | [PH-07 First E2E journey](#ph-07-first-e2e-journey) | ⬜ Not started | — | — | — |
@@ -113,9 +113,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-04 Database
 
 - **Goal:** PostgreSQL runs locally in Docker Compose. The API applies its migrations at startup and reports whether the database is reachable and which schema version it holds. Tests run against isolated test databases, locally and in CI.
-- **Delivers:** `compose.yaml` with PostgreSQL and the database's settings in `.env.example`; Drizzle with the first migration, applied at startup ([ADR 0008](decisions/0008-hosting.md), decision 14); a template database per Vitest worker and cleanup between tests ([ADR 0007](decisions/0007-testing-strategy.md), decisions 12 and 13); CI's PostgreSQL service.
+- **Delivers:** `compose.yaml` with PostgreSQL and the database's settings in `.env.example`; Drizzle with the first migration, applied at startup ([ADR 0008](decisions/0008-hosting.md), decision 14); a template database per Vitest worker and cleanup between tests ([ADR 0007](decisions/0007-testing-strategy.md), decisions 12 and 13); CI's PostgreSQL from `compose.yaml`.
 - **Depends on:** —
-- **Owner steps:** none.
+- **Owner steps:** have Docker Desktop running, with its WSL integration turned on.
 - **Expected path:** full.
 - **Open points:** [PH-04](open-points.md#ph-04-database).
 

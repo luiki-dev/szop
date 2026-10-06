@@ -76,81 +76,9 @@ Roadmap entry: [PH-03](roadmap.md#ph-03-api-skeleton).
 
 Roadmap entry: [PH-04](roadmap.md#ph-04-database).
 
-#### OP-005
-
-**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`allowBuilds` in pnpm 12, [ADR 0016](decisions/0016-toolchain-details.md), decision 3) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18).
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
-  - **PH-03:** `apps/api/.env.example` and the `.env` copy step ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** `compose.yaml` and the database's settings in `.env.example`
-- **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
-- **Status:** ⬜ Open
-
-#### OP-006
-
-**Choose the PostgreSQL major version** for `compose.yaml`, matching the newest one RDS offers, so development and the demo run the same major version. It must be **PostgreSQL 15 or newer**, for `ON DELETE SET NULL (column)` on composite foreign keys ([ADR 0012](decisions/0012-security-baseline.md), decision 6).
-
-- **Source:** [ADR 0005](decisions/0005-development-environment.md), decision 4 and consequences; [ADR 0008](decisions/0008-hosting.md), decision 19; [ADR 0012](decisions/0012-security-baseline.md), decision 6
-- **Status:** ⬜ Open
-
-#### OP-011
-
-**Settle how tests are isolated**: the exact `TRUNCATE` mechanism between tests, and the template-database setup per Vitest worker.
-
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 12 and 13
-- **Status:** ⬜ Open
-
-#### OP-012
-
-**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** the first test against the database
-  - **PH-05:** the first component test
-  - **PH-07:** the first E2E journey on both viewports
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
-- **Status:** ⬜ Open
-
-#### OP-013
-
-**Build what the demo runs on**: the Terraform code for `infra/bootstrap`, `infra/base` and `infra/demo`, the multi-stage Dockerfile, serving the SPA with `@fastify/static`, `GET /api/health`, migrations at startup and the SES `EmailSender`. ECR's lifecycle policy must not expire released images (m11): a higher-priority rule selects `v*`-tagged images with a count limit never reached, which shields them from the lower-priority rule keeping only the last few of the rest, since ECR has no "keep" action. Bootstrap's state bucket has versioning, the public-access block and a policy that allows only TLS (C6).
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** `GET /api/health` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** migrations at startup
-  - **PH-06:** serving the SPA with `@fastify/static`
-  - **PH-08:** the multi-stage Dockerfile
-  - **PH-09:** `infra/bootstrap`, with the state bucket's protections
-  - **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy
-  - **PH-12:** `infra/demo`
-  - **PH-18:** the SES `EmailSender`
-- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
-- **Status:** ⬜ Open
-
-#### OP-067
-
-**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
-
-- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
-- **Status:** ⬜ Open
-
-#### OP-068
-
-**Add Dependabot's other ecosystems.** Majors of Node and PostgreSQL change on purpose, together with `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version (audit m13).
-
-- **Parts:**
-  - **PH-04:** `docker-compose` (PostgreSQL in `compose.yaml`), ignoring its major updates
-  - **PH-08:** `docker` (the Node base image), ignoring its major updates
-  - **PH-09:** `terraform` (the AWS provider)
-- **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 18; [Audit, m13](audits/2026-09-29-design-sanity-check.md#process-and-ci); [ADR 0018](decisions/0018-ci-details.md)
-- **Status:** ⬜ Open
-
 ### PH-05 SPA skeleton
 
-Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).\
-Also: [OP-012](#op-012).
+Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).
 
 #### OP-010
 
@@ -164,16 +92,51 @@ Also: [OP-012](#op-012).
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
 - **Status:** ⬜ Open
 
+#### OP-012
+
+**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** the first test against the database ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
+  - **PH-05:** the first component test
+  - **PH-07:** the first E2E journey on both viewports
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
+- **Status:** ⬜ Open
+
+#### OP-067
+
+**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
+
+- **Moved from PH-04:** it does not depend on that phase.
+- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
+- **Status:** ⬜ Open
+
 ### PH-06 Production build and web baseline
 
-Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).\
-Also: [OP-013](#op-013).
+Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 
 #### OP-007
 
 **Decide how the API's production build includes `packages/shared`**, which is consumed from source with no build step of its own.
 
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decision 8
+- **Status:** ⬜ Open
+
+#### OP-013
+
+**Build what the demo runs on**: the Terraform code for `infra/bootstrap`, `infra/base` and `infra/demo`, the multi-stage Dockerfile, serving the SPA with `@fastify/static`, `GET /api/health`, migrations at startup and the SES `EmailSender`. ECR's lifecycle policy must not expire released images (m11): a higher-priority rule selects `v*`-tagged images with a count limit never reached, which shields them from the lower-priority rule keeping only the last few of the rest, since ECR has no "keep" action. Bootstrap's state bucket has versioning, the public-access block and a policy that allows only TLS (C6).
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** `GET /api/health` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** migrations at startup ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
+  - **PH-06:** serving the SPA with `@fastify/static`
+  - **PH-08:** the multi-stage Dockerfile
+  - **PH-09:** `infra/bootstrap`, with the state bucket's protections
+  - **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy
+  - **PH-12:** `infra/demo`
+  - **PH-18:** the SES `EmailSender`
+- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ⬜ Open
 
 #### OP-053
@@ -200,6 +163,13 @@ Also: [OP-013](#op-013).
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 4
 - **Status:** ⬜ Open
 
+#### OP-078
+
+**Keep the migrations folder where the compiled API finds it.** `migrationsFolder` is resolved as `../../drizzle` from the `migrate` module's own location (`apps/api/src/db/migrate.ts`), so the compiled module must keep that relative position to `apps/api/drizzle/`; a bundle into a single `dist/server.js` (esbuild or tsup) would resolve to the wrong folder. `drizzle/meta/_journal.json` must ship too, because `readJournal()` reads it on every `buildApp`. If the journal is missing, `buildApp` (`server.ts`, outside the startup `try`) throws an uncaught exception that is not logged through pino as `startup failed`: PH-06 and PH-08 should test the built output (PH-08's image must copy `drizzle/`), or catch that case.
+
+- **Source:** [ADR 0020](decisions/0020-database-details.md), consequences
+- **Status:** ⬜ Open
+
 ### PH-07 First E2E journey
 
 Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).\
@@ -215,7 +185,7 @@ Also: [OP-010](#op-010), [OP-012](#op-012).
 ### PH-08 Container image
 
 Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).\
-Also: [OP-013](#op-013), [OP-068](#op-068).
+Also: [OP-013](#op-013), [OP-078](#op-078).
 
 #### OP-015
 
@@ -226,19 +196,30 @@ Also: [OP-013](#op-013), [OP-068](#op-068).
 
 #### OP-017
 
-**Decide how the configuration assembles the database connection string** from the password injected by ECS. The connection to RDS uses TLS with full certificate verification, which needs the RDS certificate authority bundle in the image.
+**Connect to RDS with TLS and full certificate verification.** That needs the RDS certificate authority bundle in the image and the pool's TLS settings, with full verification. Nothing is assembled: the five `DATABASE_*` settings stay separate and ECS injects only the password, which the pool takes as a field.
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-08:** the RDS certificate authority bundle in the image
-  - **PH-12:** assembling the connection string from the injected password, with full certificate verification
-- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
+  - **PH-12:** the pool's TLS settings, with full certificate verification
+- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving); [ADR 0020](decisions/0020-database-details.md), decision 3 (the settings stay separate, so no connection string is assembled)
 - **Status:** ⬜ Open
 
 #### OP-032
 
-**Add a CI job that proves the built image starts**: run it next to a PostgreSQL service and call `/api/health`, or run the E2E suite against the image. It covers what the demo check does not require for other PRs, such as Dependabot's bumps of the Node base image or PostgreSQL.
+**Add a CI job that proves the built image starts**: run it next to PostgreSQL from `compose.yaml` and call `/api/health`, or run the E2E suite against the image. It covers what the demo check does not require for other PRs, such as Dependabot's bumps of the Node base image or PostgreSQL.
 
 - **Source:** [Audit, MAJOR-13](audits/2026-09-29-design-sanity-check.md#major-13-roadmap-phases-and-the-definition-of-done-are-not-ready-for-the-roadmap-brainstorm); [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 3
+- **Status:** ⬜ Open
+
+#### OP-068
+
+**Add Dependabot's other ecosystems.** Majors of Node and PostgreSQL change on purpose, together with `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version (audit m13).
+
+- **Parts:**
+  - **PH-04:** `docker-compose` (PostgreSQL in `compose.yaml`), ignoring its major updates ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
+  - **PH-08:** `docker` (the Node base image), ignoring its major updates
+  - **PH-09:** `terraform` (the AWS provider)
+- **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 18; [Audit, m13](audits/2026-09-29-design-sanity-check.md#process-and-ci); [ADR 0018](decisions/0018-ci-details.md)
 - **Status:** ⬜ Open
 
 ## Stage 3: Walking skeleton, deployed and released
@@ -367,7 +348,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 
 #### OP-043
 
-**Make redeploys safe for the single-instance demo**, in the phase that builds the ECS service, the health check and migrations at startup; an ADR records it, refining [ADR 0008](decisions/0008-hosting.md), decisions 14 and 15. ECS starts the new task before stopping the old one by default, so a redeploy (which applies the new commit's `infra/demo`, [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7) migrates the database while the old task still serves traffic and runs its cleanup timer. Directions: a minimum of 0% and a maximum of 100% healthy tasks, so the old task stops first; the app refuses to start, with a clear log message, if the database holds migrations its code does not know or one of its migrations is older than the last one applied (Drizzle's migrator is expected to skip those; confirm it), since switching branches can otherwise skip a migration or run old code on a newer schema; a process-only `/api/health` for the load balancer, with a grace period covering migrations, so a database hiccup does not restart the only task, and a check that includes the database (for example `/api/health/ready`) for `demo-up`'s final wait. The runbook explains the message and how to switch branches: destroy, then spin up again.
+**Make redeploys safe for the single-instance demo**, in the phase that builds the ECS service (PH-12); an ADR records it, refining [ADR 0008](decisions/0008-hosting.md), decisions 14 and 15. ECS starts the new task before stopping the old one by default, so a redeploy (which applies the new commit's `infra/demo`, [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7) migrates the database while the old task still serves traffic and runs its cleanup timer. **Settled in PH-04:** Drizzle's migrator skips a migration older than the last one applied, silently ([`drizzle.md`](development/tools/drizzle.md); [ADR 0020](decisions/0020-database-details.md), consequences); an unreachable database stops startup ([ADR 0020](decisions/0020-database-details.md), decision 11); and the health check stays one combined route, `/api/health`, which includes the database, acceptable with one instance (decision 11; its tuning is [OP-075](#op-075)). **Still open:** a minimum of 0% and a maximum of 100% healthy tasks, so the old task stops first; the app refusing to start, with a clear log message, if the database holds migrations its code does not know or one of its migrations is older than the last one applied (today the health route reports `"unknown"` for an unknown migration and the older one is skipped without a word), since switching branches can otherwise skip a migration or run old code on a newer schema; and the runbook explaining the message and how to switch branches: destroy, then spin up again.
 
 - **Source:** [Audit, MAJOR-9](audits/2026-09-29-design-sanity-check.md#major-9-the-single-instance-guarantee-doesnt-hold-during-a-redeploy-and-branch-redeploys-can-skip-migrations)
 - **Status:** ⬜ Open
@@ -377,6 +358,20 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 **Quieten the health route's request logs.** The load balancer calls `GET /api/health` every few seconds, which would fill CloudWatch with two lines per check; for example, the route's `logLevel` set to `warn`.
 
 - **Source:** [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope)
+- **Status:** ⬜ Open
+
+#### OP-074
+
+**Choose the database role the app uses on RDS.** The master user, or a role with only the privileges the app needs (no `CREATEDB`, no role management), created by a migration or by Terraform. Locally the app and the tests use the superuser `szop`, which the tests need for `CREATE DATABASE`.
+
+- **Source:** [PH-04 spec](superpowers/specs/2026-10-05-PH-04-database-design.md#out-of-scope)
+- **Status:** ⬜ Open
+
+#### OP-075
+
+**Tune the ECS health check and the deployment circuit breaker.** The health check's grace period (long enough for migrations at startup), its interval and thresholds, and the circuit breaker with rollback, so that a deploy whose tasks keep failing is marked failed. `/api/health` includes the database, so a database outage replaces running tasks; acceptable with one instance ([ADR 0020](decisions/0020-database-details.md), decision 11).
+
+- **Source:** [ADR 0020](decisions/0020-database-details.md), decision 11
 - **Status:** ⬜ Open
 
 ### PH-13 Releases
@@ -450,6 +445,13 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
 **Add the JSON error shape and a not-found handler.** The architecture's error shape (`{ "error": { "code", "message" } }`, [architecture, Errors](architecture/architecture.md#errors)) for validation errors, unknown routes and unexpected errors, with `setErrorHandler` and `setNotFoundHandler`, when the first route that can fail arrives; until then unknown routes return Fastify's default 404 body.
 
 - **Source:** [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope)
+- **Status:** ⬜ Open
+
+#### OP-076
+
+**Check in CI that the migrations match the schema.** A step that runs `drizzle-kit generate` (or `check`) and fails if it would write a new migration, so a forgotten `pnpm db:generate` cannot be merged.
+
+- **Source:** [PH-04 spec](superpowers/specs/2026-10-05-PH-04-database-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
 ### PH-16 Guest workspace and lists
@@ -720,6 +722,13 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Source:** [ADR 0016](decisions/0016-toolchain-details.md), decision 4
 - **Status:** ⬜ Open
 
+#### OP-077
+
+**Upgrade to Drizzle 1.0** once it is stable: its migrations folder has a new layout, and drizzle-kit drops the deprecated `@esbuild-kit` packages. Those packages pull in an old esbuild (0.18), which `pnpm audit` reports as the GitHub Security Advisory (GHSA) [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99) (moderate, esbuild 0.24.2 or older): it concerns esbuild's development server, which drizzle-kit never runs, and drizzle-kit is a development dependency, so it is not exploitable here. Dependabot will raise an alert and probably cannot fix it; whether to dismiss the alert or add a `pnpm.overrides` entry is the owner's decision, and the upgrade removes it.
+
+- **Source:** [ADR 0020](decisions/0020-database-details.md), decision 1
+- **Status:** ⬜ Open
+
 ## Closed
 
 #### OP-001
@@ -750,6 +759,24 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decision 26; [ADR 0010](decisions/0010-ci-cd.md), decision 23; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 2
 - **Status:** ✅ Closed: `infra/bootstrap` and the permanent part of `infra/base` are applied in PH-09 and PH-10, the safety net is merged in PH-11, and the real `demo-up` comes with PH-12 ([ADR 0014](decisions/0014-roadmap.md), decision 8)
 
+#### OP-005
+
+**Set up the development environment**: Node pinned in `.nvmrc` and `engines`, pnpm workspaces, strict ESM TypeScript, `compose.yaml`, `.env` and `.env.example`, ESLint and Prettier, husky with lint-staged, VS Code settings, `.gitattributes`, and the tools' entries in `.gitignore` (which already ignores Terraform state and Claude Code's local settings). Write `docs/development/setup.md` and a page per tool in `docs/development/tools/`. Keep pnpm's default of running no dependency install scripts, with the allowlist (`allowBuilds` in pnpm 12, [ADR 0016](decisions/0016-toolchain-details.md), decision 3) as short as possible ([ADR 0012](decisions/0012-security-baseline.md), decision 18).
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
+  - **PH-03:** `apps/api/.env.example` and the `.env` copy step ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** `compose.yaml` and the database's settings in `.env.example` ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
+- **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
+- **Status:** ✅ Closed: the last part, PH-04's, is done ([ADR 0020](decisions/0020-database-details.md), decisions 8 and 9; [#20](https://github.com/luiki-dev/szop/pull/20))
+
+#### OP-006
+
+**Choose the PostgreSQL major version** for `compose.yaml`, matching the newest one RDS offers, so development and the demo run the same major version. It must be **PostgreSQL 15 or newer**, for `ON DELETE SET NULL (column)` on composite foreign keys ([ADR 0012](decisions/0012-security-baseline.md), decision 6).
+
+- **Source:** [ADR 0005](decisions/0005-development-environment.md), decision 4 and consequences; [ADR 0008](decisions/0008-hosting.md), decision 19; [ADR 0012](decisions/0012-security-baseline.md), decision 6
+- **Status:** ✅ Closed: PostgreSQL 18 (18.6), [ADR 0020](decisions/0020-database-details.md), decision 8 ([#20](https://github.com/luiki-dev/szop/pull/20))
+
 #### OP-008
 
 **Give the README a short "Development" section** pointing to `docs/development/`.
@@ -763,6 +790,13 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 - **Source:** [ADR 0009](decisions/0009-git-workflow.md), decision 16 and consequences; [Audit, m9](audits/2026-09-29-design-sanity-check.md#process-and-ci)
 - **Status:** ✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#11](https://github.com/luiki-dev/szop/pull/11))
+
+#### OP-011
+
+**Settle how tests are isolated**: the exact `TRUNCATE` mechanism between tests, and the template-database setup per Vitest worker.
+
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 12 and 13
+- **Status:** ✅ Closed: [ADR 0020](decisions/0020-database-details.md), decisions 7 and 13 ([#20](https://github.com/luiki-dev/szop/pull/20))
 
 #### OP-022
 

@@ -1,5 +1,5 @@
 # Weekly version updates (ADR 0010, decision 18; details in ADR 0018).
-# Later phases add the docker-compose, docker and terraform ecosystems (OP-068).
+# Later phases add the docker and terraform ecosystems (OP-068).
 version: 2
 updates:
   - package-ecosystem: npm
@@ -41,3 +41,23 @@ updates:
     commit-message:
       prefix: ci
       include: scope
+
+  - package-ecosystem: docker-compose
+    # PostgreSQL's image in compose.yaml, which CI uses too.
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      docker-compose:
+        update-types: [minor, patch]
+    # build(deps): …
+    commit-message:
+      prefix: build
+      include: scope
+    ignore:
+      # PostgreSQL's major changes on purpose, together with RDS (audit m13).
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]

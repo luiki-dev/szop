@@ -1,6 +1,6 @@
 # Dependabot
 
-Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for new versions of Szop's npm packages and GitHub Actions and opens pull requests for them (one grouped PR for the minor and patch updates of each ecosystem, and one PR per major update), and it warns about dependencies with known vulnerabilities.
+Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for new versions of Szop's npm packages, GitHub Actions and the PostgreSQL image and opens pull requests for them (one grouped PR for the minor and patch updates of each ecosystem, and one PR per major update), and it warns about dependencies with known vulnerabilities.
 
 ## Why Szop uses it
 
@@ -13,13 +13,14 @@ Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for 
 - `version: 2`: the file format's version.
 - `package-ecosystem: npm` with `directory: /`: the npm packages of the whole workspace, read from the root `package.json` and `pnpm-lock.yaml`.
 - `package-ecosystem: github-actions` with `directories: [/, /.github/actions/setup]`: `/` covers the workflows in `.github/workflows/`; the composite setup action is not scanned by default, so its folder is listed too.
+- `package-ecosystem: docker-compose` with `directory: /`: the images in `compose.yaml`, which today means PostgreSQL's. Its group is `docker-compose`, its messages are `build(deps): …`, and it ignores PostgreSQL's major updates: the major changes on purpose, together with RDS, `compose.yaml` and the [Docker Compose and PostgreSQL](docker-compose.md) page.
 - `schedule: interval: weekly, day: monday`: look for updates once a week, on Monday.
 - `cooldown: default-days: 7`: propose a version only once it is at least 7 days old, so a malicious release is usually found and removed before it is offered. Security updates skip the wait.
-- `groups`: `npm` and `actions`, each with `update-types: [minor, patch]`, put all minor and patch updates of an ecosystem in one PR. A major update matches no group, so it gets a PR of its own.
+- `groups`: `npm`, `actions` and `docker-compose`, each with `update-types: [minor, patch]`, put all minor and patch updates of an ecosystem in one PR. A major update matches no group, so it gets a PR of its own.
 - `commit-message`: `prefix: build` and `prefix-development: build` with `include: scope` give `build(deps): …` for a dependency and `build(deps-dev): …` for a devDependency; for actions, `prefix: ci` gives `ci(deps): …`. Both scopes are on [commitlint](commitlint.md)'s list.
 - `ignore`: major updates of `@types/node` are skipped. Its major version follows Node's, which changes on purpose, together with `.nvmrc` and `engines`.
 
-Later phases add the `docker-compose`, `docker` and `terraform` ecosystems with their own ignore rules ([OP-068](../../open-points.md#op-068)).
+Later phases add the `docker` and `terraform` ecosystems with their own ignore rules ([OP-068](../../open-points.md#op-068)).
 
 **Alerts and security updates** are not in this file: Dependabot alerts (a warning when a dependency has a known vulnerability) and Dependabot security updates (a PR fixing it, without waiting for Monday or the cooldown) are switched on in the repository settings, listed in [GitHub settings](../github-settings.md#security).
 

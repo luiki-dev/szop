@@ -18,6 +18,9 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["apps/*/src/**/*.ts", ".claude/hooks/**/*.ts"],
+      // Test infrastructure, not app code; global-setup.ts would show 0%,
+      // since it runs outside the test workers.
+      exclude: ["apps/*/src/test/**"],
       reporter: ["text", "html", "json-summary"],
     },
   },
