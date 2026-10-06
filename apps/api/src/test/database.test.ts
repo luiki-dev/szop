@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
+import { readJournal } from "../db/schema-version.ts";
 import { truncateAllTables, useTestDatabase } from "./database.ts";
 
 describe("truncateAllTables", () => {
@@ -19,7 +20,7 @@ describe("truncateAllTables", () => {
       const migrations = await db.execute(
         sql`SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations`,
       );
-      expect(migrations.rows).toEqual([{ n: 1 }]);
+      expect(migrations.rows).toEqual([{ n: readJournal().entries.length }]);
     } finally {
       await db.execute(sql`DROP TABLE probe`);
     }

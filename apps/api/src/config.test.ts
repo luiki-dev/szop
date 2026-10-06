@@ -92,8 +92,10 @@ describe("loadConfig", () => {
       PORT: secret,
       LOG_LEVEL: secret,
       DATABASE_PORT: secret,
+      DATABASE_PASSWORD: secret,
     });
-    expect(message).toContain("PORT:");
+    // The newline and indent make this line PORT's own, not DATABASE_PORT's.
+    expect(message).toContain("\n  PORT:");
     expect(message).not.toContain(secret);
   });
 });
