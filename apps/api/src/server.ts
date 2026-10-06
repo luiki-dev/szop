@@ -17,8 +17,12 @@ try {
 // server.ts creates the pool, so server.ts closes it (ADR 0020, decision 12).
 const db = createDatabase(config.database);
 const app = buildApp({ config, db });
-db.$client.on("error", (error) => {
-  app.log.warn(error, "idle database connection lost");
+// Not logged whole: pg-pool attaches the whole client to the error.
+db.$client.on("error", (error: Error & { code?: string }) => {
+  app.log.warn(
+    { code: error.code, reason: error.message },
+    "idle database connection lost",
+  );
 });
 
 // Let requests in flight finish before exiting: on Ctrl+C, on tsx's
