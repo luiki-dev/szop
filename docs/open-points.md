@@ -427,7 +427,7 @@ Roadmap entry: [PH-14](roadmap.md#ph-14-app-shell-and-design-system).
 - How the tray scales to a long list: 40 checked items as chips.
 - Dark mode, which was not drawn.
 
-- **Source:** the owner's design exploration of 2026-10-06, the "Ring tail" artboard on [this canvas](https://claude.ai/artifact/Toj7j2GizWnVV7viL6bmc9) (private), next to the two directions not taken, "Store route" and "Yellow sticker"
+- **Source:** the owner's design exploration of 2026-10-06: [a screenshot of the mockup](ideas/visual-design/ring-tail.png), and the "Ring tail" artboard on [this canvas](https://claude.ai/artifact/Toj7j2GizWnVV7viL6bmc9) (private), next to the two directions not taken, "Store route" and "Yellow sticker"
 - **Status:** ⬜ Open
 
 ### PH-15 Seed catalog, read-only
