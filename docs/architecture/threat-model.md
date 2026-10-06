@@ -62,3 +62,5 @@ STRIDE names six kinds of threat: **S**poofing (pretending to be someone else), 
 - **Rate-limit counters live in memory** and reset when the container restarts (decision 15).
 - **`terraform plan` can run arbitrary code** with the plan role, which is read-only and reads neither secrets nor logs (decision 17).
 - **Claude Code's deny rules and push hook can be worked around** by a command written in another form, such as a subshell or a script ([ADR 0015](../decisions/0015-git-push-guard-hook.md)); they catch mistakes, while the rulesets and the deploy approval are the real boundaries (decision 19).
+- **The health route is public** and tells anyone whether the database is reachable and which migration it holds; neither is data, and the migration's name reveals nothing an attacker can use ([ADR 0020](../decisions/0020-database-details.md), decision 5).
+- **The local database uses well-known credentials** (`szop`), committed in `compose.yaml` and `.env.example`; it holds throwaway data and is bound to `127.0.0.1`, so only the developer's own machine can reach it ([ADR 0020](../decisions/0020-database-details.md), decision 9).
