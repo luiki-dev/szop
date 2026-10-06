@@ -18,7 +18,7 @@ Docker Compose starts the services a project needs from one file; Szop's only se
 - `environment`: `POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_DB`, all `szop`: local-only literals matching `apps/api/.env.example`. The image reads them only when it first initialises an empty volume, so changing them later needs `docker compose down -v`.
 - `ports: "127.0.0.1:5432:5432"`: bound to the loopback address, so only this machine can connect; Docker would otherwise publish the port on every network interface.
 - `volumes: postgres-data:/var/lib/postgresql`: a named volume. PostgreSQL 18 keeps its data in `18/docker` below that folder, so the volume is mounted one level up. It lives inside Docker Desktop's virtual machine, not in WSL or Windows, which gives PostgreSQL a real Linux file system; a bind mount to a Windows path would fail on permissions and be slow.
-- `healthcheck`: runs `pg_isready` every 2 seconds, up to 15 times; the container is `healthy` when it passes. It is what `docker compose up --wait` waits for.
+- `healthcheck`: runs `pg_isready` every 2 seconds; the container is `healthy` when it passes, and turns `unhealthy` after 15 failures in a row. It probes over TCP (`-h 127.0.0.1`), not the default Unix socket: while the image initialises an empty volume, it first runs a temporary server that listens on the socket only, so a socket probe could report healthy before the real server is up. Every CI run starts from an empty volume, so it would meet this every time. It is what `docker compose up --wait` waits for.
 
 ## Everyday use
 

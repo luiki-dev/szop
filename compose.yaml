@@ -20,9 +20,11 @@ services:
     # version, so the volume is mounted one level up.
     volumes:
       - postgres-data:/var/lib/postgresql
-    # What `docker compose up --wait` waits for.
+    # What `docker compose up --wait` waits for. It probes over TCP: while the
+    # image initialises an empty volume, a temporary server listens on the Unix
+    # socket only, and a socket probe would report healthy too early.
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "szop", "-d", "szop"]
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "szop", "-d", "szop"]
       interval: 2s
       timeout: 2s
       retries: 15
