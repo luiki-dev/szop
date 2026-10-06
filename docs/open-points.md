@@ -163,7 +163,7 @@ Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 4
 - **Status:** ⬜ Open
 
-#### OP-077
+#### OP-078
 
 **Keep the migrations folder where the compiled API finds it.** `migrationsFolder` is resolved as `../../drizzle` from the `migrate` module's own location (`apps/api/src/db/migrate.ts`), so the compiled module must keep that relative position to `apps/api/drizzle/`; a bundle into a single `dist/server.js` (esbuild or tsup) would resolve to the wrong folder. `drizzle/meta/_journal.json` must ship too, because `readJournal()` reads it on every `buildApp`. If the journal is missing, `buildApp` (`server.ts`, outside the startup `try`) throws an uncaught exception that is not logged through pino as `startup failed`: PH-06 and PH-08 should test the built output (PH-08's image must copy `drizzle/`), or catch that case.
 
@@ -185,7 +185,7 @@ Also: [OP-010](#op-010), [OP-012](#op-012).
 ### PH-08 Container image
 
 Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).\
-Also: [OP-013](#op-013), [OP-077](#op-077).
+Also: [OP-013](#op-013), [OP-078](#op-078).
 
 #### OP-015
 
@@ -348,7 +348,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 
 #### OP-043
 
-**Make redeploys safe for the single-instance demo**, in the phase that builds the ECS service (PH-12); an ADR records it, refining [ADR 0008](decisions/0008-hosting.md), decisions 14 and 15. ECS starts the new task before stopping the old one by default, so a redeploy (which applies the new commit's `infra/demo`, [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7) migrates the database while the old task still serves traffic and runs its cleanup timer. **Settled in PH-04:** Drizzle's migrator skips a migration older than the last one applied, silently ([`drizzle.md`](development/tools/drizzle.md); [ADR 0020](decisions/0020-database-details.md), consequences); an unreachable database stops startup ([ADR 0020](decisions/0020-database-details.md), decision 11); and the health check stays one combined route, `/api/health`, which includes the database, acceptable with one instance (decision 11; its tuning is [OP-074](#op-074)). **Still open:** a minimum of 0% and a maximum of 100% healthy tasks, so the old task stops first; the app refusing to start, with a clear log message, if the database holds migrations its code does not know or one of its migrations is older than the last one applied (today the health route reports `"unknown"` for an unknown migration and the older one is skipped without a word), since switching branches can otherwise skip a migration or run old code on a newer schema; and the runbook explaining the message and how to switch branches: destroy, then spin up again.
+**Make redeploys safe for the single-instance demo**, in the phase that builds the ECS service (PH-12); an ADR records it, refining [ADR 0008](decisions/0008-hosting.md), decisions 14 and 15. ECS starts the new task before stopping the old one by default, so a redeploy (which applies the new commit's `infra/demo`, [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7) migrates the database while the old task still serves traffic and runs its cleanup timer. **Settled in PH-04:** Drizzle's migrator skips a migration older than the last one applied, silently ([`drizzle.md`](development/tools/drizzle.md); [ADR 0020](decisions/0020-database-details.md), consequences); an unreachable database stops startup ([ADR 0020](decisions/0020-database-details.md), decision 11); and the health check stays one combined route, `/api/health`, which includes the database, acceptable with one instance (decision 11; its tuning is [OP-075](#op-075)). **Still open:** a minimum of 0% and a maximum of 100% healthy tasks, so the old task stops first; the app refusing to start, with a clear log message, if the database holds migrations its code does not know or one of its migrations is older than the last one applied (today the health route reports `"unknown"` for an unknown migration and the older one is skipped without a word), since switching branches can otherwise skip a migration or run old code on a newer schema; and the runbook explaining the message and how to switch branches: destroy, then spin up again.
 
 - **Source:** [Audit, MAJOR-9](audits/2026-09-29-design-sanity-check.md#major-9-the-single-instance-guarantee-doesnt-hold-during-a-redeploy-and-branch-redeploys-can-skip-migrations)
 - **Status:** ⬜ Open
@@ -360,14 +360,14 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 - **Source:** [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
-#### OP-073
+#### OP-074
 
 **Choose the database role the app uses on RDS.** The master user, or a role with only the privileges the app needs (no `CREATEDB`, no role management), created by a migration or by Terraform. Locally the app and the tests use the superuser `szop`, which the tests need for `CREATE DATABASE`.
 
 - **Source:** [PH-04 spec](superpowers/specs/2026-10-05-PH-04-database-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
-#### OP-074
+#### OP-075
 
 **Tune the ECS health check and the deployment circuit breaker.** The health check's grace period (long enough for migrations at startup), its interval and thresholds, and the circuit breaker with rollback, so that a deploy whose tasks keep failing is marked failed. `/api/health` includes the database, so a database outage replaces running tasks; acceptable with one instance ([ADR 0020](decisions/0020-database-details.md), decision 11).
 
@@ -447,7 +447,7 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
 - **Source:** [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
-#### OP-075
+#### OP-076
 
 **Check in CI that the migrations match the schema.** A step that runs `drizzle-kit generate` (or `check`) and fails if it would write a new migration, so a forgotten `pnpm db:generate` cannot be merged.
 
@@ -722,7 +722,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Source:** [ADR 0016](decisions/0016-toolchain-details.md), decision 4
 - **Status:** ⬜ Open
 
-#### OP-076
+#### OP-077
 
 **Upgrade to Drizzle 1.0** once it is stable: its migrations folder has a new layout, and drizzle-kit drops the deprecated `@esbuild-kit` packages. Those packages pull in an old esbuild (0.18), which `pnpm audit` reports as the GitHub Security Advisory (GHSA) [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99) (moderate, esbuild 0.24.2 or older): it concerns esbuild's development server, which drizzle-kit never runs, and drizzle-kit is a development dependency, so it is not exploitable here. Dependabot will raise an alert and probably cannot fix it; whether to dismiss the alert or add a `pnpm.overrides` entry is the owner's decision, and the upgrade removes it.
 

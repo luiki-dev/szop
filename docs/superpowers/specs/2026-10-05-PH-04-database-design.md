@@ -46,10 +46,10 @@ The phase is done when:
 
 - **Domain tables**: the first arrives with the phase that needs it (PH-15 or PH-16), through a normal `drizzle-kit generate`.
 - **The access layer and composite workspace keys** ([OP-054](../../open-points.md#op-054)): the first data phase.
-- **A CI check that the migrations match `schema.ts`**: pointless without a table; new **OP-075** (PH-15).
-- **Which database role the app uses on RDS**, the master user or a least-privilege role: new **OP-073** (PH-12).
-- **The ECS health check's tuning** (grace period, thresholds, the deployment circuit breaker with rollback): new **OP-074** (PH-12).
-- **Upgrading to Drizzle 1.0** once it is stable, with its new migrations folder format: new **OP-076** (Candidates).
+- **A CI check that the migrations match `schema.ts`**: pointless without a table; new **OP-076** (PH-15).
+- **Which database role the app uses on RDS**, the master user or a least-privilege role: new **OP-074** (PH-12).
+- **The ECS health check's tuning** (grace period, thresholds, the deployment circuit breaker with rollback): new **OP-075** (PH-12).
+- **Upgrading to Drizzle 1.0** once it is stable, with its new migrations folder format: new **OP-077** (Candidates).
 - **A production build** and the migrations folder's place in it: PH-06 and PH-08 (see [To verify during implementation](#to-verify-during-implementation)).
 
 ## Decisions taken in the brainstorm
@@ -58,7 +58,7 @@ Each refines an accepted ADR or fills a detail it left open; ADR 0020 records th
 
 | # | Topic | Options considered | Decision and reasoning |
 |---|-------|--------------------|------------------------|
-| 1 | Drizzle's release line | 0.45 (stable, `latest`); 1.0 release candidate | **0.45.3.** It is what tutorials and Better Auth's Drizzle adapter target today. Moving to 1.0 later is a deliberate step, like a major update, which Dependabot proposes and which changes the migrations folder's layout (OP-076). The release candidate has the future API and format, but would put pre-release software, with documentation still moving, at the base of the project. |
+| 1 | Drizzle's release line | 0.45 (stable, `latest`); 1.0 release candidate | **0.45.3.** It is what tutorials and Better Auth's Drizzle adapter target today. Moving to 1.0 later is a deliberate step, like a major update, which Dependabot proposes and which changes the migrations folder's layout (OP-077). The release candidate has the future API and format, but would put pre-release software, with documentation still moving, at the base of the project. |
 | 2 | Driver | node-postgres (`pg`); postgres.js | **node-postgres**, the most widely used PostgreSQL client for Node and the one Better Auth's documentation shows. Its optional native binding is not installed, so it needs no install script. |
 | 3 | Shape of the database settings | Separate variables; `DATABASE_URL` without the password plus `DATABASE_PASSWORD`; one `DATABASE_URL` with the password | **Separate variables:** `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`. On AWS, Terraform sets the first four as plain values and ECS injects the password from one key of the RDS-managed secret ([ADR 0008](../../decisions/0008-hosting.md), decision 22), so nothing is assembled. The pool takes the fields directly, so no password needs URL escaping (a generated one can hold `@`, `/` or `:`), and the tests swap only the name. A URL is the more familiar style, but would need parsing in the tests, and a URL holding the password would have to be assembled at container start. |
 | 4 | The first migration | An empty custom migration; a minimal real object (an extension, a small table); no migration yet | **An empty custom migration, `0000_init`**, holding only a comment saying why it exists. It exercises the whole pipeline (journal, the record of applied migrations, startup, the test template, the version in the health check) without deciding now what a later phase should. A table kept only for tests would be dead schema in production; no migration would leave migrations at startup unproven. |
@@ -68,7 +68,7 @@ Each refines an accepted ADR or fills a detail it left open; ADR 0020 records th
 | 8 | Keeping PostgreSQL running | `restart: unless-stopped`; the tests start the container; manual | **`restart: unless-stopped`.** After one `docker compose up -d`, the container comes back whenever Docker Desktop starts, until it is stopped by hand. The tests still stop with a clear message when it is not running ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 12). Starting it from the tests would hide the database's lifecycle behind `pnpm test`, which ADR 0007 chose against when it rejected Testcontainers. |
 | 9 | Credentials in `compose.yaml` | Literals; interpolated from `apps/api/.env` | **Literals** (`szop`), matching `apps/api/.env.example`. They guard a throwaway database reachable only from `127.0.0.1`, and are committed in `.env.example` anyway; real secrets exist only on AWS, where neither file is used. Interpolation would need `--env-file apps/api/.env` on every `docker compose` command (or a second `.env`), a `.env` in CI, and would still not change the password of an existing volume, since the image reads them only when it initialises an empty one. |
 | 10 | Where tests get the server's address | `apps/api/.env`; constants in the test code | **`apps/api/.env`**, parsed and validated by the same `loadConfig`; only the database name is replaced. The credentials then live in two committed places side by side, `compose.yaml` and `.env.example`, instead of three. CI copies `.env.example` to `.env`, the same step `setup.md` gives. |
-| 11 | An unreachable database at startup | Fail fast: log and exit; start anyway and retry the migrations in the background | **Fail fast.** On ECS, a stopped task is replaced, with an increasing delay for tasks that keep failing, and during a deployment the circuit breaker marks it failed; once the database is back, the next task starts. Starting anyway gives the same loop, slower and less visible (the load balancer fails the health check, then ECS replaces the task), and needs code for a retry and a "migrations pending" state. On the demo the realistic causes are mistakes (a wrong host or password, a missing security group rule), where a clear log line helps most. That a database blip replaces a running task through the combined health check is acceptable with one instance; separate liveness and readiness checks belong to systems with many (OP-074). |
+| 11 | An unreachable database at startup | Fail fast: log and exit; start anyway and retry the migrations in the background | **Fail fast.** On ECS, a stopped task is replaced, with an increasing delay for tasks that keep failing, and during a deployment the circuit breaker marks it failed; once the database is back, the next task starts. Starting anyway gives the same loop, slower and less visible (the load balancer fails the health check, then ECS replaces the task), and needs code for a retry and a "migrations pending" state. On the demo the realistic causes are mistakes (a wrong host or password, a missing security group rule), where a clear log line helps most. That a database blip replaces a running task through the combined health check is acceptable with one instance; separate liveness and readiness checks belong to systems with many (OP-075). |
 | 12 | Who closes the pool | The code that creates it; `buildApp` on `app.close()` | **The code that creates it:** `server.ts` in production, `useTestDatabase()` in tests. If `buildApp` closed it, tests building a fresh app per test would close the worker's shared pool. |
 
 ## Design
@@ -112,7 +112,7 @@ volumes:
 
 - **The version** answers [OP-006](../../open-points.md#op-006): 18 is the newest major version on RDS (PostgreSQL 19 is not offered yet), and 18.6 its newest minor. The minor is pinned so the image is reproducible; Dependabot proposes minor updates and ignores majors (see [Tooling changes](#tooling-changes)).
 - **The Debian-based image, not Alpine:** Alpine's musl C library sorts text differently from glibc, which RDS uses, and sorting matters in a shopping list.
-- **`szop` is a superuser** locally, which the tests need for `CREATE DATABASE`. What the app uses on RDS is OP-073.
+- **`szop` is a superuser** locally, which the tests need for `CREATE DATABASE`. What the app uses on RDS is OP-074.
 - **`psql`** runs in the container: `docker compose exec postgres psql -U szop`, documented in the tool page; no wrapper script.
 - **The owner's step:** Docker Desktop is installed with its WSL integration; it must be running. `setup.md` gains the section it reserved for PH-04.
 
@@ -291,7 +291,7 @@ Docker and Compose are preinstalled on `ubuntu-24.04` runners; the runner is dis
   - closed: [OP-005](../../open-points.md#op-005) (its last part), [OP-006](../../open-points.md#op-006) (18.6), [OP-011](../../open-points.md#op-011);
   - PH-04 parts ✅, each entry moved to its next phase's group: [OP-012](../../open-points.md#op-012) (PH-05), [OP-013](../../open-points.md#op-013) (PH-06), [OP-068](../../open-points.md#op-068) (PH-08);
   - [OP-067](../../open-points.md#op-067) moved to PH-05, since it does not depend on this phase;
-  - new: **OP-073** (PH-12) the app's database role on RDS; **OP-074** (PH-12) the ECS health check's grace period and thresholds, and the deployment circuit breaker with rollback; **OP-075** (PH-15) a CI check that the migrations match `schema.ts`; **OP-076** (Candidates) upgrading to Drizzle 1.0.
+  - new: **OP-074** (PH-12) the app's database role on RDS; **OP-075** (PH-12) the ECS health check's grace period and thresholds, and the deployment circuit breaker with rollback; **OP-076** (PH-15) a CI check that the migrations match `schema.ts`; **OP-077** (Candidates) upgrading to Drizzle 1.0.
 - **Roadmap and README diagram:** the PH-04 row 🚧 with the spec, plan and PR links as they land, ✅ before the merge, in the same commits ([ADR 0017](../../decisions/0017-readme-roadmap-diagram.md)); "Owner steps" becomes "have Docker Desktop running".
 
 ## Tasks
