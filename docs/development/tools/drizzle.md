@@ -24,9 +24,10 @@ Drizzle is a TypeScript object–relational mapper (ORM) that stays close to SQL
 
 Pitfalls:
 
-- **Never edit a migration once it is on `main`.** Its hash is recorded; write a new one instead.
+- **Never edit a migration once it is on `main`.** Drizzle 0.45 records a hash of each applied migration but never compares it, so an edited migration is silently not applied again: databases that ran the old version keep it, and only new ones get the edit. Write a new migration instead.
 - **Drizzle applies only migrations newer than the latest one recorded,** by the `when` timestamp. A migration generated on an older branch and merged after a newer one is skipped silently: regenerate it on top of `main` before merging.
 - **A migration runs inside one transaction** with the others of the same start.
+- **`pnpm audit` reports the GitHub Security Advisory (GHSA) [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99)** (moderate) in esbuild 0.24.2 or older, which drizzle-kit 0.31 reaches through the deprecated `@esbuild-kit` packages. It is harmless here: the advisory concerns esbuild's development server (`serve`), which drizzle-kit never runs, and drizzle-kit is a development dependency. It goes away with Drizzle 1.0 ([OP-076](../../open-points.md#op-076)). Dependabot raises an alert for it; dismissing it or adding an override is the owner's call.
 
 ## Official documentation
 

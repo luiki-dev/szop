@@ -163,6 +163,13 @@ Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 4
 - **Status:** ⬜ Open
 
+#### OP-077
+
+**Keep the migrations folder where the compiled API finds it.** `migrationsFolder` is resolved as `../../drizzle` from the `migrate` module's own location (`apps/api/src/db/migrate.ts`), so the compiled module must keep that relative position to `apps/api/drizzle/`; a bundle into a single `dist/server.js` (esbuild or tsup) would resolve to the wrong folder. `drizzle/meta/_journal.json` must ship too, because `readJournal()` reads it on every `buildApp`. If the journal is missing, `buildApp` (`server.ts`, outside the startup `try`) throws an uncaught exception that is not logged through pino as `startup failed`: PH-06 and PH-08 should test the built output (PH-08's image must copy `drizzle/`), or catch that case.
+
+- **Source:** [ADR 0020](decisions/0020-database-details.md), consequences
+- **Status:** ⬜ Open
+
 ### PH-07 First E2E journey
 
 Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).\
@@ -178,7 +185,7 @@ Also: [OP-010](#op-010), [OP-012](#op-012).
 ### PH-08 Container image
 
 Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).\
-Also: [OP-013](#op-013).
+Also: [OP-013](#op-013), [OP-077](#op-077).
 
 #### OP-015
 
@@ -705,7 +712,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 #### OP-076
 
-**Upgrade to Drizzle 1.0** once it is stable: its migrations folder has a new layout, and drizzle-kit drops the deprecated `@esbuild-kit` packages.
+**Upgrade to Drizzle 1.0** once it is stable: its migrations folder has a new layout, and drizzle-kit drops the deprecated `@esbuild-kit` packages. Those packages pull in an old esbuild (0.18), which `pnpm audit` reports as the GitHub Security Advisory (GHSA) [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99) (moderate, esbuild 0.24.2 or older): it concerns esbuild's development server, which drizzle-kit never runs, and drizzle-kit is a development dependency, so it is not exploitable here. Dependabot will raise an alert and probably cannot fix it; whether to dismiss the alert or add a `pnpm.overrides` entry is the owner's decision, and the upgrade removes it.
 
 - **Source:** [ADR 0020](decisions/0020-database-details.md), decision 1
 - **Status:** ⬜ Open

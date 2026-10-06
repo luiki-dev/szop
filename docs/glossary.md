@@ -34,6 +34,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **ECS** | Elastic Container Service | AWS's service for running containers. Szop's demo runs one ECS task on Fargate. |
 | **EKS** | Elastic Kubernetes Service | AWS's managed Kubernetes. Far more than Szop needs; not used (see ADR 0008). |
 | **ESM** | ECMAScript Modules | The standard JavaScript module system (`import` / `export`). Replaces CommonJS (`require`), the older Node-only format. Szop uses ESM everywhere. |
+| **GHSA** | GitHub Security Advisory | An entry in GitHub's advisory database describing a vulnerability in a package, such as `GHSA-67mh-4wv8-2f99`; `pnpm audit` and Dependabot report them. |
 | **GUI** | Graphical user interface | A program used through windows and buttons rather than typed commands, such as the AWS console. |
 | **HCL** | HashiCorp Configuration Language | The language Terraform configuration is written in. |
 | **HCP** | HashiCorp Cloud Platform | HashiCorp's hosted services; HCP Terraform stores Terraform state and runs Terraform remotely. Szop keeps state in its own S3 bucket instead. |

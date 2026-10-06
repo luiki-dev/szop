@@ -4,7 +4,7 @@ Docker Compose starts the services a project needs from one file; Szop's only se
 
 ## Why Szop uses it
 
-- **Services in containers:** [ADR 0005](../../decisions/0005-development-environment.md), decision 4: tools run in WSL, services in containers. A PostgreSQL installed straight into Ubuntu makes pinning a version and switching between versions awkward; a container is one pinned image, started and thrown away with one command.
+- **Services in containers:** [ADR 0005](../../decisions/0005-development-environment.md), decision 4: tools run in Windows Subsystem for Linux (WSL), services in containers. A PostgreSQL installed straight into Ubuntu makes pinning a version and switching between versions awkward; a container is one pinned image, started and thrown away with one command.
 - **The same major version as RDS** (Relational Database Service, AWS's managed database): [ADR 0008](../../decisions/0008-hosting.md), decision 19. Development and tests then meet the database behaviour production will have.
 - **CI uses this file too,** rather than a separate service container in the workflow, so there is one place that pins the version ([ADR 0020](../../decisions/0020-database-details.md), decision 6).
 
