@@ -2,13 +2,14 @@
 
 How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tool behind the tests has its own page: [Vitest](tools/vitest.md).
 
-The guide grows as the layers arrive: the database in [PH-04](../roadmap.md#ph-04-database), components in [PH-05](../roadmap.md#ph-05-spa-skeleton), end-to-end (E2E) journeys in [PH-07](../roadmap.md#ph-07-first-e2e-journey), and property tests and mutation testing in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
+The guide grows as the layers arrive: components in [PH-05](../roadmap.md#ph-05-spa-skeleton), end-to-end (E2E) journeys in [PH-07](../roadmap.md#ph-07-first-e2e-journey), and property tests and mutation testing in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
 
 ## Contents
 
 - [The layers today](#the-layers-today)
 - [Running the tests](#running-the-tests)
 - [Writing an API test](#writing-an-api-test)
+- [Writing a database test](#writing-a-database-test)
 - [Writing a unit test](#writing-a-unit-test)
 - [Rules](#rules)
 - [Coverage](#coverage)
@@ -18,19 +19,19 @@ The guide grows as the layers arrive: the database in [PH-04](../roadmap.md#ph-0
 | Layer | Where its tests live | What they prove | Vitest project |
 |---|---|---|---|
 | API tests | `apps/api/src/**/*.test.ts`, for example `health/routes.test.ts` | A request through the real app gets the right status, headers and body: they go through `buildApp` and `inject()` | `api` |
+| Database tests | `apps/api/src/**/*.test.ts` that call `useTestDatabase()`, for example `test/database.test.ts` | Queries, migrations and cleanup work against the real PostgreSQL | `api` |
 | Unit tests | next to the code, for example `apps/api/src/config.test.ts` | One function does its job for each kind of input, with no server involved | `api` |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
 
 Layers still to come:
 
-- **Database tests**, with a real database, in [PH-04](../roadmap.md#ph-04-database).
 - **Component tests** for the web app, in [PH-05](../roadmap.md#ph-05-spa-skeleton).
 - **E2E journeys**, a real browser against the whole stack, in [PH-07](../roadmap.md#ph-07-first-e2e-journey).
 - **Property tests and mutation testing** for the domain rules, in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
 
 ## Running the tests
 
-All commands run from the repository root.
+All commands run from the repository root. PostgreSQL must be running first (`docker compose up -d --wait`, see [Docker Compose and PostgreSQL](tools/docker-compose.md)); otherwise the run stops at once with `Cannot reach PostgreSQL … Start it with docker compose up -d.` The tests read the server's address and password from `apps/api/.env`.
 
 ```bash
 pnpm test                       # every project once, the same tests CI runs (CI adds `--coverage`)
@@ -83,6 +84,18 @@ Line by line:
 
 Later phases pass more things in through the same `buildApp(deps)`: a test database, a recording email sender and a controllable clock ([ADR 0007](../decisions/0007-testing-strategy.md), decision 14). Only the fakes differ from production, never the wiring.
 
+## Writing a database test
+
+A database test runs against a real PostgreSQL, so a query, a migration or a cleanup is proven the way production runs it ([ADR 0007](../decisions/0007-testing-strategy.md), decisions 12 and 13).
+
+- **The databases.** Once per run, before any test, `globalSetup` (`apps/api/src/test/global-setup.ts`) drops and recreates `szop_test_template`, migrates it with the same `runMigrations` as production, and copies it to `szop_test_1`, `szop_test_2` and so on, one per possible worker. That takes about 0.6 s on 16 CPUs. Each Vitest worker uses its own copy, so test files run in parallel without touching each other's rows.
+- **`useTestDatabase()` at the top of the file**, then `database.db` inside the tests. Pass it on to the app with `buildApp({ config, db })`.
+- **Empty tables, before each test.** Every table of the `public` schema is emptied before each test (`TRUNCATE … RESTART IDENTITY CASCADE`), so a test starts clean even if the previous one crashed. Drizzle's own record of applied migrations lives in another schema and is kept.
+- **A test that creates its own table drops it** in `finally`, as `test/database.test.ts` does, so the table does not leak into the next file that uses the same worker's database.
+- **A test that creates its own `Database` closes it** with `db.$client.end()`.
+- **Inspecting after a failure.** Nothing is dropped when a run ends, so the databases stay until the next run: `docker compose exec postgres psql -U szop -d szop_test_1`.
+- **The development database `szop` is never touched.** Tests only connect to `postgres` (to create the others) and to `szop_test_*`.
+
 ## Writing a unit test
 
 A unit test lives next to the code it tests and has the same name with `.test.ts`: `config.ts` and `config.test.ts`.
@@ -117,4 +130,5 @@ Coverage tells you which lines the tests ran. It is **measured, never gated**: n
 - **The terminal table** has one row per file and these columns: `% Stmts` (statements run), `% Branch` (the sides of `if`s and other decisions taken), `% Funcs` (functions called) and `% Lines` (lines run), then `Uncovered Line #s`, the line numbers no test reached.
 - **Files no test loads show at 0%.** The root `vitest.config.ts` lists the folders to measure, so `server.ts`, which no test imports, appears at 0% instead of silently missing. That is the honest picture of an entry point checked by hand.
 - **Every file gets a row in the terminal table**, fully covered ones included. Vitest hides fully covered files only when it detects that an AI agent is running it, so the table may look shorter in an agent's output. The same numbers are in `coverage/index.html`, which you can click through down to the line, and in CI's table.
+- **The test helpers are excluded.** The files in `apps/*/src/test/` are test infrastructure, not app code, so they get no row. `global-setup.ts` would show 0% anyway, since it runs outside the test workers.
 - **CI shows the same numbers.** The `test` job runs `pnpm test:coverage` and writes a table of every file to the job's summary ([CI/CD](ci-cd.md)).
