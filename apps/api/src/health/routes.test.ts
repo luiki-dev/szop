@@ -3,7 +3,12 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
 import type { Config } from "../config.ts";
 
-const config: Config = { host: "127.0.0.1", port: 3000, logLevel: "silent" };
+const config: Config = {
+  host: "127.0.0.1",
+  port: 3000,
+  logLevel: "silent",
+  database: { host: "", port: 1, name: "", user: "", password: "" },
+};
 
 describe("GET /api/health", () => {
   let app: FastifyInstance;
