@@ -98,7 +98,7 @@ Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** the first test against the database ✅ Done ([feat/ph-04-database](https://github.com/luiki-dev/szop/tree/feat/ph-04-database))
+  - **PH-04:** the first test against the database ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
   - **PH-05:** the first component test
   - **PH-07:** the first E2E journey on both viewports
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
@@ -129,7 +129,7 @@ Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-03:** `GET /api/health` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** migrations at startup ✅ Done ([feat/ph-04-database](https://github.com/luiki-dev/szop/tree/feat/ph-04-database))
+  - **PH-04:** migrations at startup ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
   - **PH-06:** serving the SPA with `@fastify/static`
   - **PH-08:** the multi-stage Dockerfile
   - **PH-09:** `infra/bootstrap`, with the state bucket's protections
@@ -216,7 +216,7 @@ Also: [OP-013](#op-013), [OP-077](#op-077).
 **Add Dependabot's other ecosystems.** Majors of Node and PostgreSQL change on purpose, together with `.nvmrc`, `engines`, the Dockerfile, `compose.yaml` and the RDS version (audit m13).
 
 - **Parts:**
-  - **PH-04:** `docker-compose` (PostgreSQL in `compose.yaml`), ignoring its major updates ✅ Done ([feat/ph-04-database](https://github.com/luiki-dev/szop/tree/feat/ph-04-database))
+  - **PH-04:** `docker-compose` (PostgreSQL in `compose.yaml`), ignoring its major updates ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
   - **PH-08:** `docker` (the Node base image), ignoring its major updates
   - **PH-09:** `terraform` (the AWS provider)
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 18; [Audit, m13](audits/2026-09-29-design-sanity-check.md#process-and-ci); [ADR 0018](decisions/0018-ci-details.md)
@@ -754,16 +754,16 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-01:** everything except `compose.yaml` and the `.env` files ✅ Done ([#11](https://github.com/luiki-dev/szop/pull/11))
   - **PH-03:** `apps/api/.env.example` and the `.env` copy step ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** `compose.yaml` and the database's settings in `.env.example` ✅ Done ([feat/ph-04-database](https://github.com/luiki-dev/szop/tree/feat/ph-04-database))
+  - **PH-04:** `compose.yaml` and the database's settings in `.env.example` ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decisions 3–15 and consequences; [ADR 0012](decisions/0012-security-baseline.md), decision 18
-- **Status:** ✅ Closed: the last part, PH-04's, is done ([ADR 0020](decisions/0020-database-details.md), decisions 8 and 9; [feat/ph-04-database](https://github.com/luiki-dev/szop/tree/feat/ph-04-database))
+- **Status:** ✅ Closed: the last part, PH-04's, is done ([ADR 0020](decisions/0020-database-details.md), decisions 8 and 9; [#20](https://github.com/luiki-dev/szop/pull/20))
 
 #### OP-006
 
 **Choose the PostgreSQL major version** for `compose.yaml`, matching the newest one RDS offers, so development and the demo run the same major version. It must be **PostgreSQL 15 or newer**, for `ON DELETE SET NULL (column)` on composite foreign keys ([ADR 0012](decisions/0012-security-baseline.md), decision 6).
 
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decision 4 and consequences; [ADR 0008](decisions/0008-hosting.md), decision 19; [ADR 0012](decisions/0012-security-baseline.md), decision 6
-- **Status:** ✅ Closed: PostgreSQL 18 (18.6), [ADR 0020](decisions/0020-database-details.md), decision 8 ([feat/ph-04-database](https://github.com/luiki-dev/szop/tree/feat/ph-04-database))
+- **Status:** ✅ Closed: PostgreSQL 18 (18.6), [ADR 0020](decisions/0020-database-details.md), decision 8 ([#20](https://github.com/luiki-dev/szop/pull/20))
 
 #### OP-008
 
@@ -784,7 +784,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Settle how tests are isolated**: the exact `TRUNCATE` mechanism between tests, and the template-database setup per Vitest worker.
 
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 12 and 13
-- **Status:** ✅ Closed: [ADR 0020](decisions/0020-database-details.md), decisions 7 and 13 ([feat/ph-04-database](https://github.com/luiki-dev/szop/tree/feat/ph-04-database))
+- **Status:** ✅ Closed: [ADR 0020](decisions/0020-database-details.md), decisions 7 and 13 ([#20](https://github.com/luiki-dev/szop/pull/20))
 
 #### OP-022
 
