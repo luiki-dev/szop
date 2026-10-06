@@ -1,0 +1,4 @@
+-- The first migration, empty on purpose: it proves the pipeline (the journal,
+-- Drizzle's record of applied migrations, the run at startup, the test
+-- template and the schema version in GET /api/health) before the first table
+-- exists. Tables arrive with `pnpm db:generate` (ADR 0020).
