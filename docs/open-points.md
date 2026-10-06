@@ -413,6 +413,18 @@ Roadmap entry: [PH-14](roadmap.md#ph-14-app-shell-and-design-system).
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 7–17 and 19
 - **Status:** ⬜ Open
 
+#### OP-073
+
+**Brainstorm the "Ring tail" redesign of the list screen** before the design system is built, then keep, adjust or drop it. An alternative look the owner liked in a design exploration: a fur-gray page (`#CBD0D6`) with white rounded category cards, Gabarito instead of Figtree, the raccoon mark in the header, and a progress bar drawn as a ringed raccoon tail that narrows to its tip and fills one ring per checked item. Checked items leave the list and drop as chips into a dark "haul" tray at the bottom (`#1F2937`), which shows the amount in the basket and holds the add bar; tapping a chip puts the item back. If it is kept, a new ADR supersedes the affected decisions of [ADR 0013](decisions/0013-visual-design.md) (the look, the color tokens, the font) and [visual-design.md](architecture/visual-design.md) changes with it. To settle:
+
+- The haul tray replaces the unchecked/checked split of [ORD-1](requirements/functional-requirements.md#ord-1) and makes the "hide checked items" toggle of [ORD-3](requirements/functional-requirements.md#ord-3) redundant, so the requirements change too.
+- The tray shows the basket out of the whole list, not the remaining amount that [ITM-8](requirements/functional-requirements.md#itm-8) asks for.
+- How the tray scales to a long list: 40 checked items as chips.
+- Dark mode, which was not drawn.
+
+- **Source:** the owner's design exploration of 2026-10-06: [a screenshot of the mockup](ideas/visual-design/ring-tail.png), and the "Ring tail" artboard on [this canvas](https://claude.ai/artifact/Toj7j2GizWnVV7viL6bmc9) (private), next to the two directions not taken, "Store route" and "Yellow sticker"
+- **Status:** ⬜ Open
+
 ### PH-15 Seed catalog, read-only
 
 Roadmap entry: [PH-15](roadmap.md#ph-15-seed-catalog-read-only).\
