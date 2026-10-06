@@ -2,12 +2,12 @@
 
 - **Status:** ✅ Accepted
 - **Date:** 2026-10-05
-- **Refines:** [ADR 0010](0010-ci-cd.md), decision 7 (PostgreSQL in the test job comes from `compose.yaml`, not a service container; see decision 6)
+- **Refines:** [ADR 0007](0007-testing-strategy.md), decision 12 (in CI, PostgreSQL comes from `compose.yaml`, not a service container; see decision 6); [ADR 0010](0010-ci-cd.md), decision 7 (PostgreSQL in the test job comes from `compose.yaml`, not a service container; see decision 6)
 - **Completes:** [ADR 0005](0005-development-environment.md), decision 4 (the version and the Compose service; see decisions 8 and 9); [ADR 0007](0007-testing-strategy.md), decisions 12 and 13 (how test databases are made and emptied; see decisions 7, 10 and 13); [ADR 0008](0008-hosting.md), decisions 14, 15 and 19, and its consequence on the database settings (see decisions 3, 5, 8 and 11)
 
 ## Context
 
-[PH-04](../roadmap.md#ph-04-database) brought the database. [ADR 0005](0005-development-environment.md), [ADR 0007](0007-testing-strategy.md), [ADR 0008](0008-hosting.md) and [ADR 0010](0010-ci-cd.md) set its direction; its brainstorm, the [spec](../superpowers/specs/2026-10-05-PH-04-database-design.md) and a prototype of the whole phase settled the details. Decisions 1 to 12 were taken in the brainstorm; decisions 13 to 15 came up while building, from measuring the test databases (13), from what a dropped idle connection does to the process (14) and from the generated files and test helpers meeting the formatter and the coverage report (15). Each refines an accepted ADR or fills a detail it left open. [OP-006](../open-points.md#op-006) is answered by decision 8: PostgreSQL 18 is the newest major version on RDS (18.6 its newest minor, on 2026-10-05).
+[PH-04](../roadmap.md#ph-04-database) brought the database. [ADR 0005](0005-development-environment.md), [ADR 0007](0007-testing-strategy.md), [ADR 0008](0008-hosting.md) and [ADR 0010](0010-ci-cd.md) set its direction; its brainstorm, the [spec](../superpowers/specs/2026-10-05-PH-04-database-design.md) and a prototype of the whole phase settled the details. Decisions 1 to 12 were taken in the brainstorm; decisions 13 to 15 came from the prototype of the whole phase, made while planning (the plan's findings: concurrent `DROP DATABASE`, the pool's error listener, `.prettierignore` and the coverage exclusion). The listener's log shape in decision 14 was refined during implementation, at the owner's request. Each refines an accepted ADR or fills a detail it left open. [OP-006](../open-points.md#op-006) is answered by decision 8: PostgreSQL 18 is the newest major version on RDS (18.6 its newest minor, on 2026-10-05).
 
 ## Decisions
 

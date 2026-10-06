@@ -189,17 +189,17 @@ Also: [OP-013](#op-013).
 
 #### OP-017
 
-**Decide how the configuration assembles the database connection string** from the password injected by ECS. The connection to RDS uses TLS with full certificate verification, which needs the RDS certificate authority bundle in the image.
+**Connect to RDS with TLS and full certificate verification.** That needs the RDS certificate authority bundle in the image and the pool's TLS settings, with full verification. Nothing is assembled: the five `DATABASE_*` settings stay separate and ECS injects only the password, which the pool takes as a field.
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-08:** the RDS certificate authority bundle in the image
-  - **PH-12:** assembling the connection string from the injected password, with full certificate verification
-- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
+  - **PH-12:** the pool's TLS settings, with full certificate verification
+- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving); [ADR 0020](decisions/0020-database-details.md), decision 3 (the settings stay separate, so no connection string is assembled)
 - **Status:** ⬜ Open
 
 #### OP-032
 
-**Add a CI job that proves the built image starts**: run it next to a PostgreSQL service and call `/api/health`, or run the E2E suite against the image. It covers what the demo check does not require for other PRs, such as Dependabot's bumps of the Node base image or PostgreSQL.
+**Add a CI job that proves the built image starts**: run it next to PostgreSQL from `compose.yaml` and call `/api/health`, or run the E2E suite against the image. It covers what the demo check does not require for other PRs, such as Dependabot's bumps of the Node base image or PostgreSQL.
 
 - **Source:** [Audit, MAJOR-13](audits/2026-09-29-design-sanity-check.md#major-13-roadmap-phases-and-the-definition-of-done-are-not-ready-for-the-roadmap-brainstorm); [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 3
 - **Status:** ⬜ Open
@@ -341,7 +341,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 
 #### OP-043
 
-**Make redeploys safe for the single-instance demo**, in the phase that builds the ECS service, the health check and migrations at startup; an ADR records it, refining [ADR 0008](decisions/0008-hosting.md), decisions 14 and 15. ECS starts the new task before stopping the old one by default, so a redeploy (which applies the new commit's `infra/demo`, [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7) migrates the database while the old task still serves traffic and runs its cleanup timer. Directions: a minimum of 0% and a maximum of 100% healthy tasks, so the old task stops first; the app refuses to start, with a clear log message, if the database holds migrations its code does not know or one of its migrations is older than the last one applied (Drizzle's migrator is expected to skip those; confirm it), since switching branches can otherwise skip a migration or run old code on a newer schema; a process-only `/api/health` for the load balancer, with a grace period covering migrations, so a database hiccup does not restart the only task, and a check that includes the database (for example `/api/health/ready`) for `demo-up`'s final wait. The runbook explains the message and how to switch branches: destroy, then spin up again.
+**Make redeploys safe for the single-instance demo**, in the phase that builds the ECS service (PH-12); an ADR records it, refining [ADR 0008](decisions/0008-hosting.md), decisions 14 and 15. ECS starts the new task before stopping the old one by default, so a redeploy (which applies the new commit's `infra/demo`, [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7) migrates the database while the old task still serves traffic and runs its cleanup timer. **Settled in PH-04:** Drizzle's migrator skips a migration older than the last one applied, silently ([`drizzle.md`](development/tools/drizzle.md); [ADR 0020](decisions/0020-database-details.md), consequences); an unreachable database stops startup ([ADR 0020](decisions/0020-database-details.md), decision 11); and the health check stays one combined route, `/api/health`, which includes the database, acceptable with one instance (decision 11; its tuning is [OP-074](#op-074)). **Still open:** a minimum of 0% and a maximum of 100% healthy tasks, so the old task stops first; the app refusing to start, with a clear log message, if the database holds migrations its code does not know or one of its migrations is older than the last one applied (today the health route reports `"unknown"` for an unknown migration and the older one is skipped without a word), since switching branches can otherwise skip a migration or run old code on a newer schema; and the runbook explaining the message and how to switch branches: destroy, then spin up again.
 
 - **Source:** [Audit, MAJOR-9](audits/2026-09-29-design-sanity-check.md#major-9-the-single-instance-guarantee-doesnt-hold-during-a-redeploy-and-branch-redeploys-can-skip-migrations)
 - **Status:** ⬜ Open
