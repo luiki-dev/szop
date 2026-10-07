@@ -173,11 +173,11 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 
 #### ORD-1
 
-🎯 [MVP] The list shows unchecked items first, then checked items.
+🎯 [MVP] Checked items leave the list and go to **the haul**, a tray apart from the list that shows what is already in the basket. Putting an item back returns it to the list.
 
 #### ORD-2
 
-🎯 [MVP] Within each of those two parts, items are sorted by the global category order, then alphabetically by name. Uncategorized items come last.
+🎯 [MVP] The list's items are sorted by the global category order, then alphabetically by name. Uncategorized items come last. The haul shows the most recently checked items first.
 
 #### ORD-3
 
@@ -185,11 +185,11 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 
 #### ORD-4
 
-🎯 [MVP] A toggle hides checked items.
+✖️ Dropped by [ADR 0022](../decisions/0022-ring-tail-redesign.md): it was "a toggle hides checked items". Checked items now leave the list for the haul ([ORD-1](#ord-1)), so there is nothing to hide.
 
 #### ORD-5
 
-🎯 [MVP] Each list has a "sort by category" setting, on by default. When it is off, items appear in the order they were added, and the unchecked/checked split ([ORD-1](#ord-1)) still applies. The owner and editors can change the setting.
+🎯 [MVP] Each list has a "sort by category" setting, on by default. When it is off, items appear in the order they were added, and checked items still go to the haul ([ORD-1](#ord-1)). The owner and editors can change the setting.
 
 ### Categories (CAT)
 
@@ -346,7 +346,7 @@ The user opens a list and types "mil". They pick "Milk", which is added with cat
 
 #### UC-3 Shop in a store
 
-The user walks the store in category order, checking items off. Checked items move to the checked part of the list. They hide checked items to see only what is left. The totals show the spent and remaining amounts.
+The user walks the store in category order, checking items off. Checked items drop into the haul, so the list shows only what is left. The haul shows what is in the basket, how many items are done and what is left to spend.
 
 #### UC-4 Reuse a weekly list
 

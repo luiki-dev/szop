@@ -346,7 +346,7 @@ git commit -m "docs(design): describe the Ring tail look and the haul"
 **Interfaces:**
 - Consumes: ADR 0022 (Task 1); the anchor `#the-list-and-the-haul` (Task 3); OP-080 (written in Task 5, linked here: the link resolves once Task 5 lands, and the final pass checks it).
 
-- [ ] **Step 1: The requirements**
+- [x] **Step 1: The requirements**
 
 In `docs/requirements/functional-requirements.md`, the bodies under the headings (the headings stay):
 
@@ -358,7 +358,7 @@ In `docs/requirements/functional-requirements.md`, the bodies under the headings
 
 Then check whether the document lists MVP requirements elsewhere (`grep -n "ORD-4\|ord-4" docs/requirements/functional-requirements.md`): only the ORD-4 heading and its own body should remain.
 
-- [ ] **Step 2: The architecture**
+- [x] **Step 2: The architecture**
 
 In `docs/architecture/architecture.md`:
 
@@ -366,18 +366,18 @@ In `docs/architecture/architecture.md`:
 - The **Assets** bullet: "the Figtree font (`@fontsource-variable/figtree`)" becomes "the Gabarito font (`@fontsource-variable/gabarito`)".
 - The state table's row `| **Device preference** | "hide checked items" toggle ([ORD-4](../requirements/functional-requirements.md#ord-4)) | \`localStorage\` |` becomes `| **Device preference** | none yet | \`localStorage\` |`.
 
-- [ ] **Step 3: The stack overview**
+- [x] **Step 3: The stack overview**
 
 In `docs/architecture/stack-overview.md`:
 
 - Section 5, step 2: "the shared ordering rules move it to the checked part" becomes "the shared ordering rules move it from the list to the haul".
 - Section 14, the design tokens bullet: "`--primary` instead of `#0f766e`" becomes "`--primary` instead of `#3F7357`", and "(`teal-700`, `gray-500`)" becomes "(`gray-500`, plus Szop's own `fur` and `sage-700`)".
 
-- [ ] **Step 4: The README**
+- [x] **Step 4: The README**
 
 The feature line "- **Shopping** — check items off as you go and hide what is already in the basket." becomes "- **Shopping** — check items off as you go: they drop into the haul at the bottom, so the list shows only what is left."
 
-- [ ] **Step 5: Check and commit**
+- [x] **Step 5: Check and commit**
 
 ```bash
 grep -rn -i "checked part\|hide checked\|hides checked\|figtree\|teal-" docs/requirements docs/architecture README.md   # expect no output

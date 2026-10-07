@@ -121,7 +121,7 @@ The same Zod route schemas generate an OpenAPI description of the API (via `@fas
 - **Workspace keys:** every workspace-owned table has `workspace_id NOT NULL` and `UNIQUE (workspace_id, id)`, and every reference to such a table is a **composite foreign key** on `(workspace_id, …)`, so PostgreSQL refuses a reference into another workspace even if a service check is missing. A nullable reference that becomes null when its target is deleted uses `ON DELETE SET NULL (column)`, which needs PostgreSQL 15 or newer ([ADR 0012](../decisions/0012-security-baseline.md), decision 6). Copying data between workspaces, as when a guest's lists are imported ([ACC-4](../requirements/functional-requirements.md#acc-4)), must remap every reference.
 - **Category tree:** each category stores `parent_id` and its `position` among siblings. Trees are small, so the API loads a workspace's whole tree and the shared domain rules compute the depth-first, parent-first order ([ORD-2](../requirements/functional-requirements.md#ord-2), [ORD-3](../requirements/functional-requirements.md#ord-3)). Deleting a category cascades to its subcategories in the database. Catalog products and list items pointing to a deleted category get `category_id = null` ([CAT-3](../requirements/functional-requirements.md#cat-3)).
 - **Money:** stored as integers in minor units (cents, grosze) to avoid floating-point rounding errors. **Quantity:** decimal.
-- **List items:** copy their catalog defaults when added ([ITM-6](../requirements/functional-requirements.md#itm-6), [PRD-3](../requirements/functional-requirements.md#prd-3)) and record when they were added, which gives the "order added" sort ([ORD-5](../requirements/functional-requirements.md#ord-5)).
+- **List items:** copy their catalog defaults when added ([ITM-6](../requirements/functional-requirements.md#itm-6), [PRD-3](../requirements/functional-requirements.md#prd-3)) and record when they were added, which gives the "order added" sort ([ORD-5](../requirements/functional-requirements.md#ord-5)). They also record when they were checked, which orders the haul with the most recently checked first ([ORD-2](../requirements/functional-requirements.md#ord-2)); whether "checked" is that timestamp alone or a flag next to it is [OP-080](../open-points.md#op-080).
 - **Templates:** `templates` and `template_items`, the same shape as lists and items without checked state.
 
 ### Seed data
@@ -193,7 +193,7 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md); the design system its
 - **Components:** shadcn/ui's components, built on Base UI, are copied into `apps/web/src/components/ui/` as phases need them and are ours to change. Feature folders compose them; they don't restyle them page by page.
 - **Styling:** Tailwind CSS v4 through `@tailwindcss/vite`, compiled at build time into one stylesheet. The design tokens are CSS custom properties in two tiers (Tailwind's palette, and semantic roles such as `--primary` that components use), all in `apps/web`. Dark mode follows the system setting through Tailwind's `dark:` variant.
 - **Under the CSP:** nothing injects `<style>` elements at run time ([Web security](#web-security)). Base UI runs with `disableStyleElements`, toasts use Base UI's Toast, and every E2E journey fails on a CSP violation.
-- **Assets:** the Figtree font (`@fontsource-variable/figtree`) and Lucide's icons are bundled by Vite, so everything is served from the app's own origin.
+- **Assets:** the Gabarito font (`@fontsource-variable/gabarito`) and Lucide's icons are bundled by Vite, so everything is served from the app's own origin.
 - **Budget:** the JavaScript needed for the first screen stays within 200 KB compressed, checked in CI ([NFR-3](../requirements/functional-requirements.md#nfr-3)).
 
 ### Routes (React Router)
@@ -225,7 +225,7 @@ The rate-limit (429) and quota (`quota_exceeded`) errors are shown as clear mess
 | **Server state** | lists, items, catalog, categories | TanStack Query (fetching, caching, refreshing) |
 | **URL state** | which list is open | React Router |
 | **Local UI state** | an open dialog, text typed in an input | the component (`useState`) |
-| **Device preference** | "hide checked items" toggle ([ORD-4](../requirements/functional-requirements.md#ord-4)) | `localStorage` |
+| **Device preference** | none yet | `localStorage` |
 
 There is no global client-state library (Redux, Zustand). One is added only when a real need appears.
 
