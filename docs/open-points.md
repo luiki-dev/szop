@@ -409,21 +409,9 @@ Roadmap entry: [PH-14](roadmap.md#ph-14-app-shell-and-design-system).
 
 #### OP-056
 
-**Build the UI foundation** in the first MVP phase, not the SPA skeleton ([ADR 0014](decisions/0014-roadmap.md), decision 9): Tailwind CSS v4 through `@tailwindcss/vite`; `shadcn init` with Base UI, and Base UI's `CSPProvider` with `disableStyleElements` plus the scrollbar CSS it then expects; the design tokens of [visual-design.md](architecture/visual-design.md#3-design-tokens) as CSS custom properties, light and dark, with every pair's contrast checked; Figtree from `@fontsource-variable/figtree`; Lucide; the favicon and the header logo, polished from the draft [`raccoon.svg`](architecture/visual-design/raccoon.svg); the app shell with the navigation of [section 5](architecture/visual-design.md#5-layout-and-navigation) (a drawer on phones, a sidebar from `lg`); `prettier-plugin-tailwindcss`, the Tailwind CSS IntelliSense extension in `.vscode/extensions.json`, and the tool pages for Tailwind CSS and shadcn/ui in `docs/development/tools/`.
+**Build the UI foundation** in the first MVP phase, not the SPA skeleton ([ADR 0014](decisions/0014-roadmap.md), decision 9): Tailwind CSS v4 through `@tailwindcss/vite`; `shadcn init` with Base UI, and Base UI's `CSPProvider` with `disableStyleElements` plus the scrollbar CSS it then expects; the design tokens of [visual-design.md](architecture/visual-design.md#3-design-tokens) as CSS custom properties, light and dark, with every pair's contrast checked; Gabarito from `@fontsource-variable/gabarito`; Lucide; the favicon and the header logo, polished from the draft [`raccoon.svg`](architecture/visual-design/raccoon.svg); the app shell with the navigation of [section 5](architecture/visual-design.md#5-layout-and-navigation) (a drawer on phones, a sidebar from `lg`); `prettier-plugin-tailwindcss`, the Tailwind CSS IntelliSense extension in `.vscode/extensions.json`, and the tool pages for Tailwind CSS and shadcn/ui in `docs/development/tools/`.
 
-- **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 7–17 and 19
-- **Status:** ⬜ Open
-
-#### OP-073
-
-**Brainstorm the "Ring tail" redesign of the list screen** before the design system is built, then keep, adjust or drop it. An alternative look the owner liked in a design exploration: a fur-gray page (`#CBD0D6`) with white rounded category cards, Gabarito instead of Figtree, the raccoon mark in the header, and a progress bar drawn as a ringed raccoon tail that narrows to its tip and fills one ring per checked item. Checked items leave the list and drop as chips into a dark "haul" tray at the bottom (`#1F2937`), which shows the amount in the basket and holds the add bar; tapping a chip puts the item back. If it is kept, a new ADR supersedes the affected decisions of [ADR 0013](decisions/0013-visual-design.md) (the look, the color tokens, the font) and [visual-design.md](architecture/visual-design.md) changes with it. To settle:
-
-- The haul tray replaces the unchecked/checked split of [ORD-1](requirements/functional-requirements.md#ord-1) and makes the "hide checked items" toggle of [ORD-3](requirements/functional-requirements.md#ord-3) redundant, so the requirements change too.
-- The tray shows the basket out of the whole list, not the remaining amount that [ITM-8](requirements/functional-requirements.md#itm-8) asks for.
-- How the tray scales to a long list: 40 checked items as chips.
-- Dark mode, which was not drawn.
-
-- **Source:** the owner's design exploration of 2026-10-06: [a screenshot of the mockup](ideas/visual-design/ring-tail.png), and the "Ring tail" artboard on [this canvas](https://claude.ai/artifact/Toj7j2GizWnVV7viL6bmc9) (private), next to the two directions not taken, "Store route" and "Yellow sticker"
+- **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 7–17 and 19; [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 2 and 9–12
 - **Status:** ⬜ Open
 
 ### PH-15 Seed catalog, read-only
@@ -551,6 +539,27 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 **Add `@testing-library/user-event`** with the first component test that clicks or types ([ADR 0007](decisions/0007-testing-strategy.md), decision 10 names it with `jest-dom`; nothing in PH-05 interacts).
 
 - **Source:** [PH-05 spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md#out-of-scope)
+- **Status:** ⬜ Open
+
+#### OP-081
+
+**Pick a drawer component that works under the CSP** for the haul's drawer ([visual-design.md](architecture/visual-design.md#the-list-and-the-haul)). shadcn/ui's Drawer is built on vaul; check whether vaul injects `<style>` elements, which the CSP forbids ([visual-design.md](architecture/visual-design.md#under-the-content-security-policy)). If it does, shape Base UI's Dialog as a bottom sheet, with dragging added on top. Either way the drawer is a modal dialog: focus moves in and is trapped, Esc and the dimmed list close it, and dragging is never the only way to open or close it.
+
+- **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 4 and 5; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#out-of-scope)
+- **Status:** ⬜ Open
+
+#### OP-082
+
+**Decide how "checked" is stored.** The haul orders items by when they were checked, so list items need a `checked_at` timestamp. Either it is the only field (`checked_at IS NOT NULL` means checked), or a `checked` flag stays next to it. One field cannot disagree with itself; a flag keeps the API's `{ "checked": true }` shape and simple queries. "Put all back" ([LST-5](requirements/functional-requirements.md#lst-5)) and duplicating a list must clear it either way.
+
+- **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#architecture-changes)
+- **Status:** ⬜ Open
+
+#### OP-083
+
+**Consider splitting PH-17.** The haul makes PH-17 bigger: besides adding, editing, checking and sorting items, it builds the haul, its chips, putting items back, the drawer (a new component, [OP-081](#op-081)) and the progress by item count. Its brainstorm checks the plan against the size rule of [ADR 0014](decisions/0014-roadmap.md), decision 6, and splits the drawer into a phase of its own if it is too big.
+
+- **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences
 - **Status:** ⬜ Open
 
 ### PH-18 Registration and login
@@ -900,3 +909,15 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 - **Source:** PH-01 final review
 - **Status:** ✅ Closed: set in `eslint.config.js` with the first workspace `tsconfig.json` ([#18](https://github.com/luiki-dev/szop/pull/18))
+
+#### OP-073
+
+**Brainstorm the "Ring tail" redesign of the list screen** before the design system is built, then keep, adjust or drop it. An alternative look the owner liked in a design exploration: a fur-gray page (`#CBD0D6`) with white rounded category cards, Gabarito instead of Figtree, the raccoon mark in the header, and a progress bar drawn as a ringed raccoon tail that narrows to its tip and fills one ring per checked item. Checked items leave the list and drop as chips into a dark "haul" tray at the bottom (`#1F2937`), which shows the amount in the basket and holds the add bar; tapping a chip puts the item back. If it is kept, a new ADR supersedes the affected decisions of [ADR 0013](decisions/0013-visual-design.md) (the look, the color tokens, the font) and [visual-design.md](architecture/visual-design.md) changes with it. To settle:
+
+- The haul tray replaces the unchecked/checked split of [ORD-1](requirements/functional-requirements.md#ord-1) and makes the "hide checked items" toggle of [ORD-3](requirements/functional-requirements.md#ord-3) redundant, so the requirements change too.
+- The tray shows the basket out of the whole list, not the remaining amount that [ITM-8](requirements/functional-requirements.md#itm-8) asks for.
+- How the tray scales to a long list: 40 checked items as chips.
+- Dark mode, which was not drawn.
+
+- **Source:** the owner's design exploration of 2026-10-06: [a screenshot of the mockup](ideas/visual-design/ring-tail.png), and the "Ring tail" artboard on [this canvas](https://claude.ai/artifact/Toj7j2GizWnVV7viL6bmc9) (private), next to the two directions not taken, "Store route" and "Yellow sticker"
+- **Status:** ✅ Closed: kept and adjusted in [ADR 0022](decisions/0022-ring-tail-redesign.md), designed in the [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md): sage instead of the exploration's green, the add bar above the haul, one row of chips with a drawer, progress inside the haul, the same tray on a desktop, and a darkest-haul dark mode. The work it leaves is OP-081 to OP-083 (PH-17) and OP-056 (PH-14)

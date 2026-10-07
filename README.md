@@ -44,7 +44,7 @@ Szop is built in phases, grouped into stages. The road below shows how far along
 - **Shopping lists** — create, rename and delete lists. Archive the ones you are done with, duplicate an existing list, or uncheck everything to reuse the same list next week.
 - **Adding items** — type into one input and Szop suggests products from your catalog, or press enter to add whatever you typed as a one-off item (and optionally save it to the catalog). You can also browse the catalog by category and add several products at once.
 - **Item details** — every item can carry a quantity, a unit, a short note and a price. The list totals what you have bought and what is still ahead of you.
-- **Shopping** — check items off as you go and hide what is already in the basket.
+- **Shopping** — check items off as you go: they drop into the haul at the bottom, so the list shows only what is left.
 - **Your own catalog and categories** — Szop starts you off with a predefined product catalog and a category tree, and both are yours to change: add, rename, remove, and nest categories up to five levels deep.
 - **Ordering that matches the store** — arrange your categories in the order you actually walk the aisles, and every list sorts itself that way. Prefer a plain list instead? Turn category sorting off and items stay in the order you added them.
 - **Templates** — keep reusable sets of items, like a camping trip or a weekly shop, and start a new list from one in a tap.

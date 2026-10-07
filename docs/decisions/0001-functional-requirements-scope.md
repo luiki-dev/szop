@@ -1,6 +1,6 @@
 # ADR 0001 — Functional requirements scope
 
-- **Status:** ✅ Accepted — decision 1 superseded by [ADR 0002](0002-technical-architecture.md), and with it the local browser storage in the guest-mode consequence (guest workspaces live on the server; the migration path into an account remains)
+- **Status:** ✅ Accepted — decision 1 superseded by [ADR 0002](0002-technical-architecture.md), and with it the local browser storage in the guest-mode consequence (guest workspaces live on the server; the migration path into an account remains); decision 9 superseded by [ADR 0022](0022-ring-tail-redesign.md) (checked items go to the haul; the hide toggle is dropped)
 - **Date:** 2026-09-21
 
 ## Context
@@ -19,7 +19,7 @@ The README gives a high-level description of Szop. Before any technical or visua
 | 6 | Categories on shared lists | Owner's tree; each viewer's own tree | **Owner's** tree, order and currency. Editor-added products are matched by category name. |
 | 7 | Item attributes | Minimum (qty, unit, note); plus price; name only | **Quantity, unit, note and price per unit.** Currency is a profile setting. |
 | 8 | Saving ad-hoc items to catalog | Automatic; suggested; never | **Suggested**, off by default. |
-| 9 | Checked items display | Muted within their category; separate part at the bottom | **Separate part**: all unchecked items, then all checked items, each sorted by category order and then name. A toggle hides checked items. |
+| 9 | Checked items display | Muted within their category; separate part at the bottom | **Separate part**: all unchecked items, then all checked items, each sorted by category order and then name. A toggle hides checked items. <br>🔁 **Superseded by [ADR 0022](0022-ring-tail-redesign.md), decisions 1, 4 and 6:** checked items leave the list for the haul, a tray apart from it, most recently checked first; the toggle hiding them is dropped. |
 | 10 | List lifecycle | Uncheck all, remove checked, duplicate, archive, templates | **Archive, save as template, uncheck all, duplicate.** "Remove checked" is out of scope. |
 | 11 | Templates | Created from lists only (read-only); full CRUD | **Full CRUD**, created from scratch or from a list. User-specific, never shared. |
 | 12 | Accounts | Email/password; plus social login; social only | **Email/password** with verification, reset and account deletion. Social login is a future extension. |

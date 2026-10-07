@@ -240,7 +240,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-14 App shell and design system
 
 - **Goal:** every page sits in Szop's app shell, with the raccoon logo, the navigation (a drawer on phones, a sidebar on larger screens) and the design tokens in light and dark mode. The skeleton's page is restyled in it.
-- **Delivers:** the UI foundation of [ADR 0013](decisions/0013-visual-design.md) and the [visual design](architecture/visual-design.md): Tailwind CSS, shadcn/ui on Base UI under the CSP, the design tokens, Figtree, Lucide, the favicon and the logo.
+- **Delivers:** the UI foundation of [ADR 0013](decisions/0013-visual-design.md) and [ADR 0022](decisions/0022-ring-tail-redesign.md), and the [visual design](architecture/visual-design.md): Tailwind CSS, shadcn/ui on Base UI under the CSP, the design tokens, Gabarito, Lucide, the favicon and the logo.
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -266,8 +266,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ### PH-17 List items
 
-- **Goal:** a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted: unchecked items first, then by category order or in the order they were added.
-- **Delivers:** [ITM-1](requirements/functional-requirements.md#itm-1), [ITM-6](requirements/functional-requirements.md#itm-6), [ITM-7](requirements/functional-requirements.md#itm-7), [ORD-1](requirements/functional-requirements.md#ord-1), [ORD-2](requirements/functional-requirements.md#ord-2), [ORD-3](requirements/functional-requirements.md#ord-3), [ORD-5](requirements/functional-requirements.md#ord-5); optimistic updates; forms with React Hook Form.
+- **Goal:** a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added; checked items drop into the haul, which shows how many are done and puts an item back on a tap.
+- **Delivers:** [ITM-1](requirements/functional-requirements.md#itm-1), [ITM-6](requirements/functional-requirements.md#itm-6), [ITM-7](requirements/functional-requirements.md#itm-7), [ORD-1](requirements/functional-requirements.md#ord-1), [ORD-2](requirements/functional-requirements.md#ord-2), [ORD-3](requirements/functional-requirements.md#ord-3), [ORD-5](requirements/functional-requirements.md#ord-5); the haul with its chips and drawer ([ADR 0022](decisions/0022-ring-tail-redesign.md)); optimistic updates; forms with React Hook Form.
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -302,8 +302,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ### PH-21 Shop in a store
 
-- **Goal:** in the store, a user checks items off, hides what is already in the basket and sees the spent and remaining totals; afterwards, "Uncheck all" resets the list for next week.
-- **Delivers:** [ITM-8](requirements/functional-requirements.md#itm-8), [ORD-4](requirements/functional-requirements.md#ord-4), [LST-5](requirements/functional-requirements.md#lst-5); completes [UC-3](requirements/functional-requirements.md#uc-3-shop-in-a-store) and [UC-4](requirements/functional-requirements.md#uc-4-reuse-a-weekly-list).
+- **Goal:** in the store, a user checks items off into the haul and sees in it the spent and remaining totals; afterwards, "Put all back" resets the list for next week.
+- **Delivers:** [ITM-8](requirements/functional-requirements.md#itm-8) (the amounts in the haul), [LST-5](requirements/functional-requirements.md#lst-5); completes [UC-3](requirements/functional-requirements.md#uc-3-shop-in-a-store) and [UC-4](requirements/functional-requirements.md#uc-4-reuse-a-weekly-list).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
