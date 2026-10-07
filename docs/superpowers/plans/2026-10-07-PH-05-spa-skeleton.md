@@ -944,7 +944,7 @@ EOF
 - Consumes: everything above.
 - Produces: the state the PR is opened from.
 
-- [ ] **Step 1: Update the open points**
+- [x] **Step 1: Update the open points**
 
 In `docs/open-points.md`:
 
@@ -956,15 +956,15 @@ In `docs/open-points.md`:
 - New, under `### PH-17 List items`: `#### OP-080` **Add `@testing-library/user-event`** with the first component test that clicks or types ([ADR 0007](decisions/0007-testing-strategy.md), decision 10 names it with `jest-dom`; nothing in PH-05 interacts). Source: [PH-05 spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md#out-of-scope). Status: ⬜ Open.
 - Check that PH-05's group now holds only its heading and its roadmap link, as PH-03's and PH-04's do.
 
-- [ ] **Step 2: Update the roadmap**
+- [x] **Step 2: Update the roadmap**
 
 In `docs/roadmap.md`: the PH-05 row's Plan column links `superpowers/plans/2026-10-07-PH-05-spa-skeleton.md` (the plan commit may already have set it; check). PH-05's *Delivers* gains `packages/shared` with the health response schema, used by the web client, the MSW handlers and the API's health test ([ADR 0021](decisions/0021-spa-skeleton-details.md)). The row stays `🚧 In progress`; the README diagram stays at ◐ until the PR sets ✅.
 
-- [ ] **Step 3: Walk through the definition of done**
+- [x] **Step 3: Walk through the definition of done**
 
 Read `docs/development/definition-of-done.md` and note each item's state for the PR. Expected: item 1 (tests) ✅; item 2 ➖ N/A: no domain rules in `packages/shared`; item 3 after CI; item 4 ➖ N/A: no demo environment until PH-12; item 5 ➖ N/A: no `infra/base`; items 6–10 ✅; item 11: read it (the page is the first UI, unstyled) and decide, with the reason, whether it is ✅ or ➖ N/A.
 
-- [ ] **Step 4: Final checks and a self-review of the diff**
+- [x] **Step 4: Final checks and a self-review of the diff**
 
 ```bash
 docker compose up -d --wait
@@ -974,7 +974,7 @@ git diff main --stat
 
 Expected: all pass; `pnpm test:coverage` shows three projects' worth of files (api, web, hooks) and `packages/shared`. Read the whole diff against the spec's success criteria one by one and list any gap.
 
-- [ ] **Step 5: Links check and commit**
+- [x] **Step 5: Links check and commit**
 
 Run the link check of Task 5, step 6, over `docs/open-points.md` and `docs/roadmap.md` too. Then:
 

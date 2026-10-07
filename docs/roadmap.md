@@ -122,7 +122,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-05 SPA skeleton
 
 - **Goal:** `pnpm dev` serves a page showing the API's status through Vite's proxy, so the slice runs from the single-page application (SPA) through the API to the database.
-- **Delivers:** `apps/web` with Vite, React, React Router and TanStack Query ([ADR 0002](decisions/0002-technical-architecture.md)); the development proxy for `/api`; Testing Library and Mock Service Worker (MSW) with the first component test.
+- **Delivers:** `apps/web` with Vite, React, React Router and TanStack Query ([ADR 0002](decisions/0002-technical-architecture.md)); the development proxy for `/api`; Testing Library and Mock Service Worker (MSW) with the first component test; `packages/shared` with the health response schema, used by the web client, the MSW handlers and the API's health test ([ADR 0021](decisions/0021-spa-skeleton-details.md)).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
