@@ -672,7 +672,7 @@ EOF
 - Consumes: everything from Task 3.
 - Produces: the finished page and client; `renderApp()` in the test file now returns `{ queryClient }`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `health-page.test.tsx`, extend the imports (`import type { Health } from "@szop/shared";`, `import { http, HttpResponse } from "msw";`, and `server` next to `healthyBody`), change `renderApp` to return the client, and add the tests inside the `describe`:
 
@@ -750,7 +750,7 @@ function renderApp() {
   });
 ```
 
-- [ ] **Step 2: Run them and see them fail**
+- [x] **Step 2: Run them and see them fail**
 
 ```bash
 pnpm test --project web
@@ -758,7 +758,7 @@ pnpm test --project web
 
 Expected: the first test still passes and the six new ones fail. Five of them find no text, because the minimal page renders nothing for those states: the database-down test (no `API: reachable`), the unreachable test, the schema-mismatch and not-JSON rows, and the recovery test (no `Can't reach the API`). The 500 row fails differently: the minimal client accepts the healthy body despite the status, so the page shows `API: ok` instead of the error. None of them may fail on a setup error.
 
-- [ ] **Step 3: Write the code to pass**
+- [x] **Step 3: Write the code to pass**
 
 `apps/web/src/api/client.ts`:
 
@@ -808,7 +808,7 @@ function Status({ query }: { query: ReturnType<typeof useHealth> }) {
 }
 ```
 
-- [ ] **Step 4: Run them and see them pass**
+- [x] **Step 4: Run them and see them pass**
 
 ```bash
 pnpm test --project web
@@ -816,11 +816,11 @@ pnpm test --project web
 
 Expected: all seven `web` tests pass: the ok test, the database-down test, the unreachable test, the three unexpected-response rows and the recovery test.
 
-- [ ] **Step 5: Check that the tests guard the behavior**
+- [x] **Step 5: Check that the tests guard the behavior**
 
 Temporarily delete the status check in `client.ts` (the `if (response.status …)` block) and run the tests: the 500 row must fail. Revert it. Then temporarily delete `retry: false` from `use-health.ts` and run the tests: the error-state tests must fail, because the default retries keep the page on `Checking the API…` longer than `findByText` waits. Revert that too, and check with `git diff` that both files are as committed.
 
-- [ ] **Step 6: Check the real states by hand**
+- [x] **Step 6: Check the real states by hand**
 
 With `pnpm dev` running in the background and the Chrome DevTools MCP on the Vite address:
 
@@ -832,15 +832,15 @@ docker compose start && docker compose up -d --wait
 
 Expected: first `API: ok` and `Schema version: 0000_init`; with PostgreSQL stopped, after a reload, `API: reachable` and `Database: down`; once it is back and the page reloads, `API: ok` again. Then stop the API only (stop the `pnpm dev` process and start the Vite server alone with `pnpm --filter @szop/web dev`), reload, and expect `Can't reach the API`. Record the observed texts for the PR's *How it was tested*. If the browser tool is unavailable, leave this check to the owner and say so.
 
-- [ ] **Step 7: Check the proxy's answer when the API is down**
+- [x] **Step 7: Check the proxy's answer when the API is down**
 
 With the API stopped and Vite running, `curl -s -w ' %{http_code}\n' http://127.0.0.1:5173/api/health` and record the status and body: the client must treat it as an error (not 200 or 503), which the manual check above confirms. If the proxy answered 503 or 200 with a parseable body, report it: the page would then misreport the state.
 
-- [ ] **Step 8: Check an unknown path by hand**
+- [x] **Step 8: Check an unknown path by hand**
 
 With Vite running, open `http://127.0.0.1:5173/nowhere`: expect React Router's default error screen (404). This is accepted (Review Focus, item 5); note the exact text seen in the report.
 
-- [ ] **Step 9: Checks, tick boxes and commit**
+- [x] **Step 9: Checks, tick boxes and commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:coverage

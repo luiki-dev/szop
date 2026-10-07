@@ -4,7 +4,10 @@ function Status({ query }: { query: ReturnType<typeof useHealth> }) {
   if (query.isPending) {
     return <p>Checking the API…</p>;
   }
-  if (query.data?.status === "ok") {
+  if (query.isError) {
+    return <p>Can't reach the API</p>;
+  }
+  if (query.data.status === "ok") {
     return (
       <>
         <p>API: ok</p>
@@ -13,7 +16,12 @@ function Status({ query }: { query: ReturnType<typeof useHealth> }) {
       </>
     );
   }
-  return null;
+  return (
+    <>
+      <p>API: reachable</p>
+      <p>Database: down</p>
+    </>
+  );
 }
 
 export function HealthPage() {
