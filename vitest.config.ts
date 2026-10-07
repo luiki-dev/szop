@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     projects: [
       "apps/api/vitest.config.ts",
+      "apps/web/vitest.config.ts",
       {
         test: {
           name: "hooks",

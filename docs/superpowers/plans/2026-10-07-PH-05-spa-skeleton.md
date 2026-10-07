@@ -443,7 +443,7 @@ EOF
 - Consumes: `routes` (Task 2), `healthSchema` and `Health` (Task 1).
 - Produces: `server` and `healthyBody` from `src/test/server.ts` (the MSW server with a default `GET /api/health` handler answering `healthyBody`; `healthyBody` is `{ status: "ok", database: { status: "up", schemaVersion: "0000_init" } } satisfies Health`); `getHealth(): Promise<Health>` from `src/api/client.ts`; `useHealth()` from `src/health/use-health.ts` returning TanStack Query's `UseQueryResult<Health>`; the `web` Vitest project.
 
-- [ ] **Step 1: Add the test dependencies**
+- [x] **Step 1: Add the test dependencies**
 
 ```bash
 pnpm --filter @szop/web add -D msw @testing-library/react @testing-library/dom @testing-library/jest-dom jsdom
@@ -451,7 +451,7 @@ pnpm --filter @szop/web add -D msw @testing-library/react @testing-library/dom @
 
 Expected: succeeds. `@testing-library/dom` is a peer of the React package; if pnpm reports it is not needed, drop it. If pnpm stops on an ignored build script, stop and show the owner.
 
-- [ ] **Step 2: The `web` project**
+- [x] **Step 2: The `web` project**
 
 `apps/web/vitest.config.ts`:
 
@@ -519,7 +519,7 @@ afterAll(() => {
 
 If MSW 3's names differ from these (`http`, `HttpResponse`, `setupServer`, `listen`, `resetHandlers`, `close`), follow its documentation and keep the behavior; if `@testing-library/jest-dom/vitest` does not exist, use the entry its README names for Vitest. Record either difference for ADR 0021.
 
-- [ ] **Step 3: Write the failing test**
+- [x] **Step 3: Write the failing test**
 
 `apps/web/src/health/health-page.test.tsx`:
 
@@ -560,7 +560,7 @@ describe("HealthPage", () => {
 
 If the status element is not there at the first synchronous `getByRole` (the router rendering a tick late), replace that line with `expect(await screen.findByText("Checking the API…")).toBeInTheDocument();` and say so in the task's report.
 
-- [ ] **Step 4: Run it and see it fail**
+- [x] **Step 4: Run it and see it fail**
 
 ```bash
 pnpm test --project web
@@ -568,7 +568,7 @@ pnpm test --project web
 
 Expected: the `web` project runs, and the test fails because the placeholder page has no `role="status"` element (not because of a setup error: if it fails with a configuration, import or MSW error, fix that first, as it is part of this step).
 
-- [ ] **Step 5: Write the minimal code to pass**
+- [x] **Step 5: Write the minimal code to pass**
 
 `apps/web/src/api/client.ts`:
 
@@ -631,7 +631,7 @@ export function HealthPage() {
 }
 ```
 
-- [ ] **Step 6: Run it and see it pass; settle the relative URL**
+- [x] **Step 6: Run it and see it pass; settle the relative URL**
 
 ```bash
 pnpm test --project web
@@ -639,11 +639,11 @@ pnpm test --project web
 
 Expected: PASS. If the test fails because `fetch` rejects `/api/health` as an invalid URL (Node's `fetch` takes no relative URLs, and jsdom provides none), apply this fallback and only then: in `client.ts`, call `fetch(new URL("/api/health", window.location.origin))`, run again, and record in ADR 0021 that the client resolves the path against the page's origin so the tests' Node `fetch` accepts it. If it passes as written, record that MSW's interceptor resolves relative URLs against jsdom's `location`.
 
-- [ ] **Step 7: Check it in the real app**
+- [x] **Step 7: Check it in the real app**
 
 Start `pnpm dev` in the background with PostgreSQL up. Open the Vite address with the Chrome DevTools MCP (`chrome-devtools-win`, see the user's `CLAUDE.md`), take a snapshot, and expect `API: ok`, `Database: up` and `Schema version: 0000_init` in the page. If the browser tool is unavailable, say so and leave this check to the owner. Stop `pnpm dev` afterwards.
 
-- [ ] **Step 8: Checks, tick boxes and commit**
+- [x] **Step 8: Checks, tick boxes and commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:coverage
