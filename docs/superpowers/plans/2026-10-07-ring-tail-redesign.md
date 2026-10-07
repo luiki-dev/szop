@@ -181,11 +181,11 @@ If `pnpm format:check` is not available in the worktree because `node_modules` i
 
 The mockups are pictures, not code: HTML pages styled with the spec's tokens, rendered to PNG. The brainstorm's mockups (in the main checkout's `.superpowers/brainstorm/597300-1791393805/content/`, readable, never written) are the starting point for markup: `progress-in-haul.html` (list, haul, drawer), `desktop.html` (sidebar) and `dark-mode.html` (variables per scheme). Read them; write new files only under `$CLAUDE_JOB_DIR/tmp/mockups/`.
 
-- [ ] **Step 1: Change the raccoon's tile**
+- [x] **Step 1: Change the raccoon's tile**
 
 In `raccoon.svg`, line 3: `fill="#0f766e"` becomes `fill="#5F9273"`. Nothing else changes.
 
-- [ ] **Step 2: Write the four pages**
+- [x] **Step 2: Write the four pages**
 
 Each page is a full HTML document with `<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400..800&display=swap" rel="stylesheet">`, a body background of `#E5E7EB` (like the current images), the raccoon inlined from the new `raccoon.svg`, and small captions in `system-ui` 13 px `#4B5563` under each frame, like the current images. Use the colors of [Global Constraints](#global-constraints) through CSS custom properties named after the roles (`--background`, `--card`, `--haul`, …), one set for light and one for dark, so the pictures follow the spec's table exactly. Phones are 330 × 680 px frames with 28 px corners.
 
@@ -194,7 +194,7 @@ Each page is a full HTML document with `<link href="https://fonts.googleapis.com
 3. **`navigation.html`, 1250 × 745 px**, the same layout as the current `navigation.png`: a phone with "☰ Lists", three list cards ("Weekly shop", "8 of 11 · €8.07 to go"; "Hardware store", "0 of 5"; "Birthday party", "2 of 12") and a full-width sage "+ New list" button pinned at the bottom, captioned "Phone: ☰ opens the menu as a drawer"; a 1024-wide desktop with the sidebar (raccoon 32 px and "szop" wordmark, "Lists" active on `sage-100` with `sage-700` text, "Templates", "Archive", "SETUP", "Catalog", "Categories", "Units", "Settings") next to the same three cards and a "+ New list" button at the top right, captioned "Desktop (from 1024 px): the menu is a permanent sidebar".
 4. **`brand.html`, 560 × 250 px**, the same layout as the current `brand.png`: the raccoon at 128, 32 and 16 px; a browser tab "Weekly shop – Szop" with the 16 px raccoon; the mark with the wordmark "szop" (Gabarito 700, 30 px) on a white header (`sage-700` text) and on a `gray-900` header (`sage-300` text).
 
-- [ ] **Step 3: Render them**
+- [x] **Step 3: Render them**
 
 Serve the folder and render each page with Windows Chrome in headless mode (the WSL2 setup reaches `localhost` from Windows):
 
@@ -214,15 +214,15 @@ kill $SERVER
 
 Expected: four PNGs of the given sizes (`file docs/architecture/visual-design/*.png`).
 
-- [ ] **Step 4: Check the font**
+- [x] **Step 4: Check the font**
 
 Open each PNG (the Read tool shows images) and check that every text is Gabarito (its "€" and "&" have the shapes of the brainstorm mockups, not the system font's). Then render one extra line, "Żółty ser · Łosoś · Gęś", in weights 400, 600, 700 and 800 on a scratch page, and check that every Polish letter is Gabarito, not a fallback. Note the result for the PR description.
 
-- [ ] **Step 5: Check the dark mockup reads**
+- [x] **Step 5: Check the dark mockup reads**
 
 Look at the dark phone in `list-screen.png`: the cards (`gray-800`) and the haul (`gray-950`) must read as separate from the page (`gray-900`). If they do not, change the dark `background` to `#18202D` (halfway between `gray-900` and `gray-800`), re-render, and record it: the value goes into Task 3's color table and a sentence into ADR 0022's decision 9 ("Dark mode's page is `#18202D`, not `gray-900`, so the cards and the haul stand apart from it"), amended in this task's commit.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add docs/architecture/visual-design/ docs/superpowers/plans/2026-10-07-ring-tail-redesign.md
