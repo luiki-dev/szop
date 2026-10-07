@@ -38,7 +38,9 @@ TypeScript adds static types to JavaScript, and Szop writes all its code in it, 
 - `types: ["node"]`: only Node's types are global.
 - `include: ["src", "vitest.config.ts"]`: the API's source, its tests (they sit in `src`) and its Vitest config. Nothing outside the package.
 
-Why each package has its own file: `apps/web` will add browser (DOM) types and JSX in PH-05, which the API must not see.
+**`apps/web/tsconfig.json`** adds what only the web app needs: `lib` with `dom` and `dom.iterable` (browser types), `jsx: "react-jsx"`, `module: "esnext"` with `moduleResolution: "bundler"` (the way Vite resolves imports, [ADR 0021](../../decisions/0021-spa-skeleton-details.md), decision 6) and `types: ["vite/client"]`.
+
+Why each package has its own file: the web app needs browser (DOM) types and JSX, which the API must not see.
 
 ## Everyday use
 

@@ -20,7 +20,7 @@ ESLint reads the code without running it and reports bugs and bad patterns. With
 
 There is no exception for the test runner any more: the `node:test` one, which let `test()` go unawaited, left with the hook's tests when they moved to Vitest in PH-03 ([OP-062](../../open-points.md#op-062)); Vitest's `it` needs none.
 
-The React Hooks rules come with `apps/web` in PH-05.
+The React Hooks rules are the plugin's `reactHooks.configs.flat.recommended` preset, applied to `apps/web/**/*.{ts,tsx}` only ([ADR 0021](../../decisions/0021-spa-skeleton-details.md), decision 9).
 
 ## Everyday use
 

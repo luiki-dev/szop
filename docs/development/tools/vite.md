@@ -4,7 +4,7 @@ Vite is the build tool and development server of the web app. In development it 
 
 ## Why Szop uses it
 
-- **Vite with React:** [ADR 0002](../../decisions/0002-technical-architecture.md) chose Vite as the build tool for the single-page application (SPA). It is the standard choice for a React app that is not built on a full framework, and Vitest shares its configuration ([Vitest](vitest.md)).
+- **Vite builds the React single-page application (SPA):** the [architecture](../../architecture/architecture.md#1-system-overview) names it as the SPA's build tool, and [ADR 0005](../../decisions/0005-development-environment.md) takes it as given. Vitest shares its configuration ([Vitest](vitest.md)).
 - **A proxy for one origin in development:** [ADR 0005](../../decisions/0005-development-environment.md), decision 10. The proxy's target is a constant in the config: [ADR 0021](../../decisions/0021-spa-skeleton-details.md), decision 3.
 
 ## Configuration
