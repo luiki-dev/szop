@@ -1,5 +1,5 @@
-# The workspace packages: apps/api since PH-03; apps/web arrives in PH-05,
-# packages/shared with the first shared code.
+# The workspace packages: apps/api since PH-03, apps/web and packages/shared
+# since PH-05.
 packages:
   - apps/*
   - packages/*

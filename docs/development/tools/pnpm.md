@@ -13,7 +13,7 @@ pnpm is Szop's package manager: it installs the dependencies and runs scripts ac
 
 **`pnpm-workspace.yaml`:**
 
-- `packages`: where the workspace's packages live (`apps/*` and `packages/*`). `apps/api` (`@szop/api`) is the first; `apps/web` arrives in PH-05 and `packages/shared` with the first shared code.
+- `packages`: where the workspace's packages live (`apps/*` and `packages/*`). `apps/api` (`@szop/api`) is the first; `apps/web` (`@szop/web`) and `packages/shared` (`@szop/shared`) have existed since PH-05.
 - `engineStrict: true`: installing with a Node version outside `engines` fails instead of warning (see [Node and nvm](node-and-nvm.md)).
 - `allowBuilds`: the dependencies allowed to run install scripts. Nothing is allowed ([ADR 0012](../../decisions/0012-security-baseline.md), decision 18). When a dependency wants to run a build script and is not listed, the install fails with `ERR_PNPM_IGNORED_BUILDS`. The owner then decides for each one whether to allow it (`true`) or not (`false`); do not run `pnpm approve-builds` without asking. The first entry is `esbuild: false`: esbuild is the compiler inside [tsx](tsx.md), and its install script only checks the binary that the optional platform package (`@esbuild/<platform>`) already installs, so denying it breaks nothing and avoids running code from the internet at install time ([ADR 0019](../../decisions/0019-api-skeleton-details.md), decision 11).
 

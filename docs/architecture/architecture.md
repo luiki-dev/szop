@@ -71,7 +71,7 @@ e2e/              Playwright end-to-end tests (ADR 0007)
 infra/            Terraform root modules (ADR 0008)
 ```
 
-The packages and `e2e/` are pnpm workspaces. The packages are named `@szop/api`, `@szop/web` and `@szop/shared`, and imports keep their `.ts` extension ([ADR 0019](../decisions/0019-api-skeleton-details.md), decisions 6 and 7). `packages/shared` is consumed from its TypeScript source, with no build step of its own. The rest of the tooling is in [ADR 0005](../decisions/0005-development-environment.md).
+The packages and `e2e/` are pnpm workspaces. The packages are named `@szop/api`, `@szop/web` and `@szop/shared`, and imports keep their `.ts` extension ([ADR 0019](../decisions/0019-api-skeleton-details.md), decisions 6 and 7). `packages/shared` is consumed from its TypeScript source, with no build step of its own. It exists since [PH-05](../roadmap.md#ph-05-spa-skeleton) and holds the health response's schema, `healthSchema`, which `apps/web` uses to parse `/api/health` and, in a test, `apps/api` uses to check its responses ([ADR 0021](../decisions/0021-spa-skeleton-details.md), decision 1). The rest of the tooling is in [ADR 0005](../decisions/0005-development-environment.md).
 
 ## 2. Backend (`apps/api`)
 
@@ -186,6 +186,8 @@ One JSON error shape: `{ "error": { "code": "...", "message": "..." } }`.
 
 Feature folders mirroring the backend: `lists`, `items`, `catalog`, `categories`, `units`, `templates`, `account`. Each holds its pages, components and **data hooks** — small functions such as `useList(id)` or `useCheckItem()` that wrap TanStack Query. Components never call `fetch` directly. One typed **API client** module, built on the shared Zod schemas, does all HTTP calls. Cookies are sent automatically because everything is on the same origin.
 
+**As built in [PH-05](../roadmap.md#ph-05-spa-skeleton)** ([ADR 0021](../decisions/0021-spa-skeleton-details.md)): `src/api/client.ts` holds `getHealth()`, the only code that calls `fetch`; `src/health/` holds the first feature folder, with the data hook `use-health.ts` (TanStack Query, `retry: false`), `health-page.tsx` and its component test; `src/routes.tsx` exports the route table that `src/app.tsx` (a `QueryClientProvider` around a `RouterProvider`) and the tests both build routers from; `src/test/` holds the Mock Service Worker (MSW) server and the test setup. In development, Vite proxies `/api` to the API at `http://127.0.0.1:3000`, a constant in `apps/web/vite.config.ts` (decision 3).
+
 ### Styling and components
 
 Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../decisions/0022-ring-tail-redesign.md); the design system itself is described in [visual-design.md](visual-design.md).
@@ -211,6 +213,8 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../deci
 | `/login`, `/register`, `/verify-email`, `/reset-password` | Account flows |
 | `/shared` *(Later)* | Shared with me |
 | `/s/:token` *(Later)* | Opening a share link |
+
+Only `/` exists so far, and it shows the health page; the table above is the target. Any other path shows React Router's default error screen until a not-found route is added ([ADR 0021](../decisions/0021-spa-skeleton-details.md), consequences).
 
 ### Startup
 

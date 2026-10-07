@@ -80,38 +80,6 @@ Roadmap entry: [PH-04](roadmap.md#ph-04-database).
 
 Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).
 
-#### OP-010
-
-**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-05:** Testing Library and MSW
-  - **PH-07:** Playwright with axe
-  - **PH-15:** fast-check and StrykerJS
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
-- **Status:** ⬜ Open
-
-#### OP-012
-
-**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** the first test against the database ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
-  - **PH-05:** the first component test
-  - **PH-07:** the first E2E journey on both viewports
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
-- **Status:** ⬜ Open
-
-#### OP-067
-
-**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
-
-- **Moved from PH-04:** it does not depend on that phase.
-- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
-- **Status:** ⬜ Open
-
 ### PH-06 Production build and web baseline
 
 Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
@@ -120,6 +88,7 @@ Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 
 **Decide how the API's production build includes `packages/shared`**, which is consumed from source with no build step of its own.
 
+- **Since PH-05:** `packages/shared` exists and is consumed from source by `apps/web` and, in a test, by `apps/api`; the API's production build still has to include it.
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decision 8
 - **Status:** ⬜ Open
 
@@ -163,6 +132,15 @@ Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 4
 - **Status:** ⬜ Open
 
+#### OP-067
+
+**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
+
+- **Moved from PH-04:** it does not depend on that phase.
+- **Moved from PH-05:** it does not depend on that phase.
+- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
+- **Status:** ⬜ Open
+
 #### OP-078
 
 **Keep the migrations folder where the compiled API finds it.** `migrationsFolder` is resolved as `../../drizzle` from the `migrate` module's own location (`apps/api/src/db/migrate.ts`), so the compiled module must keep that relative position to `apps/api/drizzle/`; a bundle into a single `dist/server.js` (esbuild or tsup) would resolve to the wrong folder. `drizzle/meta/_journal.json` must ship too, because `readJournal()` reads it on every `buildApp`. If the journal is missing, `buildApp` (`server.ts`, outside the startup `try`) throws an uncaught exception that is not logged through pino as `startup failed`: PH-06 and PH-08 should test the built output (PH-08's image must copy `drizzle/`), or catch that case.
@@ -172,8 +150,31 @@ Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 
 ### PH-07 First E2E journey
 
-Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).\
-Also: [OP-010](#op-010), [OP-012](#op-012).
+Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
+
+#### OP-010
+
+**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-05:** Testing Library and MSW ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
+  - **PH-07:** Playwright with axe
+  - **PH-15:** fast-check and StrykerJS
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
+- **Status:** ⬜ Open
+
+#### OP-012
+
+**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** the first test against the database ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
+  - **PH-05:** the first component test ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
+  - **PH-07:** the first E2E journey on both viewports
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
+- **Status:** ⬜ Open
 
 #### OP-057
 
@@ -442,6 +443,13 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
 - **Source:** [PH-04 spec](superpowers/specs/2026-10-05-PH-04-database-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
+#### OP-079
+
+**Serialize the API's responses through the shared schemas.** The health route sends its body as written; the first route that needs response serialization (Fastify's schema compiler with `fastify-type-provider-zod`, or an explicit parse) validates the response against the `packages/shared` schema, so the contract is enforced in the API, not only checked by a test.
+
+- **Source:** [PH-05 spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md#out-of-scope)
+- **Status:** ⬜ Open
+
 ### PH-16 Guest workspace and lists
 
 Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
@@ -524,6 +532,13 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
   - **PH-17:** removing an item
   - **PH-21:** "Uncheck all"
 - **Source:** [Audit, C3](audits/2026-09-29-design-sanity-check.md#consider-improving)
+- **Status:** ⬜ Open
+
+#### OP-080
+
+**Add `@testing-library/user-event`** with the first component test that clicks or types ([ADR 0007](decisions/0007-testing-strategy.md), decision 10 names it with `jest-dom`; nothing in PH-05 interacts).
+
+- **Source:** [PH-05 spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
 #### OP-081
