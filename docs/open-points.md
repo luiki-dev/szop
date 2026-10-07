@@ -158,7 +158,7 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-05:** Testing Library and MSW ✅ Done ([feat/ph-05-spa-skeleton](https://github.com/luiki-dev/szop/tree/feat/ph-05-spa-skeleton))
+  - **PH-05:** Testing Library and MSW ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
   - **PH-07:** Playwright with axe
   - **PH-15:** fast-check and StrykerJS
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
@@ -171,7 +171,7 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
   - **PH-04:** the first test against the database ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
-  - **PH-05:** the first component test ✅ Done ([feat/ph-05-spa-skeleton](https://github.com/luiki-dev/szop/tree/feat/ph-05-spa-skeleton))
+  - **PH-05:** the first component test ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
   - **PH-07:** the first E2E journey on both viewports
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
 - **Status:** ⬜ Open
