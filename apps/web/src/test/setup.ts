@@ -23,7 +23,8 @@ beforeAll(() => {
 });
 
 // The check is registered first so it runs last: Vitest runs afterEach hooks
-// in reverse order, and cleanup must not hide the failure.
+// in reverse order, and a throw in one hook stops the hooks after it. Running
+// last lets the cleanup below happen even when this check fails.
 afterEach(() => {
   const requests = unhandled.splice(0);
   if (requests.length > 0) {
