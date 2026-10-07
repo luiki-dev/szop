@@ -397,7 +397,7 @@ git commit -m "docs(requirements): move checked items to the haul"
 **Interfaces:**
 - Produces: the anchors `#op-079`, `#op-080` and `#op-081`, linked from ADR 0022 (Task 1) and `architecture.md` (Task 4).
 
-- [ ] **Step 1: The roadmap**
+- [x] **Step 1: The roadmap**
 
 In `docs/roadmap.md`:
 
@@ -407,11 +407,11 @@ In `docs/roadmap.md`:
 
 The README's roadmap diagram shows phase names and statuses only; check it names neither Figtree nor [ORD-4](../../requirements/functional-requirements.md#ord-4) (`grep -n -i "figtree\|ORD-4" README.md`, expect no output) and leave it.
 
-- [ ] **Step 2: OP-056**
+- [x] **Step 2: OP-056**
 
 In OP-056's text, "Figtree from `@fontsource-variable/figtree`" becomes "Gabarito from `@fontsource-variable/gabarito`", and its **Source** line becomes "[ADR 0013](decisions/0013-visual-design.md), decisions 7–17 and 19; [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 2 and 9–12".
 
-- [ ] **Step 3: Close OP-073**
+- [x] **Step 3: Close OP-073**
 
 Move the whole `#### OP-073` entry from the PH-14 group to the end of `## Closed` (after OP-065, IDs in order), unchanged except its status line:
 
@@ -419,7 +419,7 @@ Move the whole `#### OP-073` entry from the PH-14 group to the end of `## Closed
 - **Status:** ✅ Closed: kept and adjusted in [ADR 0022](decisions/0022-ring-tail-redesign.md), designed in the [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md): sage instead of the exploration's green, the add bar above the haul, one row of chips with a drawer, progress inside the haul, the same tray on a desktop, and a darkest-haul dark mode. The work it leaves is OP-079 to OP-081 (PH-17) and OP-056 (PH-14)
 ```
 
-- [ ] **Step 4: Add OP-079 to OP-081**
+- [x] **Step 4: Add OP-079 to OP-081**
 
 At the end of the `### PH-17 List items` group (after its last entry, before `### PH-18`), in this order:
 
@@ -446,7 +446,7 @@ At the end of the `### PH-17 List items` group (after its last entry, before `##
 - **Status:** ⬜ Open
 ```
 
-- [ ] **Step 5: Check and commit**
+- [x] **Step 5: Check and commit**
 
 ```bash
 grep -c "^#### OP-073" docs/open-points.md   # expect 1, under ## Closed
