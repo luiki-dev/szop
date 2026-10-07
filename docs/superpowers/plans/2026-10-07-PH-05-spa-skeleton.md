@@ -865,7 +865,7 @@ EOF
 - Consumes: the finished code and what Tasks 1 to 4 reported (the relative-URL outcome, the plugin and preset names, any `allowBuilds` entry, any MSW 3 difference).
 - Produces: the records the PR links to.
 
-- [ ] **Step 1: Write ADR 0021**
+- [x] **Step 1: Write ADR 0021**
 
 `docs/decisions/0021-spa-skeleton-details.md`, in the shape of [ADR 0020](../../decisions/0020-database-details.md) (read it first):
 
@@ -876,7 +876,7 @@ EOF
 - `## Decisions`: the spec's decisions 1 to 5 and 7 to 9, copied with their wording, renumbered 1 to 8 (the spec's decision 6, the tool pages' scope, is a scope rule and stays in the spec), with links rewritten from `../../decisions/X` to `X` and from `../../` to `../`. Add what the implementation settled, in the cells of the decisions it touches: the relative-URL outcome (Task 3, step 6) in decision 7; the React plugin's use in the `web` project and the React Hooks preset used (Tasks 2 and 3) in decision 7 or a decision 9 of their own; any `allowBuilds` entry the owner decided; any MSW 3 difference.
 - `## Consequences`: `packages/shared` exists and is consumed from source by `apps/web` and, in a test, by `apps/api`; `pnpm test` runs three projects; a path other than `/` shows React Router's default error screen until the first feature phases; a hanging API leaves the page on `Checking the API…` until timeouts arrive with [OP-040](../open-points.md#op-040); the open points closed, moved and added (Task 6); the living docs and tool pages.
 
-- [ ] **Step 2: Note the cross-references in the earlier ADRs**
+- [x] **Step 2: Note the cross-references in the earlier ADRs**
 
 In the three places `CLAUDE.md` asks for (ADR 0021's header is step 1). Read each file's existing status line and notes first, and add in the same style:
 
@@ -886,7 +886,7 @@ In the three places `CLAUDE.md` asks for (ADR 0021's header is step 1). Read eac
 
 (code formatting in the real cells.)
 
-- [ ] **Step 3: Write the three tool pages and update Vitest's**
+- [x] **Step 3: Write the three tool pages and update Vitest's**
 
 Read `docs/development/tools/vitest.md` and `drizzle.md` first, and write each page in their format (what it is, why Szop uses it with the ADR links, the configuration explained, everyday use, links to the official documentation), about 40 to 50 lines each:
 
@@ -895,13 +895,13 @@ Read `docs/development/tools/vitest.md` and `drizzle.md` first, and write each p
 - `msw.md`: what Mock Service Worker (MSW) is (fakes the network so the real client runs); why (ADR 0007, decision 10); `src/test/server.ts` and `setup.ts` explained (`onUnhandledRequest: "error"`, `resetHandlers`, `server.use` for one test); that handlers are typed with the shared schema; MSW also has a browser mode, which Szop does not use.
 - `vitest.md`: add the `web` project (jsdom, `setupFiles`, the React plugin) to *Configuration*, and replace "the web app's tests will use a browser-like environment instead" with what is true now; a short *jsdom* paragraph (a simulated browser in Node: no layout, so no sizes; fast; the E2E journeys cover real browsers).
 
-- [ ] **Step 4: Update the testing guide and the setup guide**
+- [x] **Step 4: Update the testing guide and the setup guide**
 
 `docs/development/testing.md`: read it first; then: *The layers today* gains component tests (what they cover: a page with its hook, client and schema, the network faked); *Running the tests* gains `pnpm test --project web`; a new section *Writing a component test* with the test of Task 3 as the example, covering the real route table, the fresh `QueryClient`, finding by role and text, `server.use` for a state, `findBy` for what appears after a request, and that a handler is typed with `satisfies Health`; *Rules* gains: a handler that returns a body is typed with the shared schema, and `onUnhandledRequest: "error"` stays on. Keep `## Contents` in sync.
 
 `docs/development/setup.md`: read the section that runs the API; at its end add how to see the page: with PostgreSQL running, `pnpm dev` starts the API and Vite together; open the address Vite prints (`http://localhost:5173`); what each text means (`API: ok` and the schema version; `API: reachable` with `Database: down`: start PostgreSQL; `Can't reach the API`: the API is not running or `PORT` in `apps/api/.env` is not 3000, since the proxy's target is that constant). Keep `## Contents` in sync.
 
-- [ ] **Step 5: Update the architecture, the stack overview, the glossary and the README**
+- [x] **Step 5: Update the architecture, the stack overview, the glossary and the README**
 
 `docs/architecture/architecture.md`: in 1, the monorepo layout notes that `packages/shared` exists since PH-05 and holds the health schema; in 3, *Code structure*, name `api/client.ts`, the `health` folder (page, hook, test), `routes.tsx` and `test/` as built, and the proxy's target; *Routes* notes that only `/` exists.
 
@@ -911,7 +911,7 @@ Read `docs/development/tools/vitest.md` and `drizzle.md` first, and write each p
 
 `README.md`, *Development*: one sentence that `pnpm dev` now opens the page's address (Vite's `http://localhost:5173`), next to the existing text.
 
-- [ ] **Step 6: Verify links and contents**
+- [x] **Step 6: Verify links and contents**
 
 ```bash
 for f in docs/decisions/0021-spa-skeleton-details.md docs/decisions/000{2,5,7}-*.md docs/architecture/architecture.md docs/architecture/stack-overview.md docs/development/*.md docs/development/tools/*.md docs/glossary.md README.md; do
@@ -921,7 +921,7 @@ done; echo "link check done"
 
 Expected: `link check done` with no `BROKEN` line. Check by eye that every changed document's `## Contents` lists its `##` and `###` headings, and that requirements are linked, never plain IDs.
 
-- [ ] **Step 7: Tick this task's boxes and commit**
+- [x] **Step 7: Tick this task's boxes and commit**
 
 ```bash
 git add docs/decisions docs/development docs/architecture docs/glossary.md README.md docs/superpowers/plans/2026-10-07-PH-05-spa-skeleton.md

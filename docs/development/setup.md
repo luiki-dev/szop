@@ -12,7 +12,7 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
 - [6. Clone and install](#6-clone-and-install)
 - [7. Docker Desktop and the database](#7-docker-desktop-and-the-database)
 - [8. Check that everything works](#8-check-that-everything-works)
-- [9. Run the API](#9-run-the-api)
+- [9. Run the API and the page](#9-run-the-api-and-the-page)
 - [10. What the git hooks do](#10-what-the-git-hooks-do)
 - [11. Coming later](#11-coming-later)
 
@@ -108,7 +108,7 @@ Success looks like this:
 
 What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md), [Prettier](tools/prettier.md) and [Vitest](tools/vitest.md). CI runs the same scripts, except that it runs `pnpm test:coverage`, which is `pnpm test --coverage`: the same tests, plus coverage.
 
-## 9. Run the API
+## 9. Run the API and the page
 
 PostgreSQL must be running first (section 7). Then:
 
@@ -129,7 +129,16 @@ It answers `{"status":"ok","database":{"status":"up","schemaVersion":"0000_init"
 - **With the database stopped** while the API runs, `/api/health` answers `503` with `"down"`; it recovers by itself once the database is back.
 - **If it does not start**, `pnpm dev` keeps running and waits for a change after printing the error; fix the cause and save, or press Ctrl+C. `Invalid configuration` followed by variable names means `.env` is wrong: compare it with `.env.example`. `node: .env: not found` means step 6's `cp` was skipped, a `startup failed` line with `EADDRINUSE` means something else already uses the port, which is `PORT` in `.env`, and a `startup failed` line with `ECONNREFUSED` means the database is not running: start it with `docker compose up -d --wait`. `Invalid configuration` naming `DATABASE_…` variables means `.env` predates the database: copy the database block from `.env.example`.
 
-More in [tsx](tools/tsx.md) (what restarts the API), [pino-pretty](tools/pino-pretty.md) (what makes the log readable) and the [testing guide](testing.md).
+**The page.** The same `pnpm dev` also starts Vite, which serves the web app. With PostgreSQL running, open the address Vite prints, `http://localhost:5173`, in a browser. Open that one, not the API's: Vite forwards the page's `/api` requests to the API, so the browser sees a single address. The page's heading is "Szop", and its status line says:
+
+- **`API: ok`, `Database: up` and `Schema version: 0000_init`:** the whole chain works, from the page through the API to PostgreSQL.
+- **`API: reachable` and `Database: down`:** the API answers, but cannot reach PostgreSQL. Start it with `docker compose up -d --wait`; the next time the browser tab regains focus (or on a reload) the page updates.
+- **`Can't reach the API`:** the page got no usable answer. Either the API is not running (Vite's proxy then answers `502` with an empty body, which the page treats as a failure), or `PORT` in `apps/api/.env` is not 3000: the proxy's target is the constant `http://127.0.0.1:3000` in `apps/web/vite.config.ts`, not a setting.
+- **`Checking the API…`** shows briefly while the request is in flight.
+
+Any other address, such as `/nowhere`, shows React Router's default error screen: only `/` exists so far.
+
+More in [Vite](tools/vite.md) (the dev server and the proxy), [tsx](tools/tsx.md) (what restarts the API), [pino-pretty](tools/pino-pretty.md) (what makes the log readable) and the [testing guide](testing.md).
 
 ## 10. What the git hooks do
 
@@ -137,6 +146,7 @@ On every commit, a pre-commit hook formats and lints the staged files, and a com
 
 ## 11. Coming later
 
-- **The web app**, in [PH-05](../roadmap.md#ph-05-spa-skeleton).
+- **The production build**, and serving the web app from the API, in [PH-06](../roadmap.md#ph-06-production-build-and-web-baseline).
+- **Playwright** and the first end-to-end journey, in [PH-07](../roadmap.md#ph-07-first-e2e-journey).
 
 This guide grows with those phases.

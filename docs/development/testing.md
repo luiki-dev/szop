@@ -1,8 +1,8 @@
 # Testing guide
 
-How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tool behind the tests has its own page: [Vitest](tools/vitest.md).
+How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tools behind the tests have their own pages: [Vitest](tools/vitest.md), [Testing Library](tools/testing-library.md) and [Mock Service Worker (MSW)](tools/msw.md).
 
-The guide grows as the layers arrive: components in [PH-05](../roadmap.md#ph-05-spa-skeleton), end-to-end (E2E) journeys in [PH-07](../roadmap.md#ph-07-first-e2e-journey), and property tests and mutation testing in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
+The guide grows as the layers arrive: end-to-end (E2E) journeys in [PH-07](../roadmap.md#ph-07-first-e2e-journey), and property tests and mutation testing in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
 
 ## Contents
 
@@ -10,6 +10,7 @@ The guide grows as the layers arrive: components in [PH-05](../roadmap.md#ph-05-
 - [Running the tests](#running-the-tests)
 - [Writing an API test](#writing-an-api-test)
 - [Writing a database test](#writing-a-database-test)
+- [Writing a component test](#writing-a-component-test)
 - [Writing a unit test](#writing-a-unit-test)
 - [Rules](#rules)
 - [Coverage](#coverage)
@@ -20,23 +21,24 @@ The guide grows as the layers arrive: components in [PH-05](../roadmap.md#ph-05-
 |---|---|---|---|
 | API tests | `apps/api/src/**/*.test.ts`, for example `health/routes.test.ts` | A request through the real app gets the right status, headers and body: they go through `buildApp` and `inject()` | `api` |
 | Database tests | `apps/api/src/**/*.test.ts` that call `useTestDatabase()`, for example `test/database.test.ts` | Queries, migrations and cleanup work against the real PostgreSQL | `api` |
+| Component tests | `apps/web/src/**/*.test.tsx`, for example `health/health-page.test.tsx` | A page works as a user sees it: the real route table, hook, API client and schema run in a simulated browser ([jsdom](tools/vitest.md#jsdom)) with only the network faked by MSW | `web` |
 | Unit tests | next to the code, for example `apps/api/src/config.test.ts` | One function does its job for each kind of input, with no server involved | `api` |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
 
 Layers still to come:
 
-- **Component tests** for the web app, in [PH-05](../roadmap.md#ph-05-spa-skeleton).
 - **E2E journeys**, a real browser against the whole stack, in [PH-07](../roadmap.md#ph-07-first-e2e-journey).
 - **Property tests and mutation testing** for the domain rules, in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
 
 ## Running the tests
 
-All commands run from the repository root. PostgreSQL must be running first (`docker compose up -d --wait`, see [Docker Compose and PostgreSQL](tools/docker-compose.md)); otherwise the run stops at once with `Cannot reach PostgreSQL … Start it with docker compose up -d.` The tests read the server's address and password from `apps/api/.env`.
+All commands run from the repository root. PostgreSQL must be running first for the API tests (`docker compose up -d --wait`, see [Docker Compose and PostgreSQL](tools/docker-compose.md); the `web` project itself needs no database); otherwise the run stops at once with `Cannot reach PostgreSQL … Start it with docker compose up -d.` The tests read the server's address and password from `apps/api/.env`.
 
 ```bash
 pnpm test                       # every project once, the same tests CI runs (CI adds `--coverage`)
 pnpm test:watch                 # stays running and re-runs the tests a change affects, on every save
-pnpm test --project api         # one project only: api or hooks
+pnpm test --project api         # one project only: api, web or hooks
+pnpm test --project web         # for example, only the component tests
 pnpm test health                # only the files whose path contains "health"
 pnpm test:coverage              # every project, plus a coverage report
 ```
@@ -97,6 +99,51 @@ A database test runs against a real PostgreSQL, so a query, a migration or a cle
 - **Inspecting after a failure.** Nothing is dropped when a run ends, so the databases stay until the next run: `docker compose exec postgres psql -U szop -d szop_test_1`.
 - **The development database `szop` is never touched.** Tests only connect to `postgres` (to create the others) and to `szop_test_*`.
 
+## Writing a component test
+
+A component test renders a page in a simulated browser and checks what the user would see. Only the network is faked: the real route table, data hook, API client and schema run. The first one, `apps/web/src/health/health-page.test.tsx`, is the pattern. Its setup helper and its database-down case:
+
+```tsx
+function renderApp() {
+  const queryClient = new QueryClient();
+  const router = createMemoryRouter(routes, { initialEntries: ["/"] });
+  render(
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  );
+  return { queryClient };
+}
+
+it("says the database is down when the API reports it", async () => {
+  const databaseDown = {
+    status: "error",
+    database: { status: "down" },
+  } satisfies Health;
+  server.use(
+    http.get("/api/health", () =>
+      HttpResponse.json(databaseDown, { status: 503 }),
+    ),
+  );
+
+  renderApp();
+
+  expect(await screen.findByText("API: reachable")).toBeInTheDocument();
+  expect(screen.getByText("Database: down")).toBeInTheDocument();
+});
+```
+
+Line by line:
+
+- **The real route table.** `createMemoryRouter(routes)` builds a router from the same `routes` array the app uses, with the address held in memory, so a test runs the real route definitions and not a copy that could drift from them.
+- **A fresh `QueryClient` per test.** TanStack Query caches answers in its `QueryClient`; a new one for each test means a cached answer cannot leak into the next.
+- **`server.use` sets the state.** The default handler, in `src/test/server.ts`, answers the healthy body. A test that needs another state adds a handler for that test; the setup file drops it afterwards ([MSW](tools/msw.md)). Nothing else is faked: the client, the hook and the schema parse the answer as in production.
+- **A handler is typed with the shared schema.** The body is written `satisfies Health`, the type from `packages/shared`, so a fake that drifts from the real response fails the type check.
+- **Find elements by role and text.** `getByRole("status")` finds the element that announces the page's state; `getByText` finds a line in it. Never by test ID ([Testing Library](tools/testing-library.md)).
+- **`findBy` for what appears after a request.** The answer arrives after the first render, so `await screen.findByText(…)` waits for it, where `getByText` would fail at once. Once one `findBy` has passed, the other texts of the same answer are there, and `getBy` is enough. `getByRole("status")` right after `render` finds the element synchronously, so "Checking the API…" can be asserted before the answer.
+
+A relative address such as `/api/health` works as it is; no test resolves it against a host. A test of a new page copies `renderApp`, and takes the states it needs from `server.use`.
+
 ## Writing a unit test
 
 A unit test lives next to the code it tests and has the same name with `.test.ts`: `config.ts` and `config.test.ts`.
@@ -119,6 +166,8 @@ These follow [ADR 0007](../decisions/0007-testing-strategy.md), decision 16, unl
 
 - **Test at the lowest layer that can prove the behavior.** An edge case in a rule gets a unit test; a permission check, an API test; a user journey is the last resort.
 - **No `vi.mock` of our own modules.** Replacing a module couples the test to the file structure and hides wiring mistakes. Fakes go in through `buildApp(deps)`.
+- **A handler that returns a body is typed with the shared schema** (`satisfies Health`), so a fake that drifts from the contract fails the type check.
+- **`onUnhandledFrame: "error"` stays on** in `src/test/setup.ts`: a request nobody wrote a handler for must fail the test, not reach a real network.
 - **No snapshot tests of markup.** Too easy to "update the snapshot" without reading it.
 - **Flaky tests are bugs.** Fix or delete them promptly; never just re-run.
 - **Test-driven development (TDD) for domain rules, services and routes**, and every bug fix starts with a failing test that reproduces it ([ADR 0007](../decisions/0007-testing-strategy.md), decision 3).
@@ -130,6 +179,6 @@ Coverage tells you which lines the tests ran. It is **measured, never gated**: n
 
 - **The terminal table** has one row per file and these columns: `% Stmts` (statements run), `% Branch` (the sides of `if`s and other decisions taken), `% Funcs` (functions called) and `% Lines` (lines run), then `Uncovered Line #s`, the line numbers no test reached.
 - **Files no test loads show at 0%.** The root `vitest.config.ts` lists the folders to measure, so `server.ts`, which no test imports, appears at 0% instead of silently missing. That is the honest picture of an entry point checked by hand.
-- **Every file gets a row in the terminal table**, fully covered ones included. Vitest hides fully covered files only when it detects that an AI agent is running it, so the table may look shorter in an agent's output. The same numbers are in `coverage/index.html`, which you can click through down to the line, and in CI's table.
+- **The terminal table omits files at 100%.** Vitest's `text` reporter leaves out fully covered files, so the table is shorter than the list of measured files. `coverage/coverage-summary.json` lists every measured file, and `coverage/index.html` shows the same numbers, which you can click through down to the line.
 - **The test helpers are excluded.** The files in `apps/*/src/test/` are test infrastructure, not app code, so they get no row. `global-setup.ts` would show 0% anyway, since it runs outside the test workers.
-- **CI shows the same numbers.** The `test` job runs `pnpm test:coverage` and writes a table of every file to the job's summary ([CI/CD](ci-cd.md)).
+- **CI shows the same numbers.** The `test` job runs `pnpm test:coverage` and writes a table of every file, from `coverage-summary.json`, to the job's summary ([CI/CD](ci-cd.md)).

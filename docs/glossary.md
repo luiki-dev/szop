@@ -143,11 +143,13 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Core Web Vitals** | Google's three metrics of how a page feels to use: LCP (loading), INP (responsiveness) and CLS (visual stability), each with a "good" threshold. |
 | **CSS-in-JS** | Writing styles in JavaScript that a library turns into `<style>` elements at run time (Emotion, styled-components). Ruled out for Szop by its Content Security Policy. |
 | **Dark mode** | Light text on a dark background. Szop follows the system setting, which the browser exposes to CSS as `prefers-color-scheme`. |
+| **Data router (React Router)** | React Router's mode in which the routes are one array handed to `createBrowserRouter`, and a route may have a `loader` that fetches data. Szop uses the mode but not the `loader`: TanStack Query fetches data. |
 | **Definition of done** | The checklist every piece of work must meet before it counts as finished. Szop's is kept in `docs/development/definition-of-done.md`. |
 | **Dependabot** | GitHub's built-in bot that warns about vulnerable dependencies (alerts) and opens PRs updating them (version and security updates). |
 | **Dependency injection** | Handing a component the things it depends on (database client, email sender) from outside instead of it creating them. NestJS and Spring do it with a container; Szop passes dependencies explicitly. |
 | **Design tokens** | Named values for the basic visual choices — colors, spacing, font sizes — used everywhere instead of raw values, so the look can be changed in one place. Szop's come in two tiers: a palette, and semantic roles (`primary`, `muted`) that point into it ([visual design](architecture/visual-design.md#3-design-tokens)). |
 | **Dev container** | A development environment defined in the repository and run inside a container, so every machine gets identical tools. Considered for Szop, not used (see ADR 0005). |
+| **Discriminated union** | A choice between data shapes told apart by one field, such as `status` being `"ok"` or `"error"`. Zod's `discriminatedUnion` validates such a body and gives TypeScript the matching type. |
 | **Docker Compose** | A Docker tool that starts a set of containers described in a `compose.yaml` file. A **named volume** in it keeps a container's data (such as the database files) when the container is recreated. |
 | **Domain rules** | Business logic independent of HTTP and storage — e.g. how list items are ordered, how totals are computed. Szop keeps them in `packages/shared`. |
 | **ECS Exec** | Opening a shell inside a running ECS task (`aws ecs execute-command`). Szop's way to run `psql` against the demo database. |
@@ -204,6 +206,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Property-based testing** | Testing a rule against hundreds of generated inputs instead of a few hand-picked examples, checking a property that must always hold ("a parent category always comes before its children"). Szop uses fast-check. |
 | **Proxy (dev server)** | The Vite dev server forwarding requests for `/api/*` to the API, so the browser sees a single origin during development. |
 | **Push protection** | A GitHub secret scanning feature that rejects a push containing a recognized secret, such as an access key, before it reaches the repository. |
+| **Query key** | The name TanStack Query caches an answer under, such as `["health"]`. Two components asking with the same key share one request and one answer, and the key is how a cached answer is refreshed. |
 | **Quota** | A cap on how much data one workspace may hold (for example 200 lists). |
 | **Rate limit** | A cap on how many requests of a kind are accepted in a time window (for example 10 guest creations per hour per IP address); excess requests get HTTP status 429. |
 | **Region** | A geographic area where a cloud provider runs data centers, such as AWS's `eu-central-1` (Frankfurt). |
