@@ -56,7 +56,7 @@ Things no task's own check catches, most likely first. Each has a check in the t
 **Interfaces:**
 - Produces: the file `docs/decisions/0022-ring-tail-redesign.md`, titled "ADR 0022 — "Ring tail" visual redesign", with decisions numbered 1 to 13 as below. Tasks 3 to 5 link to it as `0022-ring-tail-redesign.md` and cite its decision numbers.
 
-- [ ] **Step 1: Check the numbers are free**
+- [x] **Step 1: Check the numbers are free**
 
 ```bash
 git fetch origin
@@ -66,7 +66,7 @@ git show origin/main:docs/open-points.md | grep -E "OP-079|OP-080|OP-081" || ech
 
 Expected: `0022 free` and `OPs free`. Otherwise stop and tell the owner.
 
-- [ ] **Step 2: Write ADR 0022**
+- [x] **Step 2: Write ADR 0022**
 
 Follow the shape of [ADR 0020](../../decisions/0020-database-details.md). Its exact header:
 
@@ -104,7 +104,7 @@ After the table, the spec's paragraph "Two smaller changes from the exploration�
 - [OP-073](../open-points.md#op-073) is closed.
 ```
 
-- [ ] **Step 3: Add the notes to ADR 0013**
+- [x] **Step 3: Add the notes to ADR 0013**
 
 Status line: replace the end of line 3 so it reads:
 
@@ -126,7 +126,7 @@ At the end of each decision's last cell, just before the closing ` |`, append (a
 
 (The backslashes above only escape the backticks inside this table; write plain backticks in the ADR.)
 
-- [ ] **Step 4: Add the notes to ADR 0001**
+- [x] **Step 4: Add the notes to ADR 0001**
 
 Status line becomes:
 
@@ -140,7 +140,7 @@ At the end of decision 9's last cell, before ` |`, append:
 <br>🔁 **Superseded by [ADR 0022](0022-ring-tail-redesign.md), decisions 1, 4 and 6:** checked items leave the list for the haul, a tray apart from it, most recently checked first; the toggle hiding them is dropped.
 ```
 
-- [ ] **Step 5: Add the glossary rows**
+- [x] **Step 5: Add the glossary rows**
 
 In `docs/glossary.md`, under `## Acronyms`, between the `OAuth / OIDC` row and the `OpenSSF` row:
 
@@ -154,7 +154,7 @@ Under `## Terms`, between the `Graceful shutdown` row and the `Headless componen
 | **Haul** | In Szop's list screen, the dark tray at the bottom that collects the checked items, shows how far along the shopping is and opens into a drawer listing them all (see `visual-design.md`). |
 ```
 
-- [ ] **Step 6: Check and commit**
+- [x] **Step 6: Check and commit**
 
 ```bash
 grep -c "0022-ring-tail-redesign.md" docs/decisions/0013-visual-design.md   # expect 8 (status + 7 notes)
