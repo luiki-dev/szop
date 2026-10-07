@@ -242,11 +242,11 @@ The owner's review of this task is the approval of the mockups: on pushing, send
 - Consumes: ADR 0022 (Task 1), the PNGs (Task 2).
 - Produces: the heading `### The list and the haul` under `## 5. Layout and navigation`, anchor `#the-list-and-the-haul`, which Tasks 4 and 5 may link to.
 
-- [ ] **Step 1: The introduction**
+- [x] **Step 1: The introduction**
 
 Line 3: "The decisions behind it, with the alternatives considered, are in [ADR 0013](../decisions/0013-visual-design.md);" becomes "The decisions behind it, with the alternatives considered, are in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../decisions/0022-ring-tail-redesign.md), which replaced its look, color and font;".
 
-- [ ] **Step 2: Section 1, the look**
+- [x] **Step 2: Section 1, the look**
 
 Replace the paragraph and the image of `## 1. The look` with:
 
@@ -256,7 +256,7 @@ Replace the paragraph and the image of `## 1. The look` with:
 ![The list screen in light and dark mode: white category cards on a fur-gray page, large round checkboxes, quantities and prices on the right, the add bar, and the dark haul at the bottom with its progress bar and chips](visual-design/list-screen.png)
 ```
 
-- [ ] **Step 3: Section 3, tokens**
+- [x] **Step 3: Section 3, tokens**
 
 In the section's introduction: "**The palette** is Tailwind's built-in colors;" becomes "**The palette** is Tailwind's built-in colors plus two of Szop's own, `fur` and `sage`;", and "The roles are shadcn/ui's, plus `warning`;" becomes "The roles are shadcn/ui's, plus `warning` and the `haul-*` roles of the haul;".
 
@@ -294,7 +294,7 @@ Under `### Spacing, size, shape and motion`, the `--radius` row becomes:
 | `--radius-surface` | 18 px for category cards; 24 px for the top corners of the haul and its drawer |
 ```
 
-- [ ] **Step 4: Section 4, brand**
+- [x] **Step 4: Section 4, brand**
 
 The brand mark bullet: "on a teal rounded square" becomes "on a sage rounded square (`sage-500`)". The wordmark bullet becomes:
 
@@ -304,7 +304,7 @@ The brand mark bullet: "on a teal rounded square" becomes "on a sage rounded squ
 
 Update the image's alt text: "…next to the wordmark on light and dark headers" stays; nothing else changes in it.
 
-- [ ] **Step 5: Section 5, the list and the haul**
+- [x] **Step 5: Section 5, the list and the haul**
 
 In the bullets, "**Inside a list**, the menu gives way to a back arrow, and the add bar sits at the bottom." becomes "**Inside a list**, the menu gives way to a back arrow, and the add bar and the haul sit at the bottom ([below](#the-list-and-the-haul))."
 
@@ -318,11 +318,11 @@ The main screen's pattern, decided in [ADR 0022](../decisions/0022-ring-tail-red
 ![Three phones: the haul's drawer open at 75% of the screen, scrolled to its "Put all back" button; the haul before anything is checked; and the haul folded to one line while typing in the add bar](visual-design/haul-drawer.png)
 ```
 
-- [ ] **Step 6: Section 6, forms**
+- [x] **Step 6: Section 6, forms**
 
 The bullet "**Labels are always visible**, never placeholder-only. …" gets a second sentence after "never placeholder-only.": "The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../decisions/0022-ring-tail-redesign.md), decision 13)."
 
-- [ ] **Step 7: Contents, check and commit**
+- [x] **Step 7: Contents, check and commit**
 
 Add `  - [The list and the haul](#the-list-and-the-haul)` under `- [5. Layout and navigation](#5-layout-and-navigation)` in `## Contents`.
 
