@@ -44,7 +44,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **IAM** | Identity and Access Management | AWS's system of users, roles and permissions deciding who may do what. |
 | **IDOR** | Insecure Direct Object Reference | A hole where a request names a record by its ID and the server does not check that the caller may use it, for example an item pointing at another user's category. Closed in Szop by resolving every ID within the workspace (see ADR 0012). |
 | **INP** | Interaction to Next Paint | A Core Web Vital: how long the page takes to visibly respond to a tap, click or key press. "Good" is at most 200 ms ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
-| **JSX** | JavaScript XML | HTML-like syntax inside JavaScript or TypeScript, used to write React components. It arrives with the web app in [PH-05](roadmap.md#ph-05-spa-skeleton). |
+| **JSX** | JavaScript XML | HTML-like syntax inside JavaScript or TypeScript, used to write React components. It has been used in `apps/web` since [PH-05](roadmap.md#ph-05-spa-skeleton). |
 | **JWT** | JSON Web Token | A signed token carrying claims about a user. An alternative to server-side sessions; not used in Szop. |
 | **LCP** | Largest Contentful Paint | A Core Web Vital: when the largest piece of content (usually the main text block or image) appears. "Good" is at most 2.5 s ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
 | **LTS** | Long-Term Support | A release line that receives fixes for an extended period. Even-numbered Node.js releases (22, 24, …) become LTS. |
@@ -255,7 +255,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Variable font** | One font file containing every weight (and sometimes width), instead of one file per weight. |
 | **Vertical slice** | A piece of work that delivers one capability through every layer at once (database, API, UI, tests, deployment), as opposed to building one layer at a time. |
 | **Visual companion** | A browser tab the superpowers brainstorming workflow opens to show mockups and visual options during a brainstorm. Its files live in `.superpowers/`, which git ignores. |
-| **Vitest project** | One named group of tests inside a Vitest run, with its own configuration. Szop has two: `api`, from `apps/api/vitest.config.ts`, and `hooks`, for the push hook's tests, which is defined inline. |
+| **Vitest project** | One named group of tests inside a Vitest run, with its own configuration. Szop has three: `api`, from `apps/api/vitest.config.ts`, `web`, from `apps/web/vitest.config.ts`, and `hooks`, for the push hook's tests, which is defined inline. |
 | **Walking skeleton** | The thinnest possible version of the whole system that runs end to end (here: SPA → API → database, built by CI and deployed) and does almost nothing yet. Built early to test the foundation decisions. |
 | **WebSocket** | A persistent two-way connection between browser and server, letting the server push messages (used for live updates). |
 | **Workspace** | Everything one user owns: lists, templates, catalog, categories, units, settings. |

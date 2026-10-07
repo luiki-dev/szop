@@ -110,7 +110,7 @@ What each check is, and how it is configured: [TypeScript](tools/typescript.md),
 
 ## 9. Run the API and the page
 
-PostgreSQL must be running first (section 7). Then:
+PostgreSQL must be running first (section 7). Then one command starts both the API and the web app's dev server (Vite):
 
 ```bash
 pnpm dev
@@ -122,9 +122,9 @@ In a second terminal:
 curl http://127.0.0.1:3000/api/health
 ```
 
-It answers `{"status":"ok","database":{"status":"up","schemaVersion":"0000_init"}}`. In the first terminal the log first shows `migrations applied` with the schema version, then a `Server listening at http://127.0.0.1:3000` line, then two lines for the request: `incoming request` and `request completed`, with the status code and the time it took.
+It answers `{"status":"ok","database":{"status":"up","schemaVersion":"0000_init"}}`. In the first terminal the log first shows `migrations applied` with the schema version, then a `Server listening at http://127.0.0.1:3000` line, then two lines for the request: `incoming request` and `request completed`, with the status code and the time it took. Vite's own output, with a `Local: http://localhost:5173/` line, is in the same terminal.
 
-- **Ctrl+C** stops the API; its log says `shutting down` and pnpm prints `Done`.
+- **Ctrl+C** stops both the API and Vite; the API's log says `shutting down` and pnpm prints `Done`.
 - **Editing a file** under `apps/api/src` restarts it by itself.
 - **With the database stopped** while the API runs, `/api/health` answers `503` with `"down"`; it recovers by itself once the database is back.
 - **If it does not start**, `pnpm dev` keeps running and waits for a change after printing the error; fix the cause and save, or press Ctrl+C. `Invalid configuration` followed by variable names means `.env` is wrong: compare it with `.env.example`. `node: .env: not found` means step 6's `cp` was skipped, a `startup failed` line with `EADDRINUSE` means something else already uses the port, which is `PORT` in `.env`, and a `startup failed` line with `ECONNREFUSED` means the database is not running: start it with `docker compose up -d --wait`. `Invalid configuration` naming `DATABASE_…` variables means `.env` predates the database: copy the database block from `.env.example`.

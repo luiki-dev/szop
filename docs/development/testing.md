@@ -138,11 +138,11 @@ Line by line:
 - **The real route table.** `createMemoryRouter(routes)` builds a router from the same `routes` array the app uses, with the address held in memory, so a test runs the real route definitions and not a copy that could drift from them.
 - **A fresh `QueryClient` per test.** TanStack Query caches answers in its `QueryClient`; a new one for each test means a cached answer cannot leak into the next.
 - **`server.use` sets the state.** The default handler, in `src/test/server.ts`, answers the healthy body. A test that needs another state adds a handler for that test; the setup file drops it afterwards ([MSW](tools/msw.md)). Nothing else is faked: the client, the hook and the schema parse the answer as in production.
-- **A handler is typed with the shared schema.** The body is written `satisfies Health`, the type from `packages/shared`, so a fake that drifts from the real response fails the type check.
+- **A handler with a valid body is typed with the shared schema.** The body is written `satisfies Health`, the type from `packages/shared`, so a fake that drifts from the real response fails the type check.
 - **Find elements by role and text.** `getByRole("status")` finds the element that announces the page's state; `getByText` finds a line in it. Never by test ID ([Testing Library](tools/testing-library.md)).
 - **`findBy` for what appears after a request.** The answer arrives after the first render, so `await screen.findByText(…)` waits for it, where `getByText` would fail at once. Once one `findBy` has passed, the other texts of the same answer are there, and `getBy` is enough. `getByRole("status")` right after `render` finds the element synchronously, so "Checking the API…" can be asserted before the answer.
 
-A relative address such as `/api/health` works as it is; no test resolves it against a host. A test of a new page copies `renderApp`, and takes the states it needs from `server.use`.
+A relative address such as `/api/health` works as it is; no test resolves it against a host. When the second page's test arrives, move `renderApp` to `src/test/` and share it; the states a test needs come from `server.use`.
 
 ## Writing a unit test
 
@@ -166,8 +166,8 @@ These follow [ADR 0007](../decisions/0007-testing-strategy.md), decision 16, unl
 
 - **Test at the lowest layer that can prove the behavior.** An edge case in a rule gets a unit test; a permission check, an API test; a user journey is the last resort.
 - **No `vi.mock` of our own modules.** Replacing a module couples the test to the file structure and hides wiring mistakes. Fakes go in through `buildApp(deps)`.
-- **A handler that returns a body is typed with the shared schema** (`satisfies Health`), so a fake that drifts from the contract fails the type check.
-- **`onUnhandledFrame: "error"` stays on** in `src/test/setup.ts`: a request nobody wrote a handler for must fail the test, not reach a real network.
+- **A handler that returns a valid health body is typed with the shared schema** (`satisfies Health`), so a fake that drifts from the contract fails the type check. The two rows of the page's `it.each` that return invalid bodies on purpose are the exception.
+- **A request nobody wrote a handler for fails the test**, naming the request, and never reaches a real network. `src/test/setup.ts` records each such request in an `onUnhandledFrame` callback and fails the test in `afterEach`; MSW 3's ready-made `"error"` strategy alone would only print an error and reject the request, which a test expecting the "Can't reach the API" state would not notice. Keep both halves ([MSW](tools/msw.md)).
 - **No snapshot tests of markup.** Too easy to "update the snapshot" without reading it.
 - **Flaky tests are bugs.** Fix or delete them promptly; never just re-run.
 - **Test-driven development (TDD) for domain rules, services and routes**, and every bug fix starts with a failing test that reproduces it ([ADR 0007](../decisions/0007-testing-strategy.md), decision 3).

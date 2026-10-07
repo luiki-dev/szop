@@ -4,7 +4,7 @@ ESLint reads the code without running it and reports bugs and bad patterns. With
 
 ## Why Szop uses it
 
-- **ESLint and Prettier, rather than Biome:** [ADR 0005](../../decisions/0005-development-environment.md), decision 12. ESLint and Prettier are what most projects and tutorials use, which fits the learning goal. ESLint also has the largest rule ecosystem, including type-aware rules and, later, the React Hooks rules; Biome is faster but has a smaller ecosystem.
+- **ESLint and Prettier, rather than Biome:** [ADR 0005](../../decisions/0005-development-environment.md), decision 12. ESLint and Prettier are what most projects and tutorials use, which fits the learning goal. ESLint also has the largest rule ecosystem, including type-aware rules and the React Hooks rules (used since PH-05); Biome is faster but has a smaller ecosystem.
 - **`strictTypeChecked`, not `recommendedTypeChecked`, and no `stylisticTypeChecked`:** [ADR 0016](../../decisions/0016-toolchain-details.md). The strict preset catches more real mistakes and suits a new codebase that can follow it from the start. The stylistic preset only argues about taste, and formatting belongs to [Prettier](prettier.md).
 
 ## Configuration
