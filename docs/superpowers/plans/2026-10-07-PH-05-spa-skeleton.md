@@ -234,7 +234,7 @@ EOF
 - Consumes: `@szop/shared` (Task 1), not yet used in code.
 - Produces: `routes: RouteObject[]` from `src/routes.tsx` (one route, `/`, rendering `<HealthPage />`); `HealthPage()` from `src/health/health-page.tsx` (a placeholder here); `App()` from `src/app.tsx`. Tasks 3 and 4 build on these names.
 
-- [ ] **Step 1: Create the package and add its dependencies**
+- [x] **Step 1: Create the package and add its dependencies**
 
 `apps/web/package.json`:
 
@@ -259,7 +259,7 @@ pnpm add -Dw eslint-plugin-react-hooks
 
 Expected: all succeed. If pnpm stops on an ignored build script, stop and show the owner. Check `apps/web/package.json` lists the packages under `dependencies` and `devDependencies` as in the spec.
 
-- [ ] **Step 2: Configuration files**
+- [x] **Step 2: Configuration files**
 
 `apps/web/tsconfig.json`:
 
@@ -316,7 +316,7 @@ export default defineConfig({
 </html>
 ```
 
-- [ ] **Step 3: Source files**
+- [x] **Step 3: Source files**
 
 `apps/web/src/health/health-page.tsx` (a placeholder; Task 3 replaces it):
 
@@ -377,7 +377,7 @@ createRoot(root).render(
 
 If `react-router/dom` does not export `RouterProvider` in the installed version, import it from `react-router` instead and note it for ADR 0021.
 
-- [ ] **Step 4: The React Hooks lint rules**
+- [x] **Step 4: The React Hooks lint rules**
 
 In `eslint.config.js`, add the import next to the others (`import reactHooks from "eslint-plugin-react-hooks";`) and, after the `languageOptions` block and before `prettier`, this block:
 
@@ -391,7 +391,7 @@ In `eslint.config.js`, add the import next to the others (`import reactHooks fro
 
 If the plugin has no `configs.flat.recommended`, use the flat preset its README names, and record which one in ADR 0021.
 
-- [ ] **Step 5: The workspace comment**
+- [x] **Step 5: The workspace comment**
 
 In `pnpm-workspace.yaml`, replace the comment above `packages:` with:
 
@@ -400,7 +400,7 @@ In `pnpm-workspace.yaml`, replace the comment above `packages:` with:
 # since PH-05.
 ```
 
-- [ ] **Step 6: Checks**
+- [x] **Step 6: Checks**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck
@@ -408,7 +408,7 @@ pnpm lint && pnpm format:check && pnpm typecheck
 
 Expected: all pass. If `apps/web` cannot resolve `@szop/shared` under `moduleResolution: "bundler"` (a `.ts` target in `exports`), report the exact error before changing anything.
 
-- [ ] **Step 7: Run it**
+- [x] **Step 7: Run it**
 
 Start `pnpm dev` in the background (PostgreSQL up, `apps/api/.env` present); wait for Vite's `Local:` line, then use the URL it prints (5173 unless taken):
 
@@ -419,7 +419,7 @@ curl -s -w ' %{http_code}\n' http://127.0.0.1:5173/api/health
 
 Expected: `1`; and the API's health body with `200`, through Vite's proxy. Stop `pnpm dev` afterwards.
 
-- [ ] **Step 8: Tick this task's boxes and commit**
+- [x] **Step 8: Tick this task's boxes and commit**
 
 ```bash
 git add apps/web eslint.config.js package.json pnpm-lock.yaml pnpm-workspace.yaml docs/superpowers/plans/2026-10-07-PH-05-spa-skeleton.md
