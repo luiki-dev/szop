@@ -46,7 +46,7 @@ The topic is done when:
 
 - **Building anything**: Tailwind, the tokens as CSS and the font arrive in PH-14; the haul in PH-17 and PH-21.
 - **Screens other than the list**: the lists home, templates, the catalog and the rest keep the layout principles of `visual-design.md` and are designed by their phases, in the new look.
-- **A haul panel on wide screens**: rejected for now (decision 6); it can come back as a 💡 future extension if shopping at a desktop turns out to matter.
+- **A haul panel on wide screens**: rejected for now (decision 7); it can come back as a 💡 future extension if shopping at a desktop turns out to matter.
 - **Which drawer component**: chosen by the phase that builds the drawer, under the CSP; new open point.
 - **How "checked" is stored**: new open point for PH-17.
 - **A manual theme toggle**: still a 💡 future extension, unchanged.
