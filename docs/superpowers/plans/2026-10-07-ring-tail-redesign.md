@@ -461,7 +461,7 @@ git commit -m "docs(roadmap): plan the haul into PH-17 and PH-21"
 
 ## After tasks 1–5: final pass and the PR
 
-- [ ] **Step 1: Stale mentions**
+- [x] **Step 1: Stale mentions**
 
 ```bash
 grep -rn -i "teal\b\|teal-\|figtree\|calm and roomy\|checked part\|hide checked\|hides checked" --include=*.md . \
@@ -470,7 +470,7 @@ grep -rn -i "teal\b\|teal-\|figtree\|calm and roomy\|checked part\|hide checked\
 
 Expected: no output. (ADRs, audits, earlier specs and plans stay as written; OP-073's closed entry keeps its history.)
 
-- [ ] **Step 2: Links**
+- [x] **Step 2: Links**
 
 Check every link this branch added or changed resolves, file and anchor. For each changed Markdown file, list its links and check them:
 
@@ -481,10 +481,10 @@ grep -on "](\([^)]*\))" <file>   # per file; open each target and find the ancho
 
 At least: `#the-list-and-the-haul`, `#contrast` and `#palette-and-semantic-roles` in the spec, `#op-081`, `#op-082`, `#op-083`, `0022-ring-tail-redesign.md` from `docs/`, `docs/decisions/` and `docs/architecture/`, and the four images.
 
-- [ ] **Step 3: PH-05**
+- [x] **Step 3: PH-05**
 
 `git fetch origin && git log --oneline origin/main -5`. If PH-05 has merged, `git merge origin/main`, resolve conflicts in `stack-overview.md`, `architecture.md` and `glossary.md` keeping both sides, and re-run steps 1 and 2. If it has not, say in the PR that it touches the same three files.
 
-- [ ] **Step 4: Self-review and the PR**
+- [x] **Step 4: Self-review and the PR**
 
 Read the whole diff against the spec (`git diff origin/main`). Then open the PR with the template (`.github/pull_request_template.md`), title `docs: adopt the Ring tail redesign`, its body naming ADR 0022, the four new images (embedded), the Gabarito check of Task 2, step 4, the dark mode check of step 5, and the worktree exception. Never merge it.
