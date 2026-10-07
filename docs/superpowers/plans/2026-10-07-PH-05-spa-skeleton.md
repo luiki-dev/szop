@@ -80,7 +80,7 @@ Checked on 2026-10-07 against the published packages: React Router 8.4.0 exports
 - Consumes: nothing from earlier tasks.
 - Produces: `@szop/shared` exporting `healthSchema` (a Zod discriminated union on `status`) and `type Health`; later tasks import them as `import { healthSchema, type Health } from "@szop/shared"`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 In `apps/api/src/health/routes.test.ts`, add the import as the first line:
 
@@ -99,7 +99,7 @@ In the first test (`answers 200 …`), after the existing `expect(response.json(
 
 In the second test (`answers 503 …`), inside the `try`, after its `toEqual` add the same three lines (`const body…` and the `expect`).
 
-- [ ] **Step 2: Run it and see it fail**
+- [x] **Step 2: Run it and see it fail**
 
 ```bash
 docker compose up -d --wait
@@ -109,7 +109,7 @@ pnpm test
 
 Expected: the `api` project's `routes.test.ts` fails to load with an error that `@szop/shared` cannot be resolved; the other tests pass.
 
-- [ ] **Step 3: Create the package**
+- [x] **Step 3: Create the package**
 
 `packages/shared/package.json` (no dependencies yet; `pnpm add` writes them):
 
@@ -183,7 +183,7 @@ pnpm --filter @szop/api add -D @szop/shared --workspace
 
 Expected: both succeed; `apps/api/package.json` lists `"@szop/shared": "workspace:*"` under `devDependencies`. If pnpm stops on an ignored build script, stop and show the owner.
 
-- [ ] **Step 4: Run the tests, the type check and the lint**
+- [x] **Step 4: Run the tests, the type check and the lint**
 
 ```bash
 pnpm test && pnpm typecheck && pnpm lint && pnpm format:check
@@ -191,11 +191,11 @@ pnpm test && pnpm typecheck && pnpm lint && pnpm format:check
 
 Expected: all pass, with `routes.test.ts` green. `pnpm typecheck` runs `tsc` in `packages/shared` too. If TypeScript cannot resolve `@szop/shared` from `apps/api` (`nodenext`), report it with the exact error before changing anything: the fix belongs in the spec's decision 7, not in a workaround.
 
-- [ ] **Step 5: Show that the test catches drift**
+- [x] **Step 5: Show that the test catches drift**
 
 Temporarily change `schemaVersion: z.string()` in `health.ts` to `z.number()`, run `pnpm test --project api`, and see `routes.test.ts`'s first test fail on the parse. Revert the change (`git diff packages/shared` is empty again).
 
-- [ ] **Step 6: Measure the package in coverage**
+- [x] **Step 6: Measure the package in coverage**
 
 In the root `vitest.config.ts`, change the coverage `include` to:
 
@@ -209,7 +209,7 @@ In the root `vitest.config.ts`, change the coverage `include` to:
 
 Run `pnpm test:coverage` and check that the table lists `packages/shared/src/health.ts`.
 
-- [ ] **Step 7: Tick this task's boxes and commit**
+- [x] **Step 7: Tick this task's boxes and commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test
