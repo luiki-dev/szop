@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     projects: [
       "apps/api/vitest.config.ts",
+      "apps/web/vitest.config.ts",
       {
         test: {
           name: "hooks",
@@ -17,7 +18,11 @@ export default defineConfig({
     // test loads too, such as server.ts, so they show up at 0%.
     coverage: {
       provider: "v8",
-      include: ["apps/*/src/**/*.ts", ".claude/hooks/**/*.ts"],
+      include: [
+        "apps/*/src/**/*.{ts,tsx}",
+        "packages/*/src/**/*.ts",
+        ".claude/hooks/**/*.ts",
+      ],
       // Test infrastructure, not app code; global-setup.ts would show 0%,
       // since it runs outside the test workers.
       exclude: ["apps/*/src/test/**"],

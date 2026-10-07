@@ -1,3 +1,4 @@
+import { healthSchema } from "@szop/shared";
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
@@ -32,6 +33,11 @@ describe("GET /api/health", () => {
       status: "ok",
       database: { status: "up", schemaVersion: "0000_init" },
     });
+
+    // The schema accepts the real body and drops nothing from it: a field
+    // the API adds without the schema would fail here.
+    const body: unknown = response.json();
+    expect(healthSchema.parse(body)).toEqual(body);
   });
 
   it("answers 503 when the database cannot be reached", async () => {
@@ -50,6 +56,9 @@ describe("GET /api/health", () => {
         status: "error",
         database: { status: "down" },
       });
+
+      const body: unknown = response.json();
+      expect(healthSchema.parse(body)).toEqual(body);
     } finally {
       await unreachable.$client.end();
     }
