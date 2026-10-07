@@ -26,7 +26,7 @@
 - **Where:** the worktree `/home/lemekk/workspace/szop-ring-tail`, branch `docs/ring-tail-redesign`, made from `origin/main`. The main checkout `/home/lemekk/workspace/szop` belongs to another session working on PH-05: **never run git commands there, never write files there.** The worktree is a one-off exception to [ADR 0009](../../decisions/0009-git-workflow.md), decision 5, approved by the owner.
 - **Execution: subagent-driven, with a fresh reviewer per task.** After a task's review passes and it is committed, push the branch (`git push -u origin docs/ring-tail-redesign` the first time, `git push` after) and **pause** until the owner has reviewed that task; start the next task only when the owner says so. Tick each task's step boxes (`- [ ]` → `- [x]`) in this plan in the task's own commit.
 - **Commits** follow Conventional Commits (`docs(scope): description`, imperative) and end with the session's attribution lines, naming the model that wrote the commit.
-- **ADR number 0022, open point numbers OP-079, OP-080, OP-081.** ADR 0021 is PH-05's, on its own branch. Before Task 1 and before the PR, run `git fetch origin` and check `origin/main` for `docs/decisions/0022-*` and for `OP-079` to `OP-081` in `docs/open-points.md`; if either is taken, stop and tell the owner.
+- **ADR number 0022, open point numbers OP-081, OP-082, OP-083.** ADR 0021 is PH-05's, on its own branch. Before Task 1 and before the PR, run `git fetch origin` and check `origin/main` for `docs/decisions/0022-*` and for `OP-081` to `OP-083` in `docs/open-points.md`; if either is taken, stop and tell the owner.
 - **Writing style ([CLAUDE.md](../../../CLAUDE.md)):** requirements, use cases and requirement areas are always links, never plain IDs (outside headings and code); every status gets its icon before its word; no icons in headings; niche acronyms spelled out on first use and in the glossary; a long document's `## Contents` lists every `##` and `###` heading.
 - **Accepted ADRs are not rewritten.** In ADR 0013 and ADR 0001 only the status line and notes at the end of decision cells change (mechanical changes). Audits, earlier specs and plans stay as written.
 - **Values, exactly these** (spec, [Palette and semantic roles](../specs/2026-10-07-ring-tail-redesign-design.md#palette-and-semantic-roles)): `fur #CBD0D6`; `sage-100 #E3EEE7`, `sage-300 #86C29C`, `sage-500 #5F9273`, `sage-700 #3F7357`, `sage-950 #10261A`; Tailwind `gray-200 #E5E7EB`, `gray-400 #9CA3AF`, `gray-500 #6B7280`, `gray-600 #4B5563`, `gray-700 #374151`, `gray-800 #1F2937`, `gray-900 #111827`, `gray-950 #030712`.
@@ -38,7 +38,7 @@
 Things no task's own check catches, most likely first. Each has a check in the task named.
 
 - **A stale mention left behind**: teal, Figtree, "calm and roomy", "the checked part", the hide toggle, or [ORD-4](../../requirements/functional-requirements.md#ord-4) as live, in a living doc. A reader would trust the stale line. Check: the grep in [the final pass](#after-tasks-15-final-pass-and-the-pr).
-- **A broken anchor**: a link to `#the-list-and-the-haul`, `#op-079` or a renamed heading that does not exist. Check: the link check in the final pass.
+- **A broken anchor**: a link to `#the-list-and-the-haul`, `#op-081` or a renamed heading that does not exist. Check: the link check in the final pass.
 - **The dark mode mockup does not read**: the cards and the haul blend into the `gray-900` page (contrast 1.2:1 and 1.1:1). Check: Task 2, step 5, with the fallback the spec names.
 - **Polish characters in Gabarito**: a product name like "Żółty ser" renders in a fallback font. Check: Task 2, step 4.
 - **Merge conflicts with PH-05**: its branch also changes `stack-overview.md`, `architecture.md` and `glossary.md`. Edit only the lines named here, so a conflict stays a few lines; the final pass checks whether PH-05 has merged.
@@ -61,7 +61,7 @@ Things no task's own check catches, most likely first. Each has a check in the t
 ```bash
 git fetch origin
 git ls-tree --name-only origin/main docs/decisions/ | grep 0022 || echo "0022 free"
-git show origin/main:docs/open-points.md | grep -E "OP-079|OP-080|OP-081" || echo "OPs free"
+git show origin/main:docs/open-points.md | grep -E "OP-081|OP-082|OP-083" || echo "OPs free"
 ```
 
 Expected: `0022 free` and `OPs free`. Otherwise stop and tell the owner.
@@ -97,8 +97,8 @@ After the table, the spec's paragraph "Two smaller changes from the exploration�
 ```markdown
 - **The design system changes before it is built.** [visual-design.md](../architecture/visual-design.md) describes the Ring tail look, the `fur` and `sage` colors, the `haul-*` roles, Gabarito, `--radius-surface`, the sage brand and the list-and-haul pattern, with new mockups; PH-14 builds it ([OP-056](../open-points.md#op-056)).
 - **Checked items leave the list.** [ORD-1](../requirements/functional-requirements.md#ord-1), [ORD-2](../requirements/functional-requirements.md#ord-2), [ORD-5](../requirements/functional-requirements.md#ord-5) and [UC-3](../requirements/functional-requirements.md#uc-3-shop-in-a-store) describe the haul; [ORD-4](../requirements/functional-requirements.md#ord-4), the toggle hiding checked items, is ✖️ dropped. [ITM-8](../requirements/functional-requirements.md#itm-8) and [LST-5](../requirements/functional-requirements.md#lst-5) keep their wording: the haul shows all three totals, and "Uncheck all" is the drawer's "Put all back".
-- **List items record when they were checked**, which orders the haul; how "checked" is stored is [OP-080](../open-points.md#op-080) for PH-17.
-- **PH-17 builds the haul**: its chips, putting items back, the drawer and the progress by item count. It grows with them, so its brainstorm considers splitting the drawer off ([OP-081](../open-points.md#op-081)), and it picks a drawer component that works under the CSP ([OP-079](../open-points.md#op-079)). **PH-21 adds the money** in the haul's header and "Put all back", and no longer delivers [ORD-4](../requirements/functional-requirements.md#ord-4).
+- **List items record when they were checked**, which orders the haul; how "checked" is stored is [OP-082](../open-points.md#op-082) for PH-17.
+- **PH-17 builds the haul**: its chips, putting items back, the drawer and the progress by item count. It grows with them, so its brainstorm considers splitting the drawer off ([OP-083](../open-points.md#op-083)), and it picks a drawer component that works under the CSP ([OP-081](../open-points.md#op-081)). **PH-21 adds the money** in the haul's header and "Put all back", and no longer delivers [ORD-4](../requirements/functional-requirements.md#ord-4).
 - **The font costs 16 KB more**: Gabarito's Latin file is 36 KB against Figtree's 20 KB. Fonts are outside the 200 KB JavaScript budget of [NFR-3](../requirements/functional-requirements.md#nfr-3), and `font-display: swap` keeps text visible while it loads.
 - **A haul panel on wide screens** (decision 7) is not built; it can come back as a 💡 future extension if shopping at a desktop turns out to matter.
 - [OP-073](../open-points.md#op-073) is closed.
@@ -344,7 +344,7 @@ git commit -m "docs(design): describe the Ring tail look and the haul"
 - Modify: `README.md` (one feature line)
 
 **Interfaces:**
-- Consumes: ADR 0022 (Task 1); the anchor `#the-list-and-the-haul` (Task 3); OP-080 (written in Task 5, linked here: the link resolves once Task 5 lands, and the final pass checks it).
+- Consumes: ADR 0022 (Task 1); the anchor `#the-list-and-the-haul` (Task 3); OP-082 (written in Task 5, linked here: the link resolves once Task 5 lands, and the final pass checks it).
 
 - [x] **Step 1: The requirements**
 
@@ -362,7 +362,7 @@ Then check whether the document lists MVP requirements elsewhere (`grep -n "ORD-
 
 In `docs/architecture/architecture.md`:
 
-- The **List items** bullet under `### Data model highlights` gets this sentence at its end: "They also record when they were checked, which orders the haul with the most recently checked first ([ORD-2](../requirements/functional-requirements.md#ord-2)); whether "checked" is that timestamp alone or a flag next to it is [OP-080](../open-points.md#op-080)."
+- The **List items** bullet under `### Data model highlights` gets this sentence at its end: "They also record when they were checked, which orders the haul with the most recently checked first ([ORD-2](../requirements/functional-requirements.md#ord-2)); whether "checked" is that timestamp alone or a flag next to it is [OP-082](../open-points.md#op-082)."
 - The **Assets** bullet: "the Figtree font (`@fontsource-variable/figtree`)" becomes "the Gabarito font (`@fontsource-variable/gabarito`)".
 - The state table's row `| **Device preference** | "hide checked items" toggle ([ORD-4](../requirements/functional-requirements.md#ord-4)) | \`localStorage\` |` becomes `| **Device preference** | none yet | \`localStorage\` |`.
 
@@ -395,7 +395,7 @@ git commit -m "docs(requirements): move checked items to the haul"
 - Modify: `docs/open-points.md` (OP-056, OP-073, three new entries)
 
 **Interfaces:**
-- Produces: the anchors `#op-079`, `#op-080` and `#op-081`, linked from ADR 0022 (Task 1) and `architecture.md` (Task 4).
+- Produces: the anchors `#op-081`, `#op-082` and `#op-083`, linked from ADR 0022 (Task 1) and `architecture.md` (Task 4).
 
 - [x] **Step 1: The roadmap**
 
@@ -416,31 +416,31 @@ In OP-056's text, "Figtree from `@fontsource-variable/figtree`" becomes "Gabarit
 Move the whole `#### OP-073` entry from the PH-14 group to the end of `## Closed` (after OP-065, IDs in order), unchanged except its status line:
 
 ```markdown
-- **Status:** ✅ Closed: kept and adjusted in [ADR 0022](decisions/0022-ring-tail-redesign.md), designed in the [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md): sage instead of the exploration's green, the add bar above the haul, one row of chips with a drawer, progress inside the haul, the same tray on a desktop, and a darkest-haul dark mode. The work it leaves is OP-079 to OP-081 (PH-17) and OP-056 (PH-14)
+- **Status:** ✅ Closed: kept and adjusted in [ADR 0022](decisions/0022-ring-tail-redesign.md), designed in the [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md): sage instead of the exploration's green, the add bar above the haul, one row of chips with a drawer, progress inside the haul, the same tray on a desktop, and a darkest-haul dark mode. The work it leaves is OP-081 to OP-083 (PH-17) and OP-056 (PH-14)
 ```
 
-- [x] **Step 4: Add OP-079 to OP-081**
+- [x] **Step 4: Add OP-081 to OP-083**
 
 At the end of the `### PH-17 List items` group (after its last entry, before `### PH-18`), in this order:
 
 ```markdown
-#### OP-079
+#### OP-081
 
 **Pick a drawer component that works under the CSP** for the haul's drawer ([visual-design.md](architecture/visual-design.md#the-list-and-the-haul)). shadcn/ui's Drawer is built on vaul; check whether vaul injects `<style>` elements, which the CSP forbids ([visual-design.md](architecture/visual-design.md#under-the-content-security-policy)). If it does, shape Base UI's Dialog as a bottom sheet, with dragging added on top. Either way the drawer is a modal dialog: focus moves in and is trapped, Esc and the dimmed list close it, and dragging is never the only way to open or close it.
 
 - **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 4 and 5; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
-#### OP-080
+#### OP-082
 
 **Decide how "checked" is stored.** The haul orders items by when they were checked, so list items need a `checked_at` timestamp. Either it is the only field (`checked_at IS NOT NULL` means checked), or a `checked` flag stays next to it. One field cannot disagree with itself; a flag keeps the API's `{ "checked": true }` shape and simple queries. "Put all back" ([LST-5](requirements/functional-requirements.md#lst-5)) and duplicating a list must clear it either way.
 
 - **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#architecture-changes)
 - **Status:** ⬜ Open
 
-#### OP-081
+#### OP-083
 
-**Consider splitting PH-17.** The haul makes PH-17 bigger: besides adding, editing, checking and sorting items, it builds the haul, its chips, putting items back, the drawer (a new component, [OP-079](#op-079)) and the progress by item count. Its brainstorm checks the plan against the size rule of [ADR 0014](decisions/0014-roadmap.md), decision 6, and splits the drawer into a phase of its own if it is too big.
+**Consider splitting PH-17.** The haul makes PH-17 bigger: besides adding, editing, checking and sorting items, it builds the haul, its chips, putting items back, the drawer (a new component, [OP-081](#op-081)) and the progress by item count. Its brainstorm checks the plan against the size rule of [ADR 0014](decisions/0014-roadmap.md), decision 6, and splits the drawer into a phase of its own if it is too big.
 
 - **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences
 - **Status:** ⬜ Open
@@ -479,7 +479,7 @@ git diff --name-only origin/main -- '*.md'
 grep -on "](\([^)]*\))" <file>   # per file; open each target and find the anchor's heading
 ```
 
-At least: `#the-list-and-the-haul`, `#contrast` and `#palette-and-semantic-roles` in the spec, `#op-079`, `#op-080`, `#op-081`, `0022-ring-tail-redesign.md` from `docs/`, `docs/decisions/` and `docs/architecture/`, and the four images.
+At least: `#the-list-and-the-haul`, `#contrast` and `#palette-and-semantic-roles` in the spec, `#op-081`, `#op-082`, `#op-083`, `0022-ring-tail-redesign.md` from `docs/`, `docs/decisions/` and `docs/architecture/`, and the four images.
 
 - [ ] **Step 3: PH-05**
 

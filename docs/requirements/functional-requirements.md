@@ -6,10 +6,11 @@ Requirements are tagged:
 
 - **🎯 [MVP]** — part of the first release.
 - **🔜 [Later]** — planned core functionality, built after the MVP.
+- **✖️ [Dropped]** — no longer a requirement; the ID is kept and never reused.
 
 Every requirement and use case has its own heading, so its ID can be linked directly, for example [`functional-requirements.md#acc-1`](#acc-1) or [`#uc-3-shop-in-a-store`](#uc-3-shop-in-a-store). Other documents refer to requirements and use cases by these links rather than by plain IDs.
 
-Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server), [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits) and [ADR 0013](../decisions/0013-visual-design.md) (the non-functional requirements). Acronyms are explained in the [glossary](../glossary.md).
+Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server), [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits), [ADR 0013](../decisions/0013-visual-design.md) (the non-functional requirements) and [ADR 0022](../decisions/0022-ring-tail-redesign.md) (checked items go to the haul). Acronyms are explained in the [glossary](../glossary.md).
 
 ## Contents
 

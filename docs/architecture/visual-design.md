@@ -161,6 +161,13 @@ Items without a price are left out of all three. When no item has a price, the m
 | Offline | The amber banner at the top; checkboxes disabled with a reason | Chips, ↶ and "Put all back" disabled |
 | Dark mode | `gray-900` page, `gray-800` cards | `gray-950`, the darkest surface |
 
+**Accessibility.**
+
+- Chips and ↶ buttons are buttons named "Put *item* back". "+N more" is named "Show all N items in the haul".
+- The drawer is a modal dialog named "The haul": focus moves into it, is trapped, and returns to what opened it. Dragging is never the only way: the header and "+N more" open it, Esc and the dimmed list close it.
+- The progress bar is a `progressbar` with its value and maximum, labelled by the caption.
+- The handle is decoration: it shows the haul can be pulled up, but the header is the control, so it needs no 3:1 contrast.
+
 ## 6. Interaction patterns
 
 ### Feedback

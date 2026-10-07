@@ -526,23 +526,23 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 - **Source:** [Audit, C3](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ⬜ Open
 
-#### OP-079
+#### OP-081
 
 **Pick a drawer component that works under the CSP** for the haul's drawer ([visual-design.md](architecture/visual-design.md#the-list-and-the-haul)). shadcn/ui's Drawer is built on vaul; check whether vaul injects `<style>` elements, which the CSP forbids ([visual-design.md](architecture/visual-design.md#under-the-content-security-policy)). If it does, shape Base UI's Dialog as a bottom sheet, with dragging added on top. Either way the drawer is a modal dialog: focus moves in and is trapped, Esc and the dimmed list close it, and dragging is never the only way to open or close it.
 
 - **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 4 and 5; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
-#### OP-080
+#### OP-082
 
 **Decide how "checked" is stored.** The haul orders items by when they were checked, so list items need a `checked_at` timestamp. Either it is the only field (`checked_at IS NOT NULL` means checked), or a `checked` flag stays next to it. One field cannot disagree with itself; a flag keeps the API's `{ "checked": true }` shape and simple queries. "Put all back" ([LST-5](requirements/functional-requirements.md#lst-5)) and duplicating a list must clear it either way.
 
 - **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#architecture-changes)
 - **Status:** ⬜ Open
 
-#### OP-081
+#### OP-083
 
-**Consider splitting PH-17.** The haul makes PH-17 bigger: besides adding, editing, checking and sorting items, it builds the haul, its chips, putting items back, the drawer (a new component, [OP-079](#op-079)) and the progress by item count. Its brainstorm checks the plan against the size rule of [ADR 0014](decisions/0014-roadmap.md), decision 6, and splits the drawer into a phase of its own if it is too big.
+**Consider splitting PH-17.** The haul makes PH-17 bigger: besides adding, editing, checking and sorting items, it builds the haul, its chips, putting items back, the drawer (a new component, [OP-081](#op-081)) and the progress by item count. Its brainstorm checks the plan against the size rule of [ADR 0014](decisions/0014-roadmap.md), decision 6, and splits the drawer into a phase of its own if it is too big.
 
 - **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences
 - **Status:** ⬜ Open
@@ -905,4 +905,4 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - Dark mode, which was not drawn.
 
 - **Source:** the owner's design exploration of 2026-10-06: [a screenshot of the mockup](ideas/visual-design/ring-tail.png), and the "Ring tail" artboard on [this canvas](https://claude.ai/artifact/Toj7j2GizWnVV7viL6bmc9) (private), next to the two directions not taken, "Store route" and "Yellow sticker"
-- **Status:** ✅ Closed: kept and adjusted in [ADR 0022](decisions/0022-ring-tail-redesign.md), designed in the [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md): sage instead of the exploration's green, the add bar above the haul, one row of chips with a drawer, progress inside the haul, the same tray on a desktop, and a darkest-haul dark mode. The work it leaves is OP-079 to OP-081 (PH-17) and OP-056 (PH-14)
+- **Status:** ✅ Closed: kept and adjusted in [ADR 0022](decisions/0022-ring-tail-redesign.md), designed in the [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md): sage instead of the exploration's green, the add bar above the haul, one row of chips with a drawer, progress inside the haul, the same tray on a desktop, and a darkest-haul dark mode. The work it leaves is OP-081 to OP-083 (PH-17) and OP-056 (PH-14)

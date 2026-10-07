@@ -116,7 +116,7 @@ Computed with the WCAG formula for every pair the roles produce ([NFR-2](../../r
 | `primary-foreground` on `primary` | 5.5 | 7.8 |
 | `primary` on `accent` (the active menu entry) | 4.6 | 7.8 |
 | `ring` on `card` / on `background` (UI) | 5.5 / 3.6 | 7.1 / 8.6 |
-| `haul-foreground` on `haul` / on `haul-chip` | 14.7 / 10.3 | 20.1 / 11.9 |
+| `haul-foreground` on `haul` / on `haul-chip` | 14.7 / 10.3 | 20.1 / 14.7 |
 | `haul-muted` on `haul` / on `haul-chip` | 9.5 / 6.6 | 7.9 / 5.8 |
 | `haul-accent` on `haul` / on `haul-chip` (UI) | 7.1 / 5.0 | 9.8 / 7.1 |
 
@@ -244,7 +244,7 @@ In [architecture.md](../../architecture/architecture.md) and [stack-overview.md]
 - **[open-points.md](../../open-points.md)**:
   - [OP-073](../../open-points.md#op-073) ✅ closed, pointing at ADR 0022;
   - PH-14's design system point (Figtree, the teal tokens) names Gabarito and the new tokens;
-  - new, under PH-17: **OP-079** a drawer component that works under the CSP (shadcn's Drawer is built on vaul, which may inject styles; a Base UI Dialog shaped as a bottom sheet is the fallback); **OP-080** how "checked" is stored, the timestamp alone or a flag next to it; **OP-081** PH-17 grows with the haul and its drawer: its brainstorm considers splitting the drawer into a phase of its own.
+  - new, under PH-17: **OP-081** a drawer component that works under the CSP (shadcn's Drawer is built on vaul, which may inject styles; a Base UI Dialog shaped as a bottom sheet is the fallback); **OP-082** how "checked" is stored, the timestamp alone or a flag next to it; **OP-083** PH-17 grows with the haul and its drawer: its brainstorm considers splitting the drawer into a phase of its own.
 - **[glossary.md](../../glossary.md)**: OFL (SIL Open Font License).
 
 ## Tasks
@@ -261,5 +261,5 @@ About five, each a commit on `docs/ring-tail-redesign`:
 
 - **The dark surfaces**: with Tailwind's grays the cards and the haul are close in tone to the page (1.2:1 and 1.1:1). The final mockup must show them clearly apart; if it does not, the dark `background` moves to a custom value between `gray-900` and `gray-800`, recorded in ADR 0022.
 - **Gabarito's Latin Extended** covers Polish product names (ą, ę, ł, ó, ś, ź, ż and the capitals) in every weight used.
-- **The vaul question** (OP-079) is not answered here; the mockups do not depend on it.
+- **The vaul question** (OP-081) is not answered here; the mockups do not depend on it.
 - **This branch was made from `origin/main` while PH-05 is open**, which takes ADR 0021. If PH-05 adds open points before this merges, the new open points take the next free numbers instead.
