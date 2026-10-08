@@ -12,6 +12,8 @@ const config: Config = {
   logLevel: "silent",
   // Not used: each test passes its own database to buildApp.
   database: { host: "", port: 1, name: "", user: "", password: "" },
+  // Not served here: the SPA's serving is tested in web/routes.test.ts.
+  webRoot: "/nonexistent/szop-web-root",
 };
 
 describe("GET /api/health", () => {

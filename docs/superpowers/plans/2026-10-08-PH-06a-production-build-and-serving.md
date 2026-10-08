@@ -147,7 +147,7 @@ EOF
 - Consumes: nothing from Task 1.
 - Produces: `Config.webRoot: string` (absolute), read from `WEB_ROOT`. Task 3 passes `config.webRoot` to the serving plugin.
 
-- [ ] **Step 1: Add WEB_ROOT to the local .env first**
+- [x] **Step 1: Add WEB_ROOT to the local .env first**
 
 The test helper `src/test/database.ts` parses `apps/api/.env` with `loadConfig`; once `WEB_ROOT` is required, a file without it fails every database test.
 
@@ -158,7 +158,7 @@ grep WEB_ROOT apps/api/.env
 
 Expected: `WEB_ROOT=../web/dist`.
 
-- [ ] **Step 2: Write the failing config tests**
+- [x] **Step 2: Write the failing config tests**
 
 In `apps/api/src/config.test.ts`:
 
@@ -184,12 +184,12 @@ In `apps/api/src/config.test.ts`:
 
 `names` is built from `valid`, so "names %s when it is missing" and "lists every problem at once" cover `WEB_ROOT` without further change.
 
-- [ ] **Step 3: Run the tests and see them fail**
+- [x] **Step 3: Run the tests and see them fail**
 
 Run: `pnpm test --project api src/config.test.ts`
 Expected: FAIL: "names WEB_ROOT when it is missing", "rejects an empty WEB_ROOT", the two new tests and the typed-config test fail (`webRoot` is `undefined`).
 
-- [ ] **Step 4: Implement the setting**
+- [x] **Step 4: Implement the setting**
 
 In `apps/api/src/config.ts`:
 
@@ -212,12 +212,12 @@ In `apps/api/src/config.ts`:
 
 - In the object `loadConfig` returns, after the `database: { … },` block, add `webRoot: resolve(data.WEB_ROOT),`.
 
-- [ ] **Step 5: Run the config tests and see them pass**
+- [x] **Step 5: Run the config tests and see them pass**
 
 Run: `pnpm test --project api src/config.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Update the other config literal and the example file**
+- [x] **Step 6: Update the other config literal and the example file**
 
 In `apps/api/src/health/routes.test.ts`, add to the `config` literal, after the `database` line:
 
@@ -236,12 +236,12 @@ In `apps/api/.env.example`, append:
 WEB_ROOT=../web/dist
 ```
 
-- [ ] **Step 7: Run every check**
+- [x] **Step 7: Run every check**
 
 Run: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test`
 Expected: all pass. `typecheck` would have caught any other `Config` literal; there is none today.
 
-- [ ] **Step 8: Tick this task's boxes and commit**
+- [x] **Step 8: Tick this task's boxes and commit**
 
 ```bash
 git add apps/api/src/config.ts apps/api/src/config.test.ts apps/api/.env.example apps/api/src/health/routes.test.ts docs/superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md

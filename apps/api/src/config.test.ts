@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "./config.ts";
 
@@ -10,6 +11,7 @@ const valid = {
   DATABASE_NAME: "szop",
   DATABASE_USER: "szop",
   DATABASE_PASSWORD: "szop",
+  WEB_ROOT: "../web/dist",
 };
 
 const names = Object.keys(valid);
@@ -37,12 +39,25 @@ describe("loadConfig", () => {
         user: "szop",
         password: "szop",
       },
+      webRoot: resolve("../web/dist"),
     });
   });
 
   it("ignores variables it does not know", () => {
     expect(loadConfig({ ...valid, PATH: "/usr/bin" })).toEqual(
       loadConfig(valid),
+    );
+  });
+
+  it("resolves a relative WEB_ROOT against the working directory", () => {
+    expect(loadConfig({ ...valid, WEB_ROOT: "../web/dist" }).webRoot).toBe(
+      resolve(process.cwd(), "../web/dist"),
+    );
+  });
+
+  it("keeps an absolute WEB_ROOT as it is", () => {
+    expect(loadConfig({ ...valid, WEB_ROOT: "/srv/szop/web" }).webRoot).toBe(
+      "/srv/szop/web",
     );
   });
 
@@ -65,6 +80,7 @@ describe("loadConfig", () => {
     "DATABASE_NAME",
     "DATABASE_USER",
     "DATABASE_PASSWORD",
+    "WEB_ROOT",
   ])("rejects an empty %s instead of treating it as missing", (name) => {
     expect(errorFor({ ...valid, [name]: "" })).toMatch(
       new RegExp(`${name}: (?!missing)`),
