@@ -1,6 +1,6 @@
 # Vite
 
-Vite is the build tool and development server of the web app. In development it serves the app's source files to the browser and reloads the page the moment a file changes, with no bundling step to wait for. For production it will bundle the source into a few static files; that part arrives in [PH-06](../../roadmap.md#ph-06-production-build-and-web-baseline).
+Vite is the build tool and development server of the web app. In development it serves the app's source files to the browser and reloads the page the moment a file changes, with no bundling step to wait for. For production it will bundle the source into a few static files; that part arrives in [PH-06a](../../roadmap.md#ph-06a-production-build-and-serving).
 
 ## Why Szop uses it
 
@@ -30,7 +30,7 @@ pnpm --filter @szop/web dev  # Vite only
 - **`pnpm dev`** runs every package's `dev` script in parallel: the API restarts on a change ([tsx](tsx.md)) and Vite serves the page. It prints `Local: http://localhost:5173/`; open that address, not the API's.
 - **Changing a file** updates the open page at once. A change to `vite.config.ts` restarts Vite by itself.
 - **The page shows "Can't reach the API":** the API is not running, or `PORT` in `apps/api/.env` is not 3000. See the [setup guide](../setup.md#9-run-the-api-and-the-page).
-- **There is no `build` script yet.** Bundling for production, and serving the result from the API, is [PH-06](../../roadmap.md#ph-06-production-build-and-web-baseline).
+- **There is no `build` script yet.** Bundling for production, and serving the result from the API, is [PH-06a](../../roadmap.md#ph-06a-production-build-and-serving).
 
 ## Official documentation
 

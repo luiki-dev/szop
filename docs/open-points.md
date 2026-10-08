@@ -12,7 +12,8 @@ Everything that is still undecided or not yet done and has been left to a later 
   - [PH-03 API skeleton](#ph-03-api-skeleton)
   - [PH-04 Database](#ph-04-database)
   - [PH-05 SPA skeleton](#ph-05-spa-skeleton)
-  - [PH-06 Production build and web baseline](#ph-06-production-build-and-web-baseline)
+  - [PH-06a Production build and serving](#ph-06a-production-build-and-serving)
+  - [PH-06b Web security baseline](#ph-06b-web-security-baseline)
   - [PH-07 First E2E journey](#ph-07-first-e2e-journey)
   - [PH-08 Container image](#ph-08-container-image)
 - [Stage 3: Walking skeleton, deployed and released](#stage-3-walking-skeleton-deployed-and-released)
@@ -80,9 +81,9 @@ Roadmap entry: [PH-04](roadmap.md#ph-04-database).
 
 Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).
 
-### PH-06 Production build and web baseline
+### PH-06a Production build and serving
 
-Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
+Roadmap entry: [PH-06a](roadmap.md#ph-06a-production-build-and-serving).
 
 #### OP-007
 
@@ -99,23 +100,13 @@ Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-03:** `GET /api/health` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
   - **PH-04:** migrations at startup ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
-  - **PH-06:** serving the SPA with `@fastify/static`
+  - **PH-06a:** serving the SPA with `@fastify/static`
   - **PH-08:** the multi-stage Dockerfile
   - **PH-09:** `infra/bootstrap`, with the state bucket's protections
   - **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy
   - **PH-12:** `infra/demo`
   - **PH-18:** the SES `EmailSender`
 - **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
-- **Status:** ⬜ Open
-
-#### OP-053
-
-**Build the app-wide web baseline** with the first endpoints: `@fastify/helmet` with the CSP, HSTS and `Referrer-Policy: no-referrer`; the `Sec-Fetch-Site` or `Origin` check and JSON-only bodies on every unsafe method; `TRUSTED_PROXY_HOPS` in the configuration, and how Better Auth is handed the same client IP; the request log's URL serializer that strips tokens; the API test with a forged `X-Forwarded-For`, and the one-time manual check on the demo that the log shows the real address.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-06:** everything except the demo check
-  - **PH-12:** the one-time check on the demo that the log shows the real address
-- **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13
 - **Status:** ⬜ Open
 
 #### OP-058
@@ -132,20 +123,36 @@ Roadmap entry: [PH-06](roadmap.md#ph-06-production-build-and-web-baseline).
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 4
 - **Status:** ⬜ Open
 
+#### OP-078
+
+**Keep the migrations folder where the compiled API finds it.** `migrationsFolder` is resolved as `../../drizzle` from the `migrate` module's own location (`apps/api/src/db/migrate.ts`), so the compiled module must keep that relative position to `apps/api/drizzle/`; a bundle into a single `dist/server.js` (esbuild or tsup) would resolve to the wrong folder. `drizzle/meta/_journal.json` must ship too, because `readJournal()` reads it on every `buildApp`. If the journal is missing, `buildApp` (`server.ts`, outside the startup `try`) throws an uncaught exception that is not logged through pino as `startup failed`: PH-06 and PH-08 should test the built output (PH-08's image must copy `drizzle/`), or catch that case.
+
+- **Source:** [ADR 0020](decisions/0020-database-details.md), consequences
+- **Status:** ⬜ Open
+
+### PH-06b Web security baseline
+
+Roadmap entry: [PH-06b](roadmap.md#ph-06b-web-security-baseline).
+
+#### OP-053
+
+**Build the app-wide web baseline** with the first endpoints: `@fastify/helmet` with the CSP, HSTS and `Referrer-Policy: no-referrer`; the `Sec-Fetch-Site` or `Origin` check and JSON-only bodies on every unsafe method; `TRUSTED_PROXY_HOPS` in the configuration, and how Better Auth is handed the same client IP; the request log's URL serializer that strips tokens; the API test with a forged `X-Forwarded-For`, and the one-time manual check on the demo that the log shows the real address.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-06b:** everything except the demo check
+  - **PH-12:** the one-time check on the demo that the log shows the real address
+- **Moved from PH-06:** PH-06 was split; the web baseline is PH-06b.
+- **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13
+- **Status:** ⬜ Open
+
 #### OP-067
 
 **Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
 
 - **Moved from PH-04:** it does not depend on that phase.
 - **Moved from PH-05:** it does not depend on that phase.
+- **Moved from PH-06:** it does not depend on that phase.
 - **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
-- **Status:** ⬜ Open
-
-#### OP-078
-
-**Keep the migrations folder where the compiled API finds it.** `migrationsFolder` is resolved as `../../drizzle` from the `migrate` module's own location (`apps/api/src/db/migrate.ts`), so the compiled module must keep that relative position to `apps/api/drizzle/`; a bundle into a single `dist/server.js` (esbuild or tsup) would resolve to the wrong folder. `drizzle/meta/_journal.json` must ship too, because `readJournal()` reads it on every `buildApp`. If the journal is missing, `buildApp` (`server.ts`, outside the startup `try`) throws an uncaught exception that is not logged through pino as `startup failed`: PH-06 and PH-08 should test the built output (PH-08's image must copy `drizzle/`), or catch that case.
-
-- **Source:** [ADR 0020](decisions/0020-database-details.md), consequences
 - **Status:** ⬜ Open
 
 ### PH-07 First E2E journey

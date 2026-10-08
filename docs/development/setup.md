@@ -146,7 +146,7 @@ On every commit, a pre-commit hook formats and lints the staged files, and a com
 
 ## 11. Coming later
 
-- **The production build**, and serving the web app from the API, in [PH-06](../roadmap.md#ph-06-production-build-and-web-baseline).
+- **The production build**, and serving the web app from the API, in [PH-06a](../roadmap.md#ph-06a-production-build-and-serving).
 - **Playwright** and the first end-to-end journey, in [PH-07](../roadmap.md#ph-07-first-e2e-journey).
 
 This guide grows with those phases.
