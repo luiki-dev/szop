@@ -85,7 +85,7 @@ Checked on 2026-10-08 with throwaway probes outside the repository:
 - Consumes: nothing from earlier tasks.
 - Produces: `pnpm start` (root) → `pnpm --filter @szop/api start` → `node --env-file=.env src/server.ts`; `pnpm build` (root) → `pnpm -r build` (no package has a `build` script until Task 4, so it does nothing yet).
 
-- [ ] **Step 1: Raise the Node floor and add the root scripts**
+- [x] **Step 1: Raise the Node floor and add the root scripts**
 
 In the root `package.json`, set `"engines": { "node": ">=24.12 <25" }`, and add to `"scripts"`, after `"dev"`:
 
@@ -94,7 +94,7 @@ In the root `package.json`, set `"engines": { "node": ">=24.12 <25" }`, and add 
     "start": "pnpm --filter @szop/api start",
 ```
 
-- [ ] **Step 2: Add the API's start script**
+- [x] **Step 2: Add the API's start script**
 
 In `apps/api/package.json`, add to `"scripts"`, after `"dev"`:
 
@@ -102,12 +102,12 @@ In `apps/api/package.json`, add to `"scripts"`, after `"dev"`:
     "start": "node --env-file=.env src/server.ts",
 ```
 
-- [ ] **Step 3: Check that pnpm accepts the engine range**
+- [x] **Step 3: Check that pnpm accepts the engine range**
 
 Run: `node --version && pnpm install --frozen-lockfile`
 Expected: `v24.21.0` (or any 24.x from 24.12 on) and an install with no engine error. If the local Node is older than 24.12, stop and tell the owner to run `nvm install 24` (the setup guide's step).
 
-- [ ] **Step 4: Start the API the production way**
+- [x] **Step 4: Start the API the production way**
 
 ```bash
 docker compose up -d --wait
@@ -119,12 +119,12 @@ kill %1; sleep 1; cat /tmp/szop-start.log | head -5
 
 Expected: `{"status":"ok","database":{"status":"up","schemaVersion":"0000_init"}}`; the log is JSON lines (no `pino-pretty`) with `migrations applied` and `Server listening`, and no `ExperimentalWarning`. If `kill %1` leaves the API running (pnpm's child survives), run `pkill -f "node --env-file=.env src/server.ts"`.
 
-- [ ] **Step 5: Run the checks**
+- [x] **Step 5: Run the checks**
 
 Run: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test`
 Expected: all pass.
 
-- [ ] **Step 6: Tick this task's boxes and commit**
+- [x] **Step 6: Tick this task's boxes and commit**
 
 ```bash
 git add package.json apps/api/package.json docs/superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md

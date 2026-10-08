@@ -3,11 +3,13 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24.2 <25"
+    "node": ">=24.12 <25"
   },
   "packageManager": "pnpm@12.8.1",
   "scripts": {
     "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "start": "pnpm --filter @szop/api start",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

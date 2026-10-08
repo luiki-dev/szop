@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/server.ts | pino-pretty",
+    "start": "node --env-file=.env src/server.ts",
     "db:generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit"
   },
