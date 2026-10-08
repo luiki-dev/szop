@@ -154,5 +154,9 @@ describe("serving the SPA", () => {
 
     const page = await app.inject({ method: "GET", url: "/" });
     expect(page.statusCode).toBe(404);
+    // Fastify's basic plain-text 404: sendFile calls reply.callNotFound()
+    // inside our not-found handler, so no page and no JSON error is sent.
+    expect(page.headers["content-type"]).toMatch(/^text\/plain/);
+    expect(page.body).toBe("404 Not Found");
   });
 });

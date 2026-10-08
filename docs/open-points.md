@@ -212,6 +212,8 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 
 **Keep the symlinked workspace in the container image.** Node refuses to strip types in files under `node_modules`; `@szop/shared` works because pnpm links it to `packages/shared/src/`. An image built with `pnpm deploy`, or any step that copies workspace packages into `node_modules`, makes the API fail at startup with `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING` once it imports `@szop/shared`. The image copies the workspace as it is and installs production dependencies with `pnpm install --prod --frozen-lockfile`.
 
+**Check the pages, not only the API, at startup.** A `WEB_ROOT` that points at a missing or wrong folder does not stop the API: `/api/health` answers 200 while every page path answers a plain-text 404, with only a warning in the log ([ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 2). The image's startup check must therefore also request `/` and expect HTML with status 200.
+
 - **Source:** [ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 1
 - **Status:** ⬜ Open
 
