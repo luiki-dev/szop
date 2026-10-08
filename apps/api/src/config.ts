@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { z } from "zod";
 
 const port = z.coerce.number().int().min(1).max(65535);
@@ -23,6 +24,10 @@ const envSchema = z.object({
   DATABASE_NAME: z.string().min(1),
   DATABASE_USER: z.string().min(1),
   DATABASE_PASSWORD: z.string().min(1),
+  // The built SPA (ADR 0023, decision 2). A folder that does not exist yet,
+  // as in pnpm dev, is not an error: the API logs a warning and serves its
+  // own routes only.
+  WEB_ROOT: z.string().min(1),
 });
 
 export interface DatabaseSettings {
@@ -38,6 +43,8 @@ export interface Config {
   port: number;
   logLevel: z.infer<typeof envSchema>["LOG_LEVEL"];
   database: DatabaseSettings;
+  // Absolute: a relative WEB_ROOT is resolved against the working directory.
+  webRoot: string;
 }
 
 export function loadConfig(env: Record<string, string | undefined>): Config {
@@ -64,5 +71,6 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
       user: data.DATABASE_USER,
       password: data.DATABASE_PASSWORD,
     },
+    webRoot: resolve(data.WEB_ROOT),
   };
 }

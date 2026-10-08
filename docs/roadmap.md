@@ -12,7 +12,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-03 API skeleton](#ph-03-api-skeleton)
   - [PH-04 Database](#ph-04-database)
   - [PH-05 SPA skeleton](#ph-05-spa-skeleton)
-  - [PH-06 Production build and web baseline](#ph-06-production-build-and-web-baseline)
+  - [PH-06a Production build and serving](#ph-06a-production-build-and-serving)
+  - [PH-06b Web security baseline](#ph-06b-web-security-baseline)
   - [PH-07 First E2E journey](#ph-07-first-e2e-journey)
   - [PH-08 Container image](#ph-08-container-image)
 - [Stage 3: Walking skeleton, deployed and released](#stage-3-walking-skeleton-deployed-and-released)
@@ -97,7 +98,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-03 API skeleton](#ph-03-api-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md) | [Plan](superpowers/plans/2026-10-05-PH-03-api-skeleton.md) | [#18](https://github.com/luiki-dev/szop/pull/18) |
 | [PH-04 Database](#ph-04-database) | ✅ Done | [Spec](superpowers/specs/2026-10-05-PH-04-database-design.md) | [Plan](superpowers/plans/2026-10-05-PH-04-database.md) | [#20](https://github.com/luiki-dev/szop/pull/20) |
 | [PH-05 SPA skeleton](#ph-05-spa-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md) | [Plan](superpowers/plans/2026-10-07-PH-05-spa-skeleton.md) | [#22](https://github.com/luiki-dev/szop/pull/22) |
-| [PH-06 Production build and web baseline](#ph-06-production-build-and-web-baseline) | ⬜ Not started | — | — | — |
+| [PH-06a Production build and serving](#ph-06a-production-build-and-serving) | ✅ Done | [Spec](superpowers/specs/2026-10-08-PH-06a-production-build-and-serving-design.md) | [Plan](superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md) | [#23](https://github.com/luiki-dev/szop/pull/23) |
+| [PH-06b Web security baseline](#ph-06b-web-security-baseline) | ⬜ Not started | — | — | — |
 | [PH-07 First E2E journey](#ph-07-first-e2e-journey) | ⬜ Not started | — | — | — |
 | [PH-08 Container image](#ph-08-container-image) | ⬜ Not started | — | — | — |
 
@@ -128,14 +130,25 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Expected path:** full.
 - **Open points:** [PH-05](open-points.md#ph-05-spa-skeleton).
 
-### PH-06 Production build and web baseline
+### PH-06a Production build and serving
 
-- **Goal:** the API serves the built SPA, compressed and cached, behind the security headers and request checks every later endpoint inherits. API tests prove them, and CI fails a build whose first screen needs more than 200 KB of JavaScript.
-- **Delivers:** the SPA served by `@fastify/static`, precompressed and with the cache headers of [ADR 0013](decisions/0013-visual-design.md), decision 5; the API's production build, including `packages/shared`; the web baseline of [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13 (`@fastify/helmet` with the Content Security Policy (CSP), HTTP Strict Transport Security (HSTS) and `Referrer-Policy`, the `Sec-Fetch-Site` check and JSON-only bodies on unsafe methods, `TRUSTED_PROXY_HOPS`, tokens stripped from logged URLs); the bundle-size gate of [NFR-3](requirements/functional-requirements.md#nfr-3).
+- **Goal:** `pnpm build` and `pnpm start` serve the SPA from the API on one port, compressed and cached, and CI fails a build whose first screen needs more than 200 KB of JavaScript.
+- **Delivers:** the API run in production by Node's type stripping, with `packages/shared` from source; the SPA served by `@fastify/static`, precompressed and with the cache headers of [ADR 0013](decisions/0013-visual-design.md), decision 5, and a fallback for client-side routes; the bundle-size gate of [NFR-3](requirements/functional-requirements.md#nfr-3), run by a `build` job in CI ([ADR 0023](decisions/0023-production-build-and-serving-details.md)).
+- **Split from:** PH-06 Production build and web baseline, now retired: it held two new concepts, the production build and the web security baseline ([ADR 0014](decisions/0014-roadmap.md), decision 6).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-06](open-points.md#ph-06-production-build-and-web-baseline).
+- **Open points:** [PH-06a](open-points.md#ph-06a-production-build-and-serving).
+
+### PH-06b Web security baseline
+
+- **Goal:** every response carries the security headers and every unsafe request is checked, before the first endpoint that changes data exists. API tests prove the headers, the request checks, the client address behind a forged `X-Forwarded-For` and the tokens stripped from logged URLs.
+- **Delivers:** the web baseline of [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13: `@fastify/helmet` with the Content Security Policy (CSP), HTTP Strict Transport Security (HSTS) and `Referrer-Policy`; the `Sec-Fetch-Site` check and JSON-only bodies on unsafe methods; `TRUSTED_PROXY_HOPS`; tokens stripped from logged URLs.
+- **Split from:** PH-06 Production build and web baseline, now retired (see [PH-06a](#ph-06a-production-build-and-serving)).
+- **Depends on:** —
+- **Owner steps:** none.
+- **Expected path:** full.
+- **Open points:** [PH-06b](open-points.md#ph-06b-web-security-baseline).
 
 ### PH-07 First E2E journey
 

@@ -11,6 +11,9 @@
 # Dependencies installed by pnpm
 node_modules/
 
+# The web app's production build (pnpm build)
+dist/
+
 # Local configuration (copied from .env.example) and test coverage reports
 .env
 coverage/
