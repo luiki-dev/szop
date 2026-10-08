@@ -17,7 +17,7 @@ Szop is built in phases, grouped into stages. The road below shows how far along
                                                                            ║
                               Stage 2 · Walking skeleton, running locally  ║
                      PH-08   PH-07   PH-06b  PH-06a  PH-05   PH-04   PH-03 ║
-  ╭────────────────────○───────○───────○───────◐═══════●═══════●═══════●═══╝
+  ╭────────────────────○───────○───────○───────●═══════●═══════●═══════●═══╝
   │
   │ Stage 3 · Walking skeleton, deployed and released
   │  PH-09   PH-10   PH-11   PH-12   PH-13

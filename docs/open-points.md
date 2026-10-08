@@ -156,7 +156,7 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-03:** `GET /api/health` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
   - **PH-04:** migrations at startup ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
-  - **PH-06a:** serving the SPA with `@fastify/static` ✅ Done ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
+  - **PH-06a:** serving the SPA with `@fastify/static` ✅ Done ([#23](https://github.com/luiki-dev/szop/pull/23))
   - **PH-08:** the multi-stage Dockerfile
   - **PH-09:** `infra/bootstrap`, with the state bucket's protections
   - **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy
@@ -373,7 +373,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 
 **Bound the API's shutdown when connections stay open.** In PH-06a's browser check (Node 24.21, Fastify 5), `pnpm start` received SIGTERM, logged `shutting down` and closed its port at once, but the process took about 145 seconds to exit, held by one open connection from Chrome after its tab was closed. On ECS, a task that has not exited by its stop timeout (30 seconds by default) is killed, so a slow shutdown could cut off requests that are still running or end without the pool closing cleanly. Options to check: Fastify's `forceCloseConnections`, or a deadline after which `server.ts` exits anyway, and how either fits the graceful shutdown of [ADR 0019](decisions/0019-api-skeleton-details.md), decision 8.
 
-- **Source:** PH-06a, Task 7's browser check ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
+- **Source:** PH-06a, Task 7's browser check ([#23](https://github.com/luiki-dev/szop/pull/23))
 - **Status:** ⬜ Open
 
 ### PH-13 Releases
@@ -808,7 +808,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 - **Since PH-05:** `packages/shared` exists and is consumed from source by `apps/web` and, in a test, by `apps/api`; the API's production build still has to include it.
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decision 8
-- **Status:** ✅ Closed: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 1: nothing is compiled; production runs the source by Node's type stripping, so `packages/shared` reaches production from source too ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
+- **Status:** ✅ Closed: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 1: nothing is compiled; production runs the source by Node's type stripping, so `packages/shared` reaches production from source too ([#23](https://github.com/luiki-dev/szop/pull/23))
 
 #### OP-008
 
@@ -899,14 +899,14 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Serve the SPA's files compressed and cached**, with `@fastify/static` (OP-013): the build writes Brotli and gzip copies of every file and the server sends them with `preCompressed`; fingerprinted assets get `Cache-Control: public, max-age=31536000, immutable`; `index.html`, including the fallback for client-side routes, gets `no-cache`. An API test checks the headers.
 
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 5
-- **Status:** ✅ Closed: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decisions 3, 5 and 6: an inline Vite plugin writes the copies, `/assets/` is `immutable`, everything else `no-cache`, and the fallback answers page paths with `index.html`; API tests check the headers ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
+- **Status:** ✅ Closed: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decisions 3, 5 and 6: an inline Vite plugin writes the copies, `/assets/` is `immutable`, everything else `no-cache`, and the fallback answers page paths with `index.html`; API tests check the headers ([#23](https://github.com/luiki-dev/szop/pull/23))
 
 #### OP-059
 
 **Gate the bundle size in CI**: a check that fails when the JavaScript needed for the first screen exceeds 200 KB compressed ([NFR-3](requirements/functional-requirements.md#nfr-3)). Choose the tool (for example size-limit, or a small script reading Vite's build manifest) and whether it is part of `ci-ok`.
 
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 4
-- **Status:** ✅ Closed: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decisions 4 and 7: an inline Vite plugin sums the Brotli size of the first screen's chunks and fails the build above 200 KB, run by a `build` job that `ci-ok` needs ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
+- **Status:** ✅ Closed: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decisions 4 and 7: an inline Vite plugin sums the Brotli size of the first screen's chunks and fails the build above 200 KB, run by a `build` job that `ci-ok` needs ([#23](https://github.com/luiki-dev/szop/pull/23))
 
 #### OP-061
 
