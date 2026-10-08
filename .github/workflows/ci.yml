@@ -126,6 +126,24 @@ jobs:
             ' coverage/coverage-summary.json
           } >> "$GITHUB_STEP_SUMMARY"
 
+  build:
+    name: build
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      # The production build of the web app. It fails when the first screen
+      # needs more than 200 KB of JavaScript (NFR-3, ADR 0023, decision 4);
+      # the log shows the size.
+      - run: pnpm build
+
   commits:
     name: commits
     # Every PR, whatever it changes, so no need to wait for changes.
@@ -181,7 +199,7 @@ jobs:
 
   ci-ok:
     name: ci-ok
-    needs: [changes, lint, typecheck, test, commits, workflows]
+    needs: [changes, lint, typecheck, test, build, commits, workflows]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 5

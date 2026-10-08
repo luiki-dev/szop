@@ -817,7 +817,7 @@ EOF
 - Consumes: the root `pnpm build` (Tasks 1, 4, 5).
 - Produces: a `build` job that `ci-ok` needs.
 
-- [ ] **Step 1: Add the job**
+- [x] **Step 1: Add the job**
 
 In `.github/workflows/ci.yml`, after the `test` job and before `commits`, add:
 
@@ -843,12 +843,12 @@ In `.github/workflows/ci.yml`, after the `test` job and before `commits`, add:
 
 and change `ci-ok`'s `needs` to `[changes, lint, typecheck, test, build, commits, workflows]`.
 
-- [ ] **Step 2: Lint the workflow**
+- [x] **Step 2: Lint the workflow**
 
 Run: `command -v actionlint && actionlint; command -v zizmor && zizmor .github/workflows/ci.yml`
 Expected: no findings from the tools that are installed. If neither is installed, say so in the task summary: the `workflows` job checks them in CI after the push.
 
-- [ ] **Step 3: Document the job**
+- [x] **Step 3: Document the job**
 
 In `docs/development/ci-cd.md` (read it first):
 
@@ -859,7 +859,7 @@ In `docs/development/ci-cd.md` (read it first):
 
 The ADR link resolves once Task 7 adds the file; the link check runs in Task 7.
 
-- [ ] **Step 4: Tick this task's boxes, commit and push**
+- [x] **Step 4: Tick this task's boxes, commit and push**
 
 ```bash
 git add .github/workflows/ci.yml docs/development/ci-cd.md docs/superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md

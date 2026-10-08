@@ -40,6 +40,7 @@ CodeQL's default setup also scans `main` once a week on its own schedule.
 | `lint` | code changed | ESLint, then Prettier in check mode | `pnpm lint` and `pnpm format:check` |
 | `typecheck` | code changed | TypeScript, without emitting files | `pnpm typecheck` |
 | `test` | code changed | Starts PostgreSQL from `compose.yaml` (`docker compose up -d --wait`, after copying `apps/api/.env.example` to `apps/api/.env`), then the tests: every Vitest project (`pnpm test:coverage`), with Vitest's test report and a coverage table in the job summary | `pnpm test` (or `pnpm test:coverage`) with PostgreSQL running |
+| `build` | code changed | `pnpm build`: the web app's production build, with its precompressed copies. It fails when the first screen's JavaScript exceeds 200 KB of Brotli ([NFR-3](../requirements/functional-requirements.md#nfr-3), [ADR 0023](../decisions/0023-production-build-and-serving-details.md)) and prints the size in its log. It needs no database | `pnpm build` |
 | `commits` | every PR, never on `main` | commitlint on every commit of the branch that is not on `main`, from `HEAD^1` to `HEAD^2` (see [The merge ref](#the-merge-ref)) | `pnpm exec commitlint --from origin/main --to HEAD` |
 | `workflows` | a file under `.github/workflows/` or `.github/actions/`, or `.github/dependabot.yml` or `.github/zizmor.yml`, changed | [actionlint](tools/actionlint.md), then [zizmor](tools/zizmor.md) | see their tool pages |
 | `ci-ok` | always, after all the others | Sums up the results ([below](#ci-ok-and-the-required-checks)) | — |
@@ -61,7 +62,7 @@ The `main` ruleset requires two status checks: **`ci-ok`** and **`pr-title`**. I
 Why one aggregating job instead of requiring every job:
 
 - Requiring every job would not work well. Each new job would need the ruleset edited too, and a required job that is skipped passes anyway: a job skipped by its `if:` reports, and GitHub counts it as passed. (Skipping with a `paths:` filter instead is worse: a workflow skipped that way never starts and never reports, and a required check on it leaves the PR waiting forever. That is why `ci.yml` always runs and skips jobs with `if:`.) One job that sees every result is the single place to decide. It always runs (`if: always()`), always reports, and fails when `changes` fails: otherwise a broken detection, which leaves every other job skipped, would let the PR through.
-- Adding a job later means adding it to `ci-ok`'s `needs:` list, without touching the ruleset.
+- Adding a job later means adding it to `ci-ok`'s `needs:` list, without touching the ruleset. `build` is one of the jobs `ci-ok` waits for; the required check is still only `ci-ok`, so adding it changed no GitHub setting.
 
 **`ci-ok`'s rule:** it passes only when `changes` succeeded and every other job either succeeded or was skipped. A job that failed or was cancelled fails it. The first condition matters: when `changes` fails, every job that needs it is skipped, and "everything skipped" alone would look green.
 
@@ -73,7 +74,7 @@ Why one aggregating job instead of requiring every job:
 
 The `changes` job decides which jobs a PR needs, from the list of files it changes:
 
-- **Code** is any file that is not Markdown (`*.md`). A PR that changes only Markdown skips `lint`, `typecheck` and `test`; `ci-ok` stays green. Counting everything else as code is the safe way round: a new file type or configuration file is checked without anyone remembering to add it.
+- **Code** is any file that is not Markdown (`*.md`). A PR that changes only Markdown skips `lint`, `typecheck`, `test` and `build`; `ci-ok` stays green. Counting everything else as code is the safe way round: a new file type or configuration file is checked without anyone remembering to add it.
 - **Workflows:** a change under `.github/workflows/` or `.github/actions/`, or to `.github/dependabot.yml` or `.github/zizmor.yml`, runs the `workflows` job. zizmor audits the Dependabot configuration too, and its own configuration file changes what it reports, so a change to either can turn the check red.
 - `commits` runs on every PR, whatever it changes.
 - **A push to `main` runs every job**, whatever it changes.
@@ -90,6 +91,7 @@ The job prints the changed files and its two answers (`code=…, workflows=…`)
 6. **A job that failed for no reason of yours** (a network error while downloading, a GitHub outage): rerun it with *Re-run jobs → Re-run failed jobs* on the run's page.
 7. **The job summary** (the run's *Summary* page) lists the failed tests of the `test` job and, on a green run, its coverage table (the coverage step is skipped when tests fail).
 8. **`docker compose up --wait` failure in the `test` job:** the container never turned healthy; its logs are in the step's output. **`Cannot reach PostgreSQL` in the test step:** the database step was skipped or failed.
+9. **A failed `build` with `over budget (NFR-3)`:** the first screen needs more than 200 KB of Brotli-compressed JavaScript, and the log line names the size. Run `pnpm build` locally and find what grew: a new dependency, or an import that should be loaded lazily. Then either shrink it or, with a reason, change the budget through an ADR ([ADR 0013](../decisions/0013-visual-design.md), decision 4: "adjusted with a reason when real measurements exist").
 
 From the terminal, `gh pr checks` shows the PR's checks and `gh run view --log-failed` prints the logs of the failed steps; see the [GitHub Actions page](tools/github-actions.md#everyday-use).
 
