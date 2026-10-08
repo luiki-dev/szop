@@ -728,7 +728,7 @@ EOF
 - Consumes: `brotli(data)` and `precompress()` in `vite.config.ts` (Task 4).
 - Produces: `firstScreenBudget(limitBytes: number): Plugin`; the build's output line `first-screen JavaScript: <n> KB Brotli of 200.0 KB (<k> chunks)`, which Task 6's job shows in its log.
 
-- [ ] **Step 1: Add the plugin**
+- [x] **Step 1: Add the plugin**
 
 In `apps/web/vite.config.ts`, after `precompress()`, add:
 
@@ -774,12 +774,12 @@ function firstScreenBudget(limitBytes: number): Plugin {
 
 and register it: `plugins: [react(), precompress(), firstScreenBudget(200 * 1024)],`.
 
-- [ ] **Step 2: Build and read the line**
+- [x] **Step 2: Build and read the line**
 
 Run: `pnpm build 2>&1 | grep -E "first-screen|error|built in"`
 Expected: `first-screen JavaScript: 109.8 KB Brotli of 200.0 KB (1 chunks)` (the size may differ by a few tenths) and `built in …`.
 
-- [ ] **Step 3: Prove the failure path once, by hand**
+- [x] **Step 3: Prove the failure path once, by hand**
 
 Temporarily change the call to `firstScreenBudget(50 * 1024)`, then:
 
@@ -789,12 +789,12 @@ pnpm build; echo "exit $?"
 
 Expected: the build fails with `first-screen JavaScript: 109.8 KB Brotli of 50.0 KB (1 chunks): over budget (NFR-3)` and a non-zero exit. Check that this message is the one shown: if `closeBundle` of `precompress()` also ran and its own error (for example `ENOENT` on the output folder) hides it, make `precompress()` skip its work when the folder is missing, and say so in the task summary. Record the exact output for the PR's *How it was tested*. **Restore `200 * 1024`**, and check with `git diff apps/web/vite.config.ts | grep firstScreenBudget` that the registration reads `200 * 1024`.
 
-- [ ] **Step 4: Run every check**
+- [x] **Step 4: Run every check**
 
 Run: `pnpm build && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test`
 Expected: all pass.
 
-- [ ] **Step 5: Tick this task's boxes and commit**
+- [x] **Step 5: Tick this task's boxes and commit**
 
 ```bash
 git add apps/web/vite.config.ts docs/superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md

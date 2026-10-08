@@ -42,8 +42,46 @@ function precompress(): Plugin {
   };
 }
 
+// NFR-3: the JavaScript the first screen needs is at most 200 KB compressed
+// (ADR 0013, decision 4). It is the entry chunk and every chunk it imports
+// statically; chunks loaded later through import() do not count. Measured
+// in Brotli, what browsers download (ADR 0023, decision 4).
+function firstScreenBudget(limitBytes: number): Plugin {
+  return {
+    name: "szop:first-screen-budget",
+    apply: "build",
+    writeBundle(_options, bundle) {
+      const chunks = new Map(
+        Object.values(bundle)
+          .filter((output) => output.type === "chunk")
+          .map((chunk) => [chunk.fileName, chunk]),
+      );
+      const entry = [...chunks.values()].find((chunk) => chunk.isEntry);
+      if (!entry) throw new Error("first-screen budget: no entry chunk");
+
+      const counted = new Set<string>();
+      const queue = [entry.fileName];
+      let bytes = 0;
+      for (let name = queue.pop(); name !== undefined; name = queue.pop()) {
+        const chunk = chunks.get(name);
+        if (!chunk || counted.has(name)) continue;
+        counted.add(name);
+        bytes += brotli(chunk.code).length;
+        queue.push(...chunk.imports);
+      }
+
+      const kb = (n: number): string => (n / 1024).toFixed(1);
+      const summary = `first-screen JavaScript: ${kb(bytes)} KB Brotli of ${kb(limitBytes)} KB (${String(counted.size)} chunks)`;
+      if (bytes > limitBytes) {
+        throw new Error(`${summary}: over budget (NFR-3)`);
+      }
+      console.log(summary);
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), precompress()],
+  plugins: [react(), precompress(), firstScreenBudget(200 * 1024)],
   server: {
     proxy: {
       // The API's address from apps/api/.env.example. A constant, not a
