@@ -590,7 +590,7 @@ EOF
 - Consumes: the root `build` script (Task 1); the serving plugin (Task 3).
 - Produces: `apps/web/dist/` with `.br` and `.gz` copies; the functions `brotli(data)` and `precompress()` in `vite.config.ts`, which Task 5 reuses (`brotli`).
 
-- [ ] **Step 1: Keep `dist/` out of git and the tools first**
+- [x] **Step 1: Keep `dist/` out of git and the tools first**
 
 So no generated file is ever staged or linted:
 
@@ -611,11 +611,11 @@ dist/
 
 - `eslint.config.js`: in `globalIgnores`, add `"**/dist/"`, and extend the comment above it: `coverage/ holds Vitest's generated report; dist/ holds the web app's build.`
 
-- [ ] **Step 2: Add the build script**
+- [x] **Step 2: Add the build script**
 
 In `apps/web/package.json`, add to `"scripts"`, after `"dev"`: `"build": "vite build",`
 
-- [ ] **Step 3: Add the precompress plugin**
+- [x] **Step 3: Add the precompress plugin**
 
 Replace `apps/web/vite.config.ts` with:
 
@@ -677,7 +677,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 4: Build and look at the output**
+- [x] **Step 4: Build and look at the output**
 
 ```bash
 pnpm build
@@ -687,7 +687,7 @@ git status --short
 
 Expected: the build succeeds; `dist/index.html`, `dist/index.html.br`, `dist/index.html.gz`, and `dist/assets/index-<hash>.js` with its `.br` and `.gz`; `git status` shows only the four modified files of this task (no `dist/`).
 
-- [ ] **Step 5: Serve the build from the API**
+- [x] **Step 5: Serve the build from the API**
 
 ```bash
 pnpm start > /tmp/szop-start.log 2>&1 &
@@ -700,12 +700,12 @@ pkill -f "node --env-file=.env src/server.ts"
 
 Expected: `/` → `200`, `content-encoding: br`, `cache-control: no-cache`, `vary: accept-encoding`; the asset → `200`, `br`, `public, max-age=31536000, immutable`; `/some/route` → the HTML of `index.html`.
 
-- [ ] **Step 6: Run every check with `dist/` present**
+- [x] **Step 6: Run every check with `dist/` present**
 
 Run: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test`
 Expected: all pass; ESLint and Prettier do not look inside `apps/web/dist/`.
 
-- [ ] **Step 7: Tick this task's boxes and commit**
+- [x] **Step 7: Tick this task's boxes and commit**
 
 ```bash
 git add .gitignore .prettierignore eslint.config.js apps/web/package.json apps/web/vite.config.ts docs/superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md
