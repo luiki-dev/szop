@@ -267,12 +267,12 @@ Tell the owner in the task summary: their own `apps/api/.env` needs `WEB_ROOT=..
 - Consumes: `Config.webRoot` (Task 2); `buildApp({ config, db })` from `app.ts`; `useTestDatabase()` from `src/test/database.ts`.
 - Produces: `webRoutes(app: FastifyInstance, options: { root: string }): Promise<void>`, registered in `buildApp`; `useWebRoot(): { readonly path: string }` and `webRootFiles` in `src/test/web-root.ts`.
 
-- [ ] **Step 1: Add the dependency**
+- [x] **Step 1: Add the dependency**
 
 Run: `pnpm --filter @szop/api add @fastify/static@^10.1.5`
 Expected: `@fastify/static` under `dependencies` in `apps/api/package.json`, no `ERR_PNPM_IGNORED_BUILDS` (if it appears, stop: see Global Constraints).
 
-- [ ] **Step 2: Write the fixture helper**
+- [x] **Step 2: Write the fixture helper**
 
 Create `apps/api/src/test/web-root.ts`:
 
@@ -316,7 +316,7 @@ export function useWebRoot(): { readonly path: string } {
 }
 ```
 
-- [ ] **Step 3: Write the failing tests**
+- [x] **Step 3: Write the failing tests**
 
 Create `apps/api/src/web/routes.test.ts`:
 
@@ -478,12 +478,12 @@ describe("serving the SPA", () => {
 });
 ```
 
-- [ ] **Step 4: Run the tests and see them fail**
+- [x] **Step 4: Run the tests and see them fail**
 
 Run: `pnpm test --project api src/web/routes.test.ts`
 Expected: FAIL in the six tests that need a file or the fallback (Brotli, gzip, plain file, client-side route, HEAD, query string), each with a 404 where 200 is expected, since nothing serves files yet. The JSON 404s, "still routes /api/health" and "keeps the API working" already pass: Fastify's default 404 has the same body, which is why the handler must copy it exactly. Check that the failures are 404s, not import or setup errors.
 
-- [ ] **Step 5: Write the plugin**
+- [x] **Step 5: Write the plugin**
 
 Create `apps/api/src/web/routes.ts`:
 
@@ -547,7 +547,7 @@ export async function webRoutes(
 }
 ```
 
-- [ ] **Step 6: Register it in buildApp**
+- [x] **Step 6: Register it in buildApp**
 
 In `apps/api/src/app.ts`, add `import { webRoutes } from "./web/routes.ts";` after the `healthRoutes` import, and after the `healthRoutes` registration add:
 
@@ -557,17 +557,17 @@ In `apps/api/src/app.ts`, add `import { webRoutes } from "./web/routes.ts";` aft
   app.register(webRoutes, { root: config.webRoot });
 ```
 
-- [ ] **Step 7: Run the tests and see them pass**
+- [x] **Step 7: Run the tests and see them pass**
 
 Run: `pnpm test --project api src/web/routes.test.ts`
 Expected: PASS, 13 tests. If a header differs from the probe's findings (Facts checked), read `@fastify/static`'s README for 10.x before changing the plugin, and report the difference.
 
-- [ ] **Step 8: Run every check**
+- [x] **Step 8: Run every check**
 
 Run: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test`
 Expected: all pass. If ESLint's `strictTypeChecked` flags the not-found handler's return values, adjust the code, not the rules.
 
-- [ ] **Step 9: Tick this task's boxes and commit**
+- [x] **Step 9: Tick this task's boxes and commit**
 
 ```bash
 git add apps/api/package.json pnpm-lock.yaml apps/api/src/app.ts apps/api/src/web apps/api/src/test/web-root.ts docs/superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md
