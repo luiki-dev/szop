@@ -13,6 +13,7 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
 - [7. Docker Desktop and the database](#7-docker-desktop-and-the-database)
 - [8. Check that everything works](#8-check-that-everything-works)
 - [9. Run the API and the page](#9-run-the-api-and-the-page)
+  - [Run the production build](#run-the-production-build)
 - [10. What the git hooks do](#10-what-the-git-hooks-do)
 - [11. Coming later](#11-coming-later)
 
@@ -45,7 +46,7 @@ Install nvm with the command in its README, which always shows the current versi
 nvm install 24
 ```
 
-The repository's `.nvmrc` holds `24` (the latest 24.x satisfies `engines.node`), so once the repository is cloned (step 6), a plain `nvm install` and `nvm use` in it read the file and pick the same version. The tool page, [Node and nvm](tools/node-and-nvm.md), explains the two files.
+Szop needs Node 24.12 or later, the first version whose type stripping is stable, since the API runs its TypeScript files with Node itself in production (`engines.node` is `>=24.12 <25`). The repository's `.nvmrc` holds `24` (the latest 24.x satisfies `engines.node`), so once the repository is cloned (step 6), a plain `nvm install` and `nvm use` in it read the file and pick the same version. The tool page, [Node and nvm](tools/node-and-nvm.md), explains the two files.
 
 ## 4. pnpm
 
@@ -140,13 +141,27 @@ Any other address, such as `/nowhere`, shows React Router's default error screen
 
 More in [Vite](tools/vite.md) (the dev server and the proxy), [tsx](tools/tsx.md) (what restarts the API), [pino-pretty](tools/pino-pretty.md) (what makes the log readable) and the [testing guide](testing.md).
 
+### Run the production build
+
+`pnpm dev` is for working on the code. To run the app the way it runs in production, build the web app and let the API serve it, with PostgreSQL running (section 7):
+
+```bash
+pnpm build
+pnpm start
+```
+
+- **`pnpm build`** runs Vite's production build, which writes the web app to `apps/web/dist/`, with a `.br` and a `.gz` copy next to every text file, and prints a line such as `first-screen JavaScript: 109.8 KB Brotli of 200.0 KB (1 chunks)`. It fails when that size passes 200 KB ([Vite](tools/vite.md) explains both).
+- **`pnpm start`** runs the API with Node itself, `node --env-file=.env src/server.ts`, not tsx: no watch mode, and the log stays JSON, as in production. Stop it with Ctrl+C.
+- **Open `http://localhost:3000`,** the API's own address: it serves the page and `/api` on one port, as in production, with no Vite in between. The page shows the same status line as in development.
+
+The API finds the build through `WEB_ROOT` in `apps/api/.env`, the folder `pnpm build` writes, given relative to `apps/api`: `WEB_ROOT=../web/dist`. **An `.env` copied before this setting existed lacks it,** and the API then stops with `Invalid configuration` naming `WEB_ROOT`: add the line `WEB_ROOT=../web/dist` from `.env.example`. Until the first `pnpm build`, the folder does not exist, and `pnpm dev` logs a warning about it at startup; that is harmless, since in development Vite serves the page. A new build is picked up when the API restarts.
+
 ## 10. What the git hooks do
 
 On every commit, a pre-commit hook formats and lints the staged files, and a commit-msg hook checks that the message follows Conventional Commits. See [husky and lint-staged](tools/husky-and-lint-staged.md) and [commitlint](tools/commitlint.md).
 
 ## 11. Coming later
 
-- **The production build**, and serving the web app from the API, in [PH-06a](../roadmap.md#ph-06a-production-build-and-serving).
 - **Playwright** and the first end-to-end journey, in [PH-07](../roadmap.md#ph-07-first-e2e-journey).
 
 This guide grows with those phases.

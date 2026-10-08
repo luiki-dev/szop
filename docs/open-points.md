@@ -85,51 +85,6 @@ Roadmap entry: [PH-05](roadmap.md#ph-05-spa-skeleton).
 
 Roadmap entry: [PH-06a](roadmap.md#ph-06a-production-build-and-serving).
 
-#### OP-007
-
-**Decide how the API's production build includes `packages/shared`**, which is consumed from source with no build step of its own.
-
-- **Since PH-05:** `packages/shared` exists and is consumed from source by `apps/web` and, in a test, by `apps/api`; the API's production build still has to include it.
-- **Source:** [ADR 0005](decisions/0005-development-environment.md), decision 8
-- **Status:** ⬜ Open
-
-#### OP-013
-
-**Build what the demo runs on**: the Terraform code for `infra/bootstrap`, `infra/base` and `infra/demo`, the multi-stage Dockerfile, serving the SPA with `@fastify/static`, `GET /api/health`, migrations at startup and the SES `EmailSender`. ECR's lifecycle policy must not expire released images (m11): a higher-priority rule selects `v*`-tagged images with a count limit never reached, which shields them from the lower-priority rule keeping only the last few of the rest, since ECR has no "keep" action. Bootstrap's state bucket has versioning, the public-access block and a policy that allows only TLS (C6).
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** `GET /api/health` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** migrations at startup ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
-  - **PH-06a:** serving the SPA with `@fastify/static`
-  - **PH-08:** the multi-stage Dockerfile
-  - **PH-09:** `infra/bootstrap`, with the state bucket's protections
-  - **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy
-  - **PH-12:** `infra/demo`
-  - **PH-18:** the SES `EmailSender`
-- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
-- **Status:** ⬜ Open
-
-#### OP-058
-
-**Serve the SPA's files compressed and cached**, with `@fastify/static` (OP-013): the build writes Brotli and gzip copies of every file and the server sends them with `preCompressed`; fingerprinted assets get `Cache-Control: public, max-age=31536000, immutable`; `index.html`, including the fallback for client-side routes, gets `no-cache`. An API test checks the headers.
-
-- **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 5
-- **Status:** ⬜ Open
-
-#### OP-059
-
-**Gate the bundle size in CI**: a check that fails when the JavaScript needed for the first screen exceeds 200 KB compressed ([NFR-3](requirements/functional-requirements.md#nfr-3)). Choose the tool (for example size-limit, or a small script reading Vite's build manifest) and whether it is part of `ci-ok`.
-
-- **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 4
-- **Status:** ⬜ Open
-
-#### OP-078
-
-**Keep the migrations folder where the compiled API finds it.** `migrationsFolder` is resolved as `../../drizzle` from the `migrate` module's own location (`apps/api/src/db/migrate.ts`), so the compiled module must keep that relative position to `apps/api/drizzle/`; a bundle into a single `dist/server.js` (esbuild or tsup) would resolve to the wrong folder. `drizzle/meta/_journal.json` must ship too, because `readJournal()` reads it on every `buildApp`. If the journal is missing, `buildApp` (`server.ts`, outside the startup `try`) throws an uncaught exception that is not logged through pino as `startup failed`: PH-06 and PH-08 should test the built output (PH-08's image must copy `drizzle/`), or catch that case.
-
-- **Source:** [ADR 0020](decisions/0020-database-details.md), consequences
-- **Status:** ⬜ Open
-
 ### PH-06b Web security baseline
 
 Roadmap entry: [PH-06b](roadmap.md#ph-06b-web-security-baseline).
@@ -192,8 +147,23 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 
 ### PH-08 Container image
 
-Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).\
-Also: [OP-013](#op-013), [OP-078](#op-078).
+Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
+
+#### OP-013
+
+**Build what the demo runs on**: the Terraform code for `infra/bootstrap`, `infra/base` and `infra/demo`, the multi-stage Dockerfile, serving the SPA with `@fastify/static`, `GET /api/health`, migrations at startup and the SES `EmailSender`. ECR's lifecycle policy must not expire released images (m11): a higher-priority rule selects `v*`-tagged images with a count limit never reached, which shields them from the lower-priority rule keeping only the last few of the rest, since ECR has no "keep" action. Bootstrap's state bucket has versioning, the public-access block and a policy that allows only TLS (C6).
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** `GET /api/health` ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** migrations at startup ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
+  - **PH-06a:** serving the SPA with `@fastify/static` ✅ Done ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
+  - **PH-08:** the multi-stage Dockerfile
+  - **PH-09:** `infra/bootstrap`, with the state bucket's protections
+  - **PH-10:** the permanent part of `infra/base`, with ECR's lifecycle policy
+  - **PH-12:** `infra/demo`
+  - **PH-18:** the SES `EmailSender`
+- **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
+- **Status:** ⬜ Open
 
 #### OP-015
 
@@ -228,6 +198,21 @@ Also: [OP-013](#op-013), [OP-078](#op-078).
   - **PH-08:** `docker` (the Node base image), ignoring its major updates
   - **PH-09:** `terraform` (the AWS provider)
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 18; [Audit, m13](audits/2026-09-29-design-sanity-check.md#process-and-ci); [ADR 0018](decisions/0018-ci-details.md)
+- **Status:** ⬜ Open
+
+#### OP-078
+
+**Keep the migrations folder where the API finds it.** The API is not compiled: Node runs `apps/api/src/db/migrate.ts` itself, which resolves `migrationsFolder` as `../../drizzle` from its own location, so the path stays correct as long as the image keeps `apps/api/` whole. PH-08's image must copy `drizzle/` with `meta/_journal.json`, because `readJournal()` reads the journal on every `buildApp`. If the journal is missing, `buildApp` (`server.ts`, outside the startup `try`) throws an uncaught exception that is not logged through pino as `startup failed`: PH-08 tests the image's startup, or catches that case.
+
+- **Since PH-06a:** no build step ([ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 1); the PH-06a part is settled by design.
+- **Source:** [ADR 0020](decisions/0020-database-details.md), consequences
+- **Status:** ⬜ Open
+
+#### OP-084
+
+**Keep the symlinked workspace in the container image.** Node refuses to strip types in files under `node_modules`; `@szop/shared` works because pnpm links it to `packages/shared/src/`. An image built with `pnpm deploy`, or any step that copies workspace packages into `node_modules`, makes the API fail at startup with `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING` once it imports `@szop/shared`. The image copies the workspace as it is and installs production dependencies with `pnpm install --prod --frozen-lockfile`.
+
+- **Source:** [ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 1
 - **Status:** ⬜ Open
 
 ## Stage 3: Walking skeleton, deployed and released
@@ -808,6 +793,14 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Source:** [ADR 0005](decisions/0005-development-environment.md), decision 4 and consequences; [ADR 0008](decisions/0008-hosting.md), decision 19; [ADR 0012](decisions/0012-security-baseline.md), decision 6
 - **Status:** ✅ Closed: PostgreSQL 18 (18.6), [ADR 0020](decisions/0020-database-details.md), decision 8 ([#20](https://github.com/luiki-dev/szop/pull/20))
 
+#### OP-007
+
+**Decide how the API's production build includes `packages/shared`**, which is consumed from source with no build step of its own.
+
+- **Since PH-05:** `packages/shared` exists and is consumed from source by `apps/web` and, in a test, by `apps/api`; the API's production build still has to include it.
+- **Source:** [ADR 0005](decisions/0005-development-environment.md), decision 8
+- **Status:** ✅ Closed: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 1: nothing is compiled; production runs the source by Node's type stripping, so `packages/shared` reaches production from source too ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
+
 #### OP-008
 
 **Give the README a short "Development" section** pointing to `docs/development/`.
@@ -891,6 +884,20 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 - **Source:** [Audit, C1](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ✅ Closed: the threat model is a living page, [threat-model.md](architecture/threat-model.md), with a row in the document roles; [ADR 0012](decisions/0012-security-baseline.md), decision 2
+
+#### OP-058
+
+**Serve the SPA's files compressed and cached**, with `@fastify/static` (OP-013): the build writes Brotli and gzip copies of every file and the server sends them with `preCompressed`; fingerprinted assets get `Cache-Control: public, max-age=31536000, immutable`; `index.html`, including the fallback for client-side routes, gets `no-cache`. An API test checks the headers.
+
+- **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 5
+- **Status:** ✅ Closed: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decisions 3, 5 and 6: an inline Vite plugin writes the copies, `/assets/` is `immutable`, everything else `no-cache`, and the fallback answers page paths with `index.html`; API tests check the headers ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
+
+#### OP-059
+
+**Gate the bundle size in CI**: a check that fails when the JavaScript needed for the first screen exceeds 200 KB compressed ([NFR-3](requirements/functional-requirements.md#nfr-3)). Choose the tool (for example size-limit, or a small script reading Vite's build manifest) and whether it is part of `ci-ok`.
+
+- **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 4
+- **Status:** ✅ Closed: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decisions 4 and 7: an inline Vite plugin sums the Brotli size of the first screen's chunks and fails the build above 200 KB, run by a `build` job that `ci-ok` needs ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
 
 #### OP-061
 

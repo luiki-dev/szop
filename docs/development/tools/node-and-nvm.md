@@ -1,6 +1,6 @@
 # Node and nvm
 
-Node.js is the JavaScript runtime that runs Szop's API, its development tools and the git push guard hook; nvm (Node Version Manager) installs Node versions and switches between them per user, without `sudo`.
+Node.js is the JavaScript runtime that runs Szop's API, in development and in production, its development tools and the git push guard hook; nvm (Node Version Manager) installs Node versions and switches between them per user, without `sudo`.
 
 ## Why Szop uses it
 
@@ -9,7 +9,7 @@ Node.js is the JavaScript runtime that runs Szop's API, its development tools an
 ## Configuration
 
 - **`.nvmrc`** (repository root) holds `24`: the major version only. `nvm install` and `nvm use` read it and pick the latest 24.x, so a security fix needs no change in the repository. The setup-node action of continuous integration (CI) reads the same file from PH-02 on.
-- **`engines.node`** in `package.json` is `>=24.2 <25`: Node 24 from 24.2 on, nothing older or newer. The push hook relies on `import.meta.main`, which Node added in 24.2.0; on an older 24.x the hook would silently allow every push. pnpm enforces it through `engineStrict: true` in `pnpm-workspace.yaml` (see [pnpm](pnpm.md)), so `pnpm install` fails with `Unsupported engine` outside that range.
+- **`engines.node`** in `package.json` is `>=24.12 <25`: Node 24 from 24.12 on, nothing older or newer. Type stripping became stable in Node 24.12, and production runs the API that way (`node src/server.ts`, [ADR 0023](../../decisions/0023-production-build-and-serving-details.md), decision 1), so an older 24.x would run it on an experimental feature. The floor was `>=24.2` before PH-06a, because the push hook relies on `import.meta.main`, added in 24.2.0; the new floor covers that too. pnpm enforces it through `engineStrict: true` in `pnpm-workspace.yaml` (see [pnpm](pnpm.md)), so `pnpm install` fails with `Unsupported engine` outside that range.
 
 The two files say the same thing for different readers: `.nvmrc` tells nvm which version to install, `engines` tells pnpm which versions are acceptable.
 
@@ -23,7 +23,7 @@ node --version     # check: v24.x.y
 
 Run `nvm use` in each new shell, or after a new 24.x appears, run `nvm install` again. pnpm is installed per Node version, so after installing a new Node version run `npm install -g pnpm` once more (see [pnpm](pnpm.md)).
 
-Node 24 can run `.ts` files directly by deleting the type annotations before running them (**type stripping**, see the [glossary](../../glossary.md)); it does not check types. The git push guard hook (`.claude/hooks/`) runs this way, with no build step.
+Node 24 can run `.ts` files directly by deleting the type annotations before running them (**type stripping**, see the [glossary](../../glossary.md)); it does not check types. The git push guard hook (`.claude/hooks/`) runs this way, and so does the API in production: `pnpm start` runs `node --env-file=.env src/server.ts`, with no build step ([ADR 0023](../../decisions/0023-production-build-and-serving-details.md), decision 1). Node refuses to strip types in files under `node_modules`; `@szop/shared` still works because pnpm links it to its source in `packages/shared/src/`, outside `node_modules`. In development, [tsx](tsx.md) runs the API instead, for its watch mode.
 
 ## Official documentation
 

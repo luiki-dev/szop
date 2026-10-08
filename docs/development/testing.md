@@ -9,6 +9,7 @@ The guide grows as the layers arrive: end-to-end (E2E) journeys in [PH-07](../ro
 - [The layers today](#the-layers-today)
 - [Running the tests](#running-the-tests)
 - [Writing an API test](#writing-an-api-test)
+  - [Testing the served SPA](#testing-the-served-spa)
 - [Writing a database test](#writing-a-database-test)
 - [Writing a component test](#writing-a-component-test)
 - [Writing a unit test](#writing-a-unit-test)
@@ -85,6 +86,14 @@ Line by line:
 - **Three assertions.** The status code, the content type and the body are the contract a client sees, so the test checks all three. `toMatch` accepts any `application/json; charset=…` suffix; `toEqual` compares the whole body.
 
 Later phases pass more things in through the same `buildApp(deps)`: a test database, a recording email sender and a controllable clock ([ADR 0007](../decisions/0007-testing-strategy.md), decision 14). Only the fakes differ from production, never the wiring.
+
+### Testing the served SPA
+
+`apps/api/src/web/routes.test.ts` checks how the API serves the built web app: the compressed copies, the cache headers and the fallback to `index.html` ([ADR 0023](../decisions/0023-production-build-and-serving-details.md), decisions 5, 6 and 8). It never depends on running `pnpm build`:
+
+- **`useWebRoot()`** (`apps/api/src/test/web-root.ts`), called at the top of the file, writes a miniature build into a fresh temporary folder before the tests and removes it afterwards: an `index.html` and an `assets/index-abc123.js`, each with a `.br` and a `.gz` copy made by `node:zlib`. The contents are exported as `webRootFiles`, so a test compares a body with the file it came from. Each test passes `webRoot.path` as the `webRoot` of its literal `Config`.
+- **A compressed body** is checked by decompressing the raw bytes: `response.rawPayload` holds the body as sent, and `brotliDecompressSync(response.rawPayload)` (or `gunzipSync`) turns it back into the file. `response.body` would decode the bytes as text, which garbles compressed data.
+- **The request headers decide the encoding,** so each test sets `accept-encoding` as a browser would (`gzip, deflate, br, zstd`), as an older client would (`gzip`) or not at all, and checks `content-encoding`, `cache-control` and `vary`.
 
 ## Writing a database test
 

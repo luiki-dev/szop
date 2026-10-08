@@ -1,10 +1,11 @@
 # tsx
 
-tsx runs TypeScript files directly: it compiles each one with esbuild on the fly and hands the result to Node. Its `watch` mode restarts the program whenever a file it uses changes. In Szop it runs the API in development.
+tsx runs TypeScript files directly: it compiles each one with esbuild on the fly and hands the result to Node. Its `watch` mode restarts the program whenever a file it uses changes. In Szop it runs the API in development only; production runs `node src/server.ts`, with Node's own type stripping ([ADR 0023](../../decisions/0023-production-build-and-serving-details.md)).
 
 ## Why Szop uses it
 
-- **tsx in watch mode:** [ADR 0005](../../decisions/0005-development-environment.md), decision 9. It restarts the API on every change. Node 24 can run TypeScript itself by stripping the types, but it rejects some syntax and has rough edges with path resolution and workspace packages; compiling with `tsc` before every run is slow.
+- **tsx in watch mode:** [ADR 0005](../../decisions/0005-development-environment.md), decision 9. It restarts the API on every change; compiling with `tsc` before every run is slow.
+- **Development only:** Node 24 runs TypeScript itself by stripping the types, stable since Node 24.12, and Szop's code keeps to what stripping allows, so `pnpm start` and the container image run the API with plain `node` ([ADR 0023](../../decisions/0023-production-build-and-serving-details.md), decision 1; see [Node and nvm](node-and-nvm.md)). tsx stays for its watch mode, and production ships no development tool and no esbuild binary.
 - **It does not check types.** Neither tsx nor Node does; `pnpm typecheck` does ([TypeScript](typescript.md)).
 
 ## Configuration

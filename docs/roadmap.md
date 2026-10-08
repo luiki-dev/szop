@@ -133,7 +133,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-06a Production build and serving
 
 - **Goal:** `pnpm build` and `pnpm start` serve the SPA from the API on one port, compressed and cached, and CI fails a build whose first screen needs more than 200 KB of JavaScript.
-- **Delivers:** the API run in production by Node's type stripping, with `packages/shared` from source; the SPA served by `@fastify/static`, precompressed and with the cache headers of [ADR 0013](decisions/0013-visual-design.md), decision 5, and a fallback for client-side routes; the bundle-size gate of [NFR-3](requirements/functional-requirements.md#nfr-3), run by a `build` job in CI.
+- **Delivers:** the API run in production by Node's type stripping, with `packages/shared` from source; the SPA served by `@fastify/static`, precompressed and with the cache headers of [ADR 0013](decisions/0013-visual-design.md), decision 5, and a fallback for client-side routes; the bundle-size gate of [NFR-3](requirements/functional-requirements.md#nfr-3), run by a `build` job in CI ([ADR 0023](decisions/0023-production-build-and-serving-details.md)).
 - **Split from:** PH-06 Production build and web baseline, now retired: it held two new concepts, the production build and the web security baseline ([ADR 0014](decisions/0014-roadmap.md), decision 6).
 - **Depends on:** —
 - **Owner steps:** none.

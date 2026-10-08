@@ -53,7 +53,7 @@ node file.ts         # run a single .ts file; Node strips the types
 
 Imports name the `.ts` file (`import { findViolation } from "./guard-git-push.ts"`, `import { buildApp } from "./app.ts"`), in every package ([ADR 0019](../../decisions/0019-api-skeleton-details.md), decision 6), because Node loads exactly the file named and does not try other extensions. `allowImportingTsExtensions` makes `tsc` accept those `.ts` names, and `verbatimModuleSyntax` keeps type-only imports explicit (`import type`), which Node's type stripping needs.
 
-The push hook, `.claude/hooks/guard-git-push.ts`, is run this way: Node 24 strips its types, so it needs no build step and no dependencies.
+The push hook, `.claude/hooks/guard-git-push.ts`, is run this way: Node 24 strips its types, so it needs no build step and no dependencies. So is the API in production: `pnpm start` runs `node src/server.ts`, and nothing is compiled ([ADR 0023](../../decisions/0023-production-build-and-serving-details.md), decision 1).
 
 ## Official documentation
 

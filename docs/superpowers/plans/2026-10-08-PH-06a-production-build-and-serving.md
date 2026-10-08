@@ -886,7 +886,7 @@ There is no PR yet, so CI does not run on the push (`ci.yml` runs on pull reques
 - Consumes: the finished code and what Tasks 1 to 6 reported (any difference from the probes, the budget's failure output, any `allowBuilds` entry, whether `precompress()` needed a guard).
 - Produces: the records the PR links to, and the state the PR is opened from.
 
-- [ ] **Step 1: Write ADR 0023**
+- [x] **Step 1: Write ADR 0023**
 
 `docs/decisions/0023-production-build-and-serving-details.md`, in the shape of [ADR 0021](../../decisions/0021-spa-skeleton-details.md) (read it first):
 
@@ -899,7 +899,7 @@ There is no PR yet, so CI does not run on the push (`ci.yml` runs on pull reques
 - `## Decisions`: the spec's decisions 1 to 8, copied with their wording, links rewritten from `../../decisions/X` to `X` and from `../../` to `../`. Add what the implementation settled, in the cells of the decisions it touches: in decision 5, that `setHeaders` sees the path of the file actually sent (`.br` or `.gz` included); in decision 6, that the handler sends Fastify's 404 body itself, since a not-found handler cannot hand over to Fastify's default; anything Tasks 1 to 6 reported differently from the plan.
 - `## Consequences`: production needs Node 24.12 or later; PH-08's image keeps the symlinked workspace and copies `drizzle/` (OP-084, [OP-078](../open-points.md#op-078)); every developer's `apps/api/.env` needs `WEB_ROOT`; a client-side path whose last segment has a dot (`/lists/milk.2`) gets a 404 on reload, so routes must not end in such segments; a build is served after a restart, since files are found at startup; the plugins in `vite.config.ts` have no unit tests and are checked by the `build` job; the open points closed, moved and added (step 6); the living docs.
 
-- [ ] **Step 2: Note the cross-references in the earlier ADRs**
+- [x] **Step 2: Note the cross-references in the earlier ADRs**
 
 In the three places `CLAUDE.md` asks for (ADR 0023's header is step 1). Read each file's status line and the decision's cell first, and add in the same style as the notes already there (code formatting in the real cells):
 
@@ -909,7 +909,7 @@ In the three places `CLAUDE.md` asks for (ADR 0023's header is step 1). Read eac
 - ADR 0013, status line: append `; decisions 4 and 5 completed by [ADR 0023](0023-production-build-and-serving-details.md) (the budget's plugin and the serving rules)`. Decision 4's cell: `<br>🧩 **Completed by [ADR 0023](0023-production-build-and-serving-details.md), decision 4:** an inline Vite plugin sums the Brotli size of the entry chunk and its static imports and fails the build above 200 KB; CI's build job runs it.` Decision 5's cell: `<br>🧩 **Completed by [ADR 0023](0023-production-build-and-serving-details.md), decisions 3, 5 and 6:** an inline Vite plugin writes the copies; files under /assets/ are immutable for a year, everything else no-cache; page paths get index.html, API paths and missing files a JSON 404.`
 - ADR 0019, status line: append `; decision 6 revisited by [ADR 0023](0023-production-build-and-serving-details.md) (no tsc build)`. Decision 6's cell: `<br>🔍 **Revisited by [ADR 0023](0023-production-build-and-serving-details.md), decision 1:** the build this decision kept open is not needed: Node runs the .ts specifiers directly.`
 
-- [ ] **Step 3: Update the architecture, the stack overview and the threat model**
+- [x] **Step 3: Update the architecture, the stack overview and the threat model**
 
 `docs/architecture/architecture.md` (read sections 1, 2 and 5 first): in *Code structure* of the backend, `web/routes.ts` serves the built SPA; a short paragraph (in section 2 or 5, wherever serving the SPA is described today) on how the API serves it: `WEB_ROOT`, the precompressed copies, the cache rules, the fallback rules, and that production runs `node src/server.ts` by type stripping.
 
@@ -917,7 +917,7 @@ In the three places `CLAUDE.md` asks for (ADR 0023's header is step 1). Read eac
 
 `docs/architecture/threat-model.md` (read *Entry points, checked against STRIDE* first): add the static files as an entry point in the table's format: anyone, through GET and HEAD on any non-API path; guarded by `@fastify/static`, which refuses paths that leave `WEB_ROOT`, lists no folders and serves no dotfiles; files are found at startup, so nothing written later is served; API paths never fall back to HTML.
 
-- [ ] **Step 4: Update the guides and tool pages**
+- [x] **Step 4: Update the guides and tool pages**
 
 `docs/development/setup.md`: section 3 (*nvm and Node*): Node 24.12 or later is required (type stripping); section 9 gains a subsection, or a closing part, *Run the production build*: `pnpm build`, then `pnpm start` (PostgreSQL running), open `http://localhost:3000`; what `WEB_ROOT` in `apps/api/.env` is, and **that an existing `.env` needs the line `WEB_ROOT=../web/dist` added** (copy it from `.env.example`); that `pnpm dev` logs a warning about the missing folder until the first build, which is harmless. Section 11 (*Coming later*): drop the production build line. Keep `## Contents` in sync.
 
@@ -931,11 +931,11 @@ In the three places `CLAUDE.md` asks for (ADR 0023's header is step 1). Read eac
 
 `README.md`, *Development*: one sentence that `pnpm build` and `pnpm start` run the app the production way on `http://localhost:3000`.
 
-- [ ] **Step 5: Update the glossary**
+- [x] **Step 5: Update the glossary**
 
 `docs/glossary.md`, alphabetically under its existing sections, where missing (search first): **Brotli** (a compression format for the web, smaller than gzip, sent when the browser accepts `br`), **Content hash (fingerprint)** (a short hash of a file's content put in its name by the build, so a changed file gets a new name and the old one can be cached forever), **ETag** (a version tag of a response; the browser sends it back to ask whether its copy is still current, and gets `304 Not Modified` if so), **Precompression** (writing compressed copies at build time, so the server never compresses per request), **SPA fallback** (answering the app's own paths with `index.html`, so the client-side router can render them on a reload). Update **Type stripping**: production runs this way too ([ADR 0023](decisions/0023-production-build-and-serving-details.md)); it no longer says only the push hook does.
 
-- [ ] **Step 6: Update the open points**
+- [x] **Step 6: Update the open points**
 
 In `docs/open-points.md` (group `### PH-06a Production build and serving`), with the branch link `https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving` until the PR exists:
 
@@ -945,11 +945,11 @@ In `docs/open-points.md` (group `### PH-06a Production build and serving`), with
 - New, under `### PH-08 Container image`: `#### OP-084` **Keep the symlinked workspace in the container image.** Node refuses to strip types in files under `node_modules`; `@szop/shared` works because pnpm links it to `packages/shared/src/`. An image built with `pnpm deploy`, or any step that copies workspace packages into `node_modules`, makes the API fail at startup with `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING` once it imports `@szop/shared`. The image copies the workspace as it is and installs production dependencies with `pnpm install --prod --frozen-lockfile`. Source: [ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 1. Status: ⬜ Open.
 - Check that PH-06a's group now holds only its heading and its roadmap link, as PH-05's does.
 
-- [ ] **Step 7: Update the roadmap**
+- [x] **Step 7: Update the roadmap**
 
 In `docs/roadmap.md`: the PH-06a row's Plan column links `superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md` (the plan commit set it; check). PH-06a's *Delivers* gains `([ADR 0023](decisions/0023-production-build-and-serving-details.md))`. The row stays `🚧 In progress`; the README diagram stays at ◐ until the PR.
 
-- [ ] **Step 8: The end-to-end check in Chrome**
+- [x] **Step 8: The end-to-end check in Chrome**
 
 ```bash
 docker compose up -d --wait
@@ -966,11 +966,11 @@ Then, through the `chrome-devtools-win` MCP server (`~/.claude/CLAUDE.md`: Windo
 
 Then `pkill -f "node --env-file=.env src/server.ts"`. If the browser cannot be reached, do the same checks with `curl` (Task 4, step 5), and say so.
 
-- [ ] **Step 9: Walk through the definition of done**
+- [x] **Step 9: Walk through the definition of done**
 
 Read `docs/development/definition-of-done.md` and note each item's state for the PR. Expected: item 1 (tests) ✅; item 2 ➖ N/A: no domain rules; item 3 after CI; item 4 ➖ N/A: no demo environment until PH-12; item 5 ➖ N/A: no `infra/base`; items 6–10 ✅; item 11: read it and decide, with the reason, whether it is ✅ or ➖ N/A (the SPA's look does not change).
 
-- [ ] **Step 10: Links, final checks and a self-review of the diff**
+- [x] **Step 10: Links, final checks and a self-review of the diff**
 
 ```bash
 for f in docs/decisions/0023-production-build-and-serving-details.md docs/decisions/00{05,07,10,13,19}-*.md docs/architecture/*.md docs/development/*.md docs/development/tools/*.md docs/glossary.md docs/open-points.md docs/roadmap.md README.md; do
@@ -982,7 +982,7 @@ git diff main --stat
 
 Expected: `link check done` with no `BROKEN` line; every check passes. Check by eye that each changed document's `## Contents` lists its `##` and `###` headings, and that requirements are linked, never plain IDs. Read the whole diff against the spec's *Goal and success criteria*, one by one, and list any gap.
 
-- [ ] **Step 11: Tick this task's boxes and commit**
+- [x] **Step 11: Tick this task's boxes and commit**
 
 ```bash
 git add docs README.md
