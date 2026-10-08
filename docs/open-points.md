@@ -367,6 +367,13 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 - **Source:** [ADR 0020](decisions/0020-database-details.md), decision 11
 - **Status:** ⬜ Open
 
+#### OP-085
+
+**Bound the API's shutdown when connections stay open.** In PH-06a's browser check (Node 24.21, Fastify 5), `pnpm start` received SIGTERM, logged `shutting down` and closed its port at once, but the process took about 145 seconds to exit, held by one open connection from Chrome after its tab was closed. On ECS, a task that has not exited by its stop timeout (30 seconds by default) is killed, so a slow shutdown could cut off requests that are still running or end without the pool closing cleanly. Options to check: Fastify's `forceCloseConnections`, or a deadline after which `server.ts` exits anyway, and how either fits the graceful shutdown of [ADR 0019](decisions/0019-api-skeleton-details.md), decision 8.
+
+- **Source:** PH-06a, Task 7's browser check ([branch](https://github.com/luiki-dev/szop/tree/feat/ph-06a-production-build-and-serving))
+- **Status:** ⬜ Open
+
 ### PH-13 Releases
 
 Roadmap entry: [PH-13](roadmap.md#ph-13-releases).\

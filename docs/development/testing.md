@@ -54,38 +54,49 @@ pnpm test:coverage              # every project, plus a coverage report
 An API test sends an HTTP request to the app and checks the answer. The health test, `apps/api/src/health/routes.test.ts`, is the pattern every later route test follows:
 
 ```ts
-const config: Config = { host: "127.0.0.1", port: 3000, logLevel: "silent" };
+const config: Config = {
+  host: "127.0.0.1",
+  port: 3000,
+  logLevel: "silent",
+  // Not used: each test passes its own database to buildApp.
+  database: { host: "", port: 1, name: "", user: "", password: "" },
+  // Not served here: the SPA's serving is tested in web/routes.test.ts.
+  webRoot: "/nonexistent/szop-web-root",
+};
 
 describe("GET /api/health", () => {
+  const database = useTestDatabase();
   let app: FastifyInstance;
-
-  beforeEach(() => {
-    app = buildApp({ config });
-  });
 
   afterEach(async () => {
     await app.close();
   });
 
-  it("answers 200 with status ok", async () => {
+  it("answers 200 with the schema version when the database is up", async () => {
+    app = buildApp({ config, db: database.db });
+
     const response = await app.inject({ method: "GET", url: "/api/health" });
 
     expect(response.statusCode).toBe(200);
     expect(response.headers["content-type"]).toMatch(/^application\/json/);
-    expect(response.json()).toEqual({ status: "ok" });
+    expect(response.json()).toEqual({
+      status: "ok",
+      database: { status: "up", schemaVersion: "0000_init" },
+    });
   });
 });
 ```
 
 Line by line:
 
-- **A literal `Config`.** The test builds the settings by hand instead of reading the environment, so it works the same on every machine. `logLevel: "silent"` keeps the log lines out of the test output.
-- **`buildApp({ config })` in `beforeEach`.** Every test gets a fresh app, so nothing one test does can leak into the next. `buildApp` is the same function `server.ts` calls in production.
+- **A literal `Config`.** The test builds the settings by hand instead of reading the environment, so it works the same on every machine. `logLevel: "silent"` keeps the log lines out of the test output. `database` is never used, since the test hands `buildApp` a database of its own, and `webRoot` names a folder that does not exist, since this test does not serve the SPA ([Testing the served SPA](#testing-the-served-spa) does).
+- **`useTestDatabase()`** gives the file a real, empty PostgreSQL database ([Writing a database test](#writing-a-database-test)).
+- **`buildApp({ config, db })` in each test.** Every test gets a fresh app, so nothing one test does can leak into the next; a test that needs another database, such as one that cannot be reached, passes that instead. `buildApp` is the same function `server.ts` calls in production.
 - **`app.close()` in `afterEach`.** It shuts the app down properly, so no test leaves anything running.
 - **`app.inject()`.** Fastify handles the request in memory, through the same routing, validation and serialization as a real one, but without opening a port. It is fast, and two tests can never fight over a port.
-- **Three assertions.** The status code, the content type and the body are the contract a client sees, so the test checks all three. `toMatch` accepts any `application/json; charset=…` suffix; `toEqual` compares the whole body.
+- **Three assertions.** The status code, the content type and the body are the contract a client sees, so the test checks all three. `toMatch` accepts any `application/json; charset=…` suffix; `toEqual` compares the whole body. The real test also parses the body with the shared `healthSchema`, so the API fails its own test when it drifts from the contract.
 
-Later phases pass more things in through the same `buildApp(deps)`: a test database, a recording email sender and a controllable clock ([ADR 0007](../decisions/0007-testing-strategy.md), decision 14). Only the fakes differ from production, never the wiring.
+Later phases pass more things in through the same `buildApp(deps)`: a recording email sender and a controllable clock ([ADR 0007](../decisions/0007-testing-strategy.md), decision 14). Only the fakes differ from production, never the wiring.
 
 ### Testing the served SPA
 

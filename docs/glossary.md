@@ -127,7 +127,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Big design up front** | Designing a system in full detail before building any of it. Criticized because the decisions are made without feedback from working software. Szop decides direction up front and details per phase (see ADR 0004). |
 | **Bisect (git)** | `git bisect` finds the commit that introduced a bug by binary search: it checks out commits between a known good and a known bad one, and you mark each as good or bad. |
 | **Branch protection / ruleset** | GitHub rules that guard branches or tags, for example "no direct pushes to `main`" or "a version tag can never move". **Rulesets** are the newer mechanism; Szop uses them (see ADR 0009). |
-| **Brotli** | A compression format for web files, smaller than gzip. Szop's build writes Brotli and gzip copies of every file, and the server sends whichever the browser accepts. |
+| **Brotli** | A compression format for web files, smaller than gzip. Szop's build writes Brotli and gzip copies of every text file, and the server sends whichever the browser accepts. |
 | **Bundle** | The JavaScript and CSS files a build tool (Vite) produces from the source code for the browser to download. |
 | **Changelog** | A file (`CHANGELOG.md`) listing what changed in each released version. Szop's is written by release-please from the commit messages. |
 | **Checkpoint (PostgreSQL)** | The moment PostgreSQL writes all changed data from memory to disk. `DROP DATABASE` waits for one, so Szop's tests run their drops together and share it (see ADR 0020). |

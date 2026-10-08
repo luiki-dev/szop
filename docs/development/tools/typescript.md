@@ -34,7 +34,7 @@ TypeScript adds static types to JavaScript, and Szop writes all its code in it, 
 
 **`apps/api/tsconfig.json`**: each package has a `tsconfig.json` of its own that extends the base, so a package can add what only it needs. The API's:
 
-- `noEmit`, `erasableSyntaxOnly`, `allowImportingTsExtensions`: the same three as the root's, for the same reasons. The API is run by [tsx](tsx.md) and tested by [Vitest](vitest.md), so nothing is compiled into files.
+- `noEmit`, `erasableSyntaxOnly`, `allowImportingTsExtensions`: the same three as the root's, for the same reasons. The API is run by [tsx](tsx.md) in development and by Node's type stripping in production, and tested by [Vitest](vitest.md), so nothing is compiled into files either way.
 - `types: ["node"]`: only Node's types are global.
 - `include: ["src", "vitest.config.ts"]`: the API's source, its tests (they sit in `src`) and its Vitest config. Nothing outside the package.
 
