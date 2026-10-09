@@ -141,8 +141,8 @@ The [Szop project](https://github.com/users/luiki-dev/projects/3), owned by the 
 |---|---|---|
 | **Visibility** | Public | The README and the roadmap link it. ADR 0024, decision 13. |
 | **Fields** | Status (six options), Order, Path, Spec, Plan, Started, Finished | See [project tracking](project-tracking.md#fields). ADR 0024, decisions 7 and 8. |
-| **Workflows** | Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr,owner` | See [project tracking](project-tracking.md#workflows). |
-| **Views** | Board, Roadmap, Open points, Next up, Timeline | See [project tracking](project-tracking.md#views). |
+| **Workflows** | On: Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr,owner`; auto-add sub-issues. Off: Auto-close issue, Pull request linked to issue, Pull request merged | See [project tracking](project-tracking.md#workflows). |
+| **Views** | Timeline, Backlog, Board, Open Points, Next Up | See [project tracking](project-tracking.md#views). |
 
 ## Checking the settings
 
@@ -180,3 +180,4 @@ Expected:
 - `default_workflow_permissions` is `read` and `can_approve_pull_request_reviews` is `false`.
 - `approval_policy` is `all_external_contributors`.
 - CodeQL's `state` is `configured`, with `actions` among its `languages` once the workflows are on `main` (until then, only the JavaScript and TypeScript entries; [OP-067](../open-points.md#op-067)).
+- Six labels; six milestones, with `Definition` and `Stage 1: Local foundations` closed; the project is public.

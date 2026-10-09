@@ -97,7 +97,7 @@ The [Szop project](https://github.com/users/luiki-dev/projects/3) is public; onl
 | Order | Phases: the roadmap position in steps of 10 (PH-01 is 10, the retired PH-06 is 60, PH-06a is 70). A new phase takes a free number between its neighbours. |
 | Path | Phases: `Full` or `Bounded` |
 | Spec, Plan | Phases: links to the files on `main` |
-| Started | Phases: the day the brainstorm started (for done phases, the PR's first commit); `adr` issues: the day the work started |
+| Started | Phases: the date of the phase branch's first commit; `adr` issues: the day the work started |
 | Finished | The merge date |
 
 ### Statuses
@@ -115,32 +115,46 @@ A far-off phase behind a spike stays ⬜ Backlog and keeps its blocked-by link; 
 
 ### Views
 
-| View | Layout | Filter | Grouping and sorting |
-|---|---|---|---|
-| Board | Board | `label:phase` | Columns by Status, swimlanes by Milestone, sorted by Order |
-| Roadmap | Table | `label:phase` | Grouped by Milestone, sorted by Order; shows Status, Path, Spec, Plan, Linked pull requests, Sub-issues progress |
-| Open points | Table | `label:open-point is:open` | Grouped by Parent issue, sorted by Title |
-| Next up | Table | `status:"📌 Todo","⏳ Blocked","🚧 In progress"` | Grouped by Status; shows Labels, Parent issue, Milestone |
-| Timeline | Roadmap | `label:phase,adr` | Started to Finished, milestones as markers, sorted by Started |
+Five views, as built by the owner in the UI and read back through the API. The first two rows are the board and the plan as a table, the rest answer one question each.
 
-The Timeline is a record of what happened when: future phases have no dates yet.
+| View | Layout | Filter | Grouping and sorting | Fields shown |
+|---|---|---|---|---|
+| Timeline | Roadmap | `label:phase,adr` | Sorted by Started, then Order; the date range and the milestone markers are as built in the UI (not readable through the API) | Title, Assignees, Status |
+| Backlog | Table | none | Grouped by Milestone, sorted by Started, then Order | Title, Status, Labels, Linked pull requests, Sub-issues progress |
+| Board | Board | none | Columns by Status, swimlanes by Milestone, sorted by Started, then Order | Title, Status, Labels, Linked pull requests, Parent issue, Sub-issues progress |
+| Open Points | Table | `label:open-point is:open` | Grouped by Parent issue, sorted by Title | Title, Status, Labels |
+| Next Up | Table | `status:"📌 Todo","⏳ Blocked","🚧 In progress"` | Grouped by Status, not sorted | Title, Labels, Milestone, Parent issue, Sub-issues progress |
+
+What each is for:
+
+- **Timeline** is a record of what happened when: phases and `adr` issues from Started to Finished. Future phases have no dates yet.
+- **Backlog** is the whole plan as a table: every item grouped by milestone.
+- **Board** is the same items as cards in a column per status, a swimlane per milestone.
+- **Open Points** is the open points grouped by the phase that settles them.
+- **Next Up** is what is picked, blocked or under way, by status.
+
+Backlog and Board have no filter, so they also hold the open points and the owner steps.
 
 ### Workflows
 
-| Workflow | Setting |
-|---|---|
-| Item added to project | Status `⬜ Backlog` |
-| Item closed | Status `✅ Done` |
-| Item reopened | Status `📌 Todo` |
-| Auto-add to project | Repository `luiki-dev/szop`, filter `is:issue label:phase,open-point,adr,owner` |
-| Pull request workflows, Auto-archive items | Off: pull requests are not on the project, and done items stay visible |
+Five workflows are on and three are off, as read through the API. Their settings (the status a workflow sets, the auto-add filter) cannot be read through it: they are as the owner configured them in the UI.
+
+| Workflow | State | Setting |
+|---|---|---|
+| Item added to project | On | Status `⬜ Backlog` |
+| Item closed | On | Status `✅ Done` |
+| Item reopened | On | Status `📌 Todo` |
+| Auto-add to project | On | Repository `luiki-dev/szop`, filter `is:issue label:phase,open-point,adr,owner` |
+| Auto-add sub-issues to project | On | Sub-issues of an item already on the project are added to it |
+| Auto-close issue, Pull request linked to issue, Pull request merged | Off | Pull requests are not on the project; a PR closes its issues with `Closes #N` |
+| Auto-archive items | Not listed by the API | Meant to be off, so that done items stay visible |
 
 ## How items move
 
 | Event | On GitHub | Who |
 |---|---|---|
 | A phase is picked next | Phase and its open points → 📌 Todo | Owner (Claude proposes at the end of a phase) |
-| A phase's brainstorm starts | Phase → 🚧 In progress, Started set; the previous phase's Finished set | Claude |
+| A phase's brainstorm starts | Phase → 🚧 In progress, Started set (the date of the phase branch's first commit); Finished set for the previous phase and for any `adr` issue closed since | Claude |
 | Its spec or plan is committed | Spec, Plan set | Claude |
 | Its PR opens | The description says `Closes #<phase>` and `Closes #<OP>` for each open point it settles | Claude |
 | Its PR is merged | Those issues close; the workflow sets ✅ Done | Owner, by merging |
@@ -167,6 +181,8 @@ For PH-06b and PH-07, until [OP-086](../open-points.md#op-086) is settled:
 - **Significant plan changes** (a new phase, a split, a reorder) still go through a brainstorm, and through an ADR when they are significant.
 
 ## Setting up the project
+
+Done on 2026-10-10; kept as the reference for rebuilding the project.
 
 The owner's steps, which GitHub offers only in the web UI:
 

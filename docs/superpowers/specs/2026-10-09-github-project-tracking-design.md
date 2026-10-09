@@ -38,13 +38,13 @@ Today [`docs/roadmap.md`](../../roadmap.md) is the tracker: [ADR 0009](../../dec
 
 ## Goal and success criteria
 
-**Goal:** every phase, every open point and every piece of decision work is an issue in `luiki-dev/szop`, on the public project "Szop", where the owner sees the roadmap as a board, a table, a timeline and the open points grouped by phase; the docs link each item to its issue, and a written rule keeps both sides in step for the trial.
+**Goal:** every phase, every open point and every piece of decision work is an issue in `luiki-dev/szop`, on the public project "Szop Project", where the owner sees the roadmap as a board, a table, a timeline and the open points grouped by phase; the docs link each item to its issue, and a written rule keeps both sides in step for the trial.
 
 Success means:
 
 1. **132 issues exist**, each with the right label, milestone, parent, blocking links and project fields: 35 phase issues (PH-01 to PH-33 with PH-06a and PH-06b, and the retired PH-06), 61 open-point issues (the 60 open entries and OP-086), 18 `adr` issues (17 from the history and ADR 0024's own) and 18 owner-step issues (the open owner steps of the phases not yet done).
 2. **Only six labels exist** (`phase`, `open-point`, `spike`, `candidate`, `owner`, `adr`), and six milestones (`Definition`, `Stage 1` to `Stage 5`), with `Definition` and `Stage 1` closed.
-3. **The project is public**, named "Szop", with the fields and the six statuses below, and no template fields left; the test issue #24 and the test milestone are gone.
+3. **The project is public**, keeping the owner's title "Szop Project", with the fields and the six statuses below, and no template fields left; the test issue #24 and the test milestone are gone.
 4. **Every stage table row in `roadmap.md` and every open entry in `open-points.md` links its issue,** and a check script confirms that each link points to the issue with the matching ID.
 5. **The guide `docs/development/project-tracking.md`** explains the model, how each item moves, the trial rule and the owner's setup steps; ADR 0024 records the decisions.
 6. **The owner has built the five views and turned on the workflows** following the guide.
@@ -77,7 +77,7 @@ ADR 0024 records them.
 | 8 | Fields | — | **Order** (a number, the roadmap position in steps of 10, since a new phase takes the next free ID and IDs then stop sorting in roadmap order), **Path** (Full, Bounded), **Spec** and **Plan** (links), **Started** and **Finished** (dates, for the timeline). Team, Iteration, Quarter, Start date and Target date, left by the project's template, are deleted: a solo project paced by learning has no sprints or deadlines. |
 | 9 | Relationships | — | **An open point is a sub-issue of the phase that settles it** (of the phase it sits under now, when it has parts; it is re-parented when a part is done, as the register moves it today). **A spike blocks its phase** (OP-025 blocks PH-13, OP-038 blocks PH-16), and a "Depends on" that names an issue becomes a blocked-by link. **A split phase** is closed as not planned with a comment linking the new phases, and is linked to each of them with *Relates to* (decision 10). |
 | 10 | Linking a split phase to its successors | A comment only; sub-issues of the old phase; *Relates to* and a comment | ***Relates to* and a comment.** GitHub's *Relates to* relationship (in public preview since 2026-08-07) links two issues without meaning blocking or containment, and shows on both. It has no API yet, so the owner adds it in the issue sidebar; splits are rare. Making the new phases sub-issues of a closed, retired phase would read as if the old phase were still the container. |
-| 11 | What a phase issue holds | A link to the roadmap only; a copy of the roadmap entry | **The whole plan in the issue** (goal, delivers, depends on, owner steps as a checklist, expected path, the "Also" open points), the owner's choice, so the issue reads on its own. The issue is the original and the roadmap entry its mirror (decision 14). **Owner steps of a phase not yet done are sub-issues of their own**, labelled `owner` (`PH-10 owner step 1: …`), and the phase issue lists them, so the owner sees every step waiting on them on the board; a done phase keeps its owner steps as a ticked checklist. A checklist alone would leave the owner's steps off the board, without a status. |
+| 11 | What a phase issue holds | A link to the roadmap only; a copy of the roadmap entry | **The whole plan in the issue** (goal, delivers, depends on, owner steps (a ticked checklist for a done phase, step issues otherwise), expected path, the "Also" open points), the owner's choice, so the issue reads on its own. The issue is the original and the roadmap entry its mirror (decision 14). **Owner steps of a phase not yet done are sub-issues of their own**, labelled `owner` (`PH-10 owner step 1: …`), and the phase issue lists them, so the owner sees every step waiting on them on the board; a done phase keeps its owner steps as a ticked checklist. A checklist alone would leave the owner's steps off the board, without a status. |
 | 12 | How the GitHub side is built | A one-off run of `gh` commands, driven by the plan; a committed migration script; a GitHub Action that mirrors the docs on every merge | **A one-off run of `gh`, with a pilot first.** The issue bodies are generated from the docs into temporary files and created in batches; PH-06b with its open points goes first, the owner checks it, then the rest follows. A script would be a tested Markdown parser that loses its purpose when the trial ends, and a second new concept in one change. An Action needs a personal access token or a GitHub App to write to a user's project, a new credential under [ADR 0012](../../decisions/0012-security-baseline.md), and would tie the issues to the docs for good. |
 | 13 | Visibility of the project | Public; private | **Public.** The issues are public with the repository anyway, and the README and `roadmap.md` can link a board visitors can open. Only the owner can edit it. |
 | 14 | Keeping both sides in step | Automation; a rule | **A rule,** for the length of the trial: **GitHub is the source.** Claude makes changes on the issues first. Before each PR, and at the start of each phase, Claude brings `roadmap.md`, the README's diagram and `open-points.md` in line with GitHub, the owner's own edits in the project included; when both sides were edited, GitHub wins; the PR lists the issue changes it mirrors. The edits are live before the merge, and the mirrored doc diff is where the owner reviews them. A significant change to the plan (a new phase, a split, a reorder) still goes through a brainstorm, and through an ADR when it is significant. Drift that hurts is evidence for OP-086. |
@@ -252,7 +252,7 @@ The pilot is created before most issues exist, so its references to them stay do
 
 ### The project: fields and statuses
 
-Project #3, renamed **Szop**, public, description: *"Szop's roadmap phases, open points and decision work. The plan lives in docs/roadmap.md: https://github.com/luiki-dev/szop/blob/main/docs/roadmap.md"*. Every issue is added to it.
+Project #3, keeping the owner's title **Szop Project**, public, description: *"Szop's roadmap phases, open points, decision work and owner steps. During a trial the issues are the source of truth; docs/roadmap.md and docs/open-points.md mirror them: https://github.com/luiki-dev/szop/blob/main/docs/roadmap.md"*. Every issue is added to it.
 
 | Field | Type | Values and rules |
 |---|---|---|
@@ -260,7 +260,7 @@ Project #3, renamed **Szop**, public, description: *"Szop's roadmap phases, open
 | Order | number | Phases only. 10, 20, 30 … in roadmap order at migration (PH-06 at 60 before PH-06a at 70); a phase added later takes a free number between its neighbours |
 | Path | single select | `Full`, `Bounded`; phases only |
 | Spec, Plan | text | Absolute URLs to the files on `main`; phases only, when they exist |
-| Started | date | Phases: the date of the phase branch's first commit; ADR issues: see the table above |
+| Started | date | Phases: the date of the phase branch's first commit (for done phases, the PR's first commit); ADR issues: see the table above |
 | Finished | date | The merge date |
 
 Built-in fields used as they are: Title, Labels, Milestone, Parent issue, Sub-issues progress, Linked pull requests, Assignees. Deleted: Team, Iteration, Quarter, Start date, Target date.
@@ -281,28 +281,25 @@ Built-in fields used as they are: Title, Labels, Milestone, Parent issue, Sub-is
 
 ### Built-in workflows
 
-Configured by the owner in the project's *Workflows* page (no API):
+Configured by the owner in the project's *Workflows* page (no API to set them). **As built** (read back through the API on 2026-10-10; the settings behind each workflow cannot be read through it):
 
-- **Item added to project** → `⬜ Backlog`
-- **Item closed** → `✅ Done`
-- **Item reopened** → `📌 Todo`
-- **Auto-add to project:** repository `luiki-dev/szop`, filter `is:issue label:phase,open-point,adr,owner`
-- **Pull request merged** and the other pull request workflows: off, since pull requests are not on the project
-- **Auto-archive items:** off
+- **On:** Item added to project → `⬜ Backlog`; Item closed → `✅ Done`; Item reopened → `📌 Todo`; Auto-add to project (repository `luiki-dev/szop`, filter `is:issue label:phase,open-point,adr,owner`); **Auto-add sub-issues to project**, which the design had not listed: sub-issues of an item already on the project are added to it.
+- **Off:** Auto-close issue, Pull request linked to issue and Pull request merged, since pull requests are not on the project.
+- **Auto-archive items:** meant to be off, so that done items stay visible; the API does not list it.
 
 ### Views
 
-Built by the owner in the UI (no API), following the guide:
+Built by the owner in the UI (no API to create them). **As built** (read back through the API on 2026-10-10), which differs from the five views first designed (Board, Roadmap, Open points, Next up, Timeline) in names, filters and sorting:
 
 | # | Name | Layout | Filter | Grouping and sorting | Fields shown |
 |---|---|---|---|---|---|
-| 1 | Board | Board | `label:phase` | Columns: Status; swimlanes: Milestone; sort: Order | Title, Linked pull requests, Sub-issues progress |
-| 2 | Roadmap | Table | `label:phase` | Group: Milestone; sort: Order | Title, Status, Path, Spec, Plan, Linked pull requests, Sub-issues progress |
-| 3 | Open points | Table | `label:open-point is:open` | Group: Parent issue; sort: Title | Title, Status, Labels |
-| 4 | Next up | Table | `status:"📌 Todo","⏳ Blocked","🚧 In progress"` | Group: Status | Title, Labels, Parent issue, Milestone |
-| 5 | Timeline | Roadmap | `label:phase,adr` | Dates: Started to Finished; markers: milestones; sort: Started | Title, Status |
+| 1 | Timeline | Roadmap | `label:phase,adr` | Sort: Started, then Order; the date range (Started to Finished) and the milestone markers as built in the UI, not readable through the API | Title, Assignees, Status |
+| 2 | Backlog | Table | none | Group: Milestone; sort: Started, then Order | Title, Status, Labels, Linked pull requests, Sub-issues progress |
+| 3 | Board | Board | none | Columns: Status; swimlanes: Milestone; sort: Started, then Order | Title, Status, Labels, Linked pull requests, Parent issue, Sub-issues progress |
+| 4 | Open Points | Table | `label:open-point is:open` | Group: Parent issue; sort: Title | Title, Status, Labels |
+| 5 | Next Up | Table | `status:"📌 Todo","⏳ Blocked","🚧 In progress"` | Group: Status; no sorting | Title, Labels, Milestone, Parent issue, Sub-issues progress |
 
-The Timeline is a record of what happened when: future phases have no dates and show without bars.
+The Timeline is a record of what happened when: future phases have no dates and show without bars. Backlog and Board have no filter, so they also hold the open points and the owner steps. The guide ([project tracking](../../development/project-tracking.md#views)) describes what each view is for.
 
 ### Issue forms
 
@@ -324,15 +321,16 @@ For PH-06b and PH-07, until OP-086 is settled:
 - **Statuses map onto the docs:** ⬜ Backlog, 📌 Todo and ⏳ Blocked read ⬜ Not started in the stage tables and ⬜ Open in the register; 🚧 In progress, ✅ Done and ✖️ Dropped read the same.
 - **Significant plan changes** (a new phase, a split, a reorder) still go through a brainstorm, and through an ADR when they are significant.
 - **Who sets what:**
-  - **Claude:** `🚧 In progress` and Started when a phase's brainstorm starts; Spec and Plan when they are committed; an open point's moves, ticks and re-parenting; new open points' issues; Finished for the previous phase at the start of the next one (no workflow sets dates); `✖️ Dropped` after closing as not planned.
-  - **The owner:** `📌 Todo` and `⏳ Blocked` when choosing what comes next (Claude proposes them at the end of a phase); the *Relates to* links.
+  - **Claude:** `🚧 In progress` and Started when a phase's brainstorm starts; Spec and Plan when they are committed; an open point's moves, ticks and re-parenting; new open points' issues; Finished for the previous phase and for any `adr` issue closed since, at the start of the next phase (no workflow sets dates); `✖️ Dropped` after closing as not planned.
+  - **The owner:** `📌 Todo` when choosing what comes next (Claude proposes it at the end of a phase); the *Relates to* links.
+  - **The owner or Claude:** `⏳ Blocked`, when an item cannot move.
   - **The merge:** closes the issues named with `Closes #N` in the PR's description, and the workflow sets `✅ Done`.
 
 ### How items move
 
 | Event | On GitHub |
 |---|---|
-| A phase's brainstorm starts | Phase → 🚧, Started set; the previous phase's Finished set |
+| A phase's brainstorm starts | Phase → 🚧, Started set (the date of the phase branch's first commit); Finished set for the previous phase and for any `adr` issue closed since |
 | Its spec or plan is committed | Spec, Plan set |
 | Its PR opens | The description says `Closes #<phase>` and `Closes #<OP>` for each open point it settles |
 | Its PR is merged | Those issues close; the workflow sets ✅ |
@@ -363,7 +361,7 @@ The work is on branch `docs/adr-0024-github-project-tracking`, pushed, in one PR
 
 ## Documentation and records
 
-- **ADR 0024** — *GitHub Issues and Projects next to the docs, as a trial*: decisions 1 to 14 above. **Supersedes in part** [ADR 0009](../../decisions/0009-git-workflow.md), decision 14 ("The roadmap is the tracker: GitHub Issues and Projects are not part of the process"): 🔁 note in its cell and its status line. **Extends** [ADR 0014](../../decisions/0014-roadmap.md), decision 4 (the stage tables gain an Issue column; the project holds a finer status) and [ADR 0011](../../decisions/0011-design-sanity-check-follow-ups.md), decision 1 (each open entry links its issue): ➕ notes.
+- **ADR 0024** — *GitHub Issues and Projects next to the docs, as a trial*: decisions 1 to 14 above. **Supersedes in part** [ADR 0009](../../decisions/0009-git-workflow.md), decision 14 ("The roadmap is the tracker: GitHub Issues and Projects are not part of the process"): 🔁 note in its cell and its status line. **Revisits, for the trial,** [ADR 0014](../../decisions/0014-roadmap.md), decision 4 and [ADR 0017](../../decisions/0017-readme-roadmap-diagram.md), decision 4 (the project's issues are the source of a phase's status; the stage tables and the README's diagram mirror them, and the stage tables gain an Issue column) and [ADR 0011](../../decisions/0011-design-sanity-check-follow-ups.md), decisions 1 and 4 (the issues own what is still open; each open entry links its issue and mirrors it): 🔍 notes.
 - **New guide `docs/development/project-tracking.md`:** what lives where, the labels, milestones, fields and statuses, relationships, links in bodies, how items move, the trial rule, and the owner's setup steps (workflows and views, step by step). With a Contents section.
 - **`docs/roadmap.md`:** an **Issue** column, last, in every stage table; a "How it works" bullet on the project and its link; each candidate links its issue.
 - **`docs/open-points.md`:** `- **Issue:** [#NN](https://github.com/luiki-dev/szop/issues/NN)` in every open entry, before its Status line; a "How it works" bullet; **OP-086** under PH-08: *after the trial (PH-06b and PH-07), decide whether to drop `open-points.md` and keep `roadmap.md` as a view updated from the issues, and what the roadmap keeps* (source: ADR 0024, decision 2).
@@ -382,7 +380,7 @@ The work is on branch `docs/adr-0024-github-project-tracking`, pushed, in one PR
 One commit per task that changes files; the GitHub-only tasks are recorded in the PR's description.
 
 1. **ADR 0024 and its notes:** the ADR, the notes in ADR 0009, 0011 and 0014, the vocabulary in `CLAUDE.md`, the glossary. *Verify:* links resolve; Prettier passes.
-2. **GitHub foundations:** labels (six created, eleven deleted), milestones (six created, the test one deleted), project #3 (renamed, public, description, template fields deleted, Order, Path, Spec, Plan, Started and Finished created), test issue #24 deleted. *Verify:* `gh label list`, the milestones API and `gh project field-list` show exactly the intended set. **Stop for the owner to replace the Status options.**
+2. **GitHub foundations:** labels (six created, eleven deleted), milestones (six created, the test one deleted), project #3 (public, description, template fields deleted, Order, Path, Spec, Plan, Started and Finished created), test issue #24 deleted. *Verify:* `gh label list`, the milestones API and `gh project field-list` show exactly the intended set. **Stop for the owner to replace the Status options.**
 3. **Pilot:** once `gh project field-list` shows the six Status options, ADR 0024's issue; PH-06b, OP-053 and OP-067 with parents, fields and statuses; the proposed `owner` list. *Verify:* the issues render on GitHub as specified. **Stop for the owner's check.**
 4. **Bulk:** the other 34 phase issues, 58 open-point issues, 17 `adr` issues and 18 owner-step issues with labels, milestones, parents, blocking links and fields; the second pass that rewrites references to issue numbers; closing the done ones and PH-06; closing `Definition` and `Stage 1`. Created in batches with a pause between requests. *Verify:* counts per label; every open point has a parent except the candidates.
 5. **Guide and process files:** `project-tracking.md`, the issue forms, the PR template, the definition of done, `git-workflow.md`, `phase-walkthrough.md`, `github-settings.md`, `stack-overview.md`. *Verify:* the forms' YAML is read against GitHub's issue form schema (they load only from the default branch, so *New issue* shows them only after the merge, when they are checked once more); links resolve; Prettier passes.
