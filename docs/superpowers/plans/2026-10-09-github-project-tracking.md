@@ -18,7 +18,7 @@
 - Statuses, exactly: `⬜ Backlog`, `📌 Todo`, `⏳ Blocked`, `🚧 In progress`, `✅ Done`, `✖️ Dropped`. **The owner creates them in the UI** (spec, owner step 1); nothing in this plan touches the Status options.
 - Fields created: `Order` (NUMBER), `Path` (SINGLE_SELECT: `Full`, `Bounded`), `Spec` (TEXT), `Plan` (TEXT), `Started` (DATE), `Finished` (DATE). Deleted: `Team`, `Iteration`, `Quarter`, `Start date`, `Target date`.
 - Issue titles: `PH-06b Web security baseline`, `OP-053 <bold lead without its final period or colon>` cut at a word boundary to at most 80 characters with `…`, `ADR 0008 <ADR title after the dash>`.
-- Totals: 35 phase issues, 61 open-point issues (60 open entries and OP-086), 18 `adr` issues (ADR 0001 to 0015, 0017, 0022 and 0024): **114**.
+- Totals: 35 phase issues, 61 open-point issues (60 open entries and OP-086), 18 `adr` issues (ADR 0001 to 0015, 0017, 0022 and 0024), 18 owner-step issues (the open owner steps of PH-09 to PH-13 and PH-18): **132**.
 - Absolute links in issue bodies start with `https://github.com/luiki-dev/szop/blob/main/`.
 - Never merge, never trigger `demo-up` or `demo-down`, never delete anything not named in this plan.
 - **Shell commands run one at a time, in plain form**, from the worktree `/home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`: this session's guard refuses loops, `$(…)` substitutions and `gh … --jq` programs inside larger constructs. Anything with a loop is a Python script in `TOOLS`, run as `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/<script>.py …` (no `-I`: the scripts import `ghlib.py` from their own folder).
@@ -123,14 +123,14 @@ The design was brainstormed and written as a [spec](../superpowers/specs/2026-10
 | 8 | Fields | — | **Order** (a number, the roadmap position in steps of 10, since a new phase takes the next free ID and IDs then stop sorting in roadmap order), **Path** (Full, Bounded), **Spec** and **Plan** (links), **Started** and **Finished** (dates, for the timeline). Team, Iteration, Quarter, Start date and Target date, left by the project's template, are deleted: a solo project paced by learning has no sprints or deadlines. |
 | 9 | Relationships | — | **An open point is a sub-issue of the phase that settles it** (of the phase it sits under now, when it has parts; it is re-parented when a part is done, as the register moves it). **A spike blocks its phase** (OP-025 blocks PH-13, OP-038 blocks PH-16), and a "Depends on" that names an issue becomes a blocked-by link. **A split phase** is closed as not planned with a comment linking the new phases, and is linked to each of them with *Relates to* (decision 10). |
 | 10 | Linking a split phase to its successors | A comment only; sub-issues of the old phase; *Relates to* and a comment | ***Relates to* and a comment.** *Relates to* links two issues without meaning blocking or containment, and shows on both. It has no API yet, so the owner adds it in the issue sidebar; splits are rare. Making the new phases sub-issues of a closed, retired phase would read as if the old phase were still the container. |
-| 11 | What a phase issue holds | A link to the roadmap only; a copy of the roadmap entry | **A copy of the entry** (goal, delivers, depends on, owner steps as a checklist, expected path, the "Also" open points), the owner's choice, so the issue reads on its own. The copy can drift; the trial rule (decision 14) handles it. |
+| 11 | What a phase issue holds | A link to the roadmap only; a copy of the roadmap entry | **A copy of the entry** (goal, delivers, depends on, owner steps as a checklist, expected path, the "Also" open points), the owner's choice, so the issue reads on its own. The copy can drift; the trial rule (decision 14) handles it. **Owner steps of a phase not yet done are sub-issues of their own**, labelled `owner` (`PH-10 owner step 1: …`), and the phase issue lists them, so the owner sees every step waiting on them on the board; a done phase keeps its owner steps as a ticked checklist. A checklist alone would leave the owner's steps off the board, without a status. |
 | 12 | How the GitHub side is built | A one-off run of `gh` commands, driven by the plan; a committed migration script; a GitHub Action that mirrors the docs on every merge | **A one-off run of `gh`, with a pilot first.** The issue bodies are generated from the docs by throwaway scripts and created in batches; PH-06b with its open points goes first, the owner checks it, then the rest follows. A committed script would be a tested Markdown parser that loses its purpose when the trial ends, and a second new concept in one change. An Action needs a personal access token or a GitHub App to write to a user's project, a new credential under [ADR 0012](0012-security-baseline.md), and would make the docs the permanent source. |
 | 13 | Visibility of the project | Public; private | **Public.** The issues are public with the repository anyway, and the README and `roadmap.md` can link a board visitors can open. Only the owner can edit it. |
 | 14 | Keeping both sides in step | Automation; a rule | **A rule,** for the length of the trial: the docs are the source; a change to a roadmap entry or an open point updates its issue in the same working session, and the PR says so. Drift that hurts is evidence for OP-086. |
 
 ## Consequences
 
-- **114 issues exist** on the [Szop project](https://github.com/users/luiki-dev/projects/3): 35 phases, 61 open points and 18 `adr` issues, in six milestones, with six labels.
+- **132 issues exist** on the [Szop project](https://github.com/users/luiki-dev/projects/3): 35 phases, 61 open points, 18 `adr` issues and 18 owner steps, in six milestones, with six labels.
 - **The stage tables gain an Issue column, and every open entry an Issue line.** The README links the board under its diagram, which stays as it is ([ADR 0017](0017-readme-roadmap-diagram.md)).
 - **A new guide**, [project tracking](../development/project-tracking.md), explains the model, how items move and the owner's setup steps; issue forms in `.github/ISSUE_TEMPLATE/` give new issues the same shape.
 - **The PR template and the [definition of done](../development/definition-of-done.md)** (items 6 and 9) name the issues during the trial, and a PR closes its issues with `Closes #N`.
@@ -301,10 +301,12 @@ def key_for(path, anchor):
 def render(md, source, nums):
     """Rewrites relative links in Markdown taken from `source` (a repo-relative path).
 
+    A `{{KEY}}` placeholder becomes `#N` when KEY has an issue, else KEY itself.
     A link to a phase or an open point that has an issue becomes `text (#N)`;
     any other relative link becomes an absolute URL on main.
     """
     base = posixpath.dirname(source)
+    md = re.sub(r"\{\{([^}]+)\}\}", lambda m: f"#{nums[m.group(1)]}" if m.group(1) in nums else m.group(1), md)
 
     def sub(m):
         text, target = m.group(1), m.group(2)
@@ -492,7 +494,27 @@ class Render(unittest.TestCase):
         self.assertEqual(render("[g](https://example.com/a)", "docs/roadmap.md", {}), "[g](https://example.com/a)")
 
 
+class Placeholders(unittest.TestCase):
+    def test_placeholder_with_and_without_number(self):
+        md = "- {{PH-10 owner step 1}}"
+        self.assertEqual(render(md, "docs/roadmap.md", {"PH-10 owner step 1": 40}), "- #40")
+        self.assertEqual(render(md, "docs/roadmap.md", {}), "- PH-10 owner step 1")
+
+
 class Parse(unittest.TestCase):
+    def test_owner_steps(self):
+        steps = [i for i in ITEMS.values() if i["kind"] == "owner-step"]
+        self.assertEqual(len(steps), 18)
+        ph10 = [i for i in steps if i["parent"] == "PH-10"]
+        self.assertEqual(len(ph10), 3)
+        self.assertTrue(all(i["labels"] == ["owner"] for i in steps))
+        self.assertTrue(ph10[0]["title"].startswith("PH-10 owner step 1: Choose the name and buy the domain"))
+        self.assertTrue(all(len(i["title"]) <= 100 for i in steps))
+        self.assertIn("{{PH-10 owner step 1}}", ITEMS["PH-10"]["body"])
+        self.assertEqual(ITEMS["PH-10 owner step 1"]["fields"]["Status"], "⬜ Backlog")
+        self.assertFalse([i for i in steps if i["parent"] == "PH-02"])
+        self.assertIn("- [x]", ITEMS["PH-02"]["body"])
+        self.assertNotIn("{{", ITEMS["PH-02"]["body"])
     def test_counts(self):
         kinds = [i["kind"] for i in ITEMS.values()]
         self.assertEqual(kinds.count("phase"), 35)
@@ -508,7 +530,8 @@ class Parse(unittest.TestCase):
         for item in ITEMS.values():
             if item["kind"] == "open-point":
                 self.assertLessEqual(len(item["title"]), 80, item["title"])
-            self.assertTrue(item["title"].startswith(item["key"] + " "), item["title"])
+            sep = ": " if item["kind"] == "owner-step" else " "
+            self.assertTrue(item["title"].startswith(item["key"] + sep), item["title"])
             self.assertNotIn("](", item["title"])
         self.assertEqual(ITEMS["OP-053"]["title"], "OP-053 Build the app-wide web baseline")
 
@@ -536,7 +559,7 @@ class Parse(unittest.TestCase):
         body = ITEMS["PH-13"]["body"]
         for heading in ("### Goal", "### Delivers", "### Depends on", "### Owner steps", "### Expected path", "### Also"):
             self.assertIn(heading, body)
-        self.assertIn("- [ ] Run that trial", body)
+        self.assertIn("- {{PH-13 owner step 1}}", body)
         self.assertIn("- [x]", ITEMS["PH-02"]["body"])
 
     def test_parts_are_a_checklist(self):
@@ -625,12 +648,28 @@ def phase_entries(text):
     return out
 
 
-def owner_steps(text, done):
+def step_list(text):
+    """The owner steps of a roadmap entry, capitalised, without the final period; [] for "none"."""
     t = text.strip()
     if t.lower().startswith("none"):
-        return cap(t)
-    box = "[x]" if done else "[ ]"
-    return "\n".join(f"- {box} {cap(s.strip().rstrip('.'))}" for s in t.split("; "))
+        return []
+    return [cap(s.strip().rstrip(".")) for s in t.split("; ")]
+
+
+def owner_steps(key, text, done):
+    steps = step_list(text)
+    if not steps:
+        return cap(text.strip())
+    if done:
+        return "\n".join(f"- [x] {s}" for s in steps)
+    return "\n".join(f"- {{{{{key} owner step {i}}}}}" for i in range(1, len(steps) + 1))
+
+
+def step_title(prefix, text):
+    title = f"{prefix}: {text}"
+    if len(title) <= 100:
+        return title
+    return title[:99].rsplit(" ", 1)[0].rstrip(",;:") + "…"
 
 
 def path_value(text):
@@ -650,7 +689,7 @@ def phase_body(key, name, f, entry_url, also, done):
         if k not in ("Goal", "Delivers", "Depends on", "Owner steps", "Expected path", "Open points"):
             sec(k, v)
     sec("Depends on", f.get("Depends on", "—"))
-    sec("Owner steps", owner_steps(f.get("Owner steps", "none."), done))
+    sec("Owner steps", owner_steps(key, f.get("Owner steps", "none."), done))
     sec("Expected path", cap(f["Expected path"]))
     sec("Also", ", ".join(f"[OP-{n}](open-points.md#op-{n})" for n in also) if also else "—")
     return "\n".join(out).rstrip() + "\n"
@@ -672,7 +711,7 @@ def phases(roadmap, before_split, also):
             rows[r.group(1)] = r.groups()
             stage_of[r.group(1)] = stage
     old = phase_entries(before_split)["PH-06"]
-    items = []
+    items, steps = [], []
     for i, key in enumerate(order):
         if key == "PH-06":
             e, url, done = old, f"https://github.com/luiki-dev/szop/blob/{PRE_SPLIT}/docs/roadmap.md#ph-06-production-build-and-web-baseline", False
@@ -705,7 +744,17 @@ def phases(roadmap, before_split, also):
             "fields": {"Status": status, "Order": 10 * (i + 1), "Path": path_value(f["Expected path"]),
                        "Spec": spec, "Plan": plan, "Started": started, "Finished": finished},
         })
-    return items
+        if not done:  # a done phase keeps its steps as a ticked checklist
+            for n, step in enumerate(step_list(f.get("Owner steps", "none.")), 1):
+                steps.append({
+                    "key": f"{key} owner step {n}", "kind": "owner-step",
+                    "title": step_title(f"{key} owner step {n}", step), "labels": ["owner"],
+                    "milestone": None, "parent": key, "blocked_by": [], "source": "docs/roadmap.md",
+                    "body": f"Owner step of [{key} {e['name']}]({url}), from its **Owner steps** in the roadmap.\n\n{step}.\n",
+                    "close": None, "close_comment": None,
+                    "fields": {"Status": "📌 Todo" if key in TODO else "⬜ Backlog"},
+                })
+    return items, steps
 
 
 def open_points(register):
@@ -791,7 +840,8 @@ def build(root):
     register = (root / "docs/open-points.md").read_text(encoding="utf-8")
     before = (HERE / "roadmap-before-split.md").read_text(encoding="utf-8")
     ops, also = open_points(register)
-    return phases(roadmap, before, also) + ops + adrs()
+    phase_items, steps = phases(roadmap, before, also)
+    return phase_items + ops + adrs() + steps
 
 
 if __name__ == "__main__":
@@ -813,7 +863,7 @@ Expected: `OK`. If an assertion about the docs fails (for example a "Depends on"
 Read all 60 open entries in `docs/open-points.md`. An entry gets `owner` when only the owner can carry it out: an AWS, domain or GitHub setting, a manual check on the demo or in the UI, a purchase, a decision reserved to the owner. Write `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner.json` as a JSON list of keys, and `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner-reasons.md` with one line per key: `- OP-NNN: <reason>`. Re-run step 6 (still `OK`), then:
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/parse.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
-Expected: `{'phase': 35, 'open-point': 60, 'adr': 18}` (the 17 historical ADRs and ADR 0024).
+Expected: `{'phase': 35, 'open-point': 60, 'adr': 18, 'owner-step': 18}` (the 17 historical ADRs and ADR 0024).
 
 - [x] **Step 8: Write `create.py`**
 
@@ -865,7 +915,12 @@ def option_id(field, value):
 for it in todo:
     k = it["key"]
     if k not in state:
-        match = [e["number"] for e in existing if e["title"].startswith(k + " ")]
+        # An exact title first. The prefix fallback (for a title the owner has edited) is never used
+        # for an owner step, and a key's prefix never matches an owner-step title, so "PH-10 " cannot
+        # match "PH-10 owner step 1: ...".
+        match = [e["number"] for e in existing if e["title"] == it["title"]]
+        if not match and it["kind"] != "owner-step":
+            match = [e["number"] for e in existing if e["title"].startswith(k + " ") and " owner step " not in e["title"]]
         if match:
             state[k] = {"number": match[0], "item": None, "done": []}
         else:
@@ -944,7 +999,7 @@ Expected: titles, labels and milestone as in the spec; PH-06b shows OP-053 and O
 
 - [ ] **Step 11: Stop for the owner**
 
-Report the four issue links, `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner-reasons.md` (the proposed `owner` labels) and the count of issues the bulk run will create (phases 34, open points 58, `adr` 17). Wait for the owner's go or changes. Apply any change to `parse.py` or `owner.json` and re-run steps 6 and 7; Task 4's `relink.py` then brings the pilot's bodies up to date, and its `create.py --all` adds any new label (re-run `gh issue edit <n> --add-label owner` by hand for a pilot issue that gains one).
+Report the four issue links, `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner-reasons.md` (the proposed `owner` labels) and the count of issues the bulk run will create (phases 34, open points 58, `adr` 17, owner steps 18). Wait for the owner's go or changes. Apply any change to `parse.py` or `owner.json` and re-run steps 6 and 7; Task 4's `relink.py` then brings the pilot's bodies up to date, and its `create.py --all` adds any new label (re-run `gh issue edit <n> --add-label owner` by hand for a pilot issue that gains one).
 
 ---
 
@@ -959,7 +1014,7 @@ No repository files change; the PR description records this task.
 - [ ] **Step 1: Create everything**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/create.py --all`
-Expected: 109 `issue …` lines (34 phases, 58 open points, 17 `adr`), then `fields …` for all 113 items. It takes several minutes. If it stops with an error, read it, fix the cause, and run the same command again: it continues where it stopped.
+Expected: 127 `issue …` lines (34 phases, 58 open points, 17 `adr`, 18 owner steps), then `fields …` for all 131 items. It takes several minutes. If it stops with an error, read it, fix the cause, and run the same command again: it continues where it stopped.
 
 - [ ] **Step 2: Write `relink.py`**
 
@@ -1009,6 +1064,12 @@ Expected: OP-038 among its blockers; its open points as sub-issues.
 Run: `gh issue list --repo luiki-dev/szop --label open-point --state all --limit 200` and `--label phase`, `--label adr`
 Expected: 60, 35 and 18 issues.
 
+Run: `gh issue list --repo luiki-dev/szop --label owner --state all --limit 200`
+Expected: 23 issues (5 open points and 18 owner steps).
+
+Run: `gh issue view <PH-10's number> --repo luiki-dev/szop`
+Expected: its three owner steps as sub-issues (`PH-10 owner step 1: Choose the name and buy the domain` among them), and its **Owner steps** section listing them as `#N` references.
+
 ---
 
 ### Task 5: Guide and process files
@@ -1040,6 +1101,7 @@ How Szop's work is tracked on GitHub: the roadmap's phases, the open points and 
   - [Phase issues](#phase-issues)
   - [Open-point issues](#open-point-issues)
   - [ADR issues](#adr-issues)
+  - [Owner-step issues](#owner-step-issues)
   - [Links inside issue bodies](#links-inside-issue-bodies)
 - [Relationships](#relationships)
 - [The project](#the-project)
@@ -1059,6 +1121,7 @@ How Szop's work is tracked on GitHub: the roadmap's phases, the open points and 
 | Stage | Milestone `Stage N: <title>`, its exit criterion as the description | The stage's section and table in [`roadmap.md`](../roadmap.md) |
 | Decision work before PH-01 | Milestone `Definition` | — |
 | Phase | Issue `PH-NN <name>`, label `phase`, the stage's milestone | The phase entry in `roadmap.md`, with its issue in the stage table |
+| Owner step of a phase | Issue `PH-NN owner step K: <step>`, label `owner`, sub-issue of its phase; only while the phase is not done | The phase entry's **Owner steps** in `roadmap.md` |
 | Open point | Issue `OP-NNN <lead>`, label `open-point`, sub-issue of its phase | The entry in [`open-points.md`](../open-points.md), with its **Issue** line |
 | Spike | Its open point's issue, also labelled `spike`, blocking its phase | The open point; the phase's "Depends on" |
 | Candidate | Its open point's issue, also labelled `candidate`, no parent, no milestone | The open point under "Candidates" |
@@ -1087,7 +1150,7 @@ No other labels are used. Dependabot creates `dependencies` and one label per ec
 
 ### Phase issues
 
-Title: the roadmap heading, `PH-06b Web security baseline`. The body starts with a link to the roadmap entry and copies the entry, section by section: **Goal**, **Delivers**, any extra field such as **Split from**, **Depends on**, **Owner steps** as a checklist, **Expected path**, and **Also**, the open points of other phases it does a part of. Its own open points are its sub-issues, so they are not listed. A done phase has its owner steps ticked.
+Title: the roadmap heading, `PH-06b Web security baseline`. The body starts with a link to the roadmap entry and copies the entry, section by section: **Goal**, **Delivers**, any extra field such as **Split from**, **Depends on**, **Owner steps**, **Expected path**, and **Also**, the open points of other phases it does a part of. Its own open points are its sub-issues, so they are not listed. A phase that is not done lists its owner steps as references to their [owner-step issues](#owner-step-issues); a done phase has them as a ticked checklist.
 
 ### Open-point issues
 
@@ -1097,13 +1160,17 @@ Title: the ID and the entry's bold lead, cut to 80 characters. The body starts w
 
 Title: `ADR 0008 Hosting: an on-demand demo environment on AWS`. The body links the ADR and says where it landed: a commit for ADR 0001 to 0008, which went straight to `main`, a PR since. Only the ADR's creation counts. ADRs made inside a phase have no issue of their own: the phase's issue covers them.
 
+### Owner-step issues
+
+Every owner step of a phase that is not done is an issue of its own, so the owner sees on the board what waits on them. Title: `PH-10 owner step 1: Choose the name and buy the domain`, the step as the roadmap words it, capitalised, cut to 100 characters in all; the steps of an entry are numbered from 1 in the roadmap's order. Label `owner`, no milestone, a sub-issue of its phase. The body says which phase's step it is, with a link to the roadmap entry, and gives the step's text. The phase's **Owner steps** section lists the issues. The owner closes a step when it is done (or Claude does, when the owner says so), and the workflow sets ✅ Done. A done phase has no step issues: its steps stay a ticked checklist.
+
 ### Links inside issue bodies
 
 Relative links do not work in issues. A link to a phase or an open point that has an issue is written as `PH-13 (#40)`, which GitHub shows with the title and state and records on the other issue as "mentioned"; every other link points to the file on `main`.
 
 ## Relationships
 
-- **Sub-issue:** an open point sits under the phase that settles it. One with parts sits under the phase doing the current part, and moves to the next phase when that part is done.
+- **Sub-issue:** an open point sits under the phase that settles it. One with parts sits under the phase doing the current part, and moves to the next phase when that part is done. An owner step sits under its phase.
 - **Blocked by:** a phase is blocked by its spike (PH-13 by OP-025, PH-16 by OP-038) and by any issue its "Depends on" names. The issue and its board card show a blocked marker.
 - **Relates to:** a split phase relates to the phases it was split into. This link has no API yet: the owner adds it in the issue's sidebar.
 - **`Closes #N`:** a PR closes its phase's issue, each open point it settles and, for an ADR made outside a phase, its `adr` issue.
@@ -1155,7 +1222,7 @@ The Timeline is a record of what happened when: future phases have no dates yet.
 | Item added to project | Status `⬜ Backlog` |
 | Item closed | Status `✅ Done` |
 | Item reopened | Status `📌 Todo` |
-| Auto-add to project | Repository `luiki-dev/szop`, filter `is:issue label:phase,open-point,adr` |
+| Auto-add to project | Repository `luiki-dev/szop`, filter `is:issue label:phase,open-point,adr,owner` |
 | Pull request workflows, Auto-archive items | Off: pull requests are not on the project, and done items stay visible |
 
 ## How items move
@@ -1174,6 +1241,8 @@ The Timeline is a record of what happened when: future phases have no dates yet.
 | A phase is split | New phase issues; the old one closed as not planned with a comment; its open points re-parented | Claude; the owner adds *Relates to* |
 | A candidate is picked up | `candidate` removed; a phase issue created | Claude |
 | An ADR is made outside a phase | An `adr` issue, closed by its PR | Claude |
+| An owner step is done | Its issue closed; the workflow sets ✅ Done | Owner, or Claude when the owner says so |
+| A phase's owner steps change | Step issues added, or closed as not planned with the reason; the phase's list updated | Claude |
 | An item cannot move | Status → ⏳ Blocked, with a blocked-by link when the blocker is an issue | Owner or Claude |
 
 ## The trial rule
@@ -1242,8 +1311,8 @@ body:
     id: owner-steps
     attributes:
       label: Owner steps
-      description: One checkbox per step, or "None."
-      value: "- [ ] "
+      description: One line per step (each becomes an owner-step issue, see the guide), or "None."
+      value: "- "
   - type: dropdown
     id: path
     attributes:
@@ -1398,7 +1467,7 @@ The [Szop project](https://github.com/users/luiki-dev/projects/3), owned by the 
 |---|---|---|
 | **Visibility** | Public | The README and the roadmap link it. ADR 0024, decision 13. |
 | **Fields** | Status (six options), Order, Path, Spec, Plan, Started, Finished | See [project tracking](project-tracking.md#fields). ADR 0024, decisions 7 and 8. |
-| **Workflows** | Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr` | See [project tracking](project-tracking.md#workflows). |
+| **Workflows** | Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr,owner` | See [project tracking](project-tracking.md#workflows). |
 | **Views** | Board, Roadmap, Open points, Next up, Timeline | See [project tracking](project-tracking.md#views). |
 ```
 
@@ -1488,7 +1557,7 @@ In `docs/open-points.md`, at the end of the `### PH-08 Container image` group (j
 - [ ] **Step 2: Create OP-086's issue**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/parse.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
-Expected: `{'phase': 35, 'open-point': 61, 'adr': 18}`.
+Expected: `{'phase': 35, 'open-point': 61, 'adr': 18, 'owner-step': 18}`.
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/create.py --only OP-086`
 Expected: one `issue OP-086 <n>` line; the issue is a sub-issue of PH-08 with Status `⬜ Backlog`.
@@ -1674,10 +1743,10 @@ by_number = {n["number"]: n for n in nodes}
 kinds = {}
 for it in items:
     kinds[it["kind"]] = kinds.get(it["kind"], 0) + 1
-if kinds != {"phase": 35, "open-point": 61, "adr": 18}:
+if kinds != {"phase": 35, "open-point": 61, "adr": 18, "owner-step": 18}:
     problems.append(f"manifest counts {kinds}")
-if len(nodes) != 114:
-    problems.append(f"{len(nodes)} issues on GitHub, expected 114")
+if len(nodes) != 132:
+    problems.append(f"{len(nodes)} issues on GitHub, expected 132")
 
 for it in items:
     k = it["key"]
@@ -1686,7 +1755,7 @@ for it in items:
     n = by_number.get(nums[k])
     if not n:
         problems.append(f"{k}: #{nums[k]} not found"); continue
-    if not n["title"].startswith(k + " "):
+    if not n["title"].startswith(k + (": " if it["kind"] == "owner-step" else " ")):
         problems.append(f"{k}: title {n['title']!r}")
     if sorted(l["name"] for l in n["labels"]["nodes"]) != sorted(it["labels"]):
         problems.append(f"{k}: labels {n['labels']['nodes']}")
@@ -1743,7 +1812,7 @@ git push
 gh pr create --repo luiki-dev/szop --base main --title "docs(adr): add ADR 0024 and track work in GitHub Projects" --body-file /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/pr-body.md
 ```
 
-`/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/pr-body.md` follows `.github/pull_request_template.md` as updated in Task 5: *What and why* (the trial, the 114 issues, the public project); *Links* (Roadmap phase: none, work outside phases; Spec and Plan; ADRs: 0024, with notes in 0009, 0011 and 0014; Open points: OP-086 added; Issues closed: `Closes #<ADR 0024's number>`); a section **GitHub changes made from this branch**: the labels, milestones, project settings and fields, test issue #24 and the test milestone deleted, the 113 issues created before this PR and OP-086's; *How it was tested*: `test_tracking.py`, `check.py` reporting no mismatch, the pilot reviewed by the owner; the definition of done with ➖ N/A reasons (tests: no code; mutants: no domain rules; demo: no image or infrastructure change; `infra/base`: no change; UI: none); and **Owner steps left**: the workflows, the five views, *Relates to* on PH-06, the label colors, checking the issue forms after the merge. End the body with:
+`/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/pr-body.md` follows `.github/pull_request_template.md` as updated in Task 5: *What and why* (the trial, the 132 issues, the public project); *Links* (Roadmap phase: none, work outside phases; Spec and Plan; ADRs: 0024, with notes in 0009, 0011 and 0014; Open points: OP-086 added; Issues closed: `Closes #<ADR 0024's number>`); a section **GitHub changes made from this branch**: the labels, milestones, project settings and fields, test issue #24 and the test milestone deleted, the 131 issues created before this PR and OP-086's; *How it was tested*: `test_tracking.py`, `check.py` reporting no mismatch, the pilot reviewed by the owner; the definition of done with ➖ N/A reasons (tests: no code; mutants: no domain rules; demo: no image or infrastructure change; `infra/base`: no change; UI: none); and **Owner steps left**: the workflows, the five views, *Relates to* on PH-06, the label colors, checking the issue forms after the merge. End the body with:
 
 ```
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
