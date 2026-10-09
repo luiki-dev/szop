@@ -1,5 +1,5 @@
 name: Open point
-description: An entry of the open points register, mirroring docs/open-points.md
+description: An open point. The issue is the source; docs/open-points.md mirrors it.
 title: "OP-"
 labels: [open-point]
 body:
@@ -7,14 +7,12 @@ body:
     id: entry
     attributes:
       label: Register entry
-      description: Link to the entry in docs/open-points.md
-    validations:
-      required: true
+      description: Link to the entry in docs/open-points.md, once the docs have caught up; leave empty for a new open point
   - type: textarea
     id: what
     attributes:
       label: What is open
-      description: The entry's text, its bold lead first
+      description: The open point's text, its bold lead first
     validations:
       required: true
   - type: textarea

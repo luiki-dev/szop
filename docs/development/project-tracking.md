@@ -60,11 +60,11 @@ No other labels are used. Dependabot creates `dependencies` and one label per ec
 
 ### Phase issues
 
-Title: the roadmap heading, `PH-06b Web security baseline`. The body starts with a link to the roadmap entry and copies the entry, section by section: **Goal**, **Delivers**, any extra field such as **Split from**, **Depends on**, **Owner steps**, **Expected path**, and **Also**, the open points of other phases it does a part of. Its own open points are its sub-issues, so they are not listed. A phase that is not done lists its owner steps as references to their [owner-step issues](#owner-step-issues); a done phase has them as a ticked checklist.
+Title: the roadmap heading, `PH-06b Web security baseline`. The body starts with a link to its roadmap entry and holds the phase's plan, section by section: **Goal**, **Delivers**, any extra field such as **Split from**, **Depends on**, **Owner steps**, **Expected path**, and **Also**, the open points of other phases it does a part of; the roadmap entry mirrors it. Issues created before the trial were generated from the entries. Its own open points are its sub-issues, so they are not listed. A phase that is not done lists its owner steps as references to their [owner-step issues](#owner-step-issues); a done phase has them as a ticked checklist.
 
 ### Open-point issues
 
-Title: the ID and the entry's bold lead, cut to 80 characters. The body starts with a link to the register entry, then the entry's text, then **Parts** as a checklist (a done part ticked, with its PR), **Source**, and **History** for "Moved from" notes. The status line is not copied: Status is the project's.
+Title: the ID and the open point's bold lead, cut to 80 characters. The body starts with a link to its register entry, then the open point's text, then **Parts** as a checklist (a done part ticked, with its PR), **Source**, and **History** for "Moved from" notes; the register entry mirrors it. The status lives in the project, so the body has no status line.
 
 ### ADR issues
 
@@ -72,7 +72,7 @@ Title: `ADR 0008 Hosting: an on-demand demo environment on AWS`. The body links 
 
 ### Owner-step issues
 
-Every owner step of a phase that is not done is an issue of its own, so the owner sees on the board what waits on them. Title: `PH-10 owner step 1: Choose the name and buy the domain`, the step as the roadmap words it, capitalised, cut to 100 characters in all; the steps of an entry are numbered from 1 in the roadmap's order. Label `owner`, no milestone, a sub-issue of its phase. The body says which phase's step it is, with a link to the roadmap entry, and gives the step's text. The phase's **Owner steps** section lists the issues. The owner closes a step when it is done (or Claude does, when the owner says so), and the workflow sets ✅ Done. A done phase has no step issues: its steps stay a ticked checklist.
+Every owner step of a phase that is not done is an issue of its own, so the owner sees on the board what waits on them. Title: `PH-10 owner step 1: Choose the name and buy the domain`, the step, capitalised, cut to 100 characters in all; a phase's steps are numbered from 1 in the order of its **Owner steps**. Label `owner`, no milestone, a sub-issue of its phase. The body says which phase's step it is, with a link to the roadmap entry, and gives the step's text. The phase's **Owner steps** section lists the issues, and the roadmap's **Owner steps** mirror them. The owner closes a step when it is done (or Claude does, when the owner says so), and the workflow sets ✅ Done. A done phase has no step issues: its steps stay a ticked checklist.
 
 ### Links inside issue bodies
 

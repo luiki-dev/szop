@@ -1,5 +1,5 @@
 name: Phase
-description: A roadmap phase, mirroring its entry in docs/roadmap.md
+description: A roadmap phase. The issue is the source; docs/roadmap.md mirrors it.
 title: "PH-"
 labels: [phase]
 body:
@@ -7,9 +7,7 @@ body:
     id: entry
     attributes:
       label: Roadmap entry
-      description: Link to the phase's entry in docs/roadmap.md
-    validations:
-      required: true
+      description: Link to the phase's entry in docs/roadmap.md, once the docs have caught up; leave empty for a new phase
   - type: textarea
     id: goal
     attributes:

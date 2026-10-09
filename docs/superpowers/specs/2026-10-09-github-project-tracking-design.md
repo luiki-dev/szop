@@ -77,7 +77,7 @@ ADR 0024 records them.
 | 8 | Fields | — | **Order** (a number, the roadmap position in steps of 10, since a new phase takes the next free ID and IDs then stop sorting in roadmap order), **Path** (Full, Bounded), **Spec** and **Plan** (links), **Started** and **Finished** (dates, for the timeline). Team, Iteration, Quarter, Start date and Target date, left by the project's template, are deleted: a solo project paced by learning has no sprints or deadlines. |
 | 9 | Relationships | — | **An open point is a sub-issue of the phase that settles it** (of the phase it sits under now, when it has parts; it is re-parented when a part is done, as the register moves it today). **A spike blocks its phase** (OP-025 blocks PH-13, OP-038 blocks PH-16), and a "Depends on" that names an issue becomes a blocked-by link. **A split phase** is closed as not planned with a comment linking the new phases, and is linked to each of them with *Relates to* (decision 10). |
 | 10 | Linking a split phase to its successors | A comment only; sub-issues of the old phase; *Relates to* and a comment | ***Relates to* and a comment.** GitHub's *Relates to* relationship (in public preview since 2026-08-07) links two issues without meaning blocking or containment, and shows on both. It has no API yet, so the owner adds it in the issue sidebar; splits are rare. Making the new phases sub-issues of a closed, retired phase would read as if the old phase were still the container. |
-| 11 | What a phase issue holds | A link to the roadmap only; a copy of the roadmap entry | **A copy of the entry** (goal, delivers, depends on, owner steps as a checklist, expected path, the "Also" open points), the owner's choice, so the issue reads on its own. The issue is the original and the roadmap entry its mirror (decision 14). **Owner steps of a phase not yet done are sub-issues of their own**, labelled `owner` (`PH-10 owner step 1: …`), and the phase issue lists them, so the owner sees every step waiting on them on the board; a done phase keeps its owner steps as a ticked checklist. A checklist alone would leave the owner's steps off the board, without a status. |
+| 11 | What a phase issue holds | A link to the roadmap only; a copy of the roadmap entry | **The whole plan in the issue** (goal, delivers, depends on, owner steps as a checklist, expected path, the "Also" open points), the owner's choice, so the issue reads on its own. The issue is the original and the roadmap entry its mirror (decision 14). **Owner steps of a phase not yet done are sub-issues of their own**, labelled `owner` (`PH-10 owner step 1: …`), and the phase issue lists them, so the owner sees every step waiting on them on the board; a done phase keeps its owner steps as a ticked checklist. A checklist alone would leave the owner's steps off the board, without a status. |
 | 12 | How the GitHub side is built | A one-off run of `gh` commands, driven by the plan; a committed migration script; a GitHub Action that mirrors the docs on every merge | **A one-off run of `gh`, with a pilot first.** The issue bodies are generated from the docs into temporary files and created in batches; PH-06b with its open points goes first, the owner checks it, then the rest follows. A script would be a tested Markdown parser that loses its purpose when the trial ends, and a second new concept in one change. An Action needs a personal access token or a GitHub App to write to a user's project, a new credential under [ADR 0012](../../decisions/0012-security-baseline.md), and would tie the issues to the docs for good. |
 | 13 | Visibility of the project | Public; private | **Public.** The issues are public with the repository anyway, and the README and `roadmap.md` can link a board visitors can open. Only the owner can edit it. |
 | 14 | Keeping both sides in step | Automation; a rule | **A rule,** for the length of the trial: **GitHub is the source.** Claude makes changes on the issues first. Before each PR, and at the start of each phase, Claude brings `roadmap.md`, the README's diagram and `open-points.md` in line with GitHub, the owner's own edits in the project included; when both sides were edited, GitHub wins; the PR lists the issue changes it mirrors. The edits are live before the merge, and the mirrored doc diff is where the owner reviews them. A significant change to the plan (a new phase, a split, a reorder) still goes through a brainstorm, and through an ADR when it is significant. Drift that hurts is evidence for OP-086. |
@@ -131,7 +131,7 @@ Created in one neutral color; the owner paints them. The eleven existing labels 
 
 ### Phase issues
 
-**Title:** the roadmap heading, `PH-06b Web security baseline`. **Labels:** `phase`. **Milestone:** its stage. **Body:**
+**Title:** the roadmap heading, `PH-06b Web security baseline`. **Labels:** `phase`. **Milestone:** its stage. **Body:** the phase's plan, which the roadmap entry mirrors; for the issues created at the start of the trial it was generated from the entries, in this shape:
 
 ```markdown
 Roadmap entry: [PH-06b Web security baseline](https://github.com/luiki-dev/szop/blob/main/docs/roadmap.md#ph-06b-web-security-baseline)
@@ -165,7 +165,7 @@ A field the entry has beyond these (such as PH-06a's **Split from**) is kept as 
 
 ### Open-point issues
 
-**Title:** `OP-053 ` followed by the entry's bold lead without its closing period, shortened at a word boundary to at most 80 characters. **Labels:** `open-point`, plus `spike`, `candidate` and `owner` where they apply. **Milestone:** none (the parent phase carries it). **Body:**
+**Title:** `OP-053 ` followed by the open point's bold lead without its closing period, shortened at a word boundary to at most 80 characters. **Labels:** `open-point`, plus `spike`, `candidate` and `owner` where they apply. **Milestone:** none (the parent phase carries it). **Body:** the open point's text, which the register entry mirrors; for the issues created at the start of the trial it was generated from the entries, in this shape:
 
 ```markdown
 Register entry: [OP-053](https://github.com/luiki-dev/szop/blob/main/docs/open-points.md#op-053)
@@ -186,7 +186,7 @@ Register entry: [OP-053](https://github.com/luiki-dev/szop/blob/main/docs/open-p
 - **Moved from PH-06:** PH-06 was split; the web baseline is PH-06b.
 ```
 
-"Parts" and "History" appear only when the entry has parts or "Moved from" lines. A done part is ticked and keeps its PR link. The status line is not copied: Status is the project's.
+"Parts" and "History" appear only when the entry has parts or "Moved from" lines. A done part is ticked and keeps its PR link. The status lives in the project, so the body has no status line.
 
 ### ADR issues
 
@@ -222,7 +222,7 @@ All are closed as completed. **ADR 0024's issue** is created open, 🚧 In progr
 
 ### Owner-step issues
 
-Every owner step of a phase that is not done becomes an issue, so the owner sees what waits on them on the board: 18 today (PH-09: 3, PH-10: 3, PH-11: 4, PH-12: 2, PH-13: 5, PH-18: 1). The steps are the roadmap entry's **Owner steps**, split on "; " and numbered from 1 in that order.
+Every owner step of a phase that is not done becomes an issue, so the owner sees what waits on them on the board: 18 today (PH-09: 3, PH-10: 3, PH-11: 4, PH-12: 2, PH-13: 5, PH-18: 1). The steps were taken from the roadmap entry's **Owner steps** at creation, split on "; " and numbered from 1 in that order; from then on the issues are the original and the roadmap mirrors them.
 
 **Title:** `PH-10 owner step 1: ` followed by the step, capitalised and without its final period, shortened at a word boundary to at most 100 characters in all, with `…`. **Labels:** `owner`. **Milestone:** none (the parent phase carries it). **Parent:** its phase. **Body:**
 
@@ -232,7 +232,7 @@ Owner step of [PH-10 Domain and base infrastructure](https://github.com/luiki-de
 Choose the name and buy the domain.
 ```
 
-The step's text is the whole body, capitalised and with its period; a relative link in it is rewritten like any other. The phase's **Owner steps** section lists the issues (`- #57`). The owner closes a step when it is done, or Claude does when the owner says so; the workflow sets `✅ Done`. When a phase's **Owner steps** change in the roadmap, step issues are added, or closed as not planned (`✖️ Dropped`), in the same working session. A phase's steps are not created before the phase is, and a done phase has none: its steps stay a ticked checklist.
+The step's text is the whole body, capitalised and with its period; a relative link in it is rewritten like any other. The phase's **Owner steps** section lists the issues (`- #57`). The owner closes a step when it is done, or Claude does when the owner says so; the workflow sets `✅ Done`. When a phase's owner steps change, the step issues are added, or closed as not planned (`✖️ Dropped`), and the roadmap's **Owner steps** follow. A phase's steps are not created before the phase is, and a done phase has none: its steps stay a ticked checklist.
 
 ### Relationships
 
