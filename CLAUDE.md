@@ -56,11 +56,12 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 
 - Spell out niche acronyms on first use (for example "single-page application (SPA)") and add them to `docs/glossary.md`. Common ones like API, UI, HTTP, JSON and SQL need no expansion.
 - **Every written status or outcome gets its icon**, placed before the word, which stays (`✅ Accepted`, `⬜ Open`, `🎯 [MVP]`), so searching and screen readers still work. Legends list each icon with its word. No icons in headings: they change the heading's anchor. Use one vocabulary everywhere, and extend this list when a new status appears:
-  - ✅ done or in force: ADR accepted, open point closed, finding fixed, phase done
-  - ⬜ open or not started: open point open, phase not started
-  - 🚧 in progress: open point or phase being worked on
-  - ⏳ deferred or waiting: finding deferred to an open point
-  - ✖️ rejected or dropped: finding rejected, open point dropped without being done
+  - ✅ done or in force: ADR accepted, open point closed, finding fixed, phase done, `✅ Done` on the project
+  - ⬜ open or not started: open point open, phase not started, `⬜ Backlog` on the project
+  - 📌 to do next: `📌 Todo` on the project, an item picked to be done next
+  - 🚧 in progress: open point or phase being worked on, `🚧 In progress` on the project
+  - ⏳ deferred or waiting: finding deferred to an open point, `⏳ Blocked` on the project
+  - ✖️ rejected or dropped: finding rejected, open point dropped without being done, `✖️ Dropped` on the project
   - ❔ pending: not decided or triaged yet
   - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
   - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell

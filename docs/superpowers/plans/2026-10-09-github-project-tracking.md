@@ -89,7 +89,7 @@
 **Interfaces:**
 - Produces: the file name `0024-github-project-tracking.md`, which later tasks link as `decisions/0024-github-project-tracking.md` (from `docs/`), `../decisions/0024-github-project-tracking.md` (from `docs/development/`) and `docs/decisions/0024-github-project-tracking.md` (from the root).
 
-- [ ] **Step 1: Write ADR 0024**
+- [x] **Step 1: Write ADR 0024**
 
 Create `docs/decisions/0024-github-project-tracking.md` with exactly:
 
@@ -139,13 +139,13 @@ The design was brainstormed and written as a [spec](../superpowers/specs/2026-10
 - **[OP-086](../open-points.md#op-086)** decides after PH-07 how the trial ends.
 ```
 
-- [ ] **Step 2: Add the notes to ADR 0009**
+- [x] **Step 2: Add the notes to ADR 0009**
 
 In `docs/decisions/0009-git-workflow.md`:
 - At the end of the status line (line 3), after `decision 9 refined by [ADR 0016](0016-toolchain-details.md) (an allow-list of scopes)`, append: `; decision 14 superseded in part by [ADR 0024](0024-github-project-tracking.md) (GitHub Issues and a GitHub Project track the work, in a trial next to the roadmap)`
 - In decision 14's row, replace `**The roadmap is the tracker:** GitHub Issues and Projects are not part of the process. |` with `**The roadmap is the tracker:** GitHub Issues and Projects are not part of the process. <br>🔁 **Superseded in part by [ADR 0024](0024-github-project-tracking.md), decisions 1 and 2:** GitHub Issues and a GitHub Project track the phases, open points and decision work, in a trial next to the roadmap. |`
 
-- [ ] **Step 3: Add the notes to ADR 0011 and ADR 0014**
+- [x] **Step 3: Add the notes to ADR 0011 and ADR 0014**
 
 In `docs/decisions/0011-design-sanity-check-follow-ups.md`:
 - Status line: append `; decision 1 extended by [ADR 0024](0024-github-project-tracking.md) (each open entry links its GitHub issue)` after `(the visual design doc)`.
@@ -155,7 +155,7 @@ In `docs/decisions/0014-roadmap.md`:
 - Status line: replace `(the README's roadmap diagram mirrors the stage tables)` with `(the README's roadmap diagram mirrors the stage tables) and extended by [ADR 0024](0024-github-project-tracking.md) (the stage tables link each phase's issue, and the GitHub Project holds a finer status)`.
 - Decision 4's row: replace `the README's roadmap diagram mirrors the stage tables. |` with `the README's roadmap diagram mirrors the stage tables. <br>➕ **Extended by [ADR 0024](0024-github-project-tracking.md), decisions 1 and 7:** each stage table links its phases' issues, and the GitHub Project holds a finer status. |`
 
-- [ ] **Step 4: Extend the status vocabulary in `CLAUDE.md`**
+- [x] **Step 4: Extend the status vocabulary in `CLAUDE.md`**
 
 In the list under "Every written status or outcome gets its icon", replace these lines:
 
@@ -178,7 +178,7 @@ with:
   - ✖️ rejected or dropped: finding rejected, open point dropped without being done, `✖️ Dropped` on the project
 ```
 
-- [ ] **Step 5: Add four terms to the glossary**
+- [x] **Step 5: Add four terms to the glossary**
 
 In `docs/glossary.md`, `## Terms` table, insert each row at its alphabetical place:
 
@@ -189,7 +189,7 @@ In `docs/glossary.md`, `## Terms` table, insert each row at its alphabetical pla
 | **Sub-issue** | An issue placed under a parent issue on GitHub; the parent shows its sub-issues and how many are closed. In Szop, each open point is a sub-issue of the phase that settles it (see ADR 0024). |
 ```
 
-- [ ] **Step 6: Check the formatting and links**
+- [x] **Step 6: Check the formatting and links**
 
 Run: `pnpm exec prettier --check docs/decisions/0024-github-project-tracking.md docs/decisions/0009-git-workflow.md docs/decisions/0011-design-sanity-check-follow-ups.md docs/decisions/0014-roadmap.md docs/glossary.md CLAUDE.md`
 Expected: `All matched files use Prettier code style!` (Markdown is ignored by Prettier in this repository, so this mostly confirms no other file was touched; if a file is reported, run `pnpm exec prettier --write` on it.)
@@ -199,7 +199,7 @@ Expected: `2` for each file.
 
 Note: ADR 0024 links `../open-points.md#op-086`, which Task 6 creates.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add docs/decisions/0024-github-project-tracking.md docs/decisions/0009-git-workflow.md docs/decisions/0011-design-sanity-check-follow-ups.md docs/decisions/0014-roadmap.md CLAUDE.md docs/glossary.md
