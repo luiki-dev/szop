@@ -1824,7 +1824,7 @@ Run: `git diff main --stat` and read `git diff main` in full. Check each changed
 Run: `pnpm lint` and `pnpm format:check`
 Expected: both pass.
 
-- [ ] **Step 4: Push and open the PR**
+- [x] **Step 4: Push and open the PR**
 
 ```bash
 git push
@@ -1839,6 +1839,6 @@ gh pr create --repo luiki-dev/szop --base main --title "docs(adr): add ADR 0024 
 https://claude.ai/code/session_01XpJBovDkQJo6jkinUn2nia
 ```
 
-- [ ] **Step 5: Report**
+- [x] **Step 5: Report**
 
 Tell the owner the PR link, the project link, the check's result and the owner steps left. Do not merge.
