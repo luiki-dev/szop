@@ -18,7 +18,7 @@
 - Statuses, exactly: `⬜ Backlog`, `📌 Todo`, `⏳ Blocked`, `🚧 In progress`, `✅ Done`, `✖️ Dropped`. **The owner creates them in the UI** (spec, owner step 1); nothing in this plan touches the Status options.
 - Fields created: `Order` (NUMBER), `Path` (SINGLE_SELECT: `Full`, `Bounded`), `Spec` (TEXT), `Plan` (TEXT), `Started` (DATE), `Finished` (DATE). Deleted: `Team`, `Iteration`, `Quarter`, `Start date`, `Target date`.
 - Issue titles: `PH-06b Web security baseline`, `OP-053 <bold lead without its final period or colon>` cut at a word boundary to at most 80 characters with `…`, `ADR 0008 <ADR title after the dash>`.
-- Totals: 34 phase issues, 61 open-point issues (60 open entries and OP-086), 18 `adr` issues (ADR 0001 to 0015, 0017, 0022 and 0024): **113**.
+- Totals: 35 phase issues, 61 open-point issues (60 open entries and OP-086), 18 `adr` issues (ADR 0001 to 0015, 0017, 0022 and 0024): **114**.
 - Absolute links in issue bodies start with `https://github.com/luiki-dev/szop/blob/main/`.
 - Never merge, never trigger `demo-up` or `demo-down`, never delete anything not named in this plan.
 - **Shell commands run one at a time, in plain form**, from the worktree `/home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`: this session's guard refuses loops, `$(…)` substitutions and `gh … --jq` programs inside larger constructs. Anything with a loop is a Python script in `TOOLS`, run as `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/<script>.py …` (no `-I`: the scripts import `ghlib.py` from their own folder).
@@ -103,7 +103,7 @@ Create `docs/decisions/0024-github-project-tracking.md` with exactly:
 
 ## Context
 
-[ADR 0009](0009-git-workflow.md), decision 14 made the [roadmap](../roadmap.md) the tracker and left GitHub Issues and Projects out of the process. Since then the roadmap has gained 33 phases in five stages, the [open points register](../open-points.md) about 60 open entries that move between phases, and the stage tables, the register and the README's diagram are all kept by hand.
+[ADR 0009](0009-git-workflow.md), decision 14 made the [roadmap](../roadmap.md) the tracker and left GitHub Issues and Projects out of the process. Since then the roadmap has gained 34 phases in five stages, the [open points register](../open-points.md) about 60 open entries that move between phases, and the stage tables, the register and the README's diagram are all kept by hand.
 
 The owner wants to learn the tool most projects plan with, and to see the project's progress on a board. GitHub offers milestones, labels, sub-issues (a parent with up to 100 children), blocking links, and Projects with custom fields and board, table and roadmap views. Issue types are not available: they are defined by an organization, and `luiki-dev` is a personal account. A *Relates to* link between issues is in public preview since 2026-08-07, without an API yet.
 
@@ -130,7 +130,7 @@ The design was brainstormed and written as a [spec](../superpowers/specs/2026-10
 
 ## Consequences
 
-- **113 issues exist** on the [Szop project](https://github.com/users/luiki-dev/projects/3): 34 phases, 61 open points and 18 `adr` issues, in six milestones, with six labels.
+- **114 issues exist** on the [Szop project](https://github.com/users/luiki-dev/projects/3): 35 phases, 61 open points and 18 `adr` issues, in six milestones, with six labels.
 - **The stage tables gain an Issue column, and every open entry an Issue line.** The README links the board under its diagram, which stays as it is ([ADR 0017](0017-readme-roadmap-diagram.md)).
 - **A new guide**, [project tracking](../development/project-tracking.md), explains the model, how items move and the owner's setup steps; issue forms in `.github/ISSUE_TEMPLATE/` give new issues the same shape.
 - **The PR template and the [definition of done](../development/definition-of-done.md)** (items 6 and 9) name the issues during the trial, and a PR closes its issues with `Closes #N`.
@@ -495,7 +495,7 @@ class Render(unittest.TestCase):
 class Parse(unittest.TestCase):
     def test_counts(self):
         kinds = [i["kind"] for i in ITEMS.values()]
-        self.assertEqual(kinds.count("phase"), 34)
+        self.assertEqual(kinds.count("phase"), 35)
         self.assertEqual(kinds.count("adr"), 18)
         self.assertGreaterEqual(kinds.count("open-point"), 60)
 
@@ -519,6 +519,7 @@ class Parse(unittest.TestCase):
         self.assertIn("OP-025", ITEMS["PH-13"]["blocked_by"])
         self.assertIn("OP-038", ITEMS["PH-16"]["blocked_by"])
         self.assertIn("spike", ITEMS["OP-038"]["labels"])
+        self.assertIn("PH-11", ITEMS["PH-12"]["blocked_by"])
 
     def test_states_and_order(self):
         self.assertEqual(ITEMS["PH-06"]["close"], "not planned")
@@ -614,7 +615,7 @@ def short_title(key, lead):
 
 def phase_entries(text):
     out = {}
-    for m in re.finditer(r"^### (PH-\d+[ab]?) (.+)\n(.*?)(?=^#{2,3} |\Z)", text, re.M | re.S):
+    for m in re.finditer(r"^### (PH-\d+[ab]?) ([^\n]+)\n(.*?)(?=^#{2,3} |\Z)", text, re.M | re.S):
         fields = {}
         for line in m.group(3).splitlines():
             b = BULLET.match(line)
@@ -641,7 +642,7 @@ def phase_body(key, name, f, entry_url, also, done):
     out = [f"Roadmap entry: [{key} {name}]({entry_url})", ""]
 
     def sec(title, text):
-        out.extend([f"### {title}", "", text, ""])
+        out.extend([f"### {title}", "", cap(text), ""])
 
     sec("Goal", f["Goal"])
     sec("Delivers", f["Delivers"])
@@ -689,7 +690,11 @@ def phases(roadmap, before_split, also):
             plan = BLOB + "docs/" + CELL_LINK.search(plan_cell).group(1) if "](" in plan_cell else None
         f = e["fields"]
         blocked = sorted(set(re.findall(r"open-points\.md#(op-\d+)", f.get("Depends on", ""))))
+        dep = f.get("Depends on", "")
+        dep_phases = set(re.findall(r"\bPH-\d+[ab]?\b", dep)) | {
+            "PH-" + n for n in re.findall(r"\]\([^)#]*#ph-(\d+[ab]?)(?:-[^)]*)?\)", dep)}
         blocked = [b.upper() for b in blocked] + [op for op, ph in SPIKES.items() if ph == key]
+        blocked += sorted(dep_phases - {key})
         started, finished = DONE_DATES.get(key, (None, None))
         items.append({
             "key": key, "kind": "phase", "title": f"{key} {e['name']}", "labels": ["phase"],
@@ -808,7 +813,7 @@ Expected: `OK`. If an assertion about the docs fails (for example a "Depends on"
 Read all 60 open entries in `docs/open-points.md`. An entry gets `owner` when only the owner can carry it out: an AWS, domain or GitHub setting, a manual check on the demo or in the UI, a purchase, a decision reserved to the owner. Write `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner.json` as a JSON list of keys, and `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner-reasons.md` with one line per key: `- OP-NNN: <reason>`. Re-run step 6 (still `OK`), then:
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/parse.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
-Expected: `{'phase': 34, 'open-point': 60, 'adr': 18}` (the 17 historical ADRs and ADR 0024).
+Expected: `{'phase': 35, 'open-point': 60, 'adr': 18}` (the 17 historical ADRs and ADR 0024).
 
 - [x] **Step 8: Write `create.py`**
 
@@ -848,6 +853,12 @@ def done(key, step):
 def mark(key, step):
     state[key]["done"].append(step)
     save_state(state)
+
+
+def option_id(field, value):
+    """The option's ID by exact name, or by the name without its leading icon."""
+    opts = field["options"]
+    return opts.get(value) or opts[value.split(" ", 1)[1]]
 
 
 # 1. Create the issues and add them to the project.
@@ -907,7 +918,7 @@ for it in todo:
         f = fs[name]
         cmd = ["project", "item-edit", "--id", state[k]["item"], "--project-id", PROJECT_ID, "--field-id", f["id"]]
         if f["options"]:
-            cmd += ["--single-select-option-id", f["options"][value]]
+            cmd += ["--single-select-option-id", option_id(f, value)]
         elif name == "Order":
             cmd += ["--number", str(value)]
         elif name in ("Started", "Finished"):
@@ -933,7 +944,7 @@ Expected: titles, labels and milestone as in the spec; PH-06b shows OP-053 and O
 
 - [ ] **Step 11: Stop for the owner**
 
-Report the four issue links, `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner-reasons.md` (the proposed `owner` labels) and the count of issues the bulk run will create (phases 33, open points 58, `adr` 17). Wait for the owner's go or changes. Apply any change to `parse.py` or `owner.json` and re-run steps 6 and 7; Task 4's `relink.py` then brings the pilot's bodies up to date, and its `create.py --all` adds any new label (re-run `gh issue edit <n> --add-label owner` by hand for a pilot issue that gains one).
+Report the four issue links, `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner-reasons.md` (the proposed `owner` labels) and the count of issues the bulk run will create (phases 34, open points 58, `adr` 17). Wait for the owner's go or changes. Apply any change to `parse.py` or `owner.json` and re-run steps 6 and 7; Task 4's `relink.py` then brings the pilot's bodies up to date, and its `create.py --all` adds any new label (re-run `gh issue edit <n> --add-label owner` by hand for a pilot issue that gains one).
 
 ---
 
@@ -948,7 +959,7 @@ No repository files change; the PR description records this task.
 - [ ] **Step 1: Create everything**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/create.py --all`
-Expected: 108 `issue …` lines (33 phases, 58 open points, 17 `adr`), then `fields …` for all 112 items. It takes several minutes. If it stops with an error, read it, fix the cause, and run the same command again: it continues where it stopped.
+Expected: 109 `issue …` lines (34 phases, 58 open points, 17 `adr`), then `fields …` for all 113 items. It takes several minutes. If it stops with an error, read it, fix the cause, and run the same command again: it continues where it stopped.
 
 - [ ] **Step 2: Write `relink.py`**
 
@@ -996,7 +1007,7 @@ Run: `gh issue view <PH-16's number> --repo luiki-dev/szop`
 Expected: OP-038 among its blockers; its open points as sub-issues.
 
 Run: `gh issue list --repo luiki-dev/szop --label open-point --state all --limit 200` and `--label phase`, `--label adr`
-Expected: 60, 34 and 18 issues.
+Expected: 60, 35 and 18 issues.
 
 ---
 
@@ -1477,7 +1488,7 @@ In `docs/open-points.md`, at the end of the `### PH-08 Container image` group (j
 - [ ] **Step 2: Create OP-086's issue**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/parse.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
-Expected: `{'phase': 34, 'open-point': 61, 'adr': 18}`.
+Expected: `{'phase': 35, 'open-point': 61, 'adr': 18}`.
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/create.py --only OP-086`
 Expected: one `issue OP-086 <n>` line; the issue is a sub-issue of PH-08 with Status `⬜ Backlog`.
@@ -1547,7 +1558,7 @@ Run: `grep -c "^- \*\*Issue:\*\*" docs/open-points.md`
 Expected: `61`.
 
 Run: `grep -c "| \[#[0-9]*\](https://github.com/luiki-dev/szop/issues/[0-9]*) |$" docs/roadmap.md`
-Expected: `37` (33 phase rows and 4 candidate rows).
+Expected: `38` (34 phase rows and 4 candidate rows).
 
 - [ ] **Step 5: Add the "How it works" bullets and the README line**
 
@@ -1663,10 +1674,10 @@ by_number = {n["number"]: n for n in nodes}
 kinds = {}
 for it in items:
     kinds[it["kind"]] = kinds.get(it["kind"], 0) + 1
-if kinds != {"phase": 34, "open-point": 61, "adr": 18}:
+if kinds != {"phase": 35, "open-point": 61, "adr": 18}:
     problems.append(f"manifest counts {kinds}")
-if len(nodes) != 113:
-    problems.append(f"{len(nodes)} issues on GitHub, expected 113")
+if len(nodes) != 114:
+    problems.append(f"{len(nodes)} issues on GitHub, expected 114")
 
 for it in items:
     k = it["key"]
@@ -1701,8 +1712,8 @@ for m in re.finditer(r"^\| \[(PH-\d+[ab]?) .*\| \[#(\d+)\]\(https://github\.com/
     if int(m.group(2)) != nums.get(m.group(1)) or m.group(2) != m.group(3):
         problems.append(f"roadmap row {m.group(1)} links #{m.group(2)}")
 rows = len(re.findall(r"^\| \[PH-\d+[ab]? ", roadmap, re.M))
-if rows != 33:
-    problems.append(f"{rows} phase rows in roadmap.md, expected 33")
+if rows != 34:
+    problems.append(f"{rows} phase rows in roadmap.md, expected 34")
 register = (root / "docs/open-points.md").read_text(encoding="utf-8").split("\n## Closed")[0]
 for m in re.finditer(r"^#### (OP-\d+)\n(.*?)^- \*\*Issue:\*\* \[#(\d+)\]\(https://github\.com/luiki-dev/szop/issues/(\d+)\)$", register, re.M | re.S):
     if int(m.group(3)) != nums.get(m.group(1)) or m.group(3) != m.group(4):
@@ -1732,7 +1743,7 @@ git push
 gh pr create --repo luiki-dev/szop --base main --title "docs(adr): add ADR 0024 and track work in GitHub Projects" --body-file /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/pr-body.md
 ```
 
-`/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/pr-body.md` follows `.github/pull_request_template.md` as updated in Task 5: *What and why* (the trial, the 113 issues, the public project); *Links* (Roadmap phase: none, work outside phases; Spec and Plan; ADRs: 0024, with notes in 0009, 0011 and 0014; Open points: OP-086 added; Issues closed: `Closes #<ADR 0024's number>`); a section **GitHub changes made from this branch**: the labels, milestones, project settings and fields, test issue #24 and the test milestone deleted, the 112 issues created before this PR and OP-086's; *How it was tested*: `test_tracking.py`, `check.py` reporting no mismatch, the pilot reviewed by the owner; the definition of done with ➖ N/A reasons (tests: no code; mutants: no domain rules; demo: no image or infrastructure change; `infra/base`: no change; UI: none); and **Owner steps left**: the workflows, the five views, *Relates to* on PH-06, the label colors, checking the issue forms after the merge. End the body with:
+`/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/pr-body.md` follows `.github/pull_request_template.md` as updated in Task 5: *What and why* (the trial, the 114 issues, the public project); *Links* (Roadmap phase: none, work outside phases; Spec and Plan; ADRs: 0024, with notes in 0009, 0011 and 0014; Open points: OP-086 added; Issues closed: `Closes #<ADR 0024's number>`); a section **GitHub changes made from this branch**: the labels, milestones, project settings and fields, test issue #24 and the test milestone deleted, the 113 issues created before this PR and OP-086's; *How it was tested*: `test_tracking.py`, `check.py` reporting no mismatch, the pilot reviewed by the owner; the definition of done with ➖ N/A reasons (tests: no code; mutants: no domain rules; demo: no image or infrastructure change; `infra/base`: no change; UI: none); and **Owner steps left**: the workflows, the five views, *Relates to* on PH-06, the label colors, checking the issue forms after the merge. End the body with:
 
 ```
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

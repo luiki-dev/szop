@@ -7,7 +7,7 @@
 
 ## Context
 
-[ADR 0009](0009-git-workflow.md), decision 14 made the [roadmap](../roadmap.md) the tracker and left GitHub Issues and Projects out of the process. Since then the roadmap has gained 33 phases in five stages, the [open points register](../open-points.md) about 60 open entries that move between phases, and the stage tables, the register and the README's diagram are all kept by hand.
+[ADR 0009](0009-git-workflow.md), decision 14 made the [roadmap](../roadmap.md) the tracker and left GitHub Issues and Projects out of the process. Since then the roadmap has gained 34 phases in five stages, the [open points register](../open-points.md) about 60 open entries that move between phases, and the stage tables, the register and the README's diagram are all kept by hand.
 
 The owner wants to learn the tool most projects plan with, and to see the project's progress on a board. GitHub offers milestones, labels, sub-issues (a parent with up to 100 children), blocking links, and Projects with custom fields and board, table and roadmap views. Issue types are not available: they are defined by an organization, and `luiki-dev` is a personal account. A *Relates to* link between issues is in public preview since 2026-08-07, without an API yet.
 
@@ -34,7 +34,7 @@ The design was brainstormed and written as a [spec](../superpowers/specs/2026-10
 
 ## Consequences
 
-- **113 issues exist** on the [Szop project](https://github.com/users/luiki-dev/projects/3): 34 phases, 61 open points and 18 `adr` issues, in six milestones, with six labels.
+- **114 issues exist** on the [Szop project](https://github.com/users/luiki-dev/projects/3): 35 phases, 61 open points and 18 `adr` issues, in six milestones, with six labels.
 - **The stage tables gain an Issue column, and every open entry an Issue line.** The README links the board under its diagram, which stays as it is ([ADR 0017](0017-readme-roadmap-diagram.md)).
 - **A new guide**, [project tracking](../development/project-tracking.md), explains the model, how items move and the owner's setup steps; issue forms in `.github/ISSUE_TEMPLATE/` give new issues the same shape.
 - **The PR template and the [definition of done](../development/definition-of-done.md)** (items 6 and 9) name the issues during the trial, and a PR closes its issues with `Closes #N`.
