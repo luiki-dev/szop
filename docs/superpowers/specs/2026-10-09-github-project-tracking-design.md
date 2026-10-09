@@ -40,7 +40,7 @@ Today [`docs/roadmap.md`](../../roadmap.md) is the tracker: [ADR 0009](../../dec
 
 Success means:
 
-1. **111 issues exist**, each with the right label, milestone, parent, blocking links and project fields: 34 phase issues (PH-01 to PH-33 with PH-06a and PH-06b, and the retired PH-06), 60 open-point issues (the 59 open entries and OP-086) and 17 `adr` issues (16 from the history and ADR 0024's own).
+1. **113 issues exist**, each with the right label, milestone, parent, blocking links and project fields: 34 phase issues (PH-01 to PH-33 with PH-06a and PH-06b, and the retired PH-06), 61 open-point issues (the 60 open entries and OP-086) and 18 `adr` issues (17 from the history and ADR 0024's own).
 2. **Only six labels exist** (`phase`, `open-point`, `spike`, `candidate`, `owner`, `adr`), and six milestones (`Definition`, `Stage 1` to `Stage 5`), with `Definition` and `Stage 1` closed.
 3. **The project is public**, named "Szop", with the fields and the six statuses below, and no template fields left; the test issue #24 and the test milestone are gone.
 4. **Every stage table row in `roadmap.md` and every open entry in `open-points.md` links its issue,** and a check script confirms that each link points to the issue with the matching ID.
@@ -118,7 +118,7 @@ The test milestone "Walking Skeleton" is deleted. A stage's milestone is closed 
 | `phase` | A roadmap phase: one brainstorm, one branch, one PR |
 | `open-point` | An entry of the open points register |
 | `spike` | An open point answered by a spike before its phase |
-| `candidate` | An optional phase, not scheduled |
+| `candidate` | Optional work, not scheduled: a candidate phase or an upgrade waiting for its moment |
 | `owner` | Only the owner can do it |
 | `adr` | Decision work whose result is one ADR, made outside a phase |
 
@@ -258,7 +258,7 @@ Built-in fields used as they are: Title, Labels, Milestone, Parent issue, Sub-is
 | PH-06 | closed, not planned | ✖️ Dropped |
 | PH-06b, OP-053, OP-067 | open | 📌 Todo |
 | ADR 0024's issue | open | 🚧 In progress |
-| The 16 historical `adr` issues | closed, completed | ✅ Done |
+| The 17 historical `adr` issues | closed, completed | ✅ Done |
 | Everything else | open | ⬜ Backlog |
 
 ### Built-in workflows
@@ -360,7 +360,7 @@ One commit per task that changes files; the GitHub-only tasks are recorded in th
 1. **ADR 0024 and its notes:** the ADR, the notes in ADR 0009, 0011 and 0014, the vocabulary in `CLAUDE.md`, the glossary. *Verify:* links resolve; Prettier passes.
 2. **GitHub foundations:** labels (six created, eleven deleted), milestones (six created, the test one deleted), project #3 (renamed, public, description, template fields deleted, Order, Path, Spec, Plan, Started and Finished created), test issue #24 deleted. *Verify:* `gh label list`, the milestones API and `gh project field-list` show exactly the intended set. **Stop for the owner to replace the Status options.**
 3. **Pilot:** once `gh project field-list` shows the six Status options, ADR 0024's issue; PH-06b, OP-053 and OP-067 with parents, fields and statuses; the proposed `owner` list. *Verify:* the issues render on GitHub as specified. **Stop for the owner's check.**
-4. **Bulk:** the other 33 phase issues, 57 open-point issues and 16 `adr` issues with labels, milestones, parents, blocking links and fields; the second pass that rewrites references to issue numbers; closing the done ones and PH-06; closing `Definition` and `Stage 1`. Created in batches with a pause between requests. *Verify:* counts per label; every open point has a parent except the candidates.
+4. **Bulk:** the other 33 phase issues, 58 open-point issues and 17 `adr` issues with labels, milestones, parents, blocking links and fields; the second pass that rewrites references to issue numbers; closing the done ones and PH-06; closing `Definition` and `Stage 1`. Created in batches with a pause between requests. *Verify:* counts per label; every open point has a parent except the candidates.
 5. **Guide and process files:** `project-tracking.md`, the issue forms, the PR template, the definition of done, `git-workflow.md`, `phase-walkthrough.md`, `github-settings.md`, `stack-overview.md`. *Verify:* the forms' YAML is read against GitHub's issue form schema (they load only from the default branch, so *New issue* shows them only after the merge, when they are checked once more); links resolve; Prettier passes.
 6. **Links in the docs:** the Issue column, the Issue lines, OP-086 and its issue, the README line, the candidates' links. *Verify:* Prettier passes; the tables render.
 7. **Verification and review:** the check script, the definition of done walked through, a self-review of the diff, the PR. *Verify:* the script reports no mismatch; every success criterion above is met, the owner's steps aside.
