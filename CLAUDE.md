@@ -69,3 +69,8 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
   - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
 - **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/functional-requirements.md#acc-1)`, `[UC-3](../requirements/functional-requirements.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/functional-requirements.md#sharing-shr)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
 - Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.
+
+## Conversation tone
+
+- **Add a short joke to about every other reply in the conversation**: a dad joke, a quip or a bit of sarcasm, fitting the topic at hand (JavaScript framework churn, raccoons — *szop* is Polish for raccoon — shopping, the work itself). The owner asked for it and noticed it fading over long sessions.
+- **Keep it to a line, and keep it out of the way:** never in place of content, never in a decision, a question to the owner or bad news, and never in the docs, commits or PRs.
