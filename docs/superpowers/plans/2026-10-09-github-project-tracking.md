@@ -306,7 +306,7 @@ def render(md, source, nums):
     any other relative link becomes an absolute URL on main.
     """
     base = posixpath.dirname(source)
-    md = re.sub(r"\{\{([^}]+)\}\}", lambda m: f"#{nums[m.group(1)]}" if m.group(1) in nums else m.group(1), md)
+    md = re.sub(r"\{\{(PH-\d+[ab]? owner step \d+)\}\}", lambda m: f"#{nums[m.group(1)]}" if m.group(1) in nums else m.group(1), md)
 
     def sub(m):
         text, target = m.group(1), m.group(2)
@@ -500,6 +500,11 @@ class Placeholders(unittest.TestCase):
         self.assertEqual(render(md, "docs/roadmap.md", {"PH-10 owner step 1": 40}), "- #40")
         self.assertEqual(render(md, "docs/roadmap.md", {}), "- PH-10 owner step 1")
 
+    def test_github_expressions_stay_intact(self):
+        expr = "`${{ github.event.pull_request.title }}`"
+        self.assertEqual(render(expr, "docs/open-points.md", {}), expr)
+        self.assertIn("${{ github.event.pull_request.title }}", render(ITEMS["OP-070"]["body"], "docs/open-points.md", {}))
+
 
 class Parse(unittest.TestCase):
     def test_owner_steps(self):
@@ -515,6 +520,7 @@ class Parse(unittest.TestCase):
         self.assertFalse([i for i in steps if i["parent"] == "PH-02"])
         self.assertIn("- [x]", ITEMS["PH-02"]["body"])
         self.assertNotIn("{{", ITEMS["PH-02"]["body"])
+
     def test_counts(self):
         kinds = [i["kind"] for i in ITEMS.values()]
         self.assertEqual(kinds.count("phase"), 35)
