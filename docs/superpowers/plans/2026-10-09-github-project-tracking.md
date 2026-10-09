@@ -1089,7 +1089,7 @@ Expected: its three owner steps as sub-issues (`PH-10 owner step 1: Choose the n
 - Consumes: ADR 0024's file name (Task 1); the project URL `https://github.com/users/luiki-dev/projects/3`.
 - Produces: the guide's anchors used by later links: `project-tracking.md#the-trial-rule`, `#setting-up-the-project`, `#how-items-move`.
 
-- [ ] **Step 1: Write the guide**
+- [x] **Step 1: Write the guide**
 
 Create `docs/development/project-tracking.md` with exactly:
 
@@ -1281,7 +1281,7 @@ gh issue view 57 --repo luiki-dev/szop
 ```
 ````
 
-- [ ] **Step 2: Write the issue forms**
+- [x] **Step 2: Write the issue forms**
 
 Create `.github/ISSUE_TEMPLATE/phase.yml`:
 
@@ -1397,7 +1397,7 @@ Create `.github/ISSUE_TEMPLATE/config.yml`:
 blank_issues_enabled: true
 ```
 
-- [ ] **Step 3: Update the PR template**
+- [x] **Step 3: Update the PR template**
 
 In `.github/pull_request_template.md`:
 - After the line `- Open points (closed, re-assigned or added):` add this line:
@@ -1408,13 +1408,13 @@ In `.github/pull_request_template.md`:
 - Replace `roadmap status (Claude)` with `roadmap status and the issues (Claude)`
 - Replace ``Open points closed, re-assigned or added in `docs/open-points.md` (Claude)`` with ``Open points closed, re-assigned or added in `docs/open-points.md` and their issues (Claude)``
 
-- [ ] **Step 4: Update the definition of done**
+- [x] **Step 4: Update the definition of done**
 
 In `docs/development/definition-of-done.md`, table rows 6 and 9:
 - Item 6, *What it means*: replace `the functional requirements when behavior changed; the roadmap status.` with `the functional requirements when behavior changed; the roadmap status, and during the GitHub tracking trial the phase's issue and its project fields.` *Source*: append `; ADR 0024, decision 14`.
 - Item 9, *What it means*: replace `are closed or re-assigned with a reason, and anything newly deferred is added.` with `are closed or re-assigned with a reason, and anything newly deferred is added; during the GitHub tracking trial their issues are closed, re-parented or created to match.` *Source*: append `; ADR 0024, decision 14`.
 
-- [ ] **Step 5: Update the git workflow guide and the walkthrough**
+- [x] **Step 5: Update the git workflow guide and the walkthrough**
 
 In `docs/development/git-workflow.md`, section "3. Open a pull request", after the bullet starting `- **The description follows the PR template**`, add:
 
@@ -1442,7 +1442,7 @@ In `docs/development/phase-walkthrough.md`:
 | Open-point issue | GitHub Issues, a sub-issue of its phase | `OP-053 Build the app-wide web baseline`, label `open-point` |
 ```
 
-- [ ] **Step 6: Update the GitHub settings page**
+- [x] **Step 6: Update the GitHub settings page**
 
 In `docs/development/github-settings.md`:
 - Contents: after `- [Features](#features)` add `- [Labels](#labels)`, `- [Milestones](#milestones)` and `- [Project](#project)`, one per line.
@@ -1486,7 +1486,7 @@ gh api "repos/luiki-dev/szop/milestones?state=all"
 gh project view 3 --owner luiki-dev
 ```
 
-- [ ] **Step 7: Add the stack overview section**
+- [x] **Step 7: Add the stack overview section**
 
 In `docs/architecture/stack-overview.md`, add to Contents: `- [18. Tracking the work: issues, milestones and projects](#18-tracking-the-work-issues-milestones-and-projects)`, and append the section at the end of the file:
 
@@ -1501,14 +1501,14 @@ Most teams plan on the same site that holds their code. On GitHub that means thr
 - **A project** collects issues into one table with custom fields, such as a status or a position, and shows them as **views**: a table, a **board** of columns (a kanban board, from the Japanese for "signboard", where cards move from column to column as work progresses) or a **roadmap**, a timeline drawn from date fields. Built-in **workflows** update the fields on events, such as setting the status to done when an issue closes.
 ```
 
-- [ ] **Step 8: Update `CLAUDE.md` and the README's documentation list**
+- [x] **Step 8: Update `CLAUDE.md` and the README's documentation list**
 
 In `CLAUDE.md`, section "Documentation":
 - After the bullet for `docs/open-points.md`, add: ``- `docs/development/project-tracking.md` — how the phases, open points and decision work are tracked as GitHub issues on the Szop project: labels, milestones, fields, statuses, how items move. During the trial ([ADR 0024](docs/decisions/0024-github-project-tracking.md)), a change to a roadmap entry or an open point also updates its issue in the same working session.``
 
 In `README.md`, section "Documentation", after the `Open points` bullet, add: `- [Project tracking](docs/development/project-tracking.md) — how the phases, open points and decisions are tracked as GitHub issues and on the [project board](https://github.com/users/luiki-dev/projects/3)`
 
-- [ ] **Step 9: Check**
+- [x] **Step 9: Check**
 
 Run: `pnpm exec prettier --check .github/ISSUE_TEMPLATE docs/development docs/architecture/stack-overview.md README.md CLAUDE.md .github/pull_request_template.md`
 Expected: `All matched files use Prettier code style!` If the YAML files are reported, run `pnpm exec prettier --write .github/ISSUE_TEMPLATE` and re-check.
@@ -1518,7 +1518,7 @@ Read each form against GitHub's issue form schema (top-level `name`, `descriptio
 Run: `grep -n "\](#" docs/development/project-tracking.md` and compare each anchor with a heading of the file.
 Expected: every anchor matches a heading (`#what-lives-where`, `#milestones`, … `#checking-with-gh`).
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add docs/development/project-tracking.md .github/ISSUE_TEMPLATE .github/pull_request_template.md docs/development/definition-of-done.md docs/development/git-workflow.md docs/development/phase-walkthrough.md docs/development/github-settings.md docs/architecture/stack-overview.md CLAUDE.md README.md

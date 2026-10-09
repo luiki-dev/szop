@@ -1,0 +1,46 @@
+name: Phase
+description: A roadmap phase, mirroring its entry in docs/roadmap.md
+title: "PH-"
+labels: [phase]
+body:
+  - type: input
+    id: entry
+    attributes:
+      label: Roadmap entry
+      description: Link to the phase's entry in docs/roadmap.md
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+    validations:
+      required: true
+  - type: textarea
+    id: delivers
+    attributes:
+      label: Delivers
+  - type: textarea
+    id: depends-on
+    attributes:
+      label: Depends on
+      value: "—"
+  - type: textarea
+    id: owner-steps
+    attributes:
+      label: Owner steps
+      description: One line per step (each becomes an owner-step issue, see the guide), or "None."
+      value: "- "
+  - type: dropdown
+    id: path
+    attributes:
+      label: Expected path
+      options:
+        - Full
+        - Bounded
+  - type: textarea
+    id: also
+    attributes:
+      label: Also
+      description: Open points of other phases this phase does a part of, as issue references
+      value: "—"

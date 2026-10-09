@@ -1,0 +1,30 @@
+name: Open point
+description: An entry of the open points register, mirroring docs/open-points.md
+title: "OP-"
+labels: [open-point]
+body:
+  - type: input
+    id: entry
+    attributes:
+      label: Register entry
+      description: Link to the entry in docs/open-points.md
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What is open
+      description: The entry's text, its bold lead first
+    validations:
+      required: true
+  - type: textarea
+    id: parts
+    attributes:
+      label: Parts
+      description: One checkbox per phase's part, or leave empty
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+    validations:
+      required: true

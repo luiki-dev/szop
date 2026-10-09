@@ -1,0 +1,17 @@
+name: ADR
+description: Decision work outside a phase, whose result is one ADR
+title: "ADR "
+labels: [adr]
+body:
+  - type: input
+    id: record
+    attributes:
+      label: Decision record
+      description: Link to the ADR in docs/decisions/
+    validations:
+      required: true
+  - type: input
+    id: landed
+    attributes:
+      label: Landed in
+      description: The PR that adds the ADR

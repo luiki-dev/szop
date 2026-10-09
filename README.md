@@ -94,6 +94,7 @@ Start PostgreSQL first, with `docker compose up -d --wait` (Docker Desktop must 
 - [Glossary](docs/glossary.md) — acronyms and terms used in the docs
 - [Roadmap](docs/roadmap.md) — what is built in which order, and how far along it is
 - [Open points](docs/open-points.md) — what is still undecided or undone, and where it will be settled
+- [Project tracking](docs/development/project-tracking.md) — how the phases, open points and decisions are tracked as GitHub issues and on the [project board](https://github.com/users/luiki-dev/projects/3)
 - [Git workflow](docs/development/git-workflow.md) — how changes reach `main` and how releases are cut
 - [Definition of done](docs/development/definition-of-done.md) — what every PR must meet before it is merged
 - [GitHub settings](docs/development/github-settings.md) — the repository settings behind the workflow
