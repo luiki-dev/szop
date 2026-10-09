@@ -56,7 +56,7 @@ Everything that is still undecided or not yet done and has been left to a later 
 - **Adding:** whenever a topic, phase or review defers something, it adds an entry here with the next free ID, under the phase that will settle it, in addition to mentioning it where it came up.
 - **Using:** each phase brainstorm starts from its group, including the entries on its "Also" line. Before its PR is merged, the phase closes its entries or its parts of them, or moves them to another group with a note why (the [definition of done](development/definition-of-done.md), item 9).
 - **Closing:** a settled entry moves to [Closed](#closed) with a link to what settled it (an ADR, a commit, a PR). Its status becomes ✅ **closed**, or ✖️ **dropped** when it was dropped without being done, saying why. Closed and dropped entries stay as a record.
-- **Each open entry has an issue** on GitHub ([ADR 0024](decisions/0024-github-project-tracking.md)), named on its **Issue** line: a sub-issue of its phase's issue, on the [Szop project](https://github.com/users/luiki-dev/projects/3). During the trial ([OP-086](#op-086)) this page stays the source; adding, moving or closing an entry updates its issue too ([project tracking](development/project-tracking.md#how-items-move)).
+- **Each open entry has an issue** on GitHub ([ADR 0024](decisions/0024-github-project-tracking.md)), named on its **Issue** line: a sub-issue of its phase's issue, on the [Szop project](https://github.com/users/luiki-dev/projects/3). During the trial ([OP-086](#op-086)) the issues are the source and this page mirrors them: an entry is added, moved or closed on GitHub first, then here ([project tracking](development/project-tracking.md#how-items-move)).
 
 ## Stage 1: Local foundations
 
@@ -232,7 +232,7 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 
 #### OP-086
 
-**Decide how the GitHub tracking trial ends.** After PH-06b and PH-07, decide whether GitHub Issues and the Szop project become the only tracker, and what `roadmap.md` and `open-points.md` keep: the phase entries, the stage tables, the README's diagram ([ADR 0017](decisions/0017-readme-roadmap-diagram.md)) and the register's entries. Look back at how often the two sides drifted, and which views were used.
+**Decide how the GitHub tracking trial ends.** After PH-06b and PH-07, decide whether to drop `open-points.md` and keep `roadmap.md` as a view updated from the issues, and what the roadmap keeps: the phase entries, the stage tables, the README's diagram ([ADR 0017](decisions/0017-readme-roadmap-diagram.md)). Dropping the register means rewriting the links to its entries in ADRs, specs and guides to the issues. Look back at how often the docs fell behind GitHub, and which views were used.
 
 - **Source:** [ADR 0024](decisions/0024-github-project-tracking.md), decision 2
 - **Issue:** [#156](https://github.com/luiki-dev/szop/issues/156)

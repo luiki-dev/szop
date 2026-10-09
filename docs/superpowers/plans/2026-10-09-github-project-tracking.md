@@ -1681,6 +1681,19 @@ Claude-Session: https://claude.ai/code/session_01XpJBovDkQJo6jkinUn2nia
 
 ---
 
+### Task 6b: GitHub as the source of truth (amendment)
+
+Added on 2026-10-10 at the owner's request: the trial's source of truth is reversed. Brief: the SDD workspace's `task-6b-brief.md`.
+
+- [x] **Step 1:** ADR 0024, decisions 1, 2, 11 and 14, and a Consequences bullet
+- [x] **Step 2:** the spec, with an amendment note
+- [x] **Step 3:** the guide's intro, trial rule and "How items move"
+- [x] **Step 4:** the "How it works" bullets, OP-086's text in the register and on issue #156 (relink.py is not run any more: it would overwrite edits made on GitHub)
+- [x] **Step 5:** `CLAUDE.md` and the definition of done, items 6 and 9
+- [x] **Step 6:** this record
+
+---
+
 ### Task 7: Verification, review and the PR
 
 **Files:**

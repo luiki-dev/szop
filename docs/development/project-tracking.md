@@ -1,6 +1,6 @@
 # Project tracking
 
-How Szop's work is tracked on GitHub: the roadmap's phases, the open points and the decision work as issues, the stages as milestones, and all of them on the [Szop project](https://github.com/users/luiki-dev/projects/3). The decisions are in [ADR 0024](../decisions/0024-github-project-tracking.md). For now this is a **trial**: the [roadmap](../roadmap.md) and the [open points register](../open-points.md) stay the source of truth, and [OP-086](../open-points.md#op-086) decides after PH-06b and PH-07 whether GitHub becomes the only tracker.
+How Szop's work is tracked on GitHub: the roadmap's phases, the open points and the decision work as issues, the stages as milestones, and all of them on the [Szop project](https://github.com/users/luiki-dev/projects/3). The decisions are in [ADR 0024](../decisions/0024-github-project-tracking.md). For now this is a **trial**: the issues are the source of truth, and the [roadmap](../roadmap.md) and the [open points register](../open-points.md) mirror them; [OP-086](../open-points.md#op-086) decides after PH-06b and PH-07 whether the register is dropped and the roadmap stays as a view updated from the issues.
 
 ## Contents
 
@@ -154,14 +154,17 @@ The Timeline is a record of what happened when: future phases have no dates yet.
 | An owner step is done | Its issue closed; the workflow sets ✅ Done | Owner, or Claude when the owner says so |
 | A phase's owner steps change | Step issues added, or closed as not planned with the reason; the phase's list updated | Claude |
 | An item cannot move | Status → ⏳ Blocked, with a blocked-by link when the blocker is an issue | Owner or Claude |
+| Before a PR, and at the start of a phase | The docs brought in line with GitHub: `roadmap.md`, the README's diagram, `open-points.md` | Claude |
 
 ## The trial rule
 
 For PH-06b and PH-07, until [OP-086](../open-points.md#op-086) is settled:
 
-- **The docs are the source of truth.** A PR that changes a roadmap entry, a stage table row or an open point also updates its issue during the same working session. The GitHub change is live at once, before the merge, and the PR's description lists it.
-- **Status is kept in both:** the stage tables and the register's status lines as before, and the project's finer Status.
-- **Bodies are copies.** When an entry's text changes, its issue body is edited to match.
+- **GitHub is the source of truth.** Changes are made on the issues first: bodies, statuses, parents, blocking links, new and closed issues. The docs follow.
+- **The docs are brought in line** before each PR and at the start of each phase: the phase entries and stage tables in `roadmap.md`, the README's diagram, and `open-points.md`, the owner's own edits in the project included. The PR lists the issue changes it mirrors, and its doc diff is where they are reviewed.
+- **When both sides were edited, GitHub wins.**
+- **Statuses map onto the docs:** ⬜ Backlog, 📌 Todo and ⏳ Blocked read ⬜ Not started in the stage tables and ⬜ Open in the register; 🚧 In progress, ✅ Done and ✖️ Dropped read the same.
+- **Significant plan changes** (a new phase, a split, a reorder) still go through a brainstorm, and through an ADR when they are significant.
 
 ## Setting up the project
 
