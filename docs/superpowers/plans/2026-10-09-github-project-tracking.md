@@ -224,7 +224,7 @@ No repository files change; the PR description records this task.
 **Interfaces:**
 - Produces: the six labels, the six milestones (all open for now), project #3 with the six new fields; `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/ghlib.py` (used by every later task).
 
-- [ ] **Step 1: Write `ghlib.py`**
+- [x] **Step 1: Write `ghlib.py`**
 
 Create `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/ghlib.py`:
 
@@ -320,7 +320,7 @@ def render(md, source, nums):
     return LINK.sub(sub, md)
 ```
 
-- [ ] **Step 2: Replace the labels**
+- [x] **Step 2: Replace the labels**
 
 Run each command on its own:
 
@@ -343,7 +343,7 @@ gh label create owner --repo luiki-dev/szop --color ededed --description "Only t
 gh label create adr --repo luiki-dev/szop --color ededed --description "Decision work whose result is one ADR, made outside a phase"
 ```
 
-- [ ] **Step 3: Replace the milestones**
+- [x] **Step 3: Replace the milestones**
 
 The test milestone is number 1 (`Walking Skeleton`); check with `gh api repos/luiki-dev/szop/milestones?state=all` that its title matches before deleting. Then, one command at a time:
 
@@ -372,11 +372,11 @@ for m in re.finditer(r"^## (Stage \d+: .+)\n\n\*\*Exit:\*\* (.+)$", text, re.M):
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/milestones.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
 Expected: five `created Stage …` lines.
 
-- [ ] **Step 4: Delete test issue #24**
+- [x] **Step 4: Delete test issue #24**
 
 Check first: `gh issue view 24 --repo luiki-dev/szop --json title` shows `Test item 1`. Then: `gh issue delete 24 --repo luiki-dev/szop --yes`
 
-- [ ] **Step 5: Update the project**
+- [x] **Step 5: Update the project**
 
 ```bash
 gh project edit 3 --owner luiki-dev --title "Szop" --visibility PUBLIC --description "Szop's roadmap phases, open points and decision work. The plan lives in docs/roadmap.md: https://github.com/luiki-dev/szop/blob/main/docs/roadmap.md"
@@ -396,7 +396,7 @@ gh project field-create 3 --owner luiki-dev --name "Started" --data-type DATE
 gh project field-create 3 --owner luiki-dev --name "Finished" --data-type DATE
 ```
 
-- [ ] **Step 6: Verify**
+- [x] **Step 6: Verify**
 
 Run: `gh label list --repo luiki-dev/szop`
 Expected: exactly the six labels.
@@ -410,7 +410,7 @@ Expected: Title, Assignees, Status, Labels, Linked pull requests, Milestone, Rep
 Run: `gh project view 3 --owner luiki-dev`
 Expected: title `Szop`, public.
 
-- [ ] **Step 7: Stop for the owner**
+- [x] **Step 7: Stop for the owner**
 
 Report the results and ask the owner to replace the Status options in the UI (*project → ⋯ → Settings → Status*) with exactly `⬜ Backlog`, `📌 Todo`, `⏳ Blocked`, `🚧 In progress`, `✅ Done`, `✖️ Dropped`. Wait for the owner's reply.
 
