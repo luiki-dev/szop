@@ -239,7 +239,7 @@ Project #3, renamed **Szop**, public, description: *"Szop's roadmap phases, open
 
 | Field | Type | Values and rules |
 |---|---|---|
-| Status | single select (built-in) | `⬜ Backlog`, `📌 Todo`, `⏳ Blocked`, `🚧 In progress`, `✅ Done`, `✖️ Dropped`, replacing Todo, In progress, Done, Blocked |
+| Status | single select (built-in) | `⬜ Backlog`, `📌 Todo`, `⏳ Blocked`, `🚧 In progress`, `✅ Done`, `✖️ Dropped`, replacing Todo, In progress, Done, Blocked; set by the owner in the UI |
 | Order | number | Phases only. 10, 20, 30 … in roadmap order at migration (PH-06 at 60 before PH-06a at 70); a phase added later takes a free number between its neighbours |
 | Path | single select | `Full`, `Bounded`; phases only |
 | Spec, Plan | text | Absolute URLs to the files on `main`; phases only, when they exist |
@@ -325,12 +325,13 @@ For PH-06b and PH-07, until OP-086 is settled:
 
 ### Owner steps
 
-1. Check the pilot (PH-06b, OP-053, OP-067, the `owner` label list) and say go or what to change.
-2. Turn on the workflows and the auto-add filter.
-3. Build the five views.
-4. Add the *Relates to* links from PH-06 to PH-06a and PH-06b.
-5. Set the label colors.
-6. Review the PR, and merge it.
+1. Replace the Status options with the six above, in the project's settings, after the GitHub foundations and before the pilot.
+2. Check the pilot (PH-06b, OP-053, OP-067, the `owner` label list) and say go or what to change.
+3. Turn on the workflows and the auto-add filter.
+4. Build the five views.
+5. Add the *Relates to* links from PH-06 to PH-06a and PH-06b.
+6. Set the label colors.
+7. Review the PR, and merge it.
 
 ### Git
 
@@ -357,8 +358,8 @@ The work is on branch `docs/adr-0024-github-project-tracking`, pushed, in one PR
 One commit per task that changes files; the GitHub-only tasks are recorded in the PR's description.
 
 1. **ADR 0024 and its notes:** the ADR, the notes in ADR 0009, 0011 and 0014, the vocabulary in `CLAUDE.md`, the glossary. *Verify:* links resolve; Prettier passes.
-2. **GitHub foundations:** labels (six created, eleven deleted), milestones (six created, the test one deleted), project #3 (renamed, public, description, template fields deleted, Order, Path, Spec, Plan, Started and Finished created, the Status options replaced), test issue #24 deleted. *Verify:* `gh label list`, the milestones API and `gh project field-list` show exactly the intended set.
-3. **Pilot:** ADR 0024's issue; PH-06b, OP-053 and OP-067 with parents, fields and statuses; the proposed `owner` list. *Verify:* the issues render on GitHub as specified. **Stop for the owner's check.**
+2. **GitHub foundations:** labels (six created, eleven deleted), milestones (six created, the test one deleted), project #3 (renamed, public, description, template fields deleted, Order, Path, Spec, Plan, Started and Finished created), test issue #24 deleted. *Verify:* `gh label list`, the milestones API and `gh project field-list` show exactly the intended set. **Stop for the owner to replace the Status options.**
+3. **Pilot:** once `gh project field-list` shows the six Status options, ADR 0024's issue; PH-06b, OP-053 and OP-067 with parents, fields and statuses; the proposed `owner` list. *Verify:* the issues render on GitHub as specified. **Stop for the owner's check.**
 4. **Bulk:** the other 33 phase issues, 57 open-point issues and 16 `adr` issues with labels, milestones, parents, blocking links and fields; the second pass that rewrites references to issue numbers; closing the done ones and PH-06; closing `Definition` and `Stage 1`. Created in batches with a pause between requests. *Verify:* counts per label; every open point has a parent except the candidates.
 5. **Guide and process files:** `project-tracking.md`, the issue forms, the PR template, the definition of done, `git-workflow.md`, `phase-walkthrough.md`, `github-settings.md`, `stack-overview.md`. *Verify:* the forms' YAML is read against GitHub's issue form schema (they load only from the default branch, so *New issue* shows them only after the merge, when they are checked once more); links resolve; Prettier passes.
 6. **Links in the docs:** the Issue column, the Issue lines, OP-086 and its issue, the README line, the candidates' links. *Verify:* Prettier passes; the tables render.
@@ -366,7 +367,6 @@ One commit per task that changes files; the GitHub-only tasks are recorded in th
 
 ## To verify during implementation
 
-- **Replacing the Status options** (task 2): that GraphQL's `updateProjectV2Field` accepts `singleSelectOptions` for the built-in Status field; if not, the owner edits the options in the UI before the pilot.
 - **Deleting template fields** (task 2): that `gh project field-delete` removes Team, Iteration, Quarter, Start date and Target date.
 - **Making the project public** (task 2): `gh project edit --visibility PUBLIC`.
 - **Sub-issues and dependencies from `gh`** (tasks 3 and 4): `gh issue create --parent` and `gh issue edit --add-blocked-by` in `gh` 2.96, including a closed parent.
