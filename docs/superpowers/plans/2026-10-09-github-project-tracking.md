@@ -1003,7 +1003,7 @@ Expected: no `issue …` lines (nothing new created), four `fields …` lines. T
 Run: `gh issue view <PH-06b's number> --repo luiki-dev/szop` and the same for OP-053, OP-067 and ADR 0024.
 Expected: titles, labels and milestone as in the spec; PH-06b shows OP-053 and OP-067 as sub-issues; links in the bodies are absolute; OP-053 has a Parts checklist and a History line; the project shows PH-06b, OP-053 and OP-067 as `📌 Todo` with Order 80 on PH-06b, and ADR 0024 as `🚧 In progress`.
 
-- [ ] **Step 11: Stop for the owner**
+- [x] **Step 11: Stop for the owner**
 
 Report the four issue links, `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner-reasons.md` (the proposed `owner` labels) and the count of issues the bulk run will create (phases 34, open points 58, `adr` 17, owner steps 18). Wait for the owner's go or changes. Apply any change to `parse.py` or `owner.json` and re-run steps 6 and 7; Task 4's `relink.py` then brings the pilot's bodies up to date, and its `create.py --all` adds any new label (re-run `gh issue edit <n> --add-label owner` by hand for a pilot issue that gains one).
 
@@ -1017,12 +1017,12 @@ No repository files change; the PR description records this task.
 - Consumes: `manifest.json`, `issues.json`, `create.py`, `ghlib.py`.
 - Produces: all issues except OP-086; `relink.py`.
 
-- [ ] **Step 1: Create everything**
+- [x] **Step 1: Create everything**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/create.py --all`
 Expected: 127 `issue …` lines (34 phases, 58 open points, 17 `adr`, 18 owner steps), then `fields …` for all 131 items. It takes several minutes. If it stops with an error, read it, fix the cause, and run the same command again: it continues where it stopped.
 
-- [ ] **Step 2: Write `relink.py`**
+- [x] **Step 2: Write `relink.py`**
 
 Create `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/relink.py`:
 
@@ -1050,16 +1050,16 @@ for it in items:
     print("relinked", it["key"], n)
 ```
 
-- [ ] **Step 3: Relink**
+- [x] **Step 3: Relink**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/relink.py`
 Expected: `relinked …` lines, among them the pilot's four. Run it again: no output.
 
-- [ ] **Step 4: Close the finished milestones**
+- [x] **Step 4: Close the finished milestones**
 
 Run: `gh api repos/luiki-dev/szop/milestones?state=all` and note the numbers of `Definition` and `Stage 1: Local foundations`. Then, for each: `gh api -X PATCH repos/luiki-dev/szop/milestones/<number> -f state=closed`
 
-- [ ] **Step 5: Spot-check**
+- [x] **Step 5: Spot-check**
 
 Run: `gh issue view <PH-06's number> --repo luiki-dev/szop --comments`
 Expected: closed as not planned, with the comment linking PH-06a and PH-06b by number; the project shows `✖️ Dropped`.
