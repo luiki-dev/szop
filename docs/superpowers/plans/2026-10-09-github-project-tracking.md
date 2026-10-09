@@ -1547,7 +1547,7 @@ Claude-Session: https://claude.ai/code/session_01XpJBovDkQJo6jkinUn2nia
 - Consumes: `issues.json`, `parse.py`, `create.py`, `relink.py`.
 - Produces: `link_docs.py`; OP-086's issue.
 
-- [ ] **Step 1: Add OP-086 to the register**
+- [x] **Step 1: Add OP-086 to the register**
 
 In `docs/open-points.md`, at the end of the `### PH-08 Container image` group (just before `## Stage 3: Walking skeleton, deployed and released`), add:
 
@@ -1560,7 +1560,7 @@ In `docs/open-points.md`, at the end of the `### PH-08 Container image` group (j
 - **Status:** ⬜ Open
 ```
 
-- [ ] **Step 2: Create OP-086's issue**
+- [x] **Step 2: Create OP-086's issue**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/parse.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
 Expected: `{'phase': 35, 'open-point': 61, 'adr': 18, 'owner-step': 18}`.
@@ -1568,7 +1568,7 @@ Expected: `{'phase': 35, 'open-point': 61, 'adr': 18, 'owner-step': 18}`.
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/create.py --only OP-086`
 Expected: one `issue OP-086 <n>` line; the issue is a sub-issue of PH-08 with Status `⬜ Backlog`.
 
-- [ ] **Step 3: Write `link_docs.py`**
+- [x] **Step 3: Write `link_docs.py`**
 
 Create `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/link_docs.py`:
 
@@ -1624,7 +1624,7 @@ path.write_text("\n".join(out) + sep + closed, encoding="utf-8")
 print("linked")
 ```
 
-- [ ] **Step 4: Run it**
+- [x] **Step 4: Run it**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/link_docs.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
 Expected: `linked`. Then `git diff --stat` shows only `docs/roadmap.md` and `docs/open-points.md` changed (besides step 1's OP-086).
@@ -1635,7 +1635,7 @@ Expected: `61`.
 Run: `grep -c "| \[#[0-9]*\](https://github.com/luiki-dev/szop/issues/[0-9]*) |$" docs/roadmap.md`
 Expected: `38` (34 phase rows and 4 candidate rows).
 
-- [ ] **Step 5: Add the "How it works" bullets and the README line**
+- [x] **Step 5: Add the "How it works" bullets and the README line**
 
 In `docs/roadmap.md`, "How it works", after the bullet starting `- **Not on the roadmap:**`, add:
 
@@ -1655,12 +1655,12 @@ In `README.md`, section "Roadmap", after the closing fence of the diagram, add a
 The [project board](https://github.com/users/luiki-dev/projects/3) shows the same phases as GitHub issues, with their open points and what comes next.
 ```
 
-- [ ] **Step 6: Relink the issue bodies**
+- [x] **Step 6: Relink the issue bodies**
 
 The register entries did not change except for their new Issue lines, which `parse.py` ignores. Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/relink.py`
 Expected: no output, or only OP-086's neighbours if a body referenced it.
 
-- [ ] **Step 7: Check and commit**
+- [x] **Step 7: Check and commit**
 
 Run: `pnpm exec prettier --check docs/roadmap.md docs/open-points.md README.md`
 Expected: all files pass.

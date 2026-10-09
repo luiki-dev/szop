@@ -39,6 +39,8 @@ Szop is built in phases, grouped into stages. The road below shows how far along
   ● done   ◐ in progress   ○ not started   ✕ dropped   ═ road travelled
 ```
 
+The [project board](https://github.com/users/luiki-dev/projects/3) shows the same phases as GitHub issues, with their open points and what comes next.
+
 ## Features
 
 - **Shopping lists** — create, rename and delete lists. Archive the ones you are done with, duplicate an existing list, or uncheck everything to reuse the same list next week.

@@ -61,15 +61,16 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Size of a phase** ([ADR 0014](decisions/0014-roadmap.md), decision 6): it ends with something working, brings at most one big concept new to the project, and its plan has about 3 to 8 tasks. A phase that grows past about 10 tasks or a second new concept is split before it is planned or executed, and the owner can ask for a split at any time.
 - **Changing the roadmap** is expected as phases teach us things. A split phase becomes `PH-16a`, `PH-16b` and so on, and its old ID is retired; a new phase gets the next free number. A change needs an ADR only when it reflects a significant decision ([ADR 0004](decisions/0004-implementation-process.md), decision 6). A new feature goes through the [functional requirements](requirements/functional-requirements.md) first (decision 10).
 - **Not on the roadmap:** work outside phases (dependency updates, documentation fixes, ADR-only PRs), and spikes, which run before the phase that needs them and are listed under its "depends on".
+- **On GitHub** ([ADR 0024](decisions/0024-github-project-tracking.md)): each phase, each open point and each ADR made outside a phase is also an issue on the [Szop project](https://github.com/users/luiki-dev/projects/3), and the stage tables link each phase's issue. During the trial ([OP-086](open-points.md#op-086)) this page stays the source: a change to an entry updates its issue in the same working session, as [project tracking](development/project-tracking.md#the-trial-rule) describes.
 
 ## Stage 1: Local foundations
 
 **Exit:** the repository is a pnpm monorepo whose lint, type and commit message checks run on every commit and every PR, and a failing check blocks the merge.
 
-| Phase | Status | Spec | Plan | PR |
-|---|---|---|---|---|
-| [PH-01 Monorepo and toolchain](#ph-01-monorepo-and-toolchain) | ✅ Done | [Spec](superpowers/specs/2026-10-02-PH-01-monorepo-and-toolchain-design.md) | [Plan](superpowers/plans/2026-10-02-PH-01-monorepo-and-toolchain.md) | [#11](https://github.com/luiki-dev/szop/pull/11) |
-| [PH-02 CI checks](#ph-02-ci-checks) | ✅ Done | [Spec](superpowers/specs/2026-10-04-PH-02-ci-checks-design.md) | [Plan](superpowers/plans/2026-10-04-PH-02-ci-checks.md) | [#14](https://github.com/luiki-dev/szop/pull/14) |
+| Phase | Status | Spec | Plan | PR | Issue |
+|---|---|---|---|---|---|
+| [PH-01 Monorepo and toolchain](#ph-01-monorepo-and-toolchain) | ✅ Done | [Spec](superpowers/specs/2026-10-02-PH-01-monorepo-and-toolchain-design.md) | [Plan](superpowers/plans/2026-10-02-PH-01-monorepo-and-toolchain.md) | [#11](https://github.com/luiki-dev/szop/pull/11) | [#29](https://github.com/luiki-dev/szop/issues/29) |
+| [PH-02 CI checks](#ph-02-ci-checks) | ✅ Done | [Spec](superpowers/specs/2026-10-04-PH-02-ci-checks-design.md) | [Plan](superpowers/plans/2026-10-04-PH-02-ci-checks.md) | [#14](https://github.com/luiki-dev/szop/pull/14) | [#30](https://github.com/luiki-dev/szop/issues/30) |
 
 ### PH-01 Monorepo and toolchain
 
@@ -93,15 +94,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 **Exit:** `pnpm dev` shows a page that reads the API's status, which reads PostgreSQL. Every test layer has its first test, and CI runs them all, against a production build and in the container image.
 
-| Phase | Status | Spec | Plan | PR |
-|---|---|---|---|---|
-| [PH-03 API skeleton](#ph-03-api-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md) | [Plan](superpowers/plans/2026-10-05-PH-03-api-skeleton.md) | [#18](https://github.com/luiki-dev/szop/pull/18) |
-| [PH-04 Database](#ph-04-database) | ✅ Done | [Spec](superpowers/specs/2026-10-05-PH-04-database-design.md) | [Plan](superpowers/plans/2026-10-05-PH-04-database.md) | [#20](https://github.com/luiki-dev/szop/pull/20) |
-| [PH-05 SPA skeleton](#ph-05-spa-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md) | [Plan](superpowers/plans/2026-10-07-PH-05-spa-skeleton.md) | [#22](https://github.com/luiki-dev/szop/pull/22) |
-| [PH-06a Production build and serving](#ph-06a-production-build-and-serving) | ✅ Done | [Spec](superpowers/specs/2026-10-08-PH-06a-production-build-and-serving-design.md) | [Plan](superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md) | [#23](https://github.com/luiki-dev/szop/pull/23) |
-| [PH-06b Web security baseline](#ph-06b-web-security-baseline) | ⬜ Not started | — | — | — |
-| [PH-07 First E2E journey](#ph-07-first-e2e-journey) | ⬜ Not started | — | — | — |
-| [PH-08 Container image](#ph-08-container-image) | ⬜ Not started | — | — | — |
+| Phase | Status | Spec | Plan | PR | Issue |
+|---|---|---|---|---|---|
+| [PH-03 API skeleton](#ph-03-api-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md) | [Plan](superpowers/plans/2026-10-05-PH-03-api-skeleton.md) | [#18](https://github.com/luiki-dev/szop/pull/18) | [#31](https://github.com/luiki-dev/szop/issues/31) |
+| [PH-04 Database](#ph-04-database) | ✅ Done | [Spec](superpowers/specs/2026-10-05-PH-04-database-design.md) | [Plan](superpowers/plans/2026-10-05-PH-04-database.md) | [#20](https://github.com/luiki-dev/szop/pull/20) | [#32](https://github.com/luiki-dev/szop/issues/32) |
+| [PH-05 SPA skeleton](#ph-05-spa-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md) | [Plan](superpowers/plans/2026-10-07-PH-05-spa-skeleton.md) | [#22](https://github.com/luiki-dev/szop/pull/22) | [#33](https://github.com/luiki-dev/szop/issues/33) |
+| [PH-06a Production build and serving](#ph-06a-production-build-and-serving) | ✅ Done | [Spec](superpowers/specs/2026-10-08-PH-06a-production-build-and-serving-design.md) | [Plan](superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md) | [#23](https://github.com/luiki-dev/szop/pull/23) | [#35](https://github.com/luiki-dev/szop/issues/35) |
+| [PH-06b Web security baseline](#ph-06b-web-security-baseline) | ⬜ Not started | — | — | — | [#25](https://github.com/luiki-dev/szop/issues/25) |
+| [PH-07 First E2E journey](#ph-07-first-e2e-journey) | ⬜ Not started | — | — | — | [#36](https://github.com/luiki-dev/szop/issues/36) |
+| [PH-08 Container image](#ph-08-container-image) | ⬜ Not started | — | — | — | [#37](https://github.com/luiki-dev/szop/issues/37) |
 
 ### PH-03 API skeleton
 
@@ -172,13 +173,13 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 **Exit:** one button creates a demo of any commit at `demo.<domain>`, a nightly run destroys it, and `v0.1.0` is released.
 
-| Phase | Status | Spec | Plan | PR |
-|---|---|---|---|---|
-| [PH-09 AWS account and Terraform bootstrap](#ph-09-aws-account-and-terraform-bootstrap) | ⬜ Not started | — | — | — |
-| [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure) | ⬜ Not started | — | — | — |
-| [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | ⬜ Not started | — | — | — |
-| [PH-12 First deploy](#ph-12-first-deploy) | ⬜ Not started | — | — | — |
-| [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — |
+| Phase | Status | Spec | Plan | PR | Issue |
+|---|---|---|---|---|---|
+| [PH-09 AWS account and Terraform bootstrap](#ph-09-aws-account-and-terraform-bootstrap) | ⬜ Not started | — | — | — | [#38](https://github.com/luiki-dev/szop/issues/38) |
+| [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure) | ⬜ Not started | — | — | — | [#39](https://github.com/luiki-dev/szop/issues/39) |
+| [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | ⬜ Not started | — | — | — | [#40](https://github.com/luiki-dev/szop/issues/40) |
+| [PH-12 First deploy](#ph-12-first-deploy) | ⬜ Not started | — | — | — | [#41](https://github.com/luiki-dev/szop/issues/41) |
+| [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
 
 ### PH-09 AWS account and Terraform bootstrap
 
@@ -229,26 +230,26 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 **Exit:** every 🎯 requirement is delivered and meets [NFR-1](requirements/functional-requirements.md#nfr-1) to [NFR-3](requirements/functional-requirements.md#nfr-3), every MVP use case has a passing E2E journey, and `1.0.0` is released: a `Release-As: 1.0.0` footer reaches `main` and the owner merges the release PR ([ADR 0009](decisions/0009-git-workflow.md)).
 
-| Phase | Status | Spec | Plan | PR |
-|---|---|---|---|---|
-| [PH-14 App shell and design system](#ph-14-app-shell-and-design-system) | ⬜ Not started | — | — | — |
-| [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only) | ⬜ Not started | — | — | — |
-| [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists) | ⬜ Not started | — | — | — |
-| [PH-17 List items](#ph-17-list-items) | ⬜ Not started | — | — | — |
-| [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — |
-| [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — |
-| [PH-20 Quotas and rate limits](#ph-20-quotas-and-rate-limits) | ⬜ Not started | — | — | — |
-| [PH-21 Shop in a store](#ph-21-shop-in-a-store) | ⬜ Not started | — | — | — |
-| [PH-22 Offline state](#ph-22-offline-state) | ⬜ Not started | — | — | — |
-| [PH-23 Smart input](#ph-23-smart-input) | ⬜ Not started | — | — | — |
-| [PH-24 Catalog browser](#ph-24-catalog-browser) | ⬜ Not started | — | — | — |
-| [PH-25 Archive and duplicate](#ph-25-archive-and-duplicate) | ⬜ Not started | — | — | — |
-| [PH-26 Catalog and units](#ph-26-catalog-and-units) | ⬜ Not started | — | — | — |
-| [PH-27 Categories](#ph-27-categories) | ⬜ Not started | — | — | — |
-| [PH-28 Templates](#ph-28-templates) | ⬜ Not started | — | — | — |
-| [PH-29 Password reset and change](#ph-29-password-reset-and-change) | ⬜ Not started | — | — | — |
-| [PH-30 Settings and account deletion](#ph-30-settings-and-account-deletion) | ⬜ Not started | — | — | — |
-| [PH-31 Automatic cleanup](#ph-31-automatic-cleanup) | ⬜ Not started | — | — | — |
+| Phase | Status | Spec | Plan | PR | Issue |
+|---|---|---|---|---|---|
+| [PH-14 App shell and design system](#ph-14-app-shell-and-design-system) | ⬜ Not started | — | — | — | [#43](https://github.com/luiki-dev/szop/issues/43) |
+| [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only) | ⬜ Not started | — | — | — | [#44](https://github.com/luiki-dev/szop/issues/44) |
+| [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists) | ⬜ Not started | — | — | — | [#45](https://github.com/luiki-dev/szop/issues/45) |
+| [PH-17 List items](#ph-17-list-items) | ⬜ Not started | — | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
+| [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
+| [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
+| [PH-20 Quotas and rate limits](#ph-20-quotas-and-rate-limits) | ⬜ Not started | — | — | — | [#49](https://github.com/luiki-dev/szop/issues/49) |
+| [PH-21 Shop in a store](#ph-21-shop-in-a-store) | ⬜ Not started | — | — | — | [#50](https://github.com/luiki-dev/szop/issues/50) |
+| [PH-22 Offline state](#ph-22-offline-state) | ⬜ Not started | — | — | — | [#51](https://github.com/luiki-dev/szop/issues/51) |
+| [PH-23 Smart input](#ph-23-smart-input) | ⬜ Not started | — | — | — | [#52](https://github.com/luiki-dev/szop/issues/52) |
+| [PH-24 Catalog browser](#ph-24-catalog-browser) | ⬜ Not started | — | — | — | [#53](https://github.com/luiki-dev/szop/issues/53) |
+| [PH-25 Archive and duplicate](#ph-25-archive-and-duplicate) | ⬜ Not started | — | — | — | [#54](https://github.com/luiki-dev/szop/issues/54) |
+| [PH-26 Catalog and units](#ph-26-catalog-and-units) | ⬜ Not started | — | — | — | [#55](https://github.com/luiki-dev/szop/issues/55) |
+| [PH-27 Categories](#ph-27-categories) | ⬜ Not started | — | — | — | [#56](https://github.com/luiki-dev/szop/issues/56) |
+| [PH-28 Templates](#ph-28-templates) | ⬜ Not started | — | — | — | [#57](https://github.com/luiki-dev/szop/issues/57) |
+| [PH-29 Password reset and change](#ph-29-password-reset-and-change) | ⬜ Not started | — | — | — | [#58](https://github.com/luiki-dev/szop/issues/58) |
+| [PH-30 Settings and account deletion](#ph-30-settings-and-account-deletion) | ⬜ Not started | — | — | — | [#59](https://github.com/luiki-dev/szop/issues/59) |
+| [PH-31 Automatic cleanup](#ph-31-automatic-cleanup) | ⬜ Not started | — | — | — | [#60](https://github.com/luiki-dev/szop/issues/60) |
 
 ### PH-14 App shell and design system
 
@@ -418,10 +419,10 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 Both phases are rough: each is split into smaller phases once the MVP is done ([ADR 0014](decisions/0014-roadmap.md), decision 3).
 
-| Phase | Status | Spec | Plan | PR |
-|---|---|---|---|---|
-| [PH-32 Sharing](#ph-32-sharing) | ⬜ Not started | — | — | — |
-| [PH-33 Live updates](#ph-33-live-updates) | ⬜ Not started | — | — | — |
+| Phase | Status | Spec | Plan | PR | Issue |
+|---|---|---|---|---|---|
+| [PH-32 Sharing](#ph-32-sharing) | ⬜ Not started | — | — | — | [#61](https://github.com/luiki-dev/szop/issues/61) |
+| [PH-33 Live updates](#ph-33-live-updates) | ⬜ Not started | — | — | — | [#62](https://github.com/luiki-dev/szop/issues/62) |
 
 ### PH-32 Sharing
 
@@ -445,9 +446,9 @@ Both phases are rough: each is split into smaller phases once the MVP is done ([
 
 Optional technical phases that change no behavior, in no particular order. A candidate becomes a phase, with the next free ID, when the owner decides to do it ([ADR 0014](decisions/0014-roadmap.md), decision 13). Feature ideas are not listed here: they live in the [future extensions](requirements/functional-requirements.md#future-extensions-ideas-not-committed) of the functional requirements.
 
-| Candidate | What it would bring | Open point |
-|---|---|---|
-| Load testing | k6 runs against the demo environment | [OP-029](open-points.md#op-029) |
-| Supply-chain provenance | Signed attestations, a software bill of materials (SBOM) and an OpenSSF Scorecard | [OP-030](open-points.md#op-030) |
-| Storybook | A workshop and documentation for the components; to look at again after the first few feature phases | [OP-060](open-points.md#op-060) |
-| Always-on readiness | What an always-on deployment would need: backups, a content delivery network (CDN) with a web application firewall, alarms, SES production access, a privacy notice and more; only if one is ever planned | [OP-033](open-points.md#op-033) |
+| Candidate | What it would bring | Open point | Issue |
+|---|---|---|---|
+| Load testing | k6 runs against the demo environment | [OP-029](open-points.md#op-029) | [#114](https://github.com/luiki-dev/szop/issues/114) |
+| Supply-chain provenance | Signed attestations, a software bill of materials (SBOM) and an OpenSSF Scorecard | [OP-030](open-points.md#op-030) | [#115](https://github.com/luiki-dev/szop/issues/115) |
+| Storybook | A workshop and documentation for the components; to look at again after the first few feature phases | [OP-060](open-points.md#op-060) | [#117](https://github.com/luiki-dev/szop/issues/117) |
+| Always-on readiness | What an always-on deployment would need: backups, a content delivery network (CDN) with a web application firewall, alarms, SES production access, a privacy notice and more; only if one is ever planned | [OP-033](open-points.md#op-033) | [#116](https://github.com/luiki-dev/szop/issues/116) |
