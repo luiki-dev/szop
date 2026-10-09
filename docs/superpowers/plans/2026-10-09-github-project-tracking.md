@@ -445,16 +445,16 @@ No repository files change; the PR description records this task.
 
 `close` is `null`, `"completed"` or `"not planned"`; `close_comment` may hold `{PH-06a}`-style placeholders filled with issue numbers.
 
-- [ ] **Step 1: Check the Status options**
+- [x] **Step 1: Check the Status options**
 
 Run: `gh project field-list 3 --owner luiki-dev --format json`
 Expected: the Status field's options are exactly the six of Global Constraints. If not, stop and ask the owner.
 
-- [ ] **Step 2: Save PH-06's pre-split roadmap**
+- [x] **Step 2: Save PH-06's pre-split roadmap**
 
 Run: `git show bffb63b3c4951bc02e3ce2bb1c13e892c7d8c7a1:docs/roadmap.md` and save its output to `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/roadmap-before-split.md` with the Write tool (or redirect: `git show bffb63b3c4951bc02e3ce2bb1c13e892c7d8c7a1:docs/roadmap.md > /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/roadmap-before-split.md`).
 
-- [ ] **Step 3: Write the failing tests**
+- [x] **Step 3: Write the failing tests**
 
 Create `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/test_tracking.py`:
 
@@ -549,12 +549,12 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 4: Run the tests to see them fail**
+- [x] **Step 4: Run the tests to see them fail**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/test_tracking.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
 Expected: an error, `ModuleNotFoundError: No module named 'parse'`.
 
-- [ ] **Step 5: Write `parse.py`**
+- [x] **Step 5: Write `parse.py`**
 
 Create `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/parse.py`:
 
@@ -798,19 +798,19 @@ if __name__ == "__main__":
     print(kinds)
 ```
 
-- [ ] **Step 6: Run the tests to see them pass**
+- [x] **Step 6: Run the tests to see them pass**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/test_tracking.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
 Expected: `OK`. If an assertion about the docs fails (for example a "Depends on" format that the regex misses), fix `parse.py`, not the test, unless the test contradicts the spec.
 
-- [ ] **Step 7: Judge the `owner` labels**
+- [x] **Step 7: Judge the `owner` labels**
 
 Read all 60 open entries in `docs/open-points.md`. An entry gets `owner` when only the owner can carry it out: an AWS, domain or GitHub setting, a manual check on the demo or in the UI, a purchase, a decision reserved to the owner. Write `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner.json` as a JSON list of keys, and `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/owner-reasons.md` with one line per key: `- OP-NNN: <reason>`. Re-run step 6 (still `OK`), then:
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/parse.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
 Expected: `{'phase': 34, 'open-point': 60, 'adr': 18}` (the 17 historical ADRs and ADR 0024).
 
-- [ ] **Step 8: Write `create.py`**
+- [x] **Step 8: Write `create.py`**
 
 Create `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/create.py`:
 
@@ -918,7 +918,7 @@ for it in todo:
     print("fields", k)
 ```
 
-- [ ] **Step 9: Run the pilot, twice**
+- [x] **Step 9: Run the pilot, twice**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/create.py --only "ADR 0024" PH-06b OP-053 OP-067`
 Expected: four `issue …` lines and four `fields …` lines.
@@ -926,7 +926,7 @@ Expected: four `issue …` lines and four `fields …` lines.
 Run the same command again.
 Expected: no `issue …` lines (nothing new created), four `fields …` lines. Then `gh issue list --repo luiki-dev/szop --state all` shows exactly four issues.
 
-- [ ] **Step 10: Verify the pilot on GitHub**
+- [x] **Step 10: Verify the pilot on GitHub**
 
 Run: `gh issue view <PH-06b's number> --repo luiki-dev/szop` and the same for OP-053, OP-067 and ADR 0024.
 Expected: titles, labels and milestone as in the spec; PH-06b shows OP-053 and OP-067 as sub-issues; links in the bodies are absolute; OP-053 has a Parts checklist and a History line; the project shows PH-06b, OP-053 and OP-067 as `📌 Todo` with Order 80 on PH-06b, and ADR 0024 as `🚧 In progress`.
