@@ -1702,7 +1702,7 @@ Added on 2026-10-10 at the owner's request: the trial's source of truth is rever
 **Interfaces:**
 - Consumes: `manifest.json`, `issues.json`, the docs.
 
-- [ ] **Step 1: Write the check**
+- [x] **Step 1: Write the check**
 
 Create `/home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/issues.graphql`:
 
@@ -1812,12 +1812,12 @@ if len(re.findall(r"^- \*\*Issue:\*\*", register, re.M)) != 61:
 print("\n".join(problems) if problems else "no mismatch")
 ```
 
-- [ ] **Step 2: Run the check**
+- [x] **Step 2: Run the check**
 
 Run: `python3 /home/lemekk/.claude/jobs/a874b5ec/tmp/tracking/check.py /home/lemekk/workspace/szop/.claude/worktrees/adr-0024-github-project-tracking`
 Expected: `no mismatch`. Fix every mismatch at its cause (a manifest rule, a missed `gh` call) and run it again. If GraphQL reports that a field does not exist (`blockedBy`, `parent`), look it up with `gh api graphql -f query='{ __type(name: "Issue") { fields { name } } }'` and adjust the query.
 
-- [ ] **Step 3: Walk the definition of done and review the diff**
+- [x] **Step 3: Walk the definition of done and review the diff**
 
 Run: `git diff main --stat` and read `git diff main` in full. Check each changed doc against the spec's "Documentation and records", the writing style rules in `CLAUDE.md` (acronyms, icons, linked requirements, Contents in sync) and that no relative link points to a missing file or heading.
 
