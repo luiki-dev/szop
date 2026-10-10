@@ -12,6 +12,7 @@ const valid = {
   DATABASE_USER: "szop",
   DATABASE_PASSWORD: "szop",
   WEB_ROOT: "../web/dist",
+  TRUSTED_PROXIES: "none",
 };
 
 const names = Object.keys(valid);
@@ -40,6 +41,7 @@ describe("loadConfig", () => {
         password: "szop",
       },
       webRoot: resolve("../web/dist"),
+      trustedProxies: [],
     });
   });
 
@@ -81,6 +83,7 @@ describe("loadConfig", () => {
     "DATABASE_USER",
     "DATABASE_PASSWORD",
     "WEB_ROOT",
+    "TRUSTED_PROXIES",
   ])("rejects an empty %s instead of treating it as missing", (name) => {
     expect(errorFor({ ...valid, [name]: "" })).toMatch(
       new RegExp(`${name}: (?!missing)`),
@@ -98,6 +101,32 @@ describe("loadConfig", () => {
   it.each(["loud", "INFO"])("rejects LOG_LEVEL=%j", (level) => {
     expect(errorFor({ ...valid, LOG_LEVEL: level })).toMatch(
       /LOG_LEVEL: (?!missing)/,
+    );
+  });
+
+  it.each([
+    ["none", []],
+    ["10.0.0.0/16", ["10.0.0.0/16"]],
+    ["10.0.1.5", ["10.0.1.5"]],
+    ["fd00::/8", ["fd00::/8"]],
+    ["10.0.0.0/16, 10.1.0.0/16", ["10.0.0.0/16", "10.1.0.0/16"]],
+  ])("reads TRUSTED_PROXIES=%j", (value, expected) => {
+    expect(
+      loadConfig({ ...valid, TRUSTED_PROXIES: value }).trustedProxies,
+    ).toEqual(expected);
+  });
+
+  it.each([
+    "10.0.0.0/16,",
+    "none,10.0.0.0/16",
+    "localhost",
+    "abc",
+    "10.0.0.0/33",
+    "10.0.0.0/x",
+    "fd00::/129",
+  ])("rejects TRUSTED_PROXIES=%j", (value) => {
+    expect(errorFor({ ...valid, TRUSTED_PROXIES: value })).toMatch(
+      /TRUSTED_PROXIES: (?!missing)/,
     );
   });
 

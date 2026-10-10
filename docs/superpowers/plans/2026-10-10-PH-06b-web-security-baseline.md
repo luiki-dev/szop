@@ -87,7 +87,7 @@ Checked on 2026-10-10 with throwaway probes outside the repository, on fastify 5
 **Interfaces:**
 - Produces: `Config.trustedProxies: string[]`; `testConfig(overrides?: Partial<Config>): Config` in `src/test/config.ts`, with `logLevel: "silent"`, `trustedProxies: []` and a `webRoot` that does not exist.
 
-- [ ] **Step 1: Add the setting to the local `.env`**
+- [x] **Step 1: Add the setting to the local `.env`**
 
 `apps/api/.env` is git-ignored and is read by the test helpers through `loadConfig`. Append the line now, so the database tests keep working once the setting is required:
 
@@ -95,7 +95,7 @@ Checked on 2026-10-10 with throwaway probes outside the repository, on fastify 5
 grep -q '^TRUSTED_PROXIES=' apps/api/.env || printf '\nTRUSTED_PROXIES=none\n' >> apps/api/.env
 ```
 
-- [ ] **Step 2: Write the failing config tests**
+- [x] **Step 2: Write the failing config tests**
 
 In `apps/api/src/config.test.ts`:
 
@@ -132,12 +132,12 @@ In `apps/api/src/config.test.ts`:
   });
 ```
 
-- [ ] **Step 3: Run them and see them fail**
+- [x] **Step 3: Run them and see them fail**
 
 Run: `pnpm test config`
 Expected: FAIL. "returns the typed config" fails on the missing `trustedProxies`; the `reads TRUSTED_PROXIES` cases fail with `undefined`; the `rejects` cases fail with `expected loadConfig to throw`; "names TRUSTED_PROXIES when it is missing" fails, since the setting is not checked yet.
 
-- [ ] **Step 4: Add the setting to `config.ts`**
+- [x] **Step 4: Add the setting to `config.ts`**
 
 In `apps/api/src/config.ts`, add `import { isIP } from "node:net";` after the `node:path` import, and before `const envSchema`:
 
@@ -184,12 +184,12 @@ In `interface Config`, after `webRoot`:
 
 In `loadConfig`'s return, after `webRoot: resolve(data.WEB_ROOT),`: `trustedProxies: data.TRUSTED_PROXIES,`.
 
-- [ ] **Step 5: Run the config tests and see them pass**
+- [x] **Step 5: Run the config tests and see them pass**
 
 Run: `pnpm test config`
 Expected: PASS.
 
-- [ ] **Step 6: Add the shared test config and switch the two existing copies to it**
+- [x] **Step 6: Add the shared test config and switch the two existing copies to it**
 
 Create `apps/api/src/test/config.ts`:
 
@@ -216,7 +216,7 @@ In `apps/api/src/health/routes.test.ts`, replace the `const config: Config = { â
 
 In `apps/api/src/web/routes.test.ts`, delete the `configFor` function, replace `configFor(root)` with `testConfig({ webRoot: root })`, import `testConfig` from `"../test/config.ts"`, and drop the now unused `Config` import.
 
-- [ ] **Step 7: Document the setting in `.env.example`**
+- [x] **Step 7: Document the setting in `.env.example`**
 
 Append to `apps/api/.env.example`:
 
@@ -230,12 +230,12 @@ Append to `apps/api/.env.example`:
 TRUSTED_PROXIES=none
 ```
 
-- [ ] **Step 8: Run every check**
+- [x] **Step 8: Run every check**
 
 Run: `pnpm test && pnpm typecheck && pnpm lint && pnpm format:check`
 Expected: all pass.
 
-- [ ] **Step 9: Tick this task's boxes and commit**
+- [x] **Step 9: Tick this task's boxes and commit**
 
 ```bash
 git add apps/api/src/config.ts apps/api/src/config.test.ts apps/api/.env.example apps/api/src/test/config.ts apps/api/src/health/routes.test.ts apps/api/src/web/routes.test.ts docs/superpowers/plans/2026-10-10-PH-06b-web-security-baseline.md
