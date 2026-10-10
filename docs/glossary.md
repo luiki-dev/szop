@@ -16,6 +16,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **CDK** | Cloud Development Kit | AWS's infrastructure-as-code tool in general-purpose languages such as TypeScript. Considered, not used (see ADR 0008). |
 | **CDN** | Content Delivery Network | A network of servers around the world that serves static files close to users and can absorb or filter traffic floods in front of the application. |
 | **CI/CD** | Continuous Integration / Continuous Delivery (or Deployment) | **CI:** every change is built and checked automatically, here by GitHub Actions on every PR. **CD:** every change that passes the checks can be released or deployed at the push of a button; continuous *deployment* goes further and deploys every change by itself. |
+| **CIDR** | Classless Inter-Domain Routing | A way to write a range of IP addresses as an address and a prefix length, such as `10.0.0.0/16` (every address starting with `10.0.`). `TRUSTED_PROXIES` takes them (see ADR 0025). |
 | **CLI** | Command-line interface | A program used by typing commands in a terminal, such as `git`, `gh`, `terraform` or the AWS CLI. |
 | **CLS** | Cumulative Layout Shift | A Core Web Vital: how much visible content jumps around while a page loads. "Good" is at most 0.1 ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
 | **CORS** | Cross-Origin Resource Sharing | Browser rules deciding when a page from one domain may call an API on another domain. Not needed when frontend and API share one origin. |
