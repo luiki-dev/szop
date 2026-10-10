@@ -262,7 +262,7 @@ EOF
 - Consumes: `Config.trustedProxies`, `testConfig()` (Task 1).
 - Produces: `redactUrl(url: string): string` and `requestSerializer(request: FastifyRequest)` in `security/log.ts`; `LogStream` (`{ write(line: string): void }`) and `AppDeps.logStream?: LogStream` in `app.ts`; `captureLog(): { stream: LogStream; lines(): LogLine[] }` in `src/test/log.ts`, where `LogLine` is `Record<string, unknown>`.
 
-- [ ] **Step 1: Add the log capture helper**
+- [x] **Step 1: Add the log capture helper**
 
 Create `apps/api/src/test/log.ts`:
 
@@ -288,7 +288,7 @@ export function captureLog(): { stream: LogStream; lines(): LogLine[] } {
 }
 ```
 
-- [ ] **Step 2: Write the failing tests for the log**
+- [x] **Step 2: Write the failing tests for the log**
 
 Create `apps/api/src/security/log.test.ts`:
 
@@ -436,12 +436,12 @@ describe("the client address", () => {
 });
 ```
 
-- [ ] **Step 3: Run them and see them fail**
+- [x] **Step 3: Run them and see them fail**
 
 Run: `pnpm test security`
 Expected: FAIL. `log.test.ts` fails to import `./log.ts`; `client-ip.test.ts` fails because `logStream` is not a property of `AppDeps` at type level, and at run time nothing is captured (`undefined` instead of the address).
 
-- [ ] **Step 4: Write `security/log.ts`**
+- [x] **Step 4: Write `security/log.ts`**
 
 ```ts
 import type { FastifyRequest } from "fastify";
@@ -488,7 +488,7 @@ export function requestSerializer(request: FastifyRequest): {
 }
 ```
 
-- [ ] **Step 5: Wire the log and the trusted proxies into `buildApp`**
+- [x] **Step 5: Wire the log and the trusted proxies into `buildApp`**
 
 In `apps/api/src/app.ts`, import `requestSerializer` from `"./security/log.ts"`, and replace the `AppDeps` interface and the `Fastify(…)` call:
 
@@ -522,17 +522,17 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
 
 The rest of `buildApp` is unchanged.
 
-- [ ] **Step 6: Run the tests and see them pass**
+- [x] **Step 6: Run the tests and see them pass**
 
 Run: `pnpm test security`
 Expected: PASS. If the IPv6 case fails, stop and report: the probe showed it passing.
 
-- [ ] **Step 7: Check that development still logs**
+- [x] **Step 7: Check that development still logs**
 
 Run, with PostgreSQL up: `timeout 8 pnpm --filter @szop/api dev; true`
 Expected: pino-pretty's coloured lines, `migrations applied` and `Server listening at http://127.0.0.1:3000`. Then run every check: `pnpm test && pnpm typecheck && pnpm lint && pnpm format:check`.
 
-- [ ] **Step 8: Tick this task's boxes and commit**
+- [x] **Step 8: Tick this task's boxes and commit**
 
 ```bash
 git add apps/api/src/app.ts apps/api/src/security/log.ts apps/api/src/security/log.test.ts apps/api/src/security/client-ip.test.ts apps/api/src/test/log.ts docs/superpowers/plans/2026-10-10-PH-06b-web-security-baseline.md
