@@ -100,7 +100,7 @@ Roadmap entry: [PH-06b](roadmap.md#ph-06b-web-security-baseline).
 - **Moved from PH-06:** PH-06 was split; the web baseline is PH-06b.
 - **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13
 - **Issue:** [#26](https://github.com/luiki-dev/szop/issues/26)
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress ([`feat/ph-06b-web-security-baseline`](https://github.com/luiki-dev/szop/tree/feat/ph-06b-web-security-baseline))
 
 #### OP-067
 
