@@ -23,6 +23,7 @@ describe("security headers", () => {
     ["the SPA's index.html", "GET", "/", 200],
     ["a fingerprinted asset", "GET", "/assets/index-abc123.js", 200],
     ["the JSON 404", "GET", "/api/nope", 404],
+    ["a refused cross-site request", "POST", "/api/health", 403],
   ] as const)("are on %s", async (_, method, url, status) => {
     app = buildApp({
       config: testConfig({ webRoot: webRoot.path }),

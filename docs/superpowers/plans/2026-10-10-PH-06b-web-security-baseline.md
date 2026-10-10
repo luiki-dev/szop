@@ -719,7 +719,7 @@ EOF
 - Consumes: `testConfig()` (Task 1); `headers` registered first (Task 3).
 - Produces: `crossSite`, a `fastify-plugin` plugin exported from `security/cross-site.ts`, registered after `headers`. Every later test that sends POST, PUT, PATCH or DELETE must send `Sec-Fetch-Site: same-origin`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `apps/api/src/security/cross-site.test.ts`:
 
@@ -832,12 +832,12 @@ In `apps/api/src/security/headers.test.ts`, add a fifth row to the `it.each`, so
 
 In `apps/api/src/web/routes.test.ts`, the `it.each` "answers %s %s with Fastify's JSON 404" sends POST without the header, which is now a 403 before routing. Change its call to `start().inject({ method, url, headers: { "sec-fetch-site": "same-origin" } })`, with a comment above the `it.each`: `// Same-origin, so POST passes the cross-site check and reaches routing.`
 
-- [ ] **Step 2: Run them and see them fail**
+- [x] **Step 2: Run them and see them fail**
 
 Run: `pnpm test cross-site headers`
 Expected: FAIL: every refusal case gets 200 instead of 403, and the headers test's new row gets 404.
 
-- [ ] **Step 3: Write `security/cross-site.ts`**
+- [x] **Step 3: Write `security/cross-site.ts`**
 
 ```ts
 import type { FastifyInstance, FastifyRequest } from "fastify";
@@ -887,21 +887,21 @@ function crossSiteCheck(app: FastifyInstance): void {
 export const crossSite = fp(crossSiteCheck, { name: "szop-cross-site" });
 ```
 
-- [ ] **Step 4: Register it after `headers`**
+- [x] **Step 4: Register it after `headers`**
 
 In `apps/api/src/app.ts`, import `crossSite` from `"./security/cross-site.ts"` and add `app.register(crossSite);` right after `app.register(headers);`.
 
-- [ ] **Step 5: Run the tests and see them pass**
+- [x] **Step 5: Run the tests and see them pass**
 
 Run: `pnpm test cross-site headers web`
 Expected: PASS.
 
-- [ ] **Step 6: Run every check**
+- [x] **Step 6: Run every check**
 
 Run: `pnpm test && pnpm typecheck && pnpm lint && pnpm format:check`
 Expected: all pass. If ESLint flags the hook's parameters or `reply.send`, fix it within the rule's intent (`void` for the send) and report what changed.
 
-- [ ] **Step 7: Tick this task's boxes and commit**
+- [x] **Step 7: Tick this task's boxes and commit**
 
 ```bash
 git add apps/api/src/app.ts apps/api/src/security/cross-site.ts apps/api/src/security/cross-site.test.ts apps/api/src/security/headers.test.ts apps/api/src/web/routes.test.ts docs/superpowers/plans/2026-10-10-PH-06b-web-security-baseline.md

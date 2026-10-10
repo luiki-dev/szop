@@ -107,6 +107,7 @@ describe("serving the SPA", () => {
     expect(file.statusCode).toBe(404);
   });
 
+  // Same-origin, so POST passes the cross-site check and reaches routing.
   it.each([
     ["GET", "/api/nope"],
     ["GET", "/api"],
@@ -114,7 +115,11 @@ describe("serving the SPA", () => {
     ["GET", "/favicon.ico"],
     ["POST", "/some/route"],
   ] as const)("answers %s %s with Fastify's JSON 404", async (method, url) => {
-    const response = await start().inject({ method, url });
+    const response = await start().inject({
+      method,
+      url,
+      headers: { "sec-fetch-site": "same-origin" },
+    });
 
     expect(response.statusCode).toBe(404);
     expect(response.headers["content-type"]).toMatch(/^application\/json/);
