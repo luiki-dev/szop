@@ -24,6 +24,7 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
 - [15. How fast is fast enough](#15-how-fast-is-fast-enough)
 - [16. CI/CD: checking every change](#16-cicd-checking-every-change)
 - [17. The single-page application: React, React Router and TanStack Query](#17-the-single-page-application-react-react-router-and-tanstack-query)
+- [18. Tracking the work: issues, milestones and projects](#18-tracking-the-work-issues-milestones-and-projects)
 
 ## 1. The big picture
 
@@ -274,3 +275,12 @@ OpenID Connect (OIDC), which lets a workflow reach AWS without stored keys, GitH
 - **One origin in development, through a proxy.** `pnpm dev` starts Vite's server, which serves the page, and the API on port 3000. The browser only ever talks to Vite (`http://localhost:5173`). A request for a path starting with `/api` is **proxied**: Vite forwards it to `http://127.0.0.1:3000` and passes the answer back. The browser therefore sees one origin, as in production, and needs no Cross-Origin Resource Sharing (CORS) setup. With the API stopped, the proxy itself answers `502` with an empty body, which the client treats as an error.
 - **Mock Service Worker (MSW), in one paragraph.** In tests there is no API, so MSW fakes the network: a **handler** such as `http.get("/api/health", …)` says what an address answers, and the request goes out from the real client code and is caught on the way. Nothing in the app is replaced, so the real `getHealth`, hook and schema run; only the answer is made up. A test that needs another state adds a handler for that test with `server.use`. A request with no handler fails the test, naming the request: the setup file records it in a callback that rejects it, and checks the record after each test, because MSW 3's built-in `"error"` strategy would reject the request but leave the test green.
 - **The path of one request.** The page renders `HealthPage`, which calls `useHealth`. TanStack Query runs `getHealth`, which calls `fetch("/api/health")`. The browser sends it to Vite, whose proxy forwards it to Fastify at `127.0.0.1:3000`. The health route runs one query against PostgreSQL to read the schema version. It answers `200` with the version, or `503` when the query fails, and the body travels back the same way. `getHealth` parses the body with `healthSchema`, TanStack Query caches it under `["health"]`, and React renders the new text: "API: ok", or "API: reachable" with "Database: down". When the request itself fails, the text is "Can't reach the API".
+
+## 18. Tracking the work: issues, milestones and projects
+
+Most teams plan on the same site that holds their code. On GitHub that means three pieces, which Szop uses next to its roadmap ([ADR 0024](../decisions/0024-github-project-tracking.md); the day-to-day guide is [project tracking](../development/project-tracking.md)):
+
+- **An issue** is one piece of work with a number, a title, a body, labels and a state, open or closed. Closing records why: *completed* or *not planned*. A pull request whose description says `Closes #12` closes issue 12 when it is merged, which ties the work to the change that did it.
+- **Issues relate to each other.** A **sub-issue** sits under a parent, which shows how many of its children are closed; an issue can be **blocked by** another; and any mention of `#12` leaves a note on issue 12. Szop puts each open point under the phase that settles it, and lets a spike block its phase.
+- **A milestone** groups issues towards one goal and shows a progress bar. Szop's milestones are its roadmap stages, plus `Definition` for the decision work before the first phase.
+- **A project** collects issues into one table with custom fields, such as a status or a position, and shows them as **views**: a table, a **board** of columns (a kanban board, from the Japanese for "signboard", where cards move from column to column as work progresses) or a **roadmap**, a timeline drawn from date fields. Built-in **workflows** update the fields on events, such as setting the status to done when an issue closes.

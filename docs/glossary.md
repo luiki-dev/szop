@@ -170,6 +170,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **GitHub Actions: workflow, job, runner** | GitHub's CI/CD service. A **workflow** is a YAML file in `.github/workflows/` started by an event (a push, a PR, a schedule, a button); it holds **jobs**, which run in parallel unless one needs another, each on a fresh virtual machine, the **runner**. |
 | **GitHub App** | An integration registered on GitHub with its own identity (`name[bot]`) and narrowly chosen permissions; it gets tokens that expire within an hour. Szop's release-please runs as one (see ADR 0010). |
 | **GitHub flow** | A branching model where `main` is always releasable and every change is made on a short-lived branch merged through a pull request. Szop uses it (see ADR 0009). |
+| **GitHub Projects** | GitHub's planning tool: a project collects issues from one or more repositories and shows them as a table, a board or a timeline, with custom fields such as a status. Szop's project tracks its phases, open points and decision work (see ADR 0024). |
 | **GitOps** | Running infrastructure from git: merging a change to the main branch applies it automatically. Considered for `infra/base`, not used (see ADR 0010). |
 | **Graceful shutdown** | Stopping a server by refusing new connections and letting requests in flight finish before the process exits, instead of cutting them off. Szop's API does it on SIGINT and SIGTERM, so tsx's restarts and ECS's task stops lose no request. |
 | **Haul** | In Szop's list screen, the dark tray at the bottom that collects the checked items, shows how far along the shopping is and opens into a drawer listing them all (see `visual-design.md`). |
@@ -182,6 +183,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Immutable tag** | A container image tag that, once pushed, can never point at a different image. Szop's registry enforces it, so a version always means the same code. |
 | **IndexedDB** | A database built into the browser for storing structured data locally. Considered for guest workspaces, not used (see ADR 0002). |
 | **IPv6 /64 block** | The range of IPv6 addresses sharing their first 64 bits — typically what one household or device is given. Rate limits group addresses by it, since one machine can switch between billions of addresses inside its block. |
+| **Issue form** | A YAML file in `.github/ISSUE_TEMPLATE/` that turns GitHub's "new issue" page into a form with labelled fields, so issues of one kind share one shape. |
 | **Job summary** | The page of a GitHub Actions run (its *Summary* tab) where a job can write Markdown. Szop's `test` job shows Vitest's test report and a coverage table there. |
 | **jsdom** | A simulated browser DOM that runs inside Node.js, so component tests can render and click without a real browser. It has no layout engine. |
 | **k-anonymity** | Sending only part of a secret's hash, so that the answer covers many possible secrets and the server cannot tell which one was meant. Have I Been Pwned's password check works this way: only the first 5 characters of a SHA-1 hash leave the server. |
@@ -193,6 +195,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Merge commit, squash merge, rebase merge** | GitHub's three ways to merge a PR. A **merge commit** keeps the branch's commits and adds one commit joining the histories; a **squash merge** turns the whole branch into one new commit; a **rebase merge** replays each commit on top of `main`. Szop uses merge commits (see ADR 0009). |
 | **Merge ref** | `refs/pull/<N>/merge`, a hidden branch where GitHub keeps a test merge of a PR's branch into the current `main`. CI checks this merge commit, so it tests what `main` would look like after the merge. |
 | **Migration** | A versioned script that changes the database schema; applied in order in every environment. |
+| **Milestone** | On GitHub, a named group of issues with a progress bar of how many are closed. Szop has one per roadmap stage, and one for the definition work before the first phase (see ADR 0024). |
 | **Minor units** | The smallest unit of a currency (cents, grosze). Szop stores money as integers in minor units. |
 | **Monorepo** | One repository holding several packages (here: `apps/web`, `apps/api`, `packages/shared` and the `e2e/` tests, plus the Terraform code in `infra/`). |
 | **Multi-stage build** | A Dockerfile with several stages: one with the full toolchain compiles the app, and the final image copies only the result, staying small. |
@@ -240,6 +243,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Spike** | A short, time-boxed investigation that answers one question, such as whether a library works as hoped. Its output is an answer, not code to keep; in Szop it runs before the brainstorm of the phase that needs it (see ADR 0014). |
 | **Stage** | A milestone on Szop's roadmap with an exit criterion, such as "every MVP requirement delivered, `1.0.0` released". It groups phases and has no branch or PR of its own (see ADR 0014). |
 | **Storybook** | A separate local web app for building and reviewing components on their own, in all their states. Not used by Szop for now. |
+| **Sub-issue** | An issue placed under a parent issue on GitHub; the parent shows its sub-issues and how many are closed. In Szop, each open point is a sub-issue of the phase that settles it (see ADR 0024). |
 | **Subnet (public, private)** | A slice of a VPC's addresses. A public subnet has a route to the internet; a private one does not. |
 | **Supply-chain attack** | Attacking software through something it depends on, such as a hijacked npm package or GitHub action, instead of attacking it directly. |
 | **Tabular figures** | Digits that all have the same width (the `tnum` font feature, `tabular-nums` in Tailwind), so numbers line up in columns. |

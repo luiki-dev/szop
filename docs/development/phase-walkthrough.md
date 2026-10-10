@@ -90,6 +90,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
 
 - The branch name is `type/short-description`; a phase that adds a capability is `feat/…`.
 - A small, well-scoped phase may skip the written spec and plan ([ADR 0004](../decisions/0004-implementation-process.md), decision 8); then commits 1 and 2 do not exist.
+- When the brainstorm starts, the phase's issue moves to 🚧 In progress with its Started date, and the spec and plan links go into its Spec and Plan fields as they are committed ([project tracking](project-tracking.md#how-items-move)).
 
 ### Step 2 — Implement, task by task, test first
 
@@ -144,6 +145,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
 ```
 
 - Claude reviews its own diff first, then opens the PR with the **template** filled in.
+- The description closes the phase's issue and each open point it settles with `Closes #N`.
 - The **PR title** matters most: it becomes the merge commit's message on `main`, and release-please reads it.
 - CI tests `refs/pull/12/merge`: what `main` would look like after the merge. A newer push cancels the older run.
 - Until a check's phase lands, `ci.yml` simply has no such job; the jobs today are listed in [CI/CD](ci-cd.md).
@@ -237,6 +239,8 @@ The approval is the owner confirming that they started this run: a deploy nobody
    └─ release-please.yml  finds a feat since v0.3.0 → opens PR #14 "chore(main): release 0.4.0"
 ```
 
+The merge also closes the issues named with `Closes #N`, and the project sets them to ✅ Done.
+
 Locally, afterwards:
 
 ```bash
@@ -310,6 +314,8 @@ The highest bump wins: a `feat` and three `fix`es since `v0.3.0` make `0.4.0`. A
 | Image for any deploy | ECR, immutable | `szop:<commit hash>` |
 | Image of a release | ECR, immutable, the same image | `szop:<hash of M14>` and `szop:0.4.0` |
 | Spec / plan | The phase branch, then `main` | `docs/superpowers/specs/YYYY-MM-DD-PH-NN-<topic>-design.md`, `docs/superpowers/plans/YYYY-MM-DD-PH-NN-<topic>.md` (the phase ID in uppercase; work outside phases leaves it out) |
+| Phase issue | GitHub Issues, on the Szop project | `PH-12 First deploy`, label `phase` |
+| Open-point issue | GitHub Issues, a sub-issue of its phase | `OP-053 Build the app-wide web baseline`, label `open-point` |
 | Demo | AWS, only during a session | `https://demo.<domain>` |
 
 ## What runs on which event

@@ -10,6 +10,7 @@
 - Requirement IDs:
 - ADRs:
 - Open points (closed, re-assigned or added):
+- Issues closed (`Closes #N`, one per line):
 
 <!-- Write "none" for links that do not apply. -->
 
@@ -26,9 +27,9 @@
 - [ ] CI is green (CI)
 - [ ] Deployed and checked on the demo, covering the final head, with a Lighthouse run when the UI changed (owner): <!-- link to the demo-up run, and the commit it deployed -->
 - [ ] `infra/base` changes applied from this branch (owner; applied again from `main` once the PR is merged or closed)
-- [ ] Living docs updated: architecture, stack overview, glossary, threat model, visual design, functional requirements, roadmap status (Claude)
+- [ ] Living docs updated: architecture, stack overview, glossary, threat model, visual design, functional requirements, roadmap status and the issues (Claude)
 - [ ] Guides updated (Claude)
 - [ ] Significant decisions have ADRs (Claude → owner)
-- [ ] Open points closed, re-assigned or added in `docs/open-points.md` (Claude)
+- [ ] Open points closed, re-assigned or added in `docs/open-points.md` and their issues (Claude)
 - [ ] Commits and the PR title follow Conventional Commits; in a phase, commits follow the plan's tasks (Claude)
 - [ ] UI changes shown: screenshots of phone (light and dark) and desktop (light) (Claude)

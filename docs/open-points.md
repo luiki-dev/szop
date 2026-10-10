@@ -56,6 +56,7 @@ Everything that is still undecided or not yet done and has been left to a later 
 - **Adding:** whenever a topic, phase or review defers something, it adds an entry here with the next free ID, under the phase that will settle it, in addition to mentioning it where it came up.
 - **Using:** each phase brainstorm starts from its group, including the entries on its "Also" line. Before its PR is merged, the phase closes its entries or its parts of them, or moves them to another group with a note why (the [definition of done](development/definition-of-done.md), item 9).
 - **Closing:** a settled entry moves to [Closed](#closed) with a link to what settled it (an ADR, a commit, a PR). Its status becomes ✅ **closed**, or ✖️ **dropped** when it was dropped without being done, saying why. Closed and dropped entries stay as a record.
+- **Each open entry has an issue** on GitHub ([ADR 0024](decisions/0024-github-project-tracking.md)), named on its **Issue** line: a sub-issue of its phase's issue, on the [Szop project](https://github.com/users/luiki-dev/projects/3). During the trial ([OP-086](#op-086)) the issues are the source and this page mirrors them: an entry is added, moved or closed on GitHub first, then here ([project tracking](development/project-tracking.md#how-items-move)).
 
 ## Stage 1: Local foundations
 
@@ -98,6 +99,7 @@ Roadmap entry: [PH-06b](roadmap.md#ph-06b-web-security-baseline).
   - **PH-12:** the one-time check on the demo that the log shows the real address
 - **Moved from PH-06:** PH-06 was split; the web baseline is PH-06b.
 - **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13
+- **Issue:** [#26](https://github.com/luiki-dev/szop/issues/26)
 - **Status:** ⬜ Open
 
 #### OP-067
@@ -108,6 +110,7 @@ Roadmap entry: [PH-06b](roadmap.md#ph-06b-web-security-baseline).
 - **Moved from PH-05:** it does not depend on that phase.
 - **Moved from PH-06:** it does not depend on that phase.
 - **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
+- **Issue:** [#27](https://github.com/luiki-dev/szop/issues/27)
 - **Status:** ⬜ Open
 
 ### PH-07 First E2E journey
@@ -124,6 +127,7 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
   - **PH-07:** Playwright with axe
   - **PH-15:** fast-check and StrykerJS
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
+- **Issue:** [#63](https://github.com/luiki-dev/szop/issues/63)
 - **Status:** ⬜ Open
 
 #### OP-012
@@ -136,6 +140,7 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
   - **PH-05:** the first component test ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
   - **PH-07:** the first E2E journey on both viewports
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
+- **Issue:** [#64](https://github.com/luiki-dev/szop/issues/64)
 - **Status:** ⬜ Open
 
 #### OP-057
@@ -143,6 +148,7 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 **Extend the E2E suite for the visual design**, with the first E2E journey (OP-012): a Playwright Firefox project at the desktop viewport, next to desktop Chromium and the Pixel; axe with the `wcag2a`, `wcag2aa`, `wcag21aa` and `wcag22aa` rule sets, scanning every page in light and dark (Playwright can emulate `prefers-color-scheme`); and a journey that fails on any CSP violation the browser reports (for example a listener for `securitypolicyviolation` events, or the console). Show once that the guard catches an injected `<style>` element.
 
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11
+- **Issue:** [#65](https://github.com/luiki-dev/szop/issues/65)
 - **Status:** ⬜ Open
 
 ### PH-08 Container image
@@ -163,6 +169,7 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
   - **PH-12:** `infra/demo`
   - **PH-18:** the SES `EmailSender`
 - **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, m11](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
+- **Issue:** [#66](https://github.com/luiki-dev/szop/issues/66)
 - **Status:** ⬜ Open
 
 #### OP-015
@@ -170,6 +177,7 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 **Decide the Dockerfile's exact build steps.** The final image runs as a non-root user.
 
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decision 12; [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving)
+- **Issue:** [#67](https://github.com/luiki-dev/szop/issues/67)
 - **Status:** ⬜ Open
 
 #### OP-017
@@ -180,6 +188,7 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
   - **PH-08:** the RDS certificate authority bundle in the image
   - **PH-12:** the pool's TLS settings, with full certificate verification
 - **Source:** [ADR 0008](decisions/0008-hosting.md), consequences; [Audit, C6](audits/2026-09-29-design-sanity-check.md#consider-improving); [ADR 0020](decisions/0020-database-details.md), decision 3 (the settings stay separate, so no connection string is assembled)
+- **Issue:** [#68](https://github.com/luiki-dev/szop/issues/68)
 - **Status:** ⬜ Open
 
 #### OP-032
@@ -187,6 +196,7 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 **Add a CI job that proves the built image starts**: run it next to PostgreSQL from `compose.yaml` and call `/api/health`, or run the E2E suite against the image. It covers what the demo check does not require for other PRs, such as Dependabot's bumps of the Node base image or PostgreSQL.
 
 - **Source:** [Audit, MAJOR-13](audits/2026-09-29-design-sanity-check.md#major-13-roadmap-phases-and-the-definition-of-done-are-not-ready-for-the-roadmap-brainstorm); [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 3
+- **Issue:** [#69](https://github.com/luiki-dev/szop/issues/69)
 - **Status:** ⬜ Open
 
 #### OP-068
@@ -198,6 +208,7 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
   - **PH-08:** `docker` (the Node base image), ignoring its major updates
   - **PH-09:** `terraform` (the AWS provider)
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 18; [Audit, m13](audits/2026-09-29-design-sanity-check.md#process-and-ci); [ADR 0018](decisions/0018-ci-details.md)
+- **Issue:** [#70](https://github.com/luiki-dev/szop/issues/70)
 - **Status:** ⬜ Open
 
 #### OP-078
@@ -206,6 +217,7 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 
 - **Since PH-06a:** no build step ([ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 1); the PH-06a part is settled by design.
 - **Source:** [ADR 0020](decisions/0020-database-details.md), consequences
+- **Issue:** [#71](https://github.com/luiki-dev/szop/issues/71)
 - **Status:** ⬜ Open
 
 #### OP-084
@@ -215,6 +227,15 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 **Check the pages, not only the API, at startup.** A `WEB_ROOT` that points at a missing or wrong folder does not stop the API: `/api/health` answers 200 while every page path answers a plain-text 404, with only a warning in the log ([ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 2). The image's startup check must therefore also request `/` and expect HTML with status 200.
 
 - **Source:** [ADR 0023](decisions/0023-production-build-and-serving-details.md), decision 1
+- **Issue:** [#72](https://github.com/luiki-dev/szop/issues/72)
+- **Status:** ⬜ Open
+
+#### OP-086
+
+**Decide how the GitHub tracking trial ends.** After PH-06b and PH-07, decide whether to drop `open-points.md` and keep `roadmap.md` as a view updated from the issues, and what the roadmap keeps: the phase entries, the stage tables, the README's diagram ([ADR 0017](decisions/0017-readme-roadmap-diagram.md)). Dropping the register means rewriting the links to its entries in ADRs, specs and guides to the issues. Look back at how often the docs fell behind GitHub, and which views were used.
+
+- **Source:** [ADR 0024](decisions/0024-github-project-tracking.md), decision 2
+- **Issue:** [#156](https://github.com/luiki-dev/szop/issues/156)
 - **Status:** ⬜ Open
 
 ## Stage 3: Walking skeleton, deployed and released
@@ -233,6 +254,7 @@ Also: [OP-013](#op-013), [OP-068](#op-068).
   - **PH-11:** tearing down with `demo-down`
   - **PH-12:** spinning up, tearing down and debugging, and the message of OP-043
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decisions 30 and 31, consequences
+- **Issue:** [#73](https://github.com/luiki-dev/szop/issues/73)
 - **Status:** ⬜ Open
 
 #### OP-023
@@ -245,6 +267,7 @@ Also: [OP-013](#op-013), [OP-068](#op-068).
   - **PH-11 and PH-12:** the buttons as the runbook's primary path
   - **PH-13:** the release-please page
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 22 and consequences
+- **Issue:** [#74](https://github.com/luiki-dev/szop/issues/74)
 - **Status:** ⬜ Open
 
 ### PH-10 Domain and base infrastructure
@@ -260,6 +283,7 @@ Also: [OP-013](#op-013).
   - **PH-10:** the rule, the Terraform version pin, the Better Auth secret created outside Terraform, the check and the rotation
   - **PH-12:** confirming it for the RDS-managed database password
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decision 22; [ADR 0010](decisions/0010-ci-cd.md), decision 14; [Audit, m3](audits/2026-09-29-design-sanity-check.md#security-and-operations)
+- **Issue:** [#75](https://github.com/luiki-dev/szop/issues/75)
 - **Status:** ⬜ Open
 
 #### OP-044
@@ -270,6 +294,7 @@ Also: [OP-013](#op-013).
   - **PH-10:** the DMARC and SPF records
   - **PH-18:** what a failed send does
 - **Source:** [Audit, m2](audits/2026-09-29-design-sanity-check.md#security-and-operations); [ADR 0008](decisions/0008-hosting.md), decision 24
+- **Issue:** [#76](https://github.com/luiki-dev/szop/issues/76)
 - **Status:** ⬜ Open
 
 ### PH-11 CI access to AWS and the teardown safety net
@@ -288,6 +313,7 @@ Also: [OP-018](#op-018), [OP-023](#op-023).
   - **PH-13:** `release-please.yml` and its configuration
   - **PH-15:** `mutation.yml`
 - **Source:** [ADR 0009](decisions/0009-git-workflow.md), consequences; [ADR 0010](decisions/0010-ci-cd.md), decisions 5–18 and consequences; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7; [Audit, Process and CI](audits/2026-09-29-design-sanity-check.md#process-and-ci); [Audit, C10](audits/2026-09-29-design-sanity-check.md#consider-improving); [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 18
+- **Issue:** [#77](https://github.com/luiki-dev/szop/issues/77)
 - **Status:** ⬜ Open
 
 #### OP-020
@@ -299,6 +325,7 @@ Also: [OP-018](#op-018), [OP-023](#op-023).
   - **PH-12:** the app's two roles
   - **PH-13:** `szop-ci-release`
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decisions 15 and 16; [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 17
+- **Issue:** [#78](https://github.com/luiki-dev/szop/issues/78)
 - **Status:** ⬜ Open
 
 #### OP-066
@@ -306,6 +333,7 @@ Also: [OP-018](#op-018), [OP-023](#op-023).
 **Revisit a local hook for workflow files.** actionlint and zizmor run only in CI ([ADR 0018](decisions/0018-ci-details.md), decision 6). PH-11 writes the next workflows; if slips caught by CI were a nuisance in PH-02, add a lint-staged entry for `.github/**/*.yml`, with both tools installed as their tool pages describe.
 
 - **Source:** [ADR 0018](decisions/0018-ci-details.md), decision 6
+- **Issue:** [#79](https://github.com/luiki-dev/szop/issues/79)
 - **Status:** ⬜ Open
 
 #### OP-069
@@ -313,6 +341,7 @@ Also: [OP-018](#op-018), [OP-023](#op-023).
 **Refer to the setup action with `$/`.** Once actionlint accepts GitHub's self-repository syntax (rhysd/actionlint#732), change `uses: ./.github/actions/setup` to `uses: $/.github/actions/setup`, re-enable zizmor's `self-repository` audit in `.github/zizmor.yml`, check that Dependabot and CodeQL still read the workflows, and consider moving the checkout into the setup action.
 
 - **Source:** [ADR 0018](decisions/0018-ci-details.md), decision 12
+- **Issue:** [#80](https://github.com/luiki-dev/szop/issues/80)
 - **Status:** ⬜ Open
 
 #### OP-070
@@ -320,6 +349,7 @@ Also: [OP-018](#op-018), [OP-023](#op-023).
 **Let zizmor report even when actionlint fails.** In the `workflows` job, zizmor's step runs only if actionlint's step passed, so a workflow with both kinds of problem shows only actionlint's first. The PH-02 gate proofs showed it: an untrusted `${{ github.event.pull_request.title }}` in a `run:` script was caught by actionlint, and zizmor never ran ([#15](https://github.com/luiki-dev/szop/pull/15)). Add `if: success() || failure()` to the zizmor step, so both tools report in one run while a cancelled run still stops; consider the same for `pnpm format:check` after `pnpm lint` in the `lint` job.
 
 - **Source:** PH-02 gate proofs ([#14](https://github.com/luiki-dev/szop/pull/14)); [ADR 0018](decisions/0018-ci-details.md), decision 5
+- **Issue:** [#81](https://github.com/luiki-dev/szop/issues/81)
 - **Status:** ⬜ Open
 
 ### PH-12 First deploy
@@ -332,6 +362,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 **Decide how `infra/demo` finds base's resources**: by name (data sources) or from base's outputs (`terraform_remote_state`).
 
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decision 6
+- **Issue:** [#82](https://github.com/luiki-dev/szop/issues/82)
 - **Status:** ⬜ Open
 
 #### OP-021
@@ -339,6 +370,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 **Confirm that `demo-up` can build the image in parallel with Terraform**; otherwise the jobs run one after the other.
 
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decision 11
+- **Issue:** [#83](https://github.com/luiki-dev/szop/issues/83)
 - **Status:** ⬜ Open
 
 #### OP-043
@@ -346,6 +378,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 **Make redeploys safe for the single-instance demo**, in the phase that builds the ECS service (PH-12); an ADR records it, refining [ADR 0008](decisions/0008-hosting.md), decisions 14 and 15. ECS starts the new task before stopping the old one by default, so a redeploy (which applies the new commit's `infra/demo`, [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7) migrates the database while the old task still serves traffic and runs its cleanup timer. **Settled in PH-04:** Drizzle's migrator skips a migration older than the last one applied, silently ([`drizzle.md`](development/tools/drizzle.md); [ADR 0020](decisions/0020-database-details.md), consequences); an unreachable database stops startup ([ADR 0020](decisions/0020-database-details.md), decision 11); and the health check stays one combined route, `/api/health`, which includes the database, acceptable with one instance (decision 11; its tuning is [OP-075](#op-075)). **Still open:** a minimum of 0% and a maximum of 100% healthy tasks, so the old task stops first; the app refusing to start, with a clear log message, if the database holds migrations its code does not know or one of its migrations is older than the last one applied (today the health route reports `"unknown"` for an unknown migration and the older one is skipped without a word), since switching branches can otherwise skip a migration or run old code on a newer schema; and the runbook explaining the message and how to switch branches: destroy, then spin up again.
 
 - **Source:** [Audit, MAJOR-9](audits/2026-09-29-design-sanity-check.md#major-9-the-single-instance-guarantee-doesnt-hold-during-a-redeploy-and-branch-redeploys-can-skip-migrations)
+- **Issue:** [#84](https://github.com/luiki-dev/szop/issues/84)
 - **Status:** ⬜ Open
 
 #### OP-072
@@ -353,6 +386,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 **Quieten the health route's request logs.** The load balancer calls `GET /api/health` every few seconds, which would fill CloudWatch with two lines per check; for example, the route's `logLevel` set to `warn`.
 
 - **Source:** [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope)
+- **Issue:** [#85](https://github.com/luiki-dev/szop/issues/85)
 - **Status:** ⬜ Open
 
 #### OP-074
@@ -360,6 +394,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 **Choose the database role the app uses on RDS.** The master user, or a role with only the privileges the app needs (no `CREATEDB`, no role management), created by a migration or by Terraform. Locally the app and the tests use the superuser `szop`, which the tests need for `CREATE DATABASE`.
 
 - **Source:** [PH-04 spec](superpowers/specs/2026-10-05-PH-04-database-design.md#out-of-scope)
+- **Issue:** [#86](https://github.com/luiki-dev/szop/issues/86)
 - **Status:** ⬜ Open
 
 #### OP-075
@@ -367,6 +402,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 **Tune the ECS health check and the deployment circuit breaker.** The health check's grace period (long enough for migrations at startup), its interval and thresholds, and the circuit breaker with rollback, so that a deploy whose tasks keep failing is marked failed. `/api/health` includes the database, so a database outage replaces running tasks; acceptable with one instance ([ADR 0020](decisions/0020-database-details.md), decision 11).
 
 - **Source:** [ADR 0020](decisions/0020-database-details.md), decision 11
+- **Issue:** [#87](https://github.com/luiki-dev/szop/issues/87)
 - **Status:** ⬜ Open
 
 #### OP-085
@@ -374,6 +410,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 **Bound the API's shutdown when connections stay open.** In PH-06a's browser check (Node 24.21, Fastify 5), `pnpm start` received SIGTERM, logged `shutting down` and closed its port at once, but the process took about 145 seconds to exit, held by one open connection from Chrome after its tab was closed. On ECS, a task that has not exited by its stop timeout (30 seconds by default) is killed, so a slow shutdown could cut off requests that are still running or end without the pool closing cleanly. Options to check: Fastify's `forceCloseConnections`, or a deadline after which `server.ts` exits anyway, and how either fits the graceful shutdown of [ADR 0019](decisions/0019-api-skeleton-details.md), decision 8.
 
 - **Source:** PH-06a, Task 7's browser check ([#23](https://github.com/luiki-dev/szop/pull/23))
+- **Issue:** [#88](https://github.com/luiki-dev/szop/issues/88)
 - **Status:** ⬜ Open
 
 ### PH-13 Releases
@@ -386,6 +423,7 @@ Also: [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023).
 **Decide how releases and changelogs work with merge commits, through a trial in a throwaway repository before the phase that sets up release-please.** release-please reads every commit reaching `main`: the task commits a merge commit brings in and the merge commit itself (the PR title), so a phase appears twice, and review-fix `fix:` commits appear as fixes of unreleased code. Also open: where the `Release-As: 1.0.0` footer goes (a merge commit's body is empty; for example an empty commit with the footer, merged through a PR), and that the merge title can still be edited in GitHub's merge dialog after the title check passed. Options to compare: (A) merge commits with GitHub's default message, which release-please ignores, so task commits drive the changelog; (B) the PR-title message with noisy types hidden by `changelog-sections`; (C) squash merges; (D) merge commits with release notes rewritten by a `BEGIN_COMMIT_OVERRIDE` block, if it works for merge commits. If the outcome changes the merge strategy (ADR 0009, decision 6), a new ADR records it.
 
 - **Source:** [phase walkthrough](development/phase-walkthrough.md#open-points-for-the-releases-phase); [Audit, MAJOR-10](audits/2026-09-29-design-sanity-check.md#major-10-release-please-doesnt-work-well-with-merge-commits)
+- **Issue:** [#89](https://github.com/luiki-dev/szop/issues/89)
 - **Status:** ⬜ Open
 
 #### OP-026
@@ -393,6 +431,7 @@ Also: [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023).
 **Confirm the image version tag format**: agreed direction `szop:0.4.0`, without the git tag's `v`.
 
 - **Source:** [phase walkthrough](development/phase-walkthrough.md#open-points-for-the-releases-phase)
+- **Issue:** [#90](https://github.com/luiki-dev/szop/issues/90)
 - **Status:** ⬜ Open
 
 #### OP-027
@@ -400,6 +439,7 @@ Also: [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023).
 **Confirm release-please's branch name** (`release-please--branches--main` by default) against the ruleset and the branch naming rule.
 
 - **Source:** [phase walkthrough](development/phase-walkthrough.md#open-points-for-the-releases-phase)
+- **Issue:** [#91](https://github.com/luiki-dev/szop/issues/91)
 - **Status:** ⬜ Open
 
 ## Stage 4: MVP
@@ -413,6 +453,7 @@ Roadmap entry: [PH-14](roadmap.md#ph-14-app-shell-and-design-system).
 **Build the UI foundation** in the first MVP phase, not the SPA skeleton ([ADR 0014](decisions/0014-roadmap.md), decision 9): Tailwind CSS v4 through `@tailwindcss/vite`; `shadcn init` with Base UI, and Base UI's `CSPProvider` with `disableStyleElements` plus the scrollbar CSS it then expects; the design tokens of [visual-design.md](architecture/visual-design.md#3-design-tokens) as CSS custom properties, light and dark, with every pair's contrast checked; Gabarito from `@fontsource-variable/gabarito`; Lucide; the favicon and the header logo, polished from the draft [`raccoon.svg`](architecture/visual-design/raccoon.svg); the app shell with the navigation of [section 5](architecture/visual-design.md#5-layout-and-navigation) (a drawer on phones, a sidebar from `lg`); `prettier-plugin-tailwindcss`, the Tailwind CSS IntelliSense extension in `.vscode/extensions.json`, and the tool pages for Tailwind CSS and shadcn/ui in `docs/development/tools/`.
 
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 7–17 and 19; [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 2 and 9–12
+- **Issue:** [#92](https://github.com/luiki-dev/szop/issues/92)
 - **Status:** ⬜ Open
 
 ### PH-15 Seed catalog, read-only
@@ -428,6 +469,7 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
   - **PH-15:** the seed data tests
   - the first phase whose migration changes an existing table (probably PH-17): the migration test with fixture data
 - **Source:** [Audit, C4 and C5](audits/2026-09-29-design-sanity-check.md#consider-improving)
+- **Issue:** [#93](https://github.com/luiki-dev/szop/issues/93)
 - **Status:** ⬜ Open
 
 #### OP-071
@@ -435,6 +477,7 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
 **Add the JSON error shape and a not-found handler.** The architecture's error shape (`{ "error": { "code", "message" } }`, [architecture, Errors](architecture/architecture.md#errors)) for validation errors, unknown routes and unexpected errors, with `setErrorHandler` and `setNotFoundHandler`, when the first route that can fail arrives; until then unknown routes return Fastify's default 404 body.
 
 - **Source:** [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope)
+- **Issue:** [#94](https://github.com/luiki-dev/szop/issues/94)
 - **Status:** ⬜ Open
 
 #### OP-076
@@ -442,6 +485,7 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
 **Check in CI that the migrations match the schema.** A step that runs `drizzle-kit generate` (or `check`) and fails if it would write a new migration, so a forgotten `pnpm db:generate` cannot be merged.
 
 - **Source:** [PH-04 spec](superpowers/specs/2026-10-05-PH-04-database-design.md#out-of-scope)
+- **Issue:** [#95](https://github.com/luiki-dev/szop/issues/95)
 - **Status:** ⬜ Open
 
 #### OP-079
@@ -449,6 +493,7 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
 **Serialize the API's responses through the shared schemas.** The health route sends its body as written; the first route that needs response serialization (Fastify's schema compiler with `fastify-type-provider-zod`, or an explicit parse) validates the response against the `packages/shared` schema, so the contract is enforced in the API, not only checked by a test.
 
 - **Source:** [PH-05 spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md#out-of-scope)
+- **Issue:** [#96](https://github.com/luiki-dev/szop/issues/96)
 - **Status:** ⬜ Open
 
 ### PH-16 Guest workspace and lists
@@ -465,6 +510,7 @@ Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
   - **PH-18:** the option for registration, and what an unverified user can do
   - **PH-19:** copying into the account's workspace with every reference remapped
 - **Source:** [Audit, MAJOR-2](audits/2026-09-29-design-sanity-check.md#major-2-moving-a-guest-into-an-account-doesnt-fit-how-better-auths-anonymous-plugin-links-users); [ADR 0012](decisions/0012-security-baseline.md), decision 6
+- **Issue:** [#97](https://github.com/luiki-dev/szop/issues/97)
 - **Status:** ⬜ Open
 
 #### OP-039
@@ -475,6 +521,7 @@ Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
   - **PH-16:** the session lifetime and its expiry test
   - **PH-31:** the 3-day tier, a returning guest, how guests learn how long their data lasts, and deleting one's own guest data
 - **Source:** [Audit, MAJOR-3](audits/2026-09-29-design-sanity-check.md#major-3-guest-data-lifetime-doesnt-match-how-guests-use-a-shopping-list)
+- **Issue:** [#98](https://github.com/luiki-dev/szop/issues/98)
 - **Status:** ⬜ Open
 
 #### OP-040
@@ -486,6 +533,7 @@ Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
   - **PH-17:** checking and unchecking with an explicit value
   - **PH-22:** the E2E journey with the network cut or slowed
 - **Source:** [Audit, MAJOR-6](audits/2026-09-29-design-sanity-check.md#major-6-flaky-connectivity-in-the-store-is-underspecified-and-a-library-default-contradicts-the-decision)
+- **Issue:** [#99](https://github.com/luiki-dev/szop/issues/99)
 - **Status:** ⬜ Open
 
 #### OP-041
@@ -504,6 +552,7 @@ Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
   - **PH-30:** the currency setting
   - **PH-32:** matching categories for [SHR-5](requirements/functional-requirements.md#shr-5)
 - **Source:** [Audit, MAJOR-7](audits/2026-09-29-design-sanity-check.md#major-7-domain-rules-and-the-data-model-leave-decisions-open-that-shape-the-schema)
+- **Issue:** [#100](https://github.com/luiki-dev/szop/issues/100)
 - **Status:** ⬜ Open
 
 #### OP-048
@@ -511,6 +560,7 @@ Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
 **Make a guest's first change survive the switch from seed data to a workspace ([ACC-1](requirements/functional-requirements.md#acc-1)).** Before the first change, the frontend holds the in-memory seed data's IDs; copying the seed into the new workspace gives new IDs, so the first change itself (for example adding the seed product "Milk" with its seed category) and any cached reference can hit 404. The phase delivering [ACC-1](requirements/functional-requirements.md#acc-1) compares: copies keep the seed IDs, which works if IDs need only be unique within a workspace (for example composite keys `(workspace_id, id)`, see OP-034 and OP-041); or the server maps seed IDs in that first request. Afterwards the frontend refetches everything. Only one anonymous session is created at a time, across tabs too (for example with the Web Locks API, `navigator.locks`), since two tabs changing something at once would otherwise each create one and orphan a workspace.
 
 - **Source:** [Audit, m18](audits/2026-09-29-design-sanity-check.md#requirements-and-architecture)
+- **Issue:** [#101](https://github.com/luiki-dev/szop/issues/101)
 - **Status:** ⬜ Open
 
 #### OP-054
@@ -518,6 +568,7 @@ Roadmap entry: [PH-16](roadmap.md#ph-16-guest-workspace-and-lists).
 **Build the access layer and the workspace keys.** **The first data phase:** `ownWorkspace` and `requireListAccess` (owner role only), repositories that require `workspaceId`, `workspace_id` with `UNIQUE (workspace_id, id)` on every workspace-owned table and composite foreign keys for every reference, the two-workspace test helper with "a reference into another workspace returns 404", and the schema test over PostgreSQL's catalog. Every later phase follows the same pattern for its tables and reference fields.
 
 - **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 3–6
+- **Issue:** [#102](https://github.com/luiki-dev/szop/issues/102)
 - **Status:** ⬜ Open
 
 ### PH-17 List items
@@ -533,6 +584,7 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
   - **PH-17:** removing an item
   - **PH-21:** "Uncheck all"
 - **Source:** [Audit, C3](audits/2026-09-29-design-sanity-check.md#consider-improving)
+- **Issue:** [#103](https://github.com/luiki-dev/szop/issues/103)
 - **Status:** ⬜ Open
 
 #### OP-080
@@ -540,6 +592,7 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 **Add `@testing-library/user-event`** with the first component test that clicks or types ([ADR 0007](decisions/0007-testing-strategy.md), decision 10 names it with `jest-dom`; nothing in PH-05 interacts).
 
 - **Source:** [PH-05 spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md#out-of-scope)
+- **Issue:** [#104](https://github.com/luiki-dev/szop/issues/104)
 - **Status:** ⬜ Open
 
 #### OP-081
@@ -547,6 +600,7 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 **Pick a drawer component that works under the CSP** for the haul's drawer ([visual-design.md](architecture/visual-design.md#the-list-and-the-haul)). shadcn/ui's Drawer is built on vaul; check whether vaul injects `<style>` elements, which the CSP forbids ([visual-design.md](architecture/visual-design.md#under-the-content-security-policy)). If it does, shape Base UI's Dialog as a bottom sheet, with dragging added on top. Either way the drawer is a modal dialog: focus moves in and is trapped, Esc and the dimmed list close it, and dragging is never the only way to open or close it.
 
 - **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 4 and 5; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#out-of-scope)
+- **Issue:** [#105](https://github.com/luiki-dev/szop/issues/105)
 - **Status:** ⬜ Open
 
 #### OP-082
@@ -554,6 +608,7 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 **Decide how "checked" is stored.** The haul orders items by when they were checked, so list items need a `checked_at` timestamp. Either it is the only field (`checked_at IS NOT NULL` means checked), or a `checked` flag stays next to it. One field cannot disagree with itself; a flag keeps the API's `{ "checked": true }` shape and simple queries. "Put all back" ([LST-5](requirements/functional-requirements.md#lst-5)) and duplicating a list must clear it either way.
 
 - **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#architecture-changes)
+- **Issue:** [#106](https://github.com/luiki-dev/szop/issues/106)
 - **Status:** ⬜ Open
 
 #### OP-083
@@ -561,6 +616,7 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 **Consider splitting PH-17.** The haul makes PH-17 bigger: besides adding, editing, checking and sorting items, it builds the haul, its chips, putting items back, the drawer (a new component, [OP-081](#op-081)) and the progress by item count. Its brainstorm checks the plan against the size rule of [ADR 0014](decisions/0014-roadmap.md), decision 6, and splits the drawer into a phase of its own if it is too big.
 
 - **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences
+- **Issue:** [#107](https://github.com/luiki-dev/szop/issues/107)
 - **Status:** ⬜ Open
 
 ### PH-18 Registration and login
@@ -573,6 +629,7 @@ Also: [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044).
 **Decide how E2E tests read emails**: a file "outbox" or a local mail catcher such as Mailpit. In the phase that delivers [ACC-2](requirements/functional-requirements.md#acc-2).
 
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decision 15
+- **Issue:** [#108](https://github.com/luiki-dev/szop/issues/108)
 - **Status:** ⬜ Open
 
 #### OP-055
@@ -585,6 +642,7 @@ Also: [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044).
   - **PH-29:** revoking other sessions, and no enumeration on reset
   - **PH-30:** the current password for deleting an account
 - **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 10–12 and 14
+- **Issue:** [#109](https://github.com/luiki-dev/szop/issues/109)
 - **Status:** ⬜ Open
 
 ### PH-19 Guest data on login
@@ -602,6 +660,7 @@ Also: [OP-055](#op-055).
 **Set the E2E server's rate limits explicitly.** About 14 journeys on two viewports, each as a new guest and some registering, all from one IP address, exceed the default 10 guests and 5 registrations per hour. [ADR 0007](decisions/0007-testing-strategy.md), decision 14 makes the limits generous only for the API tests. The phase delivering [LIM-4](requirements/functional-requirements.md#lim-4) gives the E2E server generous limits in its configuration too, and says so in `testing.md`.
 
 - **Source:** [Audit, m14](audits/2026-09-29-design-sanity-check.md#process-and-ci)
+- **Issue:** [#110](https://github.com/luiki-dev/szop/issues/110)
 - **Status:** ⬜ Open
 
 #### OP-047
@@ -615,6 +674,7 @@ Also: [OP-055](#op-055).
   - **PH-25:** duplicating, and what an archived list allows
   - **PH-28:** templates
 - **Source:** [Audit, m17](audits/2026-09-29-design-sanity-check.md#requirements-and-architecture)
+- **Issue:** [#111](https://github.com/luiki-dev/szop/issues/111)
 - **Status:** ⬜ Open
 
 ### PH-21 Shop in a store
@@ -640,6 +700,7 @@ Also: [OP-041](#op-041), [OP-047](#op-047).
   - **PH-23:** the atomic increase for [ITM-4](requirements/functional-requirements.md#itm-4)
   - **PH-33:** the design of live updates
 - **Source:** [Audit, m4](audits/2026-09-29-design-sanity-check.md#security-and-operations)
+- **Issue:** [#112](https://github.com/luiki-dev/szop/issues/112)
 - **Status:** ⬜ Open
 
 ### PH-24 Catalog browser
@@ -694,6 +755,7 @@ Also: [OP-041](#op-041).
 **Settle the sharing semantics that shape its tables ([SHR](requirements/functional-requirements.md#sharing-shr)).** The [SHR](requirements/functional-requirements.md#sharing-shr) brainstorm decides first whether access is bound to the link or to the user who redeemed it, which changes the tables, and then: whether regenerating a link ([UC-12](requirements/functional-requirements.md#uc-12-revoke-access)) also removes people who already joined through it; inviting an email that has no account; an accept step for [SHR-1](requirements/functional-requirements.md#shr-1), so nobody can push lists into someone's "Shared with me"; whether a shopper may run "Uncheck all"; what happens to shares when an anonymous owner's workspace expires ([ACC-7](requirements/functional-requirements.md#acc-7)). Directions to start from: redeeming a link counts as a guest's first change and creates the anonymous session, since `architecture.md`'s "a guest opening a share link already has an anonymous user" contradicts lazy creation and is corrected then; and a shopper editing a list they can see gets 403, while 404 stays for lists a user cannot see.
 
 - **Source:** [Audit, m19](audits/2026-09-29-design-sanity-check.md#requirements-and-architecture)
+- **Issue:** [#113](https://github.com/luiki-dev/szop/issues/113)
 - **Status:** ⬜ Open
 
 ### PH-33 Live updates
@@ -710,6 +772,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Optional phase: load testing** with k6 against the demo environment. The roadmap decides whether to include it.
 
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decision 32
+- **Issue:** [#114](https://github.com/luiki-dev/szop/issues/114)
 - **Status:** ⬜ Open
 
 #### OP-030
@@ -717,6 +780,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Optional phase: supply-chain provenance**: signed attestations, a software bill of materials (SBOM) and an OpenSSF Scorecard. The roadmap decides whether to include it.
 
 - **Source:** [ADR 0010](decisions/0010-ci-cd.md), decisions 19 and 24
+- **Issue:** [#115](https://github.com/luiki-dev/szop/issues/115)
 - **Status:** ⬜ Open
 
 #### OP-033
@@ -724,6 +788,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Before Szop ever runs always-on**, add what the demo deliberately does without: backups, a CDN with a web application firewall (WAF), alarms and error tracking, SES production access, a storage alarm, a privacy notice, and a lock (for example a PostgreSQL advisory lock) around migrations and scheduled jobs once more than one instance runs (OP-043). Only if an always-on deployment is ever planned. Also a shared store (for example PostgreSQL or Redis) for the rate-limit counters, which live in memory while one instance runs ([ADR 0012](decisions/0012-security-baseline.md), decision 15).
 
 - **Source:** [ADR 0008](decisions/0008-hosting.md), decision 32; [Audit, MAJOR-1](audits/2026-09-29-design-sanity-check.md#major-1-the-docs-describe-two-different-products-a-persistent-public-service-and-a-disposable-demo); [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 5; [ADR 0012](decisions/0012-security-baseline.md), decision 15
+- **Issue:** [#116](https://github.com/luiki-dev/szop/issues/116)
 - **Status:** ⬜ Open
 
 #### OP-060
@@ -731,6 +796,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Revisit Storybook** once the component set has grown (for example after the first few feature phases) or reviewing components' states in the running app gets tedious. If it comes in, it is a workshop and documentation; its test integration would need Vitest Browser Mode, which [ADR 0007](decisions/0007-testing-strategy.md), decision 9 left out.
 
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decision 20
+- **Issue:** [#117](https://github.com/luiki-dev/szop/issues/117)
 - **Status:** ⬜ Open
 
 #### OP-063
@@ -738,6 +804,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Lint the Markdown docs without reformatting them.** Prettier stays out of Markdown because it pads tables ([ADR 0016](decisions/0016-toolchain-details.md), decision 8). A linter such as markdownlint could check headings, lists and links without touching table layout.
 
 - **Source:** [ADR 0016](decisions/0016-toolchain-details.md), decision 8
+- **Issue:** [#118](https://github.com/luiki-dev/szop/issues/118)
 - **Status:** ⬜ Open
 
 #### OP-064
@@ -745,6 +812,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Move to TypeScript 7** (the native compiler) once typescript-eslint supports it; until then TypeScript is pinned to 6.0.
 
 - **Source:** [ADR 0016](decisions/0016-toolchain-details.md), decision 4
+- **Issue:** [#119](https://github.com/luiki-dev/szop/issues/119)
 - **Status:** ⬜ Open
 
 #### OP-077
@@ -752,6 +820,7 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 **Upgrade to Drizzle 1.0** once it is stable: its migrations folder has a new layout, and drizzle-kit drops the deprecated `@esbuild-kit` packages. Those packages pull in an old esbuild (0.18), which `pnpm audit` reports as the GitHub Security Advisory (GHSA) [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99) (moderate, esbuild 0.24.2 or older): it concerns esbuild's development server, which drizzle-kit never runs, and drizzle-kit is a development dependency, so it is not exploitable here. Dependabot will raise an alert and probably cannot fix it; whether to dismiss the alert or add a `pnpm.overrides` entry is the owner's decision, and the upgrade removes it.
 
 - **Source:** [ADR 0020](decisions/0020-database-details.md), decision 1
+- **Issue:** [#120](https://github.com/luiki-dev/szop/issues/120)
 - **Status:** ⬜ Open
 
 ## Closed

@@ -1,0 +1,28 @@
+name: Open point
+description: An open point. The issue is the source; docs/open-points.md mirrors it.
+title: "OP-"
+labels: [open-point]
+body:
+  - type: input
+    id: entry
+    attributes:
+      label: Register entry
+      description: Link to the entry in docs/open-points.md, once the docs have caught up; leave empty for a new open point
+  - type: textarea
+    id: what
+    attributes:
+      label: What is open
+      description: The open point's text, its bold lead first
+    validations:
+      required: true
+  - type: textarea
+    id: parts
+    attributes:
+      label: Parts
+      description: One checkbox per phase's part, or leave empty
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+    validations:
+      required: true

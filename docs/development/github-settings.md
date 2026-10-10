@@ -14,6 +14,9 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
 - [Ruleset for version tags](#ruleset-for-version-tags)
 - [Security](#security)
 - [Features](#features)
+- [Labels](#labels)
+- [Milestones](#milestones)
+- [Project](#project)
 - [Checking the settings](#checking-the-settings)
 
 ## Order of applying
@@ -25,7 +28,8 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
    2. CodeQL's default setup (see [Security](#security)), once the PR's checks have reported.
    3. The required status checks in the [ruleset for `main`](#ruleset-for-main).
    4. The *Require code scanning results* rule last, after CodeQL has succeeded on `main`. The bypass list is empty, so a rule that asks for results CodeQL cannot produce would block every merge.
-4. Check the result (see [Checking the settings](#checking-the-settings)).
+4. The labels, milestones and project, with [ADR 0024](../decisions/0024-github-project-tracking.md): see [Labels](#labels), [Milestones](#milestones) and [Project](#project).
+5. Check the result (see [Checking the settings](#checking-the-settings)).
 
 ## Visibility
 
@@ -119,7 +123,26 @@ For public repositories some of these may already be on.
 
 ## Features
 
-*Settings → General* → section **Features**. Nothing is changed. **Issues** stay available to visitors, but they are not used for planning: the [roadmap](../roadmap.md) is the tracker (ADR 0009, decision 14).
+*Settings → General* → section **Features**. Nothing is changed. **Issues** are used: since [ADR 0024](../decisions/0024-github-project-tracking.md) they track the phases, open points and decision work, next to the [roadmap](../roadmap.md), in a trial. **Projects** stays on; the project itself belongs to the owner's account (see [Project](#project)).
+
+## Labels
+
+*Issues → Labels.* Only `phase`, `open-point`, `spike`, `candidate`, `owner` and `adr`; GitHub's default labels are deleted. Dependabot creates its own labels when it opens its first PR. What each label means is in [project tracking](project-tracking.md#labels). ADR 0024, decision 6.
+
+## Milestones
+
+*Issues → Milestones.* One per roadmap stage, `Stage 1: Local foundations` to `Stage 5: Later`, and `Definition` for the decision work before PH-01; no due dates. ADR 0024, decision 4.
+
+## Project
+
+The [Szop project](https://github.com/users/luiki-dev/projects/3), owned by the `luiki-dev` account, not the repository.
+
+| Setting | Value | Why |
+|---|---|---|
+| **Visibility** | Public | The README and the roadmap link it. ADR 0024, decision 13. |
+| **Fields** | Status (six options), Order, Path, Spec, Plan, Started, Finished | See [project tracking](project-tracking.md#fields). ADR 0024, decisions 7 and 8. |
+| **Workflows** | On: Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr,owner`; auto-add sub-issues. Off: Auto-close issue, Pull request linked to issue, Pull request merged | See [project tracking](project-tracking.md#workflows). |
+| **Views** | Timeline, Backlog, Board, Open Points, Next Up | See [project tracking](project-tracking.md#views). |
 
 ## Checking the settings
 
@@ -142,6 +165,11 @@ gh api repos/luiki-dev/szop/actions/permissions/workflow
 gh api repos/luiki-dev/szop/actions/permissions/fork-pr-contributor-approval
 # CodeQL's default setup
 gh api repos/luiki-dev/szop/code-scanning/default-setup
+
+# Labels, milestones and the project
+gh label list --repo luiki-dev/szop
+gh api "repos/luiki-dev/szop/milestones?state=all"
+gh project view 3 --owner luiki-dev
 ```
 
 Expected:
@@ -152,3 +180,4 @@ Expected:
 - `default_workflow_permissions` is `read` and `can_approve_pull_request_reviews` is `false`.
 - `approval_policy` is `all_external_contributors`.
 - CodeQL's `state` is `configured`, with `actions` among its `languages` once the workflows are on `main` (until then, only the JavaScript and TypeScript entries; [OP-067](../open-points.md#op-067)).
+- Six labels; six milestones, with `Definition` and `Stage 1: Local foundations` closed; the project is public.

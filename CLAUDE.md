@@ -16,7 +16,7 @@ How to work on it:
 - **Record decisions in the project documentation.** Capture every decision about architecture, solution design, approaches and other crucial aspects of the implementation, along with the reasoning and the alternatives considered.
 - **Explain choices.** When proposing a technology or approach, say why and what the trade-offs are, since learning is a goal in itself.
 - **Keep phases small** ([ADR 0014](docs/decisions/0014-roadmap.md), decision 6). A phase brings at most one big concept new to the project, and its plan has about 3 to 8 tasks. When a brainstorm or plan grows past that, propose a split on the roadmap before planning or executing; the owner may also ask for one at any time.
-- **Track what is deferred in `docs/open-points.md`** ([ADR 0011](docs/decisions/0011-design-sanity-check-follow-ups.md)). Whenever something is left to a later topic or phase, add an entry with the next free `OP-` ID. Start every topic or phase brainstorm from its open points, and close or re-assign them before its PR is merged.
+- **Track what is deferred in `docs/open-points.md`** ([ADR 0011](docs/decisions/0011-design-sanity-check-follow-ups.md)). Whenever something is left to a later topic or phase, add an entry with the next free `OP-` ID. Start every topic or phase brainstorm from its open points, and close or re-assign them before its PR is merged. During the GitHub tracking trial, an open point is added, re-assigned or closed on its issue first, and the register mirrors it ([ADR 0024](docs/decisions/0024-github-project-tracking.md)).
 - **Follow the implementation process in [ADR 0004](docs/decisions/0004-implementation-process.md).** In short: foundation topics (development environment → testing strategy → hosting → git workflow → CI/CD → security baseline → visual design, the git workflow added by [ADR 0006](docs/decisions/0006-git-workflow-topic.md) and the security baseline by [ADR 0011](docs/decisions/0011-design-sanity-check-follow-ups.md)) settle direction only; then a living roadmap of phases, starting with a walking skeleton and continuing in vertical slices ([`docs/roadmap.md`](docs/roadmap.md), shaped by [ADR 0014](docs/decisions/0014-roadmap.md)); each phase gets its own brainstorm, with details decided there, and meets the shared definition of done. The ADR also defines which document owns which facts (requirements, living docs, ADRs, roadmap, specs and plans).
 
 ## Git workflow
@@ -42,6 +42,7 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 - `docs/glossary.md` — acronyms and terms used in the docs.
 - `docs/roadmap.md` — the phases in order, grouped into stages, each with its goal, what it delivers, the owner's steps and its status. Keep a phase's row updated when its work starts, when its PR opens and before it is merged, and the roadmap diagram in `README.md` with it, in the same commit ([ADR 0017](docs/decisions/0017-readme-roadmap-diagram.md)).
 - `docs/open-points.md` — the register of everything still undecided or undone, grouped by the roadmap's phases. Keep it updated whenever something is deferred or settled.
+- `docs/development/project-tracking.md` — how the phases, open points and decision work are tracked as GitHub issues on the Szop project: labels, milestones, fields, statuses, how items move. During the trial ([ADR 0024](docs/decisions/0024-github-project-tracking.md)) the issues are the source: change them first, then bring `roadmap.md`, the README's diagram and `open-points.md` in line before each PR.
 - `docs/development/git-workflow.md` — the day-to-day git workflow: branches, commits, PRs, review, merging and releases.
 - `docs/development/ci-cd.md` — how CI checks every PR: the workflows and jobs, `ci-ok` and the required checks, change detection, reading a failed run, Dependabot and the rules for every workflow. Keep it updated when a workflow changes.
 - `docs/development/testing.md` — how Szop is tested: the layers, running the suites, writing each kind of test, and the rules. Read it before writing or changing tests, and keep it updated when a test layer or tool changes.
@@ -56,11 +57,12 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 
 - Spell out niche acronyms on first use (for example "single-page application (SPA)") and add them to `docs/glossary.md`. Common ones like API, UI, HTTP, JSON and SQL need no expansion.
 - **Every written status or outcome gets its icon**, placed before the word, which stays (`✅ Accepted`, `⬜ Open`, `🎯 [MVP]`), so searching and screen readers still work. Legends list each icon with its word. No icons in headings: they change the heading's anchor. Use one vocabulary everywhere, and extend this list when a new status appears:
-  - ✅ done or in force: ADR accepted, open point closed, finding fixed, phase done
-  - ⬜ open or not started: open point open, phase not started
-  - 🚧 in progress: open point or phase being worked on
-  - ⏳ deferred or waiting: finding deferred to an open point
-  - ✖️ rejected or dropped: finding rejected, open point dropped without being done
+  - ✅ done or in force: ADR accepted, open point closed, finding fixed, phase done, `✅ Done` on the project
+  - ⬜ open or not started: open point open, phase not started, `⬜ Backlog` on the project
+  - 📌 to do next: `📌 Todo` on the project, an item picked to be done next
+  - 🚧 in progress: open point or phase being worked on, `🚧 In progress` on the project
+  - ⏳ deferred or waiting: finding deferred to an open point, `⏳ Blocked` on the project
+  - ✖️ rejected or dropped: finding rejected, open point dropped without being done, `✖️ Dropped` on the project
   - ❔ pending: not decided or triaged yet
   - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
   - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell
@@ -68,3 +70,8 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
   - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
 - **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/functional-requirements.md#acc-1)`, `[UC-3](../requirements/functional-requirements.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/functional-requirements.md#sharing-shr)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
 - Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.
+
+## Conversation tone
+
+- **Add a short joke to about every other reply in the conversation**: a dad joke, a quip or a bit of sarcasm, fitting the topic at hand (JavaScript framework churn, raccoons — *szop* is Polish for raccoon — shopping, the work itself). The owner asked for it and noticed it fading over long sessions.
+- **Keep it to a line, and keep it out of the way:** never in place of content, never in a decision, a question to the owner or bad news, and never in the docs, commits or PRs.
