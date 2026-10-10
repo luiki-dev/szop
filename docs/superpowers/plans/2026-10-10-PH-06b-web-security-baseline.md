@@ -559,12 +559,12 @@ EOF
 - Consumes: `testConfig()` (Task 1); `useWebRoot()` and `webRootFiles` from `src/test/web-root.ts` (existing).
 - Produces: `headers`, a `fastify-plugin` plugin exported from `security/headers.ts`, registered first in `buildApp`.
 
-- [ ] **Step 1: Add the packages**
+- [x] **Step 1: Add the packages**
 
 Run: `pnpm --filter @szop/api add @fastify/helmet@^13.1.2 fastify-plugin@^6.0.1`
 Expected: both in `apps/api/package.json`'s `dependencies`. If pnpm stops with `ERR_PNPM_IGNORED_BUILDS`, stop and report to the controller (Global Constraints).
 
-- [ ] **Step 2: Write the failing header tests**
+- [x] **Step 2: Write the failing header tests**
 
 Create `apps/api/src/security/headers.test.ts`:
 
@@ -613,12 +613,12 @@ describe("security headers", () => {
 });
 ```
 
-- [ ] **Step 3: Run them and see them fail**
+- [x] **Step 3: Run them and see them fail**
 
 Run: `pnpm test headers`
 Expected: FAIL: every case gets `undefined` for `content-security-policy`.
 
-- [ ] **Step 4: Write `security/headers.ts`**
+- [x] **Step 4: Write `security/headers.ts`**
 
 ```ts
 import helmet from "@fastify/helmet";
@@ -656,7 +656,7 @@ async function securityHeaders(app: FastifyInstance): Promise<void> {
 export const headers = fp(securityHeaders, { name: "szop-security-headers" });
 ```
 
-- [ ] **Step 5: Register it first in `buildApp`**
+- [x] **Step 5: Register it first in `buildApp`**
 
 In `apps/api/src/app.ts`, import `headers` from `"./security/headers.ts"`, and right after the `Fastify(…)` call, before `healthRoutes`:
 
@@ -666,12 +666,12 @@ In `apps/api/src/app.ts`, import `headers` from `"./security/headers.ts"`, and r
   app.register(headers);
 ```
 
-- [ ] **Step 6: Run the tests and see them pass**
+- [x] **Step 6: Run the tests and see them pass**
 
 Run: `pnpm test headers`
 Expected: PASS. If the asset or `/` case lacks the headers, stop and report: `@fastify/static` would be bypassing the hooks.
 
-- [ ] **Step 7: Keep the build inside the CSP**
+- [x] **Step 7: Keep the build inside the CSP**
 
 In `apps/web/vite.config.ts`, inside `defineConfig({ … })`, after `plugins: […],`:
 
@@ -686,12 +686,12 @@ In `apps/web/vite.config.ts`, inside `defineConfig({ … })`, after `plugins: [�
 Run before and after the change, and compare: `pnpm build && ls -R apps/web/dist`.
 Expected: the same files before and after (nothing is small enough to be inlined today), and the first-screen line unchanged.
 
-- [ ] **Step 8: Run every check**
+- [x] **Step 8: Run every check**
 
 Run: `pnpm test && pnpm typecheck && pnpm lint && pnpm format:check`
 Expected: all pass.
 
-- [ ] **Step 9: Tick this task's boxes and commit**
+- [x] **Step 9: Tick this task's boxes and commit**
 
 ```bash
 git add apps/api/package.json pnpm-lock.yaml apps/api/src/app.ts apps/api/src/security/headers.ts apps/api/src/security/headers.test.ts apps/web/vite.config.ts docs/superpowers/plans/2026-10-10-PH-06b-web-security-baseline.md

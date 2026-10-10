@@ -3,6 +3,7 @@ import type { Config } from "./config.ts";
 import type { Database } from "./db/database.ts";
 import { readJournal } from "./db/schema-version.ts";
 import { healthRoutes } from "./health/routes.ts";
+import { headers } from "./security/headers.ts";
 import { requestSerializer } from "./security/log.ts";
 import { webRoutes } from "./web/routes.ts";
 
@@ -31,6 +32,10 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
       serializers: { req: requestSerializer },
     },
   });
+
+  // The web baseline, before any route, so every response and request goes
+  // through it (ADR 0012, decisions 7 and 8).
+  app.register(headers);
 
   // Each feature's routes are a plugin; later ones get their services as
   // plugin options.
