@@ -375,7 +375,7 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 **Build the app-wide web baseline** with the first endpoints: `@fastify/helmet` with the CSP, HSTS and `Referrer-Policy: no-referrer`; the `Sec-Fetch-Site` or `Origin` check and JSON-only bodies on every unsafe method; `TRUSTED_PROXIES` in the configuration, and how Better Auth is handed the same client IP; the request log's URL serializer that strips tokens; the API test with a forged `X-Forwarded-For`, and the one-time manual check on the demo that the log shows the real address.
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-06b:** everything except the demo check ✅ Done ([`feat/ph-06b-web-security-baseline`](https://github.com/luiki-dev/szop/tree/feat/ph-06b-web-security-baseline))
+  - **PH-06b:** everything except the demo check ✅ Done ([#158](https://github.com/luiki-dev/szop/pull/158))
   - **PH-12:** the one-time check on the demo that the log shows the real address, and `TRUSTED_PROXIES` set to the load balancer's subnets or the VPC's range from Terraform
   - **PH-18:** Better Auth handed the same client address, its exact `trustedOrigins`, and the forged-header test extended to its limiter; Better Auth's `baseURL` set explicitly, so nothing relies on `request.host` or `request.protocol` ([ADR 0025](decisions/0025-web-security-baseline-details.md)); the end-to-end "token never in the log" test extended to Better Auth's token routes, since Fastify's own programming-error warnings can carry the raw URL ([ADR 0025](decisions/0025-web-security-baseline-details.md), decision 6)
   - **PH-20:** the forged-header test extended to `@fastify/rate-limit`
