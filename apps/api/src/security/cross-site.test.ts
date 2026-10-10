@@ -4,6 +4,7 @@ import { buildApp } from "../app.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
 
+const safe = ["GET", "HEAD", "OPTIONS"] as const;
 const unsafe = ["POST", "PUT", "PATCH", "DELETE"] as const;
 
 const refused = {
@@ -20,11 +21,12 @@ describe("the cross-site check", () => {
     await app.close();
   });
 
-  // No route changes data yet, so the test adds one, answering every method.
-  function start(): FastifyInstance {
-    app = buildApp({ config: testConfig(), db: database.db });
+  // No route changes data yet, so the test adds one, answering every method
+  // (Fastify answers HEAD for every GET route).
+  function start(config = testConfig()): FastifyInstance {
+    app = buildApp({ config, db: database.db });
     app.route({
-      method: ["GET", ...unsafe],
+      method: ["GET", "OPTIONS", ...unsafe],
       url: "/api/test-unsafe",
       handler: () => ({ ok: true }),
     });
@@ -32,7 +34,7 @@ describe("the cross-site check", () => {
   }
 
   async function send(
-    method: "GET" | (typeof unsafe)[number],
+    method: (typeof safe)[number] | (typeof unsafe)[number],
     headers: Record<string, string>,
   ): Promise<{ statusCode: number; body: unknown }> {
     const response = await start().inject({
@@ -40,7 +42,9 @@ describe("the cross-site check", () => {
       url: "/api/test-unsafe",
       headers,
     });
-    return { statusCode: response.statusCode, body: response.json() };
+    // HEAD answers without a body.
+    const body: unknown = method === "HEAD" ? undefined : response.json();
+    return { statusCode: response.statusCode, body };
   }
 
   describe.each(unsafe)("%s", (method) => {
@@ -91,8 +95,30 @@ describe("the cross-site check", () => {
     });
   });
 
-  it("does not check GET, which never changes anything", async () => {
-    const response = await send("GET", { "sec-fetch-site": "cross-site" });
-    expect(response.statusCode).toBe(200);
+  it.each(safe)(
+    "does not check %s, which never changes anything",
+    async (method) => {
+      const response = await send(method, { "sec-fetch-site": "cross-site" });
+      expect(response.statusCode).toBe(200);
+    },
+  );
+
+  it("compares the raw Host, not request.host", async () => {
+    // Behind a trusted proxy request.host reads X-Forwarded-Host, which the
+    // client controls.
+    const response = await start(
+      testConfig({ trustedProxies: ["10.0.0.0/16"] }),
+    ).inject({
+      method: "POST",
+      url: "/api/test-unsafe",
+      remoteAddress: "10.0.1.5",
+      headers: {
+        host: "evil.example",
+        "x-forwarded-host": "localhost:3000",
+        origin: "http://localhost:3000",
+      },
+    });
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toEqual(refused);
   });
 });

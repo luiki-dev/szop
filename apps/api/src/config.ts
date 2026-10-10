@@ -4,13 +4,18 @@ import { z } from "zod";
 
 const port = z.coerce.number().int().min(1).max(65535);
 
-// An IPv4 or IPv6 address, optionally with a CIDR prefix length.
+// An IPv4 or IPv6 address, optionally with a CIDR prefix length. A /0 prefix
+// is every address, "trust everything", so it is refused.
 function isAddressOrRange(entry: string): boolean {
   const [address = "", prefix, ...rest] = entry.split("/");
   const version = isIP(address);
   if (version === 0 || rest.length > 0) return false;
   if (prefix === undefined) return true;
-  return /^\d+$/.test(prefix) && Number(prefix) <= (version === 4 ? 32 : 128);
+  return (
+    /^\d+$/.test(prefix) &&
+    Number(prefix) >= 1 &&
+    Number(prefix) <= (version === 4 ? 32 : 128)
+  );
 }
 
 // The proxies whose X-Forwarded-For entries are believed, by address: "none",

@@ -1,9 +1,11 @@
 import type { FastifyRequest } from "fastify";
 
-// Hides every query value and keeps the names, so a token never reaches the
-// log, whatever its parameter is called. Tokens travel in the query string,
-// never in the path (ADR 0012, decision 9; ADR 0025, decision 6). A parameter
-// without "=" is hidden whole: the bare value could be a token.
+// Hides every query value and keeps the names, so no line that carries the
+// request logs a token, whatever its parameter is called. Tokens travel in the
+// query string, never in the path (ADR 0012, decision 9; ADR 0025, decision 6).
+// A parameter without "=" is hidden whole: the bare value could be a token.
+// Fastify's own warnings about programming errors, such as a reply sent twice,
+// put the raw URL in their message, which this never sees.
 export function redactUrl(url: string): string {
   const start = url.indexOf("?");
   if (start === -1) return url;

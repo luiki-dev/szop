@@ -18,19 +18,21 @@ describe("security headers", () => {
     await app.close();
   });
 
+  const crossSite = { "sec-fetch-site": "cross-site" };
+
   it.each([
-    ["a JSON response", "GET", "/api/health", 200],
-    ["the SPA's index.html", "GET", "/", 200],
-    ["a fingerprinted asset", "GET", "/assets/index-abc123.js", 200],
-    ["the JSON 404", "GET", "/api/nope", 404],
-    ["a refused cross-site request", "POST", "/api/health", 403],
-  ] as const)("are on %s", async (_, method, url, status) => {
+    ["a JSON response", "GET", "/api/health", 200, {}],
+    ["the SPA's index.html", "GET", "/", 200, {}],
+    ["a fingerprinted asset", "GET", "/assets/index-abc123.js", 200, {}],
+    ["the JSON 404", "GET", "/api/nope", 404, {}],
+    ["a refused cross-site request", "POST", "/api/health", 403, crossSite],
+  ] as const)("are on %s", async (_, method, url, status, headers) => {
     app = buildApp({
       config: testConfig({ webRoot: webRoot.path }),
       db: database.db,
     });
 
-    const response = await app.inject({ method, url });
+    const response = await app.inject({ method, url, headers });
 
     expect(response.statusCode).toBe(status);
     expect(response.headers["content-security-policy"]).toBe(csp);

@@ -124,6 +124,8 @@ describe("loadConfig", () => {
     "10.0.0.0/33",
     "10.0.0.0/x",
     "fd00::/129",
+    "0.0.0.0/0",
+    "::/0",
   ])("rejects TRUSTED_PROXIES=%j", (value) => {
     expect(errorFor({ ...valid, TRUSTED_PROXIES: value })).toMatch(
       /TRUSTED_PROXIES: (?!missing)/,
