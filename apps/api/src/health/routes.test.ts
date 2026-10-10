@@ -2,19 +2,11 @@ import { healthSchema } from "@szop/shared";
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
-import type { Config } from "../config.ts";
 import { createDatabase } from "../db/database.ts";
+import { testConfig } from "../test/config.ts";
 import { testDatabaseSettings, useTestDatabase } from "../test/database.ts";
 
-const config: Config = {
-  host: "127.0.0.1",
-  port: 3000,
-  logLevel: "silent",
-  // Not used: each test passes its own database to buildApp.
-  database: { host: "", port: 1, name: "", user: "", password: "" },
-  // Not served here: the SPA's serving is tested in web/routes.test.ts.
-  webRoot: "/nonexistent/szop-web-root",
-};
+const config = testConfig();
 
 describe("GET /api/health", () => {
   const database = useTestDatabase();

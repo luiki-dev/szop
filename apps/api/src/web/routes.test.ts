@@ -2,20 +2,9 @@ import { brotliDecompressSync, gunzipSync } from "node:zlib";
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
-import type { Config } from "../config.ts";
+import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
 import { useWebRoot, webRootFiles } from "../test/web-root.ts";
-
-function configFor(webRoot: string): Config {
-  return {
-    host: "127.0.0.1",
-    port: 3000,
-    logLevel: "silent",
-    // Not used: each test passes its own database to buildApp.
-    database: { host: "", port: 1, name: "", user: "", password: "" },
-    webRoot,
-  };
-}
 
 const immutable = "public, max-age=31536000, immutable";
 
@@ -29,7 +18,7 @@ describe("serving the SPA", () => {
   });
 
   function start(root = webRoot.path): FastifyInstance {
-    app = buildApp({ config: configFor(root), db: database.db });
+    app = buildApp({ config: testConfig({ webRoot: root }), db: database.db });
     return app;
   }
 
@@ -118,6 +107,7 @@ describe("serving the SPA", () => {
     expect(file.statusCode).toBe(404);
   });
 
+  // Same-origin, so POST passes the cross-site check and reaches routing.
   it.each([
     ["GET", "/api/nope"],
     ["GET", "/api"],
@@ -125,7 +115,11 @@ describe("serving the SPA", () => {
     ["GET", "/favicon.ico"],
     ["POST", "/some/route"],
   ] as const)("answers %s %s with Fastify's JSON 404", async (method, url) => {
-    const response = await start().inject({ method, url });
+    const response = await start().inject({
+      method,
+      url,
+      headers: { "sec-fetch-site": "same-origin" },
+    });
 
     expect(response.statusCode).toBe(404);
     expect(response.headers["content-type"]).toMatch(/^application\/json/);

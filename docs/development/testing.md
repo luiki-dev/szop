@@ -9,6 +9,9 @@ The guide grows as the layers arrive: end-to-end (E2E) journeys in [PH-07](../ro
 - [The layers today](#the-layers-today)
 - [Running the tests](#running-the-tests)
 - [Writing an API test](#writing-an-api-test)
+  - [Unsafe requests](#unsafe-requests)
+  - [Reading the log](#reading-the-log)
+  - [Testing a hook before its routes exist](#testing-a-hook-before-its-routes-exist)
   - [Testing the served SPA](#testing-the-served-spa)
 - [Writing a database test](#writing-a-database-test)
 - [Writing a component test](#writing-a-component-test)
@@ -54,15 +57,7 @@ pnpm test:coverage              # every project, plus a coverage report
 An API test sends an HTTP request to the app and checks the answer. The health test, `apps/api/src/health/routes.test.ts`, is the pattern every later route test follows:
 
 ```ts
-const config: Config = {
-  host: "127.0.0.1",
-  port: 3000,
-  logLevel: "silent",
-  // Not used: each test passes its own database to buildApp.
-  database: { host: "", port: 1, name: "", user: "", password: "" },
-  // Not served here: the SPA's serving is tested in web/routes.test.ts.
-  webRoot: "/nonexistent/szop-web-root",
-};
+const config = testConfig();
 
 describe("GET /api/health", () => {
   const database = useTestDatabase();
@@ -89,7 +84,7 @@ describe("GET /api/health", () => {
 
 Line by line:
 
-- **A literal `Config`.** The test builds the settings by hand instead of reading the environment, so it works the same on every machine. `logLevel: "silent"` keeps the log lines out of the test output. `database` is never used, since the test hands `buildApp` a database of its own, and `webRoot` names a folder that does not exist, since this test does not serve the SPA ([Testing the served SPA](#testing-the-served-spa) does).
+- **`testConfig()`** (`apps/api/src/test/config.ts`) gives a whole `Config` built by hand instead of read from the environment, so the test works the same on every machine. `logLevel: "silent"` keeps the log lines out of the test output. `database` is never used, since the test hands `buildApp` a database of its own; `webRoot` names a folder that does not exist, since this test does not serve the SPA ([Testing the served SPA](#testing-the-served-spa) does); and `trustedProxies` is empty, so no proxy is trusted. A test overrides only what it is about, such as `testConfig({ logLevel: "info" })` or `testConfig({ trustedProxies: ["10.0.0.0/16"] })`, so a new setting needs one change in `testConfig`, not one in every test.
 - **`useTestDatabase()`** gives the file a real, empty PostgreSQL database ([Writing a database test](#writing-a-database-test)).
 - **`buildApp({ config, db })` in each test.** Every test gets a fresh app, so nothing one test does can leak into the next; a test that needs another database, such as one that cannot be reached, passes that instead. `buildApp` is the same function `server.ts` calls in production.
 - **`app.close()` in `afterEach`.** It shuts the app down properly, so no test leaves anything running.
@@ -98,11 +93,62 @@ Line by line:
 
 Later phases pass more things in through the same `buildApp(deps)`: a recording email sender and a controllable clock ([ADR 0007](../decisions/0007-testing-strategy.md), decision 14). Only the fakes differ from production, never the wiring.
 
+### Unsafe requests
+
+Every POST, PUT, PATCH and DELETE must send `Sec-Fetch-Site: same-origin`, as a browser on Szop's own page does. Without it, the cross-site check answers 403 in its `onRequest` hook, before routing, validation or the handler, so the test would prove the check instead of the route ([ADR 0025](../decisions/0025-web-security-baseline-details.md), decision 1). For a route such as a later `POST /api/lists`:
+
+```ts
+const response = await app.inject({
+  method: "POST",
+  url: "/api/lists",
+  headers: { "sec-fetch-site": "same-origin" },
+  payload: { name: "Groceries" },
+});
+```
+
+A body sent as an object goes out as JSON with `Content-Type: application/json`; any other content type gets 415 (decision 3). The check itself is tested in `security/cross-site.test.ts`, the JSON rule in `security/json-only.test.ts`.
+
+### Reading the log
+
+A test that checks what the app logs passes a log of its own. `captureLog()` (`apps/api/src/test/log.ts`) returns a `stream` to hand to `buildApp` as `logStream`, and `lines()`, which returns every line written so far, parsed from JSON. The app must log at `info` or below, since `testConfig()` keeps it silent:
+
+```ts
+const log = captureLog();
+app = buildApp({
+  config: testConfig({ logLevel: "info" }),
+  db: database.db,
+  logStream: log.stream,
+});
+
+await app.inject({ method: "GET", url: "/reset-password?token=s3cret" });
+
+const incoming = log.lines().find((line) => line.msg === "incoming request");
+expect(incoming?.req).toMatchObject({ url: "/reset-password?token=[redacted]" });
+expect(JSON.stringify(log.lines())).not.toContain("s3cret");
+```
+
+Production leaves `logStream` out and logs to standard output ([ADR 0025](../decisions/0025-web-security-baseline-details.md), decision 9). `security/log.test.ts` and `security/client-ip.test.ts` read the log this way.
+
+### Testing a hook before its routes exist
+
+A hook that guards routes, such as the cross-site check, has to be tested before the first real route that needs it exists. The test adds a throwaway route right after `buildApp` and before the first `inject()`, when Fastify still accepts new routes:
+
+```ts
+app = buildApp({ config: testConfig(), db: database.db });
+app.route({
+  method: ["POST", "DELETE"],
+  url: "/api/test-body",
+  handler: () => ({ ok: true }),
+});
+```
+
+The route answers 200, so a test sees whether the hook let the request through. Name it `/api/test-…`, so it cannot be mistaken for a real one. Once a real route exists, a test of the hook may use it instead.
+
 ### Testing the served SPA
 
 `apps/api/src/web/routes.test.ts` checks how the API serves the built web app: the compressed copies, the cache headers and the fallback to `index.html` ([ADR 0023](../decisions/0023-production-build-and-serving-details.md), decisions 5, 6 and 8). It never depends on running `pnpm build`:
 
-- **`useWebRoot()`** (`apps/api/src/test/web-root.ts`), called at the top of the file, writes a miniature build into a fresh temporary folder before the tests and removes it afterwards: an `index.html` and an `assets/index-abc123.js`, each with a `.br` and a `.gz` copy made by `node:zlib`. The contents are exported as `webRootFiles`, so a test compares a body with the file it came from. Each test passes `webRoot.path` as the `webRoot` of its literal `Config`.
+- **`useWebRoot()`** (`apps/api/src/test/web-root.ts`), called at the top of the file, writes a miniature build into a fresh temporary folder before the tests and removes it afterwards: an `index.html` and an `assets/index-abc123.js`, each with a `.br` and a `.gz` copy made by `node:zlib`. The contents are exported as `webRootFiles`, so a test compares a body with the file it came from. Each test passes it to `buildApp` as `testConfig({ webRoot: webRoot.path })`.
 - **A compressed body** is checked by decompressing the raw bytes: `response.rawPayload` holds the body as sent, and `brotliDecompressSync(response.rawPayload)` (or `gunzipSync`) turns it back into the file. `response.body` would decode the bytes as text, which garbles compressed data.
 - **The request headers decide the encoding,** so each test sets `accept-encoding` as a browser would (`gzip, deflate, br, zstd`), as an older client would (`gzip`) or not at all, and checks `content-encoding`, `cache-control` and `vary`.
 

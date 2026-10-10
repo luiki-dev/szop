@@ -82,6 +82,11 @@ function firstScreenBudget(limitBytes: number): Plugin {
 
 export default defineConfig({
   plugins: [react(), precompress(), firstScreenBudget(200 * 1024)],
+  build: {
+    // Small assets become files, never data: URIs, which the CSP's
+    // default-src 'self' blocks (ADR 0025, decision 4).
+    assetsInlineLimit: 0,
+  },
   server: {
     proxy: {
       // The API's address from apps/api/.env.example. A constant, not a

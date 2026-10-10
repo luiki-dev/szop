@@ -90,29 +90,6 @@ Roadmap entry: [PH-06a](roadmap.md#ph-06a-production-build-and-serving).
 
 Roadmap entry: [PH-06b](roadmap.md#ph-06b-web-security-baseline).
 
-#### OP-053
-
-**Build the app-wide web baseline** with the first endpoints: `@fastify/helmet` with the CSP, HSTS and `Referrer-Policy: no-referrer`; the `Sec-Fetch-Site` or `Origin` check and JSON-only bodies on every unsafe method; `TRUSTED_PROXY_HOPS` in the configuration, and how Better Auth is handed the same client IP; the request log's URL serializer that strips tokens; the API test with a forged `X-Forwarded-For`, and the one-time manual check on the demo that the log shows the real address.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-06b:** everything except the demo check
-  - **PH-12:** the one-time check on the demo that the log shows the real address
-- **Moved from PH-06:** PH-06 was split; the web baseline is PH-06b.
-- **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13
-- **Issue:** [#26](https://github.com/luiki-dev/szop/issues/26)
-- **Status:** ⬜ Open
-
-#### OP-067
-
-**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
-
-- **Moved from PH-04:** it does not depend on that phase.
-- **Moved from PH-05:** it does not depend on that phase.
-- **Moved from PH-06:** it does not depend on that phase.
-- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
-- **Issue:** [#27](https://github.com/luiki-dev/szop/issues/27)
-- **Status:** ⬜ Open
-
 ### PH-07 First E2E journey
 
 Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
@@ -149,6 +126,18 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11
 - **Issue:** [#65](https://github.com/luiki-dev/szop/issues/65)
+- **Status:** ⬜ Open
+
+#### OP-067
+
+**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
+
+- **Moved from PH-04:** it does not depend on that phase.
+- **Moved from PH-05:** it does not depend on that phase.
+- **Moved from PH-06:** it does not depend on that phase.
+- **Moved from PH-06b:** it does not depend on that phase.
+- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
+- **Issue:** [#27](https://github.com/luiki-dev/szop/issues/27)
 - **Status:** ⬜ Open
 
 ### PH-08 Container image
@@ -355,7 +344,7 @@ Also: [OP-018](#op-018), [OP-023](#op-023).
 ### PH-12 First deploy
 
 Roadmap entry: [PH-12](roadmap.md#ph-12-first-deploy).\
-Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018), [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023), [OP-053](#op-053).
+Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018), [OP-019](#op-019), [OP-020](#op-020), [OP-023](#op-023).
 
 #### OP-014
 
@@ -379,6 +368,20 @@ Also: [OP-013](#op-013), [OP-016](#op-016), [OP-017](#op-017), [OP-018](#op-018)
 
 - **Source:** [Audit, MAJOR-9](audits/2026-09-29-design-sanity-check.md#major-9-the-single-instance-guarantee-doesnt-hold-during-a-redeploy-and-branch-redeploys-can-skip-migrations)
 - **Issue:** [#84](https://github.com/luiki-dev/szop/issues/84)
+- **Status:** ⬜ Open
+
+#### OP-053
+
+**Build the app-wide web baseline** with the first endpoints: `@fastify/helmet` with the CSP, HSTS and `Referrer-Policy: no-referrer`; the `Sec-Fetch-Site` or `Origin` check and JSON-only bodies on every unsafe method; `TRUSTED_PROXIES` in the configuration, and how Better Auth is handed the same client IP; the request log's URL serializer that strips tokens; the API test with a forged `X-Forwarded-For`, and the one-time manual check on the demo that the log shows the real address.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-06b:** everything except the demo check ✅ Done ([#158](https://github.com/luiki-dev/szop/pull/158))
+  - **PH-12:** the one-time check on the demo that the log shows the real address, and `TRUSTED_PROXIES` set to the load balancer's subnets or the VPC's range from Terraform
+  - **PH-18:** Better Auth handed the same client address, its exact `trustedOrigins`, and the forged-header test extended to its limiter; Better Auth's `baseURL` set explicitly, so nothing relies on `request.host` or `request.protocol` ([ADR 0025](decisions/0025-web-security-baseline-details.md)); the end-to-end "token never in the log" test extended to Better Auth's token routes, since Fastify's own programming-error warnings can carry the raw URL ([ADR 0025](decisions/0025-web-security-baseline-details.md), decision 6)
+  - **PH-20:** the forged-header test extended to `@fastify/rate-limit`
+- **Moved from PH-06:** PH-06 was split; the web baseline is PH-06b.
+- **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13; [ADR 0025](decisions/0025-web-security-baseline-details.md), decision 7
+- **Issue:** [#26](https://github.com/luiki-dev/szop/issues/26)
 - **Status:** ⬜ Open
 
 #### OP-072
@@ -474,7 +477,7 @@ Also: [OP-010](#op-010), [OP-019](#op-019).
 
 #### OP-071
 
-**Add the JSON error shape and a not-found handler.** The architecture's error shape (`{ "error": { "code", "message" } }`, [architecture, Errors](architecture/architecture.md#errors)) for validation errors, unknown routes and unexpected errors, with `setErrorHandler` and `setNotFoundHandler`, when the first route that can fail arrives; until then unknown routes return Fastify's default 404 body.
+**Add the JSON error shape and a not-found handler.** The architecture's error shape (`{ "error": { "code", "message" } }`, [architecture, Errors](architecture/architecture.md#errors)) for validation errors, unknown routes and unexpected errors, with `setErrorHandler` and `setNotFoundHandler`, when the first route that can fail arrives; until then unknown routes return Fastify's default 404 body. Until then, the 403 of the cross-site check and the 415 of the JSON rule use Fastify's shape too ([ADR 0025](decisions/0025-web-security-baseline-details.md)).
 
 - **Source:** [PH-03 spec](superpowers/specs/2026-10-05-PH-03-api-skeleton-design.md#out-of-scope)
 - **Issue:** [#94](https://github.com/luiki-dev/szop/issues/94)
@@ -622,7 +625,7 @@ Also: [OP-040](#op-040), [OP-041](#op-041), [OP-052](#op-052).
 ### PH-18 Registration and login
 
 Roadmap entry: [PH-18](roadmap.md#ph-18-registration-and-login).\
-Also: [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044).
+Also: [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044), [OP-053](#op-053).
 
 #### OP-028
 
@@ -637,11 +640,11 @@ Also: [OP-013](#op-013), [OP-038](#op-038), [OP-044](#op-044).
 **Apply the session, password and account rules** in the phases delivering [ACC-2](requirements/functional-requirements.md#acc-2), [ACC-3](requirements/functional-requirements.md#acc-3) and [ACC-6](requirements/functional-requirements.md#acc-6): the session cookie's name and `__Host-` prefix (or `__Secure-`, if Better Auth does not allow it), with the cookie cache off; revoking other sessions on a password change or reset; 15 to 128 characters and the Have I Been Pwned plugin, failing open; login, registration, reset and resend that never reveal whether an account exists, and the Better Auth hooks that need; the per-email limits, the limit on requests without a session and the daily email cap; the current password required for deleting an account.
 
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-18:** the session cookie, the password policy, and no enumeration on registration, login and resend
+  - **PH-18:** the session cookie, the password policy, and no enumeration on registration, login and resend; email links built by the app with the token in the query string, not Better Auth's path-token default ([ADR 0025](decisions/0025-web-security-baseline-details.md), decision 6); the SPA removes a used token from the address bar ([ADR 0012](decisions/0012-security-baseline.md), decision 9)
   - **PH-20:** the per-email limits, the limit on requests without a session and the daily email cap
-  - **PH-29:** revoking other sessions, and no enumeration on reset
+  - **PH-29:** revoking other sessions, and no enumeration on reset; the reset link built the same way
   - **PH-30:** the current password for deleting an account
-- **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 10–12 and 14
+- **Source:** [ADR 0012](decisions/0012-security-baseline.md), decisions 10–12 and 14; [ADR 0025](decisions/0025-web-security-baseline-details.md), decision 6
 - **Issue:** [#109](https://github.com/luiki-dev/szop/issues/109)
 - **Status:** ⬜ Open
 
@@ -653,7 +656,7 @@ Also: [OP-038](#op-038), [OP-041](#op-041).
 ### PH-20 Quotas and rate limits
 
 Roadmap entry: [PH-20](roadmap.md#ph-20-quotas-and-rate-limits).\
-Also: [OP-055](#op-055).
+Also: [OP-053](#op-053), [OP-055](#op-055).
 
 #### OP-046
 
