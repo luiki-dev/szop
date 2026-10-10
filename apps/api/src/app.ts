@@ -5,6 +5,7 @@ import { readJournal } from "./db/schema-version.ts";
 import { healthRoutes } from "./health/routes.ts";
 import { crossSite } from "./security/cross-site.ts";
 import { headers } from "./security/headers.ts";
+import { jsonOnly } from "./security/json-only.ts";
 import { requestSerializer } from "./security/log.ts";
 import { webRoutes } from "./web/routes.ts";
 
@@ -38,6 +39,7 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
   // through it (ADR 0012, decisions 7 and 8).
   app.register(headers);
   app.register(crossSite);
+  app.register(jsonOnly);
 
   // Each feature's routes are a plugin; later ones get their services as
   // plugin options.

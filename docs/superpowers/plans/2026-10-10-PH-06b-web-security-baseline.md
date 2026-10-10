@@ -928,7 +928,7 @@ EOF
 - Consumes: `testConfig()` (Task 1); `crossSite` (Task 4), which every request here passes with `Sec-Fetch-Site: same-origin`.
 - Produces: `jsonOnly`, a `fastify-plugin` plugin exported from `security/json-only.ts`, registered after `crossSite`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `apps/api/src/security/json-only.test.ts`:
 
@@ -1020,12 +1020,12 @@ describe("JSON-only bodies", () => {
 });
 ```
 
-- [ ] **Step 2: Run them and see them fail**
+- [x] **Step 2: Run them and see them fail**
 
 Run: `pnpm test json-only`
 Expected: FAIL: the `text/plain` case gets 200 (Fastify still parses it). The other cases pass already, since Fastify has no parser for forms; they pin the behavior.
 
-- [ ] **Step 3: Write `security/json-only.ts`**
+- [x] **Step 3: Write `security/json-only.ts`**
 
 ```ts
 import type { FastifyInstance } from "fastify";
@@ -1043,21 +1043,21 @@ function jsonOnlyBodies(app: FastifyInstance): void {
 export const jsonOnly = fp(jsonOnlyBodies, { name: "szop-json-only" });
 ```
 
-- [ ] **Step 4: Register it after `crossSite`**
+- [x] **Step 4: Register it after `crossSite`**
 
 In `apps/api/src/app.ts`, import `jsonOnly` from `"./security/json-only.ts"` and add `app.register(jsonOnly);` right after `app.register(crossSite);`.
 
-- [ ] **Step 5: Run the tests and see them pass**
+- [x] **Step 5: Run the tests and see them pass**
 
 Run: `pnpm test json-only`
 Expected: PASS.
 
-- [ ] **Step 6: Run every check**
+- [x] **Step 6: Run every check**
 
 Run: `pnpm test && pnpm typecheck && pnpm lint && pnpm format:check`
 Expected: all pass.
 
-- [ ] **Step 7: Tick this task's boxes and commit**
+- [x] **Step 7: Tick this task's boxes and commit**
 
 ```bash
 git add apps/api/src/app.ts apps/api/src/security/json-only.ts apps/api/src/security/json-only.test.ts docs/superpowers/plans/2026-10-10-PH-06b-web-security-baseline.md
