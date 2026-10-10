@@ -158,7 +158,7 @@ Five workflows are on and three are off, as read through the API. Their settings
 | Its spec or plan is committed | Spec, Plan set | Claude |
 | Its PR opens | The description says `Closes #<phase>` and `Closes #<OP>` for each open point it settles | Claude |
 | Its PR is merged | Those issues close; the workflow sets ✅ Done | Owner, by merging |
-| An open point's part is done | The part ticked with its PR; the issue re-parented to the next phase, still open | Claude |
+| An open point's part is done | The part ticked with its PR; the issue re-parented to the next phase, still open, and its Status set to ⬜ Backlog, or 📌 Todo if that phase is already picked: no workflow changes it on a re-parent | Claude |
 | An open point is added | An issue with the next free ID, under its phase, label `open-point` | Claude |
 | An open point moves | Re-parented; a History line added | Claude |
 | An item is dropped | Closed as not planned with the reason as a comment; Status → ✖️ Dropped | Claude |

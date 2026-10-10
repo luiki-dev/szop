@@ -144,7 +144,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-06b Web security baseline
 
 - **Goal:** every response carries the security headers and every unsafe request is checked, before the first endpoint that changes data exists. API tests prove the headers, the request checks, the client address behind a forged `X-Forwarded-For` and the tokens stripped from logged URLs.
-- **Delivers:** the web baseline of [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13: `@fastify/helmet` with the Content Security Policy (CSP), HTTP Strict Transport Security (HSTS) and `Referrer-Policy`; the `Sec-Fetch-Site` check and JSON-only bodies on unsafe methods; `TRUSTED_PROXY_HOPS`; tokens stripped from logged URLs.
+- **Delivers:** the web baseline of [ADR 0012](decisions/0012-security-baseline.md), decisions 7–9 and 13: `@fastify/helmet` with the Content Security Policy (CSP), HTTP Strict Transport Security (HSTS) and `Referrer-Policy`; the `Sec-Fetch-Site` check and JSON-only bodies on unsafe methods; `TRUSTED_PROXIES`; tokens stripped from logged URLs ([ADR 0025](decisions/0025-web-security-baseline-details.md)).
 - **Split from:** PH-06 Production build and web baseline, now retired (see [PH-06a](#ph-06a-production-build-and-serving)).
 - **Depends on:** —
 - **Owner steps:** none.

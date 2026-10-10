@@ -80,6 +80,8 @@ cp apps/api/.env.example apps/api/.env
 
 `apps/api/.env` is the API's local configuration. Every variable in it is required (the API refuses to start without one), and `.env.example` documents each. `.env` is git-ignored and never committed.
 
+**An `.env` copied before a setting existed lacks it.** `TRUSTED_PROXIES`, added in [PH-06b](../roadmap.md#ph-06b-web-security-baseline), is the latest: an existing `apps/api/.env` needs the line `TRUSTED_PROXIES=none` from `.env.example` (no proxy sits in front of the API on your machine). Without it, the API and the API tests, which read the database settings from the same file, stop with `Invalid configuration` and `TRUSTED_PROXIES: missing` ([ADR 0025](../decisions/0025-web-security-baseline-details.md), decision 7).
+
 `pnpm install` also sets up the git hooks. Pushing over HTTPS needs credentials: run `gh auth login` (GitHub CLI) or set up Git Credential Manager. If it stops with `ERR_PNPM_IGNORED_BUILDS`, a dependency wants to run an install script; see [pnpm](tools/pnpm.md) before allowing it.
 
 ## 7. Docker Desktop and the database

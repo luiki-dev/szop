@@ -195,6 +195,7 @@ API tests through `inject()`, as [testing.md](../../development/testing.md) desc
 ### Dependencies
 
 - **`apps/api` dependencies:** `@fastify/helmet`, version 13 (13.1.2 today, on helmet 8), and `fastify-plugin`, version 6 (6.0.1 today), which `@fastify/helmet` already depends on and the security plugins now import directly. Neither is expected to have install scripts; if pnpm stops on one, the evidence goes to the owner first ([ADR 0012](../../decisions/0012-security-baseline.md), decision 18).
+- **Settled while building:** `fastify-plugin` is declared as `^6.0.0`, which resolves to 6.0.0, already in the lockfile through `@fastify/helmet`: 6.0.1 was published on the day of the change, and pnpm 12's minimum release age would have needed a `minimumReleaseAgeExclude` exemption nobody had approved. Dependabot can bring 6.0.1 later ([ADR 0025](../../decisions/0025-web-security-baseline-details.md)).
 
 ## Documentation and records
 

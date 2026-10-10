@@ -1084,7 +1084,7 @@ EOF
 - Consumes: the finished code and what Tasks 1 to 5 reported (any difference from the probes, any lint fix, any `allowBuilds` entry).
 - Produces: the records the PR links to, and the state the PR is opened from.
 
-- [ ] **Step 1: Write ADR 0025**
+- [x] **Step 1: Write ADR 0025**
 
 `docs/decisions/0025-web-security-baseline-details.md`, in the shape of [ADR 0023](../../decisions/0023-production-build-and-serving-details.md) (read it first):
 
@@ -1094,7 +1094,7 @@ EOF
 - `## Decisions`: the spec's decisions 1 to 9, copied with their wording, links rewritten from `../../decisions/X` to `X` and from `../../` to `../`. Add what the implementation settled, as `<br>**Settled while building:** …` in the cells it touches: in decision 3, that a body without `Content-Type` and a form type with an empty body get 415 too; in decision 6, that Fastify's error line carries the request and is redacted by the same serializer; in decision 7, that an IPv4-mapped IPv6 address of the proxy matches its IPv4 range; anything Tasks 1 to 5 reported differently from the plan.
 - `## Consequences`: every developer's `apps/api/.env` needs `TRUSTED_PROXIES=none`; PH-12 sets `TRUSTED_PROXIES` to the VPC's range and checks the demo's log once; tests send `Sec-Fetch-Site: same-origin` on unsafe requests; a non-browser client that must send unsafe requests needs a decision of its own; PH-18 and PH-29 build their own email links; the 403 and 415 use Fastify's shape until [OP-071](../open-points.md#op-071); `@fastify/helmet` and `fastify-plugin` are new dependencies; the open points changed (step 7); the living docs.
 
-- [ ] **Step 2: Note the refinements in ADR 0012**
+- [x] **Step 2: Note the refinements in ADR 0012**
 
 In the three places `CLAUDE.md` asks for (ADR 0025's header is step 1). Read ADR 0012's status line and the four cells first, and add in the same style as the notes already there:
 
@@ -1104,7 +1104,7 @@ In the three places `CLAUDE.md` asks for (ADR 0025's header is step 1). Read ADR
 - Decision 9's cell: `<br>✏️ **Refined by [ADR 0025](0025-web-security-baseline-details.md), decision 6:** the log hides every query value and keeps the names; tokens travel in the query string, never in the path.`
 - Decision 13's cell: `<br>✏️ **Refined by [ADR 0025](0025-web-security-baseline-details.md), decision 7:** the proxy is trusted by its addresses (TRUSTED_PROXIES), not by a hop count, which Fastify 5.12 ignores because it cannot tell whether a connection really comes from the proxy.`
 
-- [ ] **Step 3: Update the architecture, the threat model and the stack overview**
+- [x] **Step 3: Update the architecture, the threat model and the stack overview**
 
 `docs/architecture/architecture.md` (read *Abuse protection*, *Web security* and the backend's *Code structure* first): the client-address line names `TRUSTED_PROXIES` and trust by address, "never `trustProxy: true` or a hop count"; *Web security*: a refused unsafe request gets 403, a body that is not JSON gets 415, the log hides every query value and keeps the names; *Code structure*: `security/` holds the four concerns, one file each.
 
@@ -1112,7 +1112,7 @@ In the three places `CLAUDE.md` asks for (ADR 0025's header is step 1). Read ADR
 
 `docs/architecture/stack-overview.md` (read its security section first; it already explains cookies, CSRF and helmet): add, for a learner, how fetch metadata works (`Sec-Fetch-Site`, set by the browser, a header page scripts cannot set) and why it beats a CSRF token on one origin; what a "simple request" is, and why that makes JSON-only bodies a defense; `X-Forwarded-For`, trusted proxies, and why trust follows addresses rather than hop counts (the Fastify 5.12 change, as a worked example); Fastify encapsulation and `fastify-plugin`, next to the existing paragraph on plugins; the CSP written out rather than helmet's defaults.
 
-- [ ] **Step 4: Update the guides**
+- [x] **Step 4: Update the guides**
 
 `docs/development/testing.md`, *Writing an API test*: unsafe requests send `Sec-Fetch-Site: same-origin`, or the cross-site check answers 403 before routing; `testConfig()` gives a whole `Config` and each test overrides what it is about; `captureLog()` and `logStream` read back what the app logged (with `logLevel: "info"`); a hook is tested before real routes exist by adding a throwaway route right after `buildApp` and before the first `inject()`. Keep `## Contents` in sync.
 
@@ -1120,11 +1120,11 @@ In the three places `CLAUDE.md` asks for (ADR 0025's header is step 1). Read ADR
 
 `docs/development/project-tracking.md`, *How items move*: the row "An open point's part is done" becomes `The part ticked with its PR; the issue re-parented to the next phase, still open, and its Status set to ⬜ Backlog, or 📌 Todo if that phase is already picked: no workflow changes it on a re-parent`.
 
-- [ ] **Step 5: Update the glossary**
+- [x] **Step 5: Update the glossary**
 
 `docs/glossary.md`, alphabetically, where missing (search first): **Fetch metadata** (request headers such as `Sec-Fetch-Site` that the browser sets to say where a request comes from; page scripts cannot set them, which makes them a defense against cross-site request forgery; see ADR 0025), **Simple request** (a request a browser sends to another site without asking first: GET, HEAD or POST with a form's content types; JSON-only bodies close it; see ADR 0025), **X-Forwarded-For** (a header each proxy appends the address it saw to; only entries added by trusted proxies are believed; see ADR 0025), if the glossary lists headers.
 
-- [ ] **Step 6: Change the issues on GitHub first**
+- [x] **Step 6: Change the issues on GitHub first**
 
 Read each issue's body before editing (`gh issue view N --repo luiki-dev/szop`), and keep its sections; write bodies through a file under `$CLAUDE_JOB_DIR/tmp` with `gh issue edit N --repo luiki-dev/szop --body-file <file>`. Links inside bodies follow [project tracking, links](../../development/project-tracking.md#links-inside-issue-bodies).
 
@@ -1136,7 +1136,7 @@ Read each issue's body before editing (`gh issue view N --repo luiki-dev/szop`),
 
 Then confirm with `gh issue view` on each, and `gh project item-list 3 --owner luiki-dev --format json --limit 300 -q '.items[] | select(.content.number==26 or .content.number==27) | {n:.content.number,status}'`.
 
-- [ ] **Step 7: Mirror them in the register and the roadmap**
+- [x] **Step 7: Mirror them in the register and the roadmap**
 
 `docs/open-points.md`, following *How it works* (read it first):
 
@@ -1147,7 +1147,7 @@ Then confirm with `gh issue view` on each, and `gh project item-list 3 --owner l
 
 `docs/roadmap.md`: PH-06b's *Delivers* says `` `TRUSTED_PROXIES` `` instead of `` `TRUSTED_PROXY_HOPS` `` and gains `([ADR 0025](decisions/0025-web-security-baseline-details.md))`; the row's Plan column links this plan (the plan commit set it; check). The row stays `🚧 In progress`; the README diagram stays at ◐ until the PR.
 
-- [ ] **Step 8: The end-to-end check in Chrome**
+- [x] **Step 8: The end-to-end check in Chrome**
 
 ```bash
 docker compose up -d --wait
@@ -1164,11 +1164,11 @@ Then, through the `chrome-devtools-win` MCP server (`~/.claude/CLAUDE.md`: Windo
 
 Then `pkill -f "node --env-file=.env src/server.ts"`. If the browser cannot be reached, check the headers with `curl -sI` instead, and say so.
 
-- [ ] **Step 9: Walk through the definition of done**
+- [x] **Step 9: Walk through the definition of done**
 
 Read `docs/development/definition-of-done.md` and note each item's state for the PR. Expected: tests ✅; domain rules ➖ N/A: no domain rules; CI after the push; the demo check ➖ N/A: no demo environment until PH-12, which does this phase's demo check (OP-053); `infra/base` ➖ N/A; the living docs and threat model ✅; open points ✅ (step 7); UI screenshots ➖ N/A: the UI does not change. Read every item; this list is a forecast, not the answer.
 
-- [ ] **Step 10: Links, final checks and a self-review of the diff**
+- [x] **Step 10: Links, final checks and a self-review of the diff**
 
 ```bash
 for f in docs/decisions/0025-web-security-baseline-details.md docs/decisions/0012-security-baseline.md docs/architecture/*.md docs/development/*.md docs/glossary.md docs/open-points.md docs/roadmap.md README.md; do
@@ -1181,7 +1181,7 @@ git diff main --stat
 
 Expected: `link check done` with no `BROKEN` line; the `grep` prints nothing (the old name survives only in ADR 0012, ADR 0025, specs, plans and audits); every check passes. Check by eye that each changed document's `## Contents` lists its `##` and `###` headings, and that requirements are linked, never plain IDs. Read the whole diff against the spec's *Goal and success criteria*, one by one, and list any gap.
 
-- [ ] **Step 11: Tick this task's boxes and commit**
+- [x] **Step 11: Tick this task's boxes and commit**
 
 ```bash
 git add docs
