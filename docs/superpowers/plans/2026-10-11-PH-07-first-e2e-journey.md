@@ -670,7 +670,7 @@ EOF
 - Consumes: `test` and `expect` from `e2e/support/test.ts` (Task 2).
 - Produces: `expectAccessible(page: Page, options?: { disableRules?: string[] }): Promise<void>`, exported from `e2e/support/accessibility.ts`. Every later journey calls it on every page it visits.
 
-- [ ] **Step 1: Call the check from the journey and see it fail**
+- [x] **Step 1: Call the check from the journey and see it fail**
 
 `e2e/tests/health.spec.ts` becomes:
 
@@ -698,7 +698,7 @@ pnpm --filter @szop/e2e exec playwright test tests/health.spec.ts
 
 Expected: FAIL, `Cannot find module …/support/accessibility.ts`.
 
-- [ ] **Step 2: Write the check**
+- [x] **Step 2: Write the check**
 
 `e2e/support/accessibility.ts`:
 
@@ -743,7 +743,7 @@ export async function expectAccessible(
 }
 ```
 
-- [ ] **Step 3: See the journey pass**
+- [x] **Step 3: See the journey pass**
 
 ```bash
 pnpm --filter @szop/e2e exec playwright test tests/health.spec.ts
@@ -751,7 +751,7 @@ pnpm --filter @szop/e2e exec playwright test tests/health.spec.ts
 
 Expected: `3 passed`. If axe reports a violation on the health page, stop and report it with the rule and the element: the fix belongs in `apps/web` and needs the controller's go-ahead, never a disabled rule.
 
-- [ ] **Step 4: See the check catch low contrast**
+- [x] **Step 4: See the check catch low contrast**
 
 Temporarily add, in the journey right before `await expectAccessible(page);`:
 
@@ -770,7 +770,7 @@ pnpm --filter @szop/e2e exec playwright test tests/health.spec.ts --project=desk
 
 Expected: FAIL with `axe found accessibility violations`, listing `[light] color-contrast: 1 element(s) — h1` and `[dark] color-contrast: 1 element(s) — h1`, and the report's steps `axe (light)` and `axe (dark)`. Note the output, then remove the four lines and run again: `1 passed`.
 
-- [ ] **Step 5: All checks, tick, commit**
+- [x] **Step 5: All checks, tick, commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:e2e
