@@ -23,7 +23,7 @@ Nothing is configured in a file of its own. `apps/web/src/test/setup.ts`, listed
 - **`getBy`, `findBy`, `queryBy`:** `getBy…` finds the element now and throws if it is missing. `findBy…` waits, up to a timeout, for it to appear: use it for anything that shows after a request. `queryBy…` returns `null` when the element is absent, so use it to check that something is not there.
 - **Assert what the user sees:** `expect(screen.getByRole("status")).toHaveTextContent("Checking the API…")`.
 - **Reading a failure:** the error prints the page's markup as it was and, for `getByRole`, the roles it found, which shows what the query missed.
-- **`@testing-library/user-event`,** which simulates typing and clicking, is not installed yet. Nothing in the app takes input; it joins with the first interaction ([OP-080](../../open-points.md#op-080)).
+- **`@testing-library/user-event`,** which simulates typing and clicking, is not installed yet. Nothing in the app takes input; it joins with the first interaction ([OP-080](https://github.com/luiki-dev/szop/issues/104)).
 
 How to write a component test: [Testing guide](../testing.md#writing-a-component-test).
 

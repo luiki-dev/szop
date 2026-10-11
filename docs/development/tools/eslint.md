@@ -18,7 +18,7 @@ ESLint reads the code without running it and reports bugs and bad patterns. With
 - `tsconfigRootDir: import.meta.dirname`: the folder the `tsconfig.json` lookup starts from, the folder of `eslint.config.js`. With several tsconfigs (the root's and each package's), typescript-eslint must be told where to look them up from; otherwise it starts from whatever folder the command was run in.
 - `eslint-config-prettier`, last: turns off the rules that would fight Prettier over formatting.
 
-There is no exception for the test runner any more: the `node:test` one, which let `test()` go unawaited, left with the hook's tests when they moved to Vitest in PH-03 ([OP-062](../../open-points.md#op-062)); Vitest's `it` needs none.
+There is no exception for the test runner any more: the `node:test` one, which let `test()` go unawaited, left with the hook's tests when they moved to Vitest in PH-03 ([OP-062](https://github.com/luiki-dev/szop/issues/189)); Vitest's `it` needs none.
 
 The React Hooks rules are the plugin's `reactHooks.configs.flat.recommended` preset, applied to `apps/web/**/*.{ts,tsx}` only ([ADR 0021](../../decisions/0021-spa-skeleton-details.md), decision 9).
 

@@ -5,7 +5,7 @@ TypeScript adds static types to JavaScript, and Szop writes all its code in it, 
 ## Why Szop uses it
 
 - **Strict TypeScript, ES modules (ESM) everywhere, one shared base config:** [ADR 0005](../../decisions/0005-development-environment.md), decisions 7 to 9. Types catch a whole class of mistakes before the code runs, and a shared base keeps every package equally strict. Neither tsx nor Node checks types, so checking is a separate `tsc --noEmit` script (`pnpm typecheck`).
-- **Version 6.0, not 7:** typescript-eslint, which the linting in [ESLint](eslint.md) relies on, supports TypeScript up to 6.0; 7 (the native port) is not supported yet. The version is pinned to `~6.0.3` until it is. See [ADR 0016](../../decisions/0016-toolchain-details.md) and [OP-064](../../open-points.md#op-064).
+- **Version 6.0, not 7:** typescript-eslint, which the linting in [ESLint](eslint.md) relies on, supports TypeScript up to 6.0; 7 (the native port) is not supported yet. The version is pinned to `~6.0.3` until it is. See [ADR 0016](../../decisions/0016-toolchain-details.md) and [OP-064](https://github.com/luiki-dev/szop/issues/119).
 
 ## Configuration
 

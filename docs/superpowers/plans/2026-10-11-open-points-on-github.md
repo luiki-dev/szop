@@ -462,7 +462,7 @@ EOF
 - Consumes: every open point and phase as an issue (Task 1); the register no longer at `docs/open-points.md` (Task 2).
 - Produces: living docs whose links into the register all point to GitHub, except the bare links Task 4 rewords (listed in step 3's output).
 
-- [ ] **Step 1: Write the rewrite script**
+- [x] **Step 1: Write the rewrite script**
 
 `$SP/rewrite_links.py`:
 
@@ -529,7 +529,7 @@ if unknown:
     sys.exit(1)
 ```
 
-- [ ] **Step 2: Dry run**
+- [x] **Step 2: Dry run**
 
 ```bash
 SP=/tmp/claude-1000/-home-lemekk-workspace-szop/cc894fc3-6c79-426b-9c2a-af47406592d5/scratchpad
@@ -538,7 +538,7 @@ python3 "$SP/rewrite_links.py" --dry-run
 
 Expected: about 250 links in about 40 files, the bare links left for Task 4 (`README.md`, `docs/development/definition-of-done.md`, `docs/development/project-tracking.md`, `docs/roadmap.md`), and no `UNKNOWN` section. If an anchor is unknown, look at it: a typo is fixed by hand in that file first; a section anchor (`#closed`, `#candidates`, `#how-it-works`) is reported to the controller, who rules on its target. Do not extend the script to guess.
 
-- [ ] **Step 3: Run it**
+- [x] **Step 3: Run it**
 
 ```bash
 python3 "$SP/rewrite_links.py"
@@ -548,7 +548,7 @@ grep -rnE '\]\([^)]*open-points\.md' README.md CLAUDE.md .github docs --include=
 
 Expected: the same counts as the dry run; the last command prints only the bare links left for Task 4. Check `README.md`'s link (path `docs/open-points.md`) is among them, not rewritten wrongly.
 
-- [ ] **Step 4: Check that every rewritten link opens the right issue**
+- [x] **Step 4: Check that every rewritten link opens the right issue**
 
 ```bash
 python3 - <<'EOF'
@@ -577,7 +577,7 @@ EOF
 
 Expected: `every link text matches its issue`, or a short list of links whose text is not an ID (for example "open points register" or "PH-07's group"); open each of those and confirm it by hand in the task's report.
 
-- [ ] **Step 5: Tick, commit**
+- [x] **Step 5: Tick, commit**
 
 ```bash
 pnpm lint && pnpm format:check

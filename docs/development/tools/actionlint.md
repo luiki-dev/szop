@@ -6,7 +6,7 @@ actionlint is a static checker for GitHub Actions workflow files: it finds synta
 
 - **Workflow correctness, checked before merging:** [ADR 0010](../../decisions/0010-ci-cd.md), decision 21. A typo in a workflow otherwise shows up only when the workflow runs, sometimes long after the merge. [zizmor](zizmor.md) checks the security side; actionlint checks that the workflow is right.
 - **Its own release binary, pinned and verified:** [ADR 0018](../../decisions/0018-ci-details.md), decision 5. The project's recommended install, `bash <(curl …/main/…)`, runs whatever is on its `main` branch that day. A Docker image would need the same manual updates plus a pull per run, and a third-party wrapper action adds another party's code for a single binary.
-- **In CI only, for now:** [ADR 0018](../../decisions/0018-ci-details.md), decision 6. A local hook is revisited in PH-11 ([OP-066](../../open-points.md#op-066)).
+- **In CI only, for now:** [ADR 0018](../../decisions/0018-ci-details.md), decision 6. A local hook is revisited in PH-11 ([OP-066](https://github.com/luiki-dev/szop/issues/79)).
 
 ## Configuration
 

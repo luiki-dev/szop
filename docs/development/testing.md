@@ -261,7 +261,7 @@ test("the health page shows the API and the database up", async ({ page }) => {
 });
 ```
 
-- **One file per use case,** named `uc-NN-short-name.spec.ts` (`uc-03-shop-in-store.spec.ts`), written in the phase that completes the use case ([ADR 0007](../decisions/0007-testing-strategy.md), decisions 4 and 17). `health.spec.ts` is the exception: no use case is complete yet, so the walking skeleton's journey is named after its page, and it goes when the page does ([OP-087](../open-points.md#op-087)).
+- **One file per use case,** named `uc-NN-short-name.spec.ts` (`uc-03-shop-in-store.spec.ts`), written in the phase that completes the use case ([ADR 0007](../decisions/0007-testing-strategy.md), decisions 4 and 17). `health.spec.ts` is the exception: no use case is complete yet, so the walking skeleton's journey is named after its page, and it goes when the page does ([OP-087](https://github.com/luiki-dev/szop/issues/160)).
 - **Import `test` and `expect` from `../support/test.ts`,** never from `@playwright/test`. The file's `test` is Playwright's with the [CSP guard](#the-csp-guard) added, so every journey is guarded without asking. A journey that imports from `@playwright/test` would run unguarded and still pass, so ESLint refuses it, with a message naming `support/test.ts`.
 - **Call `expectAccessible(page)` once the page has settled, on every page the journey visits.** "Settled" means the journey has waited for what the page shows, as the `toContainText` lines above do; scanning earlier would scan a half-drawn screen ([The accessibility check](#the-accessibility-check)).
 - **Each test isolates itself.** Playwright gives every test a fresh browser context, a new guest with no cookies and no storage, so tests run in parallel and the database is reset only once per run, when the server starts ([ADR 0007](../decisions/0007-testing-strategy.md), decision 15). A test that needs a user registers one with a unique email, and never depends on data another test left behind.
@@ -297,7 +297,7 @@ Error: the browser reported CSP violations
 
 **Zod and the SPA.** For the `eval` probe above, the SPA switches zod to its **jitless mode**: `apps/web/src/zod-config.ts` calls `z.config({ jitless: true })`, and `main.tsx` imports it before anything else, so it runs before `@szop/shared` builds its schemas. A new entry point that loads `@szop/shared` in the browser must import `zod-config.ts` first, or every journey fails.
 
-**What the guard does not cover.** It guards the test's own context: every page, popup, iframe and navigation in it. A context created with `browser.newContext()` is not covered, and neither are violations inside a web worker. A journey that needs a second user must use a guarded context, which does not exist yet ([OP-088](../open-points.md#op-088)).
+**What the guard does not cover.** It guards the test's own context: every page, popup, iframe and navigation in it. A context created with `browser.newContext()` is not covered, and neither are violations inside a web worker. A journey that needs a second user must use a guarded context, which does not exist yet ([OP-088](https://github.com/luiki-dev/szop/issues/162)).
 
 The guard has a test of its own, `csp-guard.spec.ts`, which adds a `<style>` element at run time and expects the guard to report exactly one `style-src-elem` violation. It fails if the guard stops listening or the built app loses its CSP, and it runs on all three projects, which also proves that Firefox reports the event.
 

@@ -350,8 +350,8 @@ Until a piece exists, its step is simply skipped, and the matching [definition-o
 
 ## Open points for the releases phase
 
-Details this walkthrough runs into that the ADRs leave open. They belong to [PH-13](../roadmap.md#ph-13-releases) and are tracked in the [open points register](../open-points.md#ph-13-releases):
+Details this walkthrough runs into that the ADRs leave open. They belong to [PH-13](../roadmap.md#ph-13-releases) and are tracked in the [open points register](https://github.com/luiki-dev/szop/issues/42):
 
-- **Review fixes and duplicate entries in the changelog** ([OP-025](../open-points.md#op-025)). A review fix such as commit 8 is a `fix(…)` commit, and release-please reads every commit that reaches `main`, including those a merge commit brings in, so `CHANGELOG.md` will probably list it as a bug fix of code that was never released. The task commits and the merge commit's PR title may also appear as separate features.
-- **Image version tag format** ([OP-026](../open-points.md#op-026)): agreed direction `szop:0.4.0`, without the `v` of the git tag.
-- **release-please's branch name** ([OP-027](../open-points.md#op-027)): `release-please--branches--main` by default, to check against the ruleset and branch naming.
+- **Review fixes and duplicate entries in the changelog** ([OP-025](https://github.com/luiki-dev/szop/issues/89)). A review fix such as commit 8 is a `fix(…)` commit, and release-please reads every commit that reaches `main`, including those a merge commit brings in, so `CHANGELOG.md` will probably list it as a bug fix of code that was never released. The task commits and the merge commit's PR title may also appear as separate features.
+- **Image version tag format** ([OP-026](https://github.com/luiki-dev/szop/issues/90)): agreed direction `szop:0.4.0`, without the `v` of the git tag.
+- **release-please's branch name** ([OP-027](https://github.com/luiki-dev/szop/issues/91)): `release-please--branches--main` by default, to check against the ruleset and branch naming.

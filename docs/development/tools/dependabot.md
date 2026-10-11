@@ -20,7 +20,7 @@ Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for 
 - `commit-message`: `prefix: build` and `prefix-development: build` with `include: scope` give `build(deps): …` for a dependency and `build(deps-dev): …` for a devDependency; for actions, `prefix: ci` gives `ci(deps): …`. Both scopes are on [commitlint](commitlint.md)'s list.
 - `ignore`: major updates of `@types/node` are skipped. Its major version follows Node's, which changes on purpose, together with `.nvmrc` and `engines`.
 
-Later phases add the `docker` and `terraform` ecosystems with their own ignore rules ([OP-068](../../open-points.md#op-068)).
+Later phases add the `docker` and `terraform` ecosystems with their own ignore rules ([OP-068](https://github.com/luiki-dev/szop/issues/70)).
 
 **Alerts and security updates** are not in this file: Dependabot alerts (a warning when a dependency has a known vulnerability) and Dependabot security updates (a PR fixing it, without waiting for Monday or the cooldown) are switched on in the repository settings, listed in [GitHub settings](../github-settings.md#security).
 

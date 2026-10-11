@@ -1,6 +1,6 @@
 # Project tracking
 
-How Szop's work is tracked on GitHub: the roadmap's phases, the open points and the decision work as issues, the stages as milestones, and all of them on the [Szop project](https://github.com/users/luiki-dev/projects/3). The decisions are in [ADR 0024](../decisions/0024-github-project-tracking.md). For now this is a **trial**: the issues are the source of truth, and the [roadmap](../roadmap.md) and the [open points register](../open-points.md) mirror them; [OP-086](../open-points.md#op-086) decides after PH-06b and PH-07 whether the register is dropped and the roadmap stays as a view updated from the issues.
+How Szop's work is tracked on GitHub: the roadmap's phases, the open points and the decision work as issues, the stages as milestones, and all of them on the [Szop project](https://github.com/users/luiki-dev/projects/3). The decisions are in [ADR 0024](../decisions/0024-github-project-tracking.md). For now this is a **trial**: the issues are the source of truth, and the [roadmap](../roadmap.md) and the [open points register](../open-points.md) mirror them; [OP-086](https://github.com/luiki-dev/szop/issues/156) decides after PH-06b and PH-07 whether the register is dropped and the roadmap stays as a view updated from the issues.
 
 ## Contents
 
@@ -172,7 +172,7 @@ Five workflows are on and three are off, as read through the API. Their settings
 
 ## The trial rule
 
-For PH-06b and PH-07, until [OP-086](../open-points.md#op-086) is settled:
+For PH-06b and PH-07, until [OP-086](https://github.com/luiki-dev/szop/issues/156) is settled:
 
 - **GitHub is the source of truth.** Changes are made on the issues first: bodies, statuses, parents, blocking links, new and closed issues. The docs follow.
 - **The docs are brought in line** before each PR and at the start of each phase: the phase entries and stage tables in `roadmap.md`, the README's diagram, and `open-points.md`, the owner's own edits in the project included. The PR lists the issue changes it mirrors, and its doc diff is where they are reviewed.
