@@ -101,7 +101,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-05 SPA skeleton](#ph-05-spa-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md) | [Plan](superpowers/plans/2026-10-07-PH-05-spa-skeleton.md) | [#22](https://github.com/luiki-dev/szop/pull/22) | [#33](https://github.com/luiki-dev/szop/issues/33) |
 | [PH-06a Production build and serving](#ph-06a-production-build-and-serving) | ✅ Done | [Spec](superpowers/specs/2026-10-08-PH-06a-production-build-and-serving-design.md) | [Plan](superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md) | [#23](https://github.com/luiki-dev/szop/pull/23) | [#35](https://github.com/luiki-dev/szop/issues/35) |
 | [PH-06b Web security baseline](#ph-06b-web-security-baseline) | ✅ Done | [Spec](superpowers/specs/2026-10-10-PH-06b-web-security-baseline-design.md) | [Plan](superpowers/plans/2026-10-10-PH-06b-web-security-baseline.md) | [#158](https://github.com/luiki-dev/szop/pull/158) | [#25](https://github.com/luiki-dev/szop/issues/25) |
-| [PH-07 First E2E journey](#ph-07-first-e2e-journey) | 🚧 In progress | [Spec](superpowers/specs/2026-10-11-PH-07-first-e2e-journey-design.md) | — | — | [#36](https://github.com/luiki-dev/szop/issues/36) |
+| [PH-07 First E2E journey](#ph-07-first-e2e-journey) | 🚧 In progress | [Spec](superpowers/specs/2026-10-11-PH-07-first-e2e-journey-design.md) | [Plan](superpowers/plans/2026-10-11-PH-07-first-e2e-journey.md) | — | [#36](https://github.com/luiki-dev/szop/issues/36) |
 | [PH-08 Container image](#ph-08-container-image) | ⬜ Not started | — | — | — | [#37](https://github.com/luiki-dev/szop/issues/37) |
 
 ### PH-03 API skeleton
