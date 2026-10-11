@@ -61,10 +61,11 @@ pnpm test:e2e                                    # builds the web app, then runs
 pnpm test:e2e --project=desktop-firefox          # one project: desktop-chromium, desktop-firefox or pixel
 pnpm test:e2e tests/health.spec.ts               # one file
 pnpm test:e2e --ui                               # Playwright's UI mode: pick tests, watch them run, step through a trace
-pnpm --filter @szop/e2e exec playwright show-report   # open the HTML report of the last run
+pnpm test:e2e:report                             # open the HTML report of the last run
 ```
 
 - `pnpm test:e2e` is `pnpm build && pnpm --filter @szop/e2e exec playwright test`, so it always tests the code as it is now, and extra arguments reach Playwright. It resets the database `szop_e2e` and starts the API on port 3100 by itself ([Playwright](tools/playwright.md#start-serverts)); a `pnpm start` or `pnpm dev` running at the same time is not touched, and two E2E runs at once would fight over port 3100.
+- `pnpm test:e2e:report` does not build or run any tests: it serves the report folder on a local port and prints the address (`Serving HTML report at http://localhost:9323`), opening the browser when it can. Under WSL, open the printed address in Windows' browser. It keeps running until you press Ctrl+C. With no argument it shows `e2e/playwright-report/`, the last local run; with a folder, such as a report downloaded from CI, it shows that one: `pnpm test:e2e:report ~/Downloads/playwright-report`. The script runs in the `e2e/` folder, so a relative path is resolved from there: give an absolute or `~` path. A folder without a report ends with `No report found at …`.
 - A passing run ends with a line such as `6 passed (8.0s)`. A test is shown once per project, as `[desktop-chromium] › tests/health.spec.ts › …`.
 - **In the editor,** the Playwright Test extension runs the same config, but it does not build first: run `pnpm build` before, or the run stops with "run `pnpm build` first".
 - If the run stops before any test with "is already used", something answers on port 3100, such as a forgotten `pnpm start`: stop it. If it hangs at the very start with no output on WSL, see [the setup guide](setup.md#the-end-to-end-journeys).
@@ -324,7 +325,7 @@ axe finds only part of the accessibility problems, so a passing check is a floor
 A failed test leaves three pieces of evidence, kept for each attempt:
 
 1. **The terminal.** The failure message with the failing line, as above. It is often enough.
-2. **The HTML report,** `e2e/playwright-report/`. Open it with `pnpm --filter @szop/e2e exec playwright show-report`. It lists every test per project, and a failed one shows its error, the steps it took (the `axe (light)` and `axe (dark)` steps are here), a screenshot and the trace.
+2. **The HTML report,** `e2e/playwright-report/`. Open it with `pnpm test:e2e:report`. It lists every test per project, and a failed one shows its error, the steps it took (the `axe (light)` and `axe (dark)` steps are here), a screenshot and the trace.
 3. **The trace,** Playwright's recording of the test. Open it from the report by clicking the trace, or open the file `e2e/test-results/<test>/trace.zip` with `pnpm --filter @szop/e2e exec playwright show-trace <file>`. The trace viewer shows a timeline of the test's actions; click one to see the page's DOM (the tree of elements) as it was before and after it, the network requests, the browser's console and the source line. Step to the action before the failure to see what the page looked like.
 
 **From CI,** the `e2e` job uploads the HTML report as the `playwright-report` artifact when it fails; see [CI/CD](ci-cd.md#reading-a-failed-e2e-run) for downloading it. A trace can also be dropped on <https://trace.playwright.dev>, which opens it in the browser without uploading it anywhere.

@@ -117,10 +117,10 @@ pnpm --filter @szop/e2e exec playwright install --with-deps chromium firefox
 ```bash
 pnpm test:e2e                                          # build, then every journey on the three projects
 pnpm test:e2e --project=desktop-firefox                # one project
-pnpm --filter @szop/e2e exec playwright show-report    # open the last run's HTML report
+pnpm test:e2e:report                                   # open the last run's HTML report
 ```
 
-`pnpm test:e2e` is `pnpm build && pnpm --filter @szop/e2e exec playwright test`, so extra arguments reach Playwright. More, including the UI mode and reading a failed run: [Testing guide](../testing.md#running-the-tests).
+`pnpm test:e2e` is `pnpm build && pnpm --filter @szop/e2e exec playwright test`, so extra arguments reach Playwright. `pnpm test:e2e:report` is `pnpm --filter @szop/e2e exec playwright show-report`: it does not build or run tests, it serves the report folder on a local port and prints the address (opening the browser when it can; under WSL, open the printed address in Windows' browser), until Ctrl+C. Given a folder, such as a report downloaded from CI, it shows that one; the script runs in `e2e/`, so a relative path is resolved from there, and an absolute or `~` path is the safe choice. More, including the UI mode and reading a failed run: [Testing guide](../testing.md#running-the-tests).
 
 ## Official documentation
 
