@@ -105,7 +105,7 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
   - **PH-15:** fast-check and StrykerJS
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
 - **Issue:** [#63](https://github.com/luiki-dev/szop/issues/63)
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress on [`test/ph-07-first-e2e-journey`](https://github.com/luiki-dev/szop/tree/test/ph-07-first-e2e-journey)
 
 #### OP-012
 
@@ -118,7 +118,7 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
   - **PH-07:** the first E2E journey on both viewports
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
 - **Issue:** [#64](https://github.com/luiki-dev/szop/issues/64)
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress on [`test/ph-07-first-e2e-journey`](https://github.com/luiki-dev/szop/tree/test/ph-07-first-e2e-journey)
 
 #### OP-057
 
@@ -126,19 +126,7 @@ Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11
 - **Issue:** [#65](https://github.com/luiki-dev/szop/issues/65)
-- **Status:** ⬜ Open
-
-#### OP-067
-
-**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
-
-- **Moved from PH-04:** it does not depend on that phase.
-- **Moved from PH-05:** it does not depend on that phase.
-- **Moved from PH-06:** it does not depend on that phase.
-- **Moved from PH-06b:** it does not depend on that phase.
-- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
-- **Issue:** [#27](https://github.com/luiki-dev/szop/issues/27)
-- **Status:** ⬜ Open
+- **Status:** 🚧 In progress on [`test/ph-07-first-e2e-journey`](https://github.com/luiki-dev/szop/tree/test/ph-07-first-e2e-journey)
 
 ### PH-08 Container image
 
@@ -186,6 +174,19 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 
 - **Source:** [Audit, MAJOR-13](audits/2026-09-29-design-sanity-check.md#major-13-roadmap-phases-and-the-definition-of-done-are-not-ready-for-the-roadmap-brainstorm); [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 3
 - **Issue:** [#69](https://github.com/luiki-dev/szop/issues/69)
+- **Status:** ⬜ Open
+
+#### OP-067
+
+**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
+
+- **Moved from PH-04:** it does not depend on that phase.
+- **Moved from PH-05:** it does not depend on that phase.
+- **Moved from PH-06:** it does not depend on that phase.
+- **Moved from PH-06b:** it does not depend on that phase.
+- **Moved from PH-07:** it does not depend on that phase.
+- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
+- **Issue:** [#27](https://github.com/luiki-dev/szop/issues/27)
 - **Status:** ⬜ Open
 
 #### OP-068
@@ -457,6 +458,14 @@ Roadmap entry: [PH-14](roadmap.md#ph-14-app-shell-and-design-system).
 
 - **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 7–17 and 19; [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 2 and 9–12
 - **Issue:** [#92](https://github.com/luiki-dev/szop/issues/92)
+- **Status:** ⬜ Open
+
+#### OP-087
+
+**Replace the health journey when the health page goes.** PH-07's first E2E journey, `e2e/tests/health.spec.ts`, checks the walking skeleton's health page, since no use case was complete yet. When the app shell replaces that page, the journey is deleted or rewritten for whatever shows the API's status then, and the CSP guard's own test (`csp-guard.spec.ts`) gets another page to open if `/` changes.
+
+- **Source:** [ADR 0026](decisions/0026-first-e2e-journey-details.md), decision 8
+- **Issue:** [#160](https://github.com/luiki-dev/szop/issues/160)
 - **Status:** ⬜ Open
 
 ### PH-15 Seed catalog, read-only
