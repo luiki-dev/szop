@@ -98,7 +98,37 @@ On 2026-10-11, read from GitHub and the repository:
 | OP-062, OP-065 | PR #18 | #31 (PH-03) |
 | OP-073 | ADR 0022 | #137 (ADR 0022) |
 
-- [ ] **Step 1: Write the generator**
+New issues:
+
+| Entry | Issue | Parent |
+|---|---|---|
+| OP-001 | #167 | #133 |
+| OP-002 | #168 | #134 |
+| OP-003 | #169 | #134 |
+| OP-004 | #170 | #134 |
+| OP-005 | #171 | #32 |
+| OP-006 | #172 | #32 |
+| OP-007 | #173 | #35 |
+| OP-008 | #174 | #29 |
+| OP-009 | #175 | #29 |
+| OP-011 | #176 | #32 |
+| OP-022 | #177 | #30 |
+| OP-024 | #178 | #131 |
+| OP-031 | #179 | #134 |
+| OP-034 | #180 | #132 |
+| OP-035 | #181 | #132 |
+| OP-036 | #182 | #132 |
+| OP-037 | #183 | #132 |
+| OP-042 | #184 | #132 |
+| OP-050 | #185 | #132 |
+| OP-058 | #186 | #35 |
+| OP-059 | #187 | #35 |
+| OP-061 | #188 | #134 |
+| OP-062 | #189 | #31 |
+| OP-065 | #190 | #31 |
+| OP-073 | #191 | #137 |
+
+- [x] **Step 1: Write the generator**
 
 `$SP/closed_issues.py`:
 
@@ -182,7 +212,7 @@ json.dump(out, open(sys.argv[1], "w", encoding="utf-8"), ensure_ascii=False, ind
 print(f"{len(out)} issues prepared")
 ```
 
-- [ ] **Step 2: Generate and inspect, creating nothing**
+- [x] **Step 2: Generate and inspect, creating nothing**
 
 ```bash
 SP=/tmp/claude-1000/-home-lemekk-workspace-szop/cc894fc3-6c79-426b-9c2a-af47406592d5/scratchpad
@@ -192,7 +222,7 @@ python3 -c "import json,sys; d=json.load(open(sys.argv[1])); [print(o['op'], len
 
 Expected: `25 issues prepared`, 25 titles of at most 80 characters, and OP-001's body and comment readable, with absolute links and no relative `](decisions/…)` left. If the parser exits on an unexpected line, extend it for that shape and run again; do not edit the register.
 
-- [ ] **Step 3: Check that none of the 25 exists yet**
+- [x] **Step 3: Check that none of the 25 exists yet**
 
 ```bash
 gh issue list --repo luiki-dev/szop --label open-point --state all --limit 200 --json title -q '.[].title' | grep -oE '^OP-[0-9]+' | sort > "$SP/existing.txt"
@@ -201,7 +231,7 @@ python3 -c "import json,sys; print('\n'.join(o['op'] for o in json.load(open(sys
 
 Expected: no output. Any ID printed already has an issue: stop and report it.
 
-- [ ] **Step 4: Create, close and parent the issues, in ID order**
+- [x] **Step 4: Create, close and parent the issues, in ID order**
 
 `$SP/create_closed.sh`:
 
@@ -229,7 +259,7 @@ bash "$SP/create_closed.sh"
 
 Expected: 25 lines `OP-NNN<TAB>issue<TAB>parent`. If a call fails midway, do not re-run the script: `created.tsv` lists what exists; finish the rest by hand for the remaining entries only, then continue.
 
-- [ ] **Step 5: Resolve the cross-references**
+- [x] **Step 5: Resolve the cross-references**
 
 `$SP/resolve_tokens.py`:
 
@@ -263,7 +293,7 @@ for line in open(f"{sp}/created.tsv"):
 python3 "$SP/resolve_tokens.py" "$SP"
 ```
 
-- [ ] **Step 6: Check the result**
+- [x] **Step 6: Check the result**
 
 ```bash
 # Every register entry has exactly one issue; closed exactly when the entry is in Closed (OP-067 is closed on GitHub, still under PH-08 in the register until Task 2).
@@ -290,7 +320,7 @@ gh project item-list 3 --owner luiki-dev --limit 400 --format json -q '.items[] 
 
 Expected: `88 issues, 28 closed: OK` (OP-012, OP-057, OP-067 and the 25 new; OP-086 closes with the PR), `token check done`, `parent check done` and `board check done` with nothing printed before them. Also read OP-002's new issue (`gh issue view <its number> --repo luiki-dev/szop`) and check that its cross-references read `OP-0NN (#N)`.
 
-- [ ] **Step 7: Record the numbers, tick, commit**
+- [x] **Step 7: Record the numbers, tick, commit**
 
 Append to this task, under the mapping table, a table `| Entry | Issue | Parent |` with the 25 rows of `created.tsv` (issues as `#N`). Tick this task's boxes, then:
 
