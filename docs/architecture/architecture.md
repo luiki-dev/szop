@@ -70,7 +70,7 @@ packages/shared   Zod schemas, types, domain rules
 e2e/              Playwright end-to-end tests (ADR 0007)
   start-server.ts   resets the E2E database, then starts the API on the built SPA
   support/          the CSP guard (test.ts) and the axe helper (accessibility.ts)
-  tests/            the journeys, one file per use case
+  tests/            the journeys, one file per use case (uc-NN-….spec.ts), plus the walking skeleton's health.spec.ts and the CSP guard's own test
 infra/            Terraform root modules (ADR 0008)
 ```
 

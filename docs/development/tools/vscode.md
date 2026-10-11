@@ -15,7 +15,7 @@ Visual Studio Code (VS Code) is the editor Szop is developed in. The repository 
 - `dbaeumer.vscode-eslint`: ESLint, showing its findings in the editor as you type.
 - `esbenp.prettier-vscode`: Prettier, formatting files from the editor.
 - `vitest.explorer`: Vitest, which lists the tests in the editor's Testing view and runs or debugs one from the arrow next to it, with a failure shown on the line that failed.
-- `ms-playwright.playwright`: Playwright Test, which lists the end-to-end tests in the Testing view and runs one from the arrow beside it; see [Playwright](playwright.md#editor).
+- `ms-playwright.playwright`: Playwright Test, which lists the end-to-end tests in the Testing view and runs one from the arrow beside it; ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 21); see [Playwright](playwright.md#editor).
 - `ms-azuretools.vscode-containers`: Container Tools, for working with Docker containers and images from the editor (Docker arrives with the database in PH-04 and the container image in PH-08).
 
 The WSL extension is installed on the Windows side and is not in the list: it is needed before the repository can be opened at all. Tailwind CSS IntelliSense arrives with the styling in PH-14.

@@ -770,6 +770,14 @@ Also: [OP-041](#op-041).
 - **Issue:** [#113](https://github.com/luiki-dev/szop/issues/113)
 - **Status:** ⬜ Open
 
+#### OP-088
+
+**Guard every browser context a journey creates.** The CSP guard of PH-07 wraps Playwright's `context` fixture only, so a context a journey creates with `browser.newContext()`, for example a second user in a sharing journey, runs unguarded and still passes. Before the first journey with a second context: a fixture or helper that creates guarded contexts, and perhaps an ESLint ban on `browser.newContext` in `e2e/tests/`. Web workers are not covered either; revisit if the app gets one.
+
+- **Source:** [ADR 0026](decisions/0026-first-e2e-journey-details.md), decision 7
+- **Issue:** [#162](https://github.com/luiki-dev/szop/issues/162)
+- **Status:** ⬜ Open
+
 ### PH-33 Live updates
 
 Roadmap entry: [PH-33](roadmap.md#ph-33-live-updates).\
