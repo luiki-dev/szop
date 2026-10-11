@@ -31,7 +31,7 @@ The guide grows as the layers arrive: property tests and mutation testing in [PH
 | Database tests | `apps/api/src/**/*.test.ts` that call `useTestDatabase()`, for example `test/database.test.ts` | Queries, migrations and cleanup work against the real PostgreSQL | `api` |
 | Component tests | `apps/web/src/**/*.test.tsx`, for example `health/health-page.test.tsx` | A page works as a user sees it: the real route table, hook, API client and schema run in a simulated browser ([jsdom](tools/vitest.md#jsdom)) with only the network faked by MSW | `web` |
 | Unit tests | next to the code, for example `apps/api/src/config.test.ts` | One function does its job for each kind of input, with no server involved | `api` |
-| E2E journeys | `e2e/tests/*.spec.ts`, for example `health.spec.ts` | A real browser drives the production build through the SPA, the API and PostgreSQL, on three projects (desktop Chromium, desktop Firefox and an emulated phone), checks every page with axe and fails on any Content Security Policy (CSP) violation | ➖ N/A: Playwright |
+| End-to-end (E2E) journeys | `e2e/tests/*.spec.ts`, for example `health.spec.ts` | A real browser drives the production build through the SPA, the API and PostgreSQL, on three projects (desktop Chromium, desktop Firefox and an emulated phone), checks every page with axe and fails on any Content Security Policy (CSP) violation | ➖ N/A: Playwright |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
 
 Layer still to come: **property tests and mutation testing** for the domain rules, in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).

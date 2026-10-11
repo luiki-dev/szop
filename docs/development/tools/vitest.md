@@ -28,7 +28,7 @@ Vitest is the test runner: it finds the test files, runs them and reports which 
 
 ### jsdom
 
-jsdom is a simulated browser written in JavaScript that runs inside Node: it provides `document`, elements and events, so a component can be rendered and queried without opening a browser. It is fast, and it is what Testing Library's documentation assumes ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 9). It has no layout engine, so nothing has a size or a position: a test cannot check that something is visible on screen or fits, only that it is in the document. The end-to-end (E2E) journeys, which will run in real browsers, cover that ([PH-07](../../roadmap.md#ph-07-first-e2e-journey)).
+jsdom is a simulated browser written in JavaScript that runs inside Node: it provides `document`, elements and events, so a component can be rendered and queried without opening a browser. It is fast, and it is what Testing Library's documentation assumes ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 9). It has no layout engine, so nothing has a size or a position: a test cannot check that something is visible on screen or fits, only that it is in the document. The end-to-end (E2E) journeys, which run in real browsers, cover that ([Playwright](playwright.md)).
 
 ## Everyday use
 
