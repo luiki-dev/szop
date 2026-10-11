@@ -41,7 +41,7 @@
 - Commit messages follow Conventional Commits with ADR 0009's nine types and the `scope-enum` list in `commitlint.config.js`: code here is `test(e2e)` or `ci`; docs are `docs(adr)`, `docs(plan)`, `docs(roadmap)` or no scope. **There is no `open-points` scope.** Read the list before committing. **Every commit ends with these trailers, naming the model that actually wrote the commit** (the implementer's own model, which the controller names in the dispatch prompt), not the orchestrating model:
   ```
   Co-Authored-By: Claude <the implementer's model> <noreply@anthropic.com>
-  Claude-Session: https://claude.ai/code/session_01KBAbavVi1nADpvFxUxRfyy
+  Claude-Session: https://claude.ai/code/session_01LkjpCbeRJmU2TE8M78vjPK
   ```
 - Docs follow `CLAUDE.md`'s writing style: niche acronyms spelled out on first use and added to the glossary; status icons before their word; requirements linked, never plain IDs; a `## Contents` section in documents over about 100 lines, kept in sync; an ADR that refines another is noted in three places.
 - **GitHub first** for open points and the phase's issue ([ADR 0024](../../decisions/0024-github-project-tracking.md)): change the issues, then mirror them in `open-points.md` and `roadmap.md` (Task 6).
@@ -69,7 +69,7 @@ Checked on 2026-10-11 with throwaway probes outside the repository, on `@playwri
 - **`webServer`** (read in `playwright/lib/runner/index.js`): `env` is merged as `{ ...process.env, ...webServer.env }`; the command runs in a shell, from the config's folder; `gracefulShutdown` runs `process.kill(-pid, signal)`, **signalling the whole process group**. With a parent that relays the signal, the child got `SIGTERM` twice. `server.ts` registers its handlers with `process.once`, so a second `SIGTERM` would kill the API mid-shutdown: `start-server.ts` therefore catches the signals without relaying them, and the child then got exactly one `SIGTERM`, after a passing run and after Ctrl+C (Playwright stops its server group with `SIGTERM` on Ctrl+C too).
 - **Before starting, Playwright requests the `webServer` URL** to see whether something already answers (`isURLAvailable`): a status from 200 to 403 counts as answering, and then, with `reuseExistingServer: false`, it stops with `<url> is already used`. Anything else on the port (a 404, say) does not count: Playwright starts `start-server.ts`, and the API fails to listen with `EADDRINUSE`, logs `startup failed` and exits 1.
 
-**Seen on this machine, not a design question:** late in the probes, every TCP connection to a *closed* port on `127.0.0.1` started to time out instead of being refused (WSL's mirrored networking; open ports such as PostgreSQL's 5432 still worked). Playwright's pre-start request then hangs and the run never starts. If `pnpm test:e2e` prints nothing and hangs at the start, check with `timeout 3 bash -c 'echo > /dev/tcp/127.0.0.1/3100'`: a timeout, rather than "Connection refused", is this problem. **Stop and tell the controller**; the owner restarts WSL (`wsl --shutdown` from Windows). Do not work around it in the code.
+**Seen on this machine, and fixed by the owner before execution:** during the probes, every TCP connection from WSL to a *closed* port on `127.0.0.1` timed out after about two minutes instead of being refused (WSL's mirrored networking; `127.0.0.2` and `::1` refused at once). Playwright's pre-start request and its readiness polls have no timeout of their own, so every run stalled. Rechecked on 2026-10-11 after the owner's fix: closed ports on `127.0.0.1` refuse at once. If `pnpm test:e2e` ever prints nothing and hangs at the start again, check with `timeout 3 bash -c 'echo > /dev/tcp/127.0.0.1/3100'`: a timeout, rather than "Connection refused", is this problem. **Stop and tell the controller**; do not work around it in the code.
 
 **Not checked; each is a step below that runs the thing first:**
 
@@ -457,7 +457,7 @@ a Pixel 7 against the production build. start-server.ts resets szop_e2e
 and starts the API on port 3100 with the E2E settings over apps/api/.env.
 
 Co-Authored-By: Claude <the implementer's model> <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01KBAbavVi1nADpvFxUxRfyy
+Claude-Session: https://claude.ai/code/session_01LkjpCbeRJmU2TE8M78vjPK
 EOF
 ```
 
@@ -654,7 +654,7 @@ A test proves the guard catches an injected style element, and ESLint
 keeps journeys from importing @playwright/test directly.
 
 Co-Authored-By: Claude <the implementer's model> <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01KBAbavVi1nADpvFxUxRfyy
+Claude-Session: https://claude.ai/code/session_01LkjpCbeRJmU2TE8M78vjPK
 EOF
 ```
 
@@ -788,7 +788,7 @@ schemes and fails with every violation of both. The health journey
 calls it.
 
 Co-Authored-By: Claude <the implementer's model> <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01KBAbavVi1nADpvFxUxRfyy
+Claude-Session: https://claude.ai/code/session_01LkjpCbeRJmU2TE8M78vjPK
 EOF
 ```
 
@@ -876,7 +876,7 @@ PostgreSQL from compose.yaml and keeps the HTML report for 14 days when
 it fails. ci-ok needs it.
 
 Co-Authored-By: Claude <the implementer's model> <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01KBAbavVi1nADpvFxUxRfyy
+Claude-Session: https://claude.ai/code/session_01LkjpCbeRJmU2TE8M78vjPK
 EOF
 ```
 
@@ -913,7 +913,7 @@ Read each document before changing it, follow its existing structure and tone, a
 
 - [ ] **Step 3: Setup, CI/CD, stack overview, architecture, glossary, editor**
 
-- `docs/development/setup.md`: a step (where the test tooling is, or after PostgreSQL) installing the browsers once: `pnpm --filter @szop/e2e exec playwright install --with-deps chromium firefox`, which asks for the `sudo` password for the system libraries; the check `pnpm test:e2e`; the Playwright Test extension in the extensions list; the "comes later" line for Playwright removed; a troubleshooting note: if `pnpm test:e2e` hangs at the start with no output, test `timeout 3 bash -c 'echo > /dev/tcp/127.0.0.1/3100'`, and if it times out instead of being refused, restart WSL with `wsl --shutdown` from Windows.
+- `docs/development/setup.md`: a step (where the test tooling is, or after PostgreSQL) installing the browsers once: `pnpm --filter @szop/e2e exec playwright install --with-deps chromium firefox`, which asks for the `sudo` password for the system libraries; the check `pnpm test:e2e`; the Playwright Test extension in the extensions list; the "comes later" line for Playwright removed; a troubleshooting note: if `pnpm test:e2e` hangs at the start with no output, test `timeout 3 bash -c 'echo > /dev/tcp/127.0.0.1/3100'`, and if it times out instead of being refused, WSL's mirrored networking is dropping connections to closed ports on `127.0.0.1`; describe the fix the owner applied (the controller gives its wording in the dispatch).
 - `docs/development/ci-cd.md`: the `e2e` job in the jobs list and in `ci-ok`'s needs; why the browsers are not cached; how to read a failed run: download the `playwright-report` artifact from the run's summary page, unzip it, `pnpm --filter @szop/e2e exec playwright show-report <folder>`, or drop a trace's zip on `trace.playwright.dev`; *flaky* versus *failed* in the annotations.
 - `docs/architecture/stack-overview.md`: what an E2E test is and where it sits in the testing trophy; how Playwright drives a browser (a separate browser process, controlled over a protocol, each test in a fresh context); browser projects and device emulation; what axe checks and what it cannot (it finds about a third to a half of accessibility problems; keyboard and screen-reader use still need people); how the CSP guard listens for the browser's own violation events.
 - `docs/architecture/architecture.md`: the `e2e/` line of the layout gains its parts (`start-server.ts`, `support/`, `tests/`); the *Under the CSP* line keeps its wording, as it already names the guard.
@@ -937,7 +937,7 @@ git commit -F - <<'EOF'
 docs: document the E2E journeys, Playwright and the e2e job
 
 Co-Authored-By: Claude <the implementer's model> <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01KBAbavVi1nADpvFxUxRfyy
+Claude-Session: https://claude.ai/code/session_01LkjpCbeRJmU2TE8M78vjPK
 EOF
 ```
 
@@ -1017,7 +1017,7 @@ git commit -F - <<'EOF'
 docs(adr): add ADR 0026 and update the records for PH-07
 
 Co-Authored-By: Claude <the implementer's model> <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01KBAbavVi1nADpvFxUxRfyy
+Claude-Session: https://claude.ai/code/session_01LkjpCbeRJmU2TE8M78vjPK
 EOF
 ```
 
