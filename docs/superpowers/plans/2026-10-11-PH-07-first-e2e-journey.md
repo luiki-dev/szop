@@ -954,7 +954,7 @@ EOF
 - Consumes: everything Tasks 1–5 built and reported (any difference from the plan, any lint fix, any `allowBuilds` entry).
 - Produces: the records the PR links to, and the state the PR is opened from.
 
-- [ ] **Step 1: Write ADR 0026**
+- [x] **Step 1: Write ADR 0026**
 
 `docs/decisions/0026-first-e2e-journey-details.md`, in the shape of [ADR 0025](../../decisions/0025-web-security-baseline-details.md) (read it first):
 
@@ -964,7 +964,7 @@ EOF
 - `## Decisions`: the spec's decisions 1 to 9, copied with their wording, links rewritten from `../../decisions/X` to `X` and from `../../` to `../`. Add what planning and building settled, as `<br>**Settled while building:** …` in the cells it touches: in decision 6, that Playwright signals the whole process group, so the script waits for the API and never relays a signal; in decision 7, that Firefox reports `style-src-elem` like Chromium; anything Tasks 1 to 5 reported differently from the plan.
 - `## Consequences`: every developer installs the browsers once (`--with-deps`, `sudo`), in the setup guide; every journey imports from `support/test.ts` and calls `expectAccessible` on every page; each phase completing a use case adds its `uc-NN` journey (ADR 0007, decision 4); `health.spec.ts` goes with the health page ([OP-087](../open-points.md#op-087)); the `e2e` job adds a few minutes to every code PR, measured in the PR; the open points changed (step 4); the living docs (Task 5).
 
-- [ ] **Step 2: Note the refinements in ADR 0007 and ADR 0010**
+- [x] **Step 2: Note the refinements in ADR 0007 and ADR 0010**
 
 In the three places `CLAUDE.md` asks for (ADR 0026's header is step 1). Read each status line and cell first, and add in the same style as the notes already there:
 
@@ -973,7 +973,7 @@ In the three places `CLAUDE.md` asks for (ADR 0026's header is step 1). Read eac
 - ADR 0010's status line: append `; decision 9 refined by [ADR 0026](0026-first-e2e-journey-details.md) (the Playwright browsers are installed every run, not cached)`.
 - ADR 0010, decision 9's cell, at the bottom: `<br>✏️ **Refined by [ADR 0026](0026-first-e2e-journey-details.md), decision 5:** the Playwright browsers are installed every run, not cached: restoring the cache takes about as long as the download, and their system libraries come from apt anyway.`
 
-- [ ] **Step 3: Change the issues on GitHub first**
+- [x] **Step 3: Change the issues on GitHub first**
 
 Read each issue's body before editing (`gh issue view N --repo luiki-dev/szop`), and keep its sections; write bodies through a file under `$CLAUDE_JOB_DIR/tmp` with `gh issue edit N --repo luiki-dev/szop --body-file <file>`. Links inside bodies follow [project tracking, links](../../development/project-tracking.md#links-inside-issue-bodies).
 
@@ -983,7 +983,7 @@ Read each issue's body before editing (`gh issue view N --repo luiki-dev/szop`),
 
 Then confirm with `gh issue view` on each, and `gh project item-list 3 --owner luiki-dev --format json --limit 300 -q '.items[] | select(.content.number==63) | {n:.content.number,status}'`.
 
-- [ ] **Step 4: Mirror them in the register and the roadmap**
+- [x] **Step 4: Mirror them in the register and the roadmap**
 
 `docs/open-points.md`, following *How it works* (read it first):
 
@@ -993,11 +993,11 @@ Then confirm with `gh issue view` on each, and `gh project item-list 3 --owner l
 
 `docs/roadmap.md`: PH-07's *Delivers* gains `([ADR 0026](decisions/0026-first-e2e-journey-details.md))`; the row's Plan column links this plan (the plan commit set it; check). The row stays `🚧 In progress`; the README diagram stays at ◐ until the PR.
 
-- [ ] **Step 5: Walk through the definition of done**
+- [x] **Step 5: Walk through the definition of done**
 
 Read `docs/development/definition-of-done.md` and note each item's state for the PR. Expected: tests ✅ (a new layer, its first journey); domain rules ➖ N/A: no domain rules; CI after the PR opens; the demo check ➖ N/A: no demo environment until PH-12; `infra/base` ➖ N/A; the living docs ✅ (Task 5); the threat model ➖ N/A: no new actor or entry point (check: `e2e/` is a test package only); open points ✅ (step 4); UI screenshots ➖ N/A: the UI does not change. Read every item; this list is a forecast, not the answer.
 
-- [ ] **Step 6: Links, final checks and a self-review of the diff**
+- [x] **Step 6: Links, final checks and a self-review of the diff**
 
 ```bash
 for f in docs/decisions/0026-first-e2e-journey-details.md docs/decisions/0007-testing-strategy.md docs/decisions/0010-ci-cd.md docs/open-points.md docs/roadmap.md README.md; do
@@ -1009,7 +1009,7 @@ git diff main --stat
 
 Expected: `link check done` with no `BROKEN` line; every check passes. Read the whole diff against the spec's *Goal and success criteria*, one by one, and list any gap in the task's report.
 
-- [ ] **Step 7: Tick this task's boxes and commit**
+- [x] **Step 7: Tick this task's boxes and commit**
 
 ```bash
 git add docs

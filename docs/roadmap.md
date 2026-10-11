@@ -154,7 +154,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-07 First E2E journey
 
 - **Goal:** a Playwright journey drives the production build on a phone and on desktop Chromium and Firefox, scans every page with axe in light and dark mode, and fails on any CSP violation. CI keeps the report and traces of a failed run.
-- **Delivers:** `e2e/` with Playwright and axe ([ADR 0007](decisions/0007-testing-strategy.md); [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11); the CSP violation guard; the `e2e` job in CI ([ADR 0010](decisions/0010-ci-cd.md), decisions 7 and 9); the groundwork for [NFR-1](requirements/functional-requirements.md#nfr-1) and [NFR-2](requirements/functional-requirements.md#nfr-2).
+- **Delivers:** `e2e/` with Playwright and axe ([ADR 0007](decisions/0007-testing-strategy.md); [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11); the CSP violation guard; the `e2e` job in CI ([ADR 0010](decisions/0010-ci-cd.md), decisions 7 and 9); the groundwork for [NFR-1](requirements/functional-requirements.md#nfr-1) and [NFR-2](requirements/functional-requirements.md#nfr-2) ([ADR 0026](decisions/0026-first-e2e-journey-details.md)).
 - **Depends on:** —
 - **Owner steps:** install Playwright's browsers and the system libraries they need in WSL, once, following `setup.md`.
 - **Expected path:** full.

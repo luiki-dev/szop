@@ -94,19 +94,6 @@ Roadmap entry: [PH-06b](roadmap.md#ph-06b-web-security-baseline).
 
 Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 
-#### OP-010
-
-**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-05:** Testing Library and MSW ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
-  - **PH-07:** Playwright with axe
-  - **PH-15:** fast-check and StrykerJS
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
-- **Issue:** [#63](https://github.com/luiki-dev/szop/issues/63)
-- **Status:** 🚧 In progress on [`test/ph-07-first-e2e-journey`](https://github.com/luiki-dev/szop/tree/test/ph-07-first-e2e-journey)
-
 #### OP-012
 
 **Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
@@ -471,7 +458,20 @@ Roadmap entry: [PH-14](roadmap.md#ph-14-app-shell-and-design-system).
 ### PH-15 Seed catalog, read-only
 
 Roadmap entry: [PH-15](roadmap.md#ph-15-seed-catalog-read-only).\
-Also: [OP-010](#op-010), [OP-019](#op-019).
+Also: [OP-019](#op-019).
+
+#### OP-010
+
+**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-05:** Testing Library and MSW ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
+  - **PH-07:** Playwright with axe ✅ Done ([`test/ph-07-first-e2e-journey`](https://github.com/luiki-dev/szop/tree/test/ph-07-first-e2e-journey))
+  - **PH-15:** fast-check and StrykerJS
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
+- **Issue:** [#63](https://github.com/luiki-dev/szop/issues/63)
+- **Status:** ⬜ Open
 
 #### OP-052
 
