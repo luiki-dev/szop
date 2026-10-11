@@ -101,7 +101,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-05 SPA skeleton](#ph-05-spa-skeleton) | ✅ Done | [Spec](superpowers/specs/2026-10-07-PH-05-spa-skeleton-design.md) | [Plan](superpowers/plans/2026-10-07-PH-05-spa-skeleton.md) | [#22](https://github.com/luiki-dev/szop/pull/22) | [#33](https://github.com/luiki-dev/szop/issues/33) |
 | [PH-06a Production build and serving](#ph-06a-production-build-and-serving) | ✅ Done | [Spec](superpowers/specs/2026-10-08-PH-06a-production-build-and-serving-design.md) | [Plan](superpowers/plans/2026-10-08-PH-06a-production-build-and-serving.md) | [#23](https://github.com/luiki-dev/szop/pull/23) | [#35](https://github.com/luiki-dev/szop/issues/35) |
 | [PH-06b Web security baseline](#ph-06b-web-security-baseline) | ✅ Done | [Spec](superpowers/specs/2026-10-10-PH-06b-web-security-baseline-design.md) | [Plan](superpowers/plans/2026-10-10-PH-06b-web-security-baseline.md) | [#158](https://github.com/luiki-dev/szop/pull/158) | [#25](https://github.com/luiki-dev/szop/issues/25) |
-| [PH-07 First E2E journey](#ph-07-first-e2e-journey) | ⬜ Not started | — | — | — | [#36](https://github.com/luiki-dev/szop/issues/36) |
+| [PH-07 First E2E journey](#ph-07-first-e2e-journey) | ✅ Done | [Spec](superpowers/specs/2026-10-11-PH-07-first-e2e-journey-design.md) | [Plan](superpowers/plans/2026-10-11-PH-07-first-e2e-journey.md) | [#163](https://github.com/luiki-dev/szop/pull/163) | [#36](https://github.com/luiki-dev/szop/issues/36) |
 | [PH-08 Container image](#ph-08-container-image) | ⬜ Not started | — | — | — | [#37](https://github.com/luiki-dev/szop/issues/37) |
 
 ### PH-03 API skeleton
@@ -154,9 +154,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-07 First E2E journey
 
 - **Goal:** a Playwright journey drives the production build on a phone and on desktop Chromium and Firefox, scans every page with axe in light and dark mode, and fails on any CSP violation. CI keeps the report and traces of a failed run.
-- **Delivers:** `e2e/` with Playwright and axe ([ADR 0007](decisions/0007-testing-strategy.md); [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11); the CSP violation guard; the `e2e` job in CI ([ADR 0010](decisions/0010-ci-cd.md), decisions 7 and 9); the groundwork for [NFR-1](requirements/functional-requirements.md#nfr-1) and [NFR-2](requirements/functional-requirements.md#nfr-2).
+- **Delivers:** `e2e/` with Playwright and axe ([ADR 0007](decisions/0007-testing-strategy.md); [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11); the CSP violation guard; the `e2e` job in CI ([ADR 0010](decisions/0010-ci-cd.md), decisions 7 and 9); the groundwork for [NFR-1](requirements/functional-requirements.md#nfr-1) and [NFR-2](requirements/functional-requirements.md#nfr-2) ([ADR 0026](decisions/0026-first-e2e-journey-details.md)).
 - **Depends on:** —
-- **Owner steps:** none.
+- **Owner steps:** install Playwright's browsers and the system libraries they need in WSL, once, following `setup.md`.
 - **Expected path:** full.
 - **Open points:** [PH-07](open-points.md#ph-07-first-e2e-journey).
 

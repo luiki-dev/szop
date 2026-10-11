@@ -12,6 +12,7 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
 - [6. Clone and install](#6-clone-and-install)
 - [7. Docker Desktop and the database](#7-docker-desktop-and-the-database)
 - [8. Check that everything works](#8-check-that-everything-works)
+  - [The end-to-end journeys](#the-end-to-end-journeys)
 - [9. Run the API and the page](#9-run-the-api-and-the-page)
   - [Run the production build](#run-the-production-build)
 - [10. What the git hooks do](#10-what-the-git-hooks-do)
@@ -61,7 +62,7 @@ Run it once per Node version. In the repository, pnpm switches to the version pi
 1. Install VS Code on Windows (not in Ubuntu): <https://code.visualstudio.com/>.
 2. Install its "WSL" extension.
 3. In the Ubuntu terminal, inside the repository (after step 6), run `code .`. VS Code opens the folder from WSL.
-4. Accept the prompt to install the recommended extensions.
+4. Accept the prompt to install the recommended extensions. They are ESLint, Prettier, Vitest, Container Tools and Playwright Test, which runs the end-to-end journeys from the editor ([Playwright](tools/playwright.md#editor)).
 
 More in [VS Code](tools/vscode.md).
 
@@ -110,6 +111,30 @@ Success looks like this:
 - `pnpm test` (Vitest) ends with the lines `Test Files … passed` and `Tests … passed`, with no `failed` in between.
 
 What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md), [Prettier](tools/prettier.md) and [Vitest](tools/vitest.md). CI runs the same scripts, except that it runs `pnpm test:coverage`, which is `pnpm test --coverage`: the same tests, plus coverage.
+
+### The end-to-end journeys
+
+The end-to-end (E2E) journeys drive a real browser, so Playwright needs its own browsers, downloaded once. With PostgreSQL running (step 7), from the repository root:
+
+```bash
+pnpm --filter @szop/e2e exec playwright install --with-deps chromium firefox
+```
+
+It downloads Chromium and Firefox to `~/.cache/ms-playwright/` and, because of `--with-deps`, installs the system libraries they need through `apt`, which asks for your `sudo` password. Run it again when Playwright's version changes. Then check:
+
+```bash
+pnpm test:e2e
+```
+
+Success looks like this: it builds the web app, then Playwright prints one line per test and project, and the run ends with `6 passed` (the number grows with the journeys). What the journeys are and how they are written: the [testing guide](testing.md#writing-an-e2e-journey); the tool: [Playwright](tools/playwright.md).
+
+**If `pnpm test:e2e` hangs at the start and prints nothing,** WSL may be dropping connections to closed ports on `127.0.0.1`. Playwright's first step is to request the test server's address, `http://127.0.0.1:3100/api/health`, before the server exists, and it expects the connection to be refused at once. Test it:
+
+```bash
+timeout 3 bash -c 'echo > /dev/tcp/127.0.0.1/3100'
+```
+
+`Connection refused` is healthy. If it waits and `timeout` ends it instead, this is the problem. It appeared with WSL's mirrored networking mode (`networkingMode=mirrored` in `C:\Users\<you>\.wslconfig`), where a connection to a closed port on `127.0.0.1` hung for about two minutes instead of failing, so every run stalled. The fix is WSL's default mode, network address translation (NAT): remove the `networkingMode=mirrored` line from `.wslconfig` (or set `networkingMode=nat`), then run `wsl --shutdown` in PowerShell and open Ubuntu again.
 
 ## 9. Run the API and the page
 
@@ -164,6 +189,6 @@ On every commit, a pre-commit hook formats and lints the staged files, and a com
 
 ## 11. Coming later
 
-- **Playwright** and the first end-to-end journey, in [PH-07](../roadmap.md#ph-07-first-e2e-journey).
+- **Terraform and the AWS CLI,** in [PH-09](../roadmap.md#ph-09-aws-account-and-terraform-bootstrap).
 
 This guide grows with those phases.

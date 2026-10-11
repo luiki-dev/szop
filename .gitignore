@@ -14,6 +14,10 @@ node_modules/
 # The web app's production build (pnpm build)
 dist/
 
+# Playwright's report and test output (pnpm test:e2e)
+e2e/playwright-report/
+e2e/test-results/
+
 # Local configuration (copied from .env.example) and test coverage reports
 .env
 coverage/

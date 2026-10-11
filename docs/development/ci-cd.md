@@ -1,6 +1,6 @@
 # CI/CD
 
-How Szop's continuous integration (CI) works: which checks run on which event, how to read a failed run, and the rules every workflow follows. Every pull request is checked in GitHub Actions, and a failing check blocks the merge; CodeQL scans the code and the workflows, and Dependabot proposes updates every week. *Why* it works this way is in [ADR 0010](../decisions/0010-ci-cd.md) (the direction) and [ADR 0018](../decisions/0018-ci-details.md) (the details). Later phases add to this guide: the PostgreSQL service for the tests ([PH-04](../roadmap.md#ph-04-database)), end-to-end (E2E) tests ([PH-07](../roadmap.md#ph-07-first-e2e-journey)), the container image check ([PH-08](../roadmap.md#ph-08-container-image)), the Terraform checks ([PH-09](../roadmap.md#ph-09-aws-account-and-terraform-bootstrap)), the demo buttons ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy)) and releases ([PH-13](../roadmap.md#ph-13-releases)).
+How Szop's continuous integration (CI) works: which checks run on which event, how to read a failed run, and the rules every workflow follows. Every pull request is checked in GitHub Actions, and a failing check blocks the merge; CodeQL scans the code and the workflows, and Dependabot proposes updates every week. *Why* it works this way is in [ADR 0010](../decisions/0010-ci-cd.md) (the direction) and [ADR 0018](../decisions/0018-ci-details.md) (the details). Later phases add to this guide: the PostgreSQL service for the tests ([PH-04](../roadmap.md#ph-04-database)), the container image check ([PH-08](../roadmap.md#ph-08-container-image)), the Terraform checks ([PH-09](../roadmap.md#ph-09-aws-account-and-terraform-bootstrap)), the demo buttons ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy)) and releases ([PH-13](../roadmap.md#ph-13-releases)).
 
 The checks run the PR's own code and configuration: its workflows, its `package.json` scripts, its `commitlint.config.js`. A PR could therefore weaken a check along with the change it checks; the owner's review of every changed file is what catches that.
 
@@ -12,6 +12,7 @@ The checks run the PR's own code and configuration: its workflows, its `package.
 - [ci-ok and the required checks](#ci-ok-and-the-required-checks)
 - [Change detection](#change-detection)
 - [Reading a failed run](#reading-a-failed-run)
+  - [Reading a failed E2E run](#reading-a-failed-e2e-run)
 - [Dependabot](#dependabot)
 - [Rules for every workflow](#rules-for-every-workflow)
 - [CodeQL](#codeql)
@@ -41,11 +42,14 @@ CodeQL's default setup also scans `main` once a week on its own schedule.
 | `typecheck` | code changed | TypeScript, without emitting files | `pnpm typecheck` |
 | `test` | code changed | Starts PostgreSQL from `compose.yaml` (`docker compose up -d --wait`, after copying `apps/api/.env.example` to `apps/api/.env`), then the tests: every Vitest project (`pnpm test:coverage`), with Vitest's test report and a coverage table in the job summary | `pnpm test` (or `pnpm test:coverage`) with PostgreSQL running |
 | `build` | code changed | `pnpm build`: the web app's production build, with its precompressed copies. It fails when the first screen's JavaScript exceeds 200 KB of Brotli ([NFR-3](../requirements/functional-requirements.md#nfr-3), [ADR 0023](../decisions/0023-production-build-and-serving-details.md)) and prints the size in its log. It needs no database | `pnpm build` |
+| `e2e` | code changed | Starts PostgreSQL as `test` does, installs Playwright's browsers, then `pnpm test:e2e`: builds the web app and runs the end-to-end (E2E) journeys on desktop Chromium, desktop Firefox and an emulated phone. When it fails, it uploads the HTML report as the `playwright-report` artifact | `pnpm test:e2e` with PostgreSQL running and the browsers installed ([setup guide](setup.md#the-end-to-end-journeys)) |
 | `commits` | every PR, never on `main` | commitlint on every commit of the branch that is not on `main`, from `HEAD^1` to `HEAD^2` (see [The merge ref](#the-merge-ref)) | `pnpm exec commitlint --from origin/main --to HEAD` |
 | `workflows` | a file under `.github/workflows/` or `.github/actions/`, or `.github/dependabot.yml` or `.github/zizmor.yml`, changed | [actionlint](tools/actionlint.md), then [zizmor](tools/zizmor.md) | see their tool pages |
 | `ci-ok` | always, after all the others | Sums up the results ([below](#ci-ok-and-the-required-checks)) | — |
 
 `pr-title.yml` has one job, **`pr-title`**: it pipes the PR title into commitlint, with the same rules as every commit, because the title becomes the merge commit's message. Check a title locally with `echo "feat(api): add health check" | pnpm exec commitlint`. It is a workflow of its own so that editing the title reruns only this check, not the whole of `ci.yml`.
+
+**Why the `e2e` job does not cache the browsers.** It installs them on every run (`playwright install --with-deps chromium firefox`). Restoring a cache takes about as long as the download, and the system libraries come from `apt`, which cannot be cached; Playwright's own CI documentation advises the same ([ADR 0026](../decisions/0026-first-e2e-journey-details.md), decision 5, refining [ADR 0010](../decisions/0010-ci-cd.md), decision 9). The job retries a failed test once and fails the run for a test that passes only on its retry ([Reading a failed E2E run](#reading-a-failed-e2e-run)). If the install ever dominates the job's time, the cache or Playwright's container image comes back. The tests themselves are explained in the [testing guide](testing.md#writing-an-e2e-journey).
 
 `commits` does not wait for `changes`, since it runs on every PR whatever it changes. Merge commits that bring `main` into the branch (GitHub's *Update branch* writes `Merge branch 'main' into …`, a local `git merge origin/main` writes `Merge remote-tracking branch 'origin/main' into …`) are skipped by commitlint's default ignore rules. Those rules match the standard messages git and GitHub write, not hand-edited ones. Commits on `main` are not checked again: every one came through a checked PR.
 
@@ -62,7 +66,7 @@ The `main` ruleset requires two status checks: **`ci-ok`** and **`pr-title`**. I
 Why one aggregating job instead of requiring every job:
 
 - Requiring every job would not work well. Each new job would need the ruleset edited too, and a required job that is skipped passes anyway: a job skipped by its `if:` reports, and GitHub counts it as passed. (Skipping with a `paths:` filter instead is worse: a workflow skipped that way never starts and never reports, and a required check on it leaves the PR waiting forever. That is why `ci.yml` always runs and skips jobs with `if:`.) One job that sees every result is the single place to decide. It always runs (`if: always()`), always reports, and fails when `changes` fails: otherwise a broken detection, which leaves every other job skipped, would let the PR through.
-- Adding a job later means adding it to `ci-ok`'s `needs:` list, without touching the ruleset. `build` is one of the jobs `ci-ok` waits for; the required check is still only `ci-ok`, so adding it changed no GitHub setting.
+- Adding a job later means adding it to `ci-ok`'s `needs:` list, without touching the ruleset. `build` and `e2e` are two of the jobs `ci-ok` waits for; the required check is still only `ci-ok`, so adding them changed no GitHub setting.
 
 **`ci-ok`'s rule:** it passes only when `changes` succeeded and every other job either succeeded or was skipped. A job that failed or was cancelled fails it. The first condition matters: when `changes` fails, every job that needs it is skipped, and "everything skipped" alone would look green.
 
@@ -74,7 +78,7 @@ Why one aggregating job instead of requiring every job:
 
 The `changes` job decides which jobs a PR needs, from the list of files it changes:
 
-- **Code** is any file that is not Markdown (`*.md`). A PR that changes only Markdown skips `lint`, `typecheck`, `test` and `build`; `ci-ok` stays green. Counting everything else as code is the safe way round: a new file type or configuration file is checked without anyone remembering to add it.
+- **Code** is any file that is not Markdown (`*.md`). A PR that changes only Markdown skips `lint`, `typecheck`, `test`, `build` and `e2e`; `ci-ok` stays green. Counting everything else as code is the safe way round: a new file type or configuration file is checked without anyone remembering to add it.
 - **Workflows:** a change under `.github/workflows/` or `.github/actions/`, or to `.github/dependabot.yml` or `.github/zizmor.yml`, runs the `workflows` job. zizmor audits the Dependabot configuration too, and its own configuration file changes what it reports, so a change to either can turn the check red.
 - `commits` runs on every PR, whatever it changes.
 - **A push to `main` runs every job**, whatever it changes.
@@ -94,6 +98,16 @@ The job prints the changed files and its two answers (`code=…, workflows=…`)
 9. **A failed `build` with `over budget (NFR-3)`:** the first screen needs more than 200 KB of Brotli-compressed JavaScript, and the log line names the size. Run `pnpm build` locally and find what grew: a new dependency, or an import that should be loaded lazily. Then either shrink it or, with a reason, change the budget through an ADR ([ADR 0013](../decisions/0013-visual-design.md), decision 4: "adjusted with a reason when real measurements exist").
 
 From the terminal, `gh pr checks` shows the PR's checks and `gh run view --log-failed` prints the logs of the failed steps; see the [GitHub Actions page](tools/github-actions.md#everyday-use).
+
+### Reading a failed E2E run
+
+The `e2e` job's log shows Playwright's output, and the `github` reporter turns it into annotations on the run's summary page and next to the failing line in the PR: one error per attempt of each test that failed or was flaky, the retry marked in its header, and a *Playwright Run Summary* notice counting what passed, failed and was flaky. For the evidence behind them:
+
+1. On the run's summary page, under *Artifacts*, download `playwright-report`. It exists only when the job failed, and is kept for 14 days.
+2. Unzip it and open it: `pnpm test:e2e:report <folder>`, where the folder is the unzipped one, given as an absolute or `~` path (`pnpm test:e2e:report ~/Downloads/playwright-report`): the script runs in `e2e/`, so a relative path is resolved from there. It serves the report on a local port and prints the address; under Windows Subsystem for Linux (WSL), open it in Windows' browser. The report lists every test per project; a failed test holds its error, screenshot and trace, one trace for each attempt.
+3. Or drop a trace's zip file on <https://trace.playwright.dev>, which opens the trace viewer in the browser without uploading the file. How to read a trace: [the testing guide](testing.md#reading-a-failed-run).
+
+**Flaky versus failed.** CI retries a failed test once. A test that fails again is counted *failed*. A test that fails and then passes on its retry is counted *flaky*, and the run still fails, because `failOnFlakyTests` is on: a flaky test is a bug, and a green check would hide it. The report holds the trace of the failed first attempt, which is the one to read. Do not just re-run the job; find the cause ([testing guide](testing.md#rules)).
 
 ## Dependabot
 

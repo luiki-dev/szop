@@ -94,52 +94,6 @@ Roadmap entry: [PH-06b](roadmap.md#ph-06b-web-security-baseline).
 
 Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 
-#### OP-010
-
-**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-05:** Testing Library and MSW ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
-  - **PH-07:** Playwright with axe
-  - **PH-15:** fast-check and StrykerJS
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
-- **Issue:** [#63](https://github.com/luiki-dev/szop/issues/63)
-- **Status:** ⬜ Open
-
-#### OP-012
-
-**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** the first test against the database ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
-  - **PH-05:** the first component test ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
-  - **PH-07:** the first E2E journey on both viewports
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
-- **Issue:** [#64](https://github.com/luiki-dev/szop/issues/64)
-- **Status:** ⬜ Open
-
-#### OP-057
-
-**Extend the E2E suite for the visual design**, with the first E2E journey (OP-012): a Playwright Firefox project at the desktop viewport, next to desktop Chromium and the Pixel; axe with the `wcag2a`, `wcag2aa`, `wcag21aa` and `wcag22aa` rule sets, scanning every page in light and dark (Playwright can emulate `prefers-color-scheme`); and a journey that fails on any CSP violation the browser reports (for example a listener for `securitypolicyviolation` events, or the console). Show once that the guard catches an injected `<style>` element.
-
-- **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11
-- **Issue:** [#65](https://github.com/luiki-dev/szop/issues/65)
-- **Status:** ⬜ Open
-
-#### OP-067
-
-**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
-
-- **Moved from PH-04:** it does not depend on that phase.
-- **Moved from PH-05:** it does not depend on that phase.
-- **Moved from PH-06:** it does not depend on that phase.
-- **Moved from PH-06b:** it does not depend on that phase.
-- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
-- **Issue:** [#27](https://github.com/luiki-dev/szop/issues/27)
-- **Status:** ⬜ Open
-
 ### PH-08 Container image
 
 Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
@@ -186,6 +140,19 @@ Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
 
 - **Source:** [Audit, MAJOR-13](audits/2026-09-29-design-sanity-check.md#major-13-roadmap-phases-and-the-definition-of-done-are-not-ready-for-the-roadmap-brainstorm); [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 3
 - **Issue:** [#69](https://github.com/luiki-dev/szop/issues/69)
+- **Status:** ⬜ Open
+
+#### OP-067
+
+**Confirm CI on its first real PRs after PH-02's merge.** (1) Dependabot: the owner ran *Insights → Dependency graph → Dependabot → Check for updates* on 2026-10-05 and no PR came. What remains: the first Dependabot PR must pass `commits` (audit m9 on a real commit), and its npm update must handle pnpm 12's lockfile; if it cannot, decide between waiting, pinning and Renovate ([ADR 0010](decisions/0010-ci-cd.md), decision 18). (2) The first PR that changes only Markdown skips `lint`, `typecheck`, `test` and `workflows`, and `ci-ok` is green ✅ Done ([#16](https://github.com/luiki-dev/szop/pull/16)). (3) CodeQL's default setup lists Actions among its languages once workflows are on `main`; if not, the owner adds it ✅ Done: CodeQL added `actions` by itself after the merge, and [#16](https://github.com/luiki-dev/szop/pull/16) ran *Analyze (actions)*.
+
+- **Moved from PH-04:** it does not depend on that phase.
+- **Moved from PH-05:** it does not depend on that phase.
+- **Moved from PH-06:** it does not depend on that phase.
+- **Moved from PH-06b:** it does not depend on that phase.
+- **Moved from PH-07:** it does not depend on that phase.
+- **Source:** [ADR 0018](decisions/0018-ci-details.md), decisions 9 and 10
+- **Issue:** [#27](https://github.com/luiki-dev/szop/issues/27)
 - **Status:** ⬜ Open
 
 #### OP-068
@@ -459,10 +426,31 @@ Roadmap entry: [PH-14](roadmap.md#ph-14-app-shell-and-design-system).
 - **Issue:** [#92](https://github.com/luiki-dev/szop/issues/92)
 - **Status:** ⬜ Open
 
+#### OP-087
+
+**Replace the health journey when the health page goes.** PH-07's first E2E journey, `e2e/tests/health.spec.ts`, checks the walking skeleton's health page, since no use case was complete yet. When the app shell replaces that page, the journey is deleted or rewritten for whatever shows the API's status then, and the CSP guard's own test (`csp-guard.spec.ts`) gets another page to open if `/` changes.
+
+- **Source:** [ADR 0026](decisions/0026-first-e2e-journey-details.md), decision 8
+- **Issue:** [#160](https://github.com/luiki-dev/szop/issues/160)
+- **Status:** ⬜ Open
+
 ### PH-15 Seed catalog, read-only
 
 Roadmap entry: [PH-15](roadmap.md#ph-15-seed-catalog-read-only).\
-Also: [OP-010](#op-010), [OP-019](#op-019).
+Also: [OP-019](#op-019).
+
+#### OP-010
+
+**Add the test tooling**: the Vitest projects, Testing Library, MSW, Playwright with axe, fast-check and StrykerJS, the `test*` scripts and the Vitest and Playwright editor extensions. Write `docs/development/testing.md` and the tool pages; `CLAUDE.md` then points to `testing.md`. Each tool's editor extension and tool page come with it.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-05:** Testing Library and MSW ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
+  - **PH-07:** Playwright with axe ✅ Done ([#163](https://github.com/luiki-dev/szop/pull/163))
+  - **PH-15:** fast-check and StrykerJS
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
+- **Issue:** [#63](https://github.com/luiki-dev/szop/issues/63)
+- **Status:** ⬜ Open
 
 #### OP-052
 
@@ -761,6 +749,14 @@ Also: [OP-041](#op-041).
 - **Issue:** [#113](https://github.com/luiki-dev/szop/issues/113)
 - **Status:** ⬜ Open
 
+#### OP-088
+
+**Guard every browser context a journey creates.** The CSP guard of PH-07 wraps Playwright's `context` fixture only, so a context a journey creates with `browser.newContext()`, for example a second user in a sharing journey, runs unguarded and still passes. Before the first journey with a second context: a fixture or helper that creates guarded contexts, and perhaps an ESLint ban on `browser.newContext` in `e2e/tests/`. Web workers are not covered either; revisit if the app gets one.
+
+- **Source:** [ADR 0026](decisions/0026-first-e2e-journey-details.md), decision 7
+- **Issue:** [#162](https://github.com/luiki-dev/szop/issues/162)
+- **Status:** ⬜ Open
+
 ### PH-33 Live updates
 
 Roadmap entry: [PH-33](roadmap.md#ph-33-live-updates).\
@@ -903,6 +899,19 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 12 and 13
 - **Status:** ✅ Closed: [ADR 0020](decisions/0020-database-details.md), decisions 7 and 13 ([#20](https://github.com/luiki-dev/szop/pull/20))
 
+#### OP-012
+
+**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** the first test against the database ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
+  - **PH-05:** the first component test ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
+  - **PH-07:** the first E2E journey on both viewports ✅ Done ([#163](https://github.com/luiki-dev/szop/pull/163))
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
+- **Issue:** [#64](https://github.com/luiki-dev/szop/issues/64)
+- **Status:** ✅ Closed: [ADR 0026](decisions/0026-first-e2e-journey-details.md): `e2e/tests/health.spec.ts` runs on desktop Chromium, desktop Firefox and a Pixel 7 against the production build, so every layer has its first test ([#163](https://github.com/luiki-dev/szop/pull/163))
+
 #### OP-022
 
 **Apply and record the GitHub settings**: the required checks (`ci-ok` and the PR title check, with branches up to date), the code scanning rule, SHA pinning, read-only default token permissions and approval for outside contributors' runs. Update `github-settings.md`. The code scanning rule comes last, only after CodeQL has run successfully on `main`, since with an empty bypass list a CodeQL that cannot run would block every merge; and check that the SHA-pinning policy does not block CodeQL's default setup or Dependabot's own workflows (C9).
@@ -965,6 +974,14 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 - **Source:** [Audit, C1](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ✅ Closed: the threat model is a living page, [threat-model.md](architecture/threat-model.md), with a row in the document roles; [ADR 0012](decisions/0012-security-baseline.md), decision 2
+
+#### OP-057
+
+**Extend the E2E suite for the visual design**, with the first E2E journey (OP-012): a Playwright Firefox project at the desktop viewport, next to desktop Chromium and the Pixel; axe with the `wcag2a`, `wcag2aa`, `wcag21aa` and `wcag22aa` rule sets, scanning every page in light and dark (Playwright can emulate `prefers-color-scheme`); and a journey that fails on any CSP violation the browser reports (for example a listener for `securitypolicyviolation` events, or the console). Show once that the guard catches an injected `<style>` element.
+
+- **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11
+- **Issue:** [#65](https://github.com/luiki-dev/szop/issues/65)
+- **Status:** ✅ Closed: [ADR 0026](decisions/0026-first-e2e-journey-details.md), decisions 3 and 7: a desktop Firefox project next to desktop Chromium and the Pixel 7; `expectAccessible` runs axe with the four WCAG rule sets in light and dark; the CSP guard fails every test the browser reports a violation in, and its own test catches an injected `<style>` ([#163](https://github.com/luiki-dev/szop/pull/163))
 
 #### OP-058
 

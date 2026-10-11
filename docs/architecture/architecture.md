@@ -68,6 +68,9 @@ apps/web          React SPA
 apps/api          Fastify API (Drizzle schema, migrations, seed data)
 packages/shared   Zod schemas, types, domain rules
 e2e/              Playwright end-to-end tests (ADR 0007)
+  start-server.ts   resets the E2E database, then starts the API on the built SPA
+  support/          the CSP guard (test.ts) and the axe helper (accessibility.ts)
+  tests/            the journeys, one file per use case (uc-NN-….spec.ts), plus the walking skeleton's health.spec.ts and the CSP guard's own test
 infra/            Terraform root modules (ADR 0008)
 ```
 
@@ -199,6 +202,7 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../deci
 - **Components:** shadcn/ui's components, built on Base UI, are copied into `apps/web/src/components/ui/` as phases need them and are ours to change. Feature folders compose them; they don't restyle them page by page.
 - **Styling:** Tailwind CSS v4 through `@tailwindcss/vite`, compiled at build time into one stylesheet. The design tokens are CSS custom properties in two tiers (Tailwind's palette, and semantic roles such as `--primary` that components use), all in `apps/web`. Dark mode follows the system setting through Tailwind's `dark:` variant.
 - **Under the CSP:** nothing injects `<style>` elements at run time ([Web security](#web-security)). Base UI runs with `disableStyleElements`, toasts use Base UI's Toast, and every E2E journey fails on a CSP violation.
+- **Zod runs in its jitless mode in the browser:** zod would otherwise test for `eval` with `new Function("")` when `@szop/shared` builds its schemas, which the CSP blocks and reports. `apps/web/src/zod-config.ts` sets `z.config({ jitless: true })` and `main.tsx` imports it first; an entry point that loads `@szop/shared` imports it before anything else ([ADR 0026](../decisions/0026-first-e2e-journey-details.md)).
 - **Assets:** the Gabarito font (`@fontsource-variable/gabarito`) and Lucide's icons are bundled by Vite, so everything is served from the app's own origin.
 - **Budget:** the JavaScript needed for the first screen stays within 200 KB compressed, checked in CI ([NFR-3](../requirements/functional-requirements.md#nfr-3)).
 
