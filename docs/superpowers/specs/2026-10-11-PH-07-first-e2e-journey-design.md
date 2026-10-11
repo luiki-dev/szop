@@ -119,13 +119,13 @@ The port is written once, as a constant in the config, and passed to `start-serv
    ```
 
    where `fileEnv` is what step 2 read and `overrides` are `DATABASE_NAME=szop_e2e`, `HOST=127.0.0.1`, `PORT` (from `E2E_PORT`), `LOG_LEVEL=warn` and `WEB_ROOT` (the absolute path of `apps/web/dist`). The order of the spread is the rule: the shell's variables (`PATH` and the like), then the API's `.env`, then the E2E overrides above both. The API is not changed: it reads `process.env` as always. It migrates the empty database before it listens, so when `/api/health` answers, Playwright's readiness wait has also covered the migrations.
-5. **Relay stop signals.** A `SIGINT` or `SIGTERM` the script receives is passed to the API, which finishes requests in flight and closes its pool. The script exits with the API's exit code, so a failed start shows as the server exiting early, after its `startup failed` log line.
+5. **Wait for the API, without relaying signals.** Playwright stops its server by signalling the whole process group, so the API receives the `SIGTERM` itself and shuts down as it always does: it finishes requests in flight and closes its pool. The script catches `SIGINT` and `SIGTERM` only so that it is not killed first, and does not pass them on: a relayed second signal would reach the API after `server.ts`'s `process.once` handler is used up and kill it mid-shutdown (found while planning, see the plan's checked facts). The script exits with the API's exit code, so a failed start shows as the server exiting early, after its `startup failed` log line. If Playwright's grace period runs out, it kills the whole group, the API included.
 
 What a developer sees when something is wrong:
 
 | Case | Result |
 |---|---|
-| Port 3100 already in use | Playwright refuses to start, saying the URL is already used, because `reuseExistingServer` is `false` |
+| Port 3100 already in use | If it answers `/api/health` (a `pnpm start` on that port, say), Playwright refuses to start, saying the URL is already used, because `reuseExistingServer` is `false`; otherwise the API cannot listen, logs `startup failed` and the run stops |
 | PostgreSQL is down | Step 3's message; no test runs |
 | A migration fails | The API logs `startup failed` and exits 1; Playwright reports that the server exited early |
 
@@ -225,7 +225,7 @@ e2e:
 ## To verify during implementation
 
 - `failOnFlakyTests` exists in the installed Playwright, and a test that passes on its retry fails the run while the report labels it flaky. Check once, with a test made to fail on its first attempt, not committed.
-- `webServer.gracefulShutdown` sends `SIGTERM` to `start-server.ts`, and the relay stops the API: nothing listens on 3100 after a passing run, a failed run and Ctrl+C.
+- `webServer.gracefulShutdown` stops the API through its process group, with one `SIGTERM`: nothing listens on 3100 after a passing run, a failed run and Ctrl+C.
 - Firefox fires `securitypolicyviolation` for the injected `<style>`, with `effectiveDirective` `style-src-elem` as in Chromium; if it reports another directive name, the guard's test accepts both, with a comment.
 - The guard's final check runs while the test's pages are still open, so the round trip reaches them. If the `context` fixture's teardown comes too late for that, the round trip and the check move to an automatic fixture that depends on `page`, and the setup stays on `context`.
 - `page.evaluate` is not exempt from the CSP in either browser: the injected element is blocked and reported.
