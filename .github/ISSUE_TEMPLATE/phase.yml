@@ -1,5 +1,5 @@
 name: Phase
-description: A roadmap phase. The issue is the source; docs/roadmap.md mirrors it.
+description: A roadmap phase. docs/roadmap.md is the source of its plan; this issue's body is a copy.
 title: "PH-"
 labels: [phase]
 body:
@@ -7,7 +7,7 @@ body:
     id: entry
     attributes:
       label: Roadmap entry
-      description: Link to the phase's entry in docs/roadmap.md, once the docs have caught up; leave empty for a new phase
+      description: Link to the phase's entry in docs/roadmap.md, the source of this plan; leave empty for a new phase
   - type: textarea
     id: goal
     attributes:

@@ -607,7 +607,7 @@ EOF
 
 Read each file before changing it; keep its structure and tone.
 
-- [ ] **Step 1: Find every place to reword**
+- [x] **Step 1: Find every place to reword**
 
 ```bash
 grep -rnE 'open-points\.md|open points register|the register|trial|mirror' README.md CLAUDE.md .github docs --include=*.md --include=*.yml | grep -vE '^docs/(superpowers|audits|archive|decisions)/'
@@ -615,12 +615,12 @@ grep -rnE 'open-points\.md|open points register|the register|trial|mirror' READM
 
 Every hit in a living doc outside `docs/decisions/` is either reworded below or confirmed unrelated ("mirror" of something else) in the task's report.
 
-- [ ] **Step 2: `CLAUDE.md`**
+- [x] **Step 2: `CLAUDE.md`**
 
 - The bullet "**Track what is deferred in `docs/open-points.md`** ([ADR 0011](…)). Whenever something is left to a later topic or phase, add an entry with the next free `OP-` ID. Start every topic or phase brainstorm from its open points, and close or re-assign them before its PR is merged. During the GitHub tracking trial, an open point is added, re-assigned or closed on its issue first, and the register mirrors it ([ADR 0024](…))." becomes: "**Track what is deferred as `open-point` issues on GitHub** ([ADR 0027](docs/decisions/0027-open-points-on-github.md)). Whenever something is left to a later topic or phase, open an issue with the next free `OP-` ID, a sub-issue of the phase that will settle it, and mention it where it came up. Start every topic or phase brainstorm from its open points (the phase issue's sub-issues, read with `gh`), and close or re-assign them before its PR is merged. The PR description lists the issue changes it made."
 - In the documentation list: remove the `docs/open-points.md` item; `docs/roadmap.md`'s item says it is the source of each phase's plan, and that the phase issue's body is a copy updated when the PR that changes the entry opens; `docs/development/project-tracking.md`'s item drops "During the trial ([ADR 0024](…)) the issues are the source: change them first, then bring `roadmap.md`, the README's diagram and `open-points.md` in line before each PR" and says instead: "GitHub is the source of status, open points and what comes next; `roadmap.md` of each phase's plan ([ADR 0027](docs/decisions/0027-open-points-on-github.md))"; add an item `docs/archive/` — frozen records (the old open points register), never a source; read its `CLAUDE.md`.
 
-- [ ] **Step 3: `docs/development/project-tracking.md`**
+- [x] **Step 3: `docs/development/project-tracking.md`**
 
 - The introduction and "What lives where": the open-point row's source is the issue only; the phase row says `roadmap.md` holds the plan and the issue a copy.
 - "Open-point issues": the body no longer starts with a register link; it starts with the open point's text. Closed issues keep their "settled by" comment.
@@ -629,12 +629,12 @@ Every hit in a living doc outside `docs/decisions/` is either reworded below or 
 - "Views": re-read the views (`gh api graphql -f query='query{user(login:"luiki-dev"){projectV2(number:3){views(first:20){nodes{number name layout filter groupByFields(first:5){nodes{... on ProjectV2FieldCommon{name}}} verticalGroupByFields(first:5){nodes{... on ProjectV2FieldCommon{name}}} sortByFields(first:5){nodes{direction field{... on ProjectV2FieldCommon{name}}}} fields(first:20){nodes{... on ProjectV2FieldCommon{name}}}}}}}}'`) and write the table of all of them, as the plan's [Facts checked](#facts-checked) shows unless they changed, with Owner Steps added and a "What each is for" line for it ("every owner step, grouped by its phase").
 - Keep `## Contents` in sync.
 
-- [ ] **Step 4: `docs/roadmap.md`**
+- [x] **Step 4: `docs/roadmap.md`**
 
 - "How it works": the **Open points** item becomes "the phase issue's sub-issues on GitHub; the brainstorm starts from them"; the **On GitHub** item becomes: each phase, open point, owner step and ADR made outside a phase is an issue on the [Szop project](https://github.com/users/luiki-dev/projects/3); this page is the source of each phase's plan, and the phase issue's body is a copy, updated when the PR that changes the entry opens; the status lives on GitHub, and the stage tables and the README's diagram mirror it ([ADR 0027](decisions/0027-open-points-on-github.md)).
 - Each phase entry's `- **Open points:**` line (rewritten to the phase issue by Task 3) reads `- **Open points:** the sub-issues of [#36](https://github.com/luiki-dev/szop/issues/36).`, with the phase's own issue. Check that every phase entry has the line in this form.
 
-- [ ] **Step 5: The other places**
+- [x] **Step 5: The other places**
 
 - `docs/development/definition-of-done.md`, item 9: "Open points closed, re-assigned or added on GitHub (`open-point` issues); the PR description lists the changes."
 - `.github/pull_request_template.md`: "- [ ] Open points closed, re-assigned or added on GitHub, and listed above (Claude)", and the Links item "Open points (closed, re-assigned or added):" stays.
@@ -643,7 +643,7 @@ Every hit in a living doc outside `docs/decisions/` is either reworded below or 
 - `docs/glossary.md`: the **Open point** entry says open points are GitHub issues labelled `open-point` ([ADR 0027](decisions/0027-open-points-on-github.md)); a **Register** entry, if present, says it is archived in `docs/archive/`.
 - `README.md`: the "Open points" line of its documentation list links the board's Open Points view and says what it is.
 
-- [ ] **Step 6: Check, tick, commit**
+- [x] **Step 6: Check, tick, commit**
 
 ```bash
 grep -rnE '\]\([^)]*open-points\.md' README.md CLAUDE.md .github docs --include=*.md --include=*.yml | grep -vE '^docs/(superpowers|audits|archive)/' || echo "no living doc links the register"

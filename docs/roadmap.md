@@ -50,18 +50,18 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 - **A stage** is a milestone with an exit criterion. It only groups phases: it has no brainstorm, branch or PR of its own.
 - **A phase** is the work item: one brainstorm, one branch, one PR, merged when it meets the [definition of done](development/definition-of-done.md). Its ID (`PH-01`, `PH-02`, …) never changes and is never reused; the order is the order on this page.
-- **Status lives in each stage's table:** ⬜ Not started, 🚧 In progress, ✅ Done, ✖️ Dropped (with the reason). When a phase's work starts, its row gets 🚧 and the links to the spec and the plan as they are committed (a bounded phase has no spec or plan: "➖ N/A: bounded"); the PR link follows when the PR opens. Before the merge, the PR sets the row to ✅, which becomes true when the owner merges it. The diagram in the [README](../README.md#roadmap) mirrors the tables: it changes in the same commit, on the same occasions, including when phases are added, split or reordered ([ADR 0017](decisions/0017-readme-roadmap-diagram.md)).
+- **Status lives on GitHub and is mirrored in each stage's table:** ⬜ Not started, 🚧 In progress, ✅ Done, ✖️ Dropped (with the reason). When a phase's work starts, its row gets 🚧 and the links to the spec and the plan as they are committed (a bounded phase has no spec or plan: "➖ N/A: bounded"); the PR link follows when the PR opens. Before the merge, the PR sets the row to ✅, which becomes true when the owner merges it. The diagram in the [README](../README.md#roadmap) mirrors the tables: it changes in the same commit, on the same occasions, including when phases are added, split or reordered ([ADR 0017](decisions/0017-readme-roadmap-diagram.md)).
 - **Each phase entry** says:
   - **Goal:** what works when the phase is done. It is also what the demo check looks at.
   - **Delivers:** the requirements and use cases it implements, as links, marked "part" when it delivers only part of one; for tooling and infrastructure, what it builds and the ADRs behind it.
   - **Depends on:** what must happen first, when that is more than the order on this page, such as a spike.
   - **Owner steps:** what only the owner can do. The owner's items of the definition of done (applying `infra/base` from the branch, the demo check) are named only where a phase needs them for the first time or in an unusual way.
   - **Expected path:** full (spec and plan) or bounded (a short design in chat), as expected today; the phase's brainstorm decides ([ADR 0004](decisions/0004-implementation-process.md), decision 8).
-  - **Open points:** the phase's group in the [open points register](open-points.md). The brainstorm starts from it.
+  - **Open points:** the phase issue's sub-issues on GitHub; the brainstorm starts from them.
 - **Size of a phase** ([ADR 0014](decisions/0014-roadmap.md), decision 6): it ends with something working, brings at most one big concept new to the project, and its plan has about 3 to 8 tasks. A phase that grows past about 10 tasks or a second new concept is split before it is planned or executed, and the owner can ask for a split at any time.
 - **Changing the roadmap** is expected as phases teach us things. A split phase becomes `PH-16a`, `PH-16b` and so on, and its old ID is retired; a new phase gets the next free number. A change needs an ADR only when it reflects a significant decision ([ADR 0004](decisions/0004-implementation-process.md), decision 6). A new feature goes through the [functional requirements](requirements/functional-requirements.md) first (decision 10).
 - **Not on the roadmap:** work outside phases (dependency updates, documentation fixes, ADR-only PRs), and spikes, which run before the phase that needs them and are listed under its "depends on".
-- **On GitHub** ([ADR 0024](decisions/0024-github-project-tracking.md)): each phase, each open entry of the register, each owner step of a phase not yet done and each ADR made outside a phase is also an issue on the [Szop project](https://github.com/users/luiki-dev/projects/3), and the stage tables link each phase's issue. During the trial ([OP-086](https://github.com/luiki-dev/szop/issues/156)) the issues are the source and this page mirrors them: it is brought in line with GitHub before each PR, as [project tracking](development/project-tracking.md#the-trial-rule) describes.
+- **On GitHub:** each phase, open point, owner step and ADR made outside a phase is an issue on the [Szop project](https://github.com/users/luiki-dev/projects/3). This page is the source of each phase's plan, and the phase issue's body is a copy, updated when the PR that changes the entry opens; the status lives on GitHub, and the stage tables and the README's diagram mirror it ([ADR 0027](decisions/0027-open-points-on-github.md)).
 
 ## Stage 1: Local foundations
 
@@ -79,7 +79,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** set up the machine following `setup.md`.
 - **Expected path:** full.
-- **Open points:** [PH-01](https://github.com/luiki-dev/szop/issues/29).
+- **Open points:** the sub-issues of [#29](https://github.com/luiki-dev/szop/issues/29).
 
 ### PH-02 CI checks
 
@@ -88,7 +88,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** apply the Actions settings (actions pinned to a full commit SHA, a read-only default token, approval for every outside contributor's runs); turn on CodeQL's default setup; add the required checks (`ci-ok` and the PR title check, with branches up to date) to the `main` ruleset, and the code scanning rule once CodeQL has run on `main`.
 - **Expected path:** full.
-- **Open points:** [PH-02](https://github.com/luiki-dev/szop/issues/30).
+- **Open points:** the sub-issues of [#30](https://github.com/luiki-dev/szop/issues/30).
 
 ## Stage 2: Walking skeleton, running locally
 
@@ -111,7 +111,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-03](https://github.com/luiki-dev/szop/issues/31).
+- **Open points:** the sub-issues of [#31](https://github.com/luiki-dev/szop/issues/31).
 
 ### PH-04 Database
 
@@ -120,7 +120,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** have Docker Desktop running, with its WSL integration turned on.
 - **Expected path:** full.
-- **Open points:** [PH-04](https://github.com/luiki-dev/szop/issues/32).
+- **Open points:** the sub-issues of [#32](https://github.com/luiki-dev/szop/issues/32).
 
 ### PH-05 SPA skeleton
 
@@ -129,7 +129,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-05](https://github.com/luiki-dev/szop/issues/33).
+- **Open points:** the sub-issues of [#33](https://github.com/luiki-dev/szop/issues/33).
 
 ### PH-06a Production build and serving
 
@@ -139,7 +139,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-06a](https://github.com/luiki-dev/szop/issues/35).
+- **Open points:** the sub-issues of [#35](https://github.com/luiki-dev/szop/issues/35).
 
 ### PH-06b Web security baseline
 
@@ -149,7 +149,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-06b](https://github.com/luiki-dev/szop/issues/25).
+- **Open points:** the sub-issues of [#25](https://github.com/luiki-dev/szop/issues/25).
 
 ### PH-07 First E2E journey
 
@@ -158,7 +158,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** install Playwright's browsers and the system libraries they need in WSL, once, following `setup.md`.
 - **Expected path:** full.
-- **Open points:** [PH-07](https://github.com/luiki-dev/szop/issues/36).
+- **Open points:** the sub-issues of [#36](https://github.com/luiki-dev/szop/issues/36).
 
 ### PH-08 Container image
 
@@ -167,7 +167,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-08](https://github.com/luiki-dev/szop/issues/37).
+- **Open points:** the sub-issues of [#37](https://github.com/luiki-dev/szop/issues/37).
 
 ## Stage 3: Walking skeleton, deployed and released
 
@@ -188,7 +188,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** create the AWS account, secure its root user with multi-factor authentication (MFA) and set up IAM Identity Center, following the runbook; install the Terraform CLI, the AWS CLI and the Session Manager plugin; apply `infra/bootstrap` from the machine.
 - **Expected path:** full.
-- **Open points:** [PH-09](https://github.com/luiki-dev/szop/issues/38).
+- **Open points:** the sub-issues of [#38](https://github.com/luiki-dev/szop/issues/38).
 
 ### PH-10 Domain and base infrastructure
 
@@ -197,7 +197,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** choose the name and buy the domain; create the Better Auth secret with one AWS CLI command; apply `infra/base` from the branch, and again from `main` after the merge.
 - **Expected path:** full.
-- **Open points:** [PH-10](https://github.com/luiki-dev/szop/issues/39).
+- **Open points:** the sub-issues of [#39](https://github.com/luiki-dev/szop/issues/39).
 
 ### PH-11 CI access to AWS and the teardown safety net
 
@@ -206,7 +206,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** nothing beyond the order, but no demo runs, and no local apply of `infra/demo` happens, before it is merged ([ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 2).
 - **Owner steps:** create the `demo-teardown` environment (no reviewer, `main` only); apply `infra/base` from the branch, and again from `main` after the merge; store the plan and deploy roles' ARNs as GitHub variables; after the merge, run `demo-down` once and see it succeed.
 - **Expected path:** full.
-- **Open points:** [PH-11](https://github.com/luiki-dev/szop/issues/40).
+- **Open points:** the sub-issues of [#40](https://github.com/luiki-dev/szop/issues/40).
 
 ### PH-12 First deploy
 
@@ -215,7 +215,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** PH-11 merged, and its first `demo-down` run seen succeeding.
 - **Owner steps:** create the `demo` environment with the owner as required reviewer and "prevent self-review" off; press `demo-up` on the branch, check the demo (including that the log shows the owner's real IP address, and a Lighthouse run), then press `demo-down`.
 - **Expected path:** full.
-- **Open points:** [PH-12](https://github.com/luiki-dev/szop/issues/41).
+- **Open points:** the sub-issues of [#41](https://github.com/luiki-dev/szop/issues/41).
 
 ### PH-13 Releases
 
@@ -224,7 +224,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** the trial of release-please with merge commits in a throwaway repository, before the brainstorm.
 - **Owner steps:** run that trial; create the `release` environment; create the `szop-release` GitHub App, install it on the repository, store its private key in the `release` environment and put the App on the `version-tags` ruleset's bypass list; store the release role's ARN as a GitHub variable; merge the first release PR.
 - **Expected path:** full.
-- **Open points:** [PH-13](https://github.com/luiki-dev/szop/issues/42).
+- **Open points:** the sub-issues of [#42](https://github.com/luiki-dev/szop/issues/42).
 
 ## Stage 4: MVP
 
@@ -258,7 +258,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-14](https://github.com/luiki-dev/szop/issues/43).
+- **Open points:** the sub-issues of [#43](https://github.com/luiki-dev/szop/issues/43).
 
 ### PH-15 Seed catalog, read-only
 
@@ -267,7 +267,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-15](https://github.com/luiki-dev/szop/issues/44).
+- **Open points:** the sub-issues of [#44](https://github.com/luiki-dev/szop/issues/44).
 
 ### PH-16 Guest workspace and lists
 
@@ -276,7 +276,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** the spike on Better Auth's anonymous plugin, before the brainstorm ([OP-038](https://github.com/luiki-dev/szop/issues/97)).
 - **Owner steps:** none.
 - **Expected path:** full; a candidate for a split into anonymous sessions and the access layer.
-- **Open points:** [PH-16](https://github.com/luiki-dev/szop/issues/45).
+- **Open points:** the sub-issues of [#45](https://github.com/luiki-dev/szop/issues/45).
 
 ### PH-17 List items
 
@@ -285,7 +285,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-17](https://github.com/luiki-dev/szop/issues/46).
+- **Open points:** the sub-issues of [#46](https://github.com/luiki-dev/szop/issues/46).
 
 ### PH-18 Registration and login
 
@@ -294,7 +294,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** verify the email addresses the demo will send to, while SES is in its sandbox.
 - **Expected path:** full; a candidate for a split into the authentication flows and sending email.
-- **Open points:** [PH-18](https://github.com/luiki-dev/szop/issues/47).
+- **Open points:** the sub-issues of [#47](https://github.com/luiki-dev/szop/issues/47).
 
 ### PH-19 Guest data on login
 
@@ -303,7 +303,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-19](https://github.com/luiki-dev/szop/issues/48).
+- **Open points:** the sub-issues of [#48](https://github.com/luiki-dev/szop/issues/48).
 
 ### PH-20 Quotas and rate limits
 
@@ -312,7 +312,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-20](https://github.com/luiki-dev/szop/issues/49).
+- **Open points:** the sub-issues of [#49](https://github.com/luiki-dev/szop/issues/49).
 
 ### PH-21 Shop in a store
 
@@ -321,7 +321,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-21](https://github.com/luiki-dev/szop/issues/50).
+- **Open points:** the sub-issues of [#50](https://github.com/luiki-dev/szop/issues/50).
 
 ### PH-22 Offline state
 
@@ -330,7 +330,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** bounded, likely.
-- **Open points:** [PH-22](https://github.com/luiki-dev/szop/issues/51).
+- **Open points:** the sub-issues of [#51](https://github.com/luiki-dev/szop/issues/51).
 
 ### PH-23 Smart input
 
@@ -339,7 +339,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-23](https://github.com/luiki-dev/szop/issues/52).
+- **Open points:** the sub-issues of [#52](https://github.com/luiki-dev/szop/issues/52).
 
 ### PH-24 Catalog browser
 
@@ -348,7 +348,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-24](https://github.com/luiki-dev/szop/issues/53).
+- **Open points:** the sub-issues of [#53](https://github.com/luiki-dev/szop/issues/53).
 
 ### PH-25 Archive and duplicate
 
@@ -357,7 +357,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** bounded, likely.
-- **Open points:** [PH-25](https://github.com/luiki-dev/szop/issues/54).
+- **Open points:** the sub-issues of [#54](https://github.com/luiki-dev/szop/issues/54).
 
 ### PH-26 Catalog and units
 
@@ -366,7 +366,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-26](https://github.com/luiki-dev/szop/issues/55).
+- **Open points:** the sub-issues of [#55](https://github.com/luiki-dev/szop/issues/55).
 
 ### PH-27 Categories
 
@@ -375,7 +375,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-27](https://github.com/luiki-dev/szop/issues/56).
+- **Open points:** the sub-issues of [#56](https://github.com/luiki-dev/szop/issues/56).
 
 ### PH-28 Templates
 
@@ -384,7 +384,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-28](https://github.com/luiki-dev/szop/issues/57).
+- **Open points:** the sub-issues of [#57](https://github.com/luiki-dev/szop/issues/57).
 
 ### PH-29 Password reset and change
 
@@ -393,7 +393,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-29](https://github.com/luiki-dev/szop/issues/58).
+- **Open points:** the sub-issues of [#58](https://github.com/luiki-dev/szop/issues/58).
 
 ### PH-30 Settings and account deletion
 
@@ -402,7 +402,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-30](https://github.com/luiki-dev/szop/issues/59).
+- **Open points:** the sub-issues of [#59](https://github.com/luiki-dev/szop/issues/59).
 
 ### PH-31 Automatic cleanup
 
@@ -411,7 +411,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** [PH-31](https://github.com/luiki-dev/szop/issues/60).
+- **Open points:** the sub-issues of [#60](https://github.com/luiki-dev/szop/issues/60).
 
 ## Stage 5: Later
 
@@ -431,7 +431,7 @@ Both phases are rough: each is split into smaller phases once the MVP is done ([
 - **Depends on:** —
 - **Owner steps:** none known yet.
 - **Expected path:** split into several phases first.
-- **Open points:** [PH-32](https://github.com/luiki-dev/szop/issues/61).
+- **Open points:** the sub-issues of [#61](https://github.com/luiki-dev/szop/issues/61).
 
 ### PH-33 Live updates
 
@@ -440,7 +440,7 @@ Both phases are rough: each is split into smaller phases once the MVP is done ([
 - **Depends on:** —
 - **Owner steps:** none known yet.
 - **Expected path:** split into several phases first.
-- **Open points:** [PH-33](https://github.com/luiki-dev/szop/issues/62).
+- **Open points:** the sub-issues of [#62](https://github.com/luiki-dev/szop/issues/62).
 
 ## Candidates
 

@@ -95,7 +95,7 @@ Start PostgreSQL first, with `docker compose up -d --wait` (Docker Desktop must 
 - [Visual design](docs/architecture/visual-design.md) — what Szop looks like, and the design system its screens are built from
 - [Glossary](docs/glossary.md) — acronyms and terms used in the docs
 - [Roadmap](docs/roadmap.md) — what is built in which order, and how far along it is
-- [Open points](docs/open-points.md) — what is still undecided or undone, and where it will be settled
+- [Open points](https://github.com/users/luiki-dev/projects/3/views/5) — the project board's view of what is still undecided or undone, grouped by the phase that will settle it
 - [Project tracking](docs/development/project-tracking.md) — how the phases, open points and decisions are tracked as GitHub issues and on the [project board](https://github.com/users/luiki-dev/projects/3)
 - [Git workflow](docs/development/git-workflow.md) — how changes reach `main` and how releases are cut
 - [Definition of done](docs/development/definition-of-done.md) — what every PR must meet before it is merged

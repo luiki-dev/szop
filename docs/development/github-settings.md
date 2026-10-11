@@ -123,7 +123,7 @@ For public repositories some of these may already be on.
 
 ## Features
 
-*Settings → General* → section **Features**. Nothing is changed. **Issues** are used: since [ADR 0024](../decisions/0024-github-project-tracking.md) they track the phases, open points and decision work, next to the [roadmap](../roadmap.md), in a trial. **Projects** stays on; the project itself belongs to the owner's account (see [Project](#project)).
+*Settings → General* → section **Features**. Nothing is changed. **Issues** are used: since [ADR 0024](../decisions/0024-github-project-tracking.md) they track the phases, open points and decision work, next to the [roadmap](../roadmap.md). **Projects** stays on; the project itself belongs to the owner's account (see [Project](#project)).
 
 ## Labels
 
@@ -142,7 +142,7 @@ The [Szop project](https://github.com/users/luiki-dev/projects/3), owned by the 
 | **Visibility** | Public | The README and the roadmap link it. ADR 0024, decision 13. |
 | **Fields** | Status (six options), Order, Path, Spec, Plan, Started, Finished | See [project tracking](project-tracking.md#fields). ADR 0024, decisions 7 and 8. |
 | **Workflows** | On: Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr,owner`; auto-add sub-issues. Off: Auto-close issue, Pull request linked to issue, Pull request merged | See [project tracking](project-tracking.md#workflows). |
-| **Views** | Timeline, Backlog, Board, Open Points, Next Up | See [project tracking](project-tracking.md#views). |
+| **Views** | Timeline, Backlog, Board, Open Points, Next Up, Owner Steps | See [project tracking](project-tracking.md#views). |
 
 ## Checking the settings
 
