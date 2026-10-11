@@ -687,7 +687,7 @@ EOF
 - Consumes: the spec's decisions 1 to 7; what Tasks 1–4 reported; the guides of Task 4 (linked from the Consequences).
 - Produces: the ADR every other change links to; the PR closes #156 and #166.
 
-- [ ] **Step 1: Write ADR 0027**
+- [x] **Step 1: Write ADR 0027**
 
 In the shape of [ADR 0024](../../decisions/0024-github-project-tracking.md) (read it first):
 
@@ -697,7 +697,7 @@ In the shape of [ADR 0024](../../decisions/0024-github-project-tracking.md) (rea
 - `## Decisions`: the spec's decisions 1 to 7, copied with their wording, links rewritten for `docs/decisions/` (`../../decisions/X` → `X`, `../../` → `../`). Add what Tasks 1–4 settled as `<br>**Settled while building:** …` where it touches a cell: in decision 5, the 25 issues' parents (the mapping rule) and that cross-references read `OP-NNN (#N)`; anything else the tasks reported differently from the plan.
 - `## Consequences`: the 25 closed issues (88 open-point issues in all); `docs/archive/` with its `CLAUDE.md`; the links (living docs to GitHub, records to the archive); the rules in [project tracking](../development/project-tracking.md); the document roles of ADR 0011, decision 4 (the register's row is replaced by the GitHub issues, and `docs/archive/` holds frozen records); the board's views documented; what is lost (open points offline).
 
-- [ ] **Step 2: The notes in the earlier ADRs**
+- [x] **Step 2: The notes in the earlier ADRs**
 
 Read each status line and cell first, and add in the style of the notes already there:
 
@@ -706,7 +706,7 @@ Read each status line and cell first, and add in the style of the notes already 
 - **ADR 0014**, status line: append `; decision 4 refined by [ADR 0027](0027-open-points-on-github.md) (status from GitHub, mirrored by the stage tables, for good)`. Cell of decision 4: `<br>✏️ **Refined by [ADR 0027](0027-open-points-on-github.md), decision 4:** the project's Status field is the source of a phase's status; the stage tables mirror it; this page stays the source of the phase's plan.`
 - **ADR 0017**, status line: append `; decision 4 refined by [ADR 0027](0027-open-points-on-github.md) (the diagram mirrors the project's status, for good)`. Cell of decision 4: `<br>✏️ **Refined by [ADR 0027](0027-open-points-on-github.md), decision 4:** the diagram mirrors the project's status, in the same commit as the stage table.`
 
-- [ ] **Step 3: #166's body**
+- [x] **Step 3: #166's body**
 
 ```bash
 SP=/tmp/claude-1000/-home-lemekk-workspace-szop/cc894fc3-6c79-426b-9c2a-af47406592d5/scratchpad
@@ -715,7 +715,7 @@ gh issue view 166 --repo luiki-dev/szop --json body -q .body
 
 It already links ADR 0027 and says "Landed in: the PR that closes this issue"; leave it unless the link is wrong.
 
-- [ ] **Step 4: Final checks, tick, commit**
+- [x] **Step 4: Final checks, tick, commit**
 
 ```bash
 for f in README.md CLAUDE.md docs/*.md docs/archive/*.md docs/decisions/*.md docs/development/*.md docs/development/tools/*.md docs/architecture/*.md docs/requirements/*.md; do grep -oE '\]\([^)#]+' "$f" | sed 's/](//' | grep -v '^http' | sort -u | while read -r l; do [ -e "$(dirname "$f")/$l" ] || echo "BROKEN in $f: $l"; done; done; echo "link check done"
