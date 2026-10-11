@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../support/test.ts";
 
 // The walking skeleton's page: the SPA, served by the API, shows the API's
 // health, which reads PostgreSQL. No use case is complete yet, so the file is

@@ -35,6 +35,26 @@ export default defineConfig(
     files: ["apps/web/**/*.{ts,tsx}"],
     extends: [reactHooks.configs.flat.recommended],
   },
+  // Journeys import test and expect from e2e/support/test.ts, which adds the
+  // CSP guard: one importing @playwright/test would run unguarded and still
+  // pass (ADR 0026, decision 7).
+  {
+    files: ["e2e/tests/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@playwright/test",
+              message:
+                "Import test and expect from ../support/test.ts, which adds the CSP guard.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Last: turns off the rules that would fight Prettier.
   prettier,
 );

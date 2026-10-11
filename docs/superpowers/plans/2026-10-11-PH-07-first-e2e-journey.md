@@ -473,7 +473,7 @@ EOF
 - Consumes: Task 1's package and config.
 - Produces: `e2e/support/test.ts` exporting `test` (Playwright's, extended), `expect` (Playwright's), and `interface CspViolation { directive: string; blocked: string; source: string; sample: string }`; the fixture `cspViolations: CspViolation[]`. Task 3's `support/accessibility.ts` imports `test` and `expect` from `./test.ts`.
 
-- [ ] **Step 1: Write the guard's test and see it fail**
+- [x] **Step 1: Write the guard's test and see it fail**
 
 `e2e/tests/csp-guard.spec.ts`:
 
@@ -507,7 +507,7 @@ pnpm --filter @szop/e2e exec playwright test tests/csp-guard.spec.ts
 
 Expected: FAIL, Playwright cannot load `../support/test.ts` (`Cannot find module`).
 
-- [ ] **Step 2: Write the guard**
+- [x] **Step 2: Write the guard**
 
 `e2e/support/test.ts`:
 
@@ -568,7 +568,7 @@ export { expect };
 
 If ESLint (step 7) flags the `eslint-disable` comment as unused because `no-empty-pattern` is off, remove the comment; if it flags another rule, fix the code, not the rule.
 
-- [ ] **Step 3: See the guard's test pass**
+- [x] **Step 3: See the guard's test pass**
 
 ```bash
 pnpm --filter @szop/e2e exec playwright test tests/csp-guard.spec.ts
@@ -576,7 +576,7 @@ pnpm --filter @szop/e2e exec playwright test tests/csp-guard.spec.ts
 
 Expected: `3 passed`.
 
-- [ ] **Step 4: Guard the journey**
+- [x] **Step 4: Guard the journey**
 
 `e2e/tests/health.spec.ts`, the first line becomes:
 
@@ -584,7 +584,7 @@ Expected: `3 passed`.
 import { expect, test } from "../support/test.ts";
 ```
 
-- [ ] **Step 5: See the guard fail a journey**
+- [x] **Step 5: See the guard fail a journey**
 
 Temporarily add, at the end of the health journey's body:
 
@@ -600,7 +600,7 @@ pnpm --filter @szop/e2e exec playwright test tests/health.spec.ts --project=desk
 
 Expected: FAIL with `the browser reported CSP violations`, the diff showing one object with `"directive": "style-src-elem"` and `"blocked": "inline"`. Note the output for the task's report, then remove the three lines and run again: `1 passed`.
 
-- [ ] **Step 6: The ESLint rule, and see it refuse a bypass**
+- [x] **Step 6: The ESLint rule, and see it refuse a bypass**
 
 `eslint.config.js`, a block after the React hooks block:
 
@@ -635,7 +635,7 @@ rm e2e/tests/zz-bypass.spec.ts
 
 Expected: `'@playwright/test' import is restricted from being used. Import test and expect from ../support/test.ts, which adds the CSP guard.` and `exit=1`.
 
-- [ ] **Step 7: All checks, tick, commit**
+- [x] **Step 7: All checks, tick, commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:e2e
