@@ -3,7 +3,7 @@
 - **Phase:** [PH-02](../../roadmap.md#ph-02-ci-checks)
 - **Date:** 2026-10-04
 - **Path:** full (spec and plan), [ADR 0004](../../decisions/0004-implementation-process.md), decision 8
-- **Open points:** [OP-019](../../open-points.md#op-019) (PH-02 part), [OP-022](../../open-points.md#op-022), [OP-023](../../open-points.md#op-023) (PH-02 part), [OP-062](../../open-points.md#op-062) (PH-02 part)
+- **Open points:** [OP-019](../../archive/open-points.md#op-019) (PH-02 part), [OP-022](../../archive/open-points.md#op-022), [OP-023](../../archive/open-points.md#op-023) (PH-02 part), [OP-062](../../archive/open-points.md#op-062) (PH-02 part)
 
 Every PR is checked in GitHub Actions, and a failing check blocks the merge. CodeQL scans the code and the workflows, and Dependabot proposes updates every week. The direction was settled by [ADR 0010](../../decisions/0010-ci-cd.md) (CI/CD), [ADR 0009](../../decisions/0009-git-workflow.md), decision 13 (the `main` ruleset) and [ADR 0012](../../decisions/0012-security-baseline.md). This spec holds the details those ADRs left to the phase, as agreed in the brainstorm. Two guides were inputs as well as outputs: the [git workflow](../../development/git-workflow.md) and the [phase walkthrough](../../development/phase-walkthrough.md).
 
@@ -41,7 +41,7 @@ The phase is done when:
 ## Out of scope
 
 - The `e2e`, `docker` and `infra` jobs, the PostgreSQL service of `test`, and coverage in the job summary: each joins `ci.yml` in the phase that creates what it checks (PH-04, PH-07, PH-08, PH-09; [ADR 0010](../../decisions/0010-ci-cd.md), decision 23).
-- `infra-plan.yml` and `demo-down.yml` (PH-11), `demo-up.yml` (PH-12), `release-please.yml` (PH-13), `mutation.yml` (PH-15) ([OP-019](../../open-points.md#op-019)).
+- `infra-plan.yml` and `demo-down.yml` (PH-11), `demo-up.yml` (PH-12), `release-please.yml` (PH-13), `mutation.yml` (PH-15) ([OP-019](../../archive/open-points.md#op-019)).
 - Dependabot's `docker-compose`, `docker` and `terraform` ecosystems, with their audit m13 ignore rules: PH-04, PH-08 and PH-09.
 - A local hook running actionlint and zizmor (decision 6).
 - Confirming Dependabot on its first real PRs: after the merge (decision 10).
@@ -87,7 +87,7 @@ From [ADR 0010](../../decisions/0010-ci-cd.md), decisions 4 and 20:
 | `changes` | always | Checkout with `fetch-depth: 2`. On a PR, `git diff --name-only HEAD^1 HEAD`; outputs **`code`** (true if any changed file is not `*.md`) and **`workflows`** (true if anything under `.github/workflows/` or `.github/actions/` changed). On a push to `main`, both are `true`. |
 | `lint` | `code` | Setup action, `pnpm lint` (ESLint), `pnpm format:check` (new: `prettier --check .`). |
 | `typecheck` | `code` | Setup action, `pnpm typecheck`. |
-| `test` | `code` | Setup action, `pnpm test`: the push hook's `node:test` tests ([OP-062](../../open-points.md#op-062)). |
+| `test` | `code` | Setup action, `pnpm test`: the push hook's `node:test` tests ([OP-062](../../archive/open-points.md#op-062)). |
 | `commits` | PRs only | Checkout with `fetch-depth: 0`, setup action, `pnpm exec commitlint --from HEAD^1 --to HEAD^2`: every commit on the branch that is not on `main`. Merge commits from *Update branch* are skipped by commitlint's default ignores. Not run on `main`: every commit there came through a checked PR. |
 | `workflows` | `workflows` | actionlint (release binary, version and SHA-256 pinned, checksum verified) and `zizmorcore/zizmor-action` (pinned by SHA, `advanced-security: false`). |
 | `ci-ok` | `if: always()`, `needs:` every job above | Fails unless `changes` succeeded and no job's result is `failure` or `cancelled`; `skipped` is fine. A short script reads the results from `env:` (`toJSON(needs)`). A failed `changes` leaves every other job `skipped`, so without the first condition a broken detection would pass (audit m10). |
@@ -129,7 +129,7 @@ From [ADR 0010](../../decisions/0010-ci-cd.md), decisions 4 and 20:
 | 3 | Claude | | Push and open the PH-02 PR; `ci-ok` and `pr-title` report for the first time. |
 | 4 | Owner | once they reported | **CodeQL default setup** for JavaScript/TypeScript and Actions. It scans `main` at once and every PR after. Checks audit C9: CodeQL's managed workflow runs under the SHA-pinning policy. |
 | 5 | Owner | | **`main` ruleset:** required status checks `ci-ok` and `pr-title`, with *Require branches to be up to date before merging*. |
-| 6 | Owner | after CodeQL succeeded on `main` | **`main` ruleset:** *Require code scanning results*, CodeQL, blocking security alerts of *high or higher*. Last, since with an empty bypass list a CodeQL that cannot run would block every merge ([OP-022](../../open-points.md#op-022)). |
+| 6 | Owner | after CodeQL succeeded on `main` | **`main` ruleset:** *Require code scanning results*, CodeQL, blocking security alerts of *high or higher*. Last, since with an empty bypass list a CodeQL that cannot run would block every merge ([OP-022](../../archive/open-points.md#op-022)). |
 | 7 | Claude | | Read the settings back with `gh api` (read-only) and compare them with `github-settings.md`, which gains the commands. |
 | 8 | Claude, then owner | | The proof PR ([Proving the gates](#proving-the-gates)); the owner deletes its branch after it is closed. |
 | 9 | Owner | | Review and merge PH-02. |
@@ -163,9 +163,9 @@ For each: the run's link and the merge box showing the merge blocked go into the
 - **`github-settings.md`:** the Actions settings, CodeQL, the two required checks, the code scanning rule, and the `gh api` commands to verify them.
 - **`git-workflow.md`:** "Once CI exists" in the present tense; the PH-02 rows of "What is enforced" in force; `build(deps-dev)` next to `build(deps)`; a link to `ci-cd.md` for failed runs.
 - **`phase-walkthrough.md`:** a PH-02 row of its own in "When this all exists"; `format:check` in step 3; `build(deps-dev)` for the Dependabot actor.
-- **`CLAUDE.md`:** `ci-cd.md` in the documentation list ([OP-023](../../open-points.md#op-023)).
+- **`CLAUDE.md`:** `ci-cd.md` in the documentation list ([OP-023](../../archive/open-points.md#op-023)).
 - **Glossary:** CI and CD, runner, composite action, required status check, template injection, actionlint, zizmor.
-- **Open points:** [OP-022](../../open-points.md#op-022) closed; the PH-02 parts of [OP-019](../../open-points.md#op-019), [OP-023](../../open-points.md#op-023) and [OP-062](../../open-points.md#op-062) ✅; new **OP-066** (PH-11): revisit a local actionlint and zizmor hook; new **OP-067** (PH-03): confirm the first Dependabot PRs (m9 on a real commit, pnpm 12's lockfile); new **OP-068** (PH-04, PH-08, PH-09): the `docker-compose`, `docker` and `terraform` ecosystems with their m13 ignores.
+- **Open points:** [OP-022](../../archive/open-points.md#op-022) closed; the PH-02 parts of [OP-019](../../archive/open-points.md#op-019), [OP-023](../../archive/open-points.md#op-023) and [OP-062](../../archive/open-points.md#op-062) ✅; new **OP-066** (PH-11): revisit a local actionlint and zizmor hook; new **OP-067** (PH-03): confirm the first Dependabot PRs (m9 on a real commit, pnpm 12's lockfile); new **OP-068** (PH-04, PH-08, PH-09): the `docker-compose`, `docker` and `terraform` ecosystems with their m13 ignores.
 - **Roadmap and README diagram:** the PH-02 row 🚧 with the spec, plan and PR links as they land, ✅ before the merge, in the same commits ([ADR 0017](../../decisions/0017-readme-roadmap-diagram.md)).
 
 ## Tasks

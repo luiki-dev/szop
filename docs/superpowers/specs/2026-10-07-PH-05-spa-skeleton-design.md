@@ -3,7 +3,7 @@
 - **Phase:** [PH-05](../../roadmap.md#ph-05-spa-skeleton)
 - **Date:** 2026-10-07
 - **Path:** full (spec and plan), [ADR 0004](../../decisions/0004-implementation-process.md), decision 8
-- **Open points:** [OP-010](../../open-points.md#op-010) (PH-05 part), [OP-012](../../open-points.md#op-012) (PH-05 part), [OP-007](../../open-points.md#op-007) (a note only); new [OP-079](../../open-points.md#op-079) and [OP-080](../../open-points.md#op-080); [OP-067](../../open-points.md#op-067) is not tied to this phase
+- **Open points:** [OP-010](../../archive/open-points.md#op-010) (PH-05 part), [OP-012](../../archive/open-points.md#op-012) (PH-05 part), [OP-007](../../archive/open-points.md#op-007) (a note only); new [OP-079](../../archive/open-points.md#op-079) and [OP-080](../../archive/open-points.md#op-080); [OP-067](../../archive/open-points.md#op-067) is not tied to this phase
 
 The single-page application (SPA) exists: `pnpm dev` serves a page that shows the API's status through Vite's proxy, so the slice runs from the SPA through the API to the database. The direction was settled by [ADR 0002](../../decisions/0002-technical-architecture.md) (React, React Router, TanStack Query), [ADR 0005](../../decisions/0005-development-environment.md) (Vite's proxy, `packages/shared` consumed from source), [ADR 0007](../../decisions/0007-testing-strategy.md) (Vitest, jsdom, Testing Library and Mock Service Worker (MSW)) and the [architecture](../../architecture/architecture.md) (feature folders, data hooks, one API client). This spec holds the details those left to the phase, as agreed in the brainstorm.
 
@@ -43,10 +43,10 @@ The demo check of the [definition of done](../../development/definition-of-done.
 ## Out of scope
 
 - **Styling:** Tailwind CSS, shadcn/ui, the design tokens and the app shell are [PH-14](../../roadmap.md#ph-14-app-shell-and-design-system) ([ADR 0014](../../decisions/0014-roadmap.md), decision 9). The page stays plain semantic HTML.
-- **A production build, a `build` script and serving the SPA from the API:** [PH-06](../../roadmap.md#ph-06-production-build-and-web-baseline), which also decides how the API's build includes `packages/shared` ([OP-007](../../open-points.md#op-007)).
+- **A production build, a `build` script and serving the SPA from the API:** [PH-06](../../roadmap.md#ph-06-production-build-and-web-baseline), which also decides how the API's build includes `packages/shared` ([OP-007](../../archive/open-points.md#op-007)).
 - **Playwright, axe and the first E2E journey:** [PH-07](../../roadmap.md#ph-07-first-e2e-journey).
-- **The API serializing its responses through the shared schema:** with the first route that needs response serialization (new [OP-079](../../open-points.md#op-079)). Here the API's code does not change; its test checks the response against the schema.
-- **`@testing-library/user-event`:** nothing in this phase clicks or types. It joins with the first interaction (new [OP-080](../../open-points.md#op-080)).
+- **The API serializing its responses through the shared schema:** with the first route that needs response serialization (new [OP-079](../../archive/open-points.md#op-079)). Here the API's code does not change; its test checks the response against the schema.
+- **`@testing-library/user-event`:** nothing in this phase clicks or types. It joins with the first interaction (new [OP-080](../../archive/open-points.md#op-080)).
 - **More than one route, a not-found route and error boundaries:** the first feature phases. The route table has one route, `/`.
 - **Authentication, an error shape for the client and everything else in the [frontend architecture](../../architecture/architecture.md#3-frontend-appsweb) that has no screen yet.**
 
@@ -145,7 +145,7 @@ The root `package.json` gains `eslint-plugin-react-hooks` and nothing else the s
 - **`apps/web/vitest.config.ts`:** `defineProject` with `name: "web"`, `environment: "jsdom"`, `include: ["src/**/*.test.{ts,tsx}"]` and `setupFiles: ["src/test/setup.ts"]`. Still no globals: tests import `describe`, `it` and `expect` from `vitest`. Whether the project needs the React plugin or the `jsx` setting is enough is verified while building.
 - **`src/test/setup.ts`:** registers the `@testing-library/jest-dom` matchers, starts the MSW server with `onUnhandledRequest: "error"` before all tests, resets its handlers after each test and closes it after all, and unmounts rendered trees after each test.
 - **`src/test/server.ts`:** `setupServer` with one default handler, `GET /api/health` answering the healthy body, built with `HttpResponse.json<Health>(…)`, so the response is typed by the shared schema.
-- **`health/health-page.test.tsx`,** the first component test ([OP-012](../../open-points.md#op-012)), written first and seen failing. Each test renders the real route table through `createMemoryRouter(routes)` and `RouterProvider`, inside a `QueryClientProvider` with a fresh `QueryClient`, and finds elements by role and text:
+- **`health/health-page.test.tsx`,** the first component test ([OP-012](../../archive/open-points.md#op-012)), written first and seen failing. Each test renders the real route table through `createMemoryRouter(routes)` and `RouterProvider`, inside a `QueryClientProvider` with a fresh `QueryClient`, and finds elements by role and text:
   - **ok:** with the default handler, "Checking the API…" shows first, then "API: ok", "Database: up" and the schema version;
   - **database down:** a handler returning 503 with the outage body shows "API: reachable" and "Database: down";
   - **unreachable:** a handler returning `HttpResponse.error()` shows "Can't reach the API";
@@ -178,7 +178,7 @@ Versions are pinned during implementation; today's are React 19.3, React Router 
 - **Stack overview:** sections for React, React Router (data router and why `loader` is unused), TanStack Query (query keys, the retry default) and MSW; the shared package section gains its first schema.
 - **Glossary:** new terms as they appear (such as DOM, jsdom, MSW, proxy).
 - **README:** the "Development" section mentions the page.
-- **Open points:** the PH-05 parts of [OP-010](../../open-points.md#op-010) and [OP-012](../../open-points.md#op-012) ✅, each entry moved to its next phase's group; [OP-007](../../open-points.md#op-007) gains a note that `packages/shared` exists; new **OP-079** (PH-15, with [OP-071](../../open-points.md#op-071)): the API serializes its responses through the shared schemas; new **OP-080** (PH-17, the first phase with forms and clicks): `@testing-library/user-event` joins with the first interaction.
+- **Open points:** the PH-05 parts of [OP-010](../../archive/open-points.md#op-010) and [OP-012](../../archive/open-points.md#op-012) ✅, each entry moved to its next phase's group; [OP-007](../../archive/open-points.md#op-007) gains a note that `packages/shared` exists; new **OP-079** (PH-15, with [OP-071](../../archive/open-points.md#op-071)): the API serializes its responses through the shared schemas; new **OP-080** (PH-17, the first phase with forms and clicks): `@testing-library/user-event` joins with the first interaction.
 - **Roadmap and README diagram:** the PH-05 row 🚧 with the spec link now, the plan and PR links as they land, ✅ before the merge, in the same commits as the README's diagram ([ADR 0017](../../decisions/0017-readme-roadmap-diagram.md)).
 
 ## Tasks

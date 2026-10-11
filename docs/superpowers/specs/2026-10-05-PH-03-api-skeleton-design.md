@@ -3,7 +3,7 @@
 - **Phase:** [PH-03](../../roadmap.md#ph-03-api-skeleton)
 - **Date:** 2026-10-05
 - **Path:** full (spec and plan), [ADR 0004](../../decisions/0004-implementation-process.md), decision 8
-- **Open points:** [OP-010](../../open-points.md#op-010) (PH-03 part), [OP-012](../../open-points.md#op-012) (PH-03 part), [OP-013](../../open-points.md#op-013) (PH-03 part), [OP-062](../../open-points.md#op-062) (PH-03 part), [OP-065](../../open-points.md#op-065); [OP-067](../../open-points.md#op-067) waits for the owner's Dependabot check
+- **Open points:** [OP-010](../../archive/open-points.md#op-010) (PH-03 part), [OP-012](../../archive/open-points.md#op-012) (PH-03 part), [OP-013](../../archive/open-points.md#op-013) (PH-03 part), [OP-062](../../archive/open-points.md#op-062) (PH-03 part), [OP-065](../../archive/open-points.md#op-065); [OP-067](../../archive/open-points.md#op-067) waits for the owner's Dependabot check
 
 The Fastify API exists: `pnpm dev` starts it, `GET /api/health` answers, and the first API test passes locally and in CI. The direction was settled by [ADR 0002](../../decisions/0002-technical-architecture.md) (Fastify, Zod), [ADR 0005](../../decisions/0005-development-environment.md) (tsx, pnpm workspaces), [ADR 0007](../../decisions/0007-testing-strategy.md) (Vitest, `buildApp(deps)`, API tests through `inject()`) and the [architecture](../../architecture/architecture.md) (configuration validated by Zod, pino logging). This spec holds the details those left to the phase, as agreed in the brainstorm.
 
@@ -43,7 +43,7 @@ The phase is done when:
 
 - **The database**, its check in `/api/health` and the first test against it: PH-04.
 - **A production build and a `start` script**: PH-06, which also decides between `tsc` and a bundler.
-- **The web baseline** (`@fastify/helmet`, the `Origin` check, `TRUSTED_PROXY_HOPS`, the log's URL serializer): PH-06 ([OP-053](../../open-points.md#op-053)).
+- **The web baseline** (`@fastify/helmet`, the `Origin` check, `TRUSTED_PROXY_HOPS`, the log's URL serializer): PH-06 ([OP-053](../../archive/open-points.md#op-053)).
 - **`packages/shared` and `fastify-type-provider-zod`**: with the first shared schema or the first route with input.
 - **The JSON error shape and a not-found handler** ([architecture, Errors](../../architecture/architecture.md#errors)): unknown routes get Fastify's default 404 body until the first route that can fail (new OP-071, PH-15).
 - **Quietening the health route's request logs**, which the load balancer will call every few seconds: PH-12 (new OP-072).
@@ -62,7 +62,7 @@ Each refines an accepted ADR or fills a detail it left open; ADR 0019 records th
 | 6 | Import specifiers | `.ts` extensions; `.js` extensions | **`.ts` extensions** (`./app.ts`), as the push hook already does. tsx, Vitest and Node all run them, and PH-06 stays free to build with `tsc` (`rewriteRelativeImportExtensions`) or a bundler. `.js` extensions pointing at `.ts` files are the older convention and confusing to read. |
 | 7 | Package names | `@szop/api`, `@szop/web`, `@szop/shared`; bare `api`, `web`, `shared` | **`@szop/…`.** A scope cannot clash with a package on the npm registry, and it is what pnpm's `--filter` examples and most monorepos use. |
 | 8 | Graceful shutdown | Hand-written signal handlers; `close-with-grace` | **Hand-written:** on SIGINT or SIGTERM, `await app.close()`, then exit. About eight lines, no dependency. Requests in flight finish, which matters for tsx's restarts now and for ECS stopping a task later. |
-| 9 | Health without a database | `200 {"status":"ok"}` now, the database check in PH-04; wait for PH-04 | **Now, without the database.** The route proves the skeleton; PH-04 adds the check ([OP-013](../../open-points.md#op-013)). |
+| 9 | Health without a database | `200 {"status":"ok"}` now, the database check in PH-04; wait for PH-04 | **Now, without the database.** The route proves the skeleton; PH-04 adds the check ([OP-013](../../archive/open-points.md#op-013)). |
 | 10 | Testing the entry point | Checked by hand; a test spawning the server | **By hand.** `server.ts` only reads the environment, listens and shuts down; everything it calls is tested. A spawning test would be slow and fragile for little gain. `testing.md` states the rule: entry points are checked by hand, the logic they call is tested. |
 
 ## Design
@@ -139,13 +139,13 @@ apps/api/
 
 `test:e2e` and `test:mutation` arrive with Playwright (PH-07) and StrykerJS (PH-15).
 
-- **The push hook's tests** move from `node:test` and `node:assert` to Vitest's `test` and `expect`, with the same cases ([OP-062](../../open-points.md#op-062)).
+- **The push hook's tests** move from `node:test` and `node:assert` to Vitest's `test` and `expect`, with the same cases ([OP-062](../../archive/open-points.md#op-062)).
 
 ### Tests written in this phase
 
 Written first and seen failing, then made to pass ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 3).
 
-- **`health/routes.test.ts`, the first API test** ([OP-012](../../open-points.md#op-012)): builds the app with `buildApp({ config })` and a literal test config with `logLevel: "silent"`; `app.inject({ method: "GET", url: "/api/health" })` returns 200, a JSON content type and `{ status: "ok" }`; the app is closed after each test.
+- **`health/routes.test.ts`, the first API test** ([OP-012](../../archive/open-points.md#op-012)): builds the app with `buildApp({ config })` and a literal test config with `logLevel: "silent"`; `app.inject({ method: "GET", url: "/api/health" })` returns 200, a JSON content type and `{ status: "ok" }`; the app is closed after each test.
 - **`config.test.ts`, unit tests:**
   - a valid environment gives the typed config, with `port` a number;
   - each missing variable is named in the error;
@@ -156,7 +156,7 @@ Written first and seen failing, then made to pass ([ADR 0007](../../decisions/00
 
 ### Tooling changes
 
-- **`eslint.config.js`:** `tsconfigRootDir: import.meta.dirname` next to `projectService` ([OP-065](../../open-points.md#op-065)); the `node:test` exception removed ([OP-062](../../open-points.md#op-062)).
+- **`eslint.config.js`:** `tsconfigRootDir: import.meta.dirname` next to `projectService` ([OP-065](../../archive/open-points.md#op-065)); the `node:test` exception removed ([OP-062](../../archive/open-points.md#op-062)).
 - **Root `package.json`:** `dev`, `typecheck` chained (decision 4), the three `test` scripts; Vitest and `@vitest/coverage-v8` as devDependencies.
 - **Root `tsconfig.json`:** `include` gains `*.ts`, so `vitest.config.ts` is checked and linted.
 - **`.gitignore`:** `.env` and `coverage/`. **`.prettierignore`:** `coverage/`.
@@ -171,13 +171,13 @@ Written first and seen failing, then made to pass ([ADR 0007](../../decisions/00
 - **`docs/development/testing.md`** (new, [ADR 0007](../../decisions/0007-testing-strategy.md), decision 22): the layers that exist today (API tests, unit tests, the push hook's tests), how to run them, how to write an API test with `buildApp` and `inject()`, the rules of decision 16, "entry points are checked by hand", and coverage.
 - **Tool pages** in `docs/development/tools/`: `vitest.md`, `tsx.md`, `pino-pretty.md`, in the format of [ADR 0005](../../decisions/0005-development-environment.md), decision 15.
 - **`setup.md`:** copy `.env.example`, run `pnpm dev`, check `/api/health`.
-- **`CLAUDE.md`:** a pointer to `testing.md` for whoever writes code ([OP-010](../../open-points.md#op-010)), and `testing.md` in the documentation list.
+- **`CLAUDE.md`:** a pointer to `testing.md` for whoever writes code ([OP-010](../../archive/open-points.md#op-010)), and `testing.md` in the documentation list.
 - **Architecture:** in Cross-cutting, the configuration rule (required, no defaults, `.env` locally), startup and shutdown, and `buildApp`'s wiring through plugin options; in the monorepo layout, the `@szop/` names and `.ts` imports.
 - **Stack overview:** Fastify (plugins, encapsulation, `inject()`), pino, Zod for configuration, Vitest, tsx.
 - **`ci-cd.md`:** the `test` job runs Vitest with coverage, and where to find the coverage table.
 - **Glossary:** new terms as they appear (such as SIGTERM, encapsulation).
 - **README:** the "Development" section gains `pnpm dev` and `pnpm test`.
-- **Open points:** the PH-03 parts of [OP-010](../../open-points.md#op-010), [OP-012](../../open-points.md#op-012) and [OP-013](../../open-points.md#op-013) ✅, each entry moved to its next phase's group; [OP-062](../../open-points.md#op-062) and [OP-065](../../open-points.md#op-065) closed; [OP-067](../../open-points.md#op-067) moved to PH-04 unless the owner's Dependabot check happens first; new **OP-071** (PH-15): the JSON error shape and the not-found handler; new **OP-072** (PH-12): quieten the health route's request logs.
+- **Open points:** the PH-03 parts of [OP-010](../../archive/open-points.md#op-010), [OP-012](../../archive/open-points.md#op-012) and [OP-013](../../archive/open-points.md#op-013) ✅, each entry moved to its next phase's group; [OP-062](../../archive/open-points.md#op-062) and [OP-065](../../archive/open-points.md#op-065) closed; [OP-067](../../archive/open-points.md#op-067) moved to PH-04 unless the owner's Dependabot check happens first; new **OP-071** (PH-15): the JSON error shape and the not-found handler; new **OP-072** (PH-12): quieten the health route's request logs.
 - **Roadmap and README diagram:** the PH-03 row 🚧 with the spec, plan and PR links as they land, ✅ before the merge, in the same commits ([ADR 0017](../../decisions/0017-readme-roadmap-diagram.md)).
 
 ## Tasks

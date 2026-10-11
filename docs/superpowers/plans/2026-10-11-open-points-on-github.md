@@ -350,19 +350,19 @@ EOF
 - Consumes: Task 1's issues (OP-067's and OP-086's numbers for the last mirror edit: #27, #156).
 - Produces: the archive at `docs/archive/open-points.md`, linked only from the records; Task 3 removes the living docs' links to the old path.
 
-- [ ] **Step 1: The last mirror edit, before the move**
+- [x] **Step 1: The last mirror edit, before the move**
 
 In `docs/open-points.md`:
 - **OP-067:** move the entry from `### PH-08 Container image`'s group to `## Closed`, in ID order; its status line becomes `- **Status:** ✅ Closed: Dependabot's first PR, [#165](https://github.com/luiki-dev/szop/pull/165), passed \`commits\` and kept pnpm 12's lockfile; parts (2) and (3) were done in [#16](https://github.com/luiki-dev/szop/pull/16)`.
 - **OP-086:** move it to `## Closed`, in ID order; its status line becomes `- **Status:** ✅ Closed: [ADR 0027](decisions/0027-open-points-on-github.md): open points live on GitHub, closed ones included, and this register is archived`.
 
-- [ ] **Step 2: Move it**
+- [x] **Step 2: Move it**
 
 ```bash
 mkdir -p docs/archive && git mv docs/open-points.md docs/archive/open-points.md
 ```
 
-- [ ] **Step 3: Re-point the archive's own links and add the banner**
+- [x] **Step 3: Re-point the archive's own links and add the banner**
 
 Its relative links were relative to `docs/`; now they need one more `../`:
 
@@ -383,7 +383,7 @@ Then, right under the `# Open points` title, insert:
 > **Frozen on 2026-10-11 by [ADR 0027](../decisions/0027-open-points-on-github.md). Not maintained.** Open points, open and closed, are GitHub issues labelled `open-point`: see the board's [Open Points view](https://github.com/users/luiki-dev/projects/3/views/5). This page keeps the register as it was on that day, for the specs, plans and audits that link to it.
 ```
 
-- [ ] **Step 4: The folder's `CLAUDE.md`**
+- [x] **Step 4: The folder's `CLAUDE.md`**
 
 `docs/archive/CLAUDE.md`:
 
@@ -397,7 +397,7 @@ Frozen records. Nothing in this folder is a source of current state.
 - `open-points.md`: the open points register, archived by [ADR 0027](../decisions/0027-open-points-on-github.md).
 ```
 
-- [ ] **Step 5: Re-point the records' links**
+- [x] **Step 5: Re-point the records' links**
 
 ```bash
 sed -i 's#](\.\./\.\./open-points\.md#](../../archive/open-points.md#g' docs/superpowers/specs/*.md docs/superpowers/plans/*.md
@@ -407,7 +407,7 @@ grep -rnE '\]\((\.\./)+open-points\.md' docs/superpowers docs/audits || echo "no
 
 Expected: `no record links to the old path`. Plain-text mentions such as `docs/open-points.md` in a plan's commands stay as written.
 
-- [ ] **Step 6: Check every link into and inside the archive**
+- [x] **Step 6: Check every link into and inside the archive**
 
 ```bash
 python3 - <<'EOF'
@@ -434,7 +434,7 @@ EOF
 
 Expected: `all links resolve`. A missing file that was already missing before this task (check with `git stash` if unsure) is reported to the controller, not fixed here. ADR 0027 does not exist yet: links to `0027-open-points-on-github.md` from the archive are the one expected miss until Task 5; list them and move on.
 
-- [ ] **Step 7: Tick, commit**
+- [x] **Step 7: Tick, commit**
 
 ```bash
 git add -A docs/archive docs/superpowers docs/audits

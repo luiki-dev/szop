@@ -1034,7 +1034,7 @@ Replace line 70 (it starts with `- **The scope is optional**`) with:
 
 Follow the template. It must say:
 - commitlint checks each commit message against Conventional Commits, in the `commit-msg` hook.
-- Why: [ADR 0009](../../decisions/0009-git-workflow.md), decisions 9 and 16; the two preset changes from [OP-009](../../open-points.md#op-009) (long links in bodies and footers; only the nine types); the scope allow-list, [ADR 0016](../../decisions/0016-toolchain-details.md).
+- Why: [ADR 0009](../../decisions/0009-git-workflow.md), decisions 9 and 16; the two preset changes from [OP-009](../../archive/open-points.md#op-009) (long links in bodies and footers; only the nine types); the scope allow-list, [ADR 0016](../../decisions/0016-toolchain-details.md).
 - Configuration: `commitlint.config.js` rule by rule; how to add a scope; merge commits are ignored by default; `.husky/commit-msg`.
 - Everyday use: what a rejected commit looks like and how to fix it (the message is in `.git/COMMIT_EDITMSG`; `git commit -e -F .git/COMMIT_EDITMSG`); checking a message without committing: `echo "msg" | pnpm exec commitlint`; CI checks every commit of a PR from PH-02.
 - Official docs: `https://commitlint.js.org/`, `https://commitlint.js.org/reference/rules.html`, `https://www.conventionalcommits.org/`.

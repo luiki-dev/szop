@@ -3,7 +3,7 @@
 - **Phase:** [PH-04](../../roadmap.md#ph-04-database)
 - **Date:** 2026-10-05
 - **Path:** full (spec and plan), [ADR 0004](../../decisions/0004-implementation-process.md), decision 8
-- **Open points:** [OP-005](../../open-points.md#op-005) (PH-04 part), [OP-006](../../open-points.md#op-006), [OP-011](../../open-points.md#op-011), [OP-012](../../open-points.md#op-012) (PH-04 part), [OP-013](../../open-points.md#op-013) (PH-04 part), [OP-068](../../open-points.md#op-068) (PH-04 part); [OP-067](../../open-points.md#op-067) does not depend on this phase and moves on
+- **Open points:** [OP-005](../../archive/open-points.md#op-005) (PH-04 part), [OP-006](../../archive/open-points.md#op-006), [OP-011](../../archive/open-points.md#op-011), [OP-012](../../archive/open-points.md#op-012) (PH-04 part), [OP-013](../../archive/open-points.md#op-013) (PH-04 part), [OP-068](../../archive/open-points.md#op-068) (PH-04 part); [OP-067](../../archive/open-points.md#op-067) does not depend on this phase and moves on
 
 PostgreSQL runs locally in Docker Compose, the API applies its migrations at startup, `GET /api/health` reports whether the database is reachable and which schema version it holds, and tests run against isolated test databases, locally and in CI. The direction was settled by [ADR 0002](../../decisions/0002-technical-architecture.md) (PostgreSQL, Drizzle), [ADR 0005](../../decisions/0005-development-environment.md), decision 4 (PostgreSQL in Docker Compose), [ADR 0007](../../decisions/0007-testing-strategy.md), decisions 12 and 13 (a template database, a copy per Vitest worker, `TRUNCATE` between tests), [ADR 0008](../../decisions/0008-hosting.md), decisions 14, 15 and 19 (migrations at startup, the health check, the version matching RDS), [ADR 0010](../../decisions/0010-ci-cd.md), decision 7 (PostgreSQL in CI's `test` job) and [ADR 0019](../../decisions/0019-api-skeleton-details.md) (the database joins `AppDeps`). This spec holds the details those left to the phase, as agreed in the brainstorm.
 
@@ -45,7 +45,7 @@ The phase is done when:
 ## Out of scope
 
 - **Domain tables**: the first arrives with the phase that needs it (PH-15 or PH-16), through a normal `drizzle-kit generate`.
-- **The access layer and composite workspace keys** ([OP-054](../../open-points.md#op-054)): the first data phase.
+- **The access layer and composite workspace keys** ([OP-054](../../archive/open-points.md#op-054)): the first data phase.
 - **A CI check that the migrations match `schema.ts`**: pointless without a table; new **OP-076** (PH-15).
 - **Which database role the app uses on RDS**, the master user or a least-privilege role: new **OP-074** (PH-12).
 - **The ECS health check's tuning** (grace period, thresholds, the deployment circuit breaker with rollback): new **OP-075** (PH-12).
@@ -110,7 +110,7 @@ volumes:
   postgres-data:
 ```
 
-- **The version** answers [OP-006](../../open-points.md#op-006): 18 is the newest major version on RDS (PostgreSQL 19 is not offered yet), and 18.6 its newest minor. The minor is pinned so the image is reproducible; Dependabot proposes minor updates and ignores majors (see [Tooling changes](#tooling-changes)).
+- **The version** answers [OP-006](../../archive/open-points.md#op-006): 18 is the newest major version on RDS (PostgreSQL 19 is not offered yet), and 18.6 its newest minor. The minor is pinned so the image is reproducible; Dependabot proposes minor updates and ignores majors (see [Tooling changes](#tooling-changes)).
 - **The Debian-based image, not Alpine:** Alpine's musl C library sorts text differently from glibc, which RDS uses, and sorting matters in a shopping list.
 - **`szop` is a superuser** locally, which the tests need for `CREATE DATABASE`. What the app uses on RDS is OP-074.
 - **`psql`** runs in the container: `docker compose exec postgres psql -U szop`, documented in the tool page; no wrapper script.
@@ -219,7 +219,7 @@ The route:
   - `beforeEach`: `truncateAllTables(db)`, before rather than after, so a test starts clean even after a crashed one;
   - `afterAll`: `db.$client.end()`;
   - returns `{ db }`, a getter the test passes to `buildApp({ config, db })`.
-- **`truncateAllTables(db)`**, one round trip that reads the table list each time, so it never goes stale ([OP-011](../../open-points.md#op-011)):
+- **`truncateAllTables(db)`**, one round trip that reads the table list each time, so it never goes stale ([OP-011](../../archive/open-points.md#op-011)):
 
   ```sql
   DO $$
@@ -249,7 +249,7 @@ Database names are built from the fixed prefix and a number, never from input, s
 
 Written first and seen failing, then made to pass ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 3).
 
-- **`health/routes.test.ts`, the first test against the database** ([OP-012](../../open-points.md#op-012)):
+- **`health/routes.test.ts`, the first test against the database** ([OP-012](../../archive/open-points.md#op-012)):
   - with `useTestDatabase()`: `GET /api/health` answers 200 and `{ status: "ok", database: { status: "up", schemaVersion: "0000_init" } }`, which also proves the template was migrated;
   - with a database built for `127.0.0.1` port 1 (refused at once), closed after the test: 503 and `{ status: "error", database: { status: "down" } }`.
 - **`test/database.test.ts`:** `truncateAllTables` empties a probe table created by the test and leaves Drizzle's table with its row; the probe table is dropped in `finally`.
@@ -270,7 +270,7 @@ Docker and Compose are preinstalled on `ubuntu-24.04` runners; the runner is dis
 
 ### Tooling changes
 
-- **`.github/dependabot.yml`** ([OP-068](../../open-points.md#op-068), PH-04 part): a `docker-compose` entry at `/`, weekly on Monday with the same cooldown, minor and patch updates grouped, majors ignored (PostgreSQL's major changes on purpose, with RDS, audit m13), commit prefix `build`. The header comment updated.
+- **`.github/dependabot.yml`** ([OP-068](../../archive/open-points.md#op-068), PH-04 part): a `docker-compose` entry at `/`, weekly on Monday with the same cooldown, minor and patch updates grouped, majors ignored (PostgreSQL's major changes on purpose, with RDS, audit m13), commit prefix `build`. The header comment updated.
 - **`apps/api/vitest.config.ts`:** `globalSetup: ["src/test/global-setup.ts"]`.
 - **`pnpm-workspace.yaml`:** unchanged, unless an install script asks for an `allowBuilds` decision; the owner decides, as in PH-03.
 - **Before committing `ci.yml`:** actionlint and zizmor at CI's pinned versions, as in PH-02.
@@ -288,9 +288,9 @@ Docker and Compose are preinstalled on `ubuntu-24.04` runners; the runner is dis
 - **Glossary:** new terms as they appear.
 - **README:** the "Development" section starts the database before `pnpm dev`.
 - **Open points:**
-  - closed: [OP-005](../../open-points.md#op-005) (its last part), [OP-006](../../open-points.md#op-006) (18.6), [OP-011](../../open-points.md#op-011);
-  - PH-04 parts ✅, each entry moved to its next phase's group: [OP-012](../../open-points.md#op-012) (PH-05), [OP-013](../../open-points.md#op-013) (PH-06), [OP-068](../../open-points.md#op-068) (PH-08);
-  - [OP-067](../../open-points.md#op-067) moved to PH-05, since it does not depend on this phase;
+  - closed: [OP-005](../../archive/open-points.md#op-005) (its last part), [OP-006](../../archive/open-points.md#op-006) (18.6), [OP-011](../../archive/open-points.md#op-011);
+  - PH-04 parts ✅, each entry moved to its next phase's group: [OP-012](../../archive/open-points.md#op-012) (PH-05), [OP-013](../../archive/open-points.md#op-013) (PH-06), [OP-068](../../archive/open-points.md#op-068) (PH-08);
+  - [OP-067](../../archive/open-points.md#op-067) moved to PH-05, since it does not depend on this phase;
   - new: **OP-074** (PH-12) the app's database role on RDS; **OP-075** (PH-12) the ECS health check's grace period and thresholds, and the deployment circuit breaker with rollback; **OP-076** (PH-15) a CI check that the migrations match `schema.ts`; **OP-077** (Candidates) upgrading to Drizzle 1.0.
 - **Roadmap and README diagram:** the PH-04 row 🚧 with the spec, plan and PR links as they land, ✅ before the merge, in the same commits ([ADR 0017](../../decisions/0017-readme-roadmap-diagram.md)); "Owner steps" becomes "have Docker Desktop running".
 
