@@ -1,6 +1,6 @@
 # Open points
 
-> **Frozen on 2026-10-11 by [ADR 0027](../decisions/0027-open-points-on-github.md). Not maintained.** Open points, open and closed, are GitHub issues labelled `open-point`: see the board's [Open Points view](https://github.com/users/luiki-dev/projects/3/views/5). This page keeps the register as it was on that day, for the specs, plans and audits that link to it.
+> **Frozen on 2026-10-11 by [ADR 0027](../decisions/0027-open-points-on-github.md). Not maintained.** Open points, open and closed, are GitHub issues labelled `open-point`: see the board's [Open Points view](https://github.com/users/luiki-dev/projects/3/views/5), which shows open ones only; closed ones are found with `gh issue list --repo luiki-dev/szop --label open-point --state closed` or GitHub's issue search (`label:open-point is:closed`). This page keeps the register as it was on that day, for the specs, plans and audits that link to it.
 
 Everything that is still undecided or not yet done and has been left to a later topic or phase: decisions to take, checks to run, documents to write, settings to apply. One list, so nothing deferred in an ADR, a guide or a review is forgotten. Why the register exists is recorded in [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 1; how it is grouped by the roadmap's phases, in [ADR 0014](../decisions/0014-roadmap.md).
 

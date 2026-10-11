@@ -9,7 +9,7 @@
 - Plan:
 - Requirement IDs:
 - ADRs:
-- Open points (closed, re-assigned or added):
+- Issues changed (open points closed, re-assigned or added; phase bodies updated):
 - Issues closed (`Closes #N`, one per line):
 
 <!-- Write "none" for links that do not apply. -->

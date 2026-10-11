@@ -64,7 +64,7 @@ Title: the roadmap heading, `PH-06b Web security baseline`. The body starts with
 
 ### Open-point issues
 
-Title: the ID and the open point's bold lead, cut to 80 characters. The body starts with the open point's text, then **Parts** as a checklist (a done part ticked, with its PR), **Source**, and **History** for "Moved from" notes. The issue is the only home of the open point. The status lives in the project, so the body has no status line. A closed open point keeps a "settled by" comment, naming the ADR, PR or commit that settled it, or the reason it was dropped. The 25 entries closed before the register moved to GitHub are closed issues whose body starts with "Closed before the register moved to GitHub" and a link to ADR 0027.
+Title: the ID and the open point's bold lead, cut to 80 characters. The body starts with the open point's text, then **Parts** as a checklist (a done part ticked, with its PR), **Source**, and **History** for "Moved from" notes. The issue is the only home of the open point. Issues created before ADR 0027 start instead with a link to their entry in the archived register (`docs/archive/open-points.md`); new issues start with the open point's text. The status lives in the project, so the body has no status line. A closed open point keeps a "settled by" comment, naming the ADR, PR or commit that settled it, or the reason it was dropped. The 25 entries closed before the register moved to GitHub are closed issues whose body starts with "Closed before the register moved to GitHub" and a link to ADR 0027.
 
 ### ADR issues
 
@@ -131,9 +131,9 @@ What each is for:
 - **Timeline** is a record of what happened when: phases and `adr` issues from Started to Finished. Future phases have no dates yet.
 - **Backlog** is the whole plan as a table: every item grouped by milestone.
 - **Board** is the same items as cards in a column per status, a swimlane per milestone.
-- **Open Points** is the open points grouped by the phase that settles them.
+- **Open Points** is the open points grouped by the phase that settles them. It shows open ones only; closed ones are found with `gh issue list --repo luiki-dev/szop --label open-point --state closed` or GitHub's issue search (`label:open-point is:closed`).
 - **Next Up** is what is picked, blocked or under way, by status.
-- **Owner Steps** is every owner step, grouped by its phase.
+- **Owner Steps** is every item only the owner can do (label `owner`), grouped by phase.
 
 Backlog and Board have no filter, so they also hold the open points and the owner steps.
 
@@ -161,8 +161,9 @@ Five workflows are on and three are off, as read through the API. Their settings
 | Its PR opens | The description says `Closes #<phase>` and `Closes #<OP>` for each open point it settles | Claude |
 | Its PR is merged | Those issues close; the workflow sets ✅ Done | Owner, by merging |
 | An open point's part is done | The part ticked with its PR; the issue re-parented to the next phase, still open, and its Status set to ⬜ Backlog, or 📌 Todo if that phase is already picked: no workflow changes it on a re-parent | Claude |
-| An open point is added | An issue with the next free ID (the highest `OP-` among the issues labelled `open-point`, plus one), under its phase, label `open-point`; mentioned, as a link, where it came up | Claude |
+| An open point is added | An issue with the next free ID (the highest `OP-` among the issues labelled `open-point`, plus one; the command is in [Checking with gh](#checking-with-gh)), under its phase, label `open-point`; mentioned, as a link, where it came up | Claude |
 | An open point moves | Re-parented; a History line added | Claude |
+| An open point gains or loses a part in another phase | That phase issue's **Also** section updated | Claude |
 | An item is dropped | Closed as not planned with the reason as a comment; Status → ✖️ Dropped | Claude |
 | A phase is split | New phase issues; the old one closed as not planned with a comment; its open points re-parented | Claude; the owner adds *Relates to* |
 | A candidate is picked up | `candidate` removed; a phase issue created | Claude |
@@ -178,12 +179,13 @@ Each fact has one source; the other place only copies it, and changes when the t
 
 | Fact | Source | Copied in | When the copy changes |
 |---|---|---|---|
-| A phase's plan (goal, delivers, depends on, owner steps, expected path) | `roadmap.md`'s phase entry | the phase issue's body | when the PR that changes the entry opens; the PR lists the bodies it updated |
+| A phase's plan (goal, delivers, depends on, expected path, and the wording of its owner steps) | `roadmap.md`'s phase entry | the phase issue's body | when the PR that changes the entry opens; the PR lists the bodies it updated |
 | Phase status | the project's Status field | the stage tables' Status column and the README's diagram | work starts, the PR opens, the merge (in the PR, before it), in one commit |
 | Spec, plan and PR links of a phase | the stage tables | the project's Spec and Plan fields | when each is committed or opened |
 | Open points, open and closed: text, parts, history, status, phase | issues labelled `open-point` | nowhere | — |
 | What comes next | the board's 📌 Todo | nowhere | — |
-| Owner steps | issues labelled `owner` | the phase entry's "Owner steps" | with the phase's plan |
+| Whether an owner step is done | the `owner` issue | nowhere | — |
+| Also (the open points of other phases a phase does a part of) | the phase issue's body | nowhere | when the part is added, done or moved |
 | New phases, splits, reorders | a brainstorm, then `roadmap.md` (and an ADR when significant) | new issues, the diagram | in the same PR |
 
 The rules that follow from it:
@@ -216,3 +218,11 @@ gh project field-list 3 --owner luiki-dev
 gh issue list --repo luiki-dev/szop --label phase --state all --limit 100
 gh issue view 57 --repo luiki-dev/szop
 ```
+
+The next free open-point ID is one more than the highest `OP-` ID, which this prints:
+
+```bash
+gh issue list --repo luiki-dev/szop --label open-point --state all --limit 500 --json title --jq '[.[].title | capture("^OP-(?<n>[0-9]+)").n | tonumber] | max'
+```
+
+`gh` lists issues by creation, and the back-filled closed ones are the newest, so the top row is not the highest ID.
