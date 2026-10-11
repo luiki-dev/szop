@@ -3,6 +3,7 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "vitest.explorer",
+    "ms-playwright.playwright",
     "ms-azuretools.vscode-containers"
   ]
 }

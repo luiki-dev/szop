@@ -894,11 +894,11 @@ EOF
 
 Read each document before changing it, follow its existing structure and tone, and keep its `## Contents` in sync. Write for a learner: say what a thing is before how to use it.
 
-- [ ] **Step 1: The tool page**
+- [x] **Step 1: The tool page**
 
 `docs/development/tools/playwright.md`, in the shape of `tools/vitest.md` (read it first): what Playwright is (a library that drives real browsers, and a test runner around it) and what axe is (a rule engine that checks a rendered page against the Web Content Accessibility Guidelines (WCAG)); `## Why Szop uses it`: Playwright over Cypress ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 11), the three projects (decision 5; [ADR 0013](../../decisions/0013-visual-design.md), decision 2), axe's rule sets (ADR 0013, decision 3); `## Configuration`: `e2e/package.json`, `e2e/tsconfig.json` (why `dom`), and `playwright.config.ts` setting by setting, as the spec's table has them; `start-server.ts` step by step, including why it does not relay signals; `support/test.ts` and `support/accessibility.ts`; the ESLint rule; `## Editor`: the Playwright Test extension (`ms-playwright.playwright`), which runs the same config but does not build first; `## Browsers`: where they are downloaded, `--with-deps` and why it needs `sudo`, and that the version follows `@playwright/test`.
 
-- [ ] **Step 2: The testing guide**
+- [x] **Step 2: The testing guide**
 
 `docs/development/testing.md`:
 
@@ -911,7 +911,7 @@ Read each document before changing it, follow its existing structure and tone, a
 - `### Reading a failed run`: the HTML report, a test's trace (timeline, DOM snapshots, network, console), locally and from CI's artifact; what *flaky* and *failed* mean in CI (one retry, `failOnFlakyTests`);
 - *Rules*: add "every journey imports from `support/test.ts`" and "no axe rule is turned off for all pages".
 
-- [ ] **Step 3: Setup, CI/CD, stack overview, architecture, glossary, editor**
+- [x] **Step 3: Setup, CI/CD, stack overview, architecture, glossary, editor**
 
 - `docs/development/setup.md`: a step (where the test tooling is, or after PostgreSQL) installing the browsers once: `pnpm --filter @szop/e2e exec playwright install --with-deps chromium firefox`, which asks for the `sudo` password for the system libraries; the check `pnpm test:e2e`; the Playwright Test extension in the extensions list; the "comes later" line for Playwright removed; a troubleshooting note: if `pnpm test:e2e` hangs at the start with no output, test `timeout 3 bash -c 'echo > /dev/tcp/127.0.0.1/3100'`, and if it times out instead of being refused, WSL's mirrored networking is dropping connections to closed ports on `127.0.0.1`; describe the fix the owner applied (the controller gives its wording in the dispatch).
 - `docs/development/ci-cd.md`: the `e2e` job in the jobs list and in `ci-ok`'s needs; why the browsers are not cached; how to read a failed run: download the `playwright-report` artifact from the run's summary page, unzip it, `pnpm --filter @szop/e2e exec playwright show-report <folder>`, or drop a trace's zip on `trace.playwright.dev`; *flaky* versus *failed* in the annotations.
@@ -920,7 +920,7 @@ Read each document before changing it, follow its existing structure and tone, a
 - `docs/glossary.md`, alphabetically, where missing (search first): **axe** (axe-core, the accessibility rule engine; see `tools/playwright.md`), **Playwright**, **Trace** (Playwright's recording of a test: actions, DOM snapshots, network and console, viewed in the trace viewer), **Flaky test** (a test that passes and fails on the same code; ADR 0007, decision 16).
 - `.vscode/extensions.json`: `"ms-playwright.playwright"` after `"vitest.explorer"`.
 
-- [ ] **Step 4: Check the links, tick, commit**
+- [x] **Step 4: Check the links, tick, commit**
 
 ```bash
 for f in docs/development/*.md docs/development/tools/playwright.md docs/architecture/*.md docs/glossary.md; do

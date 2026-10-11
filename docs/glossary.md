@@ -52,7 +52,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **MFA** | Multi-Factor Authentication | Logging in with a second proof besides the password, such as a code from an authenticator app. |
 | **MSW** | Mock Service Worker | A library that intercepts the app's HTTP requests at the network level and answers them with fake responses. Szop's component tests use it, so the real API client runs unchanged. |
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
-| **NAT** | Network Address Translation | Here: a NAT gateway lets resources in a private subnet reach the internet. Costs about $32 a month on AWS; not used (see ADR 0008). |
+| **NAT** | Network Address Translation | In AWS: a NAT gateway lets resources in a private subnet reach the internet. Costs about $32 a month on AWS; not used (see ADR 0008). In WSL: its default networking mode, where Windows hands the Linux side a private address; the alternative, mirrored mode, broke Playwright's start (see the [setup guide](development/setup.md#the-end-to-end-journeys)). |
 | **NFR** | Non-functional requirement | A quality the system must have rather than something it does: supported browsers, accessibility, performance. Szop's are [NFR-1 to NFR-3](requirements/functional-requirements.md#3-non-functional-requirements). |
 | **nvm** | Node Version Manager | A tool that installs and switches Node.js versions per user. Szop's `.nvmrc` tells it which one to use. |
 | **OAuth / OIDC** | Open Authorization / OpenID Connect | Standards for logging in through another provider ("Sign in with Google"). Relevant for the social-login future extension. Also how CI logs in to AWS without stored keys: GitHub signs a token saying which repository the job belongs to and which environment, branch or PR event it runs for, and AWS exchanges it for short-lived credentials (see ADR 0010 and ADR 0012). |
@@ -120,7 +120,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 
 | Term | Meaning |
 |---|---|
-| **Accessibility check (axe)** | An automated scan of a page for barriers to people using assistive technology, such as a missing label or low contrast. axe-core is the common engine; Szop runs it in the E2E journeys. |
+| **Accessibility check (axe)** | An automated scan of a page for barriers to people using assistive technology, such as a missing label or low contrast. **axe** (axe-core) is the common rule engine; Szop runs it in the E2E journeys through `@axe-core/playwright`, in light and dark mode (see [Playwright](development/tools/playwright.md)). It finds only part of the problems: keyboard and screen-reader use still need people. |
 | **actionlint** | A static checker for GitHub Actions workflow files: syntax, expressions, `needs:` and, through shellcheck, the shell scripts of `run:` steps. Runs in CI's `workflows` job. |
 | **Anonymous user** | A server-side user without email or password, created automatically for a guest. Registering links it to a real account. |
 | **Baseline (web features)** | A label for web features that work in all major browsers. "Widely available" means they have done so for at least 30 months; Vite's default build target is based on it. |
@@ -129,6 +129,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Bisect (git)** | `git bisect` finds the commit that introduced a bug by binary search: it checks out commits between a known good and a known bad one, and you mark each as good or bad. |
 | **Branch protection / ruleset** | GitHub rules that guard branches or tags, for example "no direct pushes to `main`" or "a version tag can never move". **Rulesets** are the newer mechanism; Szop uses them (see ADR 0009). |
 | **Brotli** | A compression format for web files, smaller than gzip. Szop's build writes Brotli and gzip copies of every text file, and the server sends whichever the browser accepts. |
+| **Browser context** | In Playwright, an isolated browser session, like a new private window: its own cookies, storage and pages. Every E2E test gets a fresh one, so tests share no state and can run in parallel. |
 | **Bundle** | The JavaScript and CSS files a build tool (Vite) produces from the source code for the browser to download. |
 | **Changelog** | A file (`CHANGELOG.md`) listing what changed in each released version. Szop's is written by release-please from the commit messages. |
 | **Checkpoint (PostgreSQL)** | The moment PostgreSQL writes all changed data from memory to disk. `DROP DATABASE` waits for one, so Szop's tests run their drops together and share it (see ADR 0020). |
@@ -144,6 +145,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Cookie prefix** | A cookie name starting with `__Host-` or `__Secure-`, which the browser accepts only with matching attributes. `__Host-` requires `Secure`, the path `/` and no `Domain`, so no other subdomain can set or overwrite the cookie. |
 | **Cooldown (Dependabot)** | A waiting period before Dependabot proposes a new version of a dependency, so malicious releases are usually found and removed before they are offered. Szop uses 7 days (see ADR 0010). |
 | **Core Web Vitals** | Google's three metrics of how a page feels to use: LCP (loading), INP (responsiveness) and CLS (visual stability), each with a "good" threshold. |
+| **CSP guard** | The part of Szop's E2E tests (`e2e/support/test.ts`) that listens for the browser's `securitypolicyviolation` events on every page and fails the test if there was any (see [Testing guide](development/testing.md#the-csp-guard)). |
 | **CSS-in-JS** | Writing styles in JavaScript that a library turns into `<style>` elements at run time (Emotion, styled-components). Ruled out for Szop by its Content Security Policy. |
 | **Dark mode** | Light text on a dark background. Szop follows the system setting, which the browser exposes to CSS as `prefers-color-scheme`. |
 | **Data router (React Router)** | React Router's mode in which the routes are one array handed to `createBrowserRouter`, and a route may have a `loader` that fetches data. Szop uses the mode but not the `loader`: TanStack Query fetches data. |
@@ -164,7 +166,8 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Event bus** | An in-process publish/subscribe mechanism: code publishes "list 42 changed", listeners (such as the WebSocket hub) react. |
 | **Fargate** | AWS's way of running ECS tasks without managing servers: you state CPU and memory, AWS provides the machine. |
 | **Fetch metadata** | Request headers such as `Sec-Fetch-Site` that the browser sets to say where a request comes from (`same-origin`, `same-site`, `cross-site` or `none`). Page scripts cannot set them, which makes them a defense against cross-site request forgery (CSRF): Szop refuses every unsafe request not marked `same-origin` (see ADR 0025). |
-| **Flaky test** | A test that sometimes passes and sometimes fails without any change to the code, usually because of timing or shared state. Treated as a bug in Szop. |
+| **Fixture (Playwright)** | Something Playwright prepares for a test and passes to it by name, such as `page` or `context`; `test.extend` adds or wraps them. The CSP guard is a wrapped `context` and a `cspViolations` fixture. |
+| **Flaky test** | A test that sometimes passes and sometimes fails without any change to the code, usually because of timing or shared state. Treated as a bug in Szop ([ADR 0007](decisions/0007-testing-strategy.md), decision 16): CI retries a failed E2E test once and fails the run if it passes only on the retry. |
 | **Flat config** | ESLint's configuration format since version 9: one `eslint.config.js` exporting an array of config objects, applied in order. |
 | **Formatter** | A tool that rewrites code into one consistent layout (indentation, quotes, line breaks). Szop uses Prettier. |
 | **Git flow** | A branching model with long-lived `main` and `develop` branches plus `feature/*`, `release/*` and `hotfix/*` branches, made for software released in numbered versions. Considered, not used (see ADR 0009). |
@@ -211,6 +214,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Performance budget** | Limits a project agrees not to exceed so it stays fast as it grows, such as "at most 200 KB of JavaScript" or "LCP at most 2.5 s". |
 | **Phantom dependency** | A package your code imports without declaring it, working only because something else happened to install it. It breaks when that other package changes. pnpm prevents it. |
 | **Phase** | One step of the implementation roadmap (`docs/roadmap.md`), with a `PH-` ID, taken through its own brainstorm, design approval and implementation, on one branch and in one PR. Phases are grouped into stages (see ADR 0014). |
+| **Playwright** | A library that drives real browsers from code, with a test runner around it. Szop's E2E journeys use it, with axe for accessibility checks (see [Playwright](development/tools/playwright.md)). |
 | **Plugin (Fastify)** | A function that receives the Fastify instance and options and adds routes, hooks or decorators to it, registered with `app.register`. Szop's `buildApp` registers one plugin per feature, each with the services it needs as options. |
 | **Precompression** | Writing compressed copies of files (Brotli `.br`, gzip `.gz`) at build time, so the server never compresses per request and the strongest settings are affordable. Szop's Vite build does it ([ADR 0023](decisions/0023-production-build-and-serving-details.md)). |
 | **Property-based testing** | Testing a rule against hundreds of generated inputs instead of a few hand-picked examples, checking a property that must always hold ("a parent category always comes before its children"). Szop uses fast-check. |
@@ -259,6 +263,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Testing pyramid / testing trophy** | Two shapes for a test suite. The pyramid puts most tests at the bottom as unit tests with mocked collaborators. The trophy puts most tests in the middle as integration tests against real components, such as a real database. Szop's suite is trophy-shaped (see ADR 0007). |
 | **Threat model** | A description of what a system protects, who could attack it and through which paths, and what guards each one. Szop's is a living page, [threat-model.md](architecture/threat-model.md). |
 | **Toast** | A short message that appears briefly at the edge of the screen and goes away by itself, optionally with an action such as Undo. |
+| **Trace (Playwright)** | Playwright's recording of a test: its actions, the page's DOM before and after each, the network requests and the browser's console. It is opened in the trace viewer to see why a test failed (see [Testing guide](development/testing.md#reading-a-failed-run)). |
 | **Trunk-based development** | A branching model where everyone commits to `main` (the trunk) directly or through branches living less than a day. Needs strong automated tests. Considered, not used (see ADR 0009). |
 | **Trust policy (IAM)** | The part of an IAM role that says who may assume it. Szop's CI roles trust only OIDC tokens for a given environment or PR event, such as jobs in the `demo` environment; the token does not say which workflow file runs, so the environment's own rules (a required reviewer, allowed branches) decide who gets that far (see ADR 0012). |
 | **Type-aware linting** | Linting that uses TypeScript's type information, so a rule can know, for example, that a call returns a promise. |
