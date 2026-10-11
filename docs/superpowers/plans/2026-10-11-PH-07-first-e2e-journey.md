@@ -90,7 +90,7 @@ Checked on 2026-10-11 with throwaway probes outside the repository, on `@playwri
 - Consumes: `apps/api/src/server.ts` (reads `HOST`, `PORT`, `LOG_LEVEL`, `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`, `WEB_ROOT`, `TRUSTED_PROXIES` from `process.env`; runs migrations, then listens; exits 1 after logging `startup failed`); `apps/api/.env`; `apps/web/dist/` from `pnpm build`; the `status` region of the health page (`apps/web/src/health/health-page.tsx`: "API: ok", "Database: up").
 - Produces: the workspace package `@szop/e2e`; the root script `pnpm test:e2e`; `e2e/playwright.config.ts` with the three projects; `e2e/tests/` as the test folder. Task 2 changes the journey's import; Task 3 adds a call to it.
 
-- [ ] **Step 1: Register the package**
+- [x] **Step 1: Register the package**
 
 `pnpm-workspace.yaml`: the comment and the list become
 
@@ -116,7 +116,7 @@ packages:
 }
 ```
 
-- [ ] **Step 2: Add the dependencies**
+- [x] **Step 2: Add the dependencies**
 
 ```bash
 pnpm --filter @szop/e2e add -D @playwright/test@1.63.0 @axe-core/playwright@4.13.0 pg@^8.23.1 @types/pg@^8.23.1 @types/node@^24.19.0
@@ -124,7 +124,7 @@ pnpm --filter @szop/e2e add -D @playwright/test@1.63.0 @axe-core/playwright@4.13
 
 Expected: the five in `e2e/package.json`'s `devDependencies`, the lockfile updated, no `ERR_PNPM_IGNORED_BUILDS` (if it appears, stop: Global Constraints). Then `pnpm --filter @szop/e2e exec playwright --version` prints `Version 1.63.0`.
 
-- [ ] **Step 3: Download the browsers**
+- [x] **Step 3: Download the browsers**
 
 ```bash
 pnpm --filter @szop/e2e exec playwright install chromium firefox
@@ -132,7 +132,7 @@ pnpm --filter @szop/e2e exec playwright install chromium firefox
 
 Expected: Chromium and Firefox downloaded to `~/.cache/ms-playwright`. (`--with-deps` is the owner's step, Global Constraints.)
 
-- [ ] **Step 4: The root script and the ignores**
+- [x] **Step 4: The root script and the ignores**
 
 Root `package.json`, in `scripts`, after `"test:coverage"`:
 
@@ -173,7 +173,7 @@ e2e/test-results/
   ]),
 ```
 
-- [ ] **Step 5: TypeScript**
+- [x] **Step 5: TypeScript**
 
 `e2e/tsconfig.json`:
 
@@ -193,7 +193,7 @@ e2e/test-results/
 
 `dom` is there because the functions passed to `page.evaluate` and `addInitScript` run in the browser and use `document` and `window`. `node_modules` is excluded by TypeScript's default.
 
-- [ ] **Step 6: The config**
+- [x] **Step 6: The config**
 
 `e2e/playwright.config.ts`:
 
@@ -251,7 +251,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 7: Write the journey and see it fail**
+- [x] **Step 7: Write the journey and see it fail**
 
 `e2e/tests/health.spec.ts`:
 
@@ -280,7 +280,7 @@ pnpm test:e2e
 
 Expected: the build passes, then Playwright fails before any test with `Process from config.webServer was not able to start. Exit code: 1` and Node's `Cannot find module …/e2e/start-server.ts`. If it prints nothing and hangs, see [Facts checked](#facts-checked-and-what-is-not).
 
-- [ ] **Step 8: Write the start script and see the journey pass**
+- [x] **Step 8: Write the start script and see the journey pass**
 
 `e2e/start-server.ts`:
 
@@ -387,7 +387,7 @@ pnpm test:e2e
 
 Expected: `3 passed` (one per project). If TypeScript or Node refuses something in the script, fix it there, keeping its behavior.
 
-- [ ] **Step 9: Check the failure messages**
+- [x] **Step 9: Check the failure messages**
 
 Each check undoes itself; run them one at a time.
 
@@ -413,7 +413,7 @@ kill %1
 
 Expected: the first prints `apps/web/dist is missing: run \`pnpm build\` first …` and `exit=1`; the second prints `http://127.0.0.1:3100/api/health is already used, …` and `exit=1`; the third shows the API's `startup failed` line with `EADDRINUSE`, then `Process from config.webServer was not able to start. Exit code: 1`, and `exit=1`. In no case does a test run against the other server. Note the outputs for the task's report.
 
-- [ ] **Step 10: Check that nothing is left running**
+- [x] **Step 10: Check that nothing is left running**
 
 ```bash
 port_free() { ss -ltn | grep -q ':3100 ' && echo "3100 STILL IN USE" || echo "3100 free"; }
@@ -438,7 +438,7 @@ grep "shutdown failed" "$CLAUDE_JOB_DIR/tmp/ctrl-c.log" || echo "no shutdown fai
 
 Expected: `3100 free` three times, and `no shutdown failure`. The API logs at `warn`, so its `shutting down` line (level `info`) does not show; a `shutdown failed` line (level `error`) would. If the port is still in use, stop: the shutdown design is wrong, report it.
 
-- [ ] **Step 11: All checks, tick, commit**
+- [x] **Step 11: All checks, tick, commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:e2e

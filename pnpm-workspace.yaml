@@ -1,8 +1,9 @@
 # The workspace packages: apps/api since PH-03, apps/web and packages/shared
-# since PH-05.
+# since PH-05, e2e since PH-07.
 packages:
   - apps/*
   - packages/*
+  - e2e
 
 # Refuse to install with a Node version outside package.json's engines.
 engineStrict: true

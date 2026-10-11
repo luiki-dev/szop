@@ -8,8 +8,16 @@ import tseslint from "typescript-eslint";
 export default defineConfig(
   // Docs hold no code; .superpowers/ holds the brainstorm companion's
   // untracked files; coverage/ holds Vitest's generated report; dist/ holds
-  // the web app's build.
-  globalIgnores(["docs/", ".superpowers/", "coverage/", "**/dist/"]),
+  // the web app's build; e2e/playwright-report/ and e2e/test-results/ hold
+  // Playwright's output.
+  globalIgnores([
+    "docs/",
+    ".superpowers/",
+    "coverage/",
+    "**/dist/",
+    "e2e/playwright-report/",
+    "e2e/test-results/",
+  ]),
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
   {

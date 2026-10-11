@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "pnpm test --coverage",
+    "test:e2e": "pnpm build && pnpm --filter @szop/e2e exec playwright test",
     "prepare": "husky"
   },
   "devDependencies": {
