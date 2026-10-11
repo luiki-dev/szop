@@ -94,27 +94,6 @@ Roadmap entry: [PH-06b](roadmap.md#ph-06b-web-security-baseline).
 
 Roadmap entry: [PH-07](roadmap.md#ph-07-first-e2e-journey).
 
-#### OP-012
-
-**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
-
-- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
-  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
-  - **PH-04:** the first test against the database ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
-  - **PH-05:** the first component test ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
-  - **PH-07:** the first E2E journey on both viewports
-- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
-- **Issue:** [#64](https://github.com/luiki-dev/szop/issues/64)
-- **Status:** 🚧 In progress on [`test/ph-07-first-e2e-journey`](https://github.com/luiki-dev/szop/tree/test/ph-07-first-e2e-journey)
-
-#### OP-057
-
-**Extend the E2E suite for the visual design**, with the first E2E journey (OP-012): a Playwright Firefox project at the desktop viewport, next to desktop Chromium and the Pixel; axe with the `wcag2a`, `wcag2aa`, `wcag21aa` and `wcag22aa` rule sets, scanning every page in light and dark (Playwright can emulate `prefers-color-scheme`); and a journey that fails on any CSP violation the browser reports (for example a listener for `securitypolicyviolation` events, or the console). Show once that the guard catches an injected `<style>` element.
-
-- **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11
-- **Issue:** [#65](https://github.com/luiki-dev/szop/issues/65)
-- **Status:** 🚧 In progress on [`test/ph-07-first-e2e-journey`](https://github.com/luiki-dev/szop/tree/test/ph-07-first-e2e-journey)
-
 ### PH-08 Container image
 
 Roadmap entry: [PH-08](roadmap.md#ph-08-container-image).
@@ -467,7 +446,7 @@ Also: [OP-019](#op-019).
 - **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
   - **PH-03:** Vitest, its projects and the `test*` scripts, `testing.md` and the `CLAUDE.md` pointer ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
   - **PH-05:** Testing Library and MSW ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
-  - **PH-07:** Playwright with axe ✅ Done ([`test/ph-07-first-e2e-journey`](https://github.com/luiki-dev/szop/tree/test/ph-07-first-e2e-journey))
+  - **PH-07:** Playwright with axe ✅ Done ([#163](https://github.com/luiki-dev/szop/pull/163))
   - **PH-15:** fast-check and StrykerJS
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 18, 21, 22 and consequences
 - **Issue:** [#63](https://github.com/luiki-dev/szop/issues/63)
@@ -920,6 +899,19 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 - **Source:** [ADR 0007](decisions/0007-testing-strategy.md), decisions 12 and 13
 - **Status:** ✅ Closed: [ADR 0020](decisions/0020-database-details.md), decisions 7 and 13 ([#20](https://github.com/luiki-dev/szop/pull/20))
 
+#### OP-012
+
+**Write the first test of each layer**, including the first E2E journey on both viewports, so every testing decision is tried end to end.
+
+- **Parts** ([ADR 0014](decisions/0014-roadmap.md)):
+  - **PH-03:** the first API test ✅ Done ([#18](https://github.com/luiki-dev/szop/pull/18))
+  - **PH-04:** the first test against the database ✅ Done ([#20](https://github.com/luiki-dev/szop/pull/20))
+  - **PH-05:** the first component test ✅ Done ([#22](https://github.com/luiki-dev/szop/pull/22))
+  - **PH-07:** the first E2E journey on both viewports ✅ Done ([#163](https://github.com/luiki-dev/szop/pull/163))
+- **Source:** [ADR 0007](decisions/0007-testing-strategy.md), consequences
+- **Issue:** [#64](https://github.com/luiki-dev/szop/issues/64)
+- **Status:** ✅ Closed: [ADR 0026](decisions/0026-first-e2e-journey-details.md): `e2e/tests/health.spec.ts` runs on desktop Chromium, desktop Firefox and a Pixel 7 against the production build, so every layer has its first test ([#163](https://github.com/luiki-dev/szop/pull/163))
+
 #### OP-022
 
 **Apply and record the GitHub settings**: the required checks (`ci-ok` and the PR title check, with branches up to date), the code scanning rule, SHA pinning, read-only default token permissions and approval for outside contributors' runs. Update `github-settings.md`. The code scanning rule comes last, only after CodeQL has run successfully on `main`, since with an empty bypass list a CodeQL that cannot run would block every merge; and check that the SHA-pinning policy does not block CodeQL's default setup or Dependabot's own workflows (C9).
@@ -982,6 +974,14 @@ Optional technical phases on the [roadmap](roadmap.md#candidates), not scheduled
 
 - **Source:** [Audit, C1](audits/2026-09-29-design-sanity-check.md#consider-improving)
 - **Status:** ✅ Closed: the threat model is a living page, [threat-model.md](architecture/threat-model.md), with a row in the document roles; [ADR 0012](decisions/0012-security-baseline.md), decision 2
+
+#### OP-057
+
+**Extend the E2E suite for the visual design**, with the first E2E journey (OP-012): a Playwright Firefox project at the desktop viewport, next to desktop Chromium and the Pixel; axe with the `wcag2a`, `wcag2aa`, `wcag21aa` and `wcag22aa` rule sets, scanning every page in light and dark (Playwright can emulate `prefers-color-scheme`); and a journey that fails on any CSP violation the browser reports (for example a listener for `securitypolicyviolation` events, or the console). Show once that the guard catches an injected `<style>` element.
+
+- **Source:** [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11
+- **Issue:** [#65](https://github.com/luiki-dev/szop/issues/65)
+- **Status:** ✅ Closed: [ADR 0026](decisions/0026-first-e2e-journey-details.md), decisions 3 and 7: a desktop Firefox project next to desktop Chromium and the Pixel 7; `expectAccessible` runs axe with the four WCAG rule sets in light and dark; the CSP guard fails every test the browser reports a violation in, and its own test catches an injected `<style>` ([#163](https://github.com/luiki-dev/szop/pull/163))
 
 #### OP-058
 
