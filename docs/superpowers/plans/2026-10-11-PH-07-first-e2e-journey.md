@@ -803,7 +803,7 @@ EOF
 - Consumes: `pnpm test:e2e` (Task 1), `./.github/actions/setup`, `compose.yaml`, `apps/api/.env.example`.
 - Produces: a job named `e2e`, in `ci-ok`'s `needs`; an artifact `playwright-report` on failure. Task 5 documents both.
 
-- [ ] **Step 1: Add the job**
+- [x] **Step 1: Add the job**
 
 In `.github/workflows/ci.yml`, after the `build` job and before `commits`:
 
@@ -851,7 +851,7 @@ In `.github/workflows/ci.yml`, after the `build` job and before `commits`:
 
 The file's header comment stays; nothing else changes.
 
-- [ ] **Step 2: Check the workflow locally where possible**
+- [x] **Step 2: Check the workflow locally where possible**
 
 ```bash
 pnpm exec prettier --check .github/workflows/ci.yml
@@ -862,7 +862,7 @@ git diff .github/workflows/ci.yml
 
 Expected: Prettier passes; the diff shows only the new job and the `needs` line. The `workflows`, `e2e` and `ci-ok` jobs run on GitHub when the PR opens ([After tasks 1–6](#after-tasks-16-open-the-pr)).
 
-- [ ] **Step 3: Tick, commit**
+- [x] **Step 3: Tick, commit**
 
 Tick this task's boxes, then:
 
