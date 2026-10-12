@@ -581,7 +581,7 @@ The job first runs when the PR is open ([After tasks 1–6](#after-tasks-16-open
 - Consumes: the `FROM` line of `Dockerfile` (Task 1).
 - Produces: weekly Dependabot PRs `build(deps): …` for the Node base image's minor and patch updates and digest changes.
 
-- [ ] **Step 1: Add the entry**
+- [x] **Step 1: Add the entry**
 
 In `.github/dependabot.yml`, change the header's second line from `# Later phases add the docker and terraform ecosystems (OP-068).` to `# A later phase adds the terraform ecosystem (OP-068).`, and add at the end:
 
@@ -608,7 +608,7 @@ In `.github/dependabot.yml`, change the header's second line from `# Later phase
         update-types: ["version-update:semver-major"]
 ```
 
-- [ ] **Step 2: Check it**
+- [x] **Step 2: Check it**
 
 ```bash
 pnpm format:check
@@ -617,7 +617,7 @@ python3 -c "import yaml,sys; d=yaml.safe_load(open('.github/dependabot.yml')); p
 
 Expected: `['npm', 'github-actions', 'docker-compose', 'docker']`. Dependabot validates the file on GitHub once it reaches `main`; the repository's *Insights → Dependency graph → Dependabot* tab then lists the `docker` entry (checked after the merge, noted in the PR).
 
-- [ ] **Step 3: Tick, commit, push**
+- [x] **Step 3: Tick, commit, push**
 
 ```bash
 git add .github/dependabot.yml docs/superpowers/plans/2026-10-12-PH-08-container-image.md
