@@ -19,6 +19,7 @@
     "test:coverage": "pnpm test --coverage",
     "test:e2e": "pnpm build && pnpm --filter @szop/e2e exec playwright test",
     "test:e2e:report": "pnpm --filter @szop/e2e exec playwright show-report",
+    "check:image": "scripts/check-image.sh",
     "prepare": "husky"
   },
   "devDependencies": {

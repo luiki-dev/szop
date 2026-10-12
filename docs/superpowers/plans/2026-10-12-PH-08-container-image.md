@@ -293,7 +293,7 @@ git push -u origin feat/ph-08-container-image
 - Consumes: `szop:local` and the `Dockerfile` of Task 1; the `postgres` service of `compose.yaml`.
 - Produces: `scripts/check-image.sh [--no-build]`, exit 0 when the image is healthy, its user is not root and `/` serves HTML; exit 1 with the app's logs otherwise. The `app` container is always removed; PostgreSQL is left running. Task 3 calls it with `--no-build`.
 
-- [ ] **Step 1: Write the check and see it fail**
+- [x] **Step 1: Write the check and see it fail**
 
 Create `scripts/check-image.sh`:
 
@@ -350,7 +350,7 @@ scripts/check-image.sh; echo "exit $?"
 
 Expected: `FAIL: the app did not become healthy` (Compose reports `no such service: app`), the logs header, and `exit 1`.
 
-- [ ] **Step 2: The app service**
+- [x] **Step 2: The app service**
 
 In `compose.yaml`, after the `postgres` service and before `volumes:`, add:
 
@@ -410,7 +410,7 @@ docker compose --profile app config --services
 
 Expected: `postgres` alone, then `postgres` and `app`.
 
-- [ ] **Step 3: The pnpm script**
+- [x] **Step 3: The pnpm script**
 
 In the root `package.json`, add after `"test:e2e:report"`:
 
@@ -418,7 +418,7 @@ In the root `package.json`, add after `"test:e2e:report"`:
     "check:image": "scripts/check-image.sh",
 ```
 
-- [ ] **Step 4: See the check pass**
+- [x] **Step 4: See the check pass**
 
 ```bash
 pnpm check:image; echo "exit $?"
@@ -427,7 +427,7 @@ docker compose ps -a
 
 Expected: the build (mostly cached), `==>` lines, `OK: the image starts, migrates, runs as node (uid 1000) and serves the app`, `exit 0`; `docker compose ps -a` lists `postgres` only. If the API fails to start without the root `package.json`, add `COPY package.json ./` to the final stage, note it for the ADR, and rerun. If the healthcheck never passes, run `docker compose --profile app up app` in the foreground and read the error.
 
-- [ ] **Step 5: With PostgreSQL stopped** (Review Focus 2)
+- [x] **Step 5: With PostgreSQL stopped** (Review Focus 2)
 
 ```bash
 docker compose stop postgres
@@ -437,7 +437,7 @@ docker compose ps -a
 
 Expected: `exit 0`; afterwards `postgres` is running and healthy, and no `app` container is listed.
 
-- [ ] **Step 6: Next to `pnpm start`** (Review Focus 1)
+- [x] **Step 6: Next to `pnpm start`** (Review Focus 1)
 
 ```bash
 pnpm build
@@ -450,7 +450,7 @@ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3000/api/health || tru
 
 Expected: the health JSON from the local API, then `exit 0` from the check, then the local API stopped (`000`). If `$CLAUDE_JOB_DIR` is unset, use a file under `/tmp` with a unique name.
 
-- [ ] **Step 7: See it fail for the right reasons** (Review Focus 3; spec, success criteria)
+- [x] **Step 7: See it fail for the right reasons** (Review Focus 3; spec, success criteria)
 
 Each probe is undone before the next; none is committed.
 
@@ -474,7 +474,7 @@ c) **Running as root:** change the Dockerfile's `USER node` to `USER root`, then
 
 Note each failure's first line for the task report.
 
-- [ ] **Step 8: All checks, tick, commit**
+- [x] **Step 8: All checks, tick, commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm check:image
