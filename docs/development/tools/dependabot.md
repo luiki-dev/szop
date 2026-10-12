@@ -1,6 +1,6 @@
 # Dependabot
 
-Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for new versions of Szop's npm packages, GitHub Actions and the PostgreSQL image and opens pull requests for them (one grouped PR for the minor and patch updates of each ecosystem, and one PR per major update), and it warns about dependencies with known vulnerabilities.
+Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for new versions of Szop's npm packages, GitHub Actions, the PostgreSQL image and the Node base image of the container image and opens pull requests for them (one grouped PR for the minor and patch updates of each ecosystem, and one PR per major update), and it warns about dependencies with known vulnerabilities.
 
 ## Why Szop uses it
 
@@ -14,13 +14,14 @@ Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for 
 - `package-ecosystem: npm` with `directory: /`: the npm packages of the whole workspace, read from the root `package.json` and `pnpm-lock.yaml`.
 - `package-ecosystem: github-actions` with `directories: [/, /.github/actions/setup]`: `/` covers the workflows in `.github/workflows/`; the composite setup action is not scanned by default, so its folder is listed too.
 - `package-ecosystem: docker-compose` with `directory: /`: the images in `compose.yaml`, which today means PostgreSQL's. Its group is `docker-compose`, its messages are `build(deps): …`, and it ignores PostgreSQL's major updates: the major changes on purpose, together with RDS, `compose.yaml` and the [Docker Compose and PostgreSQL](docker-compose.md) page.
+- `package-ecosystem: docker` with `directory: /`: the base image in the root `Dockerfile`, `node:24-trixie-slim` pinned by digest. A new digest of the same tag, or a new minor or patch tag, comes as a PR that changes the `FROM` line. Its group is `docker`, its messages are `build(deps): …`, and it ignores Node's major updates, which change on purpose, together with `.nvmrc` and `engines` ([Docker](docker.md#updating-the-base-image)).
 - `schedule: interval: weekly, day: monday`: look for updates once a week, on Monday.
 - `cooldown: default-days: 7`: propose a version only once it is at least 7 days old, so a malicious release is usually found and removed before it is offered. Security updates skip the wait.
-- `groups`: `npm`, `actions` and `docker-compose`, each with `update-types: [minor, patch]`, put all minor and patch updates of an ecosystem in one PR. A major update matches no group, so it gets a PR of its own.
+- `groups`: `npm`, `actions`, `docker-compose` and `docker`, each with `update-types: [minor, patch]`, put all minor and patch updates of an ecosystem in one PR. A major update matches no group, so it gets a PR of its own.
 - `commit-message`: `prefix: build` and `prefix-development: build` with `include: scope` give `build(deps): …` for a dependency and `build(deps-dev): …` for a devDependency; for actions, `prefix: ci` gives `ci(deps): …`. Both scopes are on [commitlint](commitlint.md)'s list.
 - `ignore`: major updates of `@types/node` are skipped. Its major version follows Node's, which changes on purpose, together with `.nvmrc` and `engines`.
 
-Later phases add the `docker` and `terraform` ecosystems with their own ignore rules ([OP-068](https://github.com/luiki-dev/szop/issues/70)).
+A later phase adds the `terraform` ecosystem with its own ignore rules ([OP-068](https://github.com/luiki-dev/szop/issues/70)).
 
 **Alerts and security updates** are not in this file: Dependabot alerts (a warning when a dependency has a known vulnerability) and Dependabot security updates (a PR fixing it, without waiting for Monday or the cooldown) are switched on in the repository settings, listed in [GitHub settings](../github-settings.md#security).
 

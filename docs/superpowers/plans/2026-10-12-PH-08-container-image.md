@@ -644,29 +644,29 @@ git push
 
 Read each file before changing it and follow its existing shape and tone. Link ADR 0028 as `docs/decisions/0028-container-image-details.md` (relative from each file), which Task 6 writes.
 
-- [ ] **Step 1: The tool page**
+- [x] **Step 1: The tool page**
 
 `docs/development/tools/docker.md`, in the shape of `docs/development/tools/playwright.md` (read it first): what Docker images and the Dockerfile are, BuildKit and its cache mounts, the build context and `.dockerignore`; **why** each choice (the spec's decisions 1, 6, 7, 9, 10 and 11, briefly, linking ADR 0028); **the Dockerfile explained stage by stage** (`base`, `manifests`, `build`, `prod-deps`, the final stage), and why `pnpm deploy` is not used; **everyday use**: `pnpm check:image`, `docker compose --profile app up --build` to run it and open `http://127.0.0.1:8080`, `docker compose --profile app down`, a shell inside (`docker compose --profile app exec app sh`), rebuilding without the cache (`docker build --no-cache -t szop:local .`); **updating the base image** (Dependabot's PRs; the digest; Node's major by hand with `.nvmrc` and `engines`); **official documentation** links (Dockerfile reference, BuildKit cache mounts, `.dockerignore`, the Node image's docs). Add a `## Contents` if it passes about 100 lines.
 
-- [ ] **Step 2: Compose and Dependabot pages**
+- [x] **Step 2: Compose and Dependabot pages**
 
 - `docker-compose.md`: *Configuration* describes the `app` service and the profile (only started with `--profile app`; port 8080; `read_only`; the healthcheck through Node); *Everyday use* gains `pnpm check:image` and links `docker.md`.
 - `dependabot.md`: the `docker` entry, as the other entries are described (what it updates, the ignored majors, the grouping, the commit prefix); the line that says the `docker` ecosystem comes later is updated.
 
-- [ ] **Step 3: Testing, CI/CD and setup**
+- [x] **Step 3: Testing, CI/CD and setup**
 
 - `testing.md`: *The layers today* gains the image check (what it proves: the image builds, starts next to PostgreSQL, migrates, runs as `node`, serves `/`); *Running the tests* gains `pnpm check:image`, with Docker as a prerequisite; how to read its failure (the `FAIL:` line, then the app's logs). Keep the `## Contents` in sync.
 - `ci-cd.md`: *The jobs* gains `docker` (builds with BuildKit's GitHub Actions cache, loads `szop:local`, runs `scripts/check-image.sh --no-build`; no `pnpm install` on the runner); *ci-ok and the required checks* lists it; *Reading a failed run* says where the `FAIL:` line and the app's logs are; *Dependabot* lists the `docker` ecosystem. Keep the `## Contents` in sync.
 - `setup.md`: in *8. Check that everything works* or *9. Run the API and the page* (whichever fits), running the image with `pnpm check:image` and `docker compose --profile app up --build`; remove the image from *11. Coming later* if it is listed there.
 
-- [ ] **Step 4: Architecture, stack overview, threat model, glossary**
+- [x] **Step 4: Architecture, stack overview, threat model, glossary**
 
 - `architecture.md`, *5. Deployment*: the image's runtime layout: `/app` with `node_modules`, `apps/api/{package.json,src,drizzle,certs,node_modules}`, `packages/shared/{package.json,src,node_modules}`, `apps/web/dist`; working directory `/app/apps/api`; `node src/server.ts` as `node`; what the image sets (`WEB_ROOT`, `NODE_ENV`) and what the runner sets.
 - `stack-overview.md`: a new section *Container images* (numbered after the last, with its `## Contents` line): images and layers, the layer cache and why the manifests are copied first, multi-stage builds, why the user is not root and the files belong to root, pinning by digest versus by tag, a read-only root filesystem, PID 1 and signals. Learning-oriented, as the other sections.
 - `threat-model.md`: where it lists what guards the running API (read *Entry points, checked against STRIDE* and *Risks accepted on purpose* first), add the image's guards: non-root user, code read-only to it, read-only root filesystem, no secrets in the image (settings arrive at run time), and that the image is not scanned yet ([OP-090](https://github.com/luiki-dev/szop/issues/194)). Change only what the model's structure has a place for.
 - `glossary.md`: add the acronyms new to the docs, each in alphabetical order in the existing table: **CVE** (Common Vulnerabilities and Exposures), **PID** (process identifier), **SBOM** (software bill of materials) if not there, **OCI** (Open Container Initiative) if a doc uses it. Check each with `grep -n '^| \*\*NAME\*\*' docs/glossary.md` first.
 
-- [ ] **Step 5: Check the links, tick, commit**
+- [x] **Step 5: Check the links, tick, commit**
 
 ```bash
 for f in docs/development/tools/docker.md docs/development/tools/docker-compose.md docs/development/tools/dependabot.md docs/architecture/stack-overview.md docs/architecture/architecture.md docs/architecture/threat-model.md docs/development/ci-cd.md docs/development/testing.md docs/development/setup.md docs/glossary.md; do

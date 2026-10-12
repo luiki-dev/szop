@@ -43,6 +43,7 @@ CodeQL's default setup also scans `main` once a week on its own schedule.
 | `test` | code changed | Starts PostgreSQL from `compose.yaml` (`docker compose up -d --wait`, after copying `apps/api/.env.example` to `apps/api/.env`), then the tests: every Vitest project (`pnpm test:coverage`), with Vitest's test report and a coverage table in the job summary | `pnpm test` (or `pnpm test:coverage`) with PostgreSQL running |
 | `build` | code changed | `pnpm build`: the web app's production build, with its precompressed copies. It fails when the first screen's JavaScript exceeds 200 KB of Brotli ([NFR-3](../requirements/functional-requirements.md#nfr-3), [ADR 0023](../decisions/0023-production-build-and-serving-details.md)) and prints the size in its log. It needs no database | `pnpm build` |
 | `e2e` | code changed | Starts PostgreSQL as `test` does, installs Playwright's browsers, then `pnpm test:e2e`: builds the web app and runs the end-to-end (E2E) journeys on desktop Chromium, desktop Firefox and an emulated phone. When it fails, it uploads the HTML report as the `playwright-report` artifact | `pnpm test:e2e` with PostgreSQL running and the browsers installed ([setup guide](setup.md#the-end-to-end-journeys)) |
+| `docker` | code changed | Builds the container image with BuildKit, its layers cached in GitHub's cache, and loads it as `szop:local` without pushing it anywhere; then `scripts/check-image.sh --no-build` starts it next to PostgreSQL from `compose.yaml` and checks that it becomes healthy, runs as `node` and serves the SPA at `/` ([ADR 0028](../decisions/0028-container-image-details.md)). It runs no `pnpm install` on the runner: the dependencies are installed only inside the build | `pnpm check:image` with Docker running ([Docker](tools/docker.md)) |
 | `commits` | every PR, never on `main` | commitlint on every commit of the branch that is not on `main`, from `HEAD^1` to `HEAD^2` (see [The merge ref](#the-merge-ref)) | `pnpm exec commitlint --from origin/main --to HEAD` |
 | `workflows` | a file under `.github/workflows/` or `.github/actions/`, or `.github/dependabot.yml` or `.github/zizmor.yml`, changed | [actionlint](tools/actionlint.md), then [zizmor](tools/zizmor.md) | see their tool pages |
 | `ci-ok` | always, after all the others | Sums up the results ([below](#ci-ok-and-the-required-checks)) | — |
@@ -66,7 +67,7 @@ The `main` ruleset requires two status checks: **`ci-ok`** and **`pr-title`**. I
 Why one aggregating job instead of requiring every job:
 
 - Requiring every job would not work well. Each new job would need the ruleset edited too, and a required job that is skipped passes anyway: a job skipped by its `if:` reports, and GitHub counts it as passed. (Skipping with a `paths:` filter instead is worse: a workflow skipped that way never starts and never reports, and a required check on it leaves the PR waiting forever. That is why `ci.yml` always runs and skips jobs with `if:`.) One job that sees every result is the single place to decide. It always runs (`if: always()`), always reports, and fails when `changes` fails: otherwise a broken detection, which leaves every other job skipped, would let the PR through.
-- Adding a job later means adding it to `ci-ok`'s `needs:` list, without touching the ruleset. `build` and `e2e` are two of the jobs `ci-ok` waits for; the required check is still only `ci-ok`, so adding them changed no GitHub setting.
+- Adding a job later means adding it to `ci-ok`'s `needs:` list, without touching the ruleset. `build`, `e2e` and `docker` are among the jobs `ci-ok` waits for; the required check is still only `ci-ok`, so adding them changed no GitHub setting.
 
 **`ci-ok`'s rule:** it passes only when `changes` succeeded and every other job either succeeded or was skipped. A job that failed or was cancelled fails it. The first condition matters: when `changes` fails, every job that needs it is skipped, and "everything skipped" alone would look green.
 
@@ -78,7 +79,7 @@ Why one aggregating job instead of requiring every job:
 
 The `changes` job decides which jobs a PR needs, from the list of files it changes:
 
-- **Code** is any file that is not Markdown (`*.md`). A PR that changes only Markdown skips `lint`, `typecheck`, `test`, `build` and `e2e`; `ci-ok` stays green. Counting everything else as code is the safe way round: a new file type or configuration file is checked without anyone remembering to add it.
+- **Code** is any file that is not Markdown (`*.md`). A PR that changes only Markdown skips `lint`, `typecheck`, `test`, `build`, `e2e` and `docker`; `ci-ok` stays green. Counting everything else as code is the safe way round: a new file type or configuration file is checked without anyone remembering to add it.
 - **Workflows:** a change under `.github/workflows/` or `.github/actions/`, or to `.github/dependabot.yml` or `.github/zizmor.yml`, runs the `workflows` job. zizmor audits the Dependabot configuration too, and its own configuration file changes what it reports, so a change to either can turn the check red.
 - `commits` runs on every PR, whatever it changes.
 - **A push to `main` runs every job**, whatever it changes.
@@ -97,6 +98,8 @@ The job prints the changed files and its two answers (`code=…, workflows=…`)
 8. **`docker compose up --wait` failure in the `test` job:** the container never turned healthy; its logs are in the step's output. **`Cannot reach PostgreSQL` in the test step:** the database step was skipped or failed.
 9. **A failed `build` with `over budget (NFR-3)`:** the first screen needs more than 200 KB of Brotli-compressed JavaScript, and the log line names the size. Run `pnpm build` locally and find what grew: a new dependency, or an import that should be loaded lazily. Then either shrink it or, with a reason, change the budget through an ADR ([ADR 0013](../decisions/0013-visual-design.md), decision 4: "adjusted with a reason when real measurements exist").
 
+10. **A failed `docker` job:** if the build step failed, its log shows the Dockerfile step and the command's error, as `docker build -t szop:local .` would locally. If the check step failed, its log ends with a `FAIL:` line followed by the app's logs: `the app did not become healthy` (the API did not start or never answered `/api/health`; the logs say why), `GET / answered …` (the SPA is not where `WEB_ROOT` points) or `the image's user is …` (the Dockerfile's `USER` changed). Reproduce with `pnpm check:image`; the [testing guide](testing.md#running-the-tests) explains each message.
+
 From the terminal, `gh pr checks` shows the PR's checks and `gh run view --log-failed` prints the logs of the failed steps; see the [GitHub Actions page](tools/github-actions.md#everyday-use).
 
 ### Reading a failed E2E run
@@ -113,11 +116,12 @@ The `e2e` job's log shows Playwright's output, and the `github` reporter turns i
 
 Dependabot ([tool page](tools/dependabot.md)) opens update PRs every Monday:
 
-- **Groups:** one PR for all minor and patch updates of the npm packages, one for those of the GitHub Actions, one for those of the images in `compose.yaml`, and a separate PR for each major version.
+- **Groups:** one PR for all minor and patch updates of the npm packages, one for those of the GitHub Actions, one for those of the images in `compose.yaml`, one for the Node base image in the `Dockerfile`, and a separate PR for each major version.
 - **Cooldown:** a version is proposed only once it is at least 7 days old; security updates skip the wait.
 - **Commit messages:** `build(deps): …` for a dependency, `build(deps-dev): …` for a devDependency, `ci(deps): …` for an action. They pass commitlint like any commit.
 - **`@types/node`'s major updates are ignored**, since its major version follows Node's, which changes on purpose together with `.nvmrc`.
 - **PostgreSQL's major updates are ignored** the same way: the major version changes on purpose, together with RDS and `compose.yaml`.
+- **Node's major updates in the `Dockerfile` are ignored** too: the major changes on purpose, together with `.nvmrc` and `engines`.
 
 A Dependabot PR is reviewed and merged by the owner like any other PR; nothing merges by itself. Merging one makes the others out of date, so each needs *Update branch* and a new CI run before it can be merged.
 

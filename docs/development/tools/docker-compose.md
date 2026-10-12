@@ -1,6 +1,6 @@
 # Docker Compose and PostgreSQL
 
-Docker Compose starts the services a project needs from one file; Szop's only service is PostgreSQL, the database the API uses in development and the tests use, locally and in CI.
+Docker Compose starts the services a project needs from one file. Szop's everyday service is PostgreSQL, the database the API uses in development and the tests use, locally and in CI; a second service, `app`, runs [the container image](docker.md) next to it when asked for.
 
 ## Why Szop uses it
 
@@ -19,6 +19,14 @@ Docker Compose starts the services a project needs from one file; Szop's only se
 - `ports: "127.0.0.1:5432:5432"`: bound to the loopback address, so only this machine can connect; Docker would otherwise publish the port on every network interface.
 - `volumes: postgres-data:/var/lib/postgresql`: a named volume. PostgreSQL 18 keeps its data in `18/docker` below that folder, so the volume is mounted one level up. It lives inside Docker Desktop's virtual machine, not in WSL or Windows, which gives PostgreSQL a real Linux file system; a bind mount to a Windows path would fail on permissions and be slow.
 - `healthcheck`: runs `pg_isready` every 2 seconds; the container is `healthy` when it passes, and turns `unhealthy` after 15 failures in a row. It probes over TCP (`-h 127.0.0.1`), not the default Unix socket: while the image initialises an empty volume, it first runs a temporary server that listens on the socket only, so a socket probe could report healthy before the real server is up. Every CI run starts from an empty volume, so it would meet this every time. It is what `docker compose up --wait` waits for.
+- **The `app` service** ([ADR 0028](../../decisions/0028-container-image-details.md)), the container image:
+  - `profiles: [app]`: a **profile** marks a service that starts only when asked for with `--profile app`, so `docker compose up` still starts PostgreSQL alone.
+  - `build: .` and `image: szop:local`: built from the root `Dockerfile` and tagged `szop:local`; with `--no-build`, Compose uses an image of that name already built, as CI does.
+  - `depends_on: postgres: condition: service_healthy`: PostgreSQL is started first, and the app only once its health check passes.
+  - `environment`: every setting the image does not set itself. `HOST: 0.0.0.0`, because inside the container the API must listen on every interface for Docker's port mapping to reach it; `DATABASE_HOST: postgres`, the service's name on the network Compose creates for the project; the rest as in `apps/api/.env.example`.
+  - `ports: "127.0.0.1:8080:3000"`: the API listens on 3000 inside the container and is reached on 8080 on this machine, so `pnpm dev` and `pnpm start` keep 3000.
+  - `read_only: true`: the container's root filesystem is read-only, which proves the API writes nothing to disk, as AWS's container service will require.
+  - `healthcheck`: `node -e` with `fetch` on `/api/health`, since the slim image has no `curl`; `docker compose up --wait` waits for it.
 
 ## Everyday use
 
@@ -36,6 +44,7 @@ docker compose down -v                       # remove the data too
 - **`down -v`** gives a fresh, empty database on the next `up`.
 - **What keeps the data:** a container restart, a Docker Desktop restart, a minor image update and `down`. Only `down -v`, `docker volume rm szop_postgres-data` and Docker Desktop's *Clean / Purge data* remove it.
 - **A major upgrade** (18 to 19) starts an empty database beside the old one; in development, run `down -v` and let the migrations rebuild the schema.
+- **The container image:** `pnpm check:image` builds it, starts it next to PostgreSQL, checks it and removes it; `docker compose --profile app up --build` runs it on <http://127.0.0.1:8080>. More on the [Docker page](docker.md#everyday-use).
 - **`port is already allocated` or `address already in use`:** something else listens on 5432, often a PostgreSQL installed natively or another project's container. Find it with `docker ps` and `sudo ss -ltnp | grep 5432`.
 - **`docker: command not found` in WSL:** Docker Desktop is not running, or its WSL integration is off (*Settings → Resources → WSL integration*).
 
