@@ -1,6 +1,6 @@
 # Testing guide
 
-How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tools behind the tests have their own pages: [Vitest](tools/vitest.md), [Testing Library](tools/testing-library.md), [Mock Service Worker (MSW)](tools/msw.md) and [Playwright](tools/playwright.md).
+How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tools behind the tests have their own pages: [Vitest](tools/vitest.md), [Testing Library](tools/testing-library.md), [Mock Service Worker (MSW)](tools/msw.md), [Playwright](tools/playwright.md) and [Docker](tools/docker.md).
 
 The guide grows as the layers arrive: property tests and mutation testing in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
 
@@ -32,6 +32,7 @@ The guide grows as the layers arrive: property tests and mutation testing in [PH
 | Component tests | `apps/web/src/**/*.test.tsx`, for example `health/health-page.test.tsx` | A page works as a user sees it: the real route table, hook, API client and schema run in a simulated browser ([jsdom](tools/vitest.md#jsdom)) with only the network faked by MSW | `web` |
 | Unit tests | next to the code, for example `apps/api/src/config.test.ts` | One function does its job for each kind of input, with no server involved | `api` |
 | End-to-end (E2E) journeys | `e2e/tests/*.spec.ts`, for example `health.spec.ts` | A real browser drives the production build through the SPA, the API and PostgreSQL, on three projects (desktop Chromium, desktop Firefox and an emulated phone), checks every page with axe and fails on any Content Security Policy (CSP) violation | ➖ N/A: Playwright |
+| The image check | `scripts/check-image.sh` | The container image builds, starts next to PostgreSQL, migrates, runs as the `node` user and serves the SPA at `/` ([ADR 0028](../decisions/0028-container-image-details.md)) | ➖ N/A: a bash script |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
 
 Layer still to come: **property tests and mutation testing** for the domain rules, in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
@@ -69,6 +70,16 @@ pnpm test:e2e:report                             # open the HTML report of the l
 - A passing run ends with a line such as `6 passed (8.0s)`. A test is shown once per project, as `[desktop-chromium] › tests/health.spec.ts › …`.
 - **In the editor,** the Playwright Test extension runs the same config, but it does not build first: it tests the last build. Run `pnpm build` after every change to `apps/web` or `packages/shared`, or the run tests the old code (and stops with "run `pnpm build` first" when there is no build at all). Changes to the API need no rebuild, since the API runs from source.
 - If the run stops before any test with "is already used", something still answers on port 3100. The usual holder is an E2E server left behind by a run that was killed hard, a closed terminal for example (Playwright starts its server in a separate process group, so the signal never reaches it). Killing `start-server.ts` does nothing, since it ignores `SIGINT` and `SIGTERM` by design. Find the listener with `ss -ltnp 'sport = :3100'` and stop that process, normally `node src/server.ts`, the API: `start-server.ts` then exits by itself. A `pnpm start` is a holder only if its `PORT` was set to 3100 (it listens on 3000 by default). If it hangs at the very start with no output on WSL, see [the setup guide](setup.md#the-end-to-end-journeys).
+
+The image check is not part of `pnpm test` either: it needs Docker and builds the container image, which takes a while the first time. It needs Docker Desktop running; it starts PostgreSQL itself if it is stopped, and leaves it running.
+
+```bash
+pnpm check:image                                 # build the image, start it next to PostgreSQL, check it, remove it
+```
+
+- A passing run ends with `OK: the image starts, migrates, runs as node (uid 1000) and serves the app`.
+- A failing run prints a `FAIL:` line, then the app's logs, and exits 1. `the app did not become healthy` means the API did not start or never answered `/api/health`: the logs say why (a missing migrations journal, an unreachable database, an invalid setting). `GET / answered 404, not 200` means the SPA is not where `WEB_ROOT` points. `GET / did not answer within 10 seconds` means the app accepted the request but never replied. `the image's user is 'root', not node` means the Dockerfile's `USER` changed. In every case the `app` container is removed afterwards.
+- CI runs the same script in its `docker` job, on an image it built itself ([CI/CD](ci-cd.md#the-jobs)). More on the image and the check: [Docker](tools/docker.md#running-it-the-app-profile-and-the-check).
 
 ## Writing an API test
 

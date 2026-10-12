@@ -1,4 +1,4 @@
-# PostgreSQL for local development and CI (ADR 0005, decision 4; ADR 0020).
+# PostgreSQL for local development and CI (ADR 0005, decision 4; ADR 0020), and the container image under the app profile (ADR 0028).
 name: szop
 services:
   postgres:
@@ -25,6 +25,48 @@ services:
     # socket only, and a socket probe would report healthy too early.
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "szop", "-d", "szop"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+  # The container image (ADR 0028), started only with --profile app, so
+  # `docker compose up` alone still starts PostgreSQL only. pnpm check:image
+  # starts it and checks it.
+  app:
+    profiles: [app]
+    build: .
+    image: szop:local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Every setting the image does not set itself (it sets WEB_ROOT and
+    # NODE_ENV). Inside the container the API listens on every interface, so
+    # Docker's port mapping reaches it; the published port stays on the host's
+    # 127.0.0.1.
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3000"
+      LOG_LEVEL: info
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: szop
+      DATABASE_USER: szop
+      DATABASE_PASSWORD: szop
+      TRUSTED_PROXIES: none
+    # 8080 on the host, so pnpm dev and pnpm start keep 3000.
+    ports:
+      - "127.0.0.1:8080:3000"
+    # The API writes nothing to disk (logs go to stdout), as ECS's
+    # readonlyRootFilesystem will require.
+    read_only: true
+    # The slim image has no curl, so Node itself asks for /api/health.
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
+        ]
       interval: 2s
       timeout: 2s
       retries: 15

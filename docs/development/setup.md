@@ -15,6 +15,7 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
   - [The end-to-end journeys](#the-end-to-end-journeys)
 - [9. Run the API and the page](#9-run-the-api-and-the-page)
   - [Run the production build](#run-the-production-build)
+  - [Run the container image](#run-the-container-image)
 - [10. What the git hooks do](#10-what-the-git-hooks-do)
 - [11. Coming later](#11-coming-later)
 
@@ -182,6 +183,22 @@ pnpm start
 - **Open `http://localhost:3000`,** the API's own address: it serves the page and `/api` on one port, as in production, with no Vite in between. The page shows the same status line as in development.
 
 The API finds the build through `WEB_ROOT` in `apps/api/.env`, the folder `pnpm build` writes, given relative to `apps/api`: `WEB_ROOT=../web/dist`. **An `.env` copied before this setting existed lacks it,** and the API then stops with `Invalid configuration` naming `WEB_ROOT`: add the line `WEB_ROOT=../web/dist` from `.env.example`. Until the first `pnpm build`, the folder does not exist, and `pnpm dev` logs a warning about it at startup. Opening a page on the API's own port (`http://localhost:3000`) before the first build also logs a warning per request (`Trying to send a NotFound error inside a 404 handler`) and answers a plain-text 404. Both are harmless, since in development the page is opened on Vite's port, `http://localhost:5173`, and Vite serves it. A new build is picked up when the API restarts.
+
+### Run the container image
+
+The container image is how the app will run on AWS: the API and the built page in one image, run by Docker ([Docker](tools/docker.md)). With Docker Desktop running (section 7):
+
+```bash
+pnpm check:image
+```
+
+It builds the image (a few minutes the first time, then mostly from Docker's cache), starts it next to PostgreSQL, checks it and removes it again. Success looks like this: it ends with `OK: the image starts, migrates, runs as node (uid 1000) and serves the app`. To keep it running and open it in the browser:
+
+```bash
+docker compose --profile app up --build
+```
+
+Open `http://localhost:8080`: the same page as `pnpm start`, served from inside the container, with the development database. It uses port 8080, so it can run next to `pnpm dev` or `pnpm start`. Stop it with Ctrl+C. The [testing guide](testing.md#running-the-tests) explains a failed check.
 
 ## 10. What the git hooks do
 
