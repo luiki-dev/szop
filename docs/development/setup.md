@@ -198,7 +198,7 @@ It builds the image (a few minutes the first time, then mostly from Docker's cac
 docker compose --profile app up --build
 ```
 
-Open `http://localhost:8080`: the same page as `pnpm start`, served from inside the container, with the development database. It uses port 8080, so it can run next to `pnpm dev` or `pnpm start`. Stop it with Ctrl+C. The [testing guide](testing.md#running-the-tests) explains a failed check.
+Open `http://localhost:8080`: the same page as `pnpm start`, served from inside the container, with the development database. It uses port 8080, so it can run next to `pnpm dev` or `pnpm start`. Stop it with Ctrl+C, and remove its containers with `docker compose --profile app down`: a plain `docker compose down` leaves out every service behind a profile, so it removes PostgreSQL but leaves the app running, and warns `Network szop_default Resource is still in use`. The [testing guide](testing.md#running-the-tests) explains a failed check.
 
 ## 10. What the git hooks do
 

@@ -93,6 +93,7 @@ docker run --rm --entrypoint sh szop:local -c 'ls -la /app'   # look inside with
 ```
 
 - **It uses the development database** `szop`, as `pnpm start` does, and migrates it the same way.
+- **Stop it with the profile too:** `docker compose --profile app down`. A plain `docker compose down` only sees the services without a profile, so it removes PostgreSQL, leaves the app running (soon unhealthy, with its database gone) and warns `Network szop_default Resource is still in use`. Run the command with the profile to clean up.
 - **Port 8080, not 3000,** so the image and `pnpm dev` or `pnpm start` can run at the same time.
 - **A failed check:** read the `FAIL:` line, then the logs under it. `the app did not become healthy` means the API did not start or did not answer `/api/health`: the logs show why (a missing setting, an unreachable database, a missing file). `GET / answered 404` means the SPA is not where `WEB_ROOT` points.
 - **Docker Desktop must be running,** with its WSL integration on ([Docker Compose](docker-compose.md#everyday-use)).

@@ -42,6 +42,7 @@ docker compose down -v                       # remove the data too
 
 - **In `psql`:** `\l` lists the databases, `\c szop_test_1` switches to one, `\dt` lists its tables, `\dt drizzle.*` those of the migration bookkeeping, and `\q` quits.
 - **`down -v`** gives a fresh, empty database on the next `up`.
+- **Commands without `--profile app` ignore the `app` service.** After `docker compose --profile app up`, a plain `down` removes PostgreSQL but not the app, and warns that the network `szop_default` is still in use; `docker compose --profile app down` removes both.
 - **What keeps the data:** a container restart, a Docker Desktop restart, a minor image update and `down`. Only `down -v`, `docker volume rm szop_postgres-data` and Docker Desktop's *Clean / Purge data* remove it.
 - **A major upgrade** (18 to 19) starts an empty database beside the old one; in development, run `down -v` and let the migrations rebuild the schema.
 - **The container image:** `pnpm check:image` builds it, starts it next to PostgreSQL, checks it and removes it; `docker compose --profile app up --build` runs it on <http://127.0.0.1:8080>. More on the [Docker page](docker.md#everyday-use).
