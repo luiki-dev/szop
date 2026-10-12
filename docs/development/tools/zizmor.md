@@ -6,7 +6,7 @@ zizmor is a security linter for GitHub Actions: it audits the workflow files, co
 
 - **Workflow security, checked by a tool:** [ADR 0010](../../decisions/0010-ci-cd.md), decision 21. The rules every workflow follows (decision 20 of the same ADR) are easy to break by accident; zizmor checks them on every change. [actionlint](actionlint.md) checks correctness; zizmor checks security. CodeQL also scans the workflows, but blocks a merge only for *high* or *critical* alerts, while any zizmor finding fails the job.
 - **Its maintainers' own action, in annotation mode:** [ADR 0018](../../decisions/0018-ci-details.md), decision 5. `zizmorcore/zizmor-action` is pinned by SHA, so Dependabot keeps it current. By default it uploads its results to GitHub's code scanning, which needs the `security-events: write` permission and never fails the job, so a finding would block only through the code scanning rule. With `advanced-security: false`, findings fail the job directly, with only `contents: read`.
-- **In CI only, for now:** [ADR 0018](../../decisions/0018-ci-details.md), decision 6. A local hook is revisited in PH-11 ([OP-066](../../open-points.md#op-066)).
+- **In CI only, for now:** [ADR 0018](../../decisions/0018-ci-details.md), decision 6. A local hook is revisited in PH-11 ([OP-066](https://github.com/luiki-dev/szop/issues/79)).
 
 ## Configuration
 
@@ -19,7 +19,7 @@ zizmor is a security linter for GitHub Actions: it audits the workflow files, co
 
 **`.github/zizmor.yml`**, which zizmor finds on its own:
 
-- `rules: self-repository: disable: true`: turns off the audit that reports every local action referred to as `./…`. GitHub's newer `$/…` syntax is safer, but actionlint 1.7.12 rejects it as invalid, so Szop keeps `./` and this audit off until actionlint accepts `$/` ([ADR 0018](../../decisions/0018-ci-details.md), decision 12; [OP-069](../../open-points.md#op-069)).
+- `rules: self-repository: disable: true`: turns off the audit that reports every local action referred to as `./…`. GitHub's newer `$/…` syntax is safer, but actionlint 1.7.12 rejects it as invalid, so Szop keeps `./` and this audit off until actionlint accepts `$/` ([ADR 0018](../../decisions/0018-ci-details.md), decision 12; [OP-069](https://github.com/luiki-dev/szop/issues/80)).
 
 ## Everyday use
 

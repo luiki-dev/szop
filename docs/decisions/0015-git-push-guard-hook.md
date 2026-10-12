@@ -29,5 +29,5 @@ The `--force*`, `-f`, `+branch`, `--delete`, `-d` and `--tags` rules were tested
 
 - **The hook guards against mistakes, not against a determined attacker,** like the deny rules: it does not interpret subshells, `eval`, aliases or scripts. GitHub's rulesets ([ADR 0009](0009-git-workflow.md)) and the reviewer on `demo` (ADR 0012, decision 16) stay the real boundaries.
 - **Every shell command Claude runs starts a short Node process first.** It takes a few tens of milliseconds.
-- **The hook and its tests live outside the toolchain** until there is one: [OP-062](../open-points.md#op-062) brings them under ESLint, Prettier and CI in PH-01 and PH-02.
+- **The hook and its tests live outside the toolchain** until there is one: [OP-062](https://github.com/luiki-dev/szop/issues/189) brings them under ESLint, Prettier and CI in PH-01 and PH-02.
 - **The living docs are updated:** `git-workflow.md` (what enforces Claude's push guardrails), the threat model (Claude Code's guards), the glossary (a Claude Code hook) and `CLAUDE.md` (don't work around the hook either).

@@ -3,7 +3,7 @@
 - **Phase:** [PH-07](../../roadmap.md#ph-07-first-e2e-journey)
 - **Date:** 2026-10-11
 - **Path:** full (spec and plan), [ADR 0004](../../decisions/0004-implementation-process.md), decision 8
-- **Open points:** [OP-010](../../open-points.md#op-010) (PH-07 part, then on to PH-15); [OP-012](../../open-points.md#op-012) (its last part); [OP-057](../../open-points.md#op-057); [OP-067](../../open-points.md#op-067) moved to [PH-08](../../roadmap.md#ph-08-container-image); new [OP-087](../../open-points.md#op-087)
+- **Open points:** [OP-010](../../archive/open-points.md#op-010) (PH-07 part, then on to PH-15); [OP-012](../../archive/open-points.md#op-012) (its last part); [OP-057](../../archive/open-points.md#op-057); [OP-067](../../archive/open-points.md#op-067) moved to [PH-08](../../roadmap.md#ph-08-container-image); new [OP-087](../../archive/open-points.md#op-087)
 
 A real browser drives the production build for the first time. Playwright starts the API against its own database, opens the health page on desktop Chromium, desktop Firefox and an emulated phone, checks it with axe in light and dark mode, and fails if the browser reports any Content Security Policy (CSP) violation. CI runs the suite on every code PR and keeps the report of a failed run. The direction was settled by [ADR 0007](../../decisions/0007-testing-strategy.md) (decisions 4, 5, 6, 11, 15, 17, 18 and 21), [ADR 0010](../../decisions/0010-ci-cd.md) (decisions 7 and 9) and [ADR 0013](../../decisions/0013-visual-design.md) (decisions 2, 3 and 9). This spec holds the details those left to the phase, as agreed in the brainstorm. They are recorded in ADR 0026, which also refines ADR 0010, decision 9: the browsers are not cached ([decision 5](#decisions-taken-in-the-brainstorm)).
 
@@ -45,23 +45,23 @@ The phase is done when:
 
 - **Journeys for use cases.** No use case is complete yet; each phase that completes one adds its journey ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 4).
 - **Reading emails in tests**, decided by the phase that delivers [ACC-2](../../requirements/functional-requirements.md#acc-2) (ADR 0007, decision 15).
-- **Running the suite against the container image**, one of the two options of [OP-032](../../open-points.md#op-032), left to PH-08.
+- **Running the suite against the container image**, one of the two options of [OP-032](../../archive/open-points.md#op-032), left to PH-08.
 - **Dark styles.** The health page has none yet, so both color schemes see the same page; the design system arrives in [PH-14](../../roadmap.md#ph-14-app-shell-and-design-system).
 - **A WebKit project, visual regression and Lighthouse CI**, left out by ADR 0007, decisions 5, 6 and 23, and ADR 0013, decisions 1 and 23.
-- **How the GitHub tracking trial ends** ([OP-086](../../open-points.md#op-086)). It stays in the PH-08 group and is taken as an ADR-only PR right after PH-07 merges, so the review includes this phase.
+- **How the GitHub tracking trial ends** ([OP-086](../../archive/open-points.md#op-086)). It stays in the PH-08 group and is taken as an ADR-only PR right after PH-07 merges, so the review includes this phase.
 
 ## Decisions taken in the brainstorm
 
 | # | Topic | Options considered | Decision |
 |---|---|---|---|
-| 1 | Open points outside E2E | Keep them in PH-07; move them | **[OP-067](../../open-points.md#op-067) moves to PH-08** with the same "does not depend on that phase" note: GitHub shows no Dependabot PR yet, so PH-07 cannot close it. [OP-086](../../open-points.md#op-086) is a process decision, a second concept for the phase; it stays in the PH-08 group and is taken as an ADR-only PR after PH-07 merges. |
+| 1 | Open points outside E2E | Keep them in PH-07; move them | **[OP-067](../../archive/open-points.md#op-067) moves to PH-08** with the same "does not depend on that phase" note: GitHub shows no Dependabot PR yet, so PH-07 cannot close it. [OP-086](../../archive/open-points.md#op-086) is a process decision, a second concept for the phase; it stays in the PH-08 group and is taken as an ADR-only PR after PH-07 merges. |
 | 2 | What `pnpm test:e2e` runs against | The script builds first; Playwright's `webServer` builds, then starts; the developer builds by hand | **The script builds first:** `pnpm build`, then `playwright test`. It always tests the code as it is, and CI runs the same script. A build inside `webServer` counts against the server's timeout and hides its errors; building by hand makes a stale `dist/` easy to test. **The server runs on its own port, 3100, and starts fresh every run** (`reuseExistingServer: false`), so a running `pnpm start` on 3000, with the development database, is never tested by mistake. |
 | 3 | How axe scans light and dark | A helper scanning both schemes; six projects (three, each in both schemes); an automatic scan after every navigation | **A helper, `expectAccessible(page)`,** called by the journey on every page it reaches, scans in light, then in dark. Six projects double every run for what is almost always a contrast problem, which the helper catches. An automatic scan cannot tell when a single-page application (SPA) has finished rendering a screen, so it would scan half-loaded pages. |
 | 4 | Retries | None; two in CI (Playwright's default); one in CI with flaky tests failing the job | **One retry in CI, with `failOnFlakyTests: true`; none locally.** The check stays red for a flaky test, as ADR 0007, decision 16 wants, and the report labels each failure *flaky* (passed on its retry) or *failed* (failed twice), with a trace of each attempt. Two retries turn the check green and hide the flakiness. |
 | 5 | Playwright's browsers in CI | Cached, as ADR 0010, decision 9 said; installed every run; Playwright's container image | **Installed every run, not cached:** `playwright install --with-deps chromium firefox`. Restoring the cache takes about as long as the download, and the system libraries come from `apt`, which cannot be cached; Playwright's CI documentation advises the same. The container image's tag must match `@playwright/test` exactly, and `docker compose up --wait` ([ADR 0020](../../decisions/0020-database-details.md), decision 6) is awkward inside a container job. The install step's time is noted in the PR; if it dominates the job, the cache or the image comes back. **Refines ADR 0010, decision 9.** |
 | 6 | Server and database | One start script reading `apps/api/.env`; a separate `e2e/.env` with a reset step in the script; importing the API's test helpers | **One start script, `e2e/start-server.ts`:** it resets `szop_e2e`, then starts the API with the settings of `apps/api/.env` and the E2E overrides merged in one visible expression, `{ ...process.env, ...fileEnv, ...overrides }`, rather than through `--env-file`, whose precedence rule (the environment wins over the file) is invisible in the code. Being one script, the reset always comes before the start, whether the run starts from the command line, the editor or CI. A second `.env` would drift from the first; importing from `apps/api/src/test/` would couple `e2e/` to another package's private test folder. |
 | 7 | The CSP guard | The `securitypolicyviolation` event; console messages; a report endpoint on the API | **The event, collected by a wrapper of Playwright's `context` fixture** and checked after every test. It is standard and fires in Chromium and Firefox alike. Firefox writes its CSP messages to the browser's own console, which Playwright may not see; a report endpoint adds a route to the API for the tests' sake. **ESLint bans importing from `@playwright/test` in `e2e/tests/`**, since a journey that bypasses `support/test.ts` would run unguarded and still pass. |
-| 8 | The first journey's name and lifetime | `health.spec.ts`; `uc-01-…` | **`health.spec.ts`,** named after the page: no use case is complete, and the `uc-NN-…` files of ADR 0007, decision 17 are for use cases. It stays until the health page itself is replaced, tracked as [OP-087](../../open-points.md#op-087) for PH-14. |
+| 8 | The first journey's name and lifetime | `health.spec.ts`; `uc-01-…` | **`health.spec.ts`,** named after the page: no use case is complete, and the `uc-NN-…` files of ADR 0007, decision 17 are for use cases. It stays until the health page itself is replaced, tracked as [OP-087](../../archive/open-points.md#op-087) for PH-14. |
 | 9 | What CI keeps of a failed run | The HTML report; the report and `test-results/` | **The HTML report only.** Playwright copies each failed test's trace and screenshot into it, so it is the one thing needed to read a failure. |
 
 ## Design
@@ -208,10 +208,10 @@ e2e:
 - **`.vscode/extensions.json`:** `ms-playwright.playwright` (ADR 0007, decision 21).
 - **GitHub first, then the docs** ([ADR 0024](../../decisions/0024-github-project-tracking.md)):
   - [#36](https://github.com/luiki-dev/szop/issues/36) is 🚧 In progress, with its owner step [#159](https://github.com/luiki-dev/szop/issues/159) (installing the browsers with their system libraries); its Spec and Plan fields set as they are committed. The roadmap's PH-07 row and **Owner steps** follow, with the README's diagram.
-  - [OP-010](../../open-points.md#op-010): the PH-07 part ✅ done; re-parented to PH-15, ⬜ Backlog.
-  - [OP-012](../../open-points.md#op-012) and [OP-057](../../open-points.md#op-057): closed by the PR.
-  - [OP-067](../../open-points.md#op-067): re-parented to PH-08, with "Moved from PH-07: it does not depend on that phase."
-  - [OP-087](../../open-points.md#op-087) ([#160](https://github.com/luiki-dev/szop/issues/160)), under PH-14: replace the health journey when the health page goes.
+  - [OP-010](../../archive/open-points.md#op-010): the PH-07 part ✅ done; re-parented to PH-15, ⬜ Backlog.
+  - [OP-012](../../archive/open-points.md#op-012) and [OP-057](../../archive/open-points.md#op-057): closed by the PR.
+  - [OP-067](../../archive/open-points.md#op-067): re-parented to PH-08, with "Moved from PH-07: it does not depend on that phase."
+  - [OP-087](../../archive/open-points.md#op-087) ([#160](https://github.com/luiki-dev/szop/issues/160)), under PH-14: replace the health journey when the health page goes.
 
 ## Tasks
 

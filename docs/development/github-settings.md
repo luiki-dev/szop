@@ -123,7 +123,7 @@ For public repositories some of these may already be on.
 
 ## Features
 
-*Settings → General* → section **Features**. Nothing is changed. **Issues** are used: since [ADR 0024](../decisions/0024-github-project-tracking.md) they track the phases, open points and decision work, next to the [roadmap](../roadmap.md), in a trial. **Projects** stays on; the project itself belongs to the owner's account (see [Project](#project)).
+*Settings → General* → section **Features**. Nothing is changed. **Issues** are used: since [ADR 0024](../decisions/0024-github-project-tracking.md) they track the phases, open points and decision work, next to the [roadmap](../roadmap.md). **Projects** stays on; the project itself belongs to the owner's account (see [Project](#project)).
 
 ## Labels
 
@@ -142,7 +142,7 @@ The [Szop project](https://github.com/users/luiki-dev/projects/3), owned by the 
 | **Visibility** | Public | The README and the roadmap link it. ADR 0024, decision 13. |
 | **Fields** | Status (six options), Order, Path, Spec, Plan, Started, Finished | See [project tracking](project-tracking.md#fields). ADR 0024, decisions 7 and 8. |
 | **Workflows** | On: Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr,owner`; auto-add sub-issues. Off: Auto-close issue, Pull request linked to issue, Pull request merged | See [project tracking](project-tracking.md#workflows). |
-| **Views** | Timeline, Backlog, Board, Open Points, Next Up | See [project tracking](project-tracking.md#views). |
+| **Views** | Timeline, Backlog, Board, Open Points, Next Up, Owner Steps | See [project tracking](project-tracking.md#views). |
 
 ## Checking the settings
 
@@ -179,5 +179,5 @@ Expected:
 - `sha_pinning_required` is `true`.
 - `default_workflow_permissions` is `read` and `can_approve_pull_request_reviews` is `false`.
 - `approval_policy` is `all_external_contributors`.
-- CodeQL's `state` is `configured`, with `actions` among its `languages` once the workflows are on `main` (until then, only the JavaScript and TypeScript entries; [OP-067](../open-points.md#op-067)).
+- CodeQL's `state` is `configured`, with `actions` among its `languages` once the workflows are on `main` (until then, only the JavaScript and TypeScript entries; [OP-067](https://github.com/luiki-dev/szop/issues/27)).
 - Six labels; six milestones, with `Definition` and `Stage 1: Local foundations` closed; the project is public.

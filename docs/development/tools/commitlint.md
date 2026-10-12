@@ -6,7 +6,7 @@ commitlint checks every commit message against the Conventional Commits conventi
 
 - **Conventional Commits, checked by a tool:** [ADR 0009](../../decisions/0009-git-workflow.md), decision 9. release-please reads the commit types to pick the next version, so a convention nobody checks would silently drift. Plain imperative subjects would give tools nothing to read.
 - **In a hook, then in CI:** decision 16 of the same ADR puts commitlint and the `commit-msg` hook in the development environment phase, since both need `package.json` and husky. From PH-02, CI checks every commit of a pull request too, so skipping the hook only delays the failure.
-- **The preset, with two changes** ([OP-009](../../open-points.md#op-009)): the line-length limits on bodies and footers are off, since Dependabot's commit bodies hold links longer than 100 characters, which would fail every Dependabot PR; and only the nine types of ADR 0009 are allowed, not the preset's `style` and `revert`.
+- **The preset, with two changes** ([OP-009](https://github.com/luiki-dev/szop/issues/175)): the line-length limits on bodies and footers are off, since Dependabot's commit bodies hold links longer than 100 characters, which would fail every Dependabot PR; and only the nine types of ADR 0009 are allowed, not the preset's `style` and `revert`.
 - **A scope allow-list:** a misspelled scope (`feat(aip)`) would otherwise pass and split the history. [ADR 0016](../../decisions/0016-toolchain-details.md) explains the list.
 
 ## Configuration

@@ -9,7 +9,7 @@
 - Plan:
 - Requirement IDs:
 - ADRs:
-- Open points (closed, re-assigned or added):
+- Issues changed (open points closed, re-assigned or added; phase bodies updated):
 - Issues closed (`Closes #N`, one per line):
 
 <!-- Write "none" for links that do not apply. -->
@@ -30,6 +30,6 @@
 - [ ] Living docs updated: architecture, stack overview, glossary, threat model, visual design, functional requirements, roadmap status and the issues (Claude)
 - [ ] Guides updated (Claude)
 - [ ] Significant decisions have ADRs (Claude → owner)
-- [ ] Open points closed, re-assigned or added in `docs/open-points.md` and their issues (Claude)
+- [ ] Open points closed, re-assigned or added on GitHub, and listed above (Claude)
 - [ ] Commits and the PR title follow Conventional Commits; in a phase, commits follow the plan's tasks (Claude)
 - [ ] UI changes shown: screenshots of phone (light and dark) and desktop (light) (Claude)

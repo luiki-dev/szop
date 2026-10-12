@@ -1,11 +1,11 @@
 # "Ring tail" visual redesign — design
 
-- **Topic:** the "Ring tail" redesign of [OP-073](../../open-points.md#op-073), settled before PH-14 builds the design system
+- **Topic:** the "Ring tail" redesign of [OP-073](../../archive/open-points.md#op-073), settled before PH-14 builds the design system
 - **Date:** 2026-10-07
 - **Path:** full (spec and plan), [ADR 0004](../../decisions/0004-implementation-process.md), decision 8; documentation only, no code
-- **Open points:** [OP-073](../../open-points.md#op-073)
+- **Open points:** [OP-073](../../archive/open-points.md#op-073)
 
-A design exploration on 2026-10-06 produced an alternative look for Szop, "Ring tail" ([screenshot](../../ideas/visual-design/ring-tail.png)): a fur-gray page with white category cards, Gabarito, and checked items dropping out of the list into a dark "haul" tray at the bottom. This brainstorm kept it, adjusted it and settled what [OP-073](../../open-points.md#op-073) left open. The result replaces parts of [ADR 0013](../../decisions/0013-visual-design.md) (the look, the color, the font) and decision 9 of [ADR 0001](../../decisions/0001-functional-requirements-scope.md) (how checked items are shown), so it changes the design system, the requirements and the architecture notes. Nothing is built here: PH-14 builds the design system, and the list phases build the screen.
+A design exploration on 2026-10-06 produced an alternative look for Szop, "Ring tail" ([screenshot](../../ideas/visual-design/ring-tail.png)): a fur-gray page with white category cards, Gabarito, and checked items dropping out of the list into a dark "haul" tray at the bottom. This brainstorm kept it, adjusted it and settled what [OP-073](../../archive/open-points.md#op-073) left open. The result replaces parts of [ADR 0013](../../decisions/0013-visual-design.md) (the look, the color, the font) and decision 9 of [ADR 0001](../../decisions/0001-functional-requirements-scope.md) (how checked items are shown), so it changes the design system, the requirements and the architecture notes. Nothing is built here: PH-14 builds the design system, and the list phases build the screen.
 
 ## Contents
 
@@ -39,7 +39,7 @@ The topic is done when:
 - ADR 0022 records the decisions below with the options considered, and the earlier ADRs it changes carry the notes of the CLAUDE.md convention;
 - [visual-design.md](../../architecture/visual-design.md) describes the Ring tail look, the tokens of this spec, Gabarito, the sage brand and the list-and-haul pattern, and its mockups show them;
 - the requirements, the architecture, the stack overview and the roadmap describe the haul instead of the unchecked/checked split and the hide toggle;
-- [OP-073](../../open-points.md#op-073) is closed and the new open points are in the register;
+- [OP-073](../../archive/open-points.md#op-073) is closed and the new open points are in the register;
 - no document still names teal, Figtree, "the checked part" or the hide toggle as current, outside accepted ADRs and audits, which stay as written.
 
 ## Out of scope
@@ -241,8 +241,8 @@ In [architecture.md](../../architecture/architecture.md) and [stack-overview.md]
   The exploration's [screenshot](../../ideas/visual-design/ring-tail.png) stays, as the record of where the idea came from.
 - **Requirements, architecture and the stack overview**: as in the two sections above.
 - **[roadmap.md](../../roadmap.md)**: PH-14 delivers Gabarito instead of Figtree. PH-17's goal speaks of the haul instead of "unchecked items first": it builds the haul, its chips, putting items back, the drawer and the progress by item count. PH-21 adds the money in the haul's header ([ITM-8](../../requirements/functional-requirements.md#itm-8)) and "Put all back" ([LST-5](../../requirements/functional-requirements.md#lst-5)), and no longer delivers [ORD-4](../../requirements/functional-requirements.md#ord-4). The README's diagram names no requirements and does not change.
-- **[open-points.md](../../open-points.md)**:
-  - [OP-073](../../open-points.md#op-073) ✅ closed, pointing at ADR 0022;
+- **[open-points.md](../../archive/open-points.md)**:
+  - [OP-073](../../archive/open-points.md#op-073) ✅ closed, pointing at ADR 0022;
   - PH-14's design system point (Figtree, the teal tokens) names Gabarito and the new tokens;
   - new, under PH-17: **OP-081** a drawer component that works under the CSP (shadcn's Drawer is built on vaul, which may inject styles; a Base UI Dialog shaped as a bottom sheet is the fallback); **OP-082** how "checked" is stored, the timestamp alone or a flag next to it; **OP-083** PH-17 grows with the haul and its drawer: its brainstorm considers splitting the drawer into a phase of its own.
 - **[glossary.md](../../glossary.md)**: OFL (SIL Open Font License).

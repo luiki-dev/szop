@@ -1089,20 +1089,20 @@ EOF
 `docs/decisions/0025-web-security-baseline-details.md`, in the shape of [ADR 0023](../../decisions/0023-production-build-and-serving-details.md) (read it first):
 
 - Title `# ADR 0025 — Web security baseline details`; `- **Status:** ✅ Accepted`; `- **Date:** 2026-10-10`;
-- `- **Refines:** [ADR 0012](0012-security-baseline.md), decisions 7 (unsafe requests with neither header, the Origin fallback, JSON-only bodies through Fastify's parsers, see decisions 1 to 3), 8 (the CSP written out, HSTS's subdomains, the build's inline limit, see decisions 4 and 5), 9 (every query value hidden in the log, tokens only in the query, see decision 6) and 13 (the proxy trusted by address, TRUSTED_PROXIES, instead of a hop count, see decision 7)`.
-- `## Context`: [PH-06b](../roadmap.md#ph-06b-web-security-baseline), split from PH-06 (retired); ADR 0012 set the direction; the brainstorm and the [spec](../superpowers/specs/2026-10-10-PH-06b-web-security-baseline-design.md) settled the details. Decision 7 was found while planning: Fastify 5.12 ignores a hop count.
+- `- **Refines:** [ADR 0012](../../decisions/0012-security-baseline.md), decisions 7 (unsafe requests with neither header, the Origin fallback, JSON-only bodies through Fastify's parsers, see decisions 1 to 3), 8 (the CSP written out, HSTS's subdomains, the build's inline limit, see decisions 4 and 5), 9 (every query value hidden in the log, tokens only in the query, see decision 6) and 13 (the proxy trusted by address, TRUSTED_PROXIES, instead of a hop count, see decision 7)`.
+- `## Context`: [PH-06b](../../roadmap.md#ph-06b-web-security-baseline), split from PH-06 (retired); ADR 0012 set the direction; the brainstorm and the [spec](../specs/2026-10-10-PH-06b-web-security-baseline-design.md) settled the details. Decision 7 was found while planning: Fastify 5.12 ignores a hop count.
 - `## Decisions`: the spec's decisions 1 to 9, copied with their wording, links rewritten from `../../decisions/X` to `X` and from `../../` to `../`. Add what the implementation settled, as `<br>**Settled while building:** …` in the cells it touches: in decision 3, that a body without `Content-Type` and a form type with an empty body get 415 too; in decision 6, that Fastify's error line carries the request and is redacted by the same serializer; in decision 7, that an IPv4-mapped IPv6 address of the proxy matches its IPv4 range; anything Tasks 1 to 5 reported differently from the plan.
-- `## Consequences`: every developer's `apps/api/.env` needs `TRUSTED_PROXIES=none`; PH-12 sets `TRUSTED_PROXIES` to the VPC's range and checks the demo's log once; tests send `Sec-Fetch-Site: same-origin` on unsafe requests; a non-browser client that must send unsafe requests needs a decision of its own; PH-18 and PH-29 build their own email links; the 403 and 415 use Fastify's shape until [OP-071](../open-points.md#op-071); `@fastify/helmet` and `fastify-plugin` are new dependencies; the open points changed (step 7); the living docs.
+- `## Consequences`: every developer's `apps/api/.env` needs `TRUSTED_PROXIES=none`; PH-12 sets `TRUSTED_PROXIES` to the VPC's range and checks the demo's log once; tests send `Sec-Fetch-Site: same-origin` on unsafe requests; a non-browser client that must send unsafe requests needs a decision of its own; PH-18 and PH-29 build their own email links; the 403 and 415 use Fastify's shape until [OP-071](../../archive/open-points.md#op-071); `@fastify/helmet` and `fastify-plugin` are new dependencies; the open points changed (step 7); the living docs.
 
 - [x] **Step 2: Note the refinements in ADR 0012**
 
 In the three places `CLAUDE.md` asks for (ADR 0025's header is step 1). Read ADR 0012's status line and the four cells first, and add in the same style as the notes already there:
 
-- Status line: append `; decisions 7, 8, 9 and 13 refined by [ADR 0025](0025-web-security-baseline-details.md) (the details of the web baseline; the proxy trusted by address, not by hop count)`.
-- Decision 7's cell, at the bottom: `<br>✏️ **Refined by [ADR 0025](0025-web-security-baseline-details.md), decisions 1 to 3:** a request with neither header is refused; the Origin's host is compared with the raw Host header; bodies are kept to JSON by removing Fastify's text/plain parser, which answers 415.`
-- Decision 8's cell: `<br>✏️ **Refined by [ADR 0025](0025-web-security-baseline-details.md), decisions 4 and 5:** the CSP is written out in full with helmet's defaults off, Vite no longer inlines assets as data: URIs, and HSTS includes subdomains.`
-- Decision 9's cell: `<br>✏️ **Refined by [ADR 0025](0025-web-security-baseline-details.md), decision 6:** the log hides every query value and keeps the names; tokens travel in the query string, never in the path.`
-- Decision 13's cell: `<br>✏️ **Refined by [ADR 0025](0025-web-security-baseline-details.md), decision 7:** the proxy is trusted by its addresses (TRUSTED_PROXIES), not by a hop count, which Fastify 5.12 ignores because it cannot tell whether a connection really comes from the proxy.`
+- Status line: append `; decisions 7, 8, 9 and 13 refined by [ADR 0025](../../decisions/0025-web-security-baseline-details.md) (the details of the web baseline; the proxy trusted by address, not by hop count)`.
+- Decision 7's cell, at the bottom: `<br>✏️ **Refined by [ADR 0025](../../decisions/0025-web-security-baseline-details.md), decisions 1 to 3:** a request with neither header is refused; the Origin's host is compared with the raw Host header; bodies are kept to JSON by removing Fastify's text/plain parser, which answers 415.`
+- Decision 8's cell: `<br>✏️ **Refined by [ADR 0025](../../decisions/0025-web-security-baseline-details.md), decisions 4 and 5:** the CSP is written out in full with helmet's defaults off, Vite no longer inlines assets as data: URIs, and HSTS includes subdomains.`
+- Decision 9's cell: `<br>✏️ **Refined by [ADR 0025](../../decisions/0025-web-security-baseline-details.md), decision 6:** the log hides every query value and keeps the names; tokens travel in the query string, never in the path.`
+- Decision 13's cell: `<br>✏️ **Refined by [ADR 0025](../../decisions/0025-web-security-baseline-details.md), decision 7:** the proxy is trusted by its addresses (TRUSTED_PROXIES), not by a hop count, which Fastify 5.12 ignores because it cannot tell whether a connection really comes from the proxy.`
 
 - [x] **Step 3: Update the architecture, the threat model and the stack overview**
 
@@ -1145,7 +1145,7 @@ Then confirm with `gh issue view` on each, and `gh project item-list 3 --owner l
 - **OP-055**, **OP-071:** the same additions as #109 and #94.
 - Check that PH-06b's group now holds only its heading and its roadmap link, as PH-06a's does.
 
-`docs/roadmap.md`: PH-06b's *Delivers* says `` `TRUSTED_PROXIES` `` instead of `` `TRUSTED_PROXY_HOPS` `` and gains `([ADR 0025](decisions/0025-web-security-baseline-details.md))`; the row's Plan column links this plan (the plan commit set it; check). The row stays `🚧 In progress`; the README diagram stays at ◐ until the PR.
+`docs/roadmap.md`: PH-06b's *Delivers* says `` `TRUSTED_PROXIES` `` instead of `` `TRUSTED_PROXY_HOPS` `` and gains `([ADR 0025](../../decisions/0025-web-security-baseline-details.md))`; the row's Plan column links this plan (the plan commit set it; check). The row stays `🚧 In progress`; the README diagram stays at ◐ until the PR.
 
 - [x] **Step 8: The end-to-end check in Chrome**
 

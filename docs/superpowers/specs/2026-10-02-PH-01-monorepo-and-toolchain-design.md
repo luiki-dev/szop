@@ -3,7 +3,7 @@
 - **Phase:** [PH-01](../../roadmap.md#ph-01-monorepo-and-toolchain)
 - **Date:** 2026-10-02
 - **Path:** full (spec and plan), [ADR 0004](../../decisions/0004-implementation-process.md), decision 8
-- **Open points:** [OP-005](../../open-points.md#op-005) (PH-01 part), [OP-008](../../open-points.md#op-008), [OP-009](../../open-points.md#op-009), [OP-062](../../open-points.md#op-062) (PH-01 part)
+- **Open points:** [OP-005](../../archive/open-points.md#op-005) (PH-01 part), [OP-008](../../archive/open-points.md#op-008), [OP-009](../../archive/open-points.md#op-009), [OP-062](../../archive/open-points.md#op-062) (PH-01 part)
 
 The repository becomes a pnpm workspace in strict TypeScript, with linting, formatting and commit message checks running on every commit. The direction was settled by [ADR 0005](../../decisions/0005-development-environment.md) (the development environment), [ADR 0009](../../decisions/0009-git-workflow.md), decision 16 (commitlint) and [ADR 0012](../../decisions/0012-security-baseline.md), decision 18 (pnpm's install scripts). This spec holds the details those ADRs left to the setup phase, as agreed in the brainstorm.
 
@@ -142,7 +142,7 @@ Dependencies: `@commitlint/cli`, `@commitlint/config-conventional`.
 
 `commitlint.config.js` extends the preset, and:
 
-- turns off `body-max-line-length` and `footer-max-line-length` ([OP-009](../../open-points.md#op-009)): Dependabot's bodies and our `Claude-Session` trailer hold long links;
+- turns off `body-max-line-length` and `footer-max-line-length` ([OP-009](../../archive/open-points.md#op-009)): Dependabot's bodies and our `Claude-Session` trailer hold long links;
 - limits `type-enum` to the nine types of [ADR 0009](../../decisions/0009-git-workflow.md), decision 9: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`;
 - sets `scope-enum` to this list (the scope stays optional):
   - **workspaces:** `web`, `api`, `shared`
@@ -154,7 +154,7 @@ Merge commits ("Merge branch 'main' into …") are ignored by commitlint's defau
 
 ### The push hook
 
-[OP-062](../../open-points.md#op-062), PH-01 part.
+[OP-062](../../archive/open-points.md#op-062), PH-01 part.
 
 - `guard-git-push.mjs` becomes `guard-git-push.ts` and its test `guard-git-push.test.ts`, with types added. The behavior does not change.
 - `.claude/settings.json` runs `node "$CLAUDE_PROJECT_DIR"/.claude/hooks/guard-git-push.ts`.
@@ -165,7 +165,7 @@ Merge commits ("Merge branch 'main' into …") are ignored by commitlint's defau
 
 - **`docs/development/setup.md`:** from a clean Windows machine to passing checks: WSL and Ubuntu, git, nvm and Node, pnpm, VS Code with the WSL extension, then clone, `pnpm install`, `pnpm lint`, `pnpm typecheck`, `pnpm test`. It links to the tool pages instead of explaining inline.
 - **`docs/development/tools/`:** one page per tool, in the format of ADR 0005, decision 15 (what it is, why it was chosen, its configuration files explained, a starting point, the official docs): `node-and-nvm.md`, `pnpm.md`, `typescript.md`, `eslint.md`, `prettier.md`, `husky-and-lint-staged.md`, `commitlint.md`, `vscode.md`. Each is written in its tool's task.
-- **README:** a short "Development" section pointing to `docs/development/` ([OP-008](../../open-points.md#op-008)), and the documentation list.
+- **README:** a short "Development" section pointing to `docs/development/` ([OP-008](../../archive/open-points.md#op-008)), and the documentation list.
 - **`CLAUDE.md`:** the documentation list gains `setup.md` and `tools/`.
 - **Glossary:** new terms (such as type stripping, flat config, lint-staged).
 - **`phase-walkthrough.md`:** spec and plan names with the phase ID (decision 9).

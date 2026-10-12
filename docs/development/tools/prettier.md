@@ -6,7 +6,7 @@ Prettier rewrites code into one consistent layout (quotes, line breaks, indentat
 
 - **ESLint and Prettier, rather than Biome:** [ADR 0005](../../decisions/0005-development-environment.md), decision 12. Prettier is the common standard for formatting, and [ESLint](eslint.md) keeps the job of finding bugs.
 - **The defaults, no custom options:** Prettier's own advice, since its few options exist mostly for historical reasons (<https://prettier.io/docs/option-philosophy>). Arguing about quotes or line width teaches nothing, so Szop takes the defaults.
-- **Markdown excluded:** Prettier pads every table to its widest cell. On a trial copy of the docs the glossary grew from 39 KB to 93 KB, and one long cell rewrites the whole table in a diff. Prettier has no option to turn this off, so the docs keep their hand-made formatting. A Markdown linter that checks without reformatting is a candidate later ([OP-063](../../open-points.md#op-063)). See [ADR 0016](../../decisions/0016-toolchain-details.md).
+- **Markdown excluded:** Prettier pads every table to its widest cell. On a trial copy of the docs the glossary grew from 39 KB to 93 KB, and one long cell rewrites the whole table in a diff. Prettier has no option to turn this off, so the docs keep their hand-made formatting. A Markdown linter that checks without reformatting is a candidate later ([OP-063](https://github.com/luiki-dev/szop/issues/118)). See [ADR 0016](../../decisions/0016-toolchain-details.md).
 
 ## Configuration
 

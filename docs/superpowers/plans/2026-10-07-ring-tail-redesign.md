@@ -75,12 +75,12 @@ Follow the shape of [ADR 0020](../../decisions/0020-database-details.md). Its ex
 
 - **Status:** ✅ Accepted
 - **Date:** 2026-10-07
-- **Supersedes:** [ADR 0013](0013-visual-design.md), decisions 6 (the look; see decision 1), 11 (teal; see decision 2) and 13 (Figtree; see decision 10); [ADR 0001](0001-functional-requirements-scope.md), decision 9 (checked items in a separate part, and the toggle hiding them; see decisions 1, 4 and 6)
-- **Extends:** [ADR 0013](0013-visual-design.md), decisions 10 (the `fur` and `sage` colors and the `haul-*` roles; see decision 9), 14 (`--radius-surface`; see decision 11) and 18 (the list-and-haul pattern and the add bar's label; see decisions 3 to 8 and 13)
-- **Refines:** [ADR 0013](0013-visual-design.md), decision 16 (the sage tile and the Gabarito wordmark; see decision 12)
+- **Supersedes:** [ADR 0013](../../decisions/0013-visual-design.md), decisions 6 (the look; see decision 1), 11 (teal; see decision 2) and 13 (Figtree; see decision 10); [ADR 0001](../../decisions/0001-functional-requirements-scope.md), decision 9 (checked items in a separate part, and the toggle hiding them; see decisions 1, 4 and 6)
+- **Extends:** [ADR 0013](../../decisions/0013-visual-design.md), decisions 10 (the `fur` and `sage` colors and the `haul-*` roles; see decision 9), 14 (`--radius-surface`; see decision 11) and 18 (the list-and-haul pattern and the add bar's label; see decisions 3 to 8 and 13)
+- **Refines:** [ADR 0013](../../decisions/0013-visual-design.md), decision 16 (the sage tile and the Gabarito wordmark; see decision 12)
 ```
 
-**`## Context`**, one paragraph: [OP-073](../open-points.md#op-073) recorded a design exploration of 2026-10-06, "Ring tail" ([screenshot](../ideas/visual-design/ring-tail.png)), which the owner liked: a fur-gray page with white rounded cards, Gabarito, a ringed raccoon tail as the progress bar, and checked items dropping out of the list as chips into a dark "haul" tray that also held the add bar. It was brainstormed on 2026-10-07, before PH-14 builds the design system, to keep, adjust or drop it, and to settle what the exploration left open: the green of its logo, the add bar inside the haul, a haul with 40 checked items, the remaining amount [ITM-8](../requirements/functional-requirements.md#itm-8) asks for, and dark mode. The design is in the [spec](../superpowers/specs/2026-10-07-ring-tail-redesign-design.md); the options were compared as mockups in the visual companion.
+**`## Context`**, one paragraph: [OP-073](../../archive/open-points.md#op-073) recorded a design exploration of 2026-10-06, "Ring tail" ([screenshot](../../ideas/visual-design/ring-tail.png)), which the owner liked: a fur-gray page with white rounded cards, Gabarito, a ringed raccoon tail as the progress bar, and checked items dropping out of the list as chips into a dark "haul" tray that also held the add bar. It was brainstormed on 2026-10-07, before PH-14 builds the design system, to keep, adjust or drop it, and to settle what the exploration left open: the green of its logo, the add bar inside the haul, a haul with 40 checked items, the remaining amount [ITM-8](../../requirements/functional-requirements.md#itm-8) asks for, and dark mode. The design is in the [spec](../specs/2026-10-07-ring-tail-redesign-design.md); the options were compared as mockups in the visual companion.
 
 **`## Decisions`**: the table header `| # | Topic | Options considered | Decision and reasoning |`. Rows 1 to 10 are the spec's [decisions table](../specs/2026-10-07-ring-tail-redesign-design.md#decisions-taken-in-the-brainstorm), copied verbatim, with one change: at the end of row 1 add "It supersedes ADR 0013, decision 6, and ADR 0001, decision 9." Then these three rows, verbatim:
 
@@ -95,13 +95,13 @@ After the table, the spec's paragraph "Two smaller changes from the exploration�
 **`## Consequences`**, these bullets, verbatim:
 
 ```markdown
-- **The design system changes before it is built.** [visual-design.md](../architecture/visual-design.md) describes the Ring tail look, the `fur` and `sage` colors, the `haul-*` roles, Gabarito, `--radius-surface`, the sage brand and the list-and-haul pattern, with new mockups; PH-14 builds it ([OP-056](../open-points.md#op-056)).
-- **Checked items leave the list.** [ORD-1](../requirements/functional-requirements.md#ord-1), [ORD-2](../requirements/functional-requirements.md#ord-2), [ORD-5](../requirements/functional-requirements.md#ord-5) and [UC-3](../requirements/functional-requirements.md#uc-3-shop-in-a-store) describe the haul; [ORD-4](../requirements/functional-requirements.md#ord-4), the toggle hiding checked items, is ✖️ dropped. [ITM-8](../requirements/functional-requirements.md#itm-8) and [LST-5](../requirements/functional-requirements.md#lst-5) keep their wording: the haul shows all three totals, and "Uncheck all" is the drawer's "Put all back".
-- **List items record when they were checked**, which orders the haul; how "checked" is stored is [OP-082](../open-points.md#op-082) for PH-17.
-- **PH-17 builds the haul**: its chips, putting items back, the drawer and the progress by item count. It grows with them, so its brainstorm considers splitting the drawer off ([OP-083](../open-points.md#op-083)), and it picks a drawer component that works under the CSP ([OP-081](../open-points.md#op-081)). **PH-21 adds the money** in the haul's header and "Put all back", and no longer delivers [ORD-4](../requirements/functional-requirements.md#ord-4).
-- **The font costs 16 KB more**: Gabarito's Latin file is 36 KB against Figtree's 20 KB. Fonts are outside the 200 KB JavaScript budget of [NFR-3](../requirements/functional-requirements.md#nfr-3), and `font-display: swap` keeps text visible while it loads.
+- **The design system changes before it is built.** [visual-design.md](../../architecture/visual-design.md) describes the Ring tail look, the `fur` and `sage` colors, the `haul-*` roles, Gabarito, `--radius-surface`, the sage brand and the list-and-haul pattern, with new mockups; PH-14 builds it ([OP-056](../../archive/open-points.md#op-056)).
+- **Checked items leave the list.** [ORD-1](../../requirements/functional-requirements.md#ord-1), [ORD-2](../../requirements/functional-requirements.md#ord-2), [ORD-5](../../requirements/functional-requirements.md#ord-5) and [UC-3](../../requirements/functional-requirements.md#uc-3-shop-in-a-store) describe the haul; [ORD-4](../../requirements/functional-requirements.md#ord-4), the toggle hiding checked items, is ✖️ dropped. [ITM-8](../../requirements/functional-requirements.md#itm-8) and [LST-5](../../requirements/functional-requirements.md#lst-5) keep their wording: the haul shows all three totals, and "Uncheck all" is the drawer's "Put all back".
+- **List items record when they were checked**, which orders the haul; how "checked" is stored is [OP-082](../../archive/open-points.md#op-082) for PH-17.
+- **PH-17 builds the haul**: its chips, putting items back, the drawer and the progress by item count. It grows with them, so its brainstorm considers splitting the drawer off ([OP-083](../../archive/open-points.md#op-083)), and it picks a drawer component that works under the CSP ([OP-081](../../archive/open-points.md#op-081)). **PH-21 adds the money** in the haul's header and "Put all back", and no longer delivers [ORD-4](../../requirements/functional-requirements.md#ord-4).
+- **The font costs 16 KB more**: Gabarito's Latin file is 36 KB against Figtree's 20 KB. Fonts are outside the 200 KB JavaScript budget of [NFR-3](../../requirements/functional-requirements.md#nfr-3), and `font-display: swap` keeps text visible while it loads.
 - **A haul panel on wide screens** (decision 7) is not built; it can come back as a 💡 future extension if shopping at a desktop turns out to matter.
-- [OP-073](../open-points.md#op-073) is closed.
+- [OP-073](../../archive/open-points.md#op-073) is closed.
 ```
 
 - [x] **Step 3: Add the notes to ADR 0013**
@@ -109,20 +109,20 @@ After the table, the spec's paragraph "Two smaller changes from the exploration�
 Status line: replace the end of line 3 so it reads:
 
 ```markdown
-- **Status:** ✅ Accepted — its consequences refined by [ADR 0014](0014-roadmap.md), decision 9 (the UI foundation comes with the first MVP phase, PH-14, rather than the first phase that builds UI); decisions 6, 11 and 13 superseded, 10, 14 and 18 extended and 16 refined by [ADR 0022](0022-ring-tail-redesign.md) (the Ring tail look: sage instead of teal, Gabarito instead of Figtree, the haul)
+- **Status:** ✅ Accepted — its consequences refined by [ADR 0014](../../decisions/0014-roadmap.md), decision 9 (the UI foundation comes with the first MVP phase, PH-14, rather than the first phase that builds UI); decisions 6, 11 and 13 superseded, 10, 14 and 18 extended and 16 refined by [ADR 0022](../../decisions/0022-ring-tail-redesign.md) (the Ring tail look: sage instead of teal, Gabarito instead of Figtree, the haul)
 ```
 
 At the end of each decision's last cell, just before the closing ` |`, append (after one space):
 
 | Decision | Note |
 |---|---|
-| 6 | `<br>🔁 **Superseded by [ADR 0022](0022-ring-tail-redesign.md), decision 1:** the Ring tail look, a fur-gray page with white cards and a dark tray, the haul, collecting the checked items.` |
-| 10 | `<br>➕ **Extended by [ADR 0022](0022-ring-tail-redesign.md), decision 9:** the palette adds a custom \`fur\` color and a small \`sage\` scale, and the roles add \`haul\`, \`haul-foreground\`, \`haul-muted\`, \`haul-chip\` and \`haul-accent\`.` |
-| 11 | `<br>🔁 **Superseded by [ADR 0022](0022-ring-tail-redesign.md), decision 2:** the accent is sage (\`sage-700\` in light mode, \`sage-300\` in dark mode) instead of teal.` |
-| 13 | `<br>🔁 **Superseded by [ADR 0022](0022-ring-tail-redesign.md), decision 10:** Gabarito instead of Figtree, with weight 800 added.` |
-| 14 | `<br>➕ **Extended by [ADR 0022](0022-ring-tail-redesign.md), decision 11:** \`--radius-surface\`, 18 px for cards and 24 px for the haul's top corners.` |
-| 16 | `<br>✏️ **Refined by [ADR 0022](0022-ring-tail-redesign.md), decision 12:** the tile is \`sage-500\` and the wordmark Gabarito Bold in sage.` |
-| 18 | `<br>➕ **Extended by [ADR 0022](0022-ring-tail-redesign.md), decisions 3 to 8 and 13:** the list-and-haul pattern (the add bar above the haul, the drawer, progress in the haul) and the add bar's label as the one exception to visible labels; the focus ring is sage.` |
+| 6 | `<br>🔁 **Superseded by [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decision 1:** the Ring tail look, a fur-gray page with white cards and a dark tray, the haul, collecting the checked items.` |
+| 10 | `<br>➕ **Extended by [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decision 9:** the palette adds a custom \`fur\` color and a small \`sage\` scale, and the roles add \`haul\`, \`haul-foreground\`, \`haul-muted\`, \`haul-chip\` and \`haul-accent\`.` |
+| 11 | `<br>🔁 **Superseded by [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decision 2:** the accent is sage (\`sage-700\` in light mode, \`sage-300\` in dark mode) instead of teal.` |
+| 13 | `<br>🔁 **Superseded by [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decision 10:** Gabarito instead of Figtree, with weight 800 added.` |
+| 14 | `<br>➕ **Extended by [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decision 11:** \`--radius-surface\`, 18 px for cards and 24 px for the haul's top corners.` |
+| 16 | `<br>✏️ **Refined by [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decision 12:** the tile is \`sage-500\` and the wordmark Gabarito Bold in sage.` |
+| 18 | `<br>➕ **Extended by [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decisions 3 to 8 and 13:** the list-and-haul pattern (the add bar above the haul, the drawer, progress in the haul) and the add bar's label as the one exception to visible labels; the focus ring is sage.` |
 
 (The backslashes above only escape the backticks inside this table; write plain backticks in the ADR.)
 
@@ -131,13 +131,13 @@ At the end of each decision's last cell, just before the closing ` |`, append (a
 Status line becomes:
 
 ```markdown
-- **Status:** ✅ Accepted — decision 1 superseded by [ADR 0002](0002-technical-architecture.md), and with it the local browser storage in the guest-mode consequence (guest workspaces live on the server; the migration path into an account remains); decision 9 superseded by [ADR 0022](0022-ring-tail-redesign.md) (checked items go to the haul; the hide toggle is dropped)
+- **Status:** ✅ Accepted — decision 1 superseded by [ADR 0002](../../decisions/0002-technical-architecture.md), and with it the local browser storage in the guest-mode consequence (guest workspaces live on the server; the migration path into an account remains); decision 9 superseded by [ADR 0022](../../decisions/0022-ring-tail-redesign.md) (checked items go to the haul; the hide toggle is dropped)
 ```
 
 At the end of decision 9's last cell, before ` |`, append:
 
 ```markdown
-<br>🔁 **Superseded by [ADR 0022](0022-ring-tail-redesign.md), decisions 1, 4 and 6:** checked items leave the list for the haul, a tray apart from it, most recently checked first; the toggle hiding them is dropped.
+<br>🔁 **Superseded by [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decisions 1, 4 and 6:** checked items leave the list for the haul, a tray apart from it, most recently checked first; the toggle hiding them is dropped.
 ```
 
 - [x] **Step 5: Add the glossary rows**
@@ -244,16 +244,16 @@ The owner's review of this task is the approval of the mockups: on pushing, send
 
 - [x] **Step 1: The introduction**
 
-Line 3: "The decisions behind it, with the alternatives considered, are in [ADR 0013](../decisions/0013-visual-design.md);" becomes "The decisions behind it, with the alternatives considered, are in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../decisions/0022-ring-tail-redesign.md), which replaced its look, color and font;".
+Line 3: "The decisions behind it, with the alternatives considered, are in [ADR 0013](../../decisions/0013-visual-design.md);" becomes "The decisions behind it, with the alternatives considered, are in [ADR 0013](../../decisions/0013-visual-design.md) and [ADR 0022](../../decisions/0022-ring-tail-redesign.md), which replaced its look, color and font;".
 
 - [x] **Step 2: Section 1, the look**
 
 Replace the paragraph and the image of `## 1. The look` with:
 
 ```markdown
-**Ring tail**: a fur-gray page holds white, generously rounded category cards, and a dark tray at the bottom, **the haul**, collects what is already in the basket ([The list and the haul](#the-list-and-the-haul)). Sage is the one accent, and color is used sparingly. Rows are 56 px high with large round checkboxes, for one hand on a phone in a store. The look comes from a design exploration ([its screenshot](../ideas/visual-design/ring-tail.png)), adjusted in [ADR 0022](../decisions/0022-ring-tail-redesign.md).
+**Ring tail**: a fur-gray page holds white, generously rounded category cards, and a dark tray at the bottom, **the haul**, collects what is already in the basket ([The list and the haul](#the-list-and-the-haul)). Sage is the one accent, and color is used sparingly. Rows are 56 px high with large round checkboxes, for one hand on a phone in a store. The look comes from a design exploration ([its screenshot](../../ideas/visual-design/ring-tail.png)), adjusted in [ADR 0022](../../decisions/0022-ring-tail-redesign.md).
 
-![The list screen in light and dark mode: white category cards on a fur-gray page, large round checkboxes, quantities and prices on the right, the add bar, and the dark haul at the bottom with its progress bar and chips](visual-design/list-screen.png)
+![The list screen in light and dark mode: white category cards on a fur-gray page, large round checkboxes, quantities and prices on the right, the add bar, and the dark haul at the bottom with its progress bar and chips](../../architecture/visual-design/list-screen.png)
 ```
 
 - [x] **Step 3: Section 3, tokens**
@@ -274,7 +274,7 @@ followed by the spec's roles table ([Palette and semantic roles](../specs/2026-1
 Replace the **Contrast** paragraph with:
 
 ```markdown
-**Contrast:** every text pair meets 4.5:1 and every UI part (checkbox borders, the focus ring, the progress fill) 3:1 against its background, in both schemes ([NFR-2](../requirements/functional-requirements.md#nfr-2)). The narrowest are `primary` on `accent` (4.6:1) and the focus ring on the fur page (3.6:1); every pair is listed in the [redesign spec](../superpowers/specs/2026-10-07-ring-tail-redesign-design.md#contrast). `gray-400` borders on white are only about 2.5:1, which is why `input` is `gray-500` in light mode. axe checks every page in light and dark.
+**Contrast:** every text pair meets 4.5:1 and every UI part (checkbox borders, the focus ring, the progress fill) 3:1 against its background, in both schemes ([NFR-2](../../requirements/functional-requirements.md#nfr-2)). The narrowest are `primary` on `accent` (4.6:1) and the focus ring on the fur page (3.6:1); every pair is listed in the [redesign spec](../specs/2026-10-07-ring-tail-redesign-design.md#contrast). `gray-400` borders on white are only about 2.5:1, which is why `input` is `gray-500` in light mode. axe checks every page in light and dark.
 ```
 
 Under `### Dark mode`, append to the first paragraph: "**The haul stays the darkest surface in both schemes**: `gray-800` on the fur page in light mode, `gray-950` on the `gray-900` page in dark mode, so the screen keeps its shape." (If Task 2, step 5 changed the dark page, write its value instead of `gray-900`.)
@@ -313,14 +313,14 @@ After the navigation image, add a new subsection. Its text is the spec's section
 ```markdown
 ### The list and the haul
 
-The main screen's pattern, decided in [ADR 0022](../decisions/0022-ring-tail-redesign.md), decisions 3 to 8: **checked items leave the list and drop into the haul**, a dark tray at the bottom, so the list shows only what is left. The list phases build it and design their screens on top of it.
+The main screen's pattern, decided in [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decisions 3 to 8: **checked items leave the list and drop into the haul**, a dark tray at the bottom, so the list shows only what is left. The list phases build it and design their screens on top of it.
 
-![Three phones: the haul's drawer open at 75% of the screen, scrolled to its "Put all back" button; the haul before anything is checked; and the haul folded to one line while typing in the add bar](visual-design/haul-drawer.png)
+![Three phones: the haul's drawer open at 75% of the screen, scrolled to its "Put all back" button; the haul before anything is checked; and the haul folded to one line while typing in the add bar](../../architecture/visual-design/haul-drawer.png)
 ```
 
 - [x] **Step 6: Section 6, forms**
 
-The bullet "**Labels are always visible**, never placeholder-only. …" gets a second sentence after "never placeholder-only.": "The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../decisions/0022-ring-tail-redesign.md), decision 13)."
+The bullet "**Labels are always visible**, never placeholder-only. …" gets a second sentence after "never placeholder-only.": "The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../../decisions/0022-ring-tail-redesign.md), decision 13)."
 
 - [x] **Step 7: Contents, check and commit**
 
@@ -352,7 +352,7 @@ In `docs/requirements/functional-requirements.md`, the bodies under the headings
 
 - `#### ORD-1`: `🎯 [MVP] Checked items leave the list and go to **the haul**, a tray apart from the list that shows what is already in the basket. Putting an item back returns it to the list.`
 - `#### ORD-2`: `🎯 [MVP] The list's items are sorted by the global category order, then alphabetically by name. Uncategorized items come last. The haul shows the most recently checked items first.`
-- `#### ORD-4`: `✖️ Dropped by [ADR 0022](../decisions/0022-ring-tail-redesign.md): it was "a toggle hides checked items". Checked items now leave the list for the haul ([ORD-1](#ord-1)), so there is nothing to hide.`
+- `#### ORD-4`: `✖️ Dropped by [ADR 0022](../../decisions/0022-ring-tail-redesign.md): it was "a toggle hides checked items". Checked items now leave the list for the haul ([ORD-1](#ord-1)), so there is nothing to hide.`
 - `#### ORD-5`: in its sentence, "and the unchecked/checked split ([ORD-1](#ord-1)) still applies" becomes "and checked items still go to the haul ([ORD-1](#ord-1))".
 - `#### UC-3 Shop in a store`: `The user walks the store in category order, checking items off. Checked items drop into the haul, so the list shows only what is left. The haul shows what is in the basket, how many items are done and what is left to spend.`
 
@@ -362,9 +362,9 @@ Then check whether the document lists MVP requirements elsewhere (`grep -n "ORD-
 
 In `docs/architecture/architecture.md`:
 
-- The **List items** bullet under `### Data model highlights` gets this sentence at its end: "They also record when they were checked, which orders the haul with the most recently checked first ([ORD-2](../requirements/functional-requirements.md#ord-2)); whether "checked" is that timestamp alone or a flag next to it is [OP-082](../open-points.md#op-082)."
+- The **List items** bullet under `### Data model highlights` gets this sentence at its end: "They also record when they were checked, which orders the haul with the most recently checked first ([ORD-2](../../requirements/functional-requirements.md#ord-2)); whether "checked" is that timestamp alone or a flag next to it is [OP-082](../../archive/open-points.md#op-082)."
 - The **Assets** bullet: "the Figtree font (`@fontsource-variable/figtree`)" becomes "the Gabarito font (`@fontsource-variable/gabarito`)".
-- The state table's row `| **Device preference** | "hide checked items" toggle ([ORD-4](../requirements/functional-requirements.md#ord-4)) | \`localStorage\` |` becomes `| **Device preference** | none yet | \`localStorage\` |`.
+- The state table's row `| **Device preference** | "hide checked items" toggle ([ORD-4](../../requirements/functional-requirements.md#ord-4)) | \`localStorage\` |` becomes `| **Device preference** | none yet | \`localStorage\` |`.
 
 - [x] **Step 3: The stack overview**
 
@@ -401,22 +401,22 @@ git commit -m "docs(requirements): move checked items to the haul"
 
 In `docs/roadmap.md`:
 
-- PH-14, **Delivers:** "the UI foundation of [ADR 0013](decisions/0013-visual-design.md) and the [visual design](architecture/visual-design.md): Tailwind CSS, shadcn/ui on Base UI under the CSP, the design tokens, Figtree, Lucide, the favicon and the logo." becomes "the UI foundation of [ADR 0013](decisions/0013-visual-design.md) and [ADR 0022](decisions/0022-ring-tail-redesign.md), and the [visual design](architecture/visual-design.md): Tailwind CSS, shadcn/ui on Base UI under the CSP, the design tokens, Gabarito, Lucide, the favicon and the logo."
-- PH-17, **Goal:** becomes "a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added; checked items drop into the haul, which shows how many are done and puts an item back on a tap." **Delivers:** gets, after the ORD-5 link, "; the haul with its chips and drawer ([ADR 0022](decisions/0022-ring-tail-redesign.md))".
-- PH-21, **Goal:** becomes "in the store, a user checks items off into the haul and sees in it the spent and remaining totals; afterwards, "Put all back" resets the list for next week." **Delivers:** "[ITM-8](requirements/functional-requirements.md#itm-8), [ORD-4](requirements/functional-requirements.md#ord-4), [LST-5](requirements/functional-requirements.md#lst-5);" becomes "[ITM-8](requirements/functional-requirements.md#itm-8) (the amounts in the haul), [LST-5](requirements/functional-requirements.md#lst-5);".
+- PH-14, **Delivers:** "the UI foundation of [ADR 0013](../../decisions/0013-visual-design.md) and the [visual design](../../architecture/visual-design.md): Tailwind CSS, shadcn/ui on Base UI under the CSP, the design tokens, Figtree, Lucide, the favicon and the logo." becomes "the UI foundation of [ADR 0013](../../decisions/0013-visual-design.md) and [ADR 0022](../../decisions/0022-ring-tail-redesign.md), and the [visual design](../../architecture/visual-design.md): Tailwind CSS, shadcn/ui on Base UI under the CSP, the design tokens, Gabarito, Lucide, the favicon and the logo."
+- PH-17, **Goal:** becomes "a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added; checked items drop into the haul, which shows how many are done and puts an item back on a tap." **Delivers:** gets, after the ORD-5 link, "; the haul with its chips and drawer ([ADR 0022](../../decisions/0022-ring-tail-redesign.md))".
+- PH-21, **Goal:** becomes "in the store, a user checks items off into the haul and sees in it the spent and remaining totals; afterwards, "Put all back" resets the list for next week." **Delivers:** "[ITM-8](../../requirements/functional-requirements.md#itm-8), [ORD-4](../../requirements/functional-requirements.md#ord-4), [LST-5](../../requirements/functional-requirements.md#lst-5);" becomes "[ITM-8](../../requirements/functional-requirements.md#itm-8) (the amounts in the haul), [LST-5](../../requirements/functional-requirements.md#lst-5);".
 
 The README's roadmap diagram shows phase names and statuses only; check it names neither Figtree nor [ORD-4](../../requirements/functional-requirements.md#ord-4) (`grep -n -i "figtree\|ORD-4" README.md`, expect no output) and leave it.
 
 - [x] **Step 2: OP-056**
 
-In OP-056's text, "Figtree from `@fontsource-variable/figtree`" becomes "Gabarito from `@fontsource-variable/gabarito`", and its **Source** line becomes "[ADR 0013](decisions/0013-visual-design.md), decisions 7–17 and 19; [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 2 and 9–12".
+In OP-056's text, "Figtree from `@fontsource-variable/figtree`" becomes "Gabarito from `@fontsource-variable/gabarito`", and its **Source** line becomes "[ADR 0013](../../decisions/0013-visual-design.md), decisions 7–17 and 19; [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decisions 2 and 9–12".
 
 - [x] **Step 3: Close OP-073**
 
 Move the whole `#### OP-073` entry from the PH-14 group to the end of `## Closed` (after OP-065, IDs in order), unchanged except its status line:
 
 ```markdown
-- **Status:** ✅ Closed: kept and adjusted in [ADR 0022](decisions/0022-ring-tail-redesign.md), designed in the [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md): sage instead of the exploration's green, the add bar above the haul, one row of chips with a drawer, progress inside the haul, the same tray on a desktop, and a darkest-haul dark mode. The work it leaves is OP-081 to OP-083 (PH-17) and OP-056 (PH-14)
+- **Status:** ✅ Closed: kept and adjusted in [ADR 0022](../../decisions/0022-ring-tail-redesign.md), designed in the [redesign spec](../specs/2026-10-07-ring-tail-redesign-design.md): sage instead of the exploration's green, the add bar above the haul, one row of chips with a drawer, progress inside the haul, the same tray on a desktop, and a darkest-haul dark mode. The work it leaves is OP-081 to OP-083 (PH-17) and OP-056 (PH-14)
 ```
 
 - [x] **Step 4: Add OP-081 to OP-083**
@@ -426,23 +426,23 @@ At the end of the `### PH-17 List items` group (after its last entry, before `##
 ```markdown
 #### OP-081
 
-**Pick a drawer component that works under the CSP** for the haul's drawer ([visual-design.md](architecture/visual-design.md#the-list-and-the-haul)). shadcn/ui's Drawer is built on vaul; check whether vaul injects `<style>` elements, which the CSP forbids ([visual-design.md](architecture/visual-design.md#under-the-content-security-policy)). If it does, shape Base UI's Dialog as a bottom sheet, with dragging added on top. Either way the drawer is a modal dialog: focus moves in and is trapped, Esc and the dimmed list close it, and dragging is never the only way to open or close it.
+**Pick a drawer component that works under the CSP** for the haul's drawer ([visual-design.md](../../architecture/visual-design.md#the-list-and-the-haul)). shadcn/ui's Drawer is built on vaul; check whether vaul injects `<style>` elements, which the CSP forbids ([visual-design.md](../../architecture/visual-design.md#under-the-content-security-policy)). If it does, shape Base UI's Dialog as a bottom sheet, with dragging added on top. Either way the drawer is a modal dialog: focus moves in and is trapped, Esc and the dimmed list close it, and dragging is never the only way to open or close it.
 
-- **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), decisions 4 and 5; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#out-of-scope)
+- **Source:** [ADR 0022](../../decisions/0022-ring-tail-redesign.md), decisions 4 and 5; [redesign spec](../specs/2026-10-07-ring-tail-redesign-design.md#out-of-scope)
 - **Status:** ⬜ Open
 
 #### OP-082
 
-**Decide how "checked" is stored.** The haul orders items by when they were checked, so list items need a `checked_at` timestamp. Either it is the only field (`checked_at IS NOT NULL` means checked), or a `checked` flag stays next to it. One field cannot disagree with itself; a flag keeps the API's `{ "checked": true }` shape and simple queries. "Put all back" ([LST-5](requirements/functional-requirements.md#lst-5)) and duplicating a list must clear it either way.
+**Decide how "checked" is stored.** The haul orders items by when they were checked, so list items need a `checked_at` timestamp. Either it is the only field (`checked_at IS NOT NULL` means checked), or a `checked` flag stays next to it. One field cannot disagree with itself; a flag keeps the API's `{ "checked": true }` shape and simple queries. "Put all back" ([LST-5](../../requirements/functional-requirements.md#lst-5)) and duplicating a list must clear it either way.
 
-- **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences; [redesign spec](superpowers/specs/2026-10-07-ring-tail-redesign-design.md#architecture-changes)
+- **Source:** [ADR 0022](../../decisions/0022-ring-tail-redesign.md), consequences; [redesign spec](../specs/2026-10-07-ring-tail-redesign-design.md#architecture-changes)
 - **Status:** ⬜ Open
 
 #### OP-083
 
-**Consider splitting PH-17.** The haul makes PH-17 bigger: besides adding, editing, checking and sorting items, it builds the haul, its chips, putting items back, the drawer (a new component, [OP-081](#op-081)) and the progress by item count. Its brainstorm checks the plan against the size rule of [ADR 0014](decisions/0014-roadmap.md), decision 6, and splits the drawer into a phase of its own if it is too big.
+**Consider splitting PH-17.** The haul makes PH-17 bigger: besides adding, editing, checking and sorting items, it builds the haul, its chips, putting items back, the drawer (a new component, [OP-081](#op-081)) and the progress by item count. Its brainstorm checks the plan against the size rule of [ADR 0014](../../decisions/0014-roadmap.md), decision 6, and splits the drawer into a phase of its own if it is too big.
 
-- **Source:** [ADR 0022](decisions/0022-ring-tail-redesign.md), consequences
+- **Source:** [ADR 0022](../../decisions/0022-ring-tail-redesign.md), consequences
 - **Status:** ⬜ Open
 ```
 

@@ -98,23 +98,23 @@ Create `docs/decisions/0024-github-project-tracking.md` with exactly:
 
 - **Status:** ✅ Accepted
 - **Date:** 2026-10-09
-- **Supersedes in part:** [ADR 0009](0009-git-workflow.md), decision 14 (its last sentence: "The roadmap is the tracker: GitHub Issues and Projects are not part of the process")
-- **Extends:** [ADR 0014](0014-roadmap.md), decision 4 (the stage tables link each phase's issue, and the project holds a finer status); [ADR 0011](0011-design-sanity-check-follow-ups.md), decision 1 (each open entry links its issue)
+- **Supersedes in part:** [ADR 0009](../../decisions/0009-git-workflow.md), decision 14 (its last sentence: "The roadmap is the tracker: GitHub Issues and Projects are not part of the process")
+- **Extends:** [ADR 0014](../../decisions/0014-roadmap.md), decision 4 (the stage tables link each phase's issue, and the project holds a finer status); [ADR 0011](../../decisions/0011-design-sanity-check-follow-ups.md), decision 1 (each open entry links its issue)
 
 ## Context
 
-[ADR 0009](0009-git-workflow.md), decision 14 made the [roadmap](../roadmap.md) the tracker and left GitHub Issues and Projects out of the process. Since then the roadmap has gained 34 phases in five stages, the [open points register](../open-points.md) about 60 open entries that move between phases, and the stage tables, the register and the README's diagram are all kept by hand.
+[ADR 0009](../../decisions/0009-git-workflow.md), decision 14 made the [roadmap](../../roadmap.md) the tracker and left GitHub Issues and Projects out of the process. Since then the roadmap has gained 34 phases in five stages, the [open points register](../../archive/open-points.md) about 60 open entries that move between phases, and the stage tables, the register and the README's diagram are all kept by hand.
 
 The owner wants to learn the tool most projects plan with, and to see the project's progress on a board. GitHub offers milestones, labels, sub-issues (a parent with up to 100 children), blocking links, and Projects with custom fields and board, table and roadmap views. Issue types are not available: they are defined by an organization, and `luiki-dev` is a personal account. A *Relates to* link between issues is in public preview since 2026-08-07, without an API yet.
 
-The design was brainstormed and written as a [spec](../superpowers/specs/2026-10-09-github-project-tracking-design.md), which holds the details: issue bodies, fields, views, workflows and how each item moves. The day-to-day guide is [project tracking](../development/project-tracking.md).
+The design was brainstormed and written as a [spec](../specs/2026-10-09-github-project-tracking-design.md), which holds the details: issue bodies, fields, views, workflows and how each item moves. The day-to-day guide is [project tracking](../../development/project-tracking.md).
 
 ## Decisions
 
 | # | Topic | Options considered | Decision and reasoning |
 |---|-------|--------------------|------------------------|
 | 1 | Where tracking lives | The docs stay the tracker and GitHub mirrors them; GitHub tracks status and open points while the docs keep the plan; everything in GitHub | **GitHub tracks status and open points, the docs keep the plan**, starting as a trial in which both track (decision 2). `roadmap.md` keeps the order, goals, deliverables and owner steps, reviewed in PRs next to the ADRs that justify them; the register, a list of statuses, moves and parts, fits issues better than a document. A plain mirror would be two places to update with nothing keeping them in step. Everything in GitHub is the common setup, but changes to the plan would no longer be reviewed in PRs. |
-| 2 | The trial | Switch at once; run both for a phase or two | **Both run for two phases, PH-06b and PH-07, with the docs as the source of truth.** [OP-086](../open-points.md#op-086), under PH-08, then decides whether GitHub becomes the only tracker and what the docs keep. The owner sees both before giving one up. |
+| 2 | The trial | Switch at once; run both for a phase or two | **Both run for two phases, PH-06b and PH-07, with the docs as the source of truth.** [OP-086](../../archive/open-points.md#op-086), under PH-08, then decides whether GitHub becomes the only tracker and what the docs keep. The owner sees both before giving one up. |
 | 3 | What becomes an issue | All phases, open points and closed ones; all phases and open points; only work not yet done; a pilot with the next phase or two | **All phases, including the done ones and the retired PH-06, and every open point**, candidates and spikes included. Done phases make the milestones' progress true; closed open points would add some 45 issues of history that the register already holds. |
 | 4 | Decision work | No issues for ADRs; an issue per ADR; an issue per ADR made outside a phase | **An issue per ADR made outside a phase, labelled `adr`:** ADR 0001 to 0015, the definition work up to PH-01, in a GitHub-only **`Definition` milestone**, and ADR 0017 and 0022, made between phases, without a milestone. Only an ADR's creation counts, not its later changes. ADRs made inside a phase are part of that phase's issue. From now on, an ADR made outside a phase gets an `adr` issue, starting with this one. `adr` fits better than `requirement`: only ADR 0001 is about requirements. |
 | 5 | Kinds of issue | Issue types; labels | **Labels.** Issue types are defined by an organization, and `luiki-dev` is a personal account. |
@@ -124,36 +124,36 @@ The design was brainstormed and written as a [spec](../superpowers/specs/2026-10
 | 9 | Relationships | — | **An open point is a sub-issue of the phase that settles it** (of the phase it sits under now, when it has parts; it is re-parented when a part is done, as the register moves it). **A spike blocks its phase** (OP-025 blocks PH-13, OP-038 blocks PH-16), and a "Depends on" that names an issue becomes a blocked-by link. **A split phase** is closed as not planned with a comment linking the new phases, and is linked to each of them with *Relates to* (decision 10). |
 | 10 | Linking a split phase to its successors | A comment only; sub-issues of the old phase; *Relates to* and a comment | ***Relates to* and a comment.** *Relates to* links two issues without meaning blocking or containment, and shows on both. It has no API yet, so the owner adds it in the issue sidebar; splits are rare. Making the new phases sub-issues of a closed, retired phase would read as if the old phase were still the container. |
 | 11 | What a phase issue holds | A link to the roadmap only; a copy of the roadmap entry | **A copy of the entry** (goal, delivers, depends on, owner steps as a checklist, expected path, the "Also" open points), the owner's choice, so the issue reads on its own. The copy can drift; the trial rule (decision 14) handles it. **Owner steps of a phase not yet done are sub-issues of their own**, labelled `owner` (`PH-10 owner step 1: …`), and the phase issue lists them, so the owner sees every step waiting on them on the board; a done phase keeps its owner steps as a ticked checklist. A checklist alone would leave the owner's steps off the board, without a status. |
-| 12 | How the GitHub side is built | A one-off run of `gh` commands, driven by the plan; a committed migration script; a GitHub Action that mirrors the docs on every merge | **A one-off run of `gh`, with a pilot first.** The issue bodies are generated from the docs by throwaway scripts and created in batches; PH-06b with its open points goes first, the owner checks it, then the rest follows. A committed script would be a tested Markdown parser that loses its purpose when the trial ends, and a second new concept in one change. An Action needs a personal access token or a GitHub App to write to a user's project, a new credential under [ADR 0012](0012-security-baseline.md), and would make the docs the permanent source. |
+| 12 | How the GitHub side is built | A one-off run of `gh` commands, driven by the plan; a committed migration script; a GitHub Action that mirrors the docs on every merge | **A one-off run of `gh`, with a pilot first.** The issue bodies are generated from the docs by throwaway scripts and created in batches; PH-06b with its open points goes first, the owner checks it, then the rest follows. A committed script would be a tested Markdown parser that loses its purpose when the trial ends, and a second new concept in one change. An Action needs a personal access token or a GitHub App to write to a user's project, a new credential under [ADR 0012](../../decisions/0012-security-baseline.md), and would make the docs the permanent source. |
 | 13 | Visibility of the project | Public; private | **Public.** The issues are public with the repository anyway, and the README and `roadmap.md` can link a board visitors can open. Only the owner can edit it. |
 | 14 | Keeping both sides in step | Automation; a rule | **A rule,** for the length of the trial: the docs are the source; a change to a roadmap entry or an open point updates its issue in the same working session, and the PR says so. Drift that hurts is evidence for OP-086. |
 
 ## Consequences
 
 - **132 issues exist** on the [Szop project](https://github.com/users/luiki-dev/projects/3): 35 phases, 61 open points, 18 `adr` issues and 18 owner steps, in six milestones, with six labels.
-- **The stage tables gain an Issue column, and every open entry an Issue line.** The README links the board under its diagram, which stays as it is ([ADR 0017](0017-readme-roadmap-diagram.md)).
-- **A new guide**, [project tracking](../development/project-tracking.md), explains the model, how items move and the owner's setup steps; issue forms in `.github/ISSUE_TEMPLATE/` give new issues the same shape.
-- **The PR template and the [definition of done](../development/definition-of-done.md)** (items 6 and 9) name the issues during the trial, and a PR closes its issues with `Closes #N`.
+- **The stage tables gain an Issue column, and every open entry an Issue line.** The README links the board under its diagram, which stays as it is ([ADR 0017](../../decisions/0017-readme-roadmap-diagram.md)).
+- **A new guide**, [project tracking](../../development/project-tracking.md), explains the model, how items move and the owner's setup steps; issue forms in `.github/ISSUE_TEMPLATE/` give new issues the same shape.
+- **The PR template and the [definition of done](../../development/definition-of-done.md)** (items 6 and 9) name the issues during the trial, and a PR closes its issues with `Closes #N`.
 - **`CLAUDE.md`'s status vocabulary gains `📌`**, and names the project's statuses.
 - **Some GitHub changes have no API** (the Status options, the workflows, the views, *Relates to*): they are the owner's steps, listed in the guide.
-- **[OP-086](../open-points.md#op-086)** decides after PH-07 how the trial ends.
+- **[OP-086](../../archive/open-points.md#op-086)** decides after PH-07 how the trial ends.
 ```
 
 - [x] **Step 2: Add the notes to ADR 0009**
 
 In `docs/decisions/0009-git-workflow.md`:
-- At the end of the status line (line 3), after `decision 9 refined by [ADR 0016](0016-toolchain-details.md) (an allow-list of scopes)`, append: `; decision 14 superseded in part by [ADR 0024](0024-github-project-tracking.md) (GitHub Issues and a GitHub Project track the work, in a trial next to the roadmap)`
-- In decision 14's row, replace `**The roadmap is the tracker:** GitHub Issues and Projects are not part of the process. |` with `**The roadmap is the tracker:** GitHub Issues and Projects are not part of the process. <br>🔁 **Superseded in part by [ADR 0024](0024-github-project-tracking.md), decisions 1 and 2:** GitHub Issues and a GitHub Project track the phases, open points and decision work, in a trial next to the roadmap. |`
+- At the end of the status line (line 3), after `decision 9 refined by [ADR 0016](../../decisions/0016-toolchain-details.md) (an allow-list of scopes)`, append: `; decision 14 superseded in part by [ADR 0024](../../decisions/0024-github-project-tracking.md) (GitHub Issues and a GitHub Project track the work, in a trial next to the roadmap)`
+- In decision 14's row, replace `**The roadmap is the tracker:** GitHub Issues and Projects are not part of the process. |` with `**The roadmap is the tracker:** GitHub Issues and Projects are not part of the process. <br>🔁 **Superseded in part by [ADR 0024](../../decisions/0024-github-project-tracking.md), decisions 1 and 2:** GitHub Issues and a GitHub Project track the phases, open points and decision work, in a trial next to the roadmap. |`
 
 - [x] **Step 3: Add the notes to ADR 0011 and ADR 0014**
 
 In `docs/decisions/0011-design-sanity-check-follow-ups.md`:
-- Status line: append `; decision 1 extended by [ADR 0024](0024-github-project-tracking.md) (each open entry links its GitHub issue)` after `(the visual design doc)`.
-- Decision 1's row ends with `A triage file next to the audit would have covered only the audit's findings. |`; replace with `A triage file next to the audit would have covered only the audit's findings. <br>➕ **Extended by [ADR 0024](0024-github-project-tracking.md), decision 1:** each open entry links its GitHub issue, which mirrors it during the trial. |`
+- Status line: append `; decision 1 extended by [ADR 0024](../../decisions/0024-github-project-tracking.md) (each open entry links its GitHub issue)` after `(the visual design doc)`.
+- Decision 1's row ends with `A triage file next to the audit would have covered only the audit's findings. |`; replace with `A triage file next to the audit would have covered only the audit's findings. <br>➕ **Extended by [ADR 0024](../../decisions/0024-github-project-tracking.md), decision 1:** each open entry links its GitHub issue, which mirrors it during the trial. |`
 
 In `docs/decisions/0014-roadmap.md`:
-- Status line: replace `(the README's roadmap diagram mirrors the stage tables)` with `(the README's roadmap diagram mirrors the stage tables) and extended by [ADR 0024](0024-github-project-tracking.md) (the stage tables link each phase's issue, and the GitHub Project holds a finer status)`.
-- Decision 4's row: replace `the README's roadmap diagram mirrors the stage tables. |` with `the README's roadmap diagram mirrors the stage tables. <br>➕ **Extended by [ADR 0024](0024-github-project-tracking.md), decisions 1 and 7:** each stage table links its phases' issues, and the GitHub Project holds a finer status. |`
+- Status line: replace `(the README's roadmap diagram mirrors the stage tables)` with `(the README's roadmap diagram mirrors the stage tables) and extended by [ADR 0024](../../decisions/0024-github-project-tracking.md) (the stage tables link each phase's issue, and the GitHub Project holds a finer status)`.
+- Decision 4's row: replace `the README's roadmap diagram mirrors the stage tables. |` with `the README's roadmap diagram mirrors the stage tables. <br>➕ **Extended by [ADR 0024](../../decisions/0024-github-project-tracking.md), decisions 1 and 7:** each stage table links its phases' issues, and the GitHub Project holds a finer status. |`
 
 - [x] **Step 4: Extend the status vocabulary in `CLAUDE.md`**
 
@@ -1096,7 +1096,7 @@ Create `docs/development/project-tracking.md` with exactly:
 ````markdown
 # Project tracking
 
-How Szop's work is tracked on GitHub: the roadmap's phases, the open points and the decision work as issues, the stages as milestones, and all of them on the [Szop project](https://github.com/users/luiki-dev/projects/3). The decisions are in [ADR 0024](../decisions/0024-github-project-tracking.md). For now this is a **trial**: the [roadmap](../roadmap.md) and the [open points register](../open-points.md) stay the source of truth, and [OP-086](../open-points.md#op-086) decides after PH-06b and PH-07 whether GitHub becomes the only tracker.
+How Szop's work is tracked on GitHub: the roadmap's phases, the open points and the decision work as issues, the stages as milestones, and all of them on the [Szop project](https://github.com/users/luiki-dev/projects/3). The decisions are in [ADR 0024](../../decisions/0024-github-project-tracking.md). For now this is a **trial**: the [roadmap](../../roadmap.md) and the [open points register](../../archive/open-points.md) stay the source of truth, and [OP-086](../../archive/open-points.md#op-086) decides after PH-06b and PH-07 whether GitHub becomes the only tracker.
 
 ## Contents
 
@@ -1124,15 +1124,15 @@ How Szop's work is tracked on GitHub: the roadmap's phases, the open points and 
 
 | Szop concept | On GitHub | In the docs |
 |---|---|---|
-| Stage | Milestone `Stage N: <title>`, its exit criterion as the description | The stage's section and table in [`roadmap.md`](../roadmap.md) |
+| Stage | Milestone `Stage N: <title>`, its exit criterion as the description | The stage's section and table in [`roadmap.md`](../../roadmap.md) |
 | Decision work before PH-01 | Milestone `Definition` | — |
 | Phase | Issue `PH-NN <name>`, label `phase`, the stage's milestone | The phase entry in `roadmap.md`, with its issue in the stage table |
 | Owner step of a phase | Issue `PH-NN owner step K: <step>`, label `owner`, sub-issue of its phase; only while the phase is not done | The phase entry's **Owner steps** in `roadmap.md` |
-| Open point | Issue `OP-NNN <lead>`, label `open-point`, sub-issue of its phase | The entry in [`open-points.md`](../open-points.md), with its **Issue** line |
+| Open point | Issue `OP-NNN <lead>`, label `open-point`, sub-issue of its phase | The entry in [`open-points.md`](../../archive/open-points.md), with its **Issue** line |
 | Spike | Its open point's issue, also labelled `spike`, blocking its phase | The open point; the phase's "Depends on" |
 | Candidate | Its open point's issue, also labelled `candidate`, no parent, no milestone | The open point under "Candidates" |
 | ADR made outside a phase | Issue `ADR NNNN <title>`, label `adr` | The ADR in [`docs/decisions/`](../decisions/) |
-| Requirements, use cases | — (linked from a phase's "Delivers") | [`functional-requirements.md`](../requirements/functional-requirements.md) |
+| Requirements, use cases | — (linked from a phase's "Delivers") | [`functional-requirements.md`](../../requirements/functional-requirements.md) |
 | Status | The project's Status field | The stage tables (⬜ 🚧 ✅ ✖️) and the register's status lines |
 
 ## Milestones
@@ -1253,7 +1253,7 @@ The Timeline is a record of what happened when: future phases have no dates yet.
 
 ## The trial rule
 
-For PH-06b and PH-07, until [OP-086](../open-points.md#op-086) is settled:
+For PH-06b and PH-07, until [OP-086](../../archive/open-points.md#op-086) is settled:
 
 - **The docs are the source of truth.** A PR that changes a roadmap entry, a stage table row or an open point also updates its issue during the same working session. The GitHub change is live at once, before the merge, and the PR's description lists it.
 - **Status is kept in both:** the stage tables and the register's status lines as before, and the project's finer Status.
@@ -1419,11 +1419,11 @@ In `docs/development/definition-of-done.md`, table rows 6 and 9:
 In `docs/development/git-workflow.md`, section "3. Open a pull request", after the bullet starting `- **The description follows the PR template**`, add:
 
 ```markdown
-- **The description closes the PR's issues** with `Closes #N`, one per line: a phase's issue, each open point it settles and, for an ADR made outside a phase, its `adr` issue. The merge closes them, and the project marks them ✅ Done ([project tracking](project-tracking.md)).
+- **The description closes the PR's issues** with `Closes #N`, one per line: a phase's issue, each open point it settles and, for an ADR made outside a phase, its `adr` issue. The merge closes them, and the project marks them ✅ Done ([project tracking](../../development/project-tracking.md)).
 ```
 
 In `docs/development/phase-walkthrough.md`:
-- Step 1, after the bullet starting `- A small, well-scoped phase may skip`, add: `- When the brainstorm starts, the phase's issue moves to 🚧 In progress with its Started date, and the spec and plan links go into its Spec and Plan fields as they are committed ([project tracking](project-tracking.md#how-items-move)).`
+- Step 1, after the bullet starting `- A small, well-scoped phase may skip`, add: `- When the brainstorm starts, the phase's issue moves to 🚧 In progress with its Started date, and the spec and plan links go into its Spec and Plan fields as they are committed ([project tracking](../../development/project-tracking.md#how-items-move)).`
 - Step 4, after the bullet starting `- Claude reviews its own diff first`, add:
 
   ```markdown
@@ -1447,11 +1447,11 @@ In `docs/development/phase-walkthrough.md`:
 In `docs/development/github-settings.md`:
 - Contents: after `- [Features](#features)` add `- [Labels](#labels)`, `- [Milestones](#milestones)` and `- [Project](#project)`, one per line.
 - "Order of applying": insert a new item before `4. Check the result`, and renumber that item to 5:
-  `4. The labels, milestones and project, with [ADR 0024](../decisions/0024-github-project-tracking.md): see [Labels](#labels), [Milestones](#milestones) and [Project](#project).`
+  `4. The labels, milestones and project, with [ADR 0024](../../decisions/0024-github-project-tracking.md): see [Labels](#labels), [Milestones](#milestones) and [Project](#project).`
 - Replace the "Features" section's paragraph with:
 
 ```markdown
-*Settings → General* → section **Features**. Nothing is changed. **Issues** are used: since [ADR 0024](../decisions/0024-github-project-tracking.md) they track the phases, open points and decision work, next to the [roadmap](../roadmap.md), in a trial. **Projects** stays on; the project itself belongs to the owner's account (see [Project](#project)).
+*Settings → General* → section **Features**. Nothing is changed. **Issues** are used: since [ADR 0024](../../decisions/0024-github-project-tracking.md) they track the phases, open points and decision work, next to the [roadmap](../../roadmap.md), in a trial. **Projects** stays on; the project itself belongs to the owner's account (see [Project](#project)).
 ```
 
 - After the "Features" section, before "Checking the settings", add:
@@ -1459,7 +1459,7 @@ In `docs/development/github-settings.md`:
 ```markdown
 ## Labels
 
-*Issues → Labels.* Only `phase`, `open-point`, `spike`, `candidate`, `owner` and `adr`; GitHub's default labels are deleted. Dependabot creates its own labels when it opens its first PR. What each label means is in [project tracking](project-tracking.md#labels). ADR 0024, decision 6.
+*Issues → Labels.* Only `phase`, `open-point`, `spike`, `candidate`, `owner` and `adr`; GitHub's default labels are deleted. Dependabot creates its own labels when it opens its first PR. What each label means is in [project tracking](../../development/project-tracking.md#labels). ADR 0024, decision 6.
 
 ## Milestones
 
@@ -1472,9 +1472,9 @@ The [Szop project](https://github.com/users/luiki-dev/projects/3), owned by the 
 | Setting | Value | Why |
 |---|---|---|
 | **Visibility** | Public | The README and the roadmap link it. ADR 0024, decision 13. |
-| **Fields** | Status (six options), Order, Path, Spec, Plan, Started, Finished | See [project tracking](project-tracking.md#fields). ADR 0024, decisions 7 and 8. |
-| **Workflows** | Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr,owner` | See [project tracking](project-tracking.md#workflows). |
-| **Views** | Board, Roadmap, Open points, Next up, Timeline | See [project tracking](project-tracking.md#views). |
+| **Fields** | Status (six options), Order, Path, Spec, Plan, Started, Finished | See [project tracking](../../development/project-tracking.md#fields). ADR 0024, decisions 7 and 8. |
+| **Workflows** | Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr,owner` | See [project tracking](../../development/project-tracking.md#workflows). |
+| **Views** | Board, Roadmap, Open points, Next up, Timeline | See [project tracking](../../development/project-tracking.md#views). |
 ```
 
 - In "Checking the settings", at the end of its first code block, add:
@@ -1493,7 +1493,7 @@ In `docs/architecture/stack-overview.md`, add to Contents: `- [18. Tracking the 
 ```markdown
 ## 18. Tracking the work: issues, milestones and projects
 
-Most teams plan on the same site that holds their code. On GitHub that means three pieces, which Szop uses next to its roadmap ([ADR 0024](../decisions/0024-github-project-tracking.md); the day-to-day guide is [project tracking](../development/project-tracking.md)):
+Most teams plan on the same site that holds their code. On GitHub that means three pieces, which Szop uses next to its roadmap ([ADR 0024](../../decisions/0024-github-project-tracking.md); the day-to-day guide is [project tracking](../../development/project-tracking.md)):
 
 - **An issue** is one piece of work with a number, a title, a body, labels and a state, open or closed. Closing records why: *completed* or *not planned*. A pull request whose description says `Closes #12` closes issue 12 when it is merged, which ties the work to the change that did it.
 - **Issues relate to each other.** A **sub-issue** sits under a parent, which shows how many of its children are closed; an issue can be **blocked by** another; and any mention of `#12` leaves a note on issue 12. Szop puts each open point under the phase that settles it, and lets a spike block its phase.
@@ -1504,9 +1504,9 @@ Most teams plan on the same site that holds their code. On GitHub that means thr
 - [x] **Step 8: Update `CLAUDE.md` and the README's documentation list**
 
 In `CLAUDE.md`, section "Documentation":
-- After the bullet for `docs/open-points.md`, add: ``- `docs/development/project-tracking.md` — how the phases, open points and decision work are tracked as GitHub issues on the Szop project: labels, milestones, fields, statuses, how items move. During the trial ([ADR 0024](docs/decisions/0024-github-project-tracking.md)), a change to a roadmap entry or an open point also updates its issue in the same working session.``
+- After the bullet for `docs/open-points.md`, add: ``- `docs/development/project-tracking.md` — how the phases, open points and decision work are tracked as GitHub issues on the Szop project: labels, milestones, fields, statuses, how items move. During the trial ([ADR 0024](../../decisions/0024-github-project-tracking.md)), a change to a roadmap entry or an open point also updates its issue in the same working session.``
 
-In `README.md`, section "Documentation", after the `Open points` bullet, add: `- [Project tracking](docs/development/project-tracking.md) — how the phases, open points and decisions are tracked as GitHub issues and on the [project board](https://github.com/users/luiki-dev/projects/3)`
+In `README.md`, section "Documentation", after the `Open points` bullet, add: `- [Project tracking](../../development/project-tracking.md) — how the phases, open points and decisions are tracked as GitHub issues and on the [project board](https://github.com/users/luiki-dev/projects/3)`
 
 - [x] **Step 9: Check**
 
@@ -1554,9 +1554,9 @@ In `docs/open-points.md`, at the end of the `### PH-08 Container image` group (j
 ```markdown
 #### OP-086
 
-**Decide how the GitHub tracking trial ends.** After PH-06b and PH-07, decide whether GitHub Issues and the Szop project become the only tracker, and what `roadmap.md` and `open-points.md` keep: the phase entries, the stage tables, the README's diagram ([ADR 0017](decisions/0017-readme-roadmap-diagram.md)) and the register's entries. Look back at how often the two sides drifted, and which views were used.
+**Decide how the GitHub tracking trial ends.** After PH-06b and PH-07, decide whether GitHub Issues and the Szop project become the only tracker, and what `roadmap.md` and `open-points.md` keep: the phase entries, the stage tables, the README's diagram ([ADR 0017](../../decisions/0017-readme-roadmap-diagram.md)) and the register's entries. Look back at how often the two sides drifted, and which views were used.
 
-- **Source:** [ADR 0024](decisions/0024-github-project-tracking.md), decision 2
+- **Source:** [ADR 0024](../../decisions/0024-github-project-tracking.md), decision 2
 - **Status:** ⬜ Open
 ```
 
@@ -1640,13 +1640,13 @@ Expected: `38` (34 phase rows and 4 candidate rows).
 In `docs/roadmap.md`, "How it works", after the bullet starting `- **Not on the roadmap:**`, add:
 
 ```markdown
-- **On GitHub** ([ADR 0024](decisions/0024-github-project-tracking.md)): each phase, each open point and each ADR made outside a phase is also an issue on the [Szop project](https://github.com/users/luiki-dev/projects/3), and the stage tables link each phase's issue. During the trial ([OP-086](open-points.md#op-086)) this page stays the source: a change to an entry updates its issue in the same working session, as [project tracking](development/project-tracking.md#the-trial-rule) describes.
+- **On GitHub** ([ADR 0024](../../decisions/0024-github-project-tracking.md)): each phase, each open point and each ADR made outside a phase is also an issue on the [Szop project](https://github.com/users/luiki-dev/projects/3), and the stage tables link each phase's issue. During the trial ([OP-086](../../archive/open-points.md#op-086)) this page stays the source: a change to an entry updates its issue in the same working session, as [project tracking](../../development/project-tracking.md#the-trial-rule) describes.
 ```
 
 In `docs/open-points.md`, "How it works", after the bullet starting `- **Closing:**`, add:
 
 ```markdown
-- **Each open entry has an issue** on GitHub ([ADR 0024](decisions/0024-github-project-tracking.md)), named on its **Issue** line: a sub-issue of its phase's issue, on the [Szop project](https://github.com/users/luiki-dev/projects/3). During the trial ([OP-086](#op-086)) this page stays the source; adding, moving or closing an entry updates its issue too ([project tracking](development/project-tracking.md#how-items-move)).
+- **Each open entry has an issue** on GitHub ([ADR 0024](../../decisions/0024-github-project-tracking.md)), named on its **Issue** line: a sub-issue of its phase's issue, on the [Szop project](https://github.com/users/luiki-dev/projects/3). During the trial ([OP-086](#op-086)) this page stays the source; adding, moving or closing an entry updates its issue too ([project tracking](../../development/project-tracking.md#how-items-move)).
 ```
 
 In `README.md`, section "Roadmap", after the closing fence of the diagram, add an empty line and:
