@@ -33,7 +33,7 @@ Docker Compose starts the services a project needs from one file. Szop's everyda
 ```bash
 pnpm db:up                                   # start it, and wait until it is healthy (docker compose up -d --wait)
 docker compose ps                            # is it running?
-docker compose stop                          # stop it; start brings it back
+pnpm db:down                                 # stop it; pnpm db:up brings it back (docker compose stop)
 docker compose logs postgres                 # the server's log
 docker compose exec postgres psql -U szop    # a SQL prompt
 docker compose down                          # remove the container, keep the data

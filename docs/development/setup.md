@@ -94,7 +94,7 @@ Install Docker Desktop for Windows (not in Ubuntu): <https://docs.docker.com/des
 pnpm db:up
 ```
 
-`pnpm db:up` runs `docker compose up -d --wait`. It downloads the PostgreSQL image the first time, starts the database and ends with `Container szop-postgres-1 Healthy`. The database keeps running across restarts of Docker Desktop until `docker compose stop`, and its data survives `docker compose down`. Details, and how to open `psql`, are in [Docker Compose and PostgreSQL](tools/docker-compose.md).
+`pnpm db:up` runs `docker compose up -d --wait`. It downloads the PostgreSQL image the first time, starts the database and ends with `Container szop-postgres-1 Healthy`. The database keeps running across restarts of Docker Desktop until `pnpm db:down` (`docker compose stop`), and its data survives `docker compose down`. Details, and how to open `psql`, are in [Docker Compose and PostgreSQL](tools/docker-compose.md).
 
 ## 8. Check that everything works
 
