@@ -86,7 +86,7 @@ Checked on 2026-10-12 with throwaway containers outside the repository's build (
 - Consumes: the workspace as it is: `apps/api/src/server.ts`, `apps/api/drizzle/` with `meta/_journal.json`, `apps/web`'s `build` script (`vite build`, writing `apps/web/dist`).
 - Produces: `docker build -t szop:local .` builds an image that runs `node src/server.ts` as `node` from `/app/apps/api`, with `WEB_ROOT=/app/apps/web/dist`. Task 2 runs it; Task 3 builds it in CI with the same context.
 
-- [ ] **Step 1: Move `@szop/shared` to the API's `dependencies`**
+- [x] **Step 1: Move `@szop/shared` to the API's `dependencies`**
 
 In `apps/api/package.json`, delete `"@szop/shared": "workspace:*",` from `devDependencies` and add it to `dependencies` in alphabetical order:
 
@@ -108,7 +108,7 @@ git diff pnpm-lock.yaml
 
 Expected: `pnpm install` succeeds; the lockfile diff moves `'@szop/shared'` from `devDependencies` to `dependencies` under `importers: apps/api` and nothing else.
 
-- [ ] **Step 2: The RDS certificate bundle**
+- [x] **Step 2: The RDS certificate bundle**
 
 ```bash
 mkdir -p apps/api/certs
@@ -120,7 +120,7 @@ openssl crl2pkcs7 -nocrl -certfile apps/api/certs/rds-global-bundle.pem | openss
 
 Expected: a count of certificates (around 100) and the same number of subjects; note the count, the SHA-256 and today's date for ADR 0028 (Task 6). Every subject names `Amazon RDS`; if it is not a PEM file of certificates, stop and report. Do not edit the file: `.gitattributes` stores it with LF endings, and Prettier does not format `.pem` files.
 
-- [ ] **Step 3: The build context**
+- [x] **Step 3: The build context**
 
 Create `.dockerignore`:
 
@@ -155,7 +155,7 @@ docs
 apps/api/src/test
 ```
 
-- [ ] **Step 4: The Dockerfile**
+- [x] **Step 4: The Dockerfile**
 
 Create `Dockerfile`:
 
@@ -220,7 +220,7 @@ EXPOSE 3000
 CMD ["node", "src/server.ts"]
 ```
 
-- [ ] **Step 5: Build it**
+- [x] **Step 5: Build it**
 
 ```bash
 docker build -t szop:local .
@@ -228,7 +228,7 @@ docker build -t szop:local .
 
 Expected: the build passes; the `build` stage's log shows `first-screen JavaScript: … KB Brotli of 200.0 KB`. If `pnpm install --frozen-lockfile` fails on the lockfile, step 1 was not completed. If `vite build` fails because a test file is missing from the context, the web app imports one outside a test: stop and report.
 
-- [ ] **Step 6: Look inside the image**
+- [x] **Step 6: Look inside the image**
 
 ```bash
 docker image ls szop:local --format '{{.Size}}'
@@ -245,7 +245,7 @@ docker run --rm --entrypoint sh szop:local -c '
 
 Expected: `uid=1000(node)`; `/app/apps/api`; `WEB_ROOT=/app/apps/web/dist NODE_ENV=production`; `drizzle/meta/_journal.json` present; `index.html` and `assets/` in `dist`; `shared -> ../../../../packages/shared`; the `find` prints nothing; `/app/apps/web` holds only `dist`; `/app/e2e` does not exist; no pnpm store and no Corepack cache; `read-only to node`; the bundle present. Note the size for the PR description.
 
-- [ ] **Step 7: No secrets in the image** (Review Focus 4)
+- [x] **Step 7: No secrets in the image** (Review Focus 4)
 
 ```bash
 test -f apps/api/.env && echo "apps/api/.env exists locally"
@@ -255,7 +255,7 @@ docker history --no-trunc szop:local | grep -i -E 'password|secret' || echo "no 
 
 Expected: the local `.env` exists, yet `find` prints only `done` (an `.env.example` would be harmless, but none is copied to the final stage), and the history has no secret.
 
-- [ ] **Step 8: The symlinked workspace resolves** (Review Focus 5)
+- [x] **Step 8: The symlinked workspace resolves** (Review Focus 5)
 
 ```bash
 docker run --rm --entrypoint node szop:local --input-type=module -e '
@@ -267,7 +267,7 @@ docker run --rm --entrypoint node szop:local --input-type=module -e '
 
 Expected: `resolved …` and a URL under `file:///app/packages/shared/src/`, not under `node_modules`. An `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING` here means the workspace was copied into `node_modules`: stop and report.
 
-- [ ] **Step 9: All checks, tick, commit**
+- [x] **Step 9: All checks, tick, commit**
 
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test

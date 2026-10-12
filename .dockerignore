@@ -1,0 +1,28 @@
+# What the image never needs (ADR 0028). Keeping it out also keeps the build
+# context small and the COPY . . layer stable.
+
+# Version control, editors and Claude Code
+.git
+.github
+.claude
+.superpowers
+.husky
+.vscode
+
+# Installed and built on the host; the image installs and builds its own
+**/node_modules
+**/dist
+coverage
+e2e/playwright-report
+e2e/test-results
+
+# Local settings with passwords; the examples are harmless
+**/.env
+**/.env.*
+!**/.env.example
+
+# Docs and tests: not run in the image
+docs
+**/*.test.ts
+**/*.test.tsx
+apps/api/src/test
