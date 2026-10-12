@@ -12,7 +12,7 @@
 # Installed and built on the host; the image installs and builds its own
 **/node_modules
 **/dist
-coverage
+**/coverage
 e2e/playwright-report
 e2e/test-results
 
@@ -20,6 +20,10 @@ e2e/test-results
 **/.env
 **/.env.*
 !**/.env.example
+
+# Terraform's local state and provider caches, which can hold secrets
+**/*.tfstate*
+**/.terraform
 
 # Docs and tests: not run in the image
 docs

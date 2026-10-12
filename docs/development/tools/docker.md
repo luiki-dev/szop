@@ -19,7 +19,7 @@ Docker builds and runs **containers**: a program packed together with everything
 - **One image for the API and the SPA:** [ADR 0008](../../decisions/0008-hosting.md), decisions 11 and 12. The API serves the built SPA itself, so one container holds the whole app, built by a multi-stage Dockerfile on a slim Node 24 image.
 - **The details:** [ADR 0028](../../decisions/0028-container-image-details.md):
   - **`node:24-trixie-slim`, pinned by digest** (decision 1): the official Debian 13 image, with glibc like the PostgreSQL image and RDS; Alpine, distroless and hardened images were considered.
-  - **Three stages on one pinned `base`** (decisions 6 and 7), pnpm through Corepack, and not `pnpm deploy`, which would copy `@szop/shared` into `node_modules`, where Node refuses to strip types.
+  - **Three stages on one pinned `base`, plus a shared `manifests` stage** (decisions 6 and 7), pnpm through Corepack, and not `pnpm deploy`, which would copy `@szop/shared` into `node_modules`, where Node refuses to strip types.
   - **What the image sets** (decision 9): only `WEB_ROOT` and `NODE_ENV`; every other setting comes from whoever runs it.
   - **Non-root, read-only** (decision 10): the `node` user, code owned by root, no file written at run time.
   - **The RDS certificate bundle committed** (decision 2), for the database connection's TLS from PH-12.
@@ -29,7 +29,7 @@ Docker builds and runs **containers**: a program packed together with everything
 
 ### The build context and `.dockerignore`
 
-`docker build .` sends the **build context**, the repository folder, to BuildKit; the Dockerfile's `COPY` steps can only read from it. **`.dockerignore`** at the root keeps out what the image must not hold or does not need: `.git`, every `node_modules` and `dist` (the image installs and builds its own), local `.env` files with passwords (`.env.example` stays), the docs, test files (`*.test.ts`, `*.test.tsx`, `apps/api/src/test`), Playwright's output and the editors' and tools' folders. A small context builds faster, and a stable one keeps the cache of `COPY . .` valid.
+`docker build .` sends the **build context**, the repository folder, to BuildKit; the Dockerfile's `COPY` steps can only read from it. **`.dockerignore`** at the root keeps out what the image must not hold or does not need: `.git`, every `node_modules`, `dist` and `coverage` (the image installs and builds its own), local `.env` files with passwords (`.env.example` stays), Terraform's local state and provider caches, the docs, test files (`*.test.ts`, `*.test.tsx`, `apps/api/src/test`), Playwright's output and the editors' and tools' folders. A small context builds faster, and a stable one keeps the cache of `COPY . .` valid.
 
 ### The Dockerfile, stage by stage
 
