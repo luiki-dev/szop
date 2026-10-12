@@ -84,7 +84,7 @@ The [project board](https://github.com/users/luiki-dev/projects/3) shows the sam
 
 Szop is a pnpm monorepo in TypeScript, developed in Windows Subsystem for Linux (WSL). To set up a machine and run the checks, follow the [setup guide](docs/development/setup.md); every tool has its own page in [docs/development/tools](docs/development/tools/).
 
-Start PostgreSQL first, with `docker compose up -d --wait` (Docker Desktop must be running). Then `pnpm dev` starts the API, after you copy `apps/api/.env.example` to `apps/api/.env`, and Vite, the web app's dev server: open Vite's address, `http://localhost:5173`, to see the page, which shows the API's status. `pnpm build` and then `pnpm start` run the app the production way instead: the API serves the built page and itself on one port, `http://localhost:3000`. `pnpm test` runs every test; see the [testing guide](docs/development/testing.md).
+Start PostgreSQL first, with `pnpm db:up` (Docker Desktop must be running). Then `pnpm dev` starts the API, after you copy `apps/api/.env.example` to `apps/api/.env`, and Vite, the web app's dev server: open Vite's address, `http://localhost:5173`, to see the page, which shows the API's status. `pnpm build` and then `pnpm start` run the app the production way instead: the API serves the built page and itself on one port, `http://localhost:3000`. `pnpm test` runs every test; see the [testing guide](docs/development/testing.md).
 
 ## Documentation
 
