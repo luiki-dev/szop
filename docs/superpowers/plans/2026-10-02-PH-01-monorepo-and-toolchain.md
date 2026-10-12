@@ -1027,7 +1027,7 @@ Expected: each exits 0.
 Replace line 70 (it starts with `- **The scope is optional**`) with:
 
 ```markdown
-- **The scope is optional**, and when given it must be on the allow-list in `commitlint.config.js` ([ADR 0016](../decisions/0016-toolchain-details.md)): a workspace or test layer (`web`, `api`, `shared`, `e2e`), a feature area, one per requirement area (`lists`, `templates`, …), a kind of doc (`adr`, `spec`, `plan`, `requirements`, `audit`, `roadmap`) or tooling (`infra`, `deps`, `main` for release-please, `claude`). A phase's PR title may name its feature area (`feat(templates): add templates`), since the phase spans several workspaces. A PR that needs a new scope adds it to the list.
+- **The scope is optional**, and when given it must be on the allow-list in `commitlint.config.js` ([ADR 0016](../../decisions/0016-toolchain-details.md)): a workspace or test layer (`web`, `api`, `shared`, `e2e`), a feature area, one per requirement area (`lists`, `templates`, …), a kind of doc (`adr`, `spec`, `plan`, `requirements`, `audit`, `roadmap`) or tooling (`infra`, `deps`, `main` for release-please, `claude`). A phase's PR title may name its feature area (`feat(templates): add templates`), since the phase spans several workspaces. A PR that needs a new scope adds it to the list.
 ```
 
 - [x] **Step 7: Write `docs/development/tools/commitlint.md`**
@@ -1135,12 +1135,12 @@ Over 100 lines, so it starts with a `## Contents`. Steps only, each linking its 
 
 1. **Windows: WSL and Ubuntu** — `wsl --install -d Ubuntu` in an administrator PowerShell, restart, create the Linux user. Link: `https://learn.microsoft.com/windows/wsl/install`.
 2. **git** — `sudo apt update && sudo apt install -y git`; `git config --global user.name "…"`, `git config --global user.email "…"`; `git config --global core.autocrlf false` (`.gitattributes` handles line endings).
-3. **nvm and Node** — the nvm install command from nvm's README (link it, do not copy a version-pinned URL), then in the clone `nvm install` and `nvm use` (reads `.nvmrc`). Link [node-and-nvm.md](tools/node-and-nvm.md).
-4. **pnpm** — `npm install -g pnpm`; pnpm switches to the pinned version itself. Link [pnpm.md](tools/pnpm.md).
-5. **VS Code** — install on Windows, add the WSL extension, open the repository from WSL with `code .`, accept the recommended extensions. Link [vscode.md](tools/vscode.md).
+3. **nvm and Node** — the nvm install command from nvm's README (link it, do not copy a version-pinned URL), then in the clone `nvm install` and `nvm use` (reads `.nvmrc`). Link [node-and-nvm.md](../../development/tools/node-and-nvm.md).
+4. **pnpm** — `npm install -g pnpm`; pnpm switches to the pinned version itself. Link [pnpm.md](../../development/tools/pnpm.md).
+5. **VS Code** — install on Windows, add the WSL extension, open the repository from WSL with `code .`, accept the recommended extensions. Link [vscode.md](../../development/tools/vscode.md).
 6. **Clone and install** — `git clone https://github.com/luiki-dev/szop.git`, `cd szop`, `nvm use`, `pnpm install` (also sets up the git hooks).
 7. **Check that everything works** — `pnpm lint`, `pnpm typecheck`, `pnpm test`; what success looks like.
-8. **What the git hooks do** — two sentences, linking [husky-and-lint-staged.md](tools/husky-and-lint-staged.md) and [commitlint.md](tools/commitlint.md).
+8. **What the git hooks do** — two sentences, linking [husky-and-lint-staged.md](../../development/tools/husky-and-lint-staged.md) and [commitlint.md](../../development/tools/commitlint.md).
 9. **Coming later** — Docker Desktop and the database (PH-04), running the app (PH-03).
 
 - [x] **Step 2: Write `docs/decisions/0016-toolchain-details.md`**
@@ -1150,24 +1150,24 @@ Over 100 lines, so it starts with a `## Contents`. Steps only, each linking its 
 
 - **Status:** ✅ Accepted
 - **Date:** 2026-10-02
-- **Refines:** [ADR 0005](0005-development-environment.md), decision 12 (Markdown left out of Prettier); [ADR 0007](0007-testing-strategy.md), decision 18 (`pnpm test` runs Node's test runner until Vitest arrives); [ADR 0009](0009-git-workflow.md), decision 9 (an allow-list of scopes); [ADR 0015](0015-git-push-guard-hook.md), decision 3 (the push hook in TypeScript)
+- **Refines:** [ADR 0005](../../decisions/0005-development-environment.md), decision 12 (Markdown left out of Prettier); [ADR 0007](../../decisions/0007-testing-strategy.md), decision 18 (`pnpm test` runs Node's test runner until Vitest arrives); [ADR 0009](../../decisions/0009-git-workflow.md), decision 9 (an allow-list of scopes); [ADR 0015](../../decisions/0015-git-push-guard-hook.md), decision 3 (the push hook in TypeScript)
 
 ## Context
 
-[ADR 0005](0005-development-environment.md) settled the development environment and left its details to the setup phase, now [PH-01](../roadmap.md#ph-01-monorepo-and-toolchain). Its brainstorm, the [spec](../superpowers/specs/2026-10-02-PH-01-monorepo-and-toolchain-design.md), and a prototype of every configuration settled them. Some refine accepted ADRs; this record holds them all.
+[ADR 0005](../../decisions/0005-development-environment.md) settled the development environment and left its details to the setup phase, now [PH-01](../../roadmap.md#ph-01-monorepo-and-toolchain). Its brainstorm, the [spec](../specs/2026-10-02-PH-01-monorepo-and-toolchain-design.md), and a prototype of every configuration settled them. Some refine accepted ADRs; this record holds them all.
 
 ## Decisions
 
 | # | Topic | Options considered | Decision and reasoning |
 |---|-------|--------------------|------------------------|
-| 1 | What the workspace holds | Root only; empty shells for `apps/api`, `apps/web` and `packages/shared`; only `packages/shared` | **Root only.** Each package arrives with its first real code (PH-03, PH-05, the first shared code), like `compose.yaml` in PH-04 ([ADR 0014](0014-roadmap.md), decision 7). Shells would be placeholder code rewritten later. |
+| 1 | What the workspace holds | Root only; empty shells for `apps/api`, `apps/web` and `packages/shared`; only `packages/shared` | **Root only.** Each package arrives with its first real code (PH-03, PH-05, the first shared code), like `compose.yaml` in PH-04 ([ADR 0014](../../decisions/0014-roadmap.md), decision 7). Shells would be placeholder code rewritten later. |
 | 2 | Installing pnpm | `npm install -g pnpm` and pnpm's own version switching; Corepack; pnpm's standalone installer | **`npm install -g pnpm` once per Node version; pnpm then runs the version in `packageManager` by itself** (tried: 11.28.2 and 12.7.0 both ran the pinned 12.8.1). Corepack is still experimental and no longer bundled from Node 25. The standalone installer pipes a script from the internet into the shell. |
-| 3 | pnpm's settings | — | **`engineStrict: true` and `allowBuilds: {}` in `pnpm-workspace.yaml`.** Without `engineStrict`, pnpm 12 installed with an unsupported Node. `allowBuilds` is pnpm 12's name for the install-script allowlist ([ADR 0012](0012-security-baseline.md), decision 18): a dependency with a build script must be listed as allowed or denied, or the install fails, and the owner decides. |
-| 4 | TypeScript version | 7.0 (the native port); 6.0 | **6.0 (`~6.0.3`), with `@types/node` 24.** typescript-eslint, which type-aware linting needs, supports TypeScript below 6.1 only. Moving to 7 is [OP-064](../open-points.md#op-064). |
+| 3 | pnpm's settings | — | **`engineStrict: true` and `allowBuilds: {}` in `pnpm-workspace.yaml`.** Without `engineStrict`, pnpm 12 installed with an unsupported Node. `allowBuilds` is pnpm 12's name for the install-script allowlist ([ADR 0012](../../decisions/0012-security-baseline.md), decision 18): a dependency with a build script must be listed as allowed or denied, or the install fails, and the owner decides. |
+| 4 | TypeScript version | 7.0 (the native port); 6.0 | **6.0 (`~6.0.3`), with `@types/node` 24.** typescript-eslint, which type-aware linting needs, supports TypeScript below 6.1 only. Moving to 7 is [OP-064](../../archive/open-points.md#op-064). |
 | 5 | The push hook's language | TypeScript run by Node's type stripping; JavaScript checked through JSDoc; JavaScript, not type-checked | **TypeScript, run directly by Node 24.** With no packages, it is the only real code, so it is what makes "strict TypeScript" true now. It keeps no build step and no dependencies. ADR 0005, decision 9 turned type stripping down for the API because of workspace imports, which a standalone file does not have. Its entry point uses `import.meta.main`, added in Node 24.2.0, so `engines.node` is `>=24.2 <25`: on an older 24.x the hook would silently allow every push. |
-| 6 | Running the hook's tests | `pnpm test` runs `node --test` until Vitest arrives; a permanent `pnpm test:hooks` | **`pnpm test` runs Node's test runner until PH-03 moves the tests into Vitest** ([OP-062](../open-points.md#op-062)). `pnpm test` keeps meaning "every test". Until then, ESLint's `no-floating-promises` allows `node:test`'s `test()`, typescript-eslint's documented setting for it. |
+| 6 | Running the hook's tests | `pnpm test` runs `node --test` until Vitest arrives; a permanent `pnpm test:hooks` | **`pnpm test` runs Node's test runner until PH-03 moves the tests into Vitest** ([OP-062](../../archive/open-points.md#op-062)). `pnpm test` keeps meaning "every test". Until then, ESLint's `no-floating-promises` allows `node:test`'s `test()`, typescript-eslint's documented setting for it. |
 | 7 | ESLint strictness | `strictTypeChecked`; `recommendedTypeChecked`; `strictTypeChecked` with `stylisticTypeChecked` | **`strictTypeChecked`.** Beyond bugs, it flags code that is probably wrong. Loosening later is easy, tightening an existing codebase is not. Style is Prettier's job. |
-| 8 | Prettier and Markdown | A one-off reformat of all docs; formatting docs when touched; code only | **Code only: `*.md` is in `.prettierignore`.** On a copy of the docs, Prettier padded every table to its widest cell: the glossary grew from 39 KB to 93 KB, each row of ADR 0011's decision table to 2,583 characters, and an edit to one long cell rewrites the whole table in the diff. Prettier cannot turn table alignment off. A Markdown linter that does not reformat is [OP-063](../open-points.md#op-063). |
+| 8 | Prettier and Markdown | A one-off reformat of all docs; formatting docs when touched; code only | **Code only: `*.md` is in `.prettierignore`.** On a copy of the docs, Prettier padded every table to its widest cell: the glossary grew from 39 KB to 93 KB, each row of ADR 0011's decision table to 2,583 characters, and an edit to one long cell rewrites the whole table in the diff. Prettier cannot turn table alignment off. A Markdown linter that does not reformat is [OP-063](../../archive/open-points.md#op-063). |
 | 9 | Prettier options | The defaults; tweaks such as single quotes | **The defaults** (`{}`), Prettier's own advice against debating options. |
 | 10 | lint-staged's ESLint glob | The types in use today; every type ESLint lints | **Every type ESLint lints** (`ts`, `tsx`, `mts`, `cts`, `js`, `jsx`, `mjs`, `cjs`), so a phase adding `.tsx` is covered without anyone remembering to extend it. Everything else is formatted by Prettier if it knows the type. |
 | 11 | Commit scopes | An allow-list; any scope | **An allow-list in `commitlint.config.js`; the scope stays optional.** Workspaces and test layers, one feature scope per requirement area, the kinds of docs, and tooling (`infra`, `deps`, `main` for release-please, `claude`). Typos and near-duplicates are rejected; a PR that needs a new scope adds it. ADR 0009's examples already went beyond its listed scopes. |
@@ -1175,19 +1175,19 @@ Over 100 lines, so it starts with a `## Contents`. Steps only, each linking its 
 
 ## Consequences
 
-- **The configuration files and tool pages exist:** `docs/development/setup.md` and a page per tool in `docs/development/tools/`, living docs from now on ([ADR 0005](0005-development-environment.md), consequences).
+- **The configuration files and tool pages exist:** `docs/development/setup.md` and a page per tool in `docs/development/tools/`, living docs from now on ([ADR 0005](../../decisions/0005-development-environment.md), consequences).
 - **Every commit is formatted, linted and checked,** the owner's and Claude's; CI repeats the checks from PH-02.
-- **Open points:** [OP-005](../open-points.md#op-005) keeps its PH-04 part; [OP-008](../open-points.md#op-008) and [OP-009](../open-points.md#op-009) are closed; [OP-062](../open-points.md#op-062) gains a PH-03 part; [OP-063](../open-points.md#op-063) (a Markdown linter) and [OP-064](../open-points.md#op-064) (TypeScript 7) are new candidates.
+- **Open points:** [OP-005](../../archive/open-points.md#op-005) keeps its PH-04 part; [OP-008](../../archive/open-points.md#op-008) and [OP-009](../../archive/open-points.md#op-009) are closed; [OP-062](../../archive/open-points.md#op-062) gains a PH-03 part; [OP-063](../../archive/open-points.md#op-063) (a Markdown linter) and [OP-064](../../archive/open-points.md#op-064) (TypeScript 7) are new candidates.
 - **The living docs are updated:** the README's "Development" section, `CLAUDE.md`'s documentation list, the glossary, `git-workflow.md` (the scope rule, the hook's path) and `phase-walkthrough.md` (the file names).
 ```
 
 - [x] **Step 3: Add the status-line pointers to the refined ADRs**
 
 Each is a mechanical status change (CLAUDE.md allows it). Append to the end of each `- **Status:**` line:
-- `0005-development-environment.md`: `; decision 12 refined by [ADR 0016](0016-toolchain-details.md) (Markdown left out of Prettier)`
-- `0007-testing-strategy.md`: `; decision 18 refined by [ADR 0016](0016-toolchain-details.md) (Node's test runner until Vitest)`
-- `0009-git-workflow.md`: if the line is only `✅ Accepted`, append ` — decision 9 refined by [ADR 0016](0016-toolchain-details.md) (an allow-list of scopes)`; otherwise append `; decision 9 refined by …` with the same text.
-- `0015-git-push-guard-hook.md`: ` — decision 3 refined by [ADR 0016](0016-toolchain-details.md) (the hook in TypeScript)`
+- `0005-development-environment.md`: `; decision 12 refined by [ADR 0016](../../decisions/0016-toolchain-details.md) (Markdown left out of Prettier)`
+- `0007-testing-strategy.md`: `; decision 18 refined by [ADR 0016](../../decisions/0016-toolchain-details.md) (Node's test runner until Vitest)`
+- `0009-git-workflow.md`: if the line is only `✅ Accepted`, append ` — decision 9 refined by [ADR 0016](../../decisions/0016-toolchain-details.md) (an allow-list of scopes)`; otherwise append `; decision 9 refined by …` with the same text.
+- `0015-git-push-guard-hook.md`: ` — decision 3 refined by [ADR 0016](../../decisions/0016-toolchain-details.md) (the hook in TypeScript)`
 
 Read each status line first and match its punctuation (`—` before the first refinement, `;` between refinements).
 
@@ -1210,13 +1210,13 @@ README: add a section before `## Documentation`:
 ```markdown
 ## Development
 
-Szop is a pnpm monorepo in TypeScript, developed in WSL. To set up a machine and run the checks, follow the [setup guide](docs/development/setup.md); every tool has its own page in [docs/development/tools](docs/development/tools/).
+Szop is a pnpm monorepo in TypeScript, developed in WSL. To set up a machine and run the checks, follow the [setup guide](../../development/setup.md); every tool has its own page in [docs/development/tools](docs/development/tools/).
 ```
 
 and add to the `## Documentation` list, after "GitHub settings":
 
 ```markdown
-- [Setup guide](docs/development/setup.md) — from a clean Windows machine to passing checks
+- [Setup guide](../../development/setup.md) — from a clean Windows machine to passing checks
 - [Tool pages](docs/development/tools/) — each development tool, why it was chosen and its configuration explained
 ```
 
@@ -1240,9 +1240,9 @@ And in the acronyms table, if missing: **LTS** (Long-Term Support).
 - [x] **Step 8: Update `docs/open-points.md`**
 
 - **OP-005:** in its Parts, mark `**PH-01:** … ✅ ([#PR](…))` once the PR number is known (set it after the PR opens, step 11); move the entry under `### PH-04 Database`; remove `[OP-005](#op-005)` from PH-04's "Also" line (it now sits there) and add it to the "Also" line of no other phase.
-- **OP-008, OP-009:** move to `## Closed`, status `✅ Closed: [ADR 0016](decisions/0016-toolchain-details.md); built in PH-01 ([#PR](…))`.
+- **OP-008, OP-009:** move to `## Closed`, status `✅ Closed: [ADR 0016](../../decisions/0016-toolchain-details.md); built in PH-01 ([#PR](…))`.
 - **OP-062:** rewrite its text: the hook is now `guard-git-push.ts`, linted, formatted, type-checked and run by `pnpm test`. Parts: **PH-01:** ✅ (link the PR); **PH-02:** `ci.yml` runs `pnpm test`; **PH-03:** move the tests into a Vitest project and drop the `node:test` exception in `eslint.config.js`. Move it under `### PH-02 CI checks` (its next part), and add `[OP-062](#op-062)` to PH-03's "Also" line; remove it from PH-02's "Also" line.
-- **New OP-063** under `## Candidates`: "**Lint the Markdown docs without reformatting them.** Prettier stays out of Markdown because it pads tables ([ADR 0016](decisions/0016-toolchain-details.md), decision 8). A linter such as markdownlint could check headings, lists and links without touching table layout. Source: ADR 0016, decision 8. Status: ⬜ Open."
+- **New OP-063** under `## Candidates`: "**Lint the Markdown docs without reformatting them.** Prettier stays out of Markdown because it pads tables ([ADR 0016](../../decisions/0016-toolchain-details.md), decision 8). A linter such as markdownlint could check headings, lists and links without touching table layout. Source: ADR 0016, decision 8. Status: ⬜ Open."
 - **New OP-064** under `## Candidates`: "**Move to TypeScript 7** (the native compiler) once typescript-eslint supports it; until then TypeScript is pinned to 6.0. Source: ADR 0016, decision 4. Status: ⬜ Open."
 - Update the Contents if a heading changed.
 

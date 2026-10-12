@@ -446,9 +446,9 @@ Both phases are rough: each is split into smaller phases once the MVP is done ([
 
 Optional technical phases that change no behavior, in no particular order. A candidate becomes a phase, with the next free ID, when the owner decides to do it ([ADR 0014](decisions/0014-roadmap.md), decision 13). Feature ideas are not listed here: they live in the [future extensions](requirements/functional-requirements.md#future-extensions-ideas-not-committed) of the functional requirements.
 
-| Candidate | What it would bring | Open point | Issue |
-|---|---|---|---|
-| Load testing | k6 runs against the demo environment | [OP-029](https://github.com/luiki-dev/szop/issues/114) | [#114](https://github.com/luiki-dev/szop/issues/114) |
-| Supply-chain provenance | Signed attestations, a software bill of materials (SBOM) and an OpenSSF Scorecard | [OP-030](https://github.com/luiki-dev/szop/issues/115) | [#115](https://github.com/luiki-dev/szop/issues/115) |
-| Storybook | A workshop and documentation for the components; to look at again after the first few feature phases | [OP-060](https://github.com/luiki-dev/szop/issues/117) | [#117](https://github.com/luiki-dev/szop/issues/117) |
-| Always-on readiness | What an always-on deployment would need: backups, a content delivery network (CDN) with a web application firewall, alarms, SES production access, a privacy notice and more; only if one is ever planned | [OP-033](https://github.com/luiki-dev/szop/issues/116) | [#116](https://github.com/luiki-dev/szop/issues/116) |
+| Candidate | What it would bring | Open point |
+|---|---|---|
+| Load testing | k6 runs against the demo environment | [OP-029](https://github.com/luiki-dev/szop/issues/114) |
+| Supply-chain provenance | Signed attestations, a software bill of materials (SBOM) and an OpenSSF Scorecard | [OP-030](https://github.com/luiki-dev/szop/issues/115) |
+| Storybook | A workshop and documentation for the components; to look at again after the first few feature phases | [OP-060](https://github.com/luiki-dev/szop/issues/117) |
+| Always-on readiness | What an always-on deployment would need: backups, a content delivery network (CDN) with a web application firewall, alarms, SES production access, a privacy notice and more; only if one is ever planned | [OP-033](https://github.com/luiki-dev/szop/issues/116) |

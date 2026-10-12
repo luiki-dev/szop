@@ -905,7 +905,7 @@ Read each document before changing it, follow its existing structure and tone, a
 - the introduction: the guide's growth line no longer lists PH-07;
 - *The layers today*: a row for **E2E journeys** (`e2e/tests/*.spec.ts`, for example `health.spec.ts`; a real browser drives the production build through the SPA, the API and PostgreSQL, on three projects; the column "Vitest project" says `➖ N/A: Playwright`), and the "Layers still to come" list keeps only PH-15's line;
 - *Running the tests*: `pnpm test:e2e` (builds first), one project (`pnpm test:e2e --project=desktop-firefox`), one file, the UI mode (`--ui`), the editor (build first), and `pnpm --filter @szop/e2e exec playwright show-report` for the last run's report;
-- a new `## Writing an E2E journey`: one file per use case, `uc-NN-….spec.ts` ([ADR 0007](../decisions/0007-testing-strategy.md), decisions 4 and 17), with `health.spec.ts` as the walking skeleton's exception; import `test` and `expect` from `../support/test.ts` (and why, the ESLint rule); call `expectAccessible(page)` once each page has settled, on every page; each test isolates itself in its fresh context, registers users with unique emails and never depends on another test's data; locators by role and text, as Testing Library's; edge cases stay in lower layers (decision 16);
+- a new `## Writing an E2E journey`: one file per use case, `uc-NN-….spec.ts` ([ADR 0007](../../decisions/0007-testing-strategy.md), decisions 4 and 17), with `health.spec.ts` as the walking skeleton's exception; import `test` and `expect` from `../support/test.ts` (and why, the ESLint rule); call `expectAccessible(page)` once each page has settled, on every page; each test isolates itself in its fresh context, registers users with unique emails and never depends on another test's data; locators by role and text, as Testing Library's; edge cases stay in lower layers (decision 16);
 - `### The CSP guard`: what it catches, what a failure looks like (the step 5 output of Task 2, shortened), and what to do: find what injected the style or script, never loosen the CSP; that `element.style` is allowed;
 - `### The accessibility check`: what a failure looks like (Task 3, step 4's output, shortened), and the rule that no axe rule is turned off for all pages;
 - `### Reading a failed run`: the HTML report, a test's trace (timeline, DOM snapshots, network, console), locally and from CI's artifact; what *flaky* and *failed* mean in CI (one retry, `failOnFlakyTests`);
@@ -959,19 +959,19 @@ EOF
 `docs/decisions/0026-first-e2e-journey-details.md`, in the shape of [ADR 0025](../../decisions/0025-web-security-baseline-details.md) (read it first):
 
 - Title `# ADR 0026 — First E2E journey details`; `- **Status:** ✅ Accepted`; `- **Date:** 2026-10-11`;
-- `- **Refines:** [ADR 0007](0007-testing-strategy.md), decision 15 (the reset once per run is done by the start script, and the E2E server runs on its own port, see decisions 2 and 6); [ADR 0010](0010-ci-cd.md), decision 9 (the Playwright browsers are installed every run, not cached, see decision 5)`.
-- `## Context`: [PH-07](../roadmap.md#ph-07-first-e2e-journey); ADR 0007, 0010 and 0013 set the direction; the brainstorm and the [spec](../superpowers/specs/2026-10-11-PH-07-first-e2e-journey-design.md) settled the details.
+- `- **Refines:** [ADR 0007](../../decisions/0007-testing-strategy.md), decision 15 (the reset once per run is done by the start script, and the E2E server runs on its own port, see decisions 2 and 6); [ADR 0010](../../decisions/0010-ci-cd.md), decision 9 (the Playwright browsers are installed every run, not cached, see decision 5)`.
+- `## Context`: [PH-07](../../roadmap.md#ph-07-first-e2e-journey); ADR 0007, 0010 and 0013 set the direction; the brainstorm and the [spec](../specs/2026-10-11-PH-07-first-e2e-journey-design.md) settled the details.
 - `## Decisions`: the spec's decisions 1 to 9, copied with their wording, links rewritten from `../../decisions/X` to `X` and from `../../` to `../`. Add what planning and building settled, as `<br>**Settled while building:** …` in the cells it touches: in decision 6, that Playwright signals the whole process group, so the script waits for the API and never relays a signal; in decision 7, that Firefox reports `style-src-elem` like Chromium; anything Tasks 1 to 5 reported differently from the plan.
-- `## Consequences`: every developer installs the browsers once (`--with-deps`, `sudo`), in the setup guide; every journey imports from `support/test.ts` and calls `expectAccessible` on every page; each phase completing a use case adds its `uc-NN` journey (ADR 0007, decision 4); `health.spec.ts` goes with the health page ([OP-087](../open-points.md#op-087)); the `e2e` job adds a few minutes to every code PR, measured in the PR; the open points changed (step 4); the living docs (Task 5).
+- `## Consequences`: every developer installs the browsers once (`--with-deps`, `sudo`), in the setup guide; every journey imports from `support/test.ts` and calls `expectAccessible` on every page; each phase completing a use case adds its `uc-NN` journey (ADR 0007, decision 4); `health.spec.ts` goes with the health page ([OP-087](../../archive/open-points.md#op-087)); the `e2e` job adds a few minutes to every code PR, measured in the PR; the open points changed (step 4); the living docs (Task 5).
 
 - [x] **Step 2: Note the refinements in ADR 0007 and ADR 0010**
 
 In the three places `CLAUDE.md` asks for (ADR 0026's header is step 1). Read each status line and cell first, and add in the same style as the notes already there:
 
-- ADR 0007's status line: append `; decision 15 refined by [ADR 0026](0026-first-e2e-journey-details.md) (the start script resets the E2E database and runs the API on its own port)`.
-- ADR 0007, decision 15's cell, at the bottom: `<br>✏️ **Refined by [ADR 0026](0026-first-e2e-journey-details.md), decisions 2 and 6:** \`e2e/start-server.ts\` resets \`szop_e2e\`, then starts the API on port 3100 with the E2E settings over \`apps/api/.env\`; Playwright starts a fresh one every run.`
-- ADR 0010's status line: append `; decision 9 refined by [ADR 0026](0026-first-e2e-journey-details.md) (the Playwright browsers are installed every run, not cached)`.
-- ADR 0010, decision 9's cell, at the bottom: `<br>✏️ **Refined by [ADR 0026](0026-first-e2e-journey-details.md), decision 5:** the Playwright browsers are installed every run, not cached: restoring the cache takes about as long as the download, and their system libraries come from apt anyway.`
+- ADR 0007's status line: append `; decision 15 refined by [ADR 0026](../../decisions/0026-first-e2e-journey-details.md) (the start script resets the E2E database and runs the API on its own port)`.
+- ADR 0007, decision 15's cell, at the bottom: `<br>✏️ **Refined by [ADR 0026](../../decisions/0026-first-e2e-journey-details.md), decisions 2 and 6:** \`e2e/start-server.ts\` resets \`szop_e2e\`, then starts the API on port 3100 with the E2E settings over \`apps/api/.env\`; Playwright starts a fresh one every run.`
+- ADR 0010's status line: append `; decision 9 refined by [ADR 0026](../../decisions/0026-first-e2e-journey-details.md) (the Playwright browsers are installed every run, not cached)`.
+- ADR 0010, decision 9's cell, at the bottom: `<br>✏️ **Refined by [ADR 0026](../../decisions/0026-first-e2e-journey-details.md), decision 5:** the Playwright browsers are installed every run, not cached: restoring the cache takes about as long as the download, and their system libraries come from apt anyway.`
 
 - [x] **Step 3: Change the issues on GitHub first**
 
@@ -991,7 +991,7 @@ Then confirm with `gh issue view` on each, and `gh project item-list 3 --owner l
 - **OP-012** and **OP-057:** stay in PH-07's group, 🚧 In progress on the branch, until the PR (After tasks, step 3, closes them).
 - Check that OP-067 is in PH-08's group with its *Moved from PH-07* line, and OP-087 in PH-14's (the spec commit did both).
 
-`docs/roadmap.md`: PH-07's *Delivers* gains `([ADR 0026](decisions/0026-first-e2e-journey-details.md))`; the row's Plan column links this plan (the plan commit set it; check). The row stays `🚧 In progress`; the README diagram stays at ◐ until the PR.
+`docs/roadmap.md`: PH-07's *Delivers* gains `([ADR 0026](../../decisions/0026-first-e2e-journey-details.md))`; the row's Plan column links this plan (the plan commit set it; check). The row stays `🚧 In progress`; the README diagram stays at ◐ until the PR.
 
 - [x] **Step 5: Walk through the definition of done**
 

@@ -34,7 +34,7 @@ The work is done when:
 - `docs/open-points.md` no longer exists; `docs/archive/open-points.md` holds the register as it was on the day, with OP-067 and OP-086 in Closed, under a banner saying it is frozen; `docs/archive/CLAUDE.md` says the folder is never a source;
 - the specs, plans and the audit link to `archive/open-points.md` with their anchors unchanged, and every one of those links resolves;
 - the living docs (the README, `CLAUDE.md`, `.github/`, and `docs/` outside `superpowers/`, `audits/` and `archive/`) contain no link to `open-points.md`; their `#op-N` links point to the issue whose title starts with that ID, their phase-group links to the phase issue, and the ADRs' three links to "the open points register" to the board's Open Points view;
-- `CLAUDE.md`, `project-tracking.md` (including all seven views as they are set now), `roadmap.md`'s "How it works" and "Open points:" lines, the definition of done, the PR template, the open-point issue form and `phase-walkthrough.md` describe the rules of [Who owns what](#who-owns-what), with nothing left of the trial rule;
+- `CLAUDE.md`, `project-tracking.md` (including all six views as they are set now), `roadmap.md`'s "How it works" and "Open points:" lines, the definition of done, the PR template, the open-point issue form and `phase-walkthrough.md` describe the rules of [Who owns what](#who-owns-what), with nothing left of the trial rule;
 - ADR 0027 exists, with the three-place notes on every decision it changes;
 - the PR closes #156 and #166.
 
@@ -118,7 +118,7 @@ Rewritten by a throwaway script from an OP → issue map read from GitHub, then 
 ### Wording in the docs
 
 - **`CLAUDE.md`:** "Track what is deferred in `docs/open-points.md`" becomes "Track what is deferred as `open-point` issues"; the documentation list loses `open-points.md` and gains `docs/archive/` (frozen records, never a source); `project-tracking.md`'s line loses "during the trial".
-- **`docs/development/project-tracking.md`:** "The trial rule" becomes the rules of [Who owns what](#who-owns-what); "What lives where" and "How items move" lose the register; **the views table documents all seven views as they are set now, read from the API** (the owner changed their settings, and added Owner Steps).
+- **`docs/development/project-tracking.md`:** "The trial rule" becomes the rules of [Who owns what](#who-owns-what); "What lives where" and "How items move" lose the register; **the views table documents all six views as they are set now, read from the API** (the owner changed their settings, and added Owner Steps).
 - **`docs/roadmap.md`:** "How it works" (the GitHub paragraph and the "Open points" item); each phase entry's "Open points:" line points to its phase issue's sub-issues.
 - **`definition-of-done.md`** item 9, **`.github/pull_request_template.md`**'s open points line, **`.github/ISSUE_TEMPLATE/open-point.yml`**, **`phase-walkthrough.md`**, and any guide or tool page that tells the reader to edit the register.
 - **`docs/glossary.md`:** the register's entry, if any, says it is archived.
@@ -143,7 +143,7 @@ Rewritten by a throwaway script from an OP → issue map read from GitHub, then 
 1. **The 25 closed issues:** build the mapping table and show it to the owner; create, close and parent the issues; check that every register entry has an issue.
 2. **The archive:** the last mirror edit, the move, the banner, `docs/archive/CLAUDE.md`, and the records' links re-pointed.
 3. **The living docs' links:** the script, its run, and the checks.
-4. **The wording:** `CLAUDE.md`, `project-tracking.md` with the seven views, `roadmap.md`, the definition of done, the PR template, the issue form, `phase-walkthrough.md`, the glossary.
+4. **The wording:** `CLAUDE.md`, `project-tracking.md` with the six views, `roadmap.md`, the definition of done, the PR template, the issue form, `phase-walkthrough.md`, the glossary.
 5. **ADR 0027,** its notes, and #166's body.
 
 ## Checks

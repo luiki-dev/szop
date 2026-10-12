@@ -60,7 +60,7 @@ No other labels are used. Dependabot creates `dependencies` and one label per ec
 
 ### Phase issues
 
-Title: the roadmap heading, `PH-06b Web security baseline`. The body starts with a link to its roadmap entry and holds the phase's plan, section by section: **Goal**, **Delivers**, any extra field such as **Split from**, **Depends on**, **Owner steps**, **Expected path**, and **Also**, the open points of other phases it does a part of; the roadmap entry is the source and the body a copy, updated when the PR that changes the entry opens. Its own open points are its sub-issues, so they are not listed. A phase that is not done lists its owner steps as references to their [owner-step issues](#owner-step-issues); a done phase has them as a ticked checklist.
+Title: the roadmap heading, `PH-06b Web security baseline`. The body starts with a link to its roadmap entry and holds the phase's plan, section by section: **Goal**, **Delivers**, any extra field such as **Split from**, **Depends on**, **Owner steps**, **Expected path**, plus **Also**, which lives only in the issue: the open points of other phases it does a part of. The roadmap entry is the source of the rest and the body a copy of it, updated when the PR that changes the entry opens. Its own open points are its sub-issues, so they are not listed. A phase that is not done lists its owner steps as references to their [owner-step issues](#owner-step-issues); a done phase has them as a ticked checklist.
 
 ### Open-point issues
 
