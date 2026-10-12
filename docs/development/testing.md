@@ -39,7 +39,7 @@ Layer still to come: **property tests and mutation testing** for the domain rule
 
 ## Running the tests
 
-All commands run from the repository root. PostgreSQL must be running first for the API tests (`docker compose up -d --wait`, see [Docker Compose and PostgreSQL](tools/docker-compose.md); the `web` project itself needs no database); otherwise the run stops at once with `Cannot reach PostgreSQL … Start it with docker compose up -d.` The tests read the server's address and password from `apps/api/.env`.
+All commands run from the repository root. PostgreSQL must be running first for the API tests (`pnpm db:up`, which runs `docker compose up -d --wait`; see [Docker Compose and PostgreSQL](tools/docker-compose.md); the `web` project itself needs no database); otherwise the run stops at once with `Cannot reach PostgreSQL … Start it with docker compose up -d.` The tests read the server's address and password from `apps/api/.env`.
 
 ```bash
 pnpm test                       # every project once, the same tests CI runs (CI adds `--coverage`)
