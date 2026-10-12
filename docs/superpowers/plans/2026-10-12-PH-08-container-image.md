@@ -26,7 +26,7 @@
 ## Global Constraints
 
 - Branch `feat/ph-08-container-image`, holding the spec and plan commits; never commit to `main`; no worktree (`CLAUDE.md`, git workflow). Before any `git switch`, run `git status -sb`: another session may own the checkout.
-- **Execution: subagent-driven, with a fresh reviewer per task.** After a task's review passes and it is committed, `git push` the branch and **pause** until the owner has reviewed that task; start the next task only when the owner says so. Tick each task's step boxes (`- [ ]` → `- [x]`) in this plan in the task's own commit.
+- **After each task:** once it is committed (and, when executed subagent-driven, its review has passed), `git push` the branch and **pause** until the owner has reviewed that task; start the next task only when the owner says so. Tick each task's step boxes (`- [ ]` → `- [x]`) in this plan in the task's own commit.
 - **The base image, exactly:** `node:24-trixie-slim@sha256:173f125896c3b47ddf056734c7ea789d04595a6a08769a8f78e0df642781fb66`, the multi-platform index digest (linux/amd64 and linux/arm64), written **once**, in the `base` stage. Every other stage is `FROM base` or `FROM manifests` (spec, decision 7).
 - **No `# syntax=` line** in the Dockerfile: Docker 29's built-in Dockerfile frontend supports `RUN --mount=type=cache`, and a `# syntax=docker/dockerfile:1` line would pull an unpinned frontend image on every build.
 - **The image's tag is `szop:local`**, locally and in CI. **The host port is 8080** (`127.0.0.1:8080:3000`); the container listens on 3000.
