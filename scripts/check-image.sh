@@ -35,8 +35,10 @@ uid=$("${compose[@]}" exec -T app id -u) || fail "cannot run id in the app"
 # A wrong WEB_ROOT keeps /api/health at 200 while / answers a plain-text 404
 # (OP-084).
 echo "==> Checking that / serves the app"
-read -r status type < <(curl --silent --output /dev/null \
-  --write-out '%{http_code} %{content_type}\n' http://127.0.0.1:8080/) || fail "GET / did not answer"
+# curl writes 000 when it gets no answer within the time limit.
+read -r status type < <(curl --silent --max-time 10 --output /dev/null \
+  --write-out '%{http_code} %{content_type}\n' http://127.0.0.1:8080/)
+[[ "$status" != 000 ]] || fail "GET / did not answer within 10 seconds"
 [[ "$status" == 200 ]] || fail "GET / answered $status, not 200"
 [[ "$type" == text/html* ]] || fail "GET / answered '$type', not text/html"
 

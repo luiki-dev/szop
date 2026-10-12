@@ -78,7 +78,7 @@ pnpm check:image                                 # build the image, start it nex
 ```
 
 - A passing run ends with `OK: the image starts, migrates, runs as node (uid 1000) and serves the app`.
-- A failing run prints a `FAIL:` line, then the app's logs, and exits 1. `the app did not become healthy` means the API did not start or never answered `/api/health`: the logs say why (a missing migrations journal, an unreachable database, an invalid setting). `GET / answered 404, not 200` means the SPA is not where `WEB_ROOT` points. `the image's user is 'root', not node` means the Dockerfile's `USER` changed. In every case the `app` container is removed afterwards.
+- A failing run prints a `FAIL:` line, then the app's logs, and exits 1. `the app did not become healthy` means the API did not start or never answered `/api/health`: the logs say why (a missing migrations journal, an unreachable database, an invalid setting). `GET / answered 404, not 200` means the SPA is not where `WEB_ROOT` points. `GET / did not answer within 10 seconds` means the app accepted the request but never replied. `the image's user is 'root', not node` means the Dockerfile's `USER` changed. In every case the `app` container is removed afterwards.
 - CI runs the same script in its `docker` job, on an image it built itself ([CI/CD](ci-cd.md#the-jobs)). More on the image and the check: [Docker](tools/docker.md#running-it-the-app-profile-and-the-check).
 
 ## Writing an API test
