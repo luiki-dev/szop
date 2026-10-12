@@ -31,9 +31,9 @@ Docker Compose starts the services a project needs from one file. Szop's everyda
 ## Everyday use
 
 ```bash
-docker compose up -d --wait                  # start it, and wait until it is healthy
+pnpm db:up                                   # start it, and wait until it is healthy (docker compose up -d --wait)
 docker compose ps                            # is it running?
-docker compose stop                          # stop it; start brings it back
+pnpm db:down                                 # stop it; pnpm db:up brings it back (docker compose stop)
 docker compose logs postgres                 # the server's log
 docker compose exec postgres psql -U szop    # a SQL prompt
 docker compose down                          # remove the container, keep the data
@@ -42,9 +42,10 @@ docker compose down -v                       # remove the data too
 
 - **In `psql`:** `\l` lists the databases, `\c szop_test_1` switches to one, `\dt` lists its tables, `\dt drizzle.*` those of the migration bookkeeping, and `\q` quits.
 - **`down -v`** gives a fresh, empty database on the next `up`.
+- **Commands without `--profile app` ignore the `app` service.** After `docker compose --profile app up`, a plain `down` removes PostgreSQL but not the app, and warns that the network `szop_default` is still in use; `docker compose --profile app down` (`pnpm image:down`) removes both.
 - **What keeps the data:** a container restart, a Docker Desktop restart, a minor image update and `down`. Only `down -v`, `docker volume rm szop_postgres-data` and Docker Desktop's *Clean / Purge data* remove it.
 - **A major upgrade** (18 to 19) starts an empty database beside the old one; in development, run `down -v` and let the migrations rebuild the schema.
-- **The container image:** `pnpm check:image` builds it, starts it next to PostgreSQL, checks it and removes it; `docker compose --profile app up --build` runs it on <http://127.0.0.1:8080>. More on the [Docker page](docker.md#everyday-use).
+- **The container image:** `pnpm check:image` builds it, starts it next to PostgreSQL, checks it and removes it; `pnpm image:up` (`docker compose --profile app up --build`) runs it on <http://127.0.0.1:8080>. More on the [Docker page](docker.md#everyday-use).
 - **`port is already allocated` or `address already in use`:** something else listens on 5432, often a PostgreSQL installed natively or another project's container. Find it with `docker ps` and `sudo ss -ltnp | grep 5432`.
 - **`docker: command not found` in WSL:** Docker Desktop is not running, or its WSL integration is off (*Settings → Resources → WSL integration*).
 

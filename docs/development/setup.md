@@ -91,10 +91,10 @@ cp apps/api/.env.example apps/api/.env
 Install Docker Desktop for Windows (not in Ubuntu): <https://docs.docker.com/desktop/setup/install/windows-install/>. In *Settings → Resources → WSL integration*, turn it on for the Ubuntu distribution, and keep Docker Desktop running. Then, from the repository root:
 
 ```bash
-docker compose up -d --wait
+pnpm db:up
 ```
 
-It downloads the PostgreSQL image the first time, starts the database and ends with `Container szop-postgres-1 Healthy`. The database keeps running across restarts of Docker Desktop until `docker compose stop`, and its data survives `docker compose down`. Details, and how to open `psql`, are in [Docker Compose and PostgreSQL](tools/docker-compose.md).
+`pnpm db:up` runs `docker compose up -d --wait`. It downloads the PostgreSQL image the first time, starts the database and ends with `Container szop-postgres-1 Healthy`. The database keeps running across restarts of Docker Desktop until `pnpm db:down` (`docker compose stop`), and its data survives `docker compose down`. Details, and how to open `psql`, are in [Docker Compose and PostgreSQL](tools/docker-compose.md).
 
 ## 8. Check that everything works
 
@@ -111,7 +111,7 @@ Success looks like this:
 - `pnpm format:check` (Prettier) lists the files Prettier would change and exits with an error if there are any; when all is well it prints `All matched files use Prettier code style!`.
 - `pnpm test` (Vitest) ends with the lines `Test Files … passed` and `Tests … passed`, with no `failed` in between.
 
-What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md), [Prettier](tools/prettier.md) and [Vitest](tools/vitest.md). CI runs the same scripts, except that it runs `pnpm test:coverage`, which is `pnpm test --coverage`: the same tests, plus coverage.
+What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md), [Prettier](tools/prettier.md) and [Vitest](tools/vitest.md). CI runs the same scripts, except that it runs `pnpm test:coverage`, which is `pnpm test --coverage`: the same tests, plus coverage. Every script, with what it runs and when, is listed in [Scripts](scripts.md).
 
 ### The end-to-end journeys
 
@@ -161,7 +161,7 @@ It answers `{"status":"ok","database":{"status":"up","schemaVersion":"0000_init"
 **The page.** The same `pnpm dev` also starts Vite, which serves the web app. With PostgreSQL running, open the address Vite prints, `http://localhost:5173`, in a browser. Open that one, not the API's: Vite forwards the page's `/api` requests to the API, so the browser sees a single address. The page's heading is "Szop", and its status line says:
 
 - **`API: ok`, `Database: up` and `Schema version: 0000_init`:** the whole chain works, from the page through the API to PostgreSQL.
-- **`API: reachable` and `Database: down`:** the API answers, but cannot reach PostgreSQL. Start it with `docker compose up -d --wait`; the next time the browser tab regains focus (or on a reload) the page updates.
+- **`API: reachable` and `Database: down`:** the API answers, but cannot reach PostgreSQL. Start it with `pnpm db:up`; the next time the browser tab regains focus (or on a reload) the page updates.
 - **`Can't reach the API`:** the page got no usable answer. Either the API is not running (Vite's proxy then answers `502` with an empty body, which the page treats as a failure), or `PORT` in `apps/api/.env` is not 3000: the proxy's target is the constant `http://127.0.0.1:3000` in `apps/web/vite.config.ts`, not a setting.
 - **`Checking the API…`** shows briefly while the request is in flight.
 
@@ -195,10 +195,10 @@ pnpm check:image
 It builds the image (a few minutes the first time, then mostly from Docker's cache), starts it next to PostgreSQL, checks it and removes it again. Success looks like this: it ends with `OK: the image starts, migrates, runs as node (uid 1000) and serves the app`. To keep it running and open it in the browser:
 
 ```bash
-docker compose --profile app up --build
+pnpm image:up
 ```
 
-Open `http://localhost:8080`: the same page as `pnpm start`, served from inside the container, with the development database. It uses port 8080, so it can run next to `pnpm dev` or `pnpm start`. Stop it with Ctrl+C. The [testing guide](testing.md#running-the-tests) explains a failed check.
+Open `http://localhost:8080`: the same page as `pnpm start`, served from inside the container, with the development database. It uses port 8080, so it can run next to `pnpm dev` or `pnpm start`. Stop it with Ctrl+C, and remove its containers with `pnpm image:down`, which also removes PostgreSQL's container (the data stays; `pnpm db:up` brings it back). The two scripts run `docker compose --profile app up --build` and `docker compose --profile app down`: the profile matters, since a plain `docker compose down` leaves out every service behind a profile, so it removes PostgreSQL but leaves the app running, and warns `Network szop_default Resource is still in use`. The [testing guide](testing.md#running-the-tests) explains a failed check.
 
 ## 10. What the git hooks do
 

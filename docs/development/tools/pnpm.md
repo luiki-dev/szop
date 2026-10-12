@@ -1,6 +1,6 @@
 # pnpm
 
-pnpm is Szop's package manager: it installs the dependencies and runs scripts across the workspace, and it is strict about **phantom dependencies** (see the [glossary](../../glossary.md)): a package can import only what it declares.
+pnpm is Szop's package manager: it installs the dependencies and runs scripts across the workspace, and it is strict about **phantom dependencies** (see the [glossary](../../glossary.md)): a package can import only what it declares. Szop's scripts are listed in [Scripts](../scripts.md).
 
 ## Why Szop uses it
 
