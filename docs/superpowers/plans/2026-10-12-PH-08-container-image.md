@@ -701,7 +701,7 @@ git push
 - Consumes: everything Tasks 1–5 built and reported (the bundle's count, SHA-256 and date; the image's size; any deviation from the plan).
 - Produces: the records the PR links to, and the state the PR is opened from.
 
-- [ ] **Step 1: Write ADR 0028**
+- [x] **Step 1: Write ADR 0028**
 
 `docs/decisions/0028-container-image-details.md`, in the shape of [ADR 0026](../../decisions/0026-first-e2e-journey-details.md) (read it first):
 
@@ -712,7 +712,7 @@ git push
 - `## Decisions`: the spec's decisions 1 to 12, copied with their wording, links rewritten from `../../decisions/X` to `X` and from `../../` to `../`. Add what planning and building settled, as `<br>**Settled while building:** …` in the cells it touches: in decision 6, `corepack install` in a `manifests` stage downloads pnpm once for both install stages, and no `# syntax=` line is used; in decision 8, the probe that showed `apps/api/node_modules/@szop` missing without the move; in decision 2, the source URL, the download date, the number of certificates and the SHA-256, and how to refresh the bundle (download it to the same path, `git diff --stat`, check the subjects with `openssl`, commit as `build: refresh the RDS certificate bundle`); in decision 10, whether the root `package.json` was needed; anything Tasks 1 to 5 reported differently from the plan.
 - `## Consequences`: the base image changes only through Dependabot's PRs or a deliberate Node major; every code PR builds the image (the `docker` job's time, measured in the PR); `pnpm check:image` needs Docker; PH-12 points the pool's `ssl.ca` at the bundle and sets the task definition's health check and `readonlyRootFilesystem`; PH-10's registry and the spin-up workflow push the same Dockerfile's image; the candidates [OP-089](https://github.com/luiki-dev/szop/issues/193) and [OP-090](https://github.com/luiki-dev/szop/issues/194); the open points changed (step 3); the living docs (Task 5).
 
-- [ ] **Step 2: Note it in ADR 0008 and ADR 0010**
+- [x] **Step 2: Note it in ADR 0008 and ADR 0010**
 
 In the three places `CLAUDE.md` asks for (ADR 0028's header is step 1). Read each status line and cell first, and add in the same style as the notes already there:
 
@@ -724,7 +724,7 @@ In the three places `CLAUDE.md` asks for (ADR 0028's header is step 1). Read eac
 
 Check which notes the cells already carry and keep them oldest first.
 
-- [ ] **Step 3: Change the issues on GitHub first**
+- [x] **Step 3: Change the issues on GitHub first**
 
 Read each issue's body before editing (`gh issue view N --repo luiki-dev/szop`) and keep its sections; write bodies through a file under `$CLAUDE_JOB_DIR/tmp` with `gh issue edit N --repo luiki-dev/szop --body-file <file>`. Links inside bodies follow [project tracking](../../development/project-tracking.md#links-inside-issue-bodies).
 
@@ -737,15 +737,15 @@ Read each issue's body before editing (`gh issue view N --repo luiki-dev/szop`) 
 
 Then confirm with `gh issue view` on each and `gh api graphql` on #37's, #38's and #41's sub-issues.
 
-- [ ] **Step 4: The roadmap**
+- [x] **Step 4: The roadmap**
 
 `docs/roadmap.md`: PH-08's *Delivers* gains `([ADR 0028](decisions/0028-container-image-details.md))`; the row's Plan column links this plan (the plan commit set it; check). The row stays `🚧 In progress`; the README diagram stays at ◐ until the PR.
 
-- [ ] **Step 5: Walk through the definition of done**
+- [x] **Step 5: Walk through the definition of done**
 
 Read `docs/development/definition-of-done.md` and note each item's state for the PR. Expected, as a forecast to check against every item: tests ✅ (the image check, a new layer, with its failure paths shown); domain rules ➖ N/A: no domain rules; CI after the PR opens; the demo check ➖ N/A: no demo environment until PH-12; `infra/base` ➖ N/A; the living docs ✅ (Task 5); the threat model ✅ (Task 5, step 4); open points ✅ (step 3); UI screenshots ➖ N/A: the UI does not change.
 
-- [ ] **Step 6: Links, final checks and a self-review of the diff**
+- [x] **Step 6: Links, final checks and a self-review of the diff**
 
 ```bash
 for f in docs/decisions/0028-container-image-details.md docs/decisions/0008-hosting.md docs/decisions/0010-ci-cd.md docs/roadmap.md README.md docs/development/tools/docker.md docs/development/testing.md docs/development/ci-cd.md docs/architecture/architecture.md docs/architecture/threat-model.md; do
@@ -757,7 +757,7 @@ git diff main --stat
 
 Expected: `link check done` with no `BROKEN` line; every check passes. Read the whole diff against the spec's *Goal and success criteria*, one by one, and list any gap in the task's report.
 
-- [ ] **Step 7: Tick this task's boxes and commit**
+- [x] **Step 7: Tick this task's boxes and commit**
 
 ```bash
 git add docs

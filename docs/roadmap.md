@@ -163,7 +163,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-08 Container image
 
 - **Goal:** one image holds the API and the built SPA, runs as a non-root user and starts next to PostgreSQL, locally and in CI.
-- **Delivers:** the multi-stage Dockerfile of [ADR 0008](decisions/0008-hosting.md), decision 12, with the certificate authority bundle of Amazon Relational Database Service (RDS); the `docker` job in CI and a job proving the image starts; Dependabot for the Node base image.
+- **Delivers:** the multi-stage Dockerfile of [ADR 0008](decisions/0008-hosting.md), decision 12, with the certificate authority bundle of Amazon Relational Database Service (RDS); the `docker` job in CI and a job proving the image starts; Dependabot for the Node base image ([ADR 0028](decisions/0028-container-image-details.md)).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
