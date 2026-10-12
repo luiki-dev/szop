@@ -84,7 +84,7 @@ The [project board](https://github.com/users/luiki-dev/projects/3) shows the sam
 
 Szop is a pnpm monorepo in TypeScript, developed in Windows Subsystem for Linux (WSL). To set up a machine and run the checks, follow the [setup guide](docs/development/setup.md); every tool has its own page in [docs/development/tools](docs/development/tools/).
 
-Start PostgreSQL first, with `pnpm db:up` (Docker Desktop must be running). Then `pnpm dev` starts the API, after you copy `apps/api/.env.example` to `apps/api/.env`, and Vite, the web app's dev server: open Vite's address, `http://localhost:5173`, to see the page, which shows the API's status. `pnpm build` and then `pnpm start` run the app the production way instead: the API serves the built page and itself on one port, `http://localhost:3000`. `pnpm test` runs every test; see the [testing guide](docs/development/testing.md).
+Start PostgreSQL first, with `pnpm db:up` (Docker Desktop must be running). Then `pnpm dev` starts the API, after you copy `apps/api/.env.example` to `apps/api/.env`, and Vite, the web app's dev server: open Vite's address, `http://localhost:5173`, to see the page, which shows the API's status. `pnpm build` and then `pnpm start` run the app the production way instead: the API serves the built page and itself on one port, `http://localhost:3000`. `pnpm test` runs every test; see the [testing guide](docs/development/testing.md). Every script is listed in [Scripts](docs/development/scripts.md).
 
 ## Documentation
 
@@ -101,5 +101,6 @@ Start PostgreSQL first, with `pnpm db:up` (Docker Desktop must be running). Then
 - [Definition of done](docs/development/definition-of-done.md) — what every PR must meet before it is merged
 - [GitHub settings](docs/development/github-settings.md) — the repository settings behind the workflow
 - [Setup guide](docs/development/setup.md) — from a clean Windows machine to passing checks
+- [Scripts](docs/development/scripts.md) — every `pnpm` script, what it runs and when
 - [Tool pages](docs/development/tools/) — each development tool, why it was chosen and its configuration explained
 - [Decisions](docs/decisions/) — records of the decisions behind the project and why they were made

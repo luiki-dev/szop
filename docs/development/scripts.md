@@ -1,0 +1,92 @@
+# Scripts
+
+Every script Szop defines, in one place: what it runs, when to run it, and what else runs it. The scripts live in `package.json` files; `pnpm <script>` runs one from the repository root. The guides explain each in context: the [setup guide](setup.md) for getting started, the [testing guide](testing.md) for the test suites, the [CI/CD guide](ci-cd.md) for what CI runs.
+
+## Contents
+
+- [Running the app](#running-the-app)
+- [The database and the container image](#the-database-and-the-container-image)
+- [Checks](#checks)
+- [Tests](#tests)
+- [Formatting](#formatting)
+- [Run by tools, not by hand](#run-by-tools-not-by-hand)
+- [Scripts of the workspace packages](#scripts-of-the-workspace-packages)
+- [Adding a script](#adding-a-script)
+
+## Running the app
+
+| Script | Runs | When | Needs |
+|---|---|---|---|
+| `pnpm dev` | `pnpm -r --parallel dev`: the API with tsx in watch mode (its log through pino-pretty) and Vite's dev server, side by side | Working on the code: open `http://localhost:5173`; both reload on save | PostgreSQL (`pnpm db:up`), `apps/api/.env` |
+| `pnpm build` | `pnpm -r build`: Vite's production build of the web app into `apps/web/dist`, with its `.br` and `.gz` copies and the first-screen budget check | Before `pnpm start`; `pnpm test:e2e` runs it itself | — |
+| `pnpm start` | The API's `start`: `node --env-file=.env src/server.ts`, which serves the API and the built page on `http://localhost:3000` | Running the app the production way, without Docker | `pnpm build` first, PostgreSQL, `apps/api/.env` |
+
+## The database and the container image
+
+These call Docker Compose with `compose.yaml` ([Docker Compose](tools/docker-compose.md), [Docker](tools/docker.md)); Docker Desktop must be running.
+
+| Script | Runs | When |
+|---|---|---|
+| `pnpm db:up` | `docker compose up -d --wait`: starts PostgreSQL and waits until it is healthy | Before `pnpm dev`, `pnpm start` and the tests, whenever the database is not running |
+| `pnpm db:down` | `docker compose stop`: stops PostgreSQL and keeps its container and data | To free the machine's resources; `pnpm db:up` brings it back at once |
+| `pnpm image:up` | `docker compose --profile app up --build`: builds the container image and runs it next to PostgreSQL, in the foreground, on `http://127.0.0.1:8080` | Trying the app as AWS will run it. Ctrl+C stops it; `pnpm image:up -d --wait` runs it in the background |
+| `pnpm image:down` | `docker compose --profile app down`: removes the app's and PostgreSQL's containers (the data stays in its volume) | After `pnpm image:up`. Then `pnpm db:up` brings PostgreSQL back for `pnpm dev` and the tests |
+| `pnpm check:image` | `scripts/check-image.sh`: builds the image, starts it next to PostgreSQL, checks that it is healthy, runs as `node` and serves the page, then removes it | After changing the `Dockerfile`, `.dockerignore`, `compose.yaml` or the dependencies. CI's `docker` job runs it with `--no-build` on every code PR |
+
+`image:down` takes the profile with it on purpose: a plain `docker compose down` leaves out every service behind a profile and warns that the network is still in use ([Docker](tools/docker.md#everyday-use)).
+
+## Checks
+
+The same commands CI runs in its jobs ([CI/CD](ci-cd.md#the-jobs)); run them before pushing.
+
+| Script | Runs | CI job |
+|---|---|---|
+| `pnpm lint` | `eslint .`: ESLint over the whole repository ([ESLint](tools/eslint.md)) | `lint` |
+| `pnpm format:check` | `prettier --check .`: lists the files Prettier would change, and fails if there are any ([Prettier](tools/prettier.md)) | `lint` |
+| `pnpm typecheck` | `tsc --noEmit` for the root, then each package's own `typecheck` ([TypeScript](tools/typescript.md)) | `typecheck` |
+
+## Tests
+
+How to run, filter and read them: the [testing guide](testing.md#running-the-tests).
+
+| Script | Runs | When | CI job |
+|---|---|---|---|
+| `pnpm test` | `vitest run`: every Vitest project once (API, database, component, unit and hook tests) | Before every push; needs PostgreSQL | `test` (as `test:coverage`) |
+| `pnpm test:watch` | `vitest`: stays running and reruns the tests a change affects | While writing code or tests | — |
+| `pnpm test:coverage` | `pnpm test --coverage`: the same tests, plus a coverage report in `coverage/` | To see which code the tests reach | `test` |
+| `pnpm test:e2e` | `pnpm build`, then Playwright's journeys on desktop Chromium, desktop Firefox and an emulated phone ([Playwright](tools/playwright.md)) | After a change to the web app, the API's responses or the security headers; needs PostgreSQL and Playwright's browsers | `e2e` |
+| `pnpm test:e2e:report` | `playwright show-report`: serves the HTML report of the last E2E run, or of a folder given to it | After a failed E2E run, locally or downloaded from CI | — |
+| `pnpm check:image` | See [the database and the container image](#the-database-and-the-container-image) | — | `docker` |
+
+## Formatting
+
+| Script | Runs | When |
+|---|---|---|
+| `pnpm format` | `prettier --write .`: formats every file Prettier knows (Markdown is excluded by `.prettierignore`) | After a `format:check` failure. The pre-commit hook already formats the staged files |
+
+## Run by tools, not by hand
+
+| What | Runs | Triggered by |
+|---|---|---|
+| `prepare` | `husky`: installs the git hooks into `.husky/` | pnpm, after every `pnpm install` ([husky and lint-staged](tools/husky-and-lint-staged.md)) |
+| pre-commit hook | `pnpm exec lint-staged`: ESLint with `--fix` and Prettier on the staged code files, Prettier on the other staged files | Every `git commit` |
+| commit-msg hook | `pnpm exec commitlint --edit`: checks the message against Conventional Commits ([commitlint](tools/commitlint.md)) | Every `git commit` |
+
+## Scripts of the workspace packages
+
+Each package in the workspace has its own `package.json` scripts. The root scripts call most of them; call one directly with `pnpm --filter <package> <script>`.
+
+| Package | Script | Runs | Called by |
+|---|---|---|---|
+| `@szop/api` | `dev` | `tsx watch --env-file=.env src/server.ts \| pino-pretty` | `pnpm dev` |
+| `@szop/api` | `start` | `node --env-file=.env src/server.ts` | `pnpm start` |
+| `@szop/api` | `db:generate` | `drizzle-kit generate`: writes the next migration after a change to `schema.ts` ([Drizzle](tools/drizzle.md)) | By hand: `pnpm --filter @szop/api db:generate` |
+| `@szop/web` | `dev` | `vite`: the dev server on port 5173 ([Vite](tools/vite.md)) | `pnpm dev` |
+| `@szop/web` | `build` | `vite build` | `pnpm build` |
+| every package | `typecheck` | `tsc --noEmit` | `pnpm typecheck` |
+
+## Adding a script
+
+- Put it in the root `package.json` when it is run from the root; a package's own script when it belongs to that package, called by a root script or with `--filter`.
+- Name it after what it acts on and what it does, in the existing style: `test:e2e`, `db:up`, `check:image`.
+- Add its row here, and explain it in the guide where it is used.
