@@ -503,7 +503,7 @@ Expected: the staged script's mode is `100755`; if not, `git update-index --chmo
 - Consumes: `Dockerfile`, `.dockerignore`, `compose.yaml`'s `app` service, `scripts/check-image.sh --no-build`.
 - Produces: a `docker` check on every code PR, required through `ci-ok`.
 
-- [ ] **Step 1: Add the job**
+- [x] **Step 1: Add the job**
 
 In `.github/workflows/ci.yml`, after the `e2e` job and before `commits`, add:
 
@@ -545,7 +545,7 @@ Change `ci-ok`'s `needs` to:
     needs: [changes, lint, typecheck, test, build, e2e, docker, commits, workflows]
 ```
 
-- [ ] **Step 2: Check the workflow locally where possible**
+- [x] **Step 2: Check the workflow locally where possible**
 
 ```bash
 command -v actionlint && actionlint .github/workflows/ci.yml || echo "actionlint not installed: CI's workflows job checks it"
@@ -555,7 +555,7 @@ pnpm format:check
 
 Expected: no findings where the tools are installed. If zizmor reports `cache-poisoning` for `cache-to: type=gha`, stop and report the finding to the controller rather than silencing it.
 
-- [ ] **Step 3: Tick, commit, push**
+- [x] **Step 3: Tick, commit, push**
 
 ```bash
 git add .github/workflows/ci.yml docs/superpowers/plans/2026-10-12-PH-08-container-image.md

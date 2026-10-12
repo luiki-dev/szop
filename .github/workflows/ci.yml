@@ -178,6 +178,36 @@ jobs:
           path: e2e/playwright-report/
           retention-days: 14
 
+  docker:
+    name: docker
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # Builds without pushing (ADR 0010, decisions 7 and 10) and loads the
+      # image into the runner's Docker as szop:local. The layers of every
+      # stage are cached in GitHub's cache (ADR 0010, decision 9). The app's
+      # dependencies are installed only inside the build, never on the runner
+      # (ADR 0012, decision 18).
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          load: true
+          push: false
+          tags: szop:local
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # Starts the image next to PostgreSQL from compose.yaml and checks it
+      # (ADR 0028); on failure it prints the app's logs.
+      - run: scripts/check-image.sh --no-build
+
   commits:
     name: commits
     # Every PR, whatever it changes, so no need to wait for changes.
@@ -233,7 +263,8 @@ jobs:
 
   ci-ok:
     name: ci-ok
-    needs: [changes, lint, typecheck, test, build, e2e, commits, workflows]
+    needs:
+      [changes, lint, typecheck, test, build, e2e, docker, commits, workflows]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 5
