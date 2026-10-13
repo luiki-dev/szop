@@ -153,6 +153,8 @@ Five workflows are on and three are off, as read through the API. Their settings
 
 ## How items move
 
+The project's `CLAUDE.md` repeats the events Claude handles most often, as steps in its "Project tracking" section; a change to this table changes that section in the same commit.
+
 | Event | On GitHub | Who |
 |---|---|---|
 | A phase is picked next | Phase and its open points → 📌 Todo | Owner (Claude proposes at the end of a phase) |
