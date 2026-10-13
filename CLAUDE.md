@@ -16,7 +16,6 @@ How to work on it:
 - **Record decisions in the project documentation.** Capture every decision about architecture, solution design, approaches and other crucial aspects of the implementation, along with the reasoning and the alternatives considered.
 - **Explain choices.** When proposing a technology or approach, say why and what the trade-offs are, since learning is a goal in itself.
 - **Keep phases small** ([ADR 0014](docs/decisions/0014-roadmap.md), decision 6). A phase brings at most one big concept new to the project, and its plan has about 3 to 8 tasks. When a brainstorm or plan grows past that, propose a split on the roadmap before planning or executing; the owner may also ask for one at any time.
-- **Track what is deferred as `open-point` issues on GitHub** ([ADR 0027](docs/decisions/0027-open-points-on-github.md), decision 2). Whenever something is left to a later topic or phase, open an issue with the next free `OP-` ID ([how to find it](docs/development/project-tracking.md#checking-with-gh)), a sub-issue of the phase that will settle it (a candidate has none; see [project tracking](docs/development/project-tracking.md#how-items-move)), and mention it where it came up. Start every topic or phase brainstorm from its open points (the phase issue's sub-issues and the open points its **Also** section lists, read with `gh`), and close or re-assign them before its PR is merged. The PR description lists the issue changes it made.
 - **Follow the implementation process in [ADR 0004](docs/decisions/0004-implementation-process.md).** In short: foundation topics (development environment → testing strategy → hosting → git workflow → CI/CD → security baseline → visual design, the git workflow added by [ADR 0006](docs/decisions/0006-git-workflow-topic.md) and the security baseline by [ADR 0011](docs/decisions/0011-design-sanity-check-follow-ups.md)) settle direction only; then a living roadmap of phases, starting with a walking skeleton and continuing in vertical slices ([`docs/roadmap.md`](docs/roadmap.md), shaped by [ADR 0014](docs/decisions/0014-roadmap.md)); each phase gets its own brainstorm, with details decided there, and meets the shared definition of done. The ADR also defines which document owns which facts (requirements, living docs, ADRs, roadmap, specs and plans).
 
 ## Git workflow
@@ -31,6 +30,40 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 - **Never trigger `demo-up` or `demo-down`** unless the owner asks ([ADR 0010](docs/decisions/0010-ci-cd.md), consequences).
 - **Don't work around the deny rules in `.claude/settings.json` or the push hook in `.claude/hooks/`** ([ADR 0012](docs/decisions/0012-security-baseline.md), decision 19; [ADR 0015](docs/decisions/0015-git-push-guard-hook.md)). They back the rules above; if one blocks something the owner asked for, say so and let the owner run it.
 - **When a superpowers skill offers a git worktree or a local merge, don't take it.** Work on a plain branch in the main checkout (ADR 0009, decision 5), and finish by pushing the branch and opening a PR.
+
+## Project tracking
+
+Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](docs/decisions/0027-open-points-on-github.md) and `docs/development/project-tracking.md`. **GitHub** (the issues and the fields of the [Szop project](https://github.com/users/luiki-dev/projects/3)) holds the status and the open points; **`roadmap.md`** holds each phase's plan and mirrors the status in its stage tables, and the README's diagram mirrors it too. Every step below says which side it changes.
+
+During a phase:
+
+- **When a phase's brainstorm starts, before the first question:**
+  - On GitHub: the phase issue's Status → 🚧 In progress; Finished (the merge date) set on the previous phase's issue and on every `adr` issue closed since.
+  - On GitHub: read the phase's open-point issues (its sub-issues and the issues its **Also** section lists).
+- **In the phase branch's first commit:**
+  - In the repo: the phase's row in the `roadmap.md` stage table → 🚧, and the README's diagram with it.
+  - On GitHub: the phase issue's Started field → that commit's date.
+- **When the spec or plan is committed:**
+  - In the repo: its link in the phase's row of the `roadmap.md` stage table.
+  - On GitHub: the phase issue's Spec or Plan field.
+- **When the phase's owner steps change:**
+  - On GitHub: owner-step issues added, or closed as not planned with the reason.
+  - In the repo: the phase entry's **Owner steps** in `roadmap.md` updated.
+- **Before opening the PR:**
+  - On GitHub: every open-point issue of the phase closed (with a "settled by" comment) or re-assigned; the phase issue's body updated if its `roadmap.md` entry changed.
+  - In the repo: the stage table row and the README's diagram in line with GitHub, with the PR link.
+  - In the PR description: `Closes #<phase issue>` and `Closes #<open-point issue>` for each one it settles, and a list of every issue change the PR made.
+- **At the end of a phase:** propose the next phase. The owner moves its issue and its open-point issues to 📌 Todo on GitHub.
+- **Never set ✅ Done on GitHub by hand:** merging the PR closes the issues, and the project's workflow sets it.
+
+Open points (all on GitHub; no document lists them):
+
+- **Something is left to a later phase or topic:** a new open-point issue with the next free `OP-` ID ([how to find it](docs/development/project-tracking.md#checking-with-gh)), labelled `open-point`, a sub-issue of the phase that will settle it (a candidate has none), and mentioned as a link where it came up.
+- **Part of an open point is done:** the part ticked in the issue with its PR; the issue re-parented to the phase doing the next part, its Status set to ⬜ Backlog, or 📌 Todo if that phase is already picked.
+- **An open point moves to another phase:** re-parented, with a History line in its body.
+- **An open point gains or loses a part in another phase:** that phase issue's **Also** section updated.
+- **An open point is dropped:** closed as not planned, with the reason as a comment.
+- **Anything else** (a phase split, a candidate picked up, an item blocked, an ADR made outside a phase): look up its row in [How items move](docs/development/project-tracking.md#how-items-move).
 
 ## Documentation
 
