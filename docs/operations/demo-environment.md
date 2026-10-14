@@ -57,8 +57,7 @@ The root user can do everything, including closing the account, and no policy ca
 ### 3. Region and billing preferences
 
 1. **Default region:** *account menu (top right) → Settings → Localization and default Region → Edit*: **Default Region: Europe (Frankfurt)**, then *Save*. Everything Szop creates lives there ([ADR 0008](../decisions/0008-hosting.md), decision 8), and every console session now starts there. On the page of a global service (Billing, IAM, Organizations), the region menu shows every region with a lock: those services have no region, so the menu is unused there. Open a regional service, such as *Console Home*, to switch regions by hand.
-2. *Billing and Cost Management → Billing preferences → Alert preferences → Edit*: turn on **Receive AWS Free Tier alerts** and **Receive CloudWatch billing alerts**.
-3. On *Billing and Cost Management → Home*, note your plan and the remaining credits. On the Free plan, the page shows when it ends.
+2. On *Billing and Cost Management → Home*, note your plan and the remaining credits. On the Free plan, the page shows when it ends. The budget that bootstrap creates watches the spending ([Applying bootstrap](#applying-bootstrap)); no other billing alert is needed.
 
 ### 4. IAM Identity Center
 
