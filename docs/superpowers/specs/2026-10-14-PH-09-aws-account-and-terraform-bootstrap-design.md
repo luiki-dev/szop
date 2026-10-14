@@ -33,7 +33,7 @@ The roadmap's goal: Szop has its own AWS account, managed with Terraform. The st
 
 The phase is done when:
 
-- the owner's existing AWS account is cleaned up and is Szop's account: no IAM users or access keys left from earlier use, the root user with MFA and no access keys, IAM Identity Center with one administrator user with MFA, and the CLI signing in with `aws sso login --profile szop`;
+- the owner's existing AWS account is cleaned up and is Szop's account: no IAM users or access keys left from earlier use, none in `~/.aws/credentials`, the root user with MFA and no access keys, IAM Identity Center with one administrator user with MFA, and the CLI signing in with `aws sso login --profile szop`;
 - `infra/bootstrap` is applied from the owner's machine: the state bucket exists with every protection of [The state bucket](#the-state-bucket), the budget exists with its two alerts, and every resource carries the tags `project=szop` and `group=bootstrap`;
 - bootstrap's own state lives in the bucket under `bootstrap/terraform.tfstate`, the local state file is deleted, and `terraform plan` shows no changes;
 - `pnpm check:infra` passes on the owner's machine, and fails on a badly formatted `.tf` file and on a tflint finding (both shown once, locally, not committed);
@@ -73,11 +73,12 @@ The phase is done when:
 
 The runbook's "One-time account setup", in order:
 
-1. **Clean-up audit.** IAM → Users: delete every user and its access keys. IAM → Roles: delete the roles left from earlier use (not the service-linked ones AWS manages). Look for resources in every region: the Billing console's charges by service for recent months, and Resource Explorer or Tag Editor across regions. Check that the root user has no access keys.
+1. **Clean-up audit, part one: take stock.** IAM → Users: list every user and its access keys, including the user the CLI signs in with today. IAM → Roles: delete the roles left from earlier use (not the service-linked ones AWS manages). Look for resources in every region: the Billing console's charges by service for recent months, and Resource Explorer or Tag Editor across regions, and delete them. Check that the root user has no access keys. The IAM users are deleted only in step 6, once Identity Center works, so the owner is never locked out.
 2. **The root user.** MFA on, a passkey or an authenticator app; root is not used after this.
 3. **Region and billing.** `eu-central-1` as the console's default region; *Billing preferences*: Free Tier usage alerts and billing alerts on. Note the date the Free plan ends.
 4. **IAM Identity Center.** Enable the organization instance in `eu-central-1`. The runbook states first that this creates an organization and **upgrades the account to the Paid plan**. Then: one user, the owner, with MFA required; one permission set, `AdministratorAccess`, session length 8 hours, assigned to the user on the account.
 5. **The CLI.** `aws configure sso` writes the profile `szop` (start URL, region, account, permission set) to `~/.aws/config`; no keys anywhere. `aws sso login --profile szop`, then `aws sts get-caller-identity --profile szop` shows the assumed role.
+6. **Clean-up audit, part two: no long-lived keys.** With `szop` working: deactivate, then delete, every IAM user's access keys, and delete the IAM users. On the machine, remove the keys from `~/.aws/credentials` and the old profiles from `~/.aws/config`, so no profile can sign in with a key. `aws sts get-caller-identity` without a profile must then fail: a command that forgets `AWS_PROFILE` stops instead of falling back to a stored key. On this machine `~/.aws` links to the Windows user's `.aws` folder, so the Windows side changes with it.
 
 Every later command runs with `export AWS_PROFILE=szop` in the shell.
 
@@ -164,7 +165,7 @@ A `backend "s3"` block naming a bucket that does not exist yet makes `terraform 
 | tenv, then Terraform | tenv's `.deb` from its GitHub releases; `tenv tf install` reads `.terraform-version` | `.terraform-version` |
 | tflint | the release zip, checked against its SHA-256 checksum, into `~/.local/bin` | the setup guide and `ci.yml` |
 | tflint's AWS ruleset | `tflint --init`, which checks the plugin's signature | `infra/.tflint.hcl` |
-| AWS CLI v2 | AWS's official zip installer | latest; AWS publishes no pinned channel, and it runs only on the owner's machine |
+| AWS CLI v2 | AWS's official zip installer (already installed on the owner's machine; the guide still covers it) | latest; AWS publishes no pinned channel, and it runs only on the owner's machine |
 | Session Manager plugin | AWS's `.deb` | latest; needed for ECS Exec from PH-12 |
 
 ### Scripts and the git hook
@@ -231,7 +232,7 @@ The header comment's "A later phase adds the terraform ecosystem (OP-068)" goes.
 ## Owner steps
 
 1. Clean up the existing AWS account, secure its root user with MFA and set up IAM Identity Center, which upgrades the account to the Paid plan, following the runbook.
-2. Install tenv (and through it Terraform), tflint, the AWS CLI and the Session Manager plugin, following the setup guide.
+2. Install tenv (and through it Terraform), tflint and the Session Manager plugin, and check the AWS CLI (already installed), following the setup guide.
 3. Apply `infra/bootstrap` from the branch, then move its state into the bucket, following the runbook.
 
 Step 2 comes first in time: Claude runs `pnpm check:infra` on the same machine before committing the Terraform code.
