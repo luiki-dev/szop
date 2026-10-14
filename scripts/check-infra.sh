@@ -23,6 +23,9 @@ done
 
 echo "==> tflint"
 config="$PWD/infra/.tflint.hcl"
-tflint --init --config "$config"
+# Downloads the AWS ruleset from GitHub the first time, then uses the copy in
+# ~/.tflint.d/plugins.
+tflint --init --config "$config" \
+  || { echo "FAIL: tflint --init could not download the AWS ruleset; retry, or see docs/development/tools/tflint.md" >&2; exit 1; }
 (cd infra && tflint --recursive --config "$config") \
   || { echo "FAIL: tflint" >&2; exit 1; }

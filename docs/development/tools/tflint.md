@@ -41,6 +41,8 @@ Reference: https://github.com/terraform-linters/tflint-ruleset-terraform/blob/v0
 
 The name in brackets is the rule; the `Reference` link explains it and how to fix it. Any finding fails `check:infra`. A rule that is wrong for one line can be silenced with a comment above it, `# tflint-ignore: <rule>`, with the reason next to it; silencing should stay rare.
 
+**`FAIL: tflint --init could not download the AWS ruleset`**: the first run downloads the ruleset through GitHub's API, and later runs use the copy in `~/.tflint.d/plugins`. An HTTP `500` or `502` in the message is GitHub failing for a moment: run it again. A `403` means GitHub's limit for anonymous API calls (60 an hour) is used up: wait, or run with a token, `GITHUB_TOKEN=$(gh auth token) pnpm check:infra`. CI always passes its own token.
+
 ## Updating
 
 Dependabot does not see tflint or its plugin, so both are updated by hand.
