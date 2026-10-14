@@ -72,7 +72,7 @@ IAM Identity Center is AWS's single sign-on (SSO): you sign in once, with MFA, a
 2. **MFA for every sign-in.** *Settings → Authentication → Multi-factor authentication → Configure*: prompt users for MFA **every time they sign in**; allow **security keys and built-in authenticators** and **authenticator apps**; if a user has no MFA device, **require them to register one at sign-in**. Save.
 3. **Your user.** *Users → Add user*: a username (for example your first name), your email address, first and last name. *Next* through the group page (no groups), *Add user*. AWS sends an invitation email: open it, set a password, and register an MFA device when asked.
 4. **The permission set.** *Permission sets → Create permission set → Predefined permission set → AdministratorAccess → Next*. Set **Session duration** to **8 hours**. *Next → Create*.
-5. **The assignment.** *AWS accounts* → tick your account → *Assign users or groups* → *Users* → your user → *Next* → **AdministratorAccess** → *Next → Submit*.
+5. **The assignment.** *AWS accounts* shows the organization's tree. Its top entry, **Root**, is the organization's root container, not the root user: expand it, and tick **your account** under it (its name, its 12-digit ID and the label *management account*), not Root itself. Then *Assign users or groups* → *Users* → your user → *Next* → **AdministratorAccess** → *Next → Submit*.
 6. On the *Dashboard* (or *Settings*), copy the **AWS access portal URL**, which looks like `https://d-xxxxxxxxxx.awsapps.com/start`. Step 5 needs it.
 
 **Check:** open the access portal URL in a private window, sign in with your new user, password and MFA. The portal lists the account with **AdministratorAccess**.
