@@ -1,6 +1,8 @@
-# Terraform: local state (bootstrap starts with it, ADR 0008 decision 7) and provider caches
+# Terraform: local state (bootstrap starts with it, ADR 0008 decision 7), provider
+# caches and variable files (ADR 0029)
 *.tfstate*
 .terraform/
+*.tfvars
 
 # Claude Code: personal settings and permissions
 .claude/settings.local.json

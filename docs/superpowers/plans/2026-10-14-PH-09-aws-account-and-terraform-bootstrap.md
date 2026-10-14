@@ -282,7 +282,7 @@ git commit -m "build(infra): add Terraform, tflint and the infra check script"
 - Consumes: `pnpm check:infra` (Task 1).
 - Produces: the module's inputs `account_id` (12 digits, string) and `alert_email`; its output `state_bucket_name`; resource address `aws_s3_bucket.state` (Task 6's docs and the runbook name it).
 
-- [ ] **Step 1: Show the check fails on a misformatted file**
+- [x] **Step 1: Show the check fails on a misformatted file**
 
 ```bash
 mkdir -p infra/bootstrap
@@ -292,7 +292,7 @@ pnpm check:infra
 
 Expected: FAIL at `terraform fmt`, with the diff and "FAIL: formatting; run pnpm infra:fmt".
 
-- [ ] **Step 2: Write the module**
+- [x] **Step 2: Write the module**
 
 `infra/bootstrap/versions.tf`:
 
@@ -515,7 +515,7 @@ alert_email = "you@example.com"
 
 `.gitignore`: under the Terraform comment, add `*.tfvars` and change the comment to "Terraform: local state (bootstrap starts with it, ADR 0008 decision 7), provider caches and variable files (ADR 0029)".
 
-- [ ] **Step 3: Lock the provider and run the checks**
+- [x] **Step 3: Lock the provider and run the checks**
 
 ```bash
 pnpm infra:fmt
@@ -526,7 +526,7 @@ pnpm check:infra
 
 Expected: `pnpm check:infra` passes: fmt silent, "Success! The configuration is valid.", tflint with no findings. If `cost_types` or a lifecycle argument fails validation, fix it against the provider's docs for the locked version and note it for the PR description.
 
-- [ ] **Step 4: Show tflint fails on an unused variable**
+- [x] **Step 4: Show tflint fails on an unused variable**
 
 ```bash
 printf 'variable "unused" {\n  type = string\n}\n' > infra/bootstrap/unused.tf
@@ -534,7 +534,7 @@ pnpm check:infra   # Expected: FAIL: tflint, with terraform_unused_declarations
 rm infra/bootstrap/unused.tf
 ```
 
-- [ ] **Step 5: Show the variable checks and `prevent_destroy`**
+- [x] **Step 5: Show the variable checks and `prevent_destroy`**
 
 ```bash
 cd infra/bootstrap
@@ -544,7 +544,7 @@ terraform plan -input=false -var account_id=12345 -var alert_email=x 2>&1 | grep
 
 Expected: both error messages, before any AWS call (the plan stops at variable validation). The `prevent_destroy` check needs a state, so it is shown in owner step C's runbook text (`terraform plan -destroy` ends with "Instance cannot be destroyed").
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd ~/workspace/szop
