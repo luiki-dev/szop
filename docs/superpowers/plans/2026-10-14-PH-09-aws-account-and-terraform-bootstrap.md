@@ -122,7 +122,7 @@ Four moments in this plan need you. Claude stops before each one and says so. Ea
 **Interfaces:**
 - Produces: `pnpm check:infra` → `scripts/check-infra.sh` (exit 0 when every check passes, non-zero with `FAIL: …` otherwise); `pnpm infra:fmt`; `infra/.tflint.hcl` used with `--config "$PWD/infra/.tflint.hcl"`; `.terraform-version` read by CI in Task 3.
 
-- [ ] **Step 1: Pin the Terraform version**
+- [x] **Step 1: Pin the Terraform version**
 
 `.terraform-version`:
 
@@ -130,7 +130,7 @@ Four moments in this plan need you. Claude stops before each one and says so. Ea
 1.16.5
 ```
 
-- [ ] **Step 2: Configure tflint**
+- [x] **Step 2: Configure tflint**
 
 `infra/.tflint.hcl`:
 
@@ -154,7 +154,7 @@ plugin "aws" {
 }
 ```
 
-- [ ] **Step 3: Write the check script**
+- [x] **Step 3: Write the check script**
 
 `scripts/check-infra.sh`:
 
@@ -191,7 +191,7 @@ tflint --init --config "$config"
 
 Then: `chmod +x scripts/check-infra.sh` and `bash -n scripts/check-infra.sh` (no output means the syntax is valid).
 
-- [ ] **Step 4: Add the scripts and the hook**
+- [x] **Step 4: Add the scripts and the hook**
 
 In the root `package.json` `scripts`, after `"check:image"`:
 
@@ -208,7 +208,7 @@ In `lint-staged.config.js`, after the ESLint entry:
   "*.tf": "terraform fmt",
 ```
 
-- [ ] **Step 5: Write the tool pages**
+- [x] **Step 5: Write the tool pages**
 
 Each follows the layout of `docs/development/tools/actionlint.md`: what it is, `## Why Szop uses it` (with the ADR decisions: ADR 0008 decisions 4, 5, 7 and 30; ADR 0029), `## Configuration`, `## Everyday use`, and an "Updating" part.
 
@@ -216,7 +216,7 @@ Each follows the layout of `docs/development/tools/actionlint.md`: what it is, `
 - `tflint.md`: what tflint checks that `validate` does not; `infra/.tflint.hcl` line by line; installing the binary checked against its checksum; reading a finding (`rule name`, file and line, the rule's doc link); **updating tflint** (the version and `TFLINT_SHA256` in `ci.yml` and the setup guide, from `checksums.txt`) and **updating the AWS ruleset** (`version` in `.tflint.hcl`, `tflint --init`).
 - `aws-cli.md`: AWS CLI v2 and why the Session Manager plugin is needed (ECS Exec, from PH-12); profiles in `~/.aws/config`; the `szop` SSO profile and `aws sso login --profile szop`; `export AWS_PROFILE=szop`; why there are no access keys (ADR 0008, decision 25); on this machine `~/.aws` links to the Windows user's `.aws`; updating: rerun AWS's installer with `--update`.
 
-- [ ] **Step 6: Add the setup guide's section**
+- [x] **Step 6: Add the setup guide's section**
 
 In `docs/development/setup.md`, a new `## 8. Terraform, tflint and the AWS CLI` after "7. Docker Desktop and the database"; the sections after it become 9 to 12, and `## Contents` follows. Before renumbering, find links to the old anchors and fix them:
 
@@ -254,11 +254,11 @@ cd ~/workspace/szop && pnpm check:infra
 
 The text says: `~/.local/bin` is on Ubuntu's `PATH` after the next login if it did not exist before; signing in to AWS is the runbook's job, not the setup guide's ([`docs/operations/demo-environment.md`](../../operations/demo-environment.md)). "Coming later" loses its Terraform line.
 
-- [ ] **Step 7: Document the scripts and the hook**
+- [x] **Step 7: Document the scripts and the hook**
 
 `docs/development/scripts.md`: a row for `pnpm infra:fmt` under "Formatting", a row for `pnpm check:infra` under "Checks" (CI job: `infra`), in the table's style. `docs/development/tools/husky-and-lint-staged.md`: the `*.tf` entry.
 
-- [ ] **Step 8: Check and commit**
+- [x] **Step 8: Check and commit**
 
 Run: `pnpm format:check && bash -n scripts/check-infra.sh`
 Expected: both pass. (`pnpm check:infra` runs after owner step A.)

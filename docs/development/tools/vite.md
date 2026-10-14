@@ -32,7 +32,7 @@ pnpm --filter @szop/web dev  # Vite only
 
 - **`pnpm dev`** runs every package's `dev` script in parallel: the API restarts on a change ([tsx](tsx.md)) and Vite serves the page. It prints `Local: http://localhost:5173/`; open that address, not the API's.
 - **Changing a file** updates the open page at once. A change to `vite.config.ts` restarts Vite by itself.
-- **The page shows "Can't reach the API":** the API is not running, or `PORT` in `apps/api/.env` is not 3000. See the [setup guide](../setup.md#9-run-the-api-and-the-page).
+- **The page shows "Can't reach the API":** the API is not running, or `PORT` in `apps/api/.env` is not 3000. See the [setup guide](../setup.md#10-run-the-api-and-the-page).
 - **`pnpm build`** (from the root, which runs `vite build` in `apps/web`) writes the production build to `apps/web/dist/`: `index.html`, the bundle under `assets/` with a content hash in each file name, and the `.br` and `.gz` copies. `pnpm start` then serves it from the API on `http://localhost:3000`; see the [setup guide](../setup.md#run-the-production-build).
 - **`dist/` is generated,** so git (`.gitignore`), Prettier (`.prettierignore`) and ESLint (a global ignore of `**/dist/` in `eslint.config.js`) all skip it.
 - **The build fails with `over budget (NFR-3)`:** the first screen's JavaScript passed 200 KB. Find the import that grew it, and load it lazily with `import()` if the first screen does not need it.
