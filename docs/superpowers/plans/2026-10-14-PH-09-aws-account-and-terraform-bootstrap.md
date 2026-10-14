@@ -564,7 +564,7 @@ git commit -m "feat(infra): add the bootstrap module with the state bucket and t
 - Consumes: `scripts/check-infra.sh`, `.terraform-version` (Task 1); `infra/bootstrap` (Task 2).
 - Produces: job `infra`, change output `infra`.
 
-- [ ] **Step 1: Detect infra changes**
+- [x] **Step 1: Detect infra changes**
 
 In `ci.yml`'s `changes` job: add `infra: ${{ steps.detect.outputs.infra }}` to `outputs`; in the `detect` script, `infra=true` in the push branch, and in the PR branch, after the `workflows` line:
 
@@ -574,7 +574,7 @@ In `ci.yml`'s `changes` job: add `infra: ${{ steps.detect.outputs.infra }}` to `
 
 and add `echo "infra=$infra" >> "$GITHUB_OUTPUT"` and `infra=$infra` to the summary line.
 
-- [ ] **Step 2: Add the job**
+- [x] **Step 2: Add the job**
 
 After the `docker` job:
 
@@ -623,7 +623,7 @@ After the `docker` job:
 
 In `ci-ok`, `needs` becomes `[changes, lint, typecheck, test, build, e2e, docker, infra, commits, workflows]` (Prettier may wrap it).
 
-- [ ] **Step 3: Add the Dependabot entry**
+- [x] **Step 3: Add the Dependabot entry**
 
 In `.github/dependabot.yml`, remove the header line "A later phase adds the terraform ecosystem (OP-068)." and append:
 
@@ -647,16 +647,16 @@ In `.github/dependabot.yml`, remove the header line "A later phase adds the terr
       include: scope
 ```
 
-- [ ] **Step 4: Lint the workflow locally**
+- [x] **Step 4: Lint the workflow locally**
 
 Run actionlint as `docs/development/tools/actionlint.md`, "Everyday use", shows (scratch folder, version and checksum from `ci.yml`).
 Expected: no output. Then `pnpm format:check`.
 
-- [ ] **Step 5: Document**
+- [x] **Step 5: Document**
 
 `docs/development/ci-cd.md`: the `infra` job in the jobs table and its own short section (what it runs, no AWS credentials, the token, reading a failure: the `FAIL:` line names the step); the `infra` output in "Change detection"; the `terraform` entry in the Dependabot section. `docs/development/tools/dependabot.md`: the entry and what Dependabot does not update (Terraform, tflint, the ruleset).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .github docs/development

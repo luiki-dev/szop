@@ -1,6 +1,6 @@
 # CI/CD
 
-How Szop's continuous integration (CI) works: which checks run on which event, how to read a failed run, and the rules every workflow follows. Every pull request is checked in GitHub Actions, and a failing check blocks the merge; CodeQL scans the code and the workflows, and Dependabot proposes updates every week. *Why* it works this way is in [ADR 0010](../decisions/0010-ci-cd.md) (the direction) and [ADR 0018](../decisions/0018-ci-details.md) (the details). Later phases add to this guide: the PostgreSQL service for the tests ([PH-04](../roadmap.md#ph-04-database)), the container image check ([PH-08](../roadmap.md#ph-08-container-image)), the Terraform checks ([PH-09](../roadmap.md#ph-09-aws-account-and-terraform-bootstrap)), the demo buttons ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy)) and releases ([PH-13](../roadmap.md#ph-13-releases)).
+How Szop's continuous integration (CI) works: which checks run on which event, how to read a failed run, and the rules every workflow follows. Every pull request is checked in GitHub Actions, and a failing check blocks the merge; CodeQL scans the code and the workflows, and Dependabot proposes updates every week. *Why* it works this way is in [ADR 0010](../decisions/0010-ci-cd.md) (the direction) and [ADR 0018](../decisions/0018-ci-details.md) (the details). Later phases add to this guide: the demo buttons ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy)) and releases ([PH-13](../roadmap.md#ph-13-releases)).
 
 The checks run the PR's own code and configuration: its workflows, its `package.json` scripts, its `commitlint.config.js`. A PR could therefore weaken a check along with the change it checks; the owner's review of every changed file is what catches that.
 
@@ -44,6 +44,7 @@ CodeQL's default setup also scans `main` once a week on its own schedule.
 | `build` | code changed | `pnpm build`: the web app's production build, with its precompressed copies. It fails when the first screen's JavaScript exceeds 200 KB of Brotli ([NFR-3](../requirements/functional-requirements.md#nfr-3), [ADR 0023](../decisions/0023-production-build-and-serving-details.md)) and prints the size in its log. It needs no database | `pnpm build` |
 | `e2e` | code changed | Starts PostgreSQL as `test` does, installs Playwright's browsers, then `pnpm test:e2e`: builds the web app and runs the end-to-end (E2E) journeys on desktop Chromium, desktop Firefox and an emulated phone. When it fails, it uploads the HTML report as the `playwright-report` artifact | `pnpm test:e2e` with PostgreSQL running and the browsers installed ([setup guide](setup.md#the-end-to-end-journeys)) |
 | `docker` | code changed | Builds the container image with BuildKit, its layers cached in GitHub's cache, and loads it as `szop:local` without pushing it anywhere; then `scripts/check-image.sh --no-build` starts it next to PostgreSQL from `compose.yaml` and checks that it becomes healthy, runs as `node` and serves the SPA at `/` ([ADR 0028](../decisions/0028-container-image-details.md)). It runs no `pnpm install` on the runner: the dependencies are installed only inside the build | `pnpm check:image` with Docker running ([Docker](tools/docker.md)) |
+| `infra` | a file under `infra/`, `.terraform-version` or `scripts/check-infra.sh` changed | Installs Terraform in the version of `.terraform-version` (`hashicorp/setup-terraform`) and tflint as a release binary checked against `TFLINT_SHA256`, then `scripts/check-infra.sh`: `terraform fmt -check`, `terraform init -backend=false` and `terraform validate` for every module, tflint with the AWS ruleset ([ADR 0029](../decisions/0029-aws-account-and-terraform-bootstrap-details.md)). It has **no AWS credentials**: nothing reads the state or reaches AWS. `GITHUB_TOKEN` is passed only so tflint's plugin download is not rate-limited | `pnpm check:infra` ([Terraform](tools/terraform.md), [tflint](tools/tflint.md)) |
 | `commits` | every PR, never on `main` | commitlint on every commit of the branch that is not on `main`, from `HEAD^1` to `HEAD^2` (see [The merge ref](#the-merge-ref)) | `pnpm exec commitlint --from origin/main --to HEAD` |
 | `workflows` | a file under `.github/workflows/` or `.github/actions/`, or `.github/dependabot.yml` or `.github/zizmor.yml`, changed | [actionlint](tools/actionlint.md), then [zizmor](tools/zizmor.md) | see their tool pages |
 | `ci-ok` | always, after all the others | Sums up the results ([below](#ci-ok-and-the-required-checks)) | — |
@@ -81,10 +82,11 @@ The `changes` job decides which jobs a PR needs, from the list of files it chang
 
 - **Code** is any file that is not Markdown (`*.md`). A PR that changes only Markdown skips `lint`, `typecheck`, `test`, `build`, `e2e` and `docker`; `ci-ok` stays green. Counting everything else as code is the safe way round: a new file type or configuration file is checked without anyone remembering to add it.
 - **Workflows:** a change under `.github/workflows/` or `.github/actions/`, or to `.github/dependabot.yml` or `.github/zizmor.yml`, runs the `workflows` job. zizmor audits the Dependabot configuration too, and its own configuration file changes what it reports, so a change to either can turn the check red.
+- **Infra:** a change under `infra/`, to `.terraform-version` or to `scripts/check-infra.sh` runs the `infra` job. A `.tf` file is not Markdown, so it counts as code too, and the code jobs run as well.
 - `commits` runs on every PR, whatever it changes.
 - **A push to `main` runs every job**, whatever it changes.
 
-The job prints the changed files and its two answers (`code=…, workflows=…`) in its log.
+The job prints the changed files and its three answers (`code=…, workflows=…, infra=…`) in its log.
 
 ## Reading a failed run
 
@@ -99,6 +101,8 @@ The job prints the changed files and its two answers (`code=…, workflows=…`)
 9. **A failed `build` with `over budget (NFR-3)`:** the first screen needs more than 200 KB of Brotli-compressed JavaScript, and the log line names the size. Run `pnpm build` locally and find what grew: a new dependency, or an import that should be loaded lazily. Then either shrink it or, with a reason, change the budget through an ADR ([ADR 0013](../decisions/0013-visual-design.md), decision 4: "adjusted with a reason when real measurements exist").
 
 10. **A failed `docker` job:** if the build step failed, its log shows the Dockerfile step and the command's error, as `docker build -t szop:local .` would locally. If the check step failed, its log ends with a `FAIL:` line followed by the app's logs: `the app did not become healthy` (the API did not start or never answered `/api/health`; the logs say why), `GET / answered …` (the SPA is not where `WEB_ROOT` points) or `the image's user is …` (the Dockerfile's `USER` changed). Reproduce with `pnpm check:image`; the [testing guide](testing.md#running-the-tests) explains each message.
+
+11. **A failed `infra` job:** the log ends with a `FAIL:` line naming the step: `formatting` (the diff above it shows what `pnpm infra:fmt` would change), `terraform init` or `terraform validate in infra/<module>/` (the error above it names the file and line), `tflint` (each finding names its rule and links its documentation) or `tflint --init could not download the AWS ruleset` (GitHub's API failed; rerun the job). Reproduce with `pnpm check:infra`.
 
 From the terminal, `gh pr checks` shows the PR's checks and `gh run view --log-failed` prints the logs of the failed steps; see the [GitHub Actions page](tools/github-actions.md#everyday-use).
 
@@ -116,12 +120,13 @@ The `e2e` job's log shows Playwright's output, and the `github` reporter turns i
 
 Dependabot ([tool page](tools/dependabot.md)) opens update PRs every Monday:
 
-- **Groups:** one PR for all minor and patch updates of the npm packages, one for those of the GitHub Actions, one for those of the images in `compose.yaml`, one for the Node base image in the `Dockerfile`, and a separate PR for each major version.
+- **Groups:** one PR for all minor and patch updates of the npm packages, one for those of the GitHub Actions, one for those of the images in `compose.yaml`, one for the Node base image in the `Dockerfile`, one for the AWS provider in the modules under `infra/`, and a separate PR for each major version.
 - **Cooldown:** a version is proposed only once it is at least 7 days old; security updates skip the wait.
 - **Commit messages:** `build(deps): …` for a dependency, `build(deps-dev): …` for a devDependency, `ci(deps): …` for an action. They pass commitlint like any commit.
 - **`@types/node`'s major updates are ignored**, since its major version follows Node's, which changes on purpose together with `.nvmrc`.
 - **PostgreSQL's major updates are ignored** the same way: the major version changes on purpose, together with RDS and `compose.yaml`.
 - **Node's major updates in the `Dockerfile` are ignored** too: the major changes on purpose, together with `.nvmrc` and `engines`.
+- **The AWS provider's major updates are not ignored:** each comes as its own PR, to be read against the provider's upgrade guide. Terraform itself, tflint and its AWS ruleset are not something Dependabot sees; their tool pages say how to update them.
 
 A Dependabot PR is reviewed and merged by the owner like any other PR; nothing merges by itself. Merging one makes the others out of date, so each needs *Update branch* and a new CI run before it can be merged.
 

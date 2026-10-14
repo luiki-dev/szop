@@ -1,5 +1,4 @@
 # Weekly version updates (ADR 0010, decision 18; details in ADR 0018).
-# A later phase adds the terraform ecosystem (OP-068).
 version: 2
 updates:
   - package-ecosystem: npm
@@ -81,3 +80,20 @@ updates:
       # Node's major changes on purpose, with .nvmrc and engines (audit m13).
       - dependency-name: node
         update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: terraform
+    # The AWS provider in every root module under infra/ (ADR 0029).
+    directories:
+      - /infra/*
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      terraform:
+        update-types: [minor, patch]
+    # build(deps): …
+    commit-message:
+      prefix: build
+      include: scope
