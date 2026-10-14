@@ -101,6 +101,7 @@ Start PostgreSQL first, with `pnpm db:up` (Docker Desktop must be running). Then
 - [Definition of done](docs/development/definition-of-done.md) — what every PR must meet before it is merged
 - [GitHub settings](docs/development/github-settings.md) — the repository settings behind the workflow
 - [Setup guide](docs/development/setup.md) — from a clean Windows machine to passing checks
+- [Demo environment runbook](docs/operations/demo-environment.md) — setting up the AWS account and running Szop's infrastructure, step by step
 - [Scripts](docs/development/scripts.md) — every `pnpm` script, what it runs and when
 - [Tool pages](docs/development/tools/) — each development tool, why it was chosen and its configuration explained
 - [Decisions](docs/decisions/) — records of the decisions behind the project and why they were made

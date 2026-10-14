@@ -677,7 +677,7 @@ The job is proven by the PR's first CI run (the PR's `changes` output shows `inf
 - Consumes: the bucket name, variables and output of Task 2; the tools of Task 1.
 - Produces: the sections owner steps B, C and D point to: "One-time account setup", "Applying bootstrap" (parts 1 and 2), "Destroying bootstrap".
 
-- [ ] **Step 1: Write the runbook**
+- [x] **Step 1: Write the runbook**
 
 `docs/operations/demo-environment.md`. Introduction (what the demo environment is, the three modules, that every command assumes `export AWS_PROFILE=szop`), `## Contents`, then:
 
@@ -734,11 +734,11 @@ rm terraform.tfstate terraform.tfstate.backup
 
 **`## Coming later`**: spin-up and teardown with the buttons (PH-11, PH-12), debugging with ECS Exec and logs (PH-12), costs (PH-12).
 
-- [ ] **Step 2: Point to it**
+- [x] **Step 2: Point to it**
 
 `CLAUDE.md`, in the Documentation list after `ci-cd.md`'s entry or in the order of the list: `` - `docs/operations/demo-environment.md` — the runbook for the AWS demo environment: the one-time account setup, applying and destroying bootstrap, and later spinning the demo up and down. Keep it updated when an infrastructure step changes. `` `README.md`: a line where the docs are listed, or after the roadmap section if there is no such list, linking the runbook.
 
-- [ ] **Step 3: Check and commit**
+- [x] **Step 3: Check and commit**
 
 Run: `pnpm format:check`, and read the runbook's Contents against its headings.
 
