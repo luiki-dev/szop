@@ -148,8 +148,8 @@ aws s3api head-bucket --bucket szop-tfstate-ntrtcr
 ```
 
 - `An error occurred (404) … Not Found`: the name is free. Go on.
-- `An error occurred (403) … Forbidden`: another account owns it. Stop; the name in the code must change.
-- No output: it exists in your account already, so bootstrap was applied before. Stop and check the state.
+- JSON with `"BucketRegion": "eu-central-1"`: the bucket is already yours, so bootstrap was applied before. Stop and check the state.
+- Any other error (`403 Forbidden`, or `301`/`400` for a bucket in another region): another account owns the name. Stop; the name in the code must change.
 
 Then:
 

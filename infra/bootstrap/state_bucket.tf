@@ -12,7 +12,7 @@ resource "aws_s3_bucket" "state" {
   }
 }
 
-# Every earlier state stays restorable.
+# Earlier states stay restorable for 90 days (the lifecycle rule below).
 resource "aws_s3_bucket_versioning" "state" {
   bucket = aws_s3_bucket.state.id
 
