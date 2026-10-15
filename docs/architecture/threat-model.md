@@ -18,6 +18,7 @@ What Szop protects, who can act on it and through which path, and what guards ea
 - **Users' data and accounts:** lists, templates, catalogs, email addresses, password hashes, sessions.
 - **The app's secrets:** the Better Auth secret and the database password.
 - **The AWS account and its bill.**
+- **The Terraform state** in the bucket `szop-tfstate-ntrtcr`: a map of the whole infrastructure, and the record a wrong or lost copy of would make Terraform recreate or orphan resources.
 - **The integrity of the repository:** `main`, version tags, the images built from them.
 - **The email sender's reputation** in SES, and its daily sending quota.
 
@@ -51,7 +52,8 @@ STRIDE names six kinds of threat: **S**poofing (pretending to be someone else), 
 | **Pushes and PRs** | the owner's GitHub account; Claude Code acts with it | rulesets: `main` only through PRs, no force pushes, tags created only by the release App (ADR 0009; ADR 0011, decision 8) | git history and the PR record | secret scanning push protection (ADR 0009) | — | only the owner merges (ADR 0009); deny rules (decision 19) and the push hook (ADR 0015) |
 | **Workflows** (GitHub Actions) | OIDC tokens certify the environment or PR (ADR 0010) | actions pinned by commit hash; Dependabot cooldown (ADR 0010) | run logs; AWS session names carry the run ID (ADR 0010) | the plan role reads no secrets and no logs (decision 17); job logs are public | — | `id-token: write` per job, no installs next to AWS credentials (decision 18); the reviewer on `demo`, `demo-teardown` only from `main` (decision 16) |
 | **AWS roles assumed from CI** | trust policies per environment or PR event (ADR 0010; decision 16) | the deploy role cannot change `infra/base` (ADR 0010) | CloudTrail's 90-day event history | denies on secret values and log contents (ADR 0010; decision 17) | budget alerts; the nightly teardown (ADR 0008, ADR 0010) | CI never creates or edits IAM; `iam:PassRole` only for the app's two roles (ADR 0010) |
-| **Owner's AWS access** | IAM Identity Center with MFA; the root user locked away with MFA (OP-003) | — | CloudTrail's 90-day event history | — | budget alerts (ADR 0008) | — |
+| **Owner's AWS access** | IAM Identity Center with MFA at every sign-in; the root user locked away with MFA and no access keys; no IAM users or stored keys left after the [account's clean-up](../operations/demo-environment.md#one-time-account-setup) ([ADR 0029](../decisions/0029-aws-account-and-terraform-bootstrap-details.md), decisions 1 to 3) | `allowed_account_ids` stops Terraform in any other account | CloudTrail's 90-day event history | — | budget alerts, credits excluded (ADR 0029, decision 8) | short-lived credentials: an 8-hour session, nothing to leak from the machine |
+| **Terraform state** (the S3 bucket) | only identities IAM allows; no public access (the public access block, `BucketOwnerEnforced`) | versioning restores any earlier state; the state lock stops two runs writing at once; requests only over TLS ([ADR 0029](../decisions/0029-aws-account-and-terraform-bootstrap-details.md), decision 7) | CloudTrail's 90-day event history | private, encrypted (SSE-S3); secret values never enter the state (ADR 0008, decision 22) | `prevent_destroy` on the bucket; old versions kept for 90 days | — |
 | **CloudWatch Logs** | — | — | — | secrets redacted; tokens stripped (decision 9); 7-day retention; the plan role cannot read them (decision 17) | — | — |
 
 ## Risks accepted on purpose

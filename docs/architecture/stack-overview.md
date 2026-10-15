@@ -17,6 +17,7 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
 - [11. The monorepo](#11-the-monorepo)
 - [12. Where Szop runs](#12-where-szop-runs)
   - [Infrastructure as code and Terraform](#infrastructure-as-code-and-terraform)
+  - [The AWS account](#the-aws-account)
   - [The pieces, from the network inwards](#the-pieces-from-the-network-inwards)
   - [A demo session, step by step](#a-demo-session-step-by-step)
 - [13. Web security in the browser](#13-web-security-in-the-browser)
@@ -193,10 +194,23 @@ Szop runs on **AWS** (Amazon Web Services), but not all the time: it is a **demo
 
 - `terraform plan` compares the files with what exists and shows what it would create, change or delete.
 - `terraform apply` does it. `terraform destroy` deletes everything the configuration created.
-- Terraform remembers what it created in a **state** file. Szop keeps it in an S3 bucket (AWS's file storage), so every machine sees the same state.
+- Terraform remembers what it created in a **state** file: a map from each resource in the code to the real object on AWS. Without it, Terraform could not tell its own bucket from a stranger's and would try to create everything again. Szop keeps the state in an S3 bucket (AWS's file storage), so the owner's machine and CI see the same state, and the bucket's versioning keeps every earlier copy.
+- The **backend** is where a module's state lives; Szop's point at one bucket, one key per module. A **state lock** stops two runs from writing the same state at once: before a run, Terraform creates a small `.tflock` file next to the state, and a second run finds it and stops. (The **provider lock file**, `.terraform.lock.hcl`, is something else: it pins the provider's exact version, like `pnpm-lock.yaml`.)
 - A **provider** is the plugin that talks to one platform's API (here the AWS provider). A **root module** is one folder of configuration applied on its own, with its own state.
 
 Szop's configuration is split into three root modules by how long their resources live: **bootstrap** (created once: the state bucket and budget alerts), **base** (permanent and cheap: image registry, domain, certificate, email identity, the Better Auth secret, logs, IAM roles) and **demo** (created for a session and destroyed after it: network, load balancer, container, database with its RDS-managed password). Destroying the demo can never touch the other two.
+
+Bootstrap has a chicken-and-egg problem: it creates the bucket that states live in, so its own first apply keeps the state in a local file, which then moves into the bucket ([ADR 0029](../decisions/0029-aws-account-and-terraform-bootstrap-details.md)). The commands are in the [runbook](../operations/demo-environment.md#applying-bootstrap) and the tool on the [Terraform page](../development/tools/terraform.md).
+
+### The AWS account
+
+An **AWS account** is the container every resource, permission and bill belongs to. Szop has one of its own, so nothing else shares its costs or permissions ([ADR 0029](../decisions/0029-aws-account-and-terraform-bootstrap-details.md)).
+
+- **Regions.** AWS runs separate copies of most services in each **region**, a group of data centers in one area. A resource lives in one region; Szop's live in Frankfurt (`eu-central-1`). A few services are **global** (IAM, billing, Organizations): their console pages have no region.
+- **The root user** is the email address the account was opened with. It can do everything, no policy limits it, and it is used only for the few tasks only it can do, behind multi-factor authentication (MFA).
+- **IAM Identity Center** is AWS's single sign-on (SSO). People sign in once at an access portal, with MFA, and get credentials for an account through a **permission set** (here `AdministratorAccess`). Those credentials expire after a few hours. The alternative, an **access key**, works until someone deletes it, which is why a leaked key is the most common way AWS accounts are compromised; Szop has none. `aws sso login` gives the CLI and Terraform the same short-lived credentials.
+- **AWS Organizations** groups accounts under one management account. Szop has one account, but Identity Center needs an organization to hand out account access, so enabling it created one.
+- **AWS Budgets** watches the bill. Szop's budget, `szop-monthly`, emails the owner when the month's forecast passes $5 or the actual cost passes $10. It ignores credits on purpose: counted after credits, a forgotten demo would cost "$0" until the credits ran out.
 
 ### The pieces, from the network inwards
 

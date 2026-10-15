@@ -6,6 +6,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 
 | Acronym | Stands for | Meaning |
 |---|---|---|
+| **ACL** | Access Control List | A list of rules saying who may do what to a resource. In S3, per-object ACLs are switched off (`BucketOwnerEnforced`) and policies decide instead; in AWS WAF, a *web ACL* is the container of a firewall's rules. |
 | **ACM** | AWS Certificate Manager | Issues free TLS certificates for domains you control, for use on AWS load balancers. |
 | **ADR** | Architecture Decision Record | A short document recording one significant decision: its context, the options considered, the choice and its consequences. Ours live in `docs/decisions/`. |
 | **ALB** | Application Load Balancer | AWS's HTTP(S) load balancer: it decrypts HTTPS and forwards requests to healthy targets. Fronts Szop's demo. |
@@ -48,6 +49,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **INP** | Interaction to Next Paint | A Core Web Vital: how long the page takes to visibly respond to a tap, click or key press. "Good" is at most 200 ms ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
 | **JSX** | JavaScript XML | HTML-like syntax inside JavaScript or TypeScript, used to write React components. It has been used in `apps/web` since [PH-05](roadmap.md#ph-05-spa-skeleton). |
 | **JWT** | JSON Web Token | A signed token carrying claims about a user. An alternative to server-side sessions; not used in Szop. |
+| **KMS** | (AWS) Key Management Service | AWS's service for encryption keys. A customer-managed key costs $1 a month; Szop's state bucket uses S3-managed keys instead (SSE-S3). |
 | **LCP** | Largest Contentful Paint | A Core Web Vital: when the largest piece of content (usually the main text block or image) appears. "Good" is at most 2.5 s ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
 | **LTS** | Long-Term Support | A release line that receives fixes for an extended period. Even-numbered Node.js releases (22, 24, …) become LTS. |
 | **MFA** | Multi-Factor Authentication | Logging in with a second proof besides the password, such as a code from an authenticator app. |
@@ -80,6 +82,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **SMTP** | Simple Mail Transfer Protocol | The protocol for sending email. |
 | **SPA** | Single-Page Application | A web app where the browser loads one page once and JavaScript renders every screen after that, without full page reloads. Szop's frontend is one. |
 | **SPF** | Sender Policy Framework | A DNS record listing which servers may send mail for a domain. |
+| **SSE** | Server-Side Encryption | Data encrypted by the service that stores it. SSE-S3, used for Szop's state bucket, encrypts with keys S3 manages itself. |
 | **SSM** | (AWS) Systems Manager | A family of AWS operations tools. Its **Parameter Store** holds Szop's app secrets; its Session Manager plugin powers ECS Exec. |
 | **SSO** | Single Sign-On | One login giving access to several systems. IAM Identity Center is AWS's SSO; it hands out short-lived credentials. |
 | **SSR** | Server-Side Rendering | Generating a page's HTML on the server for each request. The main strength of frameworks like Next.js; not used in Szop. |
@@ -122,9 +125,11 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 
 | Term | Meaning |
 |---|---|
+| **Access key** | A long-lived AWS credential pair (an ID and a secret) for an IAM user. It works until someone deletes it, so a leaked one is the most common way AWS accounts are compromised; Szop has none, and uses IAM Identity Center's short-lived credentials instead (ADR 0029). |
 | **Accessibility check (axe)** | An automated scan of a page for barriers to people using assistive technology, such as a missing label or low contrast. **axe** (axe-core) is the common rule engine; Szop runs it in the E2E journeys through `@axe-core/playwright`, in light and dark mode (see [Playwright](development/tools/playwright.md)). It finds only part of the problems: keyboard and screen-reader use still need people. |
 | **actionlint** | A static checker for GitHub Actions workflow files: syntax, expressions, `needs:` and, through shellcheck, the shell scripts of `run:` steps. Runs in CI's `workflows` job. |
 | **Anonymous user** | A server-side user without email or password, created automatically for a guest. Registering links it to a real account. |
+| **Backend (Terraform)** | Where a root module keeps its state. Szop's modules use the S3 backend: one bucket, one key per module. |
 | **Baseline (web features)** | A label for web features that work in all major browsers. "Widely available" means they have done so for at least 30 months; Vite's default build target is based on it. |
 | **Bastion host** | A server kept only as an entry point for reaching private resources (such as a database) over SSH. Szop uses ECS Exec instead. |
 | **Big design up front** | Designing a system in full detail before building any of it. Criticized because the decisions are made without feedback from working software. Szop decides direction up front and details per phase (see ADR 0004). |
@@ -216,6 +221,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Optimistic update** | Updating the screen immediately as if a request succeeded, then correcting it if the server disagrees. |
 | **Origin** | The scheme, domain and port of a URL (`https://example.com`). Cookies and browser security rules work per origin. |
 | **Performance budget** | Limits a project agrees not to exceed so it stays fast as it grows, such as "at most 200 KB of JavaScript" or "LCP at most 2.5 s". |
+| **Permission set** | In IAM Identity Center, a named set of permissions a user is given on an account, such as `AdministratorAccess`. Signing in creates a role from it in the account. |
 | **Phantom dependency** | A package your code imports without declaring it, working only because something else happened to install it. It breaks when that other package changes. pnpm prevents it. |
 | **Phase** | One step of the implementation roadmap (`docs/roadmap.md`), with a `PH-` ID, taken through its own brainstorm, design approval and implementation, on one branch and in one PR. Phases are grouped into stages (see ADR 0014). |
 | **Playwright** | A library that drives real browsers from code, with a test runner around it. Szop's E2E journeys use it, with axe for accessibility checks (see [Playwright](development/tools/playwright.md)). |
@@ -254,6 +260,8 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Spec / implementation plan** | The two working documents of a larger phase: the spec describes the agreed design, the plan lists the steps to build it. Kept in `docs/superpowers/`. |
 | **Spike** | A short, time-boxed investigation that answers one question, such as whether a library works as hoped. Its output is an answer, not code to keep; in Szop it runs before the brainstorm of the phase that needs it (see ADR 0014). |
 | **Stage** | A milestone on Szop's roadmap with an exit criterion, such as "every MVP requirement delivered, `1.0.0` released". It groups phases and has no branch or PR of its own (see ADR 0014). |
+| **State (Terraform)** | Terraform's record of the real objects it created and their attributes, which `plan` compares with the code. Szop's lives in the bucket `szop-tfstate-ntrtcr`. |
+| **State lock (Terraform)** | A guard that stops two runs from writing the same state at once. With `use_lockfile`, Terraform creates a `.tflock` file next to the state for the length of a run. Not to be confused with the provider lock file, `.terraform.lock.hcl`. |
 | **Storybook** | A separate local web app for building and reviewing components on their own, in all their states. Not used by Szop for now. |
 | **Sub-issue** | An issue placed under a parent issue on GitHub; the parent shows its sub-issues and how many are closed. In Szop, each open point is a sub-issue of the phase that settles it (see ADR 0024). |
 | **Subnet (public, private)** | A slice of a VPC's addresses. A public subnet has a route to the internet; a private one does not. |

@@ -71,7 +71,7 @@ e2e/              Playwright end-to-end tests (ADR 0007)
   start-server.ts   resets the E2E database, then starts the API on the built SPA
   support/          the CSP guard (test.ts) and the axe helper (accessibility.ts)
   tests/            the journeys, one file per use case (uc-NN-….spec.ts), plus the walking skeleton's health.spec.ts and the CSP guard's own test
-infra/            Terraform root modules (ADR 0008)
+infra/            Terraform root modules (ADR 0008): bootstrap (the state bucket and the budget, ADR 0029); base and demo later
 ```
 
 The packages and `e2e/` are pnpm workspaces. The packages are named `@szop/api`, `@szop/web` and `@szop/shared`, and imports keep their `.ts` extension ([ADR 0019](../decisions/0019-api-skeleton-details.md), decisions 6 and 7). `packages/shared` is consumed from its TypeScript source, with no build step of its own. It exists since [PH-05](../roadmap.md#ph-05-spa-skeleton) and holds the health response's schema, `healthSchema`, which `apps/web` uses to parse `/api/health` and, in a test, `apps/api` uses to check its responses ([ADR 0021](../decisions/0021-spa-skeleton-details.md), decision 1). The rest of the tooling is in [ADR 0005](../decisions/0005-development-environment.md).

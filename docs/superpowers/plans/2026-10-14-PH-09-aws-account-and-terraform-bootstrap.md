@@ -801,28 +801,28 @@ git commit -m "feat(infra): keep bootstrap's state in the state bucket"
 - Create: `docs/decisions/0029-aws-account-and-terraform-bootstrap-details.md`
 - Modify: `docs/decisions/0008-hosting.md`, `docs/decisions/0010-ci-cd.md`, `docs/architecture/stack-overview.md`, `docs/architecture/architecture.md`, `docs/architecture/threat-model.md`, `docs/glossary.md`, `docs/roadmap.md`, `README.md`
 
-- [ ] **Step 1: Write ADR 0029**
+- [x] **Step 1: Write ADR 0029**
 
 In the format of `docs/decisions/0028-container-image-details.md`: status `✅ Accepted`; header `Completes: ADR 0008, decisions 7, 25, 26 and 30; ADR 0010, decisions 7 and 18`; context; the spec's 13 decisions as the table (topic, options considered, decision with its reasoning); consequences (the owner steps; manual bumps of Terraform, tflint and the ruleset; OP-091 and OP-092).
 
-- [ ] **Step 2: Add the notes to ADR 0008 and ADR 0010**
+- [x] **Step 2: Add the notes to ADR 0008 and ADR 0010**
 
 The status lines name ADR 0029. At the bottom of each decision's cell: ADR 0008, decisions 7, 25, 26 and 30, and ADR 0010, decisions 7 and 18, get `<br>🧩 **Completed by [ADR 0029](0029-aws-account-and-terraform-bootstrap-details.md), decision N:** …` (one sentence each), after any existing notes.
 
-- [ ] **Step 3: Update the living docs**
+- [x] **Step 3: Update the living docs**
 
 - `stack-overview.md`, section 12: a subsection "The AWS account" (an account, regions, AWS Organizations, IAM Identity Center and short-lived credentials versus access keys, AWS Budgets and why credits are excluded); the Terraform subsection gains state, backends, the state lock and the provider lock file. `## Contents` gains the new heading.
 - `architecture.md`: the `infra/` line says `bootstrap` exists, with the bucket and budget.
 - `threat-model.md`: the state bucket among the assets (it reveals the infrastructure; guarded by IAM, TLS only, public access blocked, versioning); the owner's AWS access row links the runbook and the clean-up audit.
 - `glossary.md`: SSO, SSE, KMS and any other acronym new to the docs (check MFA, IAM, S3 are already there).
 
-- [ ] **Step 4: GitHub, then the roadmap**
+- [x] **Step 4: GitHub, then the roadmap**
 
 - The PH-09 part of [OP-013](https://github.com/luiki-dev/szop/issues/66), [OP-018](https://github.com/luiki-dev/szop/issues/73) and [OP-023](https://github.com/luiki-dev/szop/issues/74) is ticked with the PR when it opens; the issues are re-parented (OP-013 to PH-10 #39; OP-018 and OP-023 to PH-11 #40) and set to ⬜ Backlog. [OP-068](https://github.com/luiki-dev/szop/issues/70) is closed by the PR.
 - The PH-09 issue's body takes the roadmap entry's new **Delivers** and **Owner steps** when the PR opens.
 - `roadmap.md`'s PH-09 row gets the PR link, with the README's diagram unchanged (◐ until the merge).
 
-- [ ] **Step 5: Check and commit**
+- [x] **Step 5: Check and commit**
 
 Run: `pnpm format:check`; `grep -rn "0029" docs/decisions/0008-hosting.md docs/decisions/0010-ci-cd.md` shows the status lines and six cell notes.
 
