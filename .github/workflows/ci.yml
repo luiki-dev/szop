@@ -58,7 +58,7 @@ jobs:
             # grep -q exit could fail the pipe.
             if grep -qv '\.md$' <<<"$files"; then code=true; else code=false; fi
             if grep -qE '^\.github/(workflows/|actions/|dependabot\.ya?ml$|zizmor\.ya?ml$)' <<<"$files"; then workflows=true; else workflows=false; fi
-            if grep -qE '^(infra/|\.terraform-version$|scripts/check-infra\.sh$)' <<<"$files"; then infra=true; else infra=false; fi
+            if grep -qE '^(infra/|\.terraform-version$|scripts/check-infra\.sh$|\.github/workflows/ci\.yml$)' <<<"$files"; then infra=true; else infra=false; fi
           fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "workflows=$workflows" >> "$GITHUB_OUTPUT"

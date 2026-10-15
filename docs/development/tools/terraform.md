@@ -65,7 +65,7 @@ The **two lock files are unrelated**: `.terraform.lock.hcl` pins provider versio
 
 ### Variables kept out of git
 
-Values that should not be public, such as the account ID and the alert address, are variables without defaults, set in a **`terraform.tfvars`** next to the module, which Terraform reads on its own. `.gitignore` ignores `*.tfvars`; a committed `terraform.tfvars.example` shows the shape. Each variable has a `validation` block, so a missing or malformed value stops the run with a clear message before anything reaches AWS.
+Values that should not be public, such as the account ID and the alert address, are variables without defaults, set in a **`terraform.tfvars`** next to the module, which Terraform reads on its own. `.gitignore` ignores `*.tfvars`; a committed `terraform.tfvars.example` shows the shape. Each variable has a `validation` block, so a malformed value stops the run with a clear message before anything reaches AWS. A missing `terraform.tfvars` makes Terraform ask for each value at the prompt, unless the command has `-input=false`, as the runbook's first `plan` does: then it stops with `No value for required variable`.
 
 ## Everyday use
 
@@ -102,7 +102,8 @@ terraform plan      # what would change; changes nothing
 **The AWS provider:** Dependabot proposes it weekly, updating the constraint and `.terraform.lock.hcl` together (ADR 0029, decision 13). By hand:
 
 ```bash
-terraform -chdir=infra/bootstrap init -upgrade -backend=false
+export AWS_PROFILE=szop   # init reads the module's S3 backend, which needs credentials
+terraform -chdir=infra/bootstrap init -upgrade
 terraform -chdir=infra/bootstrap providers lock -platform=linux_amd64
 ```
 

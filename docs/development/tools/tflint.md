@@ -18,8 +18,9 @@ tflint is a linter for Terraform code. `terraform validate` checks that the code
 **`scripts/check-infra.sh`** runs it last, after `terraform fmt` and `terraform validate`:
 
 ```bash
-tflint --init --config "$PWD/infra/.tflint.hcl"
-(cd infra && tflint --recursive --config "$PWD/infra/.tflint.hcl")
+config="$PWD/infra/.tflint.hcl"     # from the repository root, before any cd
+tflint --init --config "$config"
+(cd infra && tflint --recursive --config "$config")
 ```
 
 `--recursive` runs tflint in every folder under `infra/` that holds `.tf` files; `--config` with an absolute path makes each of those runs use the one shared file.

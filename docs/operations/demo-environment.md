@@ -133,8 +133,11 @@ The first command failing is the point: a command that forgets the profile now s
 export AWS_PROFILE=szop
 aws sso login
 cd ~/workspace/szop/infra/bootstrap
+mv backend.tf backend.tf.off      # set the S3 backend aside: its bucket does not exist yet
 cp terraform.tfvars.example terraform.tfvars
 ```
+
+`backend.tf` points at the bucket this part creates, so `terraform init` would fail with it in place; Part 2 puts it back. (`git status` shows it as deleted until then.)
 
 Edit `terraform.tfvars`: your 12-digit account ID (in quotes; `aws sts get-caller-identity --query Account --output text` prints it) and the address the budget alerts go to. git ignores this file.
 
@@ -152,8 +155,8 @@ Then:
 
 ```bash
 terraform init      # downloads the AWS provider; "Terraform has been successfully initialized!"
-terraform plan      # read it: "Plan: 8 to add, 0 to change, 0 to destroy."
-terraform apply     # shows the same plan; type yes
+terraform plan -input=false    # read it: "Plan: 8 to add, 0 to change, 0 to destroy."
+terraform apply                # shows the same plan; type yes
 ```
 
 The plan's eight resources: the bucket, its versioning, public access block, ownership controls, encryption, policy and lifecycle rule, and the budget. `apply` ends with `Apply complete! Resources: 8 added, 0 changed, 0 destroyed.` and the output `state_bucket_name = "szop-tfstate-ntrtcr"`.
@@ -174,16 +177,17 @@ The state is now the file `terraform.tfstate` in `infra/bootstrap`, the only rec
 ⚠️ **Don't:**
 
 - commit `terraform.tfvars` or `terraform.tfstate` (git ignores them; don't force-add them);
-- add a `backend` block yourself: the phase adds `backend.tf` once the bucket exists;
+- put `backend.tf` back before the apply has finished: Part 2 does;
 - delete `terraform.tfstate` before Part 2;
 - run `terraform destroy`.
 
 ### Part 2: moving the state into the bucket
 
-Once `infra/bootstrap/backend.tf` exists, it tells Terraform to keep bootstrap's state in the bucket, under `bootstrap/terraform.tfstate`, with S3's native lock. Move the state there:
+`infra/bootstrap/backend.tf` tells Terraform to keep bootstrap's state in the bucket, under `bootstrap/terraform.tfstate`, with S3's native lock. Put it back and move the state there:
 
 ```bash
 cd ~/workspace/szop/infra/bootstrap
+mv backend.tf.off backend.tf      # git status is clean again
 terraform init -migrate-state
 #   "Do you want to copy existing state to the new backend?" Enter yes
 terraform plan
