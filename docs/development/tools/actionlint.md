@@ -30,7 +30,7 @@ cd -                       # back to the repository root
 "$S/bin/actionlint" -color # no output means no problems
 ```
 
-Use the version and checksum currently in `ci.yml`. Without shellcheck installed locally, the `run:` scripts are not checked; CI checks them anyway.
+Use the version and checksum currently in `ci.yml`. Without shellcheck installed locally, the `run:` scripts are not checked, and actionlint says nothing about it; CI checks them anyway. To check them too, put shellcheck on the `PATH` for the run, for example from its Python package with uv: `PATH="$(dirname "$(uvx --from shellcheck-py python -c 'import shutil; print(shutil.which("shellcheck"))')"):$PATH" "$S/bin/actionlint" -color`.
 
 Each problem is printed as `file:line:column: message [rule]`, with the line underlined. A shellcheck finding names its code (`SC2086`), which the [shellcheck wiki](https://www.shellcheck.net/wiki/) explains.
 
