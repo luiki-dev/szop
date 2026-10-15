@@ -176,7 +176,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | Phase | Status | Spec | Plan | PR | Issue |
 |---|---|---|---|---|---|
 | [PH-09 AWS account and Terraform bootstrap](#ph-09-aws-account-and-terraform-bootstrap) | ✅ Done | [Spec](superpowers/specs/2026-10-14-PH-09-aws-account-and-terraform-bootstrap-design.md) | [Plan](superpowers/plans/2026-10-14-PH-09-aws-account-and-terraform-bootstrap.md) | [#203](https://github.com/luiki-dev/szop/pull/203) | [#38](https://github.com/luiki-dev/szop/issues/38) |
-| [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure) | 🚧 In progress | — | — | — | [#39](https://github.com/luiki-dev/szop/issues/39) |
+| [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure) | 🚧 In progress | [Spec](superpowers/specs/2026-10-15-PH-10-domain-and-base-infrastructure-design.md) | — | — | [#39](https://github.com/luiki-dev/szop/issues/39) |
 | [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | ⬜ Not started | — | — | — | [#40](https://github.com/luiki-dev/szop/issues/40) |
 | [PH-12 First deploy](#ph-12-first-deploy) | ⬜ Not started | — | — | — | [#41](https://github.com/luiki-dev/szop/issues/41) |
 | [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
