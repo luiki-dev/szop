@@ -88,7 +88,7 @@ terraform plan      # what would change; changes nothing
 
 `terraform apply` and `terraform destroy` are the owner's steps, from the [runbook](../../operations/demo-environment.md). Read the plan before typing `yes`: it lists every resource to add, change or destroy, and a `-/+` (replace) on something permanent is a reason to stop.
 
-`terraform init -backend=false`, as `check:infra` runs it, only downloads the providers: it needs no credentials and does not touch the state.
+`terraform init -backend=false`, as `check:infra` runs it, only downloads the providers: it needs no credentials and does not touch the state. The check gives each module its own data directory in `~/.cache/szop/terraform-check/`, separate from the module's `.terraform/`: once a module is initialized with its S3 backend, `init` in that `.terraform/` reloads the backend and asks for AWS credentials, even with `-backend=false`.
 
 ## Updating
 
