@@ -760,7 +760,7 @@ git commit -m "docs: add the runbook's account setup and bootstrap chapters"
 - Consumes: the bucket created in owner step C.
 - Produces: the backend pattern `infra/base` and `infra/demo` copy with their own `key`.
 
-- [ ] **Step 1: Add the backend**
+- [x] **Step 1: Add the backend**
 
 `infra/bootstrap/backend.tf`:
 
@@ -779,12 +779,12 @@ terraform {
 }
 ```
 
-- [ ] **Step 2: Check without AWS**
+- [x] **Step 2: Check without AWS**
 
 Run: `pnpm check:infra`
 Expected: passes. `init -backend=false` leaves the backend alone, so the check needs no credentials.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add infra/bootstrap/backend.tf
