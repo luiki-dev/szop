@@ -6,6 +6,9 @@ export default {
     "eslint --fix --max-warnings=0 --no-warn-ignored",
     "prettier --write",
   ],
+  // Terraform files: the formatter Terraform ships with. Prettier skips
+  // them below through --ignore-unknown.
+  "*.tf": "terraform fmt",
   // Everything else Prettier knows. It honours .prettierignore (Markdown).
   "!(*.{ts,tsx,mts,cts,js,jsx,mjs,cjs})": "prettier --write --ignore-unknown",
 };

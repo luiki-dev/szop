@@ -31,6 +31,7 @@ jobs:
     outputs:
       code: ${{ steps.detect.outputs.code }}
       workflows: ${{ steps.detect.outputs.workflows }}
+      infra: ${{ steps.detect.outputs.infra }}
     steps:
       # On a PR, the checkout is GitHub's test merge of the branch into main:
       # HEAD^1 is main, so the diff is exactly what the PR changes.
@@ -47,6 +48,7 @@ jobs:
             echo "Push to main: every check runs."
             code=true
             workflows=true
+            infra=true
           else
             # --no-renames lists both names of a renamed file.
             files=$(git diff --name-only --no-renames HEAD^1 HEAD)
@@ -56,10 +58,14 @@ jobs:
             # grep -q exit could fail the pipe.
             if grep -qv '\.md$' <<<"$files"; then code=true; else code=false; fi
             if grep -qE '^\.github/(workflows/|actions/|dependabot\.ya?ml$|zizmor\.ya?ml$)' <<<"$files"; then workflows=true; else workflows=false; fi
+            if grep -qE '^(infra/|\.terraform-version$|scripts/check-infra\.sh$|\.github/workflows/ci\.yml$)' <<<"$files"; then infra=true; else infra=false; fi
           fi
-          echo "code=$code" >> "$GITHUB_OUTPUT"
-          echo "workflows=$workflows" >> "$GITHUB_OUTPUT"
-          echo "code=$code, workflows=$workflows"
+          {
+            echo "code=$code"
+            echo "workflows=$workflows"
+            echo "infra=$infra"
+          } >> "$GITHUB_OUTPUT"
+          echo "code=$code, workflows=$workflows, infra=$infra"
 
   lint:
     name: lint
@@ -208,6 +214,47 @@ jobs:
       # (ADR 0028); on failure it prints the app's logs.
       - run: scripts/check-image.sh --no-build
 
+  infra:
+    name: infra
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      # Updated by hand: Dependabot cannot see versions inside run steps
+      # (docs/development/tools/tflint.md).
+      TFLINT_VERSION: 0.64.0
+      TFLINT_SHA256: cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The one exact version, shared with tenv on the owner's machine.
+      - id: version
+        run: echo "terraform=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ steps.version.outputs.terraform }}
+          terraform_wrapper: false
+
+      - name: tflint
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/tflint.zip" \
+            "https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip"
+          echo "${TFLINT_SHA256}  $RUNNER_TEMP/tflint.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/tflint.zip" -d "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      # GITHUB_TOKEN only keeps tflint --init from being rate-limited by
+      # GitHub's API when it downloads the AWS ruleset. No AWS credentials.
+      - run: scripts/check-infra.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
   commits:
     name: commits
     # Every PR, whatever it changes, so no need to wait for changes.
@@ -264,7 +311,18 @@ jobs:
   ci-ok:
     name: ci-ok
     needs:
-      [changes, lint, typecheck, test, build, e2e, docker, commits, workflows]
+      [
+        changes,
+        lint,
+        typecheck,
+        test,
+        build,
+        e2e,
+        docker,
+        infra,
+        commits,
+        workflows,
+      ]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 5

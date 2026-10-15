@@ -175,7 +175,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 | Phase | Status | Spec | Plan | PR | Issue |
 |---|---|---|---|---|---|
-| [PH-09 AWS account and Terraform bootstrap](#ph-09-aws-account-and-terraform-bootstrap) | ⬜ Not started | — | — | — | [#38](https://github.com/luiki-dev/szop/issues/38) |
+| [PH-09 AWS account and Terraform bootstrap](#ph-09-aws-account-and-terraform-bootstrap) | ✅ Done | [Spec](superpowers/specs/2026-10-14-PH-09-aws-account-and-terraform-bootstrap-design.md) | [Plan](superpowers/plans/2026-10-14-PH-09-aws-account-and-terraform-bootstrap.md) | [#203](https://github.com/luiki-dev/szop/pull/203) | [#38](https://github.com/luiki-dev/szop/issues/38) |
 | [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure) | ⬜ Not started | — | — | — | [#39](https://github.com/luiki-dev/szop/issues/39) |
 | [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | ⬜ Not started | — | — | — | [#40](https://github.com/luiki-dev/szop/issues/40) |
 | [PH-12 First deploy](#ph-12-first-deploy) | ⬜ Not started | — | — | — | [#41](https://github.com/luiki-dev/szop/issues/41) |
@@ -184,9 +184,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-09 AWS account and Terraform bootstrap
 
 - **Goal:** Szop has its own AWS account, managed with Terraform. The state lives in a locked-down S3 bucket, budget alerts watch the costs, and CI checks every Terraform change.
-- **Delivers:** `infra/bootstrap` with the state bucket and the budget alerts ([ADR 0008](decisions/0008-hosting.md)); the Terraform checks in `ci.yml` ([ADR 0010](decisions/0010-ci-cd.md)); the start of the runbook `docs/operations/demo-environment.md`, the tool pages for Terraform and the AWS CLI, and their place in the setup guide; Dependabot for the AWS provider.
+- **Delivers:** `infra/bootstrap` with the state bucket and the budget alerts ([ADR 0008](decisions/0008-hosting.md)); the Terraform checks in `ci.yml` ([ADR 0010](decisions/0010-ci-cd.md)); `pnpm check:infra` (formatting, validation and tflint, locally and in CI); the start of the runbook `docs/operations/demo-environment.md`, the tool pages for Terraform, tflint and the AWS CLI, and their place in the setup guide; Dependabot for the AWS provider ([ADR 0029](decisions/0029-aws-account-and-terraform-bootstrap-details.md)).
 - **Depends on:** —
-- **Owner steps:** create the AWS account, secure its root user with multi-factor authentication (MFA) and set up IAM Identity Center, following the runbook; install the Terraform CLI, the AWS CLI and the Session Manager plugin; apply `infra/bootstrap` from the machine.
+- **Owner steps:** clean up the existing AWS account, secure its root user with multi-factor authentication (MFA) and set up IAM Identity Center, which upgrades the account to the Paid plan, following the runbook; install tenv (and through it Terraform), tflint and the Session Manager plugin, and check the AWS CLI, following the setup guide; apply `infra/bootstrap` from the branch, then move its state into the bucket, following the runbook.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#38](https://github.com/luiki-dev/szop/issues/38).
 

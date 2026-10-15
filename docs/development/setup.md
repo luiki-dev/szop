@@ -11,13 +11,14 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
 - [5. VS Code](#5-vs-code)
 - [6. Clone and install](#6-clone-and-install)
 - [7. Docker Desktop and the database](#7-docker-desktop-and-the-database)
-- [8. Check that everything works](#8-check-that-everything-works)
+- [8. Terraform, tflint and the AWS CLI](#8-terraform-tflint-and-the-aws-cli)
+- [9. Check that everything works](#9-check-that-everything-works)
   - [The end-to-end journeys](#the-end-to-end-journeys)
-- [9. Run the API and the page](#9-run-the-api-and-the-page)
+- [10. Run the API and the page](#10-run-the-api-and-the-page)
   - [Run the production build](#run-the-production-build)
   - [Run the container image](#run-the-container-image)
-- [10. What the git hooks do](#10-what-the-git-hooks-do)
-- [11. Coming later](#11-coming-later)
+- [11. What the git hooks do](#11-what-the-git-hooks-do)
+- [12. Coming later](#12-coming-later)
 
 ## 1. Windows: WSL and Ubuntu
 
@@ -96,7 +97,48 @@ pnpm db:up
 
 `pnpm db:up` runs `docker compose up -d --wait`. It downloads the PostgreSQL image the first time, starts the database and ends with `Container szop-postgres-1 Healthy`. The database keeps running across restarts of Docker Desktop until `pnpm db:down` (`docker compose stop`), and its data survives `docker compose down`. Details, and how to open `psql`, are in [Docker Compose and PostgreSQL](tools/docker-compose.md).
 
-## 8. Check that everything works
+## 8. Terraform, tflint and the AWS CLI
+
+Szop's infrastructure on AWS is Terraform code in `infra/` ([Terraform](tools/terraform.md)). Four tools work with it, all in Ubuntu:
+
+- **tenv** installs Terraform in the exact version of `.terraform-version`, the way nvm installs Node from `.nvmrc`. Terraform itself is never installed with `apt`, `snap` or a zip.
+- **tflint** finds mistakes `terraform validate` does not ([tflint](tools/tflint.md)).
+- **The AWS CLI v2** signs in to AWS and runs single commands ([AWS CLI](tools/aws-cli.md)).
+- **The Session Manager plugin** lets the AWS CLI open a shell in a running container, for debugging the demo.
+
+Each download is checked against its SHA-256 checksum before it is installed; `sha256sum --check` prints `OK`, and anything else means stop. The commands use a scratch folder and the repository at `~/workspace/szop`; adjust the path if yours differs.
+
+```bash
+# tenv, which installs Terraform from .terraform-version
+S=/tmp/szop-tools; mkdir -p "$S"; cd "$S"
+curl -fsSLO https://github.com/tofuutils/tenv/releases/download/v4.15.1/tenv_v4.15.1_amd64.deb
+echo "3d1b8afa3b4f1fdc6ac127a349c2547f447e42e36d5be116ee1602bb04a0a5b1  tenv_v4.15.1_amd64.deb" | sha256sum --check
+sudo apt install ./tenv_v4.15.1_amd64.deb
+cd ~/workspace/szop && tenv tf install && terraform version     # Terraform v1.16.5
+
+# tflint
+cd "$S"
+curl -fsSLO https://github.com/terraform-linters/tflint/releases/download/v0.64.0/tflint_linux_amd64.zip
+echo "cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537  tflint_linux_amd64.zip" | sha256sum --check
+mkdir -p ~/.local/bin && unzip -o tflint_linux_amd64.zip -d ~/.local/bin && tflint --version
+
+# AWS CLI v2: skip if `aws --version` already prints aws-cli/2.x
+curl -fsSL -o awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+unzip -q awscliv2.zip && sudo ./aws/install --update && aws --version
+
+# Session Manager plugin
+curl -fsSLO https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
+sudo apt install ./session-manager-plugin.deb && session-manager-plugin --version
+
+# Back in the repository
+cd ~/workspace/szop && pnpm check:infra
+```
+
+- If `tflint --version` says `command not found`, `~/.local/bin` did not exist before and is not on your `PATH` yet: close the terminal, open a new one and try again (Ubuntu's `~/.profile` adds the folder when it exists).
+- `pnpm check:infra` ends with tflint's output and exits with no `FAIL:` line. What it runs is in [Scripts](scripts.md).
+- Signing in to AWS is not part of this guide: it needs the account set up first, and the [runbook](../operations/demo-environment.md) covers both. Do not run `aws configure` or create access keys.
+
+## 9. Check that everything works
 
 ```bash
 pnpm lint
@@ -137,7 +179,7 @@ timeout 3 bash -c 'echo > /dev/tcp/127.0.0.1/3100'
 
 `Connection refused` is healthy. If it waits and `timeout` ends it instead, this is the problem. It appeared with WSL's mirrored networking mode (`networkingMode=mirrored` in `C:\Users\<you>\.wslconfig`), where a connection to a closed port on `127.0.0.1` hung for about two minutes instead of failing, so every run stalled. The fix is WSL's default mode, network address translation (NAT): remove the `networkingMode=mirrored` line from `.wslconfig` (or set `networkingMode=nat`), then run `wsl --shutdown` in PowerShell and open Ubuntu again.
 
-## 9. Run the API and the page
+## 10. Run the API and the page
 
 PostgreSQL must be running first (section 7). Then one command starts both the API and the web app's dev server (Vite):
 
@@ -200,12 +242,12 @@ pnpm image:up
 
 Open `http://localhost:8080`: the same page as `pnpm start`, served from inside the container, with the development database. It uses port 8080, so it can run next to `pnpm dev` or `pnpm start`. Stop it with Ctrl+C, and remove its containers with `pnpm image:down`, which also removes PostgreSQL's container (the data stays; `pnpm db:up` brings it back). The two scripts run `docker compose --profile app up --build` and `docker compose --profile app down`: the profile matters, since a plain `docker compose down` leaves out every service behind a profile, so it removes PostgreSQL but leaves the app running, and warns `Network szop_default Resource is still in use`. The [testing guide](testing.md#running-the-tests) explains a failed check.
 
-## 10. What the git hooks do
+## 11. What the git hooks do
 
 On every commit, a pre-commit hook formats and lints the staged files, and a commit-msg hook checks that the message follows Conventional Commits. See [husky and lint-staged](tools/husky-and-lint-staged.md) and [commitlint](tools/commitlint.md).
 
-## 11. Coming later
+## 12. Coming later
 
-- **Terraform and the AWS CLI,** in [PH-09](../roadmap.md#ph-09-aws-account-and-terraform-bootstrap).
+- **Spinning the demo up and down** with the buttons, in [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12](../roadmap.md#ph-12-first-deploy), through the [runbook](../operations/demo-environment.md).
 
 This guide grows with those phases.

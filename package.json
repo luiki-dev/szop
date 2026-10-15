@@ -24,6 +24,8 @@
     "image:up": "docker compose --profile app up --build",
     "image:down": "docker compose --profile app down",
     "check:image": "scripts/check-image.sh",
+    "check:infra": "scripts/check-infra.sh",
+    "infra:fmt": "terraform fmt -recursive infra",
     "prepare": "husky"
   },
   "devDependencies": {

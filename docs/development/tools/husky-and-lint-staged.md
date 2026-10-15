@@ -19,7 +19,8 @@ husky installs **git hooks** (see the [glossary](../../glossary.md)) from files 
 - `"*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"`: the code files. The glob lists every type ESLint lints, so a phase that adds `.tsx` files is covered without anyone remembering to extend it.
 - `"eslint --fix --max-warnings=0 --no-warn-ignored"`: applies the fixes ESLint can make itself, then fails on any remaining finding, warnings included, so nothing is merely tolerated. `--no-warn-ignored` is there because ESLint would otherwise warn about a staged file its config ignores, such as one under `docs/`, and `--max-warnings=0` would turn that warning into a failed commit. See [ESLint](eslint.md).
 - `"prettier --write"`: formats the same files. It runs after ESLint so the final layout is Prettier's. See [Prettier](prettier.md).
-- `"!(*.{ts,tsx,mts,cts,js,jsx,mjs,cjs})"`: every other staged file.
+- `"*.tf"` and `"terraform fmt"`: the Terraform files, formatted by the formatter Terraform ships with, which needs Terraform installed ([setup guide](../setup.md#8-terraform-tflint-and-the-aws-cli)). See [Terraform](terraform.md).
+- `"!(*.{ts,tsx,mts,cts,js,jsx,mjs,cjs})"`: every other staged file. `.tf` files match it too; Prettier skips them through `--ignore-unknown`.
 - `"prettier --write --ignore-unknown"`: formats whatever Prettier knows (JSON, YAML, CSS and so on), honours `.prettierignore` (so Markdown is left alone) and skips file types Prettier does not know instead of failing on them.
 
 ## Everyday use

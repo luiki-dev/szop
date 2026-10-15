@@ -17,11 +17,11 @@ Szop is built in phases, grouped into stages. The road below shows how far along
                                                                            ║
                               Stage 2 · Walking skeleton, running locally  ║
                      PH-08   PH-07   PH-06b  PH-06a  PH-05   PH-04   PH-03 ║
-  ╭────────────────────●═══════●═══════●═══════●═══════●═══════●═══════●═══╝
-  │
-  │ Stage 3 · Walking skeleton, deployed and released
-  │  PH-09   PH-10   PH-11   PH-12   PH-13
-  ╰────○───────○───────○───────○───────○───────────────────────────────────╮
+  ╔════════════════════●═══════●═══════●═══════●═══════●═══════●═══════●═══╝
+  ║
+  ║ Stage 3 · Walking skeleton, deployed and released
+  ║  PH-09   PH-10   PH-11   PH-12   PH-13
+  ╚════●───────○───────○───────○───────○───────────────────────────────────╮
                                                                            │
                                                             Stage 4 · MVP  │
      PH-22   PH-21   PH-20   PH-19   PH-18   PH-17   PH-16   PH-15   PH-14 │
@@ -101,6 +101,7 @@ Start PostgreSQL first, with `pnpm db:up` (Docker Desktop must be running). Then
 - [Definition of done](docs/development/definition-of-done.md) — what every PR must meet before it is merged
 - [GitHub settings](docs/development/github-settings.md) — the repository settings behind the workflow
 - [Setup guide](docs/development/setup.md) — from a clean Windows machine to passing checks
+- [Demo environment runbook](docs/operations/demo-environment.md) — setting up the AWS account and running Szop's infrastructure, step by step
 - [Scripts](docs/development/scripts.md) — every `pnpm` script, what it runs and when
 - [Tool pages](docs/development/tools/) — each development tool, why it was chosen and its configuration explained
 - [Decisions](docs/decisions/) — records of the decisions behind the project and why they were made
