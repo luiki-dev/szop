@@ -655,7 +655,7 @@ git commit -m "feat(infra): add the SES identity with DKIM, DMARC and SPF to bas
 - Consumes: the resource count of Tasks 3 to 6: 1 to import (the zone) and 12 to add (repository, lifecycle policy, log group, parameter, CAA, MX, identity, 3 DKIM records, DMARC, apex TXT).
 - Produces: the heading `## Applying base` (anchor `#applying-base`).
 
-- [ ] **Step 1: Add "Applying base" after "Buying the domain"**
+- [x] **Step 1: Add "Applying base" after "Buying the domain"**
 
 ```markdown
 ## Applying base
@@ -724,7 +724,7 @@ In `secrets.tf`, raise `value_wo_version` by one, commit it on a branch, and app
 - remove `prevent_destroy` from the zone, or run `terraform destroy` here, unless Szop is shut down for good, after `infra/demo` is destroyed.
 ```
 
-- [ ] **Step 2: Update Contents and "Coming later"**
+- [x] **Step 2: Update Contents and "Coming later"**
 
 In `## Contents`, after `- [Buying the domain](#buying-the-domain)`:
 
@@ -737,7 +737,7 @@ In `## Contents`, after `- [Buying the domain](#buying-the-domain)`:
 
 In "Coming later", delete the "Applying `infra/base`" bullet. In the module table, the `infra/base` row already links both chapters (Task 1).
 
-- [ ] **Step 3: The Terraform page**
+- [x] **Step 3: The Terraform page**
 
 In `docs/development/tools/terraform.md`:
 
@@ -767,12 +767,12 @@ In `docs/development/tools/terraform.md`:
 - In `## Contents`, add the two new `###` headings under "Configuration".
 - In "Updating", in the AWS provider's commands, add a line for base after bootstrap's: `terraform -chdir=infra/base init -upgrade` and `terraform -chdir=infra/base providers lock -platform=linux_amd64`, and change "The AWS provider" to "The providers (AWS, and random in base)".
 
-- [ ] **Step 4: Check formatting**
+- [x] **Step 4: Check formatting**
 
 Run: `pnpm exec prettier --check docs/operations/demo-environment.md docs/development/tools/terraform.md`
 Expected: all files pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/operations/demo-environment.md docs/development/tools/terraform.md

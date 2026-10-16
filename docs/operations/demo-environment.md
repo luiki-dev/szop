@@ -26,6 +26,10 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [Part 2: moving the state into the bucket](#part-2-moving-the-state-into-the-bucket)
 - [Destroying bootstrap](#destroying-bootstrap)
 - [Buying the domain](#buying-the-domain)
+- [Applying base](#applying-base)
+  - [The first apply](#the-first-apply)
+  - [Checks](#checks)
+  - [Rotating the Better Auth secret](#rotating-the-better-auth-secret)
 - [Coming later](#coming-later)
 
 ## One-time account setup
@@ -267,8 +271,72 @@ The domains API exists only in `us-east-1`, hence `--region`.
 - add records to the zone by hand: `infra/base` owns its records, and a hand-made one makes Terraform fail with "already exists";
 - turn auto-renew off.
 
+## Applying base
+
+`infra/base` holds what outlives every demo: the domain's zone with its CAA, MX and mail records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
+
+### The first apply
+
+```bash
+export AWS_PROFILE=szop
+aws sso login
+cd ~/workspace/szop/infra/base
+cp terraform.tfvars.example terraform.tfvars   # the first time only
+```
+
+Edit `terraform.tfvars`: your 12-digit account ID, in quotes. git ignores the file.
+
+```bash
+terraform init                  # "Terraform has been successfully initialized!"
+terraform plan -input=false     # read it: "Plan: 1 to import, 12 to add, 1 to change, 0 to destroy."
+terraform apply                 # the same plan; type yes
+```
+
+The zone is the one to **import** and to update in place: Terraform adopts the zone the purchase created, and its name servers stay as they are. The update only adds the tags `project` and `group` (the default tags every resource gets, so Cost Explorer can group base's cost) and records `force_destroy = false` (Terraform's own setting, nothing on AWS). The twelve to add are the registry and its lifecycle policy, the log group, the secret, the CAA and MX records, the SES identity, its three DKIM records, and the DMARC and SPF records. The secret's value appears nowhere in the plan: it is generated during `apply`, sent to AWS and forgotten.
+
+⚠️ **Stop** if the plan shows the zone as `+ create` or `-/+` (replace), or if its `~ update` changes anything besides `tags_all` and `force_destroy`, for example `comment` or `name`: the import did not match. Compare the zone ID and comment in `dns.tf` with [Buying the domain](#buying-the-domain)'s command.
+
+### Checks
+
+```bash
+terraform plan                  # "No changes. Your infrastructure matches the configuration."
+terraform plan -destroy         # must end with an error: "Instance cannot be destroyed" (the zone)
+
+dig +short NS dzwoniec.com      # the four ns-….awsdns-… names of the registration
+dig +short CAA dzwoniec.com     # 0 issue "amazon.com"
+dig +short MX dzwoniec.com      # 0 .
+dig +short TXT dzwoniec.com     # "v=spf1 -all"
+dig +short TXT _dmarc.dzwoniec.com   # "v=DMARC1; p=reject"
+
+aws sesv2 get-email-identity --email-identity dzwoniec.com \
+  --query '[VerifiedForSendingStatus,DkimAttributes.Status]'
+#   [true, "SUCCESS"]; minutes to an hour after the apply, while the DKIM records spread
+
+aws resourcegroupstaggingapi get-resources --tag-filters Key=group,Values=base \
+  --query 'ResourceTagMappingList[].ResourceARN'
+#   the zone, the repository, the log group, the parameter and the SES identity
+```
+
+**The secret is not in the state.** Once, after the first apply, and after every rotation:
+
+```bash
+secret=$(aws ssm get-parameter --name /szop/better-auth-secret --with-decryption \
+  --query Parameter.Value --output text)
+terraform state pull | grep -c -- "$secret"   # must print 0
+unset secret
+```
+
+### Rotating the Better Auth secret
+
+In `secrets.tf`, raise `value_wo_version` by one, commit it on a branch, and apply as above: the plan shows one change, `~ value_wo_version`. Terraform generates a new password and overwrites the parameter. A running demo keeps the old value until its task restarts; the new value signs everyone out, which a demo can afford. Then repeat the state check.
+
+⚠️ **Don't:**
+
+- set the parameter's value by hand: the next rotation overwrites it, and the code no longer says where it came from;
+- add a `value` argument to the parameter "to see it": it would write the secret into the state;
+- remove `prevent_destroy` from the zone, or run `terraform destroy` here, unless Szop is shut down for good, after `infra/demo` is destroyed.
+
 ## Coming later
 
-- **Applying `infra/base`**: the zone, the email identity, the registry, the secret and the log group ([PH-10](../roadmap.md#ph-10-domain-and-base-infrastructure)).
 - **Spinning the demo up and down** with the `demo-up` and `demo-down` buttons, and the nightly teardown ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy)).
 - **Debugging** a running demo with ECS Exec and its logs, and **what it costs** ([PH-12](../roadmap.md#ph-12-first-deploy)).

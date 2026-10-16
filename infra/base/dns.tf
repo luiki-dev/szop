@@ -11,7 +11,7 @@ import {
 # Never destroyed: a new zone gets new name servers, and the whole domain
 # stops resolving until the registration points at them. The zone's own NS
 # and SOA records are AWS's and stay outside Terraform. The comment is the
-# registrar's, kept so the import changes nothing.
+# registrar's, kept so the import does not rewrite it.
 resource "aws_route53_zone" "main" {
   name    = local.domain
   comment = "HostedZone created by Route53 Registrar"
