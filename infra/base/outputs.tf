@@ -17,3 +17,13 @@ output "better_auth_secret_arn" {
   description = "The ARN of the Better Auth secret, for the task definition's secrets and the task execution role."
   value       = aws_ssm_parameter.better_auth_secret.arn
 }
+
+output "zone_id" {
+  description = "The hosted zone of dzwoniec.com; infra/demo writes the szop record and the certificate's validation record into it."
+  value       = aws_route53_zone.main.zone_id
+}
+
+output "domain_name" {
+  description = "The domain."
+  value       = local.domain
+}

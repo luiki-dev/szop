@@ -463,7 +463,7 @@ git commit -m "feat(infra): add the Better Auth secret, written write-only"
 - Consumes: `local.domain`.
 - Produces: `aws_route53_zone.main` (Task 6 writes records into `aws_route53_zone.main.zone_id`); outputs `zone_id`, `domain_name`.
 
-- [ ] **Step 1: Get the zone ID and comment**
+- [x] **Step 1: Get the zone ID and comment**
 
 From the owner, or, with the owner's go-ahead and a current `aws sso login`, by running Task 1's command:
 
@@ -474,7 +474,7 @@ AWS_PROFILE=szop aws route53 list-hosted-zones-by-name --dns-name dzwoniec.com \
 
 Write down the ID without `/hostedzone/`, and the comment exactly.
 
-- [ ] **Step 2: `dns.tf`**
+- [x] **Step 2: `dns.tf`**
 
 Replace `<ZONE_ID>` with the ID from Step 1, and the `comment` with the exact comment if it differs from the one below.
 
@@ -525,11 +525,11 @@ resource "aws_route53_record" "null_mx" {
 }
 ```
 
-- [ ] **Step 3: Check the CAA value**
+- [x] **Step 3: Check the CAA value**
 
 Open AWS's ACM documentation, "(Optional) Configure a CAA record". Confirm that `amazon.com` alone lets ACM issue (AWS lists `amazon.com`, `amazontrust.com`, `awstrust.com` and `amazonaws.com` as equivalent). If the page requires more than one, add them to `records`, one string each.
 
-- [ ] **Step 4: Add the outputs to `outputs.tf`**
+- [x] **Step 4: Add the outputs to `outputs.tf`**
 
 ```hcl
 output "zone_id" {
@@ -543,12 +543,12 @@ output "domain_name" {
 }
 ```
 
-- [ ] **Step 5: Run the infra check**
+- [x] **Step 5: Run the infra check**
 
 Run: `pnpm check:infra`
 Expected: validate succeeds; tflint has no findings.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add infra/base
