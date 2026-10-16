@@ -5,7 +5,7 @@ How to set up, run and take down Szop's environment on AWS, step by step. Szop r
 | Module | Holds | Applied | Chapter |
 |---|---|---|---|
 | `infra/bootstrap` | The state bucket every module keeps its state in, and the budget alerts | Once, from the owner's machine | [Applying bootstrap](#applying-bootstrap) |
-| `infra/base` | Permanent resources: DNS zone, certificate, image registry, secrets, log group | From the owner's machine, when it changes | Coming in PH-10 |
+| `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group | From the owner's machine, when it changes | [Buying the domain](#buying-the-domain), [Applying base](#applying-base) |
 | `infra/demo` | One demo session: network, load balancer, containers, database | By CI's buttons, and destroyed every night | Coming in PH-11 and PH-12 |
 
 Why each piece exists is in the [stack overview](../architecture/stack-overview.md#12-where-szop-runs); how Terraform works here is on the [Terraform page](../development/tools/terraform.md). The tools come from [setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli).
@@ -25,6 +25,7 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [Part 1: the first apply, with local state](#part-1-the-first-apply-with-local-state)
   - [Part 2: moving the state into the bucket](#part-2-moving-the-state-into-the-bucket)
 - [Destroying bootstrap](#destroying-bootstrap)
+- [Buying the domain](#buying-the-domain)
 - [Coming later](#coming-later)
 
 ## One-time account setup
@@ -216,8 +217,58 @@ Only when Szop is shut down for good, and only **after `infra/demo` and `infra/b
 
 The changes of steps 1 and 2 stay on your machine; they are not committed.
 
+## Buying the domain
+
+Szop's domain is `dzwoniec.com`, registered through Route 53, AWS's DNS service and domain registrar; the app lives at `szop.dzwoniec.com` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decisions 1 and 2). Buying it is done once, by hand: Terraform can only manage what exists.
+
+**Before you click:**
+
+- **It is paid at once, by card, and not refundable.** A `.com` costs about $15 a year. AWS promotional credits do not cover domain registrations.
+- **The budget alert fires this month.** `szop-monthly` alerts when the actual cost passes $10, and it ignores credits, so the registration triggers the email. That is expected, not a forgotten demo.
+- Sign in to the console through the access portal, not as root.
+
+**Register it:**
+
+1. *Route 53 → Domains → Registered domains → Register domains.* Search for `dzwoniec.com`, *Select*, *Proceed to checkout*.
+2. **Duration:** 1 year. **Auto-renew: on.** Without it, the domain lapses after a year and anyone can buy it.
+3. **Contacts:** your real name, address, phone and email, the same for the registrant, administrative and technical contacts. ICANN (the body that runs domain names) requires them to be accurate.
+4. **Privacy protection: on** for every contact (the default): WHOIS, the public lookup of domain owners, then shows the registrar's details instead of yours.
+5. Review, accept the terms, *Submit*. *Route 53 → Domains → Requests* shows the progress; registration takes minutes, sometimes hours.
+
+**Right after:**
+
+1. **Confirm the registrant email.** ICANN's rules make the registrar send a verification link to the registrant address. **If it is not clicked within 15 days, the domain is suspended**: it stops resolving until it is.
+2. **Transfer lock.** *Registered domains → `dzwoniec.com`*: *Transfer lock* is **On**. It stops the domain being moved to another registrar without you.
+3. **The hosted zone.** Registration creates a **hosted zone** for `dzwoniec.com` on its own: the container of the domain's DNS records, served by four AWS name servers, which the registration points at. Read its ID:
+
+   ```bash
+   aws route53 list-hosted-zones-by-name --dns-name dzwoniec.com \
+     --query 'HostedZones[0].[Id,Config.Comment]' --output text
+   #   /hostedzone/Z0123456789ABCDEFGHIJ   HostedZone created by Route53 Registrar
+   ```
+
+   The part after `/hostedzone/` is the zone ID. It is not secret: `infra/base` commits it in its `import` block, which hands the zone to Terraform ([Applying base](#applying-base)).
+
+**Check:**
+
+```bash
+aws route53domains get-domain-detail --region us-east-1 --domain-name dzwoniec.com \
+  --query '[AutoRenew,StatusList,Nameservers[].Name]'
+#   true, a status list with "clientTransferProhibited", and four ns-….awsdns-… names
+dig +short NS dzwoniec.com
+#   the same four names (empty for a while after registration; DNS takes time to catch up)
+```
+
+The domains API exists only in `us-east-1`, hence `--region`.
+
+⚠️ **Don't:**
+
+- delete or recreate the hosted zone: a new zone gets different name servers, and the whole domain stops resolving until the registration points at them and caches expire, up to two days;
+- add records to the zone by hand: `infra/base` owns its records, and a hand-made one makes Terraform fail with "already exists";
+- turn auto-renew off.
+
 ## Coming later
 
-- **Applying `infra/base`**: the domain, certificate, registry and secrets ([PH-10](../roadmap.md#ph-10-domain-and-base-infrastructure)).
+- **Applying `infra/base`**: the zone, the email identity, the registry, the secret and the log group ([PH-10](../roadmap.md#ph-10-domain-and-base-infrastructure)).
 - **Spinning the demo up and down** with the `demo-up` and `demo-down` buttons, and the nightly teardown ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy)).
 - **Debugging** a running demo with ECS Exec and its logs, and **what it costs** ([PH-12](../roadmap.md#ph-12-first-deploy)).

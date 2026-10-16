@@ -69,7 +69,7 @@ The owner needs it first: the zone ID it produces unblocks Task 5.
 **Interfaces:**
 - Produces: the heading `## Buying the domain` (anchor `#buying-the-domain`), which Task 7's "Applying base" and Task 8's roadmap entry link to; the zone ID, read by the owner, which Task 5 needs.
 
-- [ ] **Step 1: Update the module table's `infra/base` row (line 8)**
+- [x] **Step 1: Update the module table's `infra/base` row (line 8)**
 
 Replace the row with:
 
@@ -79,7 +79,7 @@ Replace the row with:
 
 (The "Applying base" link resolves once Task 7 adds the chapter.)
 
-- [ ] **Step 2: Add the chapter after "Destroying bootstrap" and before "Coming later"**
+- [x] **Step 2: Add the chapter after "Destroying bootstrap" and before "Coming later"**
 
 ```markdown
 ## Buying the domain
@@ -133,7 +133,7 @@ The domains API exists only in `us-east-1`, hence `--region`.
 - turn auto-renew off.
 ```
 
-- [ ] **Step 3: Update Contents and "Coming later"**
+- [x] **Step 3: Update Contents and "Coming later"**
 
 In `## Contents`, add `- [Buying the domain](#buying-the-domain)` after the "Destroying bootstrap" line. In "Coming later", replace the first bullet with:
 
@@ -141,12 +141,12 @@ In `## Contents`, add `- [Buying the domain](#buying-the-domain)` after the "Des
 - **Applying `infra/base`**: the zone, the email identity, the registry, the secret and the log group ([PH-10](../roadmap.md#ph-10-domain-and-base-infrastructure)).
 ```
 
-- [ ] **Step 4: Check formatting**
+- [x] **Step 4: Check formatting**
 
 Run: `pnpm exec prettier --check docs/operations/demo-environment.md`
 Expected: `All matched files use Prettier code style!`
 
-- [ ] **Step 5: Commit, push and hand over**
+- [x] **Step 5: Commit, push and hand over**
 
 ```bash
 git add docs/operations/demo-environment.md
