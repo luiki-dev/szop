@@ -287,7 +287,7 @@ git commit -m "feat(infra): add the skeleton of infra/base"
 - Consumes: the providers of Task 2.
 - Produces: `aws_ecr_repository.app`, `aws_cloudwatch_log_group.app`; outputs `ecr_repository_url`, `log_group_name`.
 
-- [ ] **Step 1: `registry.tf`**
+- [x] **Step 1: `registry.tf`**
 
 ```hcl
 # The one image repository (ADR 0008, decisions 12 and 13; ADR 0030). Tags are
@@ -342,7 +342,7 @@ resource "aws_ecr_lifecycle_policy" "app" {
 }
 ```
 
-- [ ] **Step 2: `logs.tf`**
+- [x] **Step 2: `logs.tf`**
 
 ```hcl
 # The app's log lines (ADR 0008, decision 27). In base, so a session's logs
@@ -353,7 +353,7 @@ resource "aws_cloudwatch_log_group" "app" {
 }
 ```
 
-- [ ] **Step 3: `outputs.tf`**
+- [x] **Step 3: `outputs.tf`**
 
 ```hcl
 output "ecr_repository_url" {
@@ -367,16 +367,16 @@ output "log_group_name" {
 }
 ```
 
-- [ ] **Step 4: Check the rule-priority claim**
+- [x] **Step 4: Check the rule-priority claim**
 
 Open AWS's ECR documentation, "Lifecycle policy properties" and "How lifecycle policies work". Confirm the two rules this file's comment relies on: an image matched by a higher-priority rule is not expired by a lower one, and the `tagStatus: any` rule must have the highest `rulePriority`. If either is worded differently, correct the comment and note it for ADR 0030's "Settled while building".
 
-- [ ] **Step 5: Run the infra check**
+- [x] **Step 5: Run the infra check**
 
 Run: `pnpm check:infra`
 Expected: validate succeeds for `infra/base/`; tflint has no findings.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add infra/base
