@@ -34,7 +34,7 @@ This ADR records the brainstorm's decisions, with what was settled while buildin
 ## Consequences
 
 - [PH-12](../roadmap.md#ph-12-first-deploy) creates the certificate for `szop.dzwoniec.com` and its validation record in `infra/demo`, and its deploy role ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net)) may request and delete ACM certificates and write that record, besides the `szop` record.
-- [PH-18](../roadmap.md#ph-18-registration-and-login) chooses the sender address on `dzwoniec.com` or a subdomain, and verifies the recipients the owner tests with, since SES stays in its sandbox.
+- [PH-18](../roadmap.md#ph-18-registration-and-login) chooses the sender address on `dzwoniec.com` or a subdomain, and verifies the recipients the owner tests with, since SES stays in its sandbox. The apex publishes a null MX (decision 7's records), so the sender address goes on a subdomain (for example `szop.dzwoniec.com`; DKIM's `d=dzwoniec.com` still aligns under relaxed alignment), or PH-18 drops the apex's null MX: [RFC 7505](https://www.rfc-editor.org/rfc/rfc7505#section-4.2) lets receivers reject mail whose From domain has a null MX.
 - [PH-34](../roadmap.md#ph-34-landing-page-and-demo-status) serves a page on `dzwoniec.com` and redirects `szop.dzwoniec.com` to it while no demo runs; the CAA record then gains that page's authority if it is not Amazon's.
 - A future app on `dzwoniec.com` adds its records to the zone from its own code, finding the zone by name, and sends mail only DKIM-signed for the domain, or DMARC rejects it.
 - Costs: the zone $0.50 a month, the domain about $15 a year, a few cents for images and logs.

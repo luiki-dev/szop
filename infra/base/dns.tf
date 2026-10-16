@@ -34,7 +34,9 @@ resource "aws_route53_record" "caa" {
 }
 
 # Null MX (RFC 7505): the domain receives no mail, so senders fail at once
-# instead of retrying for days. A mailbox on the domain replaces it.
+# instead of retrying for days. A mailbox on the domain, or sending mail from
+# an address on the apex, replaces it (RFC 7505 asks senders not to use a
+# null-MX domain in From).
 resource "aws_route53_record" "null_mx" {
   zone_id = aws_route53_zone.main.zone_id
   name    = local.domain

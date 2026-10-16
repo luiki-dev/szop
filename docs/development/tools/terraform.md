@@ -116,7 +116,7 @@ terraform plan      # what would change; changes nothing
 3. `tenv tf install`, then `pnpm check:infra` and `terraform plan` in each applied module: the plan must show no changes.
 4. Commit as `build(infra): update Terraform to <version>`.
 
-**The providers (AWS, and random in base):** Dependabot proposes it weekly, updating the constraint and `.terraform.lock.hcl` together (ADR 0029, decision 13). By hand:
+**The providers (AWS, and random in base):** Dependabot proposes them weekly, updating the constraint and `.terraform.lock.hcl` together (ADR 0029, decision 13). By hand:
 
 ```bash
 export AWS_PROFILE=szop   # init reads the module's S3 backend, which needs credentials
