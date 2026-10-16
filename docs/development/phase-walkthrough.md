@@ -163,7 +163,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
           ├─ deploy job: terraform apply infra/demo   ~10–15 min (RDS)
           │                                   migrations run as the container starts
           ├─ re-enable the nightly demo-down schedule
-          └─ wait for https://demo.<domain>/api/health → summary: URL, commit, image
+          └─ wait for https://szop.dzwoniec.com/api/health → summary: URL, commit, image
 ```
 
 The approval is the owner confirming that they started this run: a deploy nobody pressed, for example from a workflow a branch added, waits there and is rejected ([ADR 0012](../decisions/0012-security-baseline.md), decision 16). The owner then checks the phase's behavior in a browser on the demo, and reviews the PR commit by commit.
@@ -316,7 +316,7 @@ The highest bump wins: a `feat` and three `fix`es since `v0.3.0` make `0.4.0`. A
 | Spec / plan | The phase branch, then `main` | `docs/superpowers/specs/YYYY-MM-DD-PH-NN-<topic>-design.md`, `docs/superpowers/plans/YYYY-MM-DD-PH-NN-<topic>.md` (the phase ID in uppercase; work outside phases leaves it out) |
 | Phase issue | GitHub Issues, on the Szop project | `PH-12 First deploy`, label `phase` |
 | Open-point issue | GitHub Issues, a sub-issue of its phase | `OP-053 Build the app-wide web baseline`, label `open-point` |
-| Demo | AWS, only during a session | `https://demo.<domain>` |
+| Demo | AWS, only during a session | `https://szop.dzwoniec.com` |
 
 ## What runs on which event
 

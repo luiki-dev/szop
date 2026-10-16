@@ -791,7 +791,7 @@ git commit -m "docs: add applying base to the runbook and the Terraform page"
 - Consumes: the spec's decisions table; anything Tasks 3, 5 and 6 settled while building.
 - Produces: ADR 0030 with decisions numbered as in the spec (1 to 13), which Tasks 1, 2, 4, 5, 6 and 7 already link by number.
 
-- [ ] **Step 1: ADR 0030**
+- [x] **Step 1: ADR 0030**
 
 Write `docs/decisions/0030-domain-and-base-infrastructure-details.md` in ADR 0029's shape:
 
@@ -816,7 +816,7 @@ Write `docs/decisions/0030-domain-and-base-infrastructure-details.md` in ADR 002
 - A future app on `dzwoniec.com` adds its records to the zone from its own code, finding the zone by name, and sends mail only DKIM-signed for the domain, or DMARC rejects it.
 - Costs: the zone $0.50 a month, the domain about $15 a year, a few cents for images and logs.
 
-- [ ] **Step 2: Notes in ADRs 0008 and 0010**
+- [x] **Step 2: Notes in ADRs 0008 and 0010**
 
 ADR 0008's status line: append "; decisions 6, 12 and 17 refined and decisions 22, 24 and 27 completed by [ADR 0030](0030-domain-and-base-infrastructure-details.md) (the domain `dzwoniec.com` with the app at `szop.dzwoniec.com`, the certificate created per session in `infra/demo`, the registry's lifecycle, write-only secrets, SES at the apex with DMARC and SPF, the log group)". At the bottom of each decision's cell:
 
@@ -829,7 +829,7 @@ ADR 0008's status line: append "; decisions 6, 12 and 17 refined and decisions 2
 
 ADR 0010's status line: append "; decisions 11 and 16 refined by [ADR 0030](0030-domain-and-base-infrastructure-details.md) (the app at `szop.dzwoniec.com`; the certificate created per session)". Cells 11 and 16: `<br>✏️ **Refined by [ADR 0030](0030-domain-and-base-infrastructure-details.md), decisions 1 and 5:** the app's name is \`szop.dzwoniec.com\`; the certificate and its validation record are created per session in \`infra/demo\`, so the deploy role manages them.` (cell 11 with decision 1 only and its first clause only).
 
-- [ ] **Step 3: The living docs**
+- [x] **Step 3: The living docs**
 
 - `architecture.md`, section 5: the diagram's line becomes `HTTPS  szop.dzwoniec.com  (Route 53 DNS, ACM certificate per session)`; the "Email" bullet: "through SES, with `dzwoniec.com` as its identity (DKIM-signed; DMARC `p=reject` and SPF `-all` refuse forgeries), in its sandbox, which delivers only to verified addresses"; the "Infrastructure as code" bullet's `base` list: "image registry, DNS zone (imported from the registration, never destroyed), email identity, the Better Auth secret, log group, …", and `demo`'s: "network, load balancer, the certificate, ECS, RDS".
 - `stack-overview.md`, section 12: in "Infrastructure as code and Terraform", base's list without "certificate"; the Route 53 and ACM row: Szop's use "The domain `dzwoniec.com` and its zone; `szop.dzwoniec.com` pointing at the load balancer, with a certificate created for each session (ACM renews only certificates in use)"; the SES row: "Verification and password-reset emails, signed with DKIM for `dzwoniec.com`"; steps 2 and 4 of "A demo session" use `szop.dzwoniec.com`, and step 2 adds "requests its certificate". Add a `### Domains, DNS and email authentication` subsection before "The pieces, from the network inwards", explaining in plain words: registry, registrar and name servers; the hosted zone and why recreating it breaks the domain; record types A/alias, CNAME, TXT, MX, CAA; DKIM, SPF and DMARC and how they work together (SES's envelope sender, alignment, `p=reject`); null MX. Add it to Contents.
@@ -837,7 +837,7 @@ ADR 0010's status line: append "; decisions 11 and 16 refined by [ADR 0030](0030
 - `phase-walkthrough.md`, lines 166 and 319: `demo.<domain>` → `szop.dzwoniec.com`.
 - `glossary.md`, Acronyms: add **CAA** (Certification Authority Authorization: a DNS record naming the certificate authorities allowed to issue certificates for a domain; Szop's allows only Amazon), **ICANN** (Internet Corporation for Assigned Names and Numbers: the body that runs the domain name system's registries and accredits registrars), **MX** (Mail Exchanger: the DNS record naming the servers that receive a domain's mail; Szop's is a null MX, `0 .`, saying it receives none). Change DNS's example from `demo.example.com` to `szop.dzwoniec.com`. In the terms section (or Acronyms, whichever holds non-acronyms), add **hosted zone** and **WHOIS** if the glossary lists terms; check the file's sections first and follow them.
 
-- [ ] **Step 4: The roadmap and the README**
+- [x] **Step 4: The roadmap and the README**
 
 In `docs/roadmap.md`:
 
@@ -879,7 +879,7 @@ In `README.md`'s diagram, Stage 3's two lines become (the road keeps its width, 
 
 Check with `awk '{ print length }'` that both road lines of Stage 3 and Stage 4's are the same length as before.
 
-- [ ] **Step 5: GitHub**
+- [x] **Step 5: GitHub**
 
 ```bash
 R=luiki-dev/szop
@@ -899,12 +899,12 @@ Then:
 
 Record every change made here; the PR description lists them.
 
-- [ ] **Step 6: Check links, formatting and the infra check**
+- [x] **Step 6: Check links, formatting and the infra check**
 
 Run: `pnpm exec prettier --check docs README.md && pnpm check:infra && grep -rn "demo\.<domain>" docs README.md | grep -v -e superpowers -e archive -e audits -e "0008-hosting\|0010-ci-cd"`
 Expected: Prettier passes, the infra check passes, and the grep prints nothing (accepted ADRs keep their wording; their notes carry the change).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add docs README.md

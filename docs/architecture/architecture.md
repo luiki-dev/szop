@@ -282,7 +282,7 @@ Szop runs on AWS as an **on-demand demo environment**: created for a session, de
 
 ```
  Internet
-    │ HTTPS  demo.<domain>  (Route 53 DNS, ACM certificate)
+    │ HTTPS  szop.dzwoniec.com  (Route 53 DNS, ACM certificate per session)
     ▼
 ┌─ VPC, eu-central-1, two availability zones ──────────────────────────┐
 │  public subnets                                                      │
@@ -309,6 +309,6 @@ In the diagram, the VPC (virtual private cloud) is the demo's own private networ
 - **Migrations** run when the container starts, before it accepts requests. **`GET /api/health`** checks the database connection and is used by the load balancer's health check. It answers 200 with the latest migration's name, or 503 when the database cannot be reached.
 - **Security groups** chain the layers: the load balancer accepts traffic from anyone, the task only from the load balancer, the database only from the task. The database has no route to the internet.
 - **Secrets** (the Better Auth secret in Parameter Store, the RDS-managed database password in Secrets Manager) are injected by ECS as environment variables. Their values are never in git, the image, the task definition or Terraform state.
-- **Email** goes through SES in its sandbox, which delivers only to verified addresses.
-- **Infrastructure as code:** Terraform, in three root modules under `infra/`: `bootstrap` (state bucket, budget alerts), `base` (permanent: image registry, DNS zone, certificate, email identity, the Better Auth secret, log group, the app's IAM roles, and the GitHub OIDC provider with CI's roles) and `demo` (created per session: network, load balancer, ECS, RDS). Images carry the commit hash and, when built from a version tag, the version.
+- **Email** goes through SES, with `dzwoniec.com` as its identity (DKIM-signed; DMARC `p=reject` and SPF `-all` refuse forgeries), in its sandbox, which delivers only to verified addresses.
+- **Infrastructure as code:** Terraform, in three root modules under `infra/`: `bootstrap` (state bucket, budget alerts), `base` (permanent: image registry, DNS zone (imported from the registration, never destroyed), email identity, the Better Auth secret, log group, the app's IAM roles, and the GitHub OIDC provider with CI's roles) and `demo` (created per session: network, load balancer, the certificate, ECS, RDS). Images carry the commit hash and, when built from a version tag, the version.
 - **Deployments are push-button:** GitHub Actions workflows build the image when it is missing, apply `infra/demo`, and destroy it on request and every night. CI reaches AWS through OpenID Connect (OIDC), with no stored keys. See [ADR 0010](../decisions/0010-ci-cd.md).

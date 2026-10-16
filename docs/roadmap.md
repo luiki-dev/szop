@@ -22,6 +22,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net)
   - [PH-12 First deploy](#ph-12-first-deploy)
   - [PH-13 Releases](#ph-13-releases)
+  - [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status)
 - [Stage 4: MVP](#stage-4-mvp)
   - [PH-14 App shell and design system](#ph-14-app-shell-and-design-system)
   - [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only)
@@ -171,7 +172,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ## Stage 3: Walking skeleton, deployed and released
 
-**Exit:** one button creates a demo of any commit at `demo.<domain>`, a nightly run destroys it, and `v0.1.0` is released.
+**Exit:** one button creates a demo of any commit at `szop.dzwoniec.com`, a nightly run destroys it, `dzwoniec.com` shows whether it is up, and `v0.1.0` is released.
 
 | Phase | Status | Spec | Plan | PR | Issue |
 |---|---|---|---|---|---|
@@ -180,6 +181,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | ⬜ Not started | — | — | — | [#40](https://github.com/luiki-dev/szop/issues/40) |
 | [PH-12 First deploy](#ph-12-first-deploy) | ⬜ Not started | — | — | — | [#41](https://github.com/luiki-dev/szop/issues/41) |
 | [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
+| [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status) | ⬜ Not started | — | — | — | [#205](https://github.com/luiki-dev/szop/issues/205) |
 
 ### PH-09 AWS account and Terraform bootstrap
 
@@ -192,10 +194,10 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ### PH-10 Domain and base infrastructure
 
-- **Goal:** Szop's domain resolves through Route 53, its certificate is issued, and Amazon Simple Email Service (SES) has verified it and tells receivers to reject mail forged in its name. The image registry, the Better Auth secret and the log group are ready for the first deploy.
-- **Delivers:** the permanent part of `infra/base` ([ADR 0008](decisions/0008-hosting.md)): the DNS zone, the certificate from AWS Certificate Manager (ACM), the SES identity with the records that let receiving servers check its mail and refuse forgeries (DKIM, DMARC and SPF), the Elastic Container Registry (ECR) with lifecycle rules that keep released images, the Better Auth secret (its value created outside Terraform) and the log group.
+- **Goal:** Szop's domain `dzwoniec.com` resolves through Route 53, only Amazon may issue certificates for it, and Amazon Simple Email Service (SES) has verified it and tells receivers to reject mail forged in its name. The image registry, the Better Auth secret and the log group are ready for the first deploy.
+- **Delivers:** the permanent part of `infra/base` ([ADR 0008](decisions/0008-hosting.md); [ADR 0030](decisions/0030-domain-and-base-infrastructure-details.md)): the DNS zone, imported from the registration, with a Certification Authority Authorization (CAA) record and a null MX; the SES identity with the records that let receiving servers check its mail and refuse forgeries (DKIM, DMARC and SPF); the Elastic Container Registry (ECR) with lifecycle rules that keep released images; the Better Auth secret, written through a write-only argument so its value never enters Terraform state; the log group; the runbook's chapters on buying the domain and applying base.
 - **Depends on:** —
-- **Owner steps:** choose the name and buy the domain; create the Better Auth secret with one AWS CLI command; apply `infra/base` from the branch, and again from `main` after the merge.
+- **Owner steps:** buy `dzwoniec.com` in Route 53 and confirm its registrant email, following the runbook; apply `infra/base` from the branch and run its checks, and again from `main` after the merge.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#39](https://github.com/luiki-dev/szop/issues/39).
 
@@ -210,8 +212,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ### PH-12 First deploy
 
-- **Goal:** pressing `demo-up` on a branch builds that commit's image and serves the walking skeleton at `demo.<domain>`. Redeploys are safe for the single instance, and `demo-down` removes everything again.
-- **Delivers:** `infra/demo` with the network, the load balancer, the service on Elastic Container Service (ECS), RDS and the `demo` DNS record ([ADR 0008](decisions/0008-hosting.md)); the app's task execution role and task role in `infra/base`; the real `demo-up.yml` in the `demo` environment ([ADR 0010](decisions/0010-ci-cd.md), decision 11; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7); safe redeploys and migration checks at startup; the TLS connection to RDS; the runbook's sections on spinning up, tearing down and debugging.
+- **Goal:** pressing `demo-up` on a branch builds that commit's image and serves the walking skeleton at `szop.dzwoniec.com`. Redeploys are safe for the single instance, and `demo-down` removes everything again.
+- **Delivers:** `infra/demo` with the network, the load balancer, the service on Elastic Container Service (ECS), RDS, the certificate for `szop.dzwoniec.com` with its validation record ([ADR 0030](decisions/0030-domain-and-base-infrastructure-details.md), decision 5) and the `szop` DNS record ([ADR 0008](decisions/0008-hosting.md)); the app's task execution role and task role in `infra/base`; the real `demo-up.yml` in the `demo` environment ([ADR 0010](decisions/0010-ci-cd.md), decision 11; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7); safe redeploys and migration checks at startup; the TLS connection to RDS; the runbook's sections on spinning up, tearing down and debugging.
 - **Depends on:** PH-11 merged, and its first `demo-down` run seen succeeding.
 - **Owner steps:** create the `demo` environment with the owner as required reviewer and "prevent self-review" off; press `demo-up` on the branch, check the demo (including that the log shows the owner's real IP address, and a Lighthouse run), then press `demo-down`.
 - **Expected path:** full.
@@ -225,6 +227,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** run that trial; create the `release` environment; create the `szop-release` GitHub App, install it on the repository, store its private key in the `release` environment and put the App on the `version-tags` ruleset's bypass list; store the release role's ARN as a GitHub variable; merge the first release PR.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#42](https://github.com/luiki-dev/szop/issues/42).
+
+### PH-34 Landing page and demo status
+
+- **Goal:** `dzwoniec.com` always serves a static page that shows whether Szop's demo is up, with a link to it when it is. While no demo runs, `szop.dzwoniec.com` redirects to the page instead of failing.
+- **Delivers:** the static page and its hosting; `szop.dzwoniec.com` redirecting to it while the demo is down, which changes how `demo-down` treats the `szop` record; the status check on the page ([ADR 0030](decisions/0030-domain-and-base-infrastructure-details.md), decision 13).
+- **Depends on:** PH-12.
+- **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge, if the phase changes it.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#205](https://github.com/luiki-dev/szop/issues/205).
 
 ## Stage 4: MVP
 

@@ -18,6 +18,7 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
 - [12. Where Szop runs](#12-where-szop-runs)
   - [Infrastructure as code and Terraform](#infrastructure-as-code-and-terraform)
   - [The AWS account](#the-aws-account)
+  - [Domains, DNS and email authentication](#domains-dns-and-email-authentication)
   - [The pieces, from the network inwards](#the-pieces-from-the-network-inwards)
   - [A demo session, step by step](#a-demo-session-step-by-step)
 - [13. Web security in the browser](#13-web-security-in-the-browser)
@@ -198,7 +199,7 @@ Szop runs on **AWS** (Amazon Web Services), but not all the time: it is a **demo
 - The **backend** is where a module's state lives; Szop's point at one bucket, one key per module. A **state lock** stops two runs from writing the same state at once: before a run, Terraform creates a small `.tflock` file next to the state, and a second run finds it and stops. (The **provider lock file**, `.terraform.lock.hcl`, is something else: it pins the provider's exact version, like `pnpm-lock.yaml`.)
 - A **provider** is the plugin that talks to one platform's API (here the AWS provider). A **root module** is one folder of configuration applied on its own, with its own state.
 
-Szop's configuration is split into three root modules by how long their resources live: **bootstrap** (created once: the state bucket and budget alerts), **base** (permanent and cheap: image registry, domain, certificate, email identity, the Better Auth secret, logs, IAM roles) and **demo** (created for a session and destroyed after it: network, load balancer, container, database with its RDS-managed password). Destroying the demo can never touch the other two.
+Szop's configuration is split into three root modules by how long their resources live: **bootstrap** (created once: the state bucket and budget alerts), **base** (permanent and cheap: image registry, domain, email identity, the Better Auth secret, logs, IAM roles) and **demo** (created for a session and destroyed after it: network, load balancer, container, database with its RDS-managed password). Destroying the demo can never touch the other two.
 
 Bootstrap has a chicken-and-egg problem: it creates the bucket that states live in, so its own first apply keeps the state in a local file, which then moves into the bucket ([ADR 0029](../decisions/0029-aws-account-and-terraform-bootstrap-details.md)). The commands are in the [runbook](../operations/demo-environment.md#applying-bootstrap) and the tool on the [Terraform page](../development/tools/terraform.md).
 
@@ -212,6 +213,20 @@ An **AWS account** is the container every resource, permission and bill belongs 
 - **AWS Organizations** groups accounts under one management account. Szop has one account, but Identity Center needs an organization to hand out account access, so enabling it created one.
 - **AWS Budgets** watches the bill. Szop's budget, `szop-monthly`, emails the owner when the month's forecast passes $5 or the actual cost passes $10. It ignores credits on purpose: counted after credits, a forgotten demo would cost "$0" until the credits ran out.
 
+### Domains, DNS and email authentication
+
+A **domain name** such as `dzwoniec.com` is rented, a year at a time, from a **registrar**, which records it in the **registry** that runs its top-level domain (Verisign for `.com`; ICANN accredits both). The registration says which **name servers** answer for the domain: the servers that hold its DNS records. Route 53 is both Szop's registrar and its DNS service ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)).
+
+- **The hosted zone** is Route 53's container for one domain's records, served by four name servers that Route 53 picks when the zone is created. Buying the domain created the zone, and the registration points at its four servers. A new zone would get four other servers, and the domain would stop resolving until the registration was changed to match; that is why `infra/base` imported the existing zone instead of creating one, and why Terraform refuses to destroy it.
+- **Record types:** an **A** record maps a name to an IPv4 address, and Route 53's **alias** form of it points at an AWS resource such as a load balancer, following its changing addresses. A **CNAME** says "this name is another name", **TXT** holds free text that other systems read (SPF and DMARC live there), **MX** names the servers that receive the domain's mail, and **CAA** names the certificate authorities allowed to issue certificates for the domain. Szop's CAA allows only Amazon's, so another authority refuses even if someone passes its checks.
+- **A null MX**, `0 .`, says the domain receives no mail at all, so a sender gives up at once instead of retrying for days.
+
+Email was built without proof of who sent a message: anyone can write any address in the `From` line. Three DNS-published mechanisms let a receiving server check it:
+
+- **DKIM** (DomainKeys Identified Mail): the sender signs each message, and the receiver checks the signature against a public key published in DNS under the signing domain (`d=`). SES signs Szop's mail for `dzwoniec.com`, with its keys behind three CNAME records that point at Amazon.
+- **SPF** (Sender Policy Framework): a TXT record listing the servers allowed to send with the domain as the **envelope sender**, the hidden return address that bounces go to. SES uses its own `amazonses.com` as envelope sender, so nothing sends with `dzwoniec.com` there, and Szop's SPF record, `v=spf1 -all`, allows no one.
+- **DMARC** (Domain-based Message Authentication, Reporting and Conformance): a TXT record at `_dmarc.<domain>` telling receivers what to do with a message whose `From` domain is not backed by a passing DKIM or SPF check for the same domain (**alignment**; "relaxed" alignment lets a subdomain count as the same domain). Szop's, `p=reject`, asks receivers to refuse such messages. Szop's own mail passes through DKIM; a forgery in its name passes neither and is rejected.
+
 ### The pieces, from the network inwards
 
 | Piece | What it is | Szop's use |
@@ -220,21 +235,21 @@ An **AWS account** is the container every resource, permission and bill belongs 
 | **Virtual private cloud (VPC), subnets** | A private network in AWS, divided into **subnets**. A **public** subnet has a route to the internet (through an *internet gateway*); a **private** one does not. | The load balancer and the container sit in public subnets; the database in private ones, unreachable from the internet. |
 | **Security group** | A firewall attached to a resource, listing who may connect to it on which port. It can name another security group as the allowed source. | A chain: anyone → load balancer (443, and 80 only to redirect to HTTPS); only the load balancer → the container; only the container → the database (5432). |
 | **Application Load Balancer (ALB)** | Receives HTTPS traffic, decrypts it (TLS termination) and forwards requests to healthy targets, checking their health regularly. | Fronts the one container; redirects HTTP to HTTPS; calls `/api/health`. |
-| **Route 53, ACM** | Route 53 is AWS's DNS service (and domain registrar). AWS Certificate Manager (ACM) issues free TLS certificates for domains you control. | The domain, `demo.<domain>` pointing at the load balancer, and its certificate. |
+| **Route 53, ACM** | Route 53 is AWS's DNS service (and domain registrar). AWS Certificate Manager (ACM) issues free TLS certificates for domains you control. | The domain `dzwoniec.com` and its zone; `szop.dzwoniec.com` pointing at the load balancer, with a certificate created for each session (ACM renews only certificates in use). |
 | **Container image, ECR** | An image is the packaged app with everything it needs to run. Elastic Container Registry (ECR) stores images. | One image with the API and the built SPA, tagged with the git commit (and the version, for releases). |
 | **ECS, Fargate** | Elastic Container Service (ECS) runs containers. A **task definition** describes one (image, CPU, memory, environment); a **task** is one running copy; a **service** keeps the wanted number of tasks running and replaces failed ones. **Fargate** runs tasks without servers to manage. | One service running exactly one task. |
 | **RDS** | Relational Database Service: a managed database server. AWS installs, patches and runs PostgreSQL; you connect to it like any other. | The smallest PostgreSQL instance, empty at every spin-up. |
 | **IAM, roles** | Identity and Access Management (IAM) decides who may do what in AWS. A **role** is a set of permissions that a person or a service *assumes* temporarily, instead of holding permanent keys. | ECS's **task execution role** pulls the image and reads secrets; the app's **task role** may only send email and accept ECS Exec sessions. People log in through IAM Identity Center with short-lived credentials. |
 | **Parameter Store, Secrets Manager** | Encrypted stores for configuration values and secrets, readable only with the right IAM permissions. | The Better Auth secret; the database password, which RDS generates and keeps itself. ECS injects both as environment variables. |
-| **SES** | Simple Email Service: sends email. New accounts are in a *sandbox* that delivers only to verified addresses. | Verification and password-reset emails. |
+| **SES** | Simple Email Service: sends email. New accounts are in a *sandbox* that delivers only to verified addresses. | Verification and password-reset emails, signed with DKIM for `dzwoniec.com`. |
 | **CloudWatch** | Logs and metrics. | The app's JSON log lines, kept for 7 days. |
 
 ### A demo session, step by step
 
 1. **Build and push.** The Dockerfile builds the image; it is pushed to ECR, tagged with the commit hash. The `demo-up` workflow runs this step (if the image is missing) and the next one at the press of a button ([ADR 0010](../decisions/0010-ci-cd.md)).
-2. **Spin up.** `terraform apply` in `infra/demo` creates the network, security groups, load balancer, database and ECS service, and points `demo.<domain>` at the load balancer. This takes 10–15 minutes, mostly for the database.
+2. **Spin up.** `terraform apply` in `infra/demo` creates the network, security groups, load balancer, database and ECS service, requests its certificate, and points `szop.dzwoniec.com` at the load balancer. This takes 10–15 minutes, mostly for the database.
 3. **Start.** ECS pulls the image, reads the secrets and starts the task. The app runs its migrations, then starts serving. Once `/api/health` answers, the load balancer sends traffic to it.
-4. **Use.** The browser opens `https://demo.<domain>`: the same app as locally, with the same one-origin setup.
+4. **Use.** The browser opens `https://szop.dzwoniec.com`: the same app as locally, with the same one-origin setup.
 5. **Tear down.** `terraform destroy` removes everything created in step 2. The logs stay in CloudWatch for a week. If a session is forgotten, the nightly `demo-down` workflow destroys it ([ADR 0010](../decisions/0010-ci-cd.md)).
 
 ## 13. Web security in the browser

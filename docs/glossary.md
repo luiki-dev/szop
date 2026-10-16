@@ -13,6 +13,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **ARN** | Amazon Resource Name | The unique identifier of an AWS resource, such as `arn:aws:ssm:eu-central-1:…:parameter/…`. |
 | **AWS** | Amazon Web Services | Amazon's cloud platform, the largest hyperscaler. Szop's demo environment runs on it (see ADR 0008). |
 | **AZ** | Availability Zone | One of several separate data centers within an AWS region, with independent power and networking. |
+| **CAA** | Certification Authority Authorization | A DNS record naming the certificate authorities allowed to issue certificates for a domain. Szop's allows only Amazon (see ADR 0030). |
 | **CalVer** | Calendar Versioning | Version numbers built from the release date, such as `2026.10.0`. Considered, not used (see ADR 0009). |
 | **CDK** | Cloud Development Kit | AWS's infrastructure-as-code tool in general-purpose languages such as TypeScript. Considered, not used (see ADR 0008). |
 | **CDN** | Content Delivery Network | A network of servers around the world that serves static files close to users and can absorb or filter traffic floods in front of the application. |
@@ -28,7 +29,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **CVE** | Common Vulnerabilities and Exposures | The public catalog of known security flaws in software, each with an ID such as `CVE-2026-12345`. Image scanners such as Trivy list the CVEs in an image's packages; Szop does not scan its image yet (see ADR 0028 and OP-090). |
 | **DKIM** | DomainKeys Identified Mail | A signature on outgoing email, checked against a key published in DNS, proving the mail really comes from the domain. |
 | **DMARC** | Domain-based Message Authentication, Reporting and Conformance | A DNS record telling receiving mail servers what to do with mail that fails the SPF and DKIM checks, which stops others sending mail in the domain's name. |
-| **DNS** | Domain Name System | The internet's directory that turns names (`demo.example.com`) into addresses. |
+| **DNS** | Domain Name System | The internet's directory that turns names (`szop.dzwoniec.com`) into addresses. |
 | **DOM** | Document Object Model | The browser's tree of objects representing a page; JavaScript reads and changes the page through it. |
 | **DoS** | Denial of Service | An attack that makes a service unavailable, either by flooding it with traffic (volumetric) or by making it exhaust resources such as database space (resource exhaustion). |
 | **E2E** | End-to-end | A test that drives the real app in a real browser, through every layer (SPA → API → database), the way a user would. Szop has one E2E journey per use case (see ADR 0007). |
@@ -45,6 +46,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **HTTPS** | HTTP Secure | HTTP encrypted with TLS. |
 | **IaC** | Infrastructure as Code | Describing servers, networks and databases in files kept in git, and letting a tool create them, instead of clicking in a console. Szop uses Terraform. |
 | **IAM** | Identity and Access Management | AWS's system of users, roles and permissions deciding who may do what. |
+| **ICANN** | Internet Corporation for Assigned Names and Numbers | The body that runs the domain name system's registries and accredits registrars. |
 | **IDOR** | Insecure Direct Object Reference | A hole where a request names a record by its ID and the server does not check that the caller may use it, for example an item pointing at another user's category. Closed in Szop by resolving every ID within the workspace (see ADR 0012). |
 | **INP** | Interaction to Next Paint | A Core Web Vital: how long the page takes to visibly respond to a tap, click or key press. "Good" is at most 200 ms ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
 | **JSX** | JavaScript XML | HTML-like syntax inside JavaScript or TypeScript, used to write React components. It has been used in `apps/web` since [PH-05](roadmap.md#ph-05-spa-skeleton). |
@@ -55,6 +57,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **MFA** | Multi-Factor Authentication | Logging in with a second proof besides the password, such as a code from an authenticator app. |
 | **MSW** | Mock Service Worker | A library that intercepts the app's HTTP requests at the network level and answers them with fake responses. Szop's component tests use it, so the real API client runs unchanged. |
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
+| **MX** | Mail Exchanger | The DNS record naming the servers that receive a domain's mail. Szop's is a null MX, `0 .`, saying it receives none (see ADR 0030). |
 | **NAT** | Network Address Translation | In AWS: a NAT gateway lets resources in a private subnet reach the internet. Costs about $32 a month on AWS; not used (see ADR 0008). In WSL: its default networking mode, where Windows hands the Linux side a private address; the alternative, mirrored mode, broke Playwright's start (see the [setup guide](development/setup.md#the-end-to-end-journeys)). |
 | **NFR** | Non-functional requirement | A quality the system must have rather than something it does: supported browsers, accessibility, performance. Szop's are [NFR-1 to NFR-3](requirements/functional-requirements.md#3-non-functional-requirements). |
 | **nvm** | Node Version Manager | A tool that installs and switches Node.js versions per user. Szop's `.nvmrc` tells it which one to use. |
@@ -193,6 +196,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Hook (Claude Code)** | A command Claude Code runs at a fixed moment, for example before a tool call (a `PreToolUse` hook), configured in `settings.json`. It can block the call by exiting with code 2. Szop's refuses force pushes, deletions and tag pushes (see ADR 0015). Unrelated to git hooks despite the name. |
 | **Hook (Fastify)** | A function Fastify calls at a fixed point of a request's lifecycle (`onRequest`, `preHandler`, …). |
 | **Hook (React)** | A function starting with `use` (`useState`, `useList`) that lets a component use state or other React features. Unrelated to Fastify hooks despite the name. |
+| **Hosted zone** | Route 53's container for one domain's DNS records, served by four name servers chosen when the zone is created. Szop's zone for `dzwoniec.com` was created by the domain's purchase and imported into `infra/base`; it is never destroyed, since a new zone would get other name servers and the domain would stop resolving (see ADR 0030). |
 | **Hyperscaler** | One of the very large cloud providers offering hundreds of services worldwide: AWS, Microsoft Azure, Google Cloud. |
 | **Immutable tag** | A container image tag that, once pushed, can never point at a different image. Szop's registry enforces it, so a version always means the same code. |
 | **IndexedDB** | A database built into the browser for storing structured data locally. Considered for guest workspaces, not used (see ADR 0002). |
@@ -289,6 +293,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Vitest project** | One named group of tests inside a Vitest run, with its own configuration. Szop has three: `api`, from `apps/api/vitest.config.ts`, `web`, from `apps/web/vitest.config.ts`, and `hooks`, for the push hook's tests, which is defined inline. |
 | **Walking skeleton** | The thinnest possible version of the whole system that runs end to end (here: SPA → API → database, built by CI and deployed) and does almost nothing yet. Built early to test the foundation decisions. |
 | **WebSocket** | A persistent two-way connection between browser and server, letting the server push messages (used for live updates). |
+| **WHOIS** | The public lookup of who registered a domain, through which registrar and until when. Route 53's privacy protection hides the owner's contact details from it. |
 | **Workspace** | Everything one user owns: lists, templates, catalog, categories, units, settings. |
 | **Workspace (pnpm)** | Unrelated to the above: one package of the monorepo (`apps/web`, `apps/api`, `packages/shared`, `e2e/`) as pnpm manages it. pnpm links workspaces to each other so they can import one another. |
 | **Worktree (git)** | An extra working directory of the same repository, with another branch checked out, so two branches can be worked on side by side. Not used by default in Szop (see ADR 0009). |
