@@ -567,7 +567,7 @@ git commit -m "feat(infra): import the domain's zone into base, with CAA and nul
 - Consumes: `aws_route53_zone.main.zone_id`, `local.domain`, `local.app_hostname`.
 - Produces: `aws_sesv2_email_identity.domain`; output `app_hostname`.
 
-- [ ] **Step 1: `email.tf`**
+- [x] **Step 1: `email.tf`**
 
 ```hcl
 # SES's sender identity is the whole domain (ADR 0030, decision 7): Szop may
@@ -621,7 +621,7 @@ resource "aws_route53_record" "apex_txt" {
 }
 ```
 
-- [ ] **Step 2: Add the output to `outputs.tf`**
+- [x] **Step 2: Add the output to `outputs.tf`**
 
 ```hcl
 output "app_hostname" {
@@ -632,12 +632,12 @@ output "app_hostname" {
 
 (Skip if Task 2 already added it.)
 
-- [ ] **Step 3: Check the DKIM attribute**
+- [x] **Step 3: Check the DKIM attribute**
 
 Run: `pnpm check:infra`
 Expected: `validate` succeeds, which confirms `dkim_signing_attributes[0].tokens` exists in the provider's schema (a wrong attribute fails with "Unsupported attribute"). tflint has no findings.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add infra/base
