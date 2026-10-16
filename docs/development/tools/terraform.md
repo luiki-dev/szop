@@ -11,6 +11,8 @@ Terraform is an infrastructure as code (IaC) tool. Files ending in `.tf` describ
   - [The provider and its lock file](#the-provider-and-its-lock-file)
   - [State, the backend and the state lock](#state-the-backend-and-the-state-lock)
   - [Variables kept out of git](#variables-kept-out-of-git)
+  - [Importing what already exists](#importing-what-already-exists)
+  - [Secrets: ephemeral values and write-only arguments](#secrets-ephemeral-values-and-write-only-arguments)
 - [Everyday use](#everyday-use)
 - [Updating](#updating)
 
@@ -30,7 +32,7 @@ A **root module** is a folder of `.tf` files that Terraform runs as one unit, wi
 | Folder | Holds | Applied by |
 |---|---|---|
 | `infra/bootstrap` | The S3 bucket for every module's state, and the budget alerts | The owner, once |
-| `infra/base` (PH-10) | Permanent resources: DNS zone, certificate, image registry, secrets, log group | The owner |
+| `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group | The owner |
 | `infra/demo` (PH-12) | One demo session: network, load balancer, containers, database | CI's buttons, and the nightly teardown |
 
 Each module splits its files by concern: `versions.tf` (the Terraform and provider versions), `providers.tf` (the AWS provider's settings), `variables.tf`, `outputs.tf`, `backend.tf` (where the state lives) and one file per group of resources.
@@ -49,6 +51,8 @@ A **provider** is the plugin that talks to one platform's API; Szop uses `hashic
 - `allowed_account_ids`, so Terraform stops if the credentials belong to any account but Szop's;
 - `default_tags`, which every resource the module creates inherits: `project = "szop"` and the module's `group`, so Cost Explorer can show what each part costs (ADR 0008, decision 26).
 
+`infra/base` also uses **`hashicorp/random`** (`~> 3.7`), for the ephemeral password of its secret.
+
 **`.terraform.lock.hcl`** is the provider's lock file, committed next to the code, like `pnpm-lock.yaml`. It pins the exact provider version and the checksums of its downloads, so every machine and CI use the same build. Szop records the checksums for `linux_amd64`, the platform of WSL and of CI's runners.
 
 ### State, the backend and the state lock
@@ -66,6 +70,19 @@ The **two lock files are unrelated**: `.terraform.lock.hcl` pins provider versio
 ### Variables kept out of git
 
 Values that should not be public, such as the account ID and the alert address, are variables without defaults, set in a **`terraform.tfvars`** next to the module, which Terraform reads on its own. `.gitignore` ignores `*.tfvars`; a committed `terraform.tfvars.example` shows the shape. Each variable has a `validation` block, so a malformed value stops the run with a clear message before anything reaches AWS. A missing `terraform.tfvars` makes Terraform ask for each value at the prompt, unless the command has `-input=false`, as the runbook's first `plan` does: then it stops with `No value for required variable`.
+
+### Importing what already exists
+
+Some resources exist before Terraform knows them: buying the domain created its hosted zone. An **`import` block** names the resource in the code and the ID of the real object; the next plan shows it as *import* instead of *create*, and `apply` writes it into the state without touching AWS. The configuration must describe the object as it is, or the same plan also shows a change; the zone's plan still shows an update, but only for the default tags and Terraform's own `force_destroy` setting, never for the comment or the name. `infra/base/dns.tf` imports the zone this way ([ADR 0030](../../decisions/0030-domain-and-base-infrastructure-details.md), decision 4). The block stays in the code: once the resource is in state it does nothing.
+
+### Secrets: ephemeral values and write-only arguments
+
+**Secret values never enter the state** ([ADR 0030](../../decisions/0030-domain-and-base-infrastructure-details.md), decision 10). Two features from Terraform 1.10 and 1.11 make that possible for a secret Terraform creates:
+
+- an **ephemeral resource** (`ephemeral "random_password" …`) produces a value during a run and is never written to the state or a plan file;
+- a **write-only argument** (`value_wo` on `aws_ssm_parameter`) sends a value to AWS but never stores it. Since Terraform cannot compare what it never kept, a version number beside it (`value_wo_version`) decides when the value is sent again: raising it rotates the secret.
+
+Where a resource has no write-only argument, the secret is created outside Terraform and the code refers only to its name. The runbook's [state check](../../operations/demo-environment.md#checks) confirms it after each apply.
 
 ## Everyday use
 
@@ -99,12 +116,14 @@ terraform plan      # what would change; changes nothing
 3. `tenv tf install`, then `pnpm check:infra` and `terraform plan` in each applied module: the plan must show no changes.
 4. Commit as `build(infra): update Terraform to <version>`.
 
-**The AWS provider:** Dependabot proposes it weekly, updating the constraint and `.terraform.lock.hcl` together (ADR 0029, decision 13). By hand:
+**The providers (AWS, and random in base):** Dependabot proposes them weekly, updating the constraint and `.terraform.lock.hcl` together (ADR 0029, decision 13). By hand:
 
 ```bash
 export AWS_PROFILE=szop   # init reads the module's S3 backend, which needs credentials
 terraform -chdir=infra/bootstrap init -upgrade
 terraform -chdir=infra/bootstrap providers lock -platform=linux_amd64
+terraform -chdir=infra/base init -upgrade
+terraform -chdir=infra/base providers lock -platform=linux_amd64
 ```
 
 A new major version comes as its own PR; read its upgrade guide before merging.

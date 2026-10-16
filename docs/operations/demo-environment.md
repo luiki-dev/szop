@@ -5,7 +5,7 @@ How to set up, run and take down Szop's environment on AWS, step by step. Szop r
 | Module | Holds | Applied | Chapter |
 |---|---|---|---|
 | `infra/bootstrap` | The state bucket every module keeps its state in, and the budget alerts | Once, from the owner's machine | [Applying bootstrap](#applying-bootstrap) |
-| `infra/base` | Permanent resources: DNS zone, certificate, image registry, secrets, log group | From the owner's machine, when it changes | Coming in PH-10 |
+| `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group | From the owner's machine, when it changes | [Buying the domain](#buying-the-domain), [Applying base](#applying-base) |
 | `infra/demo` | One demo session: network, load balancer, containers, database | By CI's buttons, and destroyed every night | Coming in PH-11 and PH-12 |
 
 Why each piece exists is in the [stack overview](../architecture/stack-overview.md#12-where-szop-runs); how Terraform works here is on the [Terraform page](../development/tools/terraform.md). The tools come from [setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli).
@@ -25,6 +25,11 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [Part 1: the first apply, with local state](#part-1-the-first-apply-with-local-state)
   - [Part 2: moving the state into the bucket](#part-2-moving-the-state-into-the-bucket)
 - [Destroying bootstrap](#destroying-bootstrap)
+- [Buying the domain](#buying-the-domain)
+- [Applying base](#applying-base)
+  - [The first apply](#the-first-apply)
+  - [Checks](#checks)
+  - [Rotating the Better Auth secret](#rotating-the-better-auth-secret)
 - [Coming later](#coming-later)
 
 ## One-time account setup
@@ -216,8 +221,126 @@ Only when Szop is shut down for good, and only **after `infra/demo` and `infra/b
 
 The changes of steps 1 and 2 stay on your machine; they are not committed.
 
+## Buying the domain
+
+Szop's domain is `dzwoniec.com`, registered through Route 53, AWS's DNS service and domain registrar; the app lives at `szop.dzwoniec.com` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decisions 1 and 2). Buying it is done once, by hand: Terraform can only manage what exists.
+
+**Before you click:**
+
+- **It is paid at once, by card, and not refundable.** A `.com` costs about $15 a year. AWS promotional credits do not cover domain registrations.
+- **The budget alert fires this month.** `szop-monthly` alerts when the actual cost passes $10, and it ignores credits, so the registration triggers the email. That is expected, not a forgotten demo.
+- Sign in to the console through the access portal, not as root.
+
+**Register it:**
+
+1. *Route 53 → Domains → Registered domains → Register domains.* Search for `dzwoniec.com`, *Select*, *Proceed to checkout*.
+2. **Duration:** 1 year. **Auto-renew: on.** Without it, the domain lapses after a year and anyone can buy it.
+3. **Contacts:** your real name, address, phone and email, the same for the registrant, administrative and technical contacts. ICANN (the body that runs domain names) requires them to be accurate.
+4. **Privacy protection: on** for every contact (the default): WHOIS, the public lookup of domain owners, then shows the registrar's details instead of yours.
+5. Review, accept the terms, *Submit*. *Route 53 → Domains → Requests* shows the progress; registration takes minutes, sometimes hours.
+
+**Right after:**
+
+1. **Confirm the registrant email.** ICANN's rules make the registrar send a verification link to the registrant address. **If it is not clicked within 15 days, the domain is suspended**: it stops resolving until it is.
+2. **Transfer lock.** *Registered domains → `dzwoniec.com`*: *Transfer lock* is **On**. It stops the domain being moved to another registrar without you.
+3. **The hosted zone.** Registration creates a **hosted zone** for `dzwoniec.com` on its own: the container of the domain's DNS records, served by four AWS name servers, which the registration points at. Read its ID:
+
+   ```bash
+   aws route53 list-hosted-zones-by-name --dns-name dzwoniec.com \
+     --query 'HostedZones[0].[Id,Config.Comment]' --output text
+   #   /hostedzone/Z0123456789ABCDEFGHIJ   HostedZone created by Route53 Registrar
+   ```
+
+   The part after `/hostedzone/` is the zone ID. It is not secret: `infra/base` commits it in its `import` block, which hands the zone to Terraform ([Applying base](#applying-base)).
+
+**Check:**
+
+```bash
+aws route53domains get-domain-detail --region us-east-1 --domain-name dzwoniec.com \
+  --query '[AutoRenew,StatusList,Nameservers[].Name]'
+#   true, a status list with "clientTransferProhibited", and four ns-….awsdns-… names
+dig +short NS dzwoniec.com
+#   the same four names (empty for a while after registration; DNS takes time to catch up)
+```
+
+The domains API exists only in `us-east-1`, hence `--region`.
+
+⚠️ **Don't:**
+
+- delete or recreate the hosted zone: a new zone gets different name servers, and the whole domain stops resolving until the registration points at them and caches expire, up to two days;
+- add records to the zone by hand: `infra/base` owns its records, and a hand-made one makes Terraform fail with "already exists";
+- turn auto-renew off.
+
+## Applying base
+
+`infra/base` holds what outlives every demo: the domain's zone with its Certification Authority Authorization (CAA), Mail Exchanger (MX) and mail records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
+
+### The first apply
+
+```bash
+export AWS_PROFILE=szop
+aws sso login
+cd ~/workspace/szop/infra/base
+cp terraform.tfvars.example terraform.tfvars   # the first time only
+```
+
+Edit `terraform.tfvars`: your 12-digit account ID, in quotes. git ignores the file.
+
+```bash
+terraform init                  # "Terraform has been successfully initialized!"
+terraform plan -input=false     # read it: "Plan: 1 to import, 12 to add, 1 to change, 0 to destroy."
+terraform apply                 # the same plan; type yes
+```
+
+The zone is the one to **import** and to update in place: Terraform adopts the zone the purchase created, and its name servers stay as they are. The update only adds the tags `project` and `group` (the default tags every resource gets, so Cost Explorer can group base's cost) and records `force_destroy = false` (Terraform's own setting, nothing on AWS). The twelve to add are the registry and its lifecycle policy, the log group, the secret, the CAA and MX records, the SES identity, its three DKIM records, and the DMARC and SPF records. The secret's value appears nowhere in the plan: it is generated during `apply`, sent to AWS and forgotten.
+
+⚠️ **Stop** if the plan shows the zone as `+ create` or `-/+` (replace), or if its `~ update` changes anything besides `tags_all` and `force_destroy`, for example `comment` or `name`: the import did not match. Compare the zone ID and comment in `dns.tf` with [Buying the domain](#buying-the-domain)'s command.
+
+### Checks
+
+```bash
+terraform plan                  # "No changes. Your infrastructure matches the configuration."
+terraform plan -destroy         # must end with an error: "Instance cannot be destroyed" (the zone)
+
+dig +short NS dzwoniec.com      # the four ns-….awsdns-… names of the registration
+dig +short CAA dzwoniec.com     # 0 issue "amazon.com"
+dig +short MX dzwoniec.com      # 0 .
+dig +short TXT dzwoniec.com     # "v=spf1 -all"
+dig +short TXT _dmarc.dzwoniec.com   # "v=DMARC1; p=reject"
+
+aws sesv2 get-email-identity --email-identity dzwoniec.com \
+  --query '[VerifiedForSendingStatus,DkimAttributes.Status]'
+#   [true, "SUCCESS"]; minutes to an hour after the apply, while the DKIM records spread
+
+aws resourcegroupstaggingapi get-resources --tag-filters Key=group,Values=base \
+  --query 'ResourceTagMappingList[].ResourceARN'
+#   the repository, the log group, the parameter and the SES identity
+
+aws resourcegroupstaggingapi get-resources --region us-east-1 --tag-filters Key=group,Values=base \
+  --query 'ResourceTagMappingList[].ResourceARN'
+#   the zone: Route 53 is global, and its tags are listed in us-east-1
+```
+
+**The secret is not in the state.** Once, after the first apply, and after every rotation:
+
+```bash
+secret=$(aws ssm get-parameter --name /szop/better-auth-secret --with-decryption \
+  --query Parameter.Value --output text)
+terraform state pull | grep -c -- "$secret"   # must print 0
+unset secret
+```
+
+### Rotating the Better Auth secret
+
+In `secrets.tf`, raise `value_wo_version` by one, commit it on a branch, and apply as above: the plan shows one change, `~ value_wo_version`. Terraform generates a new password and overwrites the parameter. A running demo keeps the old value until its task restarts; the new value signs everyone out, which a demo can afford. Then repeat the state check.
+
+⚠️ **Don't:**
+
+- set the parameter's value by hand: the next rotation overwrites it, and the code no longer says where it came from;
+- add a `value` argument to the parameter "to see it": it would write the secret into the state;
+- remove `prevent_destroy` from the zone, or run `terraform destroy` here, unless Szop is shut down for good, after `infra/demo` is destroyed.
+
 ## Coming later
 
-- **Applying `infra/base`**: the domain, certificate, registry and secrets ([PH-10](../roadmap.md#ph-10-domain-and-base-infrastructure)).
 - **Spinning the demo up and down** with the `demo-up` and `demo-down` buttons, and the nightly teardown ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy)).
 - **Debugging** a running demo with ECS Exec and its logs, and **what it costs** ([PH-12](../roadmap.md#ph-12-first-deploy)).
