@@ -166,7 +166,7 @@ Tell the owner the chapter is ready (owner step 1), and that Task 5 needs the zo
 **Interfaces:**
 - Produces: `local.domain` (`"dzwoniec.com"`), `local.app_hostname` (`"szop.dzwoniec.com"`), `var.account_id`, the `aws` and `random` providers. Later tasks use these names exactly.
 
-- [ ] **Step 1: `versions.tf`**
+- [x] **Step 1: `versions.tf`**
 
 ```hcl
 terraform {
@@ -188,7 +188,7 @@ terraform {
 }
 ```
 
-- [ ] **Step 2: `backend.tf`**
+- [x] **Step 2: `backend.tf`**
 
 ```hcl
 # Base's state, in the bucket bootstrap created (ADR 0008, decision 7). S3's
@@ -204,7 +204,7 @@ terraform {
 }
 ```
 
-- [ ] **Step 3: `providers.tf`**
+- [x] **Step 3: `providers.tf`**
 
 ```hcl
 provider "aws" {
@@ -222,7 +222,7 @@ provider "aws" {
 }
 ```
 
-- [ ] **Step 4: `variables.tf`**
+- [x] **Step 4: `variables.tf`**
 
 ```hcl
 variable "account_id" {
@@ -236,7 +236,7 @@ variable "account_id" {
 }
 ```
 
-- [ ] **Step 5: `locals.tf`**
+- [x] **Step 5: `locals.tf`**
 
 ```hcl
 # The domain is public and never varies, so it is written here rather than
@@ -247,7 +247,7 @@ locals {
 }
 ```
 
-- [ ] **Step 6: `terraform.tfvars.example`**
+- [x] **Step 6: `terraform.tfvars.example`**
 
 ```hcl
 # Copy to terraform.tfvars (ignored by git) and fill in; see
@@ -255,7 +255,7 @@ locals {
 account_id = "123456789012"
 ```
 
-- [ ] **Step 7: The lock file**
+- [x] **Step 7: The lock file**
 
 ```bash
 terraform -chdir=infra/base providers lock -platform=linux_amd64
@@ -263,12 +263,12 @@ terraform -chdir=infra/base providers lock -platform=linux_amd64
 
 Expected: `Success! Terraform has updated the lock file.`, and `infra/base/.terraform.lock.hcl` lists `hashicorp/aws` and `hashicorp/random`. `providers lock` reads only the configuration and the registry: no backend, no AWS credentials. If it asks for credentials, run `export TF_DATA_DIR=$(mktemp -d)` first and unset it afterwards.
 
-- [ ] **Step 8: Run the infra check**
+- [x] **Step 8: Run the infra check**
 
 Run: `pnpm check:infra`
 Expected: `==> terraform validate infra/base/` followed by `Success! The configuration is valid.`, then tflint with no findings. tflint's `terraform_unused_declarations` may flag `local.app_hostname` as unused; if it does, add the `app_hostname` output now (Task 6's output block) instead of disabling the rule.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add infra/base
