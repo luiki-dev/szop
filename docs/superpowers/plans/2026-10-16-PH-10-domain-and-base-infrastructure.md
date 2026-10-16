@@ -395,7 +395,7 @@ git commit -m "feat(infra): add the image registry and the log group to base"
 - Consumes: the `random` provider of Task 2.
 - Produces: `aws_ssm_parameter.better_auth_secret`; output `better_auth_secret_arn` (PH-12's task execution role and task definition use it).
 
-- [ ] **Step 1: `secrets.tf`**
+- [x] **Step 1: `secrets.tf`**
 
 ```hcl
 # The Better Auth signing secret (ADR 0008, decisions 21 and 22; ADR 0030).
@@ -423,7 +423,7 @@ resource "aws_ssm_parameter" "better_auth_secret" {
 }
 ```
 
-- [ ] **Step 2: Add the output to `outputs.tf`**
+- [x] **Step 2: Add the output to `outputs.tf`**
 
 ```hcl
 output "better_auth_secret_arn" {
@@ -432,17 +432,17 @@ output "better_auth_secret_arn" {
 }
 ```
 
-- [ ] **Step 3: Run the infra check**
+- [x] **Step 3: Run the infra check**
 
 Run: `pnpm check:infra`
 Expected: validate succeeds (this is the check that the provider supports `value_wo` and the ephemeral `random_password`; it passed in the brainstorm on aws 6.69.1 and random 3.9.1); tflint has no findings.
 
-- [ ] **Step 4: Confirm nothing secret is in the configuration**
+- [x] **Step 4: Confirm nothing secret is in the configuration**
 
 Run: `grep -rn "value " infra/base/secrets.tf`
 Expected: no output. Only `value_wo` and `value_wo_version` are set; a plain `value` argument would put the secret in state.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add infra/base
