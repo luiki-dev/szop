@@ -3,6 +3,8 @@
 *.tfstate*
 .terraform/
 *.tfvars
+# Saved plans (terraform plan -out) hold every value of the configuration
+*.tfplan
 
 # Claude Code: personal settings and permissions
 .claude/settings.local.json
