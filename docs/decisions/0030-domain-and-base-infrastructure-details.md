@@ -2,7 +2,7 @@
 
 - **Status:** ✅ Accepted
 - **Date:** 2026-10-16
-- **Refines:** [ADR 0008](0008-hosting.md), decisions 6 (the certificate leaves base, see decision 5), 12 (the registry's lifecycle, see decision 9) and 17 (the domain, the app's name and the certificate, see decisions 1, 2 and 5); [ADR 0010](0010-ci-cd.md), decisions 11 and 16 (the app's name; the deploy role manages the session's certificate, see decision 5)
+- **Refines:** [ADR 0008](0008-hosting.md), decisions 6 (the certificate leaves base, see decision 5), 12 (the registry's lifecycle, see decision 9) and 17 (the domain, the app's name and the certificate, see decisions 1, 2 and 5); [ADR 0010](0010-ci-cd.md), decisions 11 and 16 (the app's name; the deploy role manages the session's certificate, see decisions 1 and 5)
 - **Completes:** [ADR 0008](0008-hosting.md), decisions 22 (secrets never in state, see decision 10), 24 (SES's identity, DMARC and SPF, see decisions 7 and 8) and 27 (the log group, see decision 11)
 
 ## Context
