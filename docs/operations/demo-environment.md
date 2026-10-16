@@ -273,7 +273,7 @@ The domains API exists only in `us-east-1`, hence `--region`.
 
 ## Applying base
 
-`infra/base` holds what outlives every demo: the domain's zone with its CAA, MX and mail records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
+`infra/base` holds what outlives every demo: the domain's zone with its Certification Authority Authorization (CAA), Mail Exchanger (MX) and mail records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
 
 ### The first apply
 
@@ -314,7 +314,11 @@ aws sesv2 get-email-identity --email-identity dzwoniec.com \
 
 aws resourcegroupstaggingapi get-resources --tag-filters Key=group,Values=base \
   --query 'ResourceTagMappingList[].ResourceARN'
-#   the zone, the repository, the log group, the parameter and the SES identity
+#   the repository, the log group, the parameter and the SES identity
+
+aws resourcegroupstaggingapi get-resources --region us-east-1 --tag-filters Key=group,Values=base \
+  --query 'ResourceTagMappingList[].ResourceARN'
+#   the zone: Route 53 is global, and its tags are listed in us-east-1
 ```
 
 **The secret is not in the state.** Once, after the first apply, and after every rotation:
