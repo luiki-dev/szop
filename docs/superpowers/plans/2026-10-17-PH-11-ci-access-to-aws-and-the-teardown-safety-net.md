@@ -119,7 +119,7 @@ git commit -m "feat(infra): add the GitHub OIDC provider and the plan role"
 - Consumes: `aws_iam_openid_connect_provider.github` (Task 1).
 - Produces: `aws_iam_role.ci_deploy` (name `szop-ci-deploy`); output `ci_deploy_role_arn`; the root module `infra/demo` with variable `account_id` (string, validated as base's). Task 3 assumes the role from `AWS_DEPLOY_ROLE_ARN` and sets `TF_VAR_account_id`.
 
-- [ ] **Step 1: The deploy role in `ci_roles.tf`**
+- [x] **Step 1: The deploy role in `ci_roles.tf`**
 
 - `data.aws_iam_policy_document.ci_deploy_trust`: as the plan role's, but `sub` = `repo:luiki-dev/szop:environment:demo-teardown` only, with a comment: `demo` is added in PH-12 with the protected environment (ADR 0032, decision 10).
 - `aws_iam_role.ci_deploy`: name `szop-ci-deploy`, `max_session_duration = 3600`.
@@ -131,19 +131,19 @@ git commit -m "feat(infra): add the GitHub OIDC provider and the plan role"
   A comment: the role grows with `infra/demo`, phase by phase (ADR 0032, decision 3).
 - Output `ci_deploy_role_arn` ("The role demo-down.yml assumes; stored as the GitHub variable AWS_DEPLOY_ROLE_ARN.").
 
-- [ ] **Step 2: `infra/demo`**
+- [x] **Step 2: `infra/demo`**
 
 Copy base's `versions.tf` (without `random`), `variables.tf` and `terraform.tfvars.example`; `backend.tf` with key `demo/terraform.tfstate`; `providers.tf` with `group = "demo"`. A header comment in `backend.tf`: only backend and provider until PH-12, so a destroy has nothing to do (ADR 0011, decision 2). Create the lock file with `terraform -chdir=infra/demo providers lock -platform=linux_amd64`.
 
-- [ ] **Step 3: The check**
+- [x] **Step 3: The check**
 
 Run: `pnpm check:infra`. Expected: validate succeeds for `infra/base/`, `infra/bootstrap/` and `infra/demo/`; tflint has no findings.
 
-- [ ] **Step 4: Prove the deploy role's policy is enough (Review Focus 2)**
+- [x] **Step 4: Prove the deploy role's policy is enough (Review Focus 2)**
 
 With the owner signed in, run `aws iam simulate-custom-policy` with the rendered `ci_deploy_state` document for `s3:ListBucket` (with `s3:prefix` context values `demo/` and `env:/`), `s3:GetObject`/`s3:PutObject` on the state key, and `s3:GetObject`/`s3:PutObject`/`s3:DeleteObject` on the lock key. Expected: allowed for the demo paths, `implicitDeny` for `base/terraform.tfstate`. Then check in the Terraform S3 backend's documentation which `ListBucket` prefixes `init` uses with the default workspace; widen to `env:/demo/*` only if it lists there. Run `validate-policy` on both new documents as in Task 1, step 5. Expected: no `ERROR`, no `SECURITY_WARNING`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add infra/base infra/demo docs/superpowers/plans

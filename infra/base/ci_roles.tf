@@ -138,3 +138,84 @@ resource "aws_iam_role_policy" "ci_plan_denies" {
   role   = aws_iam_role.ci_plan.id
   policy = data.aws_iam_policy_document.ci_plan_denies.json
 }
+
+# The deploy role: what demo-down.yml assumes in the demo-teardown environment.
+# The trust names that one environment only. GitHub creates an environment, with
+# no protection, the first time a job names it, so a role that trusted an
+# environment before it exists would trust any job that names it (ADR 0032,
+# decision 10). A pull request's token carries another subject and never matches.
+data "aws_iam_policy_document" "ci_deploy_trust" {
+  statement {
+    sid     = "GitHubDemoTeardown"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github.arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    # The token's subject for a job that names the demo-teardown environment.
+    # demo is added in PH-12, in the pull request in which the owner creates
+    # that environment with its required reviewer (ADR 0032, decision 10).
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:luiki-dev/szop:environment:demo-teardown"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ci_deploy" {
+  name               = "szop-ci-deploy"
+  assume_role_policy = data.aws_iam_policy_document.ci_deploy_trust.json
+
+  # The shortest session AWS allows for a role is one hour.
+  max_session_duration = 3600
+}
+
+# The role grows with infra/demo, phase by phase: each phase that adds a
+# resource to infra/demo adds the permissions it needs here, in the same pull
+# request (ADR 0032, decision 3). Today infra/demo has no resources, so the
+# role only reaches the demo's state and its lock file.
+data "aws_iam_policy_document" "ci_deploy_state" {
+  # Lists nothing outside demo/. The S3 backend also lists env:/ for
+  # workspaces; on AccessDenied it falls back to the default workspace, so
+  # that prefix stays closed (ADR 0032, "Settled while building").
+  statement {
+    sid       = "ListDemoState"
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::szop-tfstate-ntrtcr"]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["demo/*"]
+    }
+  }
+
+  statement {
+    sid       = "ReadWriteDemoState"
+    actions   = ["s3:GetObject", "s3:PutObject"]
+    resources = ["arn:aws:s3:::szop-tfstate-ntrtcr/demo/terraform.tfstate"]
+  }
+
+  # use_lockfile: Terraform writes the lock next to the state and deletes it
+  # when the run ends.
+  statement {
+    sid       = "ManageDemoLock"
+    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+    resources = ["arn:aws:s3:::szop-tfstate-ntrtcr/demo/terraform.tfstate.tflock"]
+  }
+}
+
+resource "aws_iam_role_policy" "ci_deploy_state" {
+  name   = "state"
+  role   = aws_iam_role.ci_deploy.id
+  policy = data.aws_iam_policy_document.ci_deploy_state.json
+}
