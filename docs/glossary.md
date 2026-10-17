@@ -53,7 +53,9 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **JWT** | JSON Web Token | A signed token carrying claims about a user. An alternative to server-side sessions; not used in Szop. |
 | **KMS** | (AWS) Key Management Service | AWS's service for encryption keys. A customer-managed key costs $1 a month; Szop's state bucket uses S3-managed keys instead (SSE-S3). |
 | **LCP** | Largest Contentful Paint | A Core Web Vital: when the largest piece of content (usually the main text block or image) appears. "Good" is at most 2.5 s ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
+| **LLM** | Large Language Model | An AI model trained on large amounts of text, such as the Claude models behind Claude Code. graphify sends docs through one to build its graph (see ADR 0031). |
 | **LTS** | Long-Term Support | A release line that receives fixes for an extended period. Even-numbered Node.js releases (22, 24, …) become LTS. |
+| **MCP** | Model Context Protocol | An open protocol that lets an AI assistant call tools and read data served by another program, such as graphify's query server (see ADR 0031). |
 | **MFA** | Multi-Factor Authentication | Logging in with a second proof besides the password, such as a code from an authenticator app. |
 | **MSW** | Mock Service Worker | A library that intercepts the app's HTTP requests at the network level and answers them with fake responses. Szop's component tests use it, so the real API client runs unchanged. |
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
