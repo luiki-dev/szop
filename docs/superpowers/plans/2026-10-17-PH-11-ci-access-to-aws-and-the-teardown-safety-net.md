@@ -90,7 +90,7 @@ Policies as `aws_iam_policy_document` data sources, matching base's style. A fil
 
 Add `ci_plan_role_arn` to `outputs.tf` ("The role infra-plan.yml assumes; stored as the GitHub variable AWS_PLAN_ROLE_ARN."). Run `pnpm check:infra`. Expected: validate succeeds for `infra/base/`, tflint has no findings.
 
-- [ ] **Step 4: Prove base's plan survives the denies (Review Focus 1)**
+- [x] **Step 4: Prove base's plan survives the denies (Review Focus 1)**
 
 Ask the owner to sign in (`aws sso login --profile szop`). Then, from `infra/base` with `AWS_PROFILE=szop`, run `terraform plan`. Expected: the OIDC provider, the role, its attachment and policies to add; nothing else changes. Then simulate the refresh under the plan role's policies: `aws iam simulate-custom-policy` with the deny document from `terraform show -json` / the rendered JSON and the actions `ssm:GetParameter` and `ssm:DescribeParameters` on the secret's ARN, and read the AWS provider's source or docs for `aws_ssm_parameter`'s read to see which of them it calls when `value_wo` is set. If the read calls `GetParameter` (with or without decryption): **stop and bring it to the owner**, with the evidence; do not loosen the deny.
 

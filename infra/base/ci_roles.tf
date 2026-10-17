@@ -51,7 +51,9 @@ resource "aws_iam_role_policy_attachment" "ci_plan_read_only" {
 # Everything infra-plan.yml prints is public (ADR 0010, decision 16).
 data "aws_iam_policy_document" "ci_plan_denies" {
   # Secret values. ssm:DescribeParameters, which returns metadata only, stays
-  # allowed through ReadOnlyAccess.
+  # allowed through ReadOnlyAccess. The AWS provider calls GetParameter with
+  # decryption when it refreshes aws_ssm_parameter, so infra-plan.yml plans
+  # base with -refresh=false instead of loosening this deny (ADR 0032, decision 11).
   statement {
     sid    = "DenySecretValues"
     effect = "Deny"
@@ -106,6 +108,12 @@ data "aws_iam_policy_document" "ci_plan_denies" {
       "bcm-data-exports:*",
       "invoicing:*",
       "payments:*",
+      "freetier:*",
+      "consolidatedbilling:*",
+      "cost-optimization-hub:*",
+      "savingsplans:*",
+      "tax:*",
+      "purchase-orders:*",
     ]
     resources = ["*"]
   }
