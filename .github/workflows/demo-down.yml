@@ -125,13 +125,19 @@ jobs:
         env:
           TRIGGER: ${{ github.event_name }}
           COMMIT: ${{ steps.state.outputs.commit }}
+          STATE: ${{ steps.state.outcome }}
+          CHECKOUT: ${{ steps.checkout-recorded.outcome }}
           DESTROY: ${{ steps.destroy.outcome }}
         run: |
           {
             echo "## demo-down"
             echo
             echo "- Trigger: \`$TRIGGER\`"
-            if [ -n "$COMMIT" ]; then
+            if [ "$STATE" != success ]; then
+              echo "- Code used: none, the demo's state could not be read"
+            elif [ "$CHECKOUT" = failure ]; then
+              echo "- Code used: none, the recorded commit \`$COMMIT\` could not be fetched"
+            elif [ -n "$COMMIT" ]; then
               echo "- Code used: commit \`$COMMIT\`, the one recorded as deployed in the demo's state"
             else
               echo "- Code used: \`main\`'s, because no deployed commit is recorded"
