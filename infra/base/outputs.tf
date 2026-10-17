@@ -27,3 +27,8 @@ output "domain_name" {
   description = "The domain."
   value       = local.domain
 }
+
+output "ci_plan_role_arn" {
+  description = "The role infra-plan.yml assumes; stored as the GitHub variable AWS_PLAN_ROLE_ARN."
+  value       = aws_iam_role.ci_plan.arn
+}

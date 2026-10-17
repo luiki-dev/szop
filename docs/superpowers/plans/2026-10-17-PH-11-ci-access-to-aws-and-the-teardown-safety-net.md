@@ -68,11 +68,11 @@
 **Interfaces:**
 - Produces: `aws_iam_openid_connect_provider.github`; `aws_iam_role.ci_plan` (name `szop-ci-plan`); output `ci_plan_role_arn`. Task 2 adds to `ci_roles.tf`; Task 4 reads the role's ARN from the variable `AWS_PLAN_ROLE_ARN`.
 
-- [ ] **Step 1: `github_oidc.tf`**
+- [x] **Step 1: `github_oidc.tf`**
 
 `aws_iam_openid_connect_provider.github` with `url = "https://token.actions.githubusercontent.com"` and `client_id_list = ["sts.amazonaws.com"]`. Leave `thumbprint_list` out if the pinned provider allows it (`terraform validate` tells); otherwise use GitHub's documented thumbprint with a comment that AWS no longer checks it. A header comment citing ADR 0010, decision 15.
 
-- [ ] **Step 2: `ci_roles.tf`, the plan role**
+- [x] **Step 2: `ci_roles.tf`, the plan role**
 
 Policies as `aws_iam_policy_document` data sources, matching base's style. A file header comment naming ADR 0010, decisions 15–16, ADR 0012, decision 17, and ADR 0032.
 
@@ -86,7 +86,7 @@ Policies as `aws_iam_policy_document` data sources, matching base's style. A fil
   - `DenyBillingAndCost`: the read actions `ReadOnlyAccess` grants for Cost Explorer (`ce:`), Budgets (`budgets:`), billing (`billing:`, `aws-portal:`), cost and usage reports (`cur:`, `bcm-data-exports:`), invoicing (`invoicing:`) and `payments:`, listed with wildcards per service (`ce:*` and so on), on `*`.
 - `access-analyzer:ValidatePolicy`: open the current `ReadOnlyAccess` version in AWS's managed policy reference. If it does not include `access-analyzer:ValidatePolicy` (or `access-analyzer:*`/`access-analyzer:Validate*`), add an `Allow` statement `AllowPolicyValidation` for it in a separate `aws_iam_role_policy.ci_plan_validate`. Note what was found for ADR 0032's "Settled while building".
 
-- [ ] **Step 3: Output and the check**
+- [x] **Step 3: Output and the check**
 
 Add `ci_plan_role_arn` to `outputs.tf` ("The role infra-plan.yml assumes; stored as the GitHub variable AWS_PLAN_ROLE_ARN."). Run `pnpm check:infra`. Expected: validate succeeds for `infra/base/`, tflint has no findings.
 
@@ -94,11 +94,11 @@ Add `ci_plan_role_arn` to `outputs.tf` ("The role infra-plan.yml assumes; stored
 
 Ask the owner to sign in (`aws sso login --profile szop`). Then, from `infra/base` with `AWS_PROFILE=szop`, run `terraform plan`. Expected: the OIDC provider, the role, its attachment and policies to add; nothing else changes. Then simulate the refresh under the plan role's policies: `aws iam simulate-custom-policy` with the deny document from `terraform show -json` / the rendered JSON and the actions `ssm:GetParameter` and `ssm:DescribeParameters` on the secret's ARN, and read the AWS provider's source or docs for `aws_ssm_parameter`'s read to see which of them it calls when `value_wo` is set. If the read calls `GetParameter` (with or without decryption): **stop and bring it to the owner**, with the evidence; do not loosen the deny.
 
-- [ ] **Step 5: Validate the policies locally**
+- [x] **Step 5: Validate the policies locally**
 
 For each rendered document (`data.aws_iam_policy_document.*.json`, read with `terraform console` or the plan's JSON), run `aws accessanalyzer validate-policy --policy-type IDENTITY_POLICY` for the permission policies and `--policy-type RESOURCE_POLICY --validate-policy-resource-type AWS::IAM::AssumeRolePolicyDocument` for the trust policy. Expected: no `ERROR` and no `SECURITY_WARNING` findings. Fix any, or record a justified one for the owner.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add infra/base docs/superpowers/plans

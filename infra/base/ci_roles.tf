@@ -1,0 +1,118 @@
+# The roles GitHub Actions assumes through the OIDC provider (github_oidc.tf):
+# ADR 0010, decisions 15 and 16; ADR 0012, decision 17; ADR 0032.
+
+# The plan role: what infra-plan.yml assumes on a pull request from this
+# repository. It can read the infrastructure and nothing else. A pull request
+# from a fork gets no OIDC token, so it never reaches this role.
+data "aws_iam_policy_document" "ci_plan_trust" {
+  statement {
+    sid     = "GitHubPullRequests"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github.arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    # The token's subject for any workflow run triggered by a pull_request
+    # event in this repository.
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:luiki-dev/szop:pull_request"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ci_plan" {
+  name               = "szop-ci-plan"
+  assume_role_policy = data.aws_iam_policy_document.ci_plan_trust.json
+
+  # The shortest session AWS allows for a role is one hour.
+  max_session_duration = 3600
+}
+
+# Read access to every service's configuration, which is what terraform plan
+# needs to refresh state. It includes access-analyzer:ValidatePolicy, which
+# infra-plan.yml uses (checked against the live policy, version v190).
+resource "aws_iam_role_policy_attachment" "ci_plan_read_only" {
+  role       = aws_iam_role.ci_plan.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+# ReadOnlyAccess is broader than a public plan log should show, so explicit
+# denies take back what must stay private (an explicit deny beats any allow).
+# Everything infra-plan.yml prints is public (ADR 0010, decision 16).
+data "aws_iam_policy_document" "ci_plan_denies" {
+  # Secret values. ssm:DescribeParameters, which returns metadata only, stays
+  # allowed through ReadOnlyAccess.
+  statement {
+    sid    = "DenySecretValues"
+    effect = "Deny"
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:GetParametersByPath",
+      "ssm:GetParameterHistory",
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = ["*"]
+  }
+
+  # Objects in the state bucket other than the two states a plan reads, which
+  # keeps bootstrap's state unreadable (ADR 0010, decision 16). The plan reads
+  # no other S3 object.
+  statement {
+    sid     = "DenyObjectsOutsideState"
+    effect  = "Deny"
+    actions = ["s3:GetObject", "s3:GetObjectVersion"]
+    not_resources = [
+      "arn:aws:s3:::szop-tfstate-ntrtcr/base/*",
+      "arn:aws:s3:::szop-tfstate-ntrtcr/demo/*",
+    ]
+  }
+
+  # Log lines can hold anything the app printed (ADR 0012, decision 17).
+  statement {
+    sid    = "DenyLogContents"
+    effect = "Deny"
+    actions = [
+      "logs:GetLogEvents",
+      "logs:FilterLogEvents",
+      "logs:StartQuery",
+      "logs:StartLiveTail",
+    ]
+    resources = ["*"]
+  }
+
+  # What the account spends is not public. ReadOnlyAccess grants reads in
+  # these services; the whole service is denied, since the plan role needs no
+  # billing action (OP-094, ADR 0032).
+  statement {
+    sid    = "DenyBillingAndCost"
+    effect = "Deny"
+    actions = [
+      "ce:*",
+      "budgets:*",
+      "billing:*",
+      "aws-portal:*",
+      "cur:*",
+      "bcm-data-exports:*",
+      "invoicing:*",
+      "payments:*",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "ci_plan_denies" {
+  name   = "denies"
+  role   = aws_iam_role.ci_plan.id
+  policy = data.aws_iam_policy_document.ci_plan_denies.json
+}
