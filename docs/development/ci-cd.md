@@ -61,22 +61,22 @@ CodeQL's default setup also scans `main` once a week on its own schedule.
 
 `commits` does not wait for `changes`, since it runs on every PR whatever it changes. Merge commits that bring `main` into the branch (GitHub's *Update branch* writes `Merge branch 'main' into …`, a local `git merge origin/main` writes `Merge remote-tracking branch 'origin/main' into …`) are skipped by commitlint's default ignore rules. Those rules match the standard messages git and GitHub write, not hand-edited ones. Commits on `main` are not checked again: every one came through a checked PR.
 
+### The merge ref
+
+For a PR, GitHub keeps a hidden branch, `refs/pull/<N>/merge`, holding a test merge of the PR's branch into the current `main`. CI checks that merge commit, not the branch's last commit, so it tests what `main` would look like after merging. In that commit, `HEAD^1` (the first parent) is `main` and `HEAD^2` (the second parent) is the branch's last commit. That is why `changes` can diff `HEAD^1` against `HEAD` to see exactly what the PR changes on `main`, and why `commits` checks `HEAD^1..HEAD^2`.
+
+A PR with merge conflicts has no test merge, so GitHub runs nothing for it until the conflicts are resolved.
+
 ### The workflows that reach AWS
 
 Three more workflows live next to `ci.yml`. Their jobs hold or may get AWS credentials, so they follow the stricter rules [below](#rules-for-every-workflow) and are not part of `ci-ok`.
 
 | Workflow | Job | Runs when | What it does | Locally |
 |---|---|---|---|---|
-| `infra-plan.yml` | `plan` | A PR from this repository changes `infra/`, `.terraform-version` or the workflow itself | Assumes `szop-ci-plan`, then for `infra/base` and `infra/demo`: `terraform init` and `terraform plan -lock=false`, the counts and changed addresses, and IAM Access Analyzer's validation of every IAM policy in the plan. Writes the comment into an artifact. Always ends green when it could write the comment: the plan is informative. `infra/base` is planned with `-refresh=false` ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 11) | `terraform plan` in the module, with your SSO sign-in |
+| `infra-plan.yml` | `plan` | A PR from this repository changes `infra/`, `.terraform-version` or the workflow itself | Assumes `szop-ci-plan`, then for `infra/base` and `infra/demo`: `terraform init` and `terraform plan -lock=false`, the counts and changed addresses, and IAM Access Analyzer's validation of every IAM policy in the plan. Writes the comment into an artifact. A module whose `init` or `plan` fails is reported in the comment and does not fail the job (the other module is still planned), because the plan is informative; a failure before that, such as the credentials step, turns the job red but still writes a comment that says both modules failed. `infra/base` is planned with `-refresh=false` ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 11) | `terraform plan` in the module, with your SSO sign-in |
 | `infra-plan.yml` | `comment` | After `plan`, unless the run was cancelled | Posts the artifact as the PR's comment, or updates the one that already carries the hidden marker `<!-- infra-plan -->`. It holds `pull-requests: write` and no AWS credentials, and no checkout | — |
 | `demo-down.yml` | `destroy` | Every night at 01:17 UTC, and by hand | In the environment `demo-teardown`, assumes `szop-ci-deploy`, reads the `deployed_commit` output of `infra/demo`, checks out that commit when one is recorded (otherwise it stays on `main`), and runs `terraform destroy -auto-approve -lock-timeout=15m`; its summary says which code it used. One run at a time, never cancelled; the job times out after 60 minutes | The runbook's [From your machine](../operations/demo-environment.md#from-your-machine) |
 | `demo-up.yml` | `placeholder` | By hand | Writes "arrives in PH-12" to its summary and fails. It has no environment and no AWS access; it exists so that the button is registered on `main` ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 2) | — |
-
-### The merge ref
-
-For a PR, GitHub keeps a hidden branch, `refs/pull/<N>/merge`, holding a test merge of the PR's branch into the current `main`. CI checks that merge commit, not the branch's last commit, so it tests what `main` would look like after merging. In that commit, `HEAD^1` (the first parent) is `main` and `HEAD^2` (the second parent) is the branch's last commit. That is why `changes` can diff `HEAD^1` against `HEAD` to see exactly what the PR changes on `main`, and why `commits` checks `HEAD^1..HEAD^2`.
-
-A PR with merge conflicts has no test merge, so GitHub runs nothing for it until the conflicts are resolved.
 
 ## ci-ok and the required checks
 
@@ -157,10 +157,10 @@ No AWS access key exists anywhere in GitHub. A job that needs AWS asks GitHub fo
 
 | Role | Assumed by | Trusts | May |
 |---|---|---|---|
-| `szop-ci-plan` | `infra-plan.yml`, job `plan` | tokens of pull requests of this repository (`sub` `repo:luiki-dev/szop:pull_request`); a fork's PR gets no token | read the infrastructure (`ReadOnlyAccess`), except secret values, log contents, S3 objects outside the Terraform state, billing and cost and the account's contact details |
+| `szop-ci-plan` | `infra-plan.yml`, job `plan` | tokens of pull requests of this repository (`sub` `repo:luiki-dev/szop:pull_request`); a fork's PR gets no token | read the infrastructure (`ReadOnlyAccess`), except secret values, log contents, S3 objects outside base's and demo's state, billing and cost and the account's contact details |
 | `szop-ci-deploy` | `demo-down.yml`, job `destroy` | tokens of jobs in the environment `demo-teardown` (`sub` `repo:luiki-dev/szop:environment:demo-teardown`) | list the state bucket and read and write the demo's state and lock file; it grows with `infra/demo` |
 
-Both roles also require `aud` `sts.amazonaws.com`. The two **repository variables** `AWS_PLAN_ROLE_ARN` and `AWS_DEPLOY_ROLE_ARN` hold their Amazon Resource Names (ARNs), the roles' unique IDs; the workflows read them as `${{ vars.… }}`. They are set once, from base's outputs ([runbook](../operations/demo-environment.md#cis-roles-and-variables), [GitHub settings](github-settings.md#variables)). The account ID is not stored: each job reads it from its credentials (`aws sts get-caller-identity`), passes it to Terraform as `TF_VAR_account_id` and masks it in the logs.
+Both roles also require `aud` `sts.amazonaws.com`. The two **repository variables** `AWS_PLAN_ROLE_ARN` and `AWS_DEPLOY_ROLE_ARN` hold their Amazon Resource Names (ARNs), the roles' unique IDs; the workflows read them as `${{ vars.… }}`. They are set once, from base's outputs ([runbook](../operations/demo-environment.md#cis-roles-and-variables), [GitHub settings](github-settings.md#variables)). The account ID is not stored: each job reads it from its credentials (`aws sts get-caller-identity`), passes it to Terraform as `TF_VAR_account_id` and masks it in the logs from then on. The credentials step runs before the mask exists and echoes the role ARN, so the ARN, and the account ID in it, shows in that step's public log; this is accepted ([threat model](../architecture/threat-model.md#risks-accepted-on-purpose)).
 
 **Dependabot and OIDC are not verified yet.** Whether a Dependabot PR that changes `infra/` gets an OIDC token for `infra-plan.yml` is checked on the first Dependabot `terraform` PR. If it does not, the `plan` and `comment` jobs skip PRs whose author is `dependabot[bot]`, and the owner plans provider bumps locally ([OP-019](https://github.com/luiki-dev/szop/issues/77)).
 
@@ -184,7 +184,7 @@ From [ADR 0010](../decisions/0010-ci-cd.md), decisions 4 and 20. zizmor checks m
 - **`persist-credentials: false`** on every `actions/checkout`, so the token is not left in `.git/config` for later steps.
 - **Nothing a PR author controls inside `${{ … }}` in a `run:` script** (titles, branch names): such a value goes through `env:` and is read as `"$NAME"`.
 - **No `pull_request_target` and no `workflow_run`**: they run with the repository's secrets on a fork's code or data.
-- **A job that holds AWS credentials runs no code a PR could change, besides Terraform's:** no setup action, no `pnpm install` and no project script; Terraform, the AWS CLI, git, jq and `gh` only ([ADR 0012](../decisions/0012-security-baseline.md), decision 18). No job holds both AWS credentials and a write token for the repository, and a job never names the `demo` environment before PH-12 creates it protected: GitHub would create it with no protection.
+- **A job that holds AWS credentials runs no code a PR could change, besides Terraform's:** no project setup action (`./.github/actions/setup`), no `pnpm install` and no project script; Terraform, the AWS CLI, git, jq and `gh` only ([ADR 0012](../decisions/0012-security-baseline.md), decision 18). No job holds both AWS credentials and a write token for the repository, and a job never names the `demo` environment before PH-12 creates it protected: GitHub would create it with no protection.
 - **actionlint and zizmor run before every commit that stages a workflow, a local action or `dependabot.yml`:** the pre-commit hook runs them on the staged files, and `pnpm check:workflows` runs them over everything. Install them with the [setup guide](setup.md#9-actionlint-zizmor-and-uv); CI runs them anyway, and zizmor's online audits only there ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 2).
 
 ## CodeQL

@@ -31,6 +31,7 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [Checks](#checks)
   - [Rotating the Better Auth secret](#rotating-the-better-auth-secret)
   - [CI's roles and variables](#cis-roles-and-variables)
+  - [Cost allocation tags](#cost-allocation-tags)
 - [Tearing down](#tearing-down)
   - [With the button](#with-the-button)
   - [The nightly run](#the-nightly-run)
@@ -68,10 +69,9 @@ The root user can do everything, including closing the account, and no policy ca
 
 1. **Default region:** *account menu (top right) → Settings → Localization and default Region → Edit*: **Default Region: Europe (Frankfurt)**, then *Save*. Everything Szop creates lives there ([ADR 0008](../decisions/0008-hosting.md), decision 8), and every console session now starts there. On the page of a global service (Billing, IAM, Organizations), the region menu shows every region with a lock: those services have no region, so the menu is unused there. Open a regional service, such as *Console Home*, to switch regions by hand.
 2. On *Billing and Cost Management → Home*, note your plan and the remaining credits. On the Free plan, the page shows when it ends. The budget that bootstrap creates watches the spending ([Applying bootstrap](#applying-bootstrap)); no other billing alert is needed.
-3. **Let IAM see the billing pages.** By default only the root user sees most of *Billing and Cost Management*: until root turns on *IAM user and role access to Billing information*, every IAM user and role, the Identity Center administrator role included, is answered with "Access denied · IAM user access not activated" on pages such as *Cost allocation tags* and *Cost Explorer*. Sign in **as the root user** (its email address and password, with MFA), then *account menu (top right) → Account → IAM user and role access to Billing information → Edit → Activate IAM Access → Update*. The switch grants nothing by itself: it lets IAM policies decide, and `AdministratorAccess` already allows billing. CI's plan role is denied billing and cost reads on purpose, because everything its job prints is public ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 5). Then sign out of root.
-4. **Cost allocation tags.** Signed in through the access portal, *Billing and Cost Management → Cost allocation tags*: under *User-defined cost allocation tags*, select `group` and `project`, then *Activate*. These are the two tags every Szop resource carries, so Cost Explorer can group the spending by module ([ADR 0008](../decisions/0008-hosting.md), decision 26). A tag shows in the list only after a resource carrying it exists, which can take up to 24 hours, and its cost data starts from the moment of activation, never earlier: do it before the first demo, not after.
+3. **Let IAM see the billing pages.** By default only the root user sees most of *Billing and Cost Management*: until root turns on *IAM user and role access to Billing information*, every IAM user and role, the Identity Center administrator role included, is answered with "Access denied · IAM user access not activated" on pages such as *Cost allocation tags* and *Cost Explorer*. Sign in **as the root user** (its email address and password, with MFA), then *account menu (top right) → Account → IAM user and role access to Billing information → Edit → Activate IAM Access → Update*. The switch grants nothing by itself: it lets IAM policies decide, and `AdministratorAccess` already allows billing. CI's plan role is denied billing and cost reads on purpose, because everything its job prints is public ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 5). Then sign out of root. The tags are activated after the first apply of base ([Cost allocation tags](#cost-allocation-tags)); on an account whose setup is already done, do this step as root now, and the tag step right after.
 
-**Check:** *Cost allocation tags* opens for your Identity Center user and lists `group` and `project` as *Active*.
+**Check:** as root, *IAM user and role access to Billing information* shows *Activated*.
 
 ### 4. IAM Identity Center
 
@@ -372,7 +372,7 @@ gh variable set AWS_PLAN_ROLE_ARN --repo luiki-dev/szop --body "$(terraform outp
 gh variable set AWS_DEPLOY_ROLE_ARN --repo luiki-dev/szop --body "$(terraform output -raw ci_deploy_role_arn)"
 ```
 
-No access key and no account ID is stored in GitHub: the workflows read the account ID from the credentials they receive. The ARNs contain the account ID, so, like it, they stay out of commits, issues and PRs.
+No access key and no account ID is stored in GitHub: the workflows read the account ID from the credentials they receive. The ARNs contain the account ID. It is not a secret, and the credentials step of both workflows prints the ARN in its public log; still, keep the ARNs and the account ID out of commits, issues and PRs, where nothing needs them.
 
 **Create the `demo-teardown` environment first**, before `demo-down.yml` reaches `main` ([GitHub settings](../development/github-settings.md#environments)): no reviewer, deployment branches limited to `main`. A job that names an environment that does not exist creates it with no protection at all. The plan comment of the PR that adds the roles needs the variables, so these steps come before it.
 
@@ -382,6 +382,12 @@ After the merge, apply base again from `main`, as for every base PR ([ADR 0011](
 
 - add `repo:luiki-dev/szop:environment:demo` to the deploy role's trust by hand: PH-12 adds it in the PR in which you create the `demo` environment with its required reviewer, because GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
 - widen a CI role in the console: the plan comment and IAM Access Analyzer check the roles' policies only when they change in code.
+
+### Cost allocation tags
+
+Once the access portal works (step 5) and a resource that carries the tags exists, which `infra/bootstrap` and `infra/base` provide, make the cost reports group by them. Signed in through the access portal, *Billing and Cost Management → Cost allocation tags*: under *User-defined cost allocation tags*, select `group` and `project`, then *Activate*. These are the two tags every Szop resource carries, so Cost Explorer can group the spending by module ([ADR 0008](../decisions/0008-hosting.md), decision 26). A tag shows in the list only after a resource carrying it exists, which can take up to 24 hours, and its cost data starts from the moment of activation, never earlier: do it before the first demo, not after. This needs step 3's *Activate IAM Access* first ([OP-094](https://github.com/luiki-dev/szop/issues/209)).
+
+**Check:** *Cost allocation tags* opens for your Identity Center user and lists `group` and `project` as *Active*.
 
 ## Tearing down
 
@@ -406,7 +412,7 @@ If two runs overlap, the second waits: `demo-down` runs one at a time and never 
 
 - **Configure AWS credentials fails**, or `Not authorized to perform sts:AssumeRoleWithWebIdentity`: the trust policy or the repository variable `AWS_DEPLOY_ROLE_ARN` no longer matches ([CI's roles and variables](#cis-roles-and-variables)).
 - **`terraform init` or `destroy` says `Error acquiring the state lock`** after 15 minutes: another run holds it, usually a `demo-up` still working. Wait for it, then re-run (*Re-run failed jobs*). If no run is going and the lock is stale, `terraform force-unlock <lock-id>` from your machine (the ID is in the error) removes it.
-- **`Cannot fetch the recorded commit`:** the demo was deployed from a commit GitHub no longer serves, and the job refuses to destroy with other code. Destroy by hand, from your machine ([From your machine](#from-your-machine)).
+- **`Cannot fetch the recorded commit`:** the demo was deployed from a commit GitHub no longer serves, and the job refuses to destroy with other code. Destroy by hand, from your machine ([From your machine](#from-your-machine)). If the commit is missing on your machine too (`git cat-file -e <commit>` fails after `git fetch origin`), destroy with `main`'s code, then check with the Tag Editor (tag `group` = `demo`) that no resource of the demo is left; a resource that `main`'s code does not know has to be deleted by hand.
 - **A destroy error from AWS** (a resource that is in use, a dependency): the log names the resource. Re-run once; if it fails again, destroy by hand and read the error there.
 - **A network error or a GitHub outage:** *Re-run failed jobs*.
 
@@ -428,7 +434,7 @@ terraform init
 terraform output deployed_commit                  # the commit the demo was deployed from
 ```
 
-With no such output (no demo has recorded one), stay on the code you have. Otherwise check out that commit, whose Terraform code and `.terraform-version` created the demo, and initialise again:
+With no such output (no demo has recorded one), destroy with `main`'s code: `git switch main` and `git pull`, so that you are on an up-to-date `main`, then `terraform init` again. Otherwise check out that commit, whose Terraform code and `.terraform-version` created the demo, and initialise again:
 
 ```bash
 git switch --detach <commit>

@@ -81,7 +81,7 @@ jobs:
       # Destroy with the code that created the demo, not main's: a resource
       # added since is unknown to main's code and would be left running.
       # If that commit cannot be fetched, the job fails here, loudly, and never
-      # falls back to main's code (ADR 0032, Review Focus 4).
+      # falls back to main's code (ADR 0032, decision 6).
       - id: checkout-recorded
         if: steps.state.outputs.commit != ''
         env:
