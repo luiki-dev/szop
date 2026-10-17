@@ -204,11 +204,11 @@ git commit -m "ci: add demo-down and a placeholder demo-up"
 - Consumes: `AWS_PLAN_ROLE_ARN`; `infra/base`, `infra/demo`.
 - Produces: the `infra-plan` workflow with jobs `plan` and `comment`; the artifact `infra-plan-comment` holding `comment.md`; the comment marker `<!-- infra-plan -->`.
 
-- [ ] **Step 1: Triggers and the `plan` job's frame**
+- [x] **Step 1: Triggers and the `plan` job's frame**
 
 `on: pull_request` to `main` with `paths: ["infra/**", ".terraform-version", ".github/workflows/infra-plan.yml"]`; `permissions: {}`; `concurrency: { group: infra-plan-${{ github.event.pull_request.number }}, cancel-in-progress: true }`. Job `plan`: `if: github.event.pull_request.head.repo.full_name == github.repository`, `permissions: { contents: read, id-token: write }`, `timeout-minutes: 20`. Checkout, credentials (`vars.AWS_PLAN_ROLE_ARN`, session `gh-${{ github.run_id }}`), `TF_VAR_account_id` as in Task 3, Terraform as in `ci.yml`.
 
-- [ ] **Step 2: Plan each module**
+- [x] **Step 2: Plan each module**
 
 One `run` step looping over `base demo`, each iteration independent (`set +e` around the module's commands, the result recorded per module, Review Focus 5):
 - `terraform -chdir=infra/$m init -input=false` then `plan -lock=false -input=false -no-color -out="$RUNNER_TEMP/$m.tfplan"`, adding `-refresh=false` for `base` only, with a comment citing ADR 0032, decision 11 (the provider decrypts the Better Auth secret on refresh, which the plan role is denied); the full plan printed to the log inside a `::group::`.
@@ -217,19 +217,19 @@ One `run` step looping over `base demo`, each iteration independent (`set +e` ar
 - Policies: every `aws_iam_role` (`assume_role_policy`), `aws_iam_role_policy` and `aws_iam_policy` (`policy`) in `.planned_values` (root module and child modules), each with its address. A value that is not a string in `planned_values` (unknown) is listed as "not checked until applied".
 - For each policy: `aws accessanalyzer validate-policy` with the policy type of Task 1, step 5; its findings kept as `findingType`, `issueCode`, `findingDetails`.
 
-- [ ] **Step 3: The comment's Markdown**
+- [x] **Step 3: The comment's Markdown**
 
 Written to `$RUNNER_TEMP/comment.md`, starting with `<!-- infra-plan -->`, then `### Terraform plan`, the planned commit (`github.event.pull_request.head.sha` via `env:`) and a link to the run. Per module: `infra/<m>: N to add, N to change, N to destroy` (or "❌ plan failed, see the log"), the changed addresses in a `<details>` block, and "IAM Access Analyzer": findings ordered `ERROR`, `SECURITY_WARNING`, `WARNING`, `SUGGESTION`, each with the policy's address, or "no findings". Upload with `actions/upload-artifact` (pinned) as `infra-plan-comment`, `retention-days: 1`, `if: always()`. The job's result is success when the comment was written.
 
-- [ ] **Step 4: The `comment` job**
+- [x] **Step 4: The `comment` job**
 
 `needs: plan`, `if: always() && needs.plan.result != 'skipped'`, `permissions: { pull-requests: write }`, `timeout-minutes: 5`, no checkout, no AWS. `actions/download-artifact` (pinned). Then with `GH_TOKEN: ${{ github.token }}`, `PR: ${{ github.event.pull_request.number }}` and `REPO: ${{ github.repository }}` in `env:`: find the comment id with `gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[] | select(.body | startswith("<!-- infra-plan -->")) | .id' | head -n1`; `PATCH repos/$REPO/issues/comments/$id` if found, else `POST repos/$REPO/issues/$PR/comments`, both with `-F body=@comment.md`.
 
-- [ ] **Step 5: Lint and see it work (Review Focus 3 and 5)**
+- [x] **Step 5: Lint and see it work (Review Focus 3 and 5)**
 
 Run actionlint and zizmor. Expected: no findings. After the owner's apply and variables (Task 7, step 1), the phase PR's run is checked in Task 7: one comment, updated by a second push; both modules listed.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .github/workflows/infra-plan.yml docs/superpowers/plans
