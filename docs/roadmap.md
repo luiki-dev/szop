@@ -21,6 +21,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure)
   - [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net)
   - [PH-12 First deploy](#ph-12-first-deploy)
+  - [PH-35 Security scanners](#ph-35-security-scanners)
   - [PH-13 Releases](#ph-13-releases)
   - [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status)
 - [Stage 4: MVP](#stage-4-mvp)
@@ -180,6 +181,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure) | ✅ Done | [Spec](superpowers/specs/2026-10-15-PH-10-domain-and-base-infrastructure-design.md) | [Plan](superpowers/plans/2026-10-16-PH-10-domain-and-base-infrastructure.md) | [#207](https://github.com/luiki-dev/szop/pull/207) | [#39](https://github.com/luiki-dev/szop/issues/39) |
 | [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | 🚧 In progress | — | — | — | [#40](https://github.com/luiki-dev/szop/issues/40) |
 | [PH-12 First deploy](#ph-12-first-deploy) | ⬜ Not started | — | — | — | [#41](https://github.com/luiki-dev/szop/issues/41) |
+| [PH-35 Security scanners](#ph-35-security-scanners) | ⬜ Not started | — | — | — | [#213](https://github.com/luiki-dev/szop/issues/213) |
 | [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
 | [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status) | ⬜ Not started | — | — | — | [#205](https://github.com/luiki-dev/szop/issues/205) |
 
@@ -204,9 +206,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-11 CI access to AWS and the teardown safety net
 
 - **Goal:** CI reaches AWS without stored keys. PRs touching `infra/` get a `terraform plan` comment, and `demo-down` destroys the demo by hand and every night, before any demo can exist.
-- **Delivers:** in `infra/base`, the GitHub OpenID Connect (OIDC) provider and the `szop-ci-plan` and `szop-ci-deploy` roles, checked by IAM Access Analyzer ([ADR 0010](decisions/0010-ci-cd.md), decisions 15 and 16; [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 17); `infra-plan.yml`; the real `demo-down.yml` in the `demo-teardown` environment; `infra/demo` with only its backend and provider; a placeholder `demo-up.yml` ([ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 2).
+- **Delivers:** in `infra/base`, the GitHub OpenID Connect (OIDC) provider and the `szop-ci-plan` and `szop-ci-deploy` roles, checked by IAM Access Analyzer ([ADR 0010](decisions/0010-ci-cd.md), decisions 15 and 16; [ADR 0012](decisions/0012-security-baseline.md), decisions 16 and 17); `infra-plan.yml`; the real `demo-down.yml` in the `demo-teardown` environment; `infra/demo` with only its backend and provider; a placeholder `demo-up.yml` ([ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 2); actionlint and zizmor in the pre-commit hook.
 - **Depends on:** nothing beyond the order, but no demo runs, and no local apply of `infra/demo` happens, before it is merged ([ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 2).
-- **Owner steps:** create the `demo-teardown` environment (no reviewer, `main` only); apply `infra/base` from the branch, and again from `main` after the merge; store the plan and deploy roles' ARNs as GitHub variables; after the merge, run `demo-down` once and see it succeed.
+- **Owner steps:** create the `demo-teardown` environment (no reviewer, `main` only); apply `infra/base` from the branch, and again from `main` after the merge; store the plan and deploy roles' ARNs as GitHub variables; after the merge, run `demo-down` once and see it succeed; as the root user, activate IAM access to billing, then the `project` and `group` cost allocation tags, following the runbook.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#40](https://github.com/luiki-dev/szop/issues/40).
 
@@ -218,6 +220,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** create the `demo` environment with the owner as required reviewer and "prevent self-review" off; press `demo-up` on the branch, check the demo (including that the log shows the owner's real IP address, and a Lighthouse run), then press `demo-down`.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#41](https://github.com/luiki-dev/szop/issues/41).
+
+### PH-35 Security scanners
+
+- **Goal:** CI scans the Terraform code for security misconfigurations and the container image for known vulnerabilities, and lints the Dockerfile.
+- **Delivers:** a misconfiguration scanner for `infra/` and the image scan with the Dockerfile lint, possibly one tool for both ([ADR 0010](decisions/0010-ci-cd.md), decision 19).
+- **Depends on:** PH-12, which brings the first real image, and the security groups, load balancer and RDS worth scanning.
+- **Owner steps:** —
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#213](https://github.com/luiki-dev/szop/issues/213).
 
 ### PH-13 Releases
 
