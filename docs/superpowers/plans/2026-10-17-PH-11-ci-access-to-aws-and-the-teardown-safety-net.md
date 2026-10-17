@@ -79,11 +79,12 @@ Policies as `aws_iam_policy_document` data sources, matching base's style. A fil
 - `data.aws_iam_policy_document.ci_plan_trust`: `sts:AssumeRoleWithWebIdentity`, principal the provider's ARN, `StringEquals` on `token.actions.githubusercontent.com:aud` = `sts.amazonaws.com` and `token.actions.githubusercontent.com:sub` = `repo:luiki-dev/szop:pull_request`.
 - `aws_iam_role.ci_plan`: name `szop-ci-plan`, `max_session_duration = 3600`.
 - `aws_iam_role_policy_attachment.ci_plan_read_only`: `arn:aws:iam::aws:policy/ReadOnlyAccess`.
-- `data.aws_iam_policy_document.ci_plan_denies` → `aws_iam_role_policy.ci_plan_denies`, four `Deny` statements with these `sid`s:
+- `data.aws_iam_policy_document.ci_plan_denies` → `aws_iam_role_policy.ci_plan_denies`, five `Deny` statements with these `sid`s:
   - `DenySecretValues`: `ssm:GetParameter`, `ssm:GetParameters`, `ssm:GetParametersByPath`, `ssm:GetParameterHistory`, `secretsmanager:GetSecretValue` on `*`.
   - `DenyObjectsOutsideState`: `s3:GetObject`, `s3:GetObjectVersion` with `not_resources` = `arn:aws:s3:::szop-tfstate-ntrtcr/base/*`, `arn:aws:s3:::szop-tfstate-ntrtcr/demo/*`.
   - `DenyLogContents`: `logs:GetLogEvents`, `logs:FilterLogEvents`, `logs:StartQuery`, `logs:StartLiveTail` on `*`.
-  - `DenyBillingAndCost`: the read actions `ReadOnlyAccess` grants for Cost Explorer (`ce:`), Budgets (`budgets:`), billing (`billing:`, `aws-portal:`), cost and usage reports (`cur:`, `bcm-data-exports:`), invoicing (`invoicing:`), `payments:`, `freetier:`, `consolidatedbilling:`, `cost-optimization-hub:`, `savingsplans:`, `tax:` and `purchase-orders:`, listed with wildcards per service (`ce:*` and so on), on `*`; `pricing:` (the public price list) stays allowed.
+  - `DenyBillingAndCost`: the read actions `ReadOnlyAccess` grants for Cost Explorer (`ce:`), Budgets (`budgets:`), billing (`billing:`, `aws-portal:`), cost and usage reports (`cur:`, `bcm-data-exports:`), invoicing (`invoicing:`), `payments:`, `freetier:`, `consolidatedbilling:`, `billingconductor:`, `cost-optimization-hub:`, `savingsplans:`, `tax:` and `purchase-orders:`, listed with wildcards per service (`ce:*` and so on), on `*`; `pricing:` (the public price list) stays allowed.
+  - `DenyAccountContacts`: `account:GetPrimaryEmail`, `account:GetContactInformation`, `account:GetAlternateContact` on `*` (added after the task review, spec decision 5).
 - `access-analyzer:ValidatePolicy`: open the current `ReadOnlyAccess` version in AWS's managed policy reference. If it does not include `access-analyzer:ValidatePolicy` (or `access-analyzer:*`/`access-analyzer:Validate*`), add an `Allow` statement `AllowPolicyValidation` for it in a separate `aws_iam_role_policy.ci_plan_validate`. Note what was found for ADR 0032's "Settled while building".
 
 - [x] **Step 3: Output and the check**
