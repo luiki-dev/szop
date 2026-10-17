@@ -184,19 +184,16 @@ resource "aws_iam_role" "ci_deploy" {
 # request (ADR 0032, decision 3). Today infra/demo has no resources, so the
 # role only reaches the demo's state and its lock file.
 data "aws_iam_policy_document" "ci_deploy_state" {
-  # Lists nothing outside demo/. The S3 backend also lists env:/ for
-  # workspaces; on AccessDenied it falls back to the default workspace, so
-  # that prefix stays closed (ADR 0032, "Settled while building").
+  # The whole bucket can be listed, though only the demo's state is readable.
+  # S3 answers a request for a missing object with 404 only when the caller may
+  # list the bucket, and with 403 otherwise; Terraform treats only 404 as "no
+  # state yet", so a prefix limit would fail every run until a state exists
+  # (ADR 0032, decision 12). The role sees key names, never other objects'
+  # contents. The backend's env:/ listing is covered by this too.
   statement {
-    sid       = "ListDemoState"
+    sid       = "ListStateBucket"
     actions   = ["s3:ListBucket"]
     resources = ["arn:aws:s3:::szop-tfstate-ntrtcr"]
-
-    condition {
-      test     = "StringLike"
-      variable = "s3:prefix"
-      values   = ["demo/*"]
-    }
   }
 
   statement {
