@@ -10,6 +10,8 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
 - [Visibility](#visibility)
 - [Pull requests](#pull-requests)
 - [Actions](#actions)
+- [Environments](#environments)
+- [Variables](#variables)
 - [Ruleset for `main`](#ruleset-for-main)
 - [Ruleset for version tags](#ruleset-for-version-tags)
 - [Security](#security)
@@ -29,7 +31,10 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
    3. The required status checks in the [ruleset for `main`](#ruleset-for-main).
    4. The *Require code scanning results* rule last, after CodeQL has succeeded on `main`. The bypass list is empty, so a rule that asks for results CodeQL cannot produce would block every merge.
 4. The labels, milestones and project, with [ADR 0024](../decisions/0024-github-project-tracking.md): see [Labels](#labels), [Milestones](#milestones) and [Project](#project).
-5. Check the result (see [Checking the settings](#checking-the-settings)).
+5. The settings CI needs to reach AWS, around the [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) PR ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md)):
+   1. The [`demo-teardown` environment](#environments), before `demo-down.yml` reaches `main`: a job that names a missing environment creates it with no protection.
+   2. The two [variables](#variables), after `infra/base` is applied from the PR's branch: they hold its outputs, and the PR's plan comment needs them.
+6. Check the result (see [Checking the settings](#checking-the-settings)).
 
 ## Visibility
 
@@ -65,6 +70,29 @@ Leave **Allow auto-merge** off: the owner's manual merge is the approval (ADR 00
 | **Approval for running fork pull request workflows from contributors** | **Require approval for all external contributors** | A PR from anyone outside the repository runs no workflow until the owner approves it. ADR 0010, decision 21. |
 | **Workflow permissions** | **Read repository contents and packages permissions** | The default `GITHUB_TOKEN` can only read; a job that needs more asks for it in its `permissions:`. ADR 0010, decision 21. |
 | ↳ **Allow GitHub Actions to create and approve pull requests** | Off | No workflow uses `GITHUB_TOKEN` to open or approve PRs; release-please uses its own GitHub App ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 8). ADR 0010, decision 21. |
+
+## Environments
+
+*Settings → Code and automation → Environments.* An environment is a named target that a job picks with `environment:`; its rules are checked before the job starts, and the token the job receives names the environment (`sub` `repo:luiki-dev/szop:environment:<name>`), which is what an AWS role's trust policy matches ([CI/CD](ci-cd.md#cis-access-to-aws)).
+
+| Environment | Setting | Value | Why |
+|---|---|---|---|
+| `demo-teardown` | **Required reviewers** | None | The nightly `demo-down` cannot wait for an approval at night. ADR 0012, decision 16. |
+| | **Deployment branches and tags** | **Selected branches and tags**, with one rule: branch **`main`** | The trust policy of `szop-ci-deploy` matches the environment, and the token of an environment job carries the same `sub` from any branch, so the policy cannot tell a branch from `main`. This rule is what does: a job on any other branch that names `demo-teardown` is refused by GitHub before it runs and never gets a token. Without it, anything that can push a branch could unlock the deploy role. ADR 0012, decision 16; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decisions 9 and 10. |
+| | **Secrets and variables** | None | The role ARN is a repository variable (below). |
+
+Create it by hand, **before** `demo-down.yml` is merged: GitHub creates an environment, with no protection, the first time a job names a missing one. The environments `demo` (the owner as required reviewer, [PH-12](../roadmap.md#ph-12-first-deploy)) and `release` (`main` only, [PH-13](../roadmap.md#ph-13-releases)) are created with the phases that use them; no job names them before that, and the deploy role does not trust `demo` until then.
+
+## Variables
+
+*Settings → Secrets and variables → Actions → Variables → Repository variables.*
+
+| Variable | Value | Why |
+|---|---|---|
+| `AWS_PLAN_ROLE_ARN` | The ARN of `szop-ci-plan`: base's output `ci_plan_role_arn` | Read by `infra-plan.yml` (`vars.AWS_PLAN_ROLE_ARN`) to assume the read-only plan role. |
+| `AWS_DEPLOY_ROLE_ARN` | The ARN of `szop-ci-deploy`: base's output `ci_deploy_role_arn` | Read by `demo-down.yml` to assume the deploy role. |
+
+They are variables, not secrets: an ARN is a name, not a credential, and what protects the roles is their trust policies. **No AWS access key and no account ID is stored in GitHub**; the workflows read the account ID from their own credentials. `gh variable set` sets them; the runbook has the commands ([CI's roles and variables](../operations/demo-environment.md#cis-roles-and-variables)). A variable that is missing makes the job fail at the credentials step, with an error about the role.
 
 ## Ruleset for `main`
 
@@ -166,6 +194,11 @@ gh api repos/luiki-dev/szop/actions/permissions/fork-pr-contributor-approval
 # CodeQL's default setup
 gh api repos/luiki-dev/szop/code-scanning/default-setup
 
+# The demo-teardown environment, its branch rule, and the variables
+gh api repos/luiki-dev/szop/environments/demo-teardown
+gh api repos/luiki-dev/szop/environments/demo-teardown/deployment-branch-policies
+gh variable list --repo luiki-dev/szop
+
 # Labels, milestones and the project
 gh label list --repo luiki-dev/szop
 gh api "repos/luiki-dev/szop/milestones?state=all"
@@ -179,5 +212,6 @@ Expected:
 - `sha_pinning_required` is `true`.
 - `default_workflow_permissions` is `read` and `can_approve_pull_request_reviews` is `false`.
 - `approval_policy` is `all_external_contributors`.
+- The environment `demo-teardown` exists with `protection_rules` empty (no reviewer) and `deployment_branch_policy` set to `custom_branch_policies: true`; its one branch policy has the name `main`. `gh variable list` shows `AWS_PLAN_ROLE_ARN` and `AWS_DEPLOY_ROLE_ARN`, and no other variable.
 - CodeQL's `state` is `configured`, with `actions` among its `languages` once the workflows are on `main` (until then, only the JavaScript and TypeScript entries; [OP-067](https://github.com/luiki-dev/szop/issues/27)).
 - Six labels; six milestones, with `Definition` and `Stage 1: Local foundations` closed; the project is public.

@@ -285,31 +285,31 @@ git commit -m "build: run actionlint and zizmor in the pre-commit hook"
 - Create: `docs/decisions/0032-ci-access-and-teardown-details.md`
 - Modify: `docs/operations/demo-environment.md`, `docs/architecture/threat-model.md`, `docs/architecture/architecture.md`, `docs/architecture/stack-overview.md`, `docs/development/ci-cd.md`, `docs/development/github-settings.md`, `docs/development/tools/github-actions.md`, `docs/development/tools/terraform.md`, `docs/glossary.md`, ADRs 0010, 0011, 0012, 0018
 
-- [ ] **Step 1: The runbook**
+- [x] **Step 1: The runbook**
 
 - "One-time account setup", step 3: as root, *Account → IAM user and role access to Billing information → Edit → Activate IAM Access*, why (OP-094's text), then *Billing and Cost Management → Cost allocation tags*: activate `project` and `group`, noting data starts from activation.
 - "Applying base": the CI roles' checks (a second plan shows no changes; `aws iam get-role --role-name szop-ci-deploy --query Role.AssumeRolePolicyDocument` shows only `environment:demo-teardown`), and storing the two outputs as repository variables (*Settings → Secrets and variables → Actions → Variables*, or `gh variable set`).
 - A new "Tearing down" section: the `demo-down` button as the primary path (*Actions → demo-down → Run workflow* on `main`), reading its summary, the nightly schedule, what a failure email means and what to do (open the run, re-run, or destroy locally), and the local fallback (`AWS_PROFILE=szop terraform -chdir=infra/demo destroy` after checking out the commit `terraform output deployed_commit` names). "Coming later" keeps only spinning up and debugging.
 - `## Contents` in sync.
 
-- [ ] **Step 2: Threat model, architecture, stack overview**
+- [x] **Step 2: Threat model, architecture, stack overview**
 
 - `threat-model.md`: a row **CI workflow** with paths "a same-repository PR (OIDC → `szop-ci-plan`)" and "a job in `demo-teardown` on `main` (OIDC → `szop-ci-deploy`)", what each reaches, and guards (trust policies by `sub`; explicit denies; `main`-only environment; no installs next to credentials). The Owner and Compromised dependency rows mention the new pieces where they change. An entry point in the STRIDE section for the OIDC trust. "Risks accepted on purpose": public plan output (ADR 0010, decision 14), `terraform plan` able to run programs with the read-only role (ADR 0012, decision 17).
 - `architecture.md`: the deployment section gains base's OIDC provider and two CI roles, and `infra/demo`.
 - `stack-overview.md`: OIDC federation, IAM roles with trust and permission policies, explicit denies, Access Analyzer's validation, GitHub environments with branch rules, scheduled workflows.
 
-- [ ] **Step 3: CI docs and settings**
+- [x] **Step 3: CI docs and settings**
 
 - `ci-cd.md`: "What runs when" and "The jobs" gain `infra-plan`, `demo-down`, `demo-up` (placeholder); a short section on the plan comment and its findings; the variables. Contents in sync.
 - `github-settings.md`: the `demo-teardown` environment (no reviewer, deployment branches: `main` only) and the two variables, with why; "Order of applying" and "Checking the settings" updated.
 - `tools/github-actions.md`: environments, OIDC (`id-token: write`), `vars`, `schedule`. `tools/terraform.md`: `demo` in the modules table, CI planning base and demo.
 - `glossary.md`: OIDC (OpenID Connect), STS (Security Token Service), and any other new acronym.
 
-- [ ] **Step 4: ADR 0032**
+- [x] **Step 4: ADR 0032**
 
 `docs/decisions/0032-ci-access-and-teardown-details.md`, in ADR 0030's format: header with `Refines:`/`Extends:`/`Completes:` for ADR 0010 (decisions 13, 14, 16), ADR 0011 (decision 7), ADR 0012 (decisions 16, 17) and ADR 0018 (decision 6); context; the decisions table copied from the spec's ten decisions (Claude's calls marked); "Settled while building" with what Tasks 1–5 found (the thumbprint, `ValidatePolicy` in `ReadOnlyAccess`, the backend's `ListBucket` prefix, the secret refresh, zizmor's config lookup); consequences. Then the notes: each earlier ADR's status line, and a `<br>✏️ **Refined by [ADR 0032](0032-ci-access-and-teardown-details.md), decision N:** …` line (or ➕/🧩) at the bottom of each affected decision's cell.
 
-- [ ] **Step 5: Check and commit**
+- [x] **Step 5: Check and commit**
 
 Run: `pnpm format:check`. Expected: pass. Check every new link resolves (`grep` the anchors).
 

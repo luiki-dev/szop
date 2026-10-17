@@ -146,7 +146,7 @@ The workflow files in `.github/` are checked by two tools, run before each commi
 - **actionlint** finds mistakes in the workflows ([actionlint](tools/actionlint.md)). It checks the shell scripts of `run:` steps through **shellcheck** when it finds it on the `PATH`.
 - **zizmor** audits them for security problems ([zizmor](tools/zizmor.md)). It is a Python tool, installed with **uv**, a package manager that puts Python command-line tools in `~/.local/bin`.
 
-The versions are the ones CI runs: actionlint's lives in `.github/workflows/ci.yml` (`ACTIONLINT_VERSION`), zizmor's in the same file (the `version:` of its step); change them together with this section. As in section 8, each download is checked against its SHA-256 checksum, and the commands use a scratch folder.
+The versions are the ones CI runs: actionlint's lives in `.github/workflows/ci.yml` (`ACTIONLINT_VERSION`), zizmor's in the same file (the `version:` of its step); change them together with this section. As in section 8, each archive is checked against its SHA-256 checksum (zizmor comes from PyPI in a pinned version and shellcheck from Ubuntu's packages, so neither has one of ours), and the commands use a scratch folder.
 
 ```bash
 # shellcheck
@@ -177,7 +177,7 @@ cd ~/workspace/szop && pnpm check:workflows
 - `sha256sum --check` must print `OK` for each archive; anything else means stop.
 - If a command says `command not found`, `~/.local/bin` did not exist before and is not on your `PATH` yet: close the terminal, open a new one and try again, as in section 8.
 - `pnpm check:workflows` prints `==> actionlint` and `==> zizmor` and ends with `No findings to report. Good job!`. A missing tool stops it with `FAIL: <tool> not found` and a pointer to this section. What it runs is in [Scripts](scripts.md).
-- The pre-commit hook needs these tools too: a commit that stages a file under `.github/` fails with `command not found` until they are installed.
+- The pre-commit hook needs these tools too: a commit that stages a workflow, a local action or `dependabot.yml` fails with `command not found` until they are installed.
 
 ## 10. Check that everything works
 

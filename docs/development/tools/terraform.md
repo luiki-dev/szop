@@ -32,8 +32,10 @@ A **root module** is a folder of `.tf` files that Terraform runs as one unit, wi
 | Folder | Holds | Applied by |
 |---|---|---|
 | `infra/bootstrap` | The S3 bucket for every module's state, and the budget alerts | The owner, once |
-| `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group | The owner |
-| `infra/demo` (PH-12) | One demo session: network, load balancer, containers, database | CI's buttons, and the nightly teardown |
+| `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group, the GitHub OIDC provider and CI's two roles | The owner |
+| `infra/demo` | One demo session: network, load balancer, containers, database. Only its backend, provider and variable until PH-12 | CI's `demo-up` button (PH-12), and `demo-down` by hand and every night |
+
+CI runs Terraform too, with the AWS credentials of an OIDC role, never a stored key: `infra-plan.yml` runs `terraform plan -lock=false` for `base` and `demo` on every pull request that touches `infra/`, as the read-only role `szop-ci-plan` (`base` with `-refresh=false`, since that role may not decrypt the Better Auth secret that a refresh reads), and `demo-down.yml` runs `terraform destroy` on `demo` as `szop-ci-deploy`. Neither changes anything in `base` or `bootstrap`. See [CI/CD](../ci-cd.md#cis-access-to-aws).
 
 Each module splits its files by concern: `versions.tf` (the Terraform and provider versions), `providers.tf` (the AWS provider's settings), `variables.tf`, `outputs.tf`, `backend.tf` (where the state lives) and one file per group of resources.
 
@@ -59,7 +61,7 @@ A **provider** is the plugin that talks to one platform's API; Szop uses `hashic
 
 Terraform's **state** is a JSON file mapping each resource in the code to the real object it created on AWS, with its attributes. Every `plan` reads it to know which objects belong to Terraform, asks AWS what they look like now, and compares both with the code. Without the state, Terraform would try to create everything again. Secret values never enter it (ADR 0008, decision 22).
 
-The **backend** says where the state lives. Every module's `backend.tf` points at the S3 bucket `szop-tfstate-ntrtcr`, each under its own key (`bootstrap/terraform.tfstate`, later `base/…` and `demo/…`). The bucket is versioned, private and reachable only over TLS, so the state is shared by the owner's machine and CI, survives a lost laptop, and can be restored to an earlier version. A `backend` block cannot use variables, since Terraform reads it before anything else, so the bucket's name is written out.
+The **backend** says where the state lives. Every module's `backend.tf` points at the S3 bucket `szop-tfstate-ntrtcr`, each under its own key (`bootstrap/terraform.tfstate`, `base/terraform.tfstate` and `demo/terraform.tfstate`). The bucket is versioned, private and reachable only over TLS, so the state is shared by the owner's machine and CI, survives a lost laptop, and can be restored to an earlier version. A `backend` block cannot use variables, since Terraform reads it before anything else, so the bucket's name is written out.
 
 Bootstrap creates that bucket, so its own first apply runs with a local `terraform.tfstate`, and its state then moves into the bucket ([the runbook](../../operations/demo-environment.md#applying-bootstrap)).
 
@@ -69,7 +71,7 @@ The **two lock files are unrelated**: `.terraform.lock.hcl` pins provider versio
 
 ### Variables kept out of git
 
-Values that should not be public, such as the account ID and the alert address, are variables without defaults, set in a **`terraform.tfvars`** next to the module, which Terraform reads on its own. `.gitignore` ignores `*.tfvars`; a committed `terraform.tfvars.example` shows the shape. Each variable has a `validation` block, so a malformed value stops the run with a clear message before anything reaches AWS. A missing `terraform.tfvars` makes Terraform ask for each value at the prompt, unless the command has `-input=false`, as the runbook's first `plan` does: then it stops with `No value for required variable`.
+Values that should not be public, such as the account ID and the alert address, are variables without defaults, set in a **`terraform.tfvars`** next to the module, which Terraform reads on its own. `.gitignore` ignores `*.tfvars`; a committed `terraform.tfvars.example` shows the shape. Each variable has a `validation` block, so a malformed value stops the run with a clear message before anything reaches AWS. CI has no `terraform.tfvars`: it sets the same variable as the environment variable `TF_VAR_account_id`, read from the role's own credentials. A missing `terraform.tfvars` makes Terraform ask for each value at the prompt, unless the command has `-input=false`, as the runbook's first `plan` does: then it stops with `No value for required variable`.
 
 ### Importing what already exists
 
