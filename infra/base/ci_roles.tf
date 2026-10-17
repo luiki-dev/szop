@@ -67,9 +67,9 @@ data "aws_iam_policy_document" "ci_plan_denies" {
     resources = ["*"]
   }
 
-  # Objects in the state bucket other than the two states a plan reads, which
-  # keeps bootstrap's state unreadable (ADR 0010, decision 16). The plan reads
-  # no other S3 object.
+  # S3 objects in every bucket except the two states a plan reads (base/ and
+  # demo/ in the state bucket), which also keeps bootstrap's state unreadable
+  # (ADR 0010, decision 16). The plan reads no other S3 object.
   statement {
     sid     = "DenyObjectsOutsideState"
     effect  = "Deny"
@@ -114,6 +114,20 @@ data "aws_iam_policy_document" "ci_plan_denies" {
       "savingsplans:*",
       "tax:*",
       "purchase-orders:*",
+      "billingconductor:*",
+    ]
+    resources = ["*"]
+  }
+
+  # A pull request could print the owner's contact details into a public log
+  # (ADR 0032, decision 5).
+  statement {
+    sid    = "DenyAccountContacts"
+    effect = "Deny"
+    actions = [
+      "account:GetPrimaryEmail",
+      "account:GetContactInformation",
+      "account:GetAlternateContact",
     ]
     resources = ["*"]
   }
