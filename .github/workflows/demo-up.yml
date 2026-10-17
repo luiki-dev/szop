@@ -1,0 +1,36 @@
+# The button for the demo environment, registered on main before the real
+# workflow exists (ADR 0011, decision 2): GitHub lists a workflow_dispatch
+# workflow in the Actions tab only once its file is on the default branch.
+# The real demo-up arrives in PH-12 (#41). This placeholder has no
+# environment, because a job naming demo would create that environment
+# unprotected, and no AWS access.
+name: demo-up
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or commit to deploy
+        required: true
+        type: string
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  placeholder:
+    name: placeholder
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      # The ref input is not used here: it would be a value from whoever
+      # presses the button.
+      - run: |
+          msg="\`demo-up\` arrives in PH-12 (#41). This placeholder only registers the button (ADR 0011, decision 2)."
+          echo "$msg" >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::$msg"
+          exit 1

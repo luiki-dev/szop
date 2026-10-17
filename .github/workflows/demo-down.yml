@@ -1,0 +1,144 @@
+# Destroys the demo environment, by hand and every night at 01:17 UTC
+# (ADR 0010, decision 13). It is the safety net against a demo left running:
+# ADR 0011, decision 7 (a real destroy every night, with the recorded commit's
+# code), ADR 0012, decision 16 (the deploy role is assumed only through the
+# demo-teardown environment), and ADR 0032, decisions 6 and 7 (it always runs
+# a real destroy; every Terraform command waits up to 15 minutes for the lock).
+#
+# The GitHub environment demo-teardown (no reviewer, main only) must exist
+# before this file reaches main: a job naming an environment that does not
+# exist creates it unprotected. A failed scheduled run is emailed by GitHub to
+# whoever last changed the schedule: the owner.
+name: demo-down
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 1 * * *"
+
+permissions: {}
+
+# Every run: step uses bash with -e and -o pipefail; without this, GitHub's default is bash -e only.
+defaults:
+  run:
+    shell: bash
+
+# One destroy at a time, and a running one is never cancelled halfway.
+concurrency:
+  group: demo-down
+  cancel-in-progress: false
+
+jobs:
+  destroy:
+    name: destroy
+    runs-on: ubuntu-24.04
+    # Deleting RDS takes about ten minutes (ADR 0032, decision 7).
+    timeout-minutes: 60
+    # Trusted by szop-ci-deploy, and by nothing else.
+    environment: demo-teardown
+    permissions:
+      contents: read # to check the repository out
+      id-token: write # to ask GitHub for the OIDC token AWS trusts
+    steps:
+      # The full history, so the commit the demo was deployed from can be
+      # fetched and checked out below.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gh-${{ github.run_id }}
+          aws-region: eu-central-1
+
+      # The account ID is read from the credentials, never stored in GitHub.
+      - name: Set the account ID for Terraform
+        run: echo "TF_VAR_account_id=$(aws sts get-caller-identity --query Account --output text)" >> "$GITHUB_ENV"
+
+      # The one exact version, shared with tenv on the owner's machine.
+      - id: version
+        run: echo "terraform=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ steps.version.outputs.terraform }}
+          terraform_wrapper: false
+
+      # deployed_commit is the output demo-up records (PH-12). Until then, and
+      # on every night with no demo up, the state has none and jq gives empty.
+      - id: state
+        run: |
+          terraform -chdir=infra/demo init -input=false -lock-timeout=15m
+          commit=$(terraform -chdir=infra/demo output -json | jq -r '.deployed_commit.value // empty')
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+
+      # Destroy with the code that created the demo, not main's: a resource
+      # added since is unknown to main's code and would be left running.
+      # If that commit cannot be fetched, the job fails here, loudly, and never
+      # falls back to main's code (ADR 0032, Review Focus 4).
+      - id: checkout-recorded
+        if: steps.state.outputs.commit != ''
+        env:
+          COMMIT: ${{ steps.state.outputs.commit }}
+        run: |
+          if ! [[ "$COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::The recorded deployed_commit is not a full commit hash: $COMMIT"
+            exit 1
+          fi
+          if [ "$COMMIT" = "$(git rev-parse HEAD)" ]; then
+            echo "The recorded commit $COMMIT is the one checked out."
+            echo "switched=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! git fetch --no-tags origin "$COMMIT"; then
+            echo "::error::Cannot fetch the recorded commit $COMMIT; not destroying with other code. Destroy the demo by hand."
+            exit 1
+          fi
+          git checkout --detach "$COMMIT"
+          echo "switched=true" >> "$GITHUB_OUTPUT"
+
+      - id: no-commit
+        if: steps.state.outputs.commit == ''
+        run: echo "::notice::No deployed commit recorded; destroying with main's code"
+
+      # That commit's own Terraform version, and its own providers.
+      - id: version-recorded
+        if: steps.checkout-recorded.outputs.switched == 'true'
+        run: echo "terraform=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - if: steps.checkout-recorded.outputs.switched == 'true'
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ steps.version-recorded.outputs.terraform }}
+          terraform_wrapper: false
+
+      - if: steps.checkout-recorded.outputs.switched == 'true'
+        run: terraform -chdir=infra/demo init -input=false -lock-timeout=15m
+
+      - id: destroy
+        run: terraform -chdir=infra/demo destroy -auto-approve -input=false -lock-timeout=15m -no-color | tee "$RUNNER_TEMP/destroy.log"
+
+      - name: Summary
+        if: always()
+        env:
+          TRIGGER: ${{ github.event_name }}
+          COMMIT: ${{ steps.state.outputs.commit }}
+          DESTROY: ${{ steps.destroy.outcome }}
+        run: |
+          {
+            echo "## demo-down"
+            echo
+            echo "- Trigger: \`$TRIGGER\`"
+            if [ -n "$COMMIT" ]; then
+              echo "- Code used: commit \`$COMMIT\`, the one recorded as deployed in the demo's state"
+            else
+              echo "- Code used: \`main\`'s, because no deployed commit is recorded"
+            fi
+            if [ "$DESTROY" = success ]; then
+              echo "- Result: $(grep 'Destroy complete!' "$RUNNER_TEMP/destroy.log" || echo 'destroy finished')"
+            else
+              echo "- Result: destroy did not finish (step outcome: $DESTROY); see the log"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

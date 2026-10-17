@@ -161,7 +161,7 @@ git commit -m "feat(infra): add the deploy role and the empty demo module"
 - Consumes: `AWS_DEPLOY_ROLE_ARN`; `infra/demo` (Task 2); the `deployed_commit` output, which PH-12 adds.
 - Produces: the `demo-down` workflow (name `demo-down`, job `destroy`) and the `demo-up` workflow (name `demo-up`, input `ref`).
 
-- [ ] **Step 1: `demo-down.yml`, per the spec's "demo-down.yml" section**
+- [x] **Step 1: `demo-down.yml`, per the spec's "demo-down.yml" section**
 
 Triggers `workflow_dispatch` (no inputs) and `schedule: - cron: "17 1 * * *"`; `permissions: {}`; `concurrency: { group: demo-down, cancel-in-progress: false }`; `defaults.run.shell: bash`. Job `destroy`: `environment: demo-teardown`, `permissions: { contents: read, id-token: write }`, `timeout-minutes: 60`. Steps, in order:
   1. `actions/checkout` (the same SHA as `ci.yml`), `fetch-depth: 0`, `persist-credentials: false`.
@@ -174,19 +174,19 @@ Triggers `workflow_dispatch` (no inputs) and `schedule: - cron: "17 1 * * *"`; `
 
   Comments at the top: what the workflow is, ADR 0010 decision 13, ADR 0011 decision 7, ADR 0012 decision 16, ADR 0032 decisions 6–7; and that `demo-teardown` must exist (no reviewer, `main` only) before this file reaches `main`.
 
-- [ ] **Step 2: Check the commit-reading logic offline**
+- [x] **Step 2: Check the commit-reading logic offline**
 
 With `jq`, check the expression on the three shapes: `{}` → empty; `{"deployed_commit":{"value":"abc…"}}` → the hash; `{"deployed_commit":{"value":null}}` → empty. Run each with `echo '<json>' | jq -r '.deployed_commit.value // empty'`. Expected: as listed.
 
-- [ ] **Step 3: `demo-up.yml`, the placeholder**
+- [x] **Step 3: `demo-up.yml`, the placeholder**
 
 `name: demo-up`; `on: workflow_dispatch` with input `ref` (description "Branch, tag or commit to deploy", required, type string); `permissions: {}`. One job `placeholder`, `runs-on: ubuntu-24.04`, `timeout-minutes: 5`, `permissions: {}`, **no `environment`**, one step that writes "`demo-up` arrives in PH-12 (#41). This placeholder only registers the button (ADR 0011, decision 2)." to `$GITHUB_STEP_SUMMARY`, prints it as `::error::`, and exits 1. The `ref` input is not used in a `run:` script.
 
-- [ ] **Step 4: Lint**
+- [x] **Step 4: Lint**
 
 Run actionlint and zizmor as their tool pages describe (`pnpm check:workflows` does not exist until Task 5). Expected: no findings.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .github/workflows/demo-down.yml .github/workflows/demo-up.yml docs/superpowers/plans
