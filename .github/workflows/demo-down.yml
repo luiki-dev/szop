@@ -53,9 +53,13 @@ jobs:
           role-session-name: gh-${{ github.run_id }}
           aws-region: eu-central-1
 
-      # The account ID is read from the credentials, never stored in GitHub.
+      # The account ID is read from the credentials, never stored in GitHub, and
+      # masked, so it shows as *** in every later log line (ARNs in the plan too).
       - name: Set the account ID for Terraform
-        run: echo "TF_VAR_account_id=$(aws sts get-caller-identity --query Account --output text)" >> "$GITHUB_ENV"
+        run: |
+          id=$(aws sts get-caller-identity --query Account --output text)
+          echo "::add-mask::$id"
+          echo "TF_VAR_account_id=$id" >> "$GITHUB_ENV"
 
       # The one exact version, shared with tenv on the owner's machine.
       - id: version
