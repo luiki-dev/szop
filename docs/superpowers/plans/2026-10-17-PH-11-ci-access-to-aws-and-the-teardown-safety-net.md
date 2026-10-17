@@ -30,7 +30,7 @@
 
 ## Review Focus
 
-1. **Base's plan fails on the secret.** If the AWS provider refreshes `aws_ssm_parameter.better_auth_secret` with `GetParameter` and decryption, `szop-ci-plan`'s deny breaks base's plan. Task 1, step 4 checks this with a local plan under the plan role's policy before anything else is built; if it breaks, stop and ask the owner (the spec forbids loosening the deny).
+1. **Base's plan fails on the secret.** *(Settled: it does; base is planned with `-refresh=false`, ADR 0032 decision 11.)* If the AWS provider refreshes `aws_ssm_parameter.better_auth_secret` with `GetParameter` and decryption, `szop-ci-plan`'s deny breaks base's plan. Task 1, step 4 checks this with a local plan under the plan role's policy before anything else is built; if it breaks, stop and ask the owner (the spec forbids loosening the deny).
 2. **`terraform init` refused by a too-narrow `ListBucket`.** The S3 backend may list `env:/` for workspaces; `s3:prefix` limited to `demo/` could make init fail for the deploy role. Task 2, step 4 tests init and destroy under the deploy role's exact policy with the policy simulator.
 3. **A PR's text reaching a shell.** The comment's Markdown includes resource addresses and Access Analyzer messages; in the comment job it must reach `gh` as a file (`--input`/`-F body=@file`), never through `${{ }}`. Task 4's zizmor run and step 6's review check it.
 4. **`demo-down` on a recorded commit that is gone.** If `deployed_commit` names a commit `git fetch` cannot find, the job must fail loudly (the nightly failure email), never fall back to `main`'s code silently. Task 3, step 2 pins this.
@@ -83,7 +83,7 @@ Policies as `aws_iam_policy_document` data sources, matching base's style. A fil
   - `DenySecretValues`: `ssm:GetParameter`, `ssm:GetParameters`, `ssm:GetParametersByPath`, `ssm:GetParameterHistory`, `secretsmanager:GetSecretValue` on `*`.
   - `DenyObjectsOutsideState`: `s3:GetObject`, `s3:GetObjectVersion` with `not_resources` = `arn:aws:s3:::szop-tfstate-ntrtcr/base/*`, `arn:aws:s3:::szop-tfstate-ntrtcr/demo/*`.
   - `DenyLogContents`: `logs:GetLogEvents`, `logs:FilterLogEvents`, `logs:StartQuery`, `logs:StartLiveTail` on `*`.
-  - `DenyBillingAndCost`: the read actions `ReadOnlyAccess` grants for Cost Explorer (`ce:`), Budgets (`budgets:`), billing (`billing:`, `aws-portal:`), cost and usage reports (`cur:`, `bcm-data-exports:`), invoicing (`invoicing:`) and `payments:`, listed with wildcards per service (`ce:*` and so on), on `*`.
+  - `DenyBillingAndCost`: the read actions `ReadOnlyAccess` grants for Cost Explorer (`ce:`), Budgets (`budgets:`), billing (`billing:`, `aws-portal:`), cost and usage reports (`cur:`, `bcm-data-exports:`), invoicing (`invoicing:`), `payments:`, `freetier:`, `consolidatedbilling:`, `cost-optimization-hub:`, `savingsplans:`, `tax:` and `purchase-orders:`, listed with wildcards per service (`ce:*` and so on), on `*`; `pricing:` (the public price list) stays allowed.
 - `access-analyzer:ValidatePolicy`: open the current `ReadOnlyAccess` version in AWS's managed policy reference. If it does not include `access-analyzer:ValidatePolicy` (or `access-analyzer:*`/`access-analyzer:Validate*`), add an `Allow` statement `AllowPolicyValidation` for it in a separate `aws_iam_role_policy.ci_plan_validate`. Note what was found for ADR 0032's "Settled while building".
 
 - [x] **Step 3: Output and the check**
@@ -210,7 +210,7 @@ git commit -m "ci: add demo-down and a placeholder demo-up"
 - [ ] **Step 2: Plan each module**
 
 One `run` step looping over `base demo`, each iteration independent (`set +e` around the module's commands, the result recorded per module, Review Focus 5):
-- `terraform -chdir=infra/$m init -input=false` then `plan -lock=false -input=false -no-color -out="$RUNNER_TEMP/$m.tfplan"`; the full plan printed to the log inside a `::group::`.
+- `terraform -chdir=infra/$m init -input=false` then `plan -lock=false -input=false -no-color -out="$RUNNER_TEMP/$m.tfplan"`, adding `-refresh=false` for `base` only, with a comment citing ADR 0032, decision 11 (the provider decrypts the Better Auth secret on refresh, which the plan role is denied); the full plan printed to the log inside a `::group::`.
 - `terraform show -json` into `$RUNNER_TEMP/$m.json`.
 - Counts: `jq '[.resource_changes[] | .change.actions] …'` → add, change, destroy (a replace counts as one add and one destroy, as Terraform's own summary does), and the changed addresses with their action.
 - Policies: every `aws_iam_role` (`assume_role_policy`), `aws_iam_role_policy` and `aws_iam_policy` (`policy`) in `.planned_values` (root module and child modules), each with its address. A value that is not a string in `planned_values` (unknown) is listed as "not checked until applied".
