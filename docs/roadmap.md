@@ -179,7 +179,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 |---|---|---|---|---|---|
 | [PH-09 AWS account and Terraform bootstrap](#ph-09-aws-account-and-terraform-bootstrap) | ✅ Done | [Spec](superpowers/specs/2026-10-14-PH-09-aws-account-and-terraform-bootstrap-design.md) | [Plan](superpowers/plans/2026-10-14-PH-09-aws-account-and-terraform-bootstrap.md) | [#203](https://github.com/luiki-dev/szop/pull/203) | [#38](https://github.com/luiki-dev/szop/issues/38) |
 | [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure) | ✅ Done | [Spec](superpowers/specs/2026-10-15-PH-10-domain-and-base-infrastructure-design.md) | [Plan](superpowers/plans/2026-10-16-PH-10-domain-and-base-infrastructure.md) | [#207](https://github.com/luiki-dev/szop/pull/207) | [#39](https://github.com/luiki-dev/szop/issues/39) |
-| [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | 🚧 In progress | — | — | — | [#40](https://github.com/luiki-dev/szop/issues/40) |
+| [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | 🚧 In progress | [Spec](superpowers/specs/2026-10-17-PH-11-ci-access-to-aws-and-the-teardown-safety-net-design.md) | — | — | [#40](https://github.com/luiki-dev/szop/issues/40) |
 | [PH-12 First deploy](#ph-12-first-deploy) | ⬜ Not started | — | — | — | [#41](https://github.com/luiki-dev/szop/issues/41) |
 | [PH-35 Security scanners](#ph-35-security-scanners) | ⬜ Not started | — | — | — | [#213](https://github.com/luiki-dev/szop/issues/213) |
 | [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
