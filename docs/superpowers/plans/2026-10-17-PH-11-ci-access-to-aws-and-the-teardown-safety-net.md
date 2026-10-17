@@ -16,7 +16,7 @@
 - `infra/demo`: `required_version = "~> 1.16"`, `hashicorp/aws` `~> 6.68`, `allowed_account_ids = [var.account_id]`, default tags `project = "szop"`, `group = "demo"`; `.terraform.lock.hcl` committed with `linux_amd64` checksums.
 - OIDC provider URL `https://token.actions.githubusercontent.com`, audience `sts.amazonaws.com`.
 - `szop-ci-plan` trusts `sub` = `repo:luiki-dev/szop:pull_request` only. `szop-ci-deploy` trusts `sub` = `repo:luiki-dev/szop:environment:demo-teardown` only; **never `environment:demo` in PH-11** (spec, decision 10). Both: `aud` = `sts.amazonaws.com`, maximum session 3600 seconds.
-- `szop-ci-deploy` in PH-11 may only list `demo/` in the bucket and read/write `demo/terraform.tfstate` and its `.tflock`. Nothing in IAM, nothing on base's resources, nothing on billing.
+- `szop-ci-deploy` in PH-11 may only list the state bucket (whole bucket, no prefix condition: spec decision 12) and read/write `demo/terraform.tfstate` and its `.tflock`. Nothing in IAM, nothing on base's resources, nothing on billing.
 - Repository variables: `AWS_PLAN_ROLE_ARN`, `AWS_DEPLOY_ROLE_ARN`. Role session names `gh-${{ github.run_id }}`. No AWS key, and no account ID, stored in GitHub.
 - `demo-down`: cron `17 1 * * *`; concurrency group `demo-down`, `cancel-in-progress: false`; `-lock-timeout=15m`; job `timeout-minutes: 60`; output name read: `deployed_commit`.
 - Every workflow follows `docs/development/ci-cd.md` "Rules for every workflow": `permissions: {}` at the top, per-job grants, `runs-on: ubuntu-24.04`, `timeout-minutes`, actions pinned to full commit SHAs with a version comment, `persist-credentials: false`, nothing a PR author controls inside `${{ }}` in `run:`, no `pull_request_target`, no `workflow_run`.
@@ -124,7 +124,7 @@ git commit -m "feat(infra): add the GitHub OIDC provider and the plan role"
 - `data.aws_iam_policy_document.ci_deploy_trust`: as the plan role's, but `sub` = `repo:luiki-dev/szop:environment:demo-teardown` only, with a comment: `demo` is added in PH-12 with the protected environment (ADR 0032, decision 10).
 - `aws_iam_role.ci_deploy`: name `szop-ci-deploy`, `max_session_duration = 3600`.
 - `data.aws_iam_policy_document.ci_deploy_state` → `aws_iam_role_policy.ci_deploy_state`:
-  - `ListDemoState`: `s3:ListBucket` on `arn:aws:s3:::szop-tfstate-ntrtcr`, condition `StringLike` `s3:prefix` = `demo/*` (plus `env:/demo/*` only if step 4 shows init needs it).
+  - `ListStateBucket`: `s3:ListBucket` on `arn:aws:s3:::szop-tfstate-ntrtcr`, no condition (spec decision 12: S3 answers a missing state with 403 instead of 404 without bucket-wide list, and Terraform fails on 403).
   - `ReadWriteDemoState`: `s3:GetObject`, `s3:PutObject` on `arn:aws:s3:::szop-tfstate-ntrtcr/demo/terraform.tfstate`.
   - `ManageDemoLock`: `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject` on `arn:aws:s3:::szop-tfstate-ntrtcr/demo/terraform.tfstate.tflock`.
 
