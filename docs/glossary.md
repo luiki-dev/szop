@@ -132,7 +132,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 |---|---|
 | **Access key** | A long-lived AWS credential pair (an ID and a secret) for an IAM user. It works until someone deletes it, so a leaked one is the most common way AWS accounts are compromised; Szop has none, and uses IAM Identity Center's short-lived credentials instead (ADR 0029). |
 | **Accessibility check (axe)** | An automated scan of a page for barriers to people using assistive technology, such as a missing label or low contrast. **axe** (axe-core) is the common rule engine; Szop runs it in the E2E journeys through `@axe-core/playwright`, in light and dark mode (see [Playwright](development/tools/playwright.md)). It finds only part of the problems: keyboard and screen-reader use still need people. |
-| **actionlint** | A static checker for GitHub Actions workflow files: syntax, expressions, `needs:` and, through shellcheck, the shell scripts of `run:` steps. Runs in CI's `workflows` job. |
+| **actionlint** | A static checker for GitHub Actions workflow files: syntax, expressions, `needs:` and, through shellcheck, the shell scripts of `run:` steps. Runs in the pre-commit hook, in `pnpm check:workflows` and in CI's `workflows` job. |
 | **Anonymous user** | A server-side user without email or password, created automatically for a guest. Registering links it to a real account. |
 | **Backend (Terraform)** | Where a root module keeps its state. Szop's modules use the S3 backend: one bucket, one key per module. |
 | **Baseline (web features)** | A label for web features that work in all major browsers. "Widely available" means they have done so for at least 30 months; Vite's default build target is based on it. |
@@ -287,6 +287,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Trust policy (IAM)** | The part of an IAM role that says who may assume it. Szop's CI roles trust only OIDC tokens for a given environment or PR event, such as jobs in the `demo` environment; the token does not say which workflow file runs, so the environment's own rules (a required reviewer, allowed branches) decide who gets that far (see ADR 0012). |
 | **Type-aware linting** | Linting that uses TypeScript's type information, so a rule can know, for example, that a call returns a promise. |
 | **Type stripping** | Running TypeScript by deleting the type annotations instead of compiling it, which Node.js does itself, stably since Node 24.12. It does not check types. The API runs this way in production ([ADR 0023](decisions/0023-production-build-and-serving-details.md)) and the Claude Code push hook always does (see ADR 0016); in development the API uses tsx instead, for its watch mode (see ADR 0005). |
+| **uv** | A fast Python package and tool manager. Szop uses it only to install zizmor (`uv tool install`), which is a Python tool (see the [setup guide](development/setup.md#9-actionlint-zizmor-and-uv)). |
 | **Utility class** | A CSS class that does one thing, such as `p-4` for padding. Tailwind CSS is built on them. |
 | **V8** | The JavaScript engine inside Chrome and Node.js. Vitest measures test coverage with V8's built-in instrumentation. |
 | **Variable font** | One font file containing every weight (and sometimes width), instead of one file per weight. |
@@ -301,5 +302,5 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Worktree (git)** | An extra working directory of the same repository, with another branch checked out, so two branches can be worked on side by side. Not used by default in Szop (see ADR 0009). |
 | **Write-only argument** | A Terraform resource setting whose value is sent to the provider but never saved in the state file. Used for secrets. |
 | **X-Forwarded-For** | An HTTP header listing the addresses a request passed through. Each proxy appends the address it saw, but the client can write anything at the start, so only entries added by trusted proxies are believed. Szop trusts the load balancer by its addresses, listed in the `TRUSTED_PROXIES` setting, not by a number of hops (see ADR 0025). |
-| **zizmor** | A security linter for GitHub Actions workflows: it finds template injection, excessive token permissions, unpinned actions and impostor commits. Runs in CI's `workflows` job. |
+| **zizmor** | A security linter for GitHub Actions workflows: it finds template injection, excessive token permissions, unpinned actions and impostor commits. Runs in the pre-commit hook, in `pnpm check:workflows` and in CI's `workflows` job. |
 | **Zod** | A TypeScript library for defining data schemas that give both compile-time types and runtime validation. |

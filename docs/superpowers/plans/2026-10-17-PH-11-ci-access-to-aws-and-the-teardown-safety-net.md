@@ -247,30 +247,30 @@ git commit -m "ci: add the infra-plan workflow with Access Analyzer"
 **Interfaces:**
 - Produces: `pnpm check:workflows`; the lint-staged entry for `.github/**/*.{yml,yaml}`.
 
-- [ ] **Step 1: `scripts/check-workflows.sh`**
+- [x] **Step 1: `scripts/check-workflows.sh`**
 
 Styled like `check-infra.sh` (header comment, `set -euo pipefail`, `cd` to the root, `==>` headings, `FAIL:` messages). For each of `actionlint` and `zizmor`: if `command -v` fails, print `FAIL: <tool> not found; see docs/development/setup.md#<anchor>` and exit 1. Then `actionlint` (no arguments: every workflow) and `zizmor --offline .github`. `"check:workflows": "scripts/check-workflows.sh"` in `package.json`, next to `check:infra`.
 
-- [ ] **Step 2: lint-staged**
+- [x] **Step 2: lint-staged**
 
 An entry `".github/**/*.{yml,yaml}"` as a function of the staged files: `actionlint` on those under `.github/workflows/`, and `zizmor --offline` on all of them; with a comment like the others. Check whether lint-staged's glob matches the dot folder and whether zizmor finds `.github/zizmor.yml` when given single files (add `--config .github/zizmor.yml` if not).
 
-- [ ] **Step 3: See the hook catch something**
+- [x] **Step 3: See the hook catch something**
 
 Stage a scratch copy of a workflow with `run: echo "${{ github.event.pull_request.title }}"` under `.github/workflows/`, run `pnpm exec lint-staged`. Expected: actionlint or zizmor reports it and the run fails. Unstage and delete the scratch file. Then run `pnpm check:workflows` on the clean tree. Expected: both pass.
 
-- [ ] **Step 4: OP-070 in `ci.yml`**
+- [x] **Step 4: OP-070 in `ci.yml`**
 
 Add `if: success() || failure()` to the zizmor step of the `workflows` job and to `- run: pnpm format:check` of the `lint` job, each with a one-line comment (both tools report in one run; a cancelled run still stops).
 
-- [ ] **Step 5: Docs**
+- [x] **Step 5: Docs**
 
 - `setup.md` section 8 renamed to cover the workflow tools too (or a new section 9 "actionlint, zizmor and uv", renumbering after it; keep `## Contents` in sync): install uv from its pinned release with a checksum, as the guide does for tenv; actionlint 1.7.12's tarball with the SHA-256 from `ci.yml` into `~/.local/bin`; `uv tool install zizmor==1.30.1`; shellcheck through `apt` if it is a one-line install; then `pnpm check:workflows` in "Check that everything works". Section 11 ("What the git hooks do") mentions the new entry.
 - `scripts.md`: `check:workflows`, what it runs, that lint-staged runs the same tools on staged files, no CI job runs the script (CI's `workflows` job runs the tools directly).
 - The two tool pages: "In CI only, for now" becomes local and CI, with ADR 0032, decision 2; "Everyday use" uses the installed tools; the update steps name both places a version lives (`ci.yml` and the setup guide). If CI's zizmor action does not pin `version: 1.30.1`, pin it there too, so local and CI run the same version.
 - `ci-cd.md`'s last rule: the hook runs both tools.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/check-workflows.sh package.json lint-staged.config.js .github/workflows/ci.yml docs docs/superpowers/plans
