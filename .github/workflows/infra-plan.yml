@@ -182,7 +182,10 @@ jobs:
       # a filter: an address goes into a code span, so only backticks and line
       # breaks are removed (the brackets of dkim[0] stay); a message goes into
       # the text, so it also loses angle and square brackets (no HTML or links)
-      # and gets no @ that would mention someone.
+      # and gets no @ that would mention someone. The filter covers what an
+      # honest plan prints. The real boundary is the job split (this job holds
+      # only pull-requests: write and no AWS credentials) and that a
+      # same-repository PR comes only from someone with write access.
       - name: Write the comment
         if: ${{ !cancelled() }}
         env:

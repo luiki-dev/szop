@@ -89,6 +89,7 @@ jobs:
         run: |
           if ! [[ "$COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
             echo "::error::The recorded deployed_commit is not a full commit hash: $COMMIT"
+            echo "reason=invalid" >> "$GITHUB_OUTPUT"
             exit 1
           fi
           if [ "$COMMIT" = "$(git rev-parse HEAD)" ]; then
@@ -98,6 +99,7 @@ jobs:
           fi
           if ! git fetch --no-tags origin "$COMMIT"; then
             echo "::error::Cannot fetch the recorded commit $COMMIT; not destroying with other code. Destroy the demo by hand."
+            echo "reason=fetch" >> "$GITHUB_OUTPUT"
             exit 1
           fi
           git checkout --detach "$COMMIT"
@@ -131,6 +133,7 @@ jobs:
           COMMIT: ${{ steps.state.outputs.commit }}
           STATE: ${{ steps.state.outcome }}
           CHECKOUT: ${{ steps.checkout-recorded.outcome }}
+          REASON: ${{ steps.checkout-recorded.outputs.reason }}
           DESTROY: ${{ steps.destroy.outcome }}
         run: |
           {
@@ -140,7 +143,11 @@ jobs:
             if [ "$STATE" != success ]; then
               echo "- Code used: none, the demo's state could not be read"
             elif [ "$CHECKOUT" = failure ]; then
-              echo "- Code used: none, the recorded commit \`$COMMIT\` could not be fetched"
+              if [ "$REASON" = invalid ]; then
+                echo "- Code used: none, the recorded commit \`$COMMIT\` is not a full commit hash"
+              else
+                echo "- Code used: none, the recorded commit \`$COMMIT\` could not be fetched"
+              fi
             elif [ -n "$COMMIT" ]; then
               echo "- Code used: commit \`$COMMIT\`, the one recorded as deployed in the demo's state"
             else

@@ -105,7 +105,7 @@ Base's new files follow its existing style: flat files by concern, policies writ
 
 `szop-ci-plan`, maximum session one hour.
 
-- **Trust:** the OIDC provider, with `aud` equal to `sts.amazonaws.com` and `sub` equal to `repo:luiki-dev/szop:pull_request`. Fork PRs never get a token, so this means same-repository PRs only.
+- **Trust:** the OIDC provider, with `aud` equal to `sts.amazonaws.com` and `sub` equal to `repo:luiki-dev/szop:pull_request`. Fork PRs never get a token, so this means same-repository PRs only. *(Settled while building by [ADR 0032](../../decisions/0032-ci-access-and-teardown-details.md), decisions 13 and 14: the trust policy matches the immutable subject `repo:luiki-dev@290870182/szop@1380292421:pull_request`.)*
 - **Permissions:** the AWS-managed `ReadOnlyAccess`; `access-analyzer:ValidatePolicy`, if `ReadOnlyAccess` does not already grant it ([decision 4](#decisions-taken-in-the-brainstorm)); and one inline policy of explicit denies:
   - secret values: `ssm:GetParameter`, `ssm:GetParameters`, `ssm:GetParametersByPath`, `ssm:GetParameterHistory`, `secretsmanager:GetSecretValue` ([ADR 0010](../../decisions/0010-ci-cd.md), decision 16);
   - S3 objects other than the state: `s3:GetObject` and its versions on everything except `szop-tfstate-ntrtcr/base/*` and `szop-tfstate-ntrtcr/demo/*`, so bootstrap's state is not readable either (ADR 0010, decision 16);
@@ -119,7 +119,7 @@ The plan runs with `-lock=false`, so the role never writes the lock file and nee
 
 `szop-ci-deploy`, maximum session one hour.
 
-- **Trust:** the OIDC provider, with `aud` equal to `sts.amazonaws.com` and `sub` equal to `repo:luiki-dev/szop:environment:demo-teardown` only. PH-12 adds `repo:luiki-dev/szop:environment:demo` ([ADR 0012](../../decisions/0012-security-baseline.md), decision 16; [decision 10](#decisions-taken-in-the-brainstorm)).
+- **Trust:** the OIDC provider, with `aud` equal to `sts.amazonaws.com` and `sub` equal to `repo:luiki-dev/szop:environment:demo-teardown` only. PH-12 adds `repo:luiki-dev/szop:environment:demo` ([ADR 0012](../../decisions/0012-security-baseline.md), decision 16; [decision 10](#decisions-taken-in-the-brainstorm)). *(Settled while building by [ADR 0032](../../decisions/0032-ci-access-and-teardown-details.md), decisions 13 and 14: the trust policy matches the immutable subject `repo:luiki-dev@290870182/szop@1380292421:environment:demo-teardown`, and the deploy role also requires `ref` `refs/heads/main`.)*
 - **Permissions in PH-11** ([decision 3](#decisions-taken-in-the-brainstorm)), one inline policy:
   - `s3:ListBucket` on `szop-tfstate-ntrtcr`, with no prefix condition ([decision 12](#decisions-taken-in-the-brainstorm));
   - `s3:GetObject` and `s3:PutObject` on `szop-tfstate-ntrtcr/demo/terraform.tfstate`;

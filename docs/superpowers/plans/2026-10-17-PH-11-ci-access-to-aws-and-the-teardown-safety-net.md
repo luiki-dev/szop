@@ -15,7 +15,7 @@
 - Region `eu-central-1`; state bucket `szop-tfstate-ntrtcr`; base's key `base/terraform.tfstate`, demo's key `demo/terraform.tfstate`, both with `use_lockfile = true`, `encrypt = true`.
 - `infra/demo`: `required_version = "~> 1.16"`, `hashicorp/aws` `~> 6.68`, `allowed_account_ids = [var.account_id]`, default tags `project = "szop"`, `group = "demo"`; `.terraform.lock.hcl` committed with `linux_amd64` checksums.
 - OIDC provider URL `https://token.actions.githubusercontent.com`, audience `sts.amazonaws.com`.
-- `szop-ci-plan` trusts `sub` = `repo:luiki-dev/szop:pull_request` only. `szop-ci-deploy` trusts `sub` = `repo:luiki-dev/szop:environment:demo-teardown` only; **never `environment:demo` in PH-11** (spec, decision 10). Both: `aud` = `sts.amazonaws.com`, maximum session 3600 seconds.
+- `szop-ci-plan` trusts `sub` = `repo:luiki-dev/szop:pull_request` only. `szop-ci-deploy` trusts `sub` = `repo:luiki-dev/szop:environment:demo-teardown` only; **never `environment:demo` in PH-11** (spec, decision 10). Both: `aud` = `sts.amazonaws.com`, maximum session 3600 seconds. *(Settled while building by ADR 0032, decisions 13 and 14: the trust policies match the immutable subject `repo:luiki-dev@290870182/szop@1380292421:…`, and the deploy role also requires `ref` `refs/heads/main`.)*
 - `szop-ci-deploy` in PH-11 may only list the state bucket (whole bucket, no prefix condition: spec decision 12) and read/write `demo/terraform.tfstate` and its `.tflock`. Nothing in IAM, nothing on base's resources, nothing on billing.
 - Repository variables: `AWS_PLAN_ROLE_ARN`, `AWS_DEPLOY_ROLE_ARN`. Role session names `gh-${{ github.run_id }}`. No AWS key, and no account ID, stored in GitHub.
 - `demo-down`: cron `17 1 * * *`; concurrency group `demo-down`, `cancel-in-progress: false`; `-lock-timeout=15m`; job `timeout-minutes: 60`; output name read: `deployed_commit`.
@@ -76,7 +76,7 @@
 
 Policies as `aws_iam_policy_document` data sources, matching base's style. A file header comment naming ADR 0010, decisions 15–16, ADR 0012, decision 17, and ADR 0032.
 
-- `data.aws_iam_policy_document.ci_plan_trust`: `sts:AssumeRoleWithWebIdentity`, principal the provider's ARN, `StringEquals` on `token.actions.githubusercontent.com:aud` = `sts.amazonaws.com` and `token.actions.githubusercontent.com:sub` = `repo:luiki-dev/szop:pull_request`.
+- `data.aws_iam_policy_document.ci_plan_trust`: `sts:AssumeRoleWithWebIdentity`, principal the provider's ARN, `StringEquals` on `token.actions.githubusercontent.com:aud` = `sts.amazonaws.com` and `token.actions.githubusercontent.com:sub` = `repo:luiki-dev/szop:pull_request`. *(Settled while building by ADR 0032, decisions 13 and 14: the trust policies match the immutable subject `repo:luiki-dev@290870182/szop@1380292421:…`, and the deploy role also requires `ref` `refs/heads/main`.)*
 - `aws_iam_role.ci_plan`: name `szop-ci-plan`, `max_session_duration = 3600`.
 - `aws_iam_role_policy_attachment.ci_plan_read_only`: `arn:aws:iam::aws:policy/ReadOnlyAccess`.
 - `data.aws_iam_policy_document.ci_plan_denies` → `aws_iam_role_policy.ci_plan_denies`, five `Deny` statements with these `sid`s:
@@ -121,7 +121,7 @@ git commit -m "feat(infra): add the GitHub OIDC provider and the plan role"
 
 - [x] **Step 1: The deploy role in `ci_roles.tf`**
 
-- `data.aws_iam_policy_document.ci_deploy_trust`: as the plan role's, but `sub` = `repo:luiki-dev/szop:environment:demo-teardown` only, with a comment: `demo` is added in PH-12 with the protected environment (ADR 0032, decision 10).
+- `data.aws_iam_policy_document.ci_deploy_trust`: as the plan role's, but `sub` = `repo:luiki-dev/szop:environment:demo-teardown` only, with a comment: `demo` is added in PH-12 with the protected environment (ADR 0032, decision 10). *(Settled while building by ADR 0032, decisions 13 and 14: the trust policies match the immutable subject `repo:luiki-dev@290870182/szop@1380292421:…`, and the deploy role also requires `ref` `refs/heads/main`.)*
 - `aws_iam_role.ci_deploy`: name `szop-ci-deploy`, `max_session_duration = 3600`.
 - `data.aws_iam_policy_document.ci_deploy_state` → `aws_iam_role_policy.ci_deploy_state`:
   - `ListStateBucket`: `s3:ListBucket` on `arn:aws:s3:::szop-tfstate-ntrtcr`, no condition (spec decision 12: S3 answers a missing state with 403 instead of 404 without bucket-wide list, and Terraform fails on 403).
