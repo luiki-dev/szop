@@ -34,13 +34,14 @@ This ADR records the decisions, with what was settled while building them. The [
 
 ## Settled while building
 
-Facts the first plan did not have, found by Tasks 1 to 5 and kept here because they explain code that looks odd:
+Facts the first plan did not have, found while building and kept here because they explain code that looks odd or record what was proven:
 
 - **The OIDC provider has no `thumbprint_list`.** AWS validates GitHub's certificate chain against its own library of trusted root authorities and no longer uses the thumbprint, and the pinned AWS provider (6.69.1) accepts the provider without it.
 - **The plan role needs no allow statement for Access Analyzer.** `ReadOnlyAccess` already grants `access-analyzer:ValidatePolicy` (decision 4).
 - **Base's plan cannot refresh the secret** (decision 11), and **the deploy role must list the whole bucket** (decision 12). The second came with a check of the S3 backend's source: its workspace listing (`env:/`) tolerates an `AccessDenied` and falls back to the default workspace in Terraform 1.14, 1.16 and `main`, so that listing would not have failed `init`; only the missing-object answer did.
 - **`demo-down` never falls back to `main`'s code.** If the recorded `deployed_commit` is not a full commit hash, or `git fetch` cannot find it, the job fails at once and loudly (the nightly failure email) instead of destroying with other code, since `main`'s code may not know a resource that a branch added and would leave it running (decision 6). The runbook says to destroy by hand then.
 - **The actions in the new workflows** are pinned to full commit hashes: `aws-actions/configure-aws-credentials` v6.3.0, `actions/download-artifact` v8.0.2 and `actions/upload-artifact` v7.0.2, next to the `actions/checkout` and `hashicorp/setup-terraform` pins `ci.yml` already used.
+- **The proofs held** (decision 9, proof PR [#216](https://github.com/luiki-dev/szop/pull/216), closed without merging). A pull request's token, whose `sub` was `repo:luiki-dev@290870182/szop@1380292421:pull_request`, was refused by AWS for `szop-ci-deploy` with `Not authorized to perform sts:AssumeRoleWithWebIdentity`. A job naming `demo-teardown` on the PR's branch was stopped by GitHub before its first step: `Branch "refs/pull/216/merge" is not allowed to deploy to demo-teardown due to environment protection rules.` The phase PR's own `infra-plan` run is the matching positive proof: the plan role was assumed and both modules planned.
 - **Dependabot and OIDC are still unknown.** Whether a Dependabot pull request gets an OIDC token with `id-token: write` is checked on the first Dependabot `terraform` PR ([OP-019](https://github.com/luiki-dev/szop/issues/77)). If it gets none, `infra-plan` skips the PRs whose author is `dependabot[bot]` and provider bumps are planned locally.
 
 ## Consequences
