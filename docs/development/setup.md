@@ -12,13 +12,14 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
 - [6. Clone and install](#6-clone-and-install)
 - [7. Docker Desktop and the database](#7-docker-desktop-and-the-database)
 - [8. Terraform, tflint and the AWS CLI](#8-terraform-tflint-and-the-aws-cli)
-- [9. Check that everything works](#9-check-that-everything-works)
+- [9. actionlint, zizmor and uv](#9-actionlint-zizmor-and-uv)
+- [10. Check that everything works](#10-check-that-everything-works)
   - [The end-to-end journeys](#the-end-to-end-journeys)
-- [10. Run the API and the page](#10-run-the-api-and-the-page)
+- [11. Run the API and the page](#11-run-the-api-and-the-page)
   - [Run the production build](#run-the-production-build)
   - [Run the container image](#run-the-container-image)
-- [11. What the git hooks do](#11-what-the-git-hooks-do)
-- [12. Coming later](#12-coming-later)
+- [12. What the git hooks do](#12-what-the-git-hooks-do)
+- [13. Coming later](#13-coming-later)
 
 ## 1. Windows: WSL and Ubuntu
 
@@ -138,12 +139,53 @@ cd ~/workspace/szop && pnpm check:infra
 - `pnpm check:infra` ends with tflint's output and exits with no `FAIL:` line. What it runs is in [Scripts](scripts.md).
 - Signing in to AWS is not part of this guide: it needs the account set up first, and the [runbook](../operations/demo-environment.md) covers both. Do not run `aws configure` or create access keys.
 
-## 9. Check that everything works
+## 9. actionlint, zizmor and uv
+
+The workflow files in `.github/` are checked by two tools, run before each commit that touches them and by `pnpm check:workflows` ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 2):
+
+- **actionlint** finds mistakes in the workflows ([actionlint](tools/actionlint.md)). It checks the shell scripts of `run:` steps through **shellcheck** when it finds it on the `PATH`.
+- **zizmor** audits them for security problems ([zizmor](tools/zizmor.md)). It is a Python tool, installed with **uv**, a package manager that puts Python command-line tools in `~/.local/bin`.
+
+The versions are the ones CI runs: actionlint's lives in `.github/workflows/ci.yml` (`ACTIONLINT_VERSION`), zizmor's in the same file (the `version:` of its step); change them together with this section. As in section 8, each archive is checked against its SHA-256 checksum (zizmor comes from PyPI in a pinned version and shellcheck from Ubuntu's packages, so neither has one of ours), and the commands use a scratch folder.
+
+```bash
+# shellcheck
+sudo apt install -y shellcheck
+
+# uv: skip if `uv --version` already prints a version
+S=/tmp/szop-tools; mkdir -p "$S"; cd "$S"
+curl -fsSLO https://github.com/astral-sh/uv/releases/download/0.13.0/uv-x86_64-unknown-linux-gnu.tar.gz
+echo "1468ebd5a5541121837c5a2817b9972ba6090fa6caa3d142620850a47fb75154  uv-x86_64-unknown-linux-gnu.tar.gz" | sha256sum --check
+mkdir -p ~/.local/bin
+tar -xzf uv-x86_64-unknown-linux-gnu.tar.gz --strip-components=1 -C ~/.local/bin uv-x86_64-unknown-linux-gnu/uv uv-x86_64-unknown-linux-gnu/uvx
+uv --version                                      # uv 0.13.0
+
+# actionlint
+curl -fsSLO https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  actionlint_1.7.12_linux_amd64.tar.gz" | sha256sum --check
+tar -xzf actionlint_1.7.12_linux_amd64.tar.gz -C ~/.local/bin actionlint
+actionlint -version                               # 1.7.12
+
+# zizmor
+uv tool install zizmor==1.30.1
+zizmor --version                                  # zizmor 1.30.1
+
+# Back in the repository
+cd ~/workspace/szop && pnpm check:workflows
+```
+
+- `sha256sum --check` must print `OK` for each archive; anything else means stop.
+- If a command says `command not found`, `~/.local/bin` did not exist before and is not on your `PATH` yet: close the terminal, open a new one and try again, as in section 8.
+- `pnpm check:workflows` prints `==> actionlint` and `==> zizmor` and ends with `No findings to report. Good job!`. A missing tool stops it with `FAIL: <tool> not found` and a pointer to this section. What it runs is in [Scripts](scripts.md).
+- The pre-commit hook needs these tools too: a commit that stages a workflow, a local action or `dependabot.yml` fails with `command not found` until they are installed.
+
+## 10. Check that everything works
 
 ```bash
 pnpm lint
 pnpm typecheck
 pnpm format:check
+pnpm check:workflows
 pnpm test
 ```
 
@@ -151,9 +193,10 @@ Success looks like this:
 
 - `pnpm lint` (ESLint) and `pnpm typecheck` (the TypeScript compiler) print only the command they ran and exit with no errors or warnings.
 - `pnpm format:check` (Prettier) lists the files Prettier would change and exits with an error if there are any; when all is well it prints `All matched files use Prettier code style!`.
+- `pnpm check:workflows` (actionlint and zizmor) ends with `No findings to report. Good job!`.
 - `pnpm test` (Vitest) ends with the lines `Test Files … passed` and `Tests … passed`, with no `failed` in between.
 
-What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md), [Prettier](tools/prettier.md) and [Vitest](tools/vitest.md). CI runs the same scripts, except that it runs `pnpm test:coverage`, which is `pnpm test --coverage`: the same tests, plus coverage. Every script, with what it runs and when, is listed in [Scripts](scripts.md).
+What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md), [Prettier](tools/prettier.md), [actionlint](tools/actionlint.md), [zizmor](tools/zizmor.md) and [Vitest](tools/vitest.md). CI runs the same scripts, except that it runs `pnpm test:coverage`, which is `pnpm test --coverage`: the same tests, plus coverage, and it runs actionlint and zizmor directly, with zizmor's online audits too. Every script, with what it runs and when, is listed in [Scripts](scripts.md).
 
 ### The end-to-end journeys
 
@@ -179,7 +222,7 @@ timeout 3 bash -c 'echo > /dev/tcp/127.0.0.1/3100'
 
 `Connection refused` is healthy. If it waits and `timeout` ends it instead, this is the problem. It appeared with WSL's mirrored networking mode (`networkingMode=mirrored` in `C:\Users\<you>\.wslconfig`), where a connection to a closed port on `127.0.0.1` hung for about two minutes instead of failing, so every run stalled. The fix is WSL's default mode, network address translation (NAT): remove the `networkingMode=mirrored` line from `.wslconfig` (or set `networkingMode=nat`), then run `wsl --shutdown` in PowerShell and open Ubuntu again.
 
-## 10. Run the API and the page
+## 11. Run the API and the page
 
 PostgreSQL must be running first (section 7). Then one command starts both the API and the web app's dev server (Vite):
 
@@ -242,11 +285,11 @@ pnpm image:up
 
 Open `http://localhost:8080`: the same page as `pnpm start`, served from inside the container, with the development database. It uses port 8080, so it can run next to `pnpm dev` or `pnpm start`. Stop it with Ctrl+C, and remove its containers with `pnpm image:down`, which also removes PostgreSQL's container (the data stays; `pnpm db:up` brings it back). The two scripts run `docker compose --profile app up --build` and `docker compose --profile app down`: the profile matters, since a plain `docker compose down` leaves out every service behind a profile, so it removes PostgreSQL but leaves the app running, and warns `Network szop_default Resource is still in use`. The [testing guide](testing.md#running-the-tests) explains a failed check.
 
-## 11. What the git hooks do
+## 12. What the git hooks do
 
-On every commit, a pre-commit hook formats and lints the staged files, and a commit-msg hook checks that the message follows Conventional Commits. See [husky and lint-staged](tools/husky-and-lint-staged.md) and [commitlint](tools/commitlint.md).
+On every commit, a pre-commit hook formats and lints the staged files (a staged workflow under `.github/` goes through actionlint and zizmor, installed in section 9), and a commit-msg hook checks that the message follows Conventional Commits. See [husky and lint-staged](tools/husky-and-lint-staged.md) and [commitlint](tools/commitlint.md).
 
-## 12. Coming later
+## 13. Coming later
 
 - **Spinning the demo up and down** with the buttons, in [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12](../roadmap.md#ph-12-first-deploy), through the [runbook](../operations/demo-environment.md).
 

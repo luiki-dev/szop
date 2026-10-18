@@ -45,6 +45,7 @@ The same commands CI runs in its jobs ([CI/CD](ci-cd.md#the-jobs)); run them bef
 | `pnpm format:check` | Check the formatting | `prettier --check .`: lists the files Prettier would change, and fails if there are any ([Prettier](tools/prettier.md)) | `lint` |
 | `pnpm typecheck` | Check the types | `tsc --noEmit` for the root, then each package's own `typecheck` ([TypeScript](tools/typescript.md)) | `typecheck` |
 | `pnpm check:infra` | Check the Terraform code | `scripts/check-infra.sh`: `terraform fmt -check`, then `terraform init -backend=false` and `terraform validate` in every module under `infra/`, then tflint; no AWS access ([Terraform](tools/terraform.md), [tflint](tools/tflint.md)). Needs the tools of the [setup guide](setup.md#8-terraform-tflint-and-the-aws-cli) | `infra` |
+| `pnpm check:workflows` | Check the workflow files | `scripts/check-workflows.sh`: `actionlint` over every workflow, then `zizmor --offline .github`; no network access, so zizmor's online audits are skipped ([actionlint](tools/actionlint.md), [zizmor](tools/zizmor.md)). Needs the tools of the [setup guide](setup.md#9-actionlint-zizmor-and-uv). No CI job runs the script: CI's `workflows` job runs the two tools directly, with zizmor's online audits | — |
 
 ## Tests
 
@@ -71,7 +72,7 @@ How to run, filter and read them: the [testing guide](testing.md#running-the-tes
 | What | Purpose | Runs | Triggered by |
 |---|---|---|---|
 | `prepare` | Install the git hooks | `husky`: installs the git hooks into `.husky/` | pnpm, after every `pnpm install` ([husky and lint-staged](tools/husky-and-lint-staged.md)) |
-| pre-commit hook | Clean up the files being committed | `pnpm exec lint-staged`: ESLint with `--fix` and Prettier on the staged code files, `terraform fmt` on the staged `.tf` files, Prettier on the other staged files | Every `git commit` |
+| pre-commit hook | Clean up the files being committed | `pnpm exec lint-staged`: ESLint with `--fix` and Prettier on the staged code files, `terraform fmt` on the staged `.tf` files, actionlint and zizmor on the staged workflow files under `.github/` (the same tools as `pnpm check:workflows`, on the staged files only), Prettier on the other staged files | Every `git commit` |
 | commit-msg hook | Check the commit message | `pnpm exec commitlint --edit`: checks the message against Conventional Commits ([commitlint](tools/commitlint.md)) | Every `git commit` |
 
 ## Scripts of the workspace packages

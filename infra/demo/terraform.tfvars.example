@@ -1,0 +1,3 @@
+# Copy to terraform.tfvars (ignored by git) and fill in to run terraform plan
+# locally. CI sets TF_VAR_account_id from the role's own credentials instead.
+account_id = "123456789012"

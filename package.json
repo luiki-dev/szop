@@ -25,6 +25,7 @@
     "image:down": "docker compose --profile app down",
     "check:image": "scripts/check-image.sh",
     "check:infra": "scripts/check-infra.sh",
+    "check:workflows": "scripts/check-workflows.sh",
     "infra:fmt": "terraform fmt -recursive infra",
     "prepare": "husky"
   },

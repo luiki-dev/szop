@@ -5,8 +5,8 @@ How to set up, run and take down Szop's environment on AWS, step by step. Szop r
 | Module | Holds | Applied | Chapter |
 |---|---|---|---|
 | `infra/bootstrap` | The state bucket every module keeps its state in, and the budget alerts | Once, from the owner's machine | [Applying bootstrap](#applying-bootstrap) |
-| `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group | From the owner's machine, when it changes | [Buying the domain](#buying-the-domain), [Applying base](#applying-base) |
-| `infra/demo` | One demo session: network, load balancer, containers, database | By CI's buttons, and destroyed every night | Coming in PH-11 and PH-12 |
+| `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group, and CI's access to AWS: the GitHub OpenID Connect (OIDC) provider and the roles `szop-ci-plan` and `szop-ci-deploy` | From the owner's machine, when it changes | [Buying the domain](#buying-the-domain), [Applying base](#applying-base) |
+| `infra/demo` | One demo session: network, load balancer, containers, database. Empty until [PH-12](../roadmap.md#ph-12-first-deploy) | By CI's `demo-up` button (PH-12), and destroyed by `demo-down`, by hand and every night | [Tearing down](#tearing-down) |
 
 Why each piece exists is in the [stack overview](../architecture/stack-overview.md#12-where-szop-runs); how Terraform works here is on the [Terraform page](../development/tools/terraform.md). The tools come from [setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli).
 
@@ -30,6 +30,12 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [The first apply](#the-first-apply)
   - [Checks](#checks)
   - [Rotating the Better Auth secret](#rotating-the-better-auth-secret)
+  - [CI's roles and variables](#cis-roles-and-variables)
+  - [Cost allocation tags](#cost-allocation-tags)
+- [Tearing down](#tearing-down)
+  - [With the button](#with-the-button)
+  - [The nightly run](#the-nightly-run)
+  - [From your machine](#from-your-machine)
 - [Coming later](#coming-later)
 
 ## One-time account setup
@@ -63,6 +69,9 @@ The root user can do everything, including closing the account, and no policy ca
 
 1. **Default region:** *account menu (top right) → Settings → Localization and default Region → Edit*: **Default Region: Europe (Frankfurt)**, then *Save*. Everything Szop creates lives there ([ADR 0008](../decisions/0008-hosting.md), decision 8), and every console session now starts there. On the page of a global service (Billing, IAM, Organizations), the region menu shows every region with a lock: those services have no region, so the menu is unused there. Open a regional service, such as *Console Home*, to switch regions by hand.
 2. On *Billing and Cost Management → Home*, note your plan and the remaining credits. On the Free plan, the page shows when it ends. The budget that bootstrap creates watches the spending ([Applying bootstrap](#applying-bootstrap)); no other billing alert is needed.
+3. **Let IAM see the billing pages.** By default only the root user sees most of *Billing and Cost Management*: until root turns on *IAM user and role access to Billing information*, every IAM user and role, the Identity Center administrator role included, is answered with "Access denied · IAM user access not activated" on pages such as *Cost allocation tags* and *Cost Explorer*. Sign in **as the root user** (its email address and password, with MFA), then *account menu (top right) → Account → IAM user and role access to Billing information → Edit → Activate IAM Access → Update*. The switch grants nothing by itself: it lets IAM policies decide, and `AdministratorAccess` already allows billing. CI's plan role is denied billing and cost reads on purpose, because everything its job prints is public ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 5). Then sign out of root. The tags are activated after the first apply of base ([Cost allocation tags](#cost-allocation-tags)); on an account whose setup is already done, do this step as root now, and the tag step right after.
+
+**Check:** as root, *IAM user and role access to Billing information* shows *Activated*.
 
 ### 4. IAM Identity Center
 
@@ -273,7 +282,7 @@ The domains API exists only in `us-east-1`, hence `--region`.
 
 ## Applying base
 
-`infra/base` holds what outlives every demo: the domain's zone with its Certification Authority Authorization (CAA), Mail Exchanger (MX) and mail records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
+`infra/base` holds what outlives every demo: the domain's zone with its Certification Authority Authorization (CAA), Mail Exchanger (MX) and mail records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)), and CI's access to AWS: the GitHub OIDC provider and the two roles `szop-ci-plan` and `szop-ci-deploy` ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
 
 ### The first apply
 
@@ -340,7 +349,106 @@ In `secrets.tf`, raise `value_wo_version` by one, commit it on a branch, and app
 - add a `value` argument to the parameter "to see it": it would write the secret into the state;
 - remove `prevent_destroy` from the zone, or run `terraform destroy` here, unless Szop is shut down for good, after `infra/demo` is destroyed.
 
+### CI's roles and variables
+
+The apply that adds the CI roles ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net)) shows `Plan: 6 to add, 0 to change, 0 to destroy.` on top of what base already holds: the OIDC provider, the two roles, the plan role's `ReadOnlyAccess` attachment and the two roles' inline policies. Apply it from the PR's branch, as above, and check:
+
+```bash
+terraform plan                  # "No changes. Your infrastructure matches the configuration."
+
+aws iam get-role --role-name szop-ci-deploy --query Role.AssumeRolePolicyDocument
+#   one statement; "token.actions.githubusercontent.com:sub" is exactly
+#   "repo:luiki-dev@290870182/szop@1380292421:environment:demo-teardown", and nothing else (never "environment:demo");
+#   "token.actions.githubusercontent.com:ref" is exactly "refs/heads/main"
+aws iam get-role --role-name szop-ci-plan --query Role.AssumeRolePolicyDocument
+#   "token.actions.githubusercontent.com:sub" is exactly "repo:luiki-dev@290870182/szop@1380292421:pull_request"
+```
+
+Both trust policies also hold `"token.actions.githubusercontent.com:aud": "sts.amazonaws.com"`. These two conditions are what keeps every other repository, branch and workflow from getting the roles' credentials. The `@` numbers are the owner's and the repository's GitHub IDs, which the immutable subject adds ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 13); they are public, unlike the account ID.
+
+**Store the two role ARNs** (Amazon Resource Names, the roles' unique IDs) as repository variables, which the workflows read as `vars.AWS_PLAN_ROLE_ARN` and `vars.AWS_DEPLOY_ROLE_ARN`. They are base's outputs. In the browser: *Settings → Secrets and variables → Actions → Variables → New repository variable*. Or with the GitHub CLI, from `infra/base`:
+
+```bash
+gh variable set AWS_PLAN_ROLE_ARN --repo luiki-dev/szop --body "$(terraform output -raw ci_plan_role_arn)"
+gh variable set AWS_DEPLOY_ROLE_ARN --repo luiki-dev/szop --body "$(terraform output -raw ci_deploy_role_arn)"
+```
+
+No access key and no account ID is stored in GitHub: the workflows read the account ID from the credentials they receive. The ARNs contain the account ID. It is not a secret, and the credentials step of both workflows prints the ARN in its public log; still, keep the ARNs and the account ID out of commits, issues and PRs, where nothing needs them.
+
+**Create the `demo-teardown` environment first**, before `demo-down.yml` reaches `main` ([GitHub settings](../development/github-settings.md#environments)): no reviewer, deployment branches limited to `main`. A job that names an environment that does not exist creates it with no protection at all. The plan comment of the PR that adds the roles needs the variables, so these steps come before it.
+
+After the merge, apply base again from `main`, as for every base PR ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 9); the plan must show no changes.
+
+⚠️ **Don't:**
+
+- add `repo:luiki-dev@290870182/szop@1380292421:environment:demo` to the deploy role's trust by hand: PH-12 adds it in the PR in which you create the `demo` environment with its required reviewer, because GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
+- widen a CI role in the console: the plan comment and IAM Access Analyzer check the roles' policies only when they change in code.
+
+### Cost allocation tags
+
+Once the access portal works (step 5) and a resource that carries the tags exists, which `infra/bootstrap` and `infra/base` provide, make the cost reports group by them. Signed in through the access portal, *Billing and Cost Management → Cost allocation tags*: under *User-defined cost allocation tags*, select `group` and `project`, then *Activate*. These are the two tags every Szop resource carries, so Cost Explorer can group the spending by module ([ADR 0008](../decisions/0008-hosting.md), decision 26). A tag shows in the list only after a resource carrying it exists, which can take up to 24 hours, and its cost data starts from the moment of activation, never earlier: do it before the first demo, not after. This needs step 3's *Activate IAM Access* first ([OP-094](https://github.com/luiki-dev/szop/issues/209)).
+
+**Check:** *Cost allocation tags* opens for your Identity Center user and lists `group` and `project` as *Active*.
+
+## Tearing down
+
+`infra/demo` is destroyed by the **`demo-down`** workflow, by hand and every night ([ADR 0010](../decisions/0010-ci-cd.md), decision 13). It is the safety net against a demo left running: a forgotten demo costs about $1.70 a day. Until [PH-12](../roadmap.md#ph-12-first-deploy) creates the first demo, `infra/demo` is empty and every run finds nothing to destroy, which still proves that the workflow, the role, the state bucket and the lock all work.
+
+### With the button
+
+1. On GitHub: *Actions → demo-down → Run workflow*, branch **`main`**, *Run workflow*. (The environment `demo-teardown` allows only `main`; on another branch the job is refused.)
+2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with an RDS database to delete.
+3. Read the run's **summary** (the run's page, *Summary*):
+   - **Trigger:** `workflow_dispatch` (by hand) or `schedule` (the nightly run).
+   - **Code used:** which Terraform code destroyed the demo and why. If a demo recorded its commit (the `deployed_commit` output of `infra/demo`, written by `demo-up` from PH-12), it is that commit, so a resource added by a branch is destroyed by the code that created it; with no commit recorded, it is `main`'s code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 6).
+   - **Result:** Terraform's own `Destroy complete! Resources: N destroyed.` (`0 destroyed` on a quiet night).
+
+**Check:** the run is green, and *Result* says `Destroy complete!`.
+
+If two runs overlap, the second waits: `demo-down` runs one at a time and never cancels a running destroy, and every Terraform command waits up to 15 minutes for the state lock.
+
+### The nightly run
+
+`demo-down` also runs **every night at 01:17 UTC** (about 02:17 to 03:17 in Poland). GitHub emails a failed scheduled run to the person who last changed the `schedule` line of the workflow: you. A failure means **the safety net did not run to the end**: a demo may still be up, so do not ignore the email. Open the run from the email and read the failed step:
+
+- **Configure AWS credentials fails**, or `Not authorized to perform sts:AssumeRoleWithWebIdentity`: the trust policy or the repository variable `AWS_DEPLOY_ROLE_ARN` no longer matches ([CI's roles and variables](#cis-roles-and-variables)).
+- **`terraform init` or `destroy` says `Error acquiring the state lock`** after 15 minutes: another run holds it, usually a `demo-up` still working. Wait for it, then re-run (*Re-run failed jobs*). If no run is going and the lock is stale, `terraform force-unlock <lock-id>` from your machine (the ID is in the error) removes it.
+- **`Cannot fetch the recorded commit`:** the demo was deployed from a commit GitHub no longer serves, and the job refuses to destroy with other code. Destroy by hand, from your machine ([From your machine](#from-your-machine)). If the commit is missing on your machine too (`git cat-file -e <commit>` fails after `git fetch origin`), destroy with `main`'s code, then check with the Tag Editor (tag `group` = `demo`) that no resource of the demo is left; a resource that `main`'s code does not know has to be deleted by hand.
+- **A destroy error from AWS** (a resource that is in use, a dependency): the log names the resource. Re-run once; if it fails again, destroy by hand and read the error there.
+- **A network error or a GitHub outage:** *Re-run failed jobs*.
+
+After any failure, check the result in the console or with the Tag Editor (*Resource Groups & Tag Editor*, tag `group` = `demo`) that nothing of the demo is left. The budget alerts ([Applying bootstrap](#applying-bootstrap)) are the second net.
+
+GitHub disables scheduled workflows of a public repository after 60 days without activity in it. `demo-up` re-enables `demo-down` every time it runs ([ADR 0010](../decisions/0010-ci-cd.md), decision 13; arriving in PH-12), so a demo cannot outlive a disabled schedule. Until then, glance at the *Actions → demo-down* page after a quiet spell: it shows a banner if the schedule was disabled.
+
+### From your machine
+
+When the workflow cannot run (GitHub is down, the role is broken), destroy from your machine with the code that created the demo:
+
+```bash
+export AWS_PROFILE=szop
+aws sso login
+git status -sb                                    # clean, on a branch you can leave
+cd infra/demo
+cp terraform.tfvars.example terraform.tfvars      # the first time only; edit account_id
+terraform init
+terraform output deployed_commit                  # the commit the demo was deployed from
+```
+
+With no such output (no demo has recorded one), destroy with `main`'s code: `git switch main` and `git pull`, so that you are on an up-to-date `main`, then `terraform init` again. Otherwise check out that commit, whose Terraform code and `.terraform-version` created the demo, and initialise again:
+
+```bash
+git switch --detach <commit>
+tenv tf install                                   # the version that commit's .terraform-version asks for
+terraform init
+terraform plan -destroy                           # read it: only the demo's resources
+terraform destroy                                 # type yes
+git switch -                                      # back to your branch
+```
+
+⚠️ **Don't:** run `terraform destroy` in `infra/base` or `infra/bootstrap` to "clean up": they hold what outlives every demo, and the zone is protected for a reason.
+
 ## Coming later
 
-- **Spinning the demo up and down** with the `demo-up` and `demo-down` buttons, and the nightly teardown ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy)).
+- **Spinning the demo up** with the `demo-up` button ([PH-12](../roadmap.md#ph-12-first-deploy)). Until then the button exists but fails on purpose.
 - **Debugging** a running demo with ECS Exec and its logs, and **what it costs** ([PH-12](../roadmap.md#ph-12-first-deploy)).

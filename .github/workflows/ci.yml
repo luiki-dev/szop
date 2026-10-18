@@ -81,7 +81,9 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup
       - run: pnpm lint
-      - run: pnpm format:check
+      # Both checks report in one run; a cancelled run still stops (OP-070).
+      - if: success() || failure()
+        run: pnpm format:check
 
   typecheck:
     name: typecheck
@@ -303,8 +305,13 @@ jobs:
           "$RUNNER_TEMP/actionlint" -color
 
       # Findings fail the job and show as annotations; nothing is uploaded.
-      - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+      # Runs after a failed actionlint too, so both report in one run; a
+      # cancelled run still stops (OP-070). The version matches the one in
+      # docs/development/setup.md, so CI and the local hook run the same zizmor.
+      - if: success() || failure()
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
         with:
+          version: 1.30.1
           advanced-security: false
           annotations: true
 
