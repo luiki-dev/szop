@@ -1,6 +1,6 @@
 import { healthSchema } from "@szop/shared";
 import type { FastifyInstance } from "fastify";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../app.ts";
 import { createDatabase } from "../db/database.ts";
 import { testConfig } from "../test/config.ts";
@@ -111,6 +111,19 @@ describe("the log", () => {
       expect(requestLines(log.lines())).toEqual([]);
     } finally {
       await unreachable.$client.end();
+    }
+  });
+
+  // Fastify 5 deprecates the top-level disableRequestLogging option and
+  // warns on every buildApp; Fastify 6 removes it.
+  it("builds without a deprecation warning", () => {
+    const emitWarning = vi.spyOn(process, "emitWarning");
+    try {
+      app = buildApp({ config: testConfig(), db: database.db });
+
+      expect(emitWarning).not.toHaveBeenCalled();
+    } finally {
+      emitWarning.mockRestore();
     }
   });
 

@@ -1,4 +1,4 @@
-import Fastify, { type FastifyInstance } from "fastify";
+import Fastify, { LogController, type FastifyInstance } from "fastify";
 import type { Config } from "./config.ts";
 import type { Database } from "./db/database.ts";
 import { readJournal } from "./db/schema-version.ts";
@@ -35,10 +35,13 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
     },
     // The load balancer checks /api/health every few seconds; its request
     // lines would bury everything else. Matched by route, so look-alike paths
-    // keep theirs, and the route's own warning still logs (ADR 0033,
-    // decision 7).
-    disableRequestLogging: (request) =>
-      request.routeOptions.url === "/api/health",
+    // keep theirs, and the route's own warning still logs. Fastify's own
+    // error lines for the route go too, which is safe while the route
+    // catches its every error (ADR 0033, decision 7).
+    logController: new LogController({
+      disableRequestLogging: (request) =>
+        request.routeOptions.url === "/api/health",
+    }),
   });
 
   // The web baseline, before any route, so every response and request goes
