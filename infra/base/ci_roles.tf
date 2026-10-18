@@ -264,10 +264,10 @@ resource "aws_iam_role_policy" "ci_deploy_state" {
 # phases would exceed, while each managed policy holds 6,144 (PH-12b spec,
 # decision 9). Every create, change and delete is scoped by the tags
 # project = szop and group = demo: in the request when creating, on the
-# resource when changing or deleting. Base and bootstrap carry project = szop too, so group = demo is
-# what keeps the role away from base (ADR 0010, decision 16; PH-12b spec,
-# decision 8). Nothing in IAM: the load balancer's service-linked role already
-# exists in the account.
+# resource when changing or deleting. Base and bootstrap carry project = szop
+# too, so group = demo is what keeps the role away from base (ADR 0010,
+# decision 16; PH-12b spec, decision 8). Nothing in IAM: the load balancer's
+# service-linked role already exists in the account.
 
 # The VPC, its subnets, the internet gateway, the public route table and the
 # load balancer's security group (EC2).
@@ -468,8 +468,8 @@ resource "aws_iam_role_policy_attachment" "ci_deploy_demo_network" {
 # The application load balancer, its listeners and the certificate of the
 # HTTPS listener (Elastic Load Balancing and ACM).
 data "aws_iam_policy_document" "ci_deploy_demo_load_balancer" {
-  # Refresh and the provider's waits; these reads support no resource
-  # scoping.
+  # Refresh and the provider's waits. The ELB Describe* reads support no
+  # resource scoping; the ACM reads are on * for simplicity.
   statement {
     sid = "ReadLoadBalancersAndCertificates"
     actions = [
