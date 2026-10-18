@@ -223,31 +223,31 @@ The controller runs this task itself, with the owner; no subagent.
 **Files:**
 - Modify: whatever the real runs show to be wrong (most likely `infra/base/ci_roles.tf`); `docs/operations/demo-environment.md` (real timings); this plan.
 
-- [ ] **Step 1: Owner checkpoint 1**
+- [x] **Step 1: Owner checkpoint 1**
 
 Ask the owner to do owner steps 1 and 2: create the `demo` environment (required reviewer: the owner; "prevent self-review" off; deployment branches: no restriction) following `github-settings.md`, then apply `infra/base` from the branch and see a second plan with no changes, and run the runbook's "CI's roles and variables" checks. Wait for confirmation.
 
-- [ ] **Step 2: The draft PR and its plan comment**
+- [x] **Step 2: The draft PR and its plan comment**
 
 Open the phase PR as a draft (`gh pr create --draft`, title `feat: add the demo's network and the demo-up button`, the template filled in as far as it goes, `Closes #220`). Check `infra-plan`'s comment: `infra/base` with no changes, `infra/demo` with Task 1's resources to add, and Access Analyzer with no errors and no security warnings for the three new policies.
 
-- [ ] **Step 3: Owner checkpoint 2: the first demo**
+- [x] **Step 3: Owner checkpoint 2: the first demo**
 
 Ask the owner to do owner step 3's first half: *Actions → demo-up → Run workflow*, *Use workflow from* `feat/ph-12b-network-and-demo-up`, `ref` empty; approve; open `https://szop.dzwoniec.com` and `http://szop.dzwoniec.com`. Watch the run with `gh run watch`/`gh run view --log-failed`. If a step fails on a missing permission, fix the policy (Task 2's rules), re-run its simulation, commit (`fix(infra): …`), push, and ask the owner to apply base and re-run. Record the run's duration and each phase's time from the log.
 
-- [ ] **Step 4: Check the demo from here**
+- [x] **Step 4: Check the demo from here**
 
 `curl -sI http://szop.dzwoniec.com` (expected `301` to `https://szop.dzwoniec.com:443/`), `curl -s https://szop.dzwoniec.com` (expected the page with the deployed commit), and `openssl s_client -connect szop.dzwoniec.com:443 -servername szop.dzwoniec.com </dev/null 2>/dev/null | openssl x509 -noout -issuer -dates` (expected an Amazon issuer). `gh workflow view demo-down.yml` shows it enabled.
 
-- [ ] **Step 5: A redeploy's plan (Review Focus 5)**
+- [x] **Step 5: A redeploy's plan (Review Focus 5)**
 
 While the demo is up, with `AWS_PROFILE=szop`: `terraform -chdir=infra/demo plan -lock=false -var deployed_commit=<any other full commit hash on the branch>`. Expected: `0 to add, 1 to change, 0 to destroy`, the HTTPS listener's fixed response changed in place.
 
-- [ ] **Step 6: Owner checkpoint 3: demo-down**
+- [x] **Step 6: Owner checkpoint 3: demo-down**
 
 Ask the owner to press `demo-down` on `main`. Expected: the summary's *Code used* is the recorded commit, *Result* `Destroy complete! Resources: N destroyed.` with N equal to the apply's count. Then check with the owner's credentials: `aws resourcegroupstaggingapi get-resources --region eu-central-1 --tag-filters Key=group,Values=demo` returns nothing, and the zone has no `szop` or `_….szop` record. Record the destroy's duration.
 
-- [ ] **Step 7: Commit and push**
+- [x] **Step 7: Commit and push**
 
 Real timings into the runbook's "Spinning up" and "Tearing down", the ticked boxes, and every fix found.
 

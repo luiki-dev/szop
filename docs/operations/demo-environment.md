@@ -419,7 +419,7 @@ Before the first press, base must be applied with PH-12b's trust and policies, a
 
 1. On GitHub: *Actions → demo-up → Run workflow*. Choose the branch in *Use workflow from*: the one you want checked, usually the PR's branch. Leave `ref` empty to deploy that branch's latest commit, or type a branch, a tag or a **full 40-digit commit hash** to deploy that instead. A short hash is refused: checkout would look it up as a branch name. Then *Run workflow*.
 2. Open the run. The job `enable-teardown` starts at once and turns green in seconds: it switches the nightly `demo-down` back on if GitHub had disabled it. The job `deploy` waits for you: *Review deployments* → tick `demo` → *Approve and deploy*. Approve only code you have read; the job gets the deploy role's credentials ([threat model](../architecture/threat-model.md#who-can-act-and-through-which-path)). *Reject* ends the run without touching AWS.
-3. Wait for `deploy` to turn green. It checks the commit out, applies `infra/demo` with that commit passed as `deployed_commit`, then asks `https://szop.dzwoniec.com` every 10 seconds, for up to 10 minutes, until the page shows the commit. The certificate is issued first, which takes a few minutes ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 5), and the page can need a few more after that: a new DNS name and a fresh load balancer do not answer at once. <!-- TIMING -->The first real run's total time is filled in here, with what each part took.<!-- /TIMING -->
+3. Wait for `deploy` to turn green. It checks the commit out, applies `infra/demo` with that commit passed as `deployed_commit`, then asks `https://szop.dzwoniec.com` every 10 seconds, for up to 10 minutes, until the page shows the commit. The certificate is issued first, which takes a few minutes ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 5), and the page can need a few more after that: a new DNS name and a fresh load balancer do not answer at once. The first run, on 2026-10-18, took about 4 minutes from the approval: about 3 minutes for the apply, of which the load balancer took 2¼, the certificate's validation half a minute and each DNS record another half minute; the page answered at the first try.
 4. Read the run's **summary**: the URL, the commit, the result of the apply, whether the page showed the commit, and that `demo-down` destroys the demo at the next 01:17 UTC unless pressed sooner.
 
 **Check:** open both addresses in a browser.
@@ -475,7 +475,7 @@ The commit is recorded as the `deployed_commit` output, so `demo-down` then dest
 ### With the button
 
 1. On GitHub: *Actions → demo-down → Run workflow*, branch **`main`**, *Run workflow*. (The environment `demo-teardown` allows only `main`; on another branch the job is refused.)
-2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with an RDS database to delete. <!-- TIMING -->How long the first real destroy took is filled in here.<!-- /TIMING -->
+2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with an RDS database to delete. The first real destroy, of the placeholder demo, took about a minute and a half, most of it the two DNS records (half a minute each) and the load balancer (20 seconds).
 3. Read the run's **summary** (the run's page, *Summary*):
    - **Trigger:** `workflow_dispatch` (by hand) or `schedule` (the nightly run).
    - **Code used:** which Terraform code destroyed the demo and why. If a demo recorded its commit (the `deployed_commit` output of `infra/demo`, written by every `demo-up` run), it is that commit, so a resource added by a branch is destroyed by the code that created it; with no commit recorded, it is `main`'s code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 6).
@@ -496,6 +496,8 @@ A destroy that reports success is the proof, and this is the second look, which 
      --query 'ResourceTagMappingList[].ResourceARN'
    #   []
    ```
+
+   Right after a destroy, the list can still name resources that are already gone: the index behind the Tag Editor lags behind deletions, by minutes or longer. On the first real destroy it still listed the two security group rules (`security-group-rule/sgr-…`) after EC2 reported them deleted. Check such a leftover in its own service before acting on it, for example `aws ec2 describe-security-group-rules --region eu-central-1 --security-group-rule-ids <id>`, which answers `InvalidSecurityGroupRuleId.NotFound` for a rule that is gone.
 
    Global services (Route 53, IAM, Budgets) show up in the Tag Editor only under *Regions: us-east-1*, and **IAM roles never show up there at all**: the API behind it does not return them. The demo creates no role until PH-12c, and the roles the app uses are base's.
 
