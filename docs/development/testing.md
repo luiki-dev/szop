@@ -191,6 +191,7 @@ A database test runs against a real PostgreSQL, so a query, a migration or a cle
 - **Empty tables, before each test.** Every table of the `public` schema is emptied before each test (`TRUNCATE … RESTART IDENTITY CASCADE`), so a test starts clean even if the previous one crashed. Drizzle's own record of applied migrations lives in another schema and is kept.
 - **A test that creates its own table drops it** in `finally`, as `test/database.test.ts` does, so the table does not leak into the next file that uses the same worker's database.
 - **A test that creates its own `Database` closes it** with `db.$client.end()`.
+- **A test that needs a database of its own** (one never migrated, or one whose `drizzle.__drizzle_migrations` it changes) creates `szop_test_<name>_${VITEST_POOL_ID}` through the `postgres` maintenance database in `beforeEach` and drops it `WITH (FORCE)` in `afterEach`, after closing its pool, as `db/migration-check.test.ts` does. Changing Drizzle's table in the worker's shared copy would break the next file's tests, and the truncation before each test leaves that table alone.
 - **Inspecting after a failure.** Nothing is dropped when a run ends, so the databases stay until the next run: `docker compose exec postgres psql -U szop -d szop_test_1`.
 - **The development database `szop` is never touched.** Tests only connect to `postgres` (to create the others) and to `szop_test_*`.
 

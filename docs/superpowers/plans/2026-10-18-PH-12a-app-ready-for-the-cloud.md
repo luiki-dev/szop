@@ -329,22 +329,22 @@ git commit -m "feat(api): leave successful health checks out of the log"
 - Consumes: the spec's decisions 1–7 and Task 4, step 1's result.
 - Produces: —
 
-- [ ] **Step 1: Write ADR 0033 "App ready for the cloud details"**
+- [x] **Step 1: Write ADR 0033 "App ready for the cloud details"**
 
 Shaped like ADR 0032: Status ✅ Accepted, Date, **Refines:** ADR 0008, decision 14 (decision 3) and ADR 0019, decision 8 (decision 6); Context; the spec's decision table, with decision 6 stating the check's result; Consequences (every `.env` needs `DATABASE_TLS`; PH-12c sets `verify-full`, the deployment percentages, the stop timeout and the runbook's remedy; the candidates OP-097 and OP-098).
 
-- [ ] **Step 2: The notes in the earlier ADRs**
+- [x] **Step 2: The notes in the earlier ADRs**
 
 ADR 0008's status line and decision 14's cell: `<br>✏️ **Refined by [ADR 0033](0033-app-ready-for-the-cloud-details.md), decision 3:** …`; ADR 0019's status line and decision 8's cell, the same for decision 6.
 
-- [ ] **Step 3: The living docs**
+- [x] **Step 3: The living docs**
 
 - `architecture.md`: startup order (configuration, the migration check, migrations, listening), `DATABASE_TLS`, the shutdown deadline, no request lines for health checks.
 - `stack-overview.md`: certificate verification with a certificate authority (CA) bundle, if not explained yet.
 - `testing.md`: `testConfig()`'s description, if it lists the database fields; a database test that needs a database of its own (Task 1's pattern).
 - `glossary.md`: CA and any other acronym the phase added, if missing.
 
-- [ ] **Step 4: Check and commit**
+- [x] **Step 4: Check and commit**
 
 Run: `pnpm format:check && pnpm lint`
 Expected: PASS.
