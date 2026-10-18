@@ -29,11 +29,12 @@ These call Docker Compose with `compose.yaml` ([Docker Compose](tools/docker-com
 |---|---|---|---|
 | `pnpm db:up` | Start the database | `docker compose up -d --wait`: starts PostgreSQL and waits until it is healthy | Before `pnpm dev`, `pnpm start` and the tests, whenever the database is not running |
 | `pnpm db:down` | Stop the database | `docker compose stop`: stops PostgreSQL and keeps its container and data | To free the machine's resources; `pnpm db:up` brings it back at once |
+| `pnpm db:reset` | Wipe the local database | `docker compose down --volumes && docker compose up -d --wait`: removes PostgreSQL's container and its volume, then starts it again on an empty one | When the API refuses to start because the database's migrations do not match the code's ([the migration check](tools/drizzle.md#the-migration-check)), or to start from empty. It also removes the test databases, which the next `pnpm test` recreates |
 | `pnpm image:up` | Start Szop in containers | `docker compose --profile app up --build`: builds the container image and runs it next to PostgreSQL, in the foreground, on `http://127.0.0.1:8080` | Trying the app as AWS will run it. Ctrl+C stops it; `pnpm image:up -d --wait` runs it in the background |
 | `pnpm image:down` | Stop and remove Szop's containers | `docker compose --profile app down`: removes the app's and PostgreSQL's containers (the data stays in its volume) | After `pnpm image:up`. Then `pnpm db:up` brings PostgreSQL back for `pnpm dev` and the tests |
 | `pnpm check:image` | Prove the container image works | `scripts/check-image.sh`: builds the image, starts it next to PostgreSQL, checks that it is healthy, runs as `node` and serves the page, then removes it | After changing the `Dockerfile`, `.dockerignore`, `compose.yaml` or the dependencies. CI's `docker` job runs it with `--no-build` on every code PR |
 
-`image:down` takes the profile with it on purpose: a plain `docker compose down` leaves out every service behind a profile and warns that the network is still in use ([Docker](tools/docker.md#everyday-use)).
+`db:reset` leaves the profile out, so a running app container keeps running; stop it first with `pnpm image:down`. `image:down` takes the profile with it on purpose: a plain `docker compose down` leaves out every service behind a profile and warns that the network is still in use ([Docker](tools/docker.md#everyday-use)).
 
 ## Checks
 

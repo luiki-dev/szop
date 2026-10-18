@@ -146,21 +146,21 @@ git commit -m "feat(api): refuse to start when the database's migrations do not 
 - Consumes: the message of Task 1.
 - Produces: the root script `db:reset`.
 
-- [ ] **Step 1: Add the script**
+- [x] **Step 1: Add the script**
 
 `"db:reset": "docker compose down --volumes && docker compose up -d --wait"`, next to `db:up` and `db:down`. Without `--profile app`, `down` leaves the app profile's services alone; `--volumes` removes the declared volume `szop_postgres-data`.
 
-- [ ] **Step 2: Check it**
+- [x] **Step 2: Check it**
 
 Run: `pnpm db:reset`, then `docker volume ls` and `pnpm --filter @szop/api start`.
 Expected: the volume is recreated (new creation time in `docker volume inspect szop_postgres-data`), PostgreSQL is healthy, and the API logs `migrations applied` with `0000_init` on the empty database. Then `pnpm test` passes (it recreates the test databases).
 
-- [ ] **Step 3: Document**
+- [x] **Step 3: Document**
 
 - `scripts.md`, the database table: `pnpm db:reset` — Wipe the local database — what it runs — when the API refuses to start because the database's migrations do not match the code's, or to start from empty; it also removes the test databases, which the next `pnpm test` recreates.
 - `drizzle.md`: a section on the check (when it runs, the three cases with a one-line branch-switching example each, the message, the remedy locally and on the demo, and that the remedy is the environment's, not the check's: [OP-097](https://github.com/luiki-dev/szop/issues/224)); the existing advice to regenerate a migration on top of `main` stays and points to the "skipped" case. Keep its `## Contents` in sync.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 Run: `pnpm format:check`
 Expected: PASS.
