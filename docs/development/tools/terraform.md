@@ -12,6 +12,8 @@ Terraform is an infrastructure as code (IaC) tool. Files ending in `.tf` describ
   - [State, the backend and the state lock](#state-the-backend-and-the-state-lock)
   - [Variables kept out of git](#variables-kept-out-of-git)
   - [Importing what already exists](#importing-what-already-exists)
+  - [Reading what another module owns: data sources](#reading-what-another-module-owns-data-sources)
+  - [Refusing a bad apply: preconditions](#refusing-a-bad-apply-preconditions)
   - [Secrets: ephemeral values and write-only arguments](#secrets-ephemeral-values-and-write-only-arguments)
 - [Everyday use](#everyday-use)
 - [Updating](#updating)
@@ -33,9 +35,9 @@ A **root module** is a folder of `.tf` files that Terraform runs as one unit, wi
 |---|---|---|
 | `infra/bootstrap` | The S3 bucket for every module's state, and the budget alerts | The owner, once |
 | `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group, the GitHub OIDC provider and CI's two roles | The owner |
-| `infra/demo` | One demo session: network, load balancer, containers, database. Only its backend, provider and variable until PH-12b | CI's `demo-up` button (PH-12b), and `demo-down` by hand and every night |
+| `infra/demo` | One demo session: network, load balancer, certificate and the `szop` DNS record (PH-12b); containers and database follow in PH-12c | CI's `demo-up` button, and `demo-down` by hand and every night |
 
-CI runs Terraform too, with the AWS credentials of an OIDC role, never a stored key: `infra-plan.yml` runs `terraform plan -lock=false` for `base` and `demo` on every pull request that touches `infra/`, as the read-only role `szop-ci-plan` (`base` with `-refresh=false`, since that role may not decrypt the Better Auth secret that a refresh reads), and `demo-down.yml` runs `terraform destroy` on `demo` as `szop-ci-deploy`. Neither changes anything in `base` or `bootstrap`. See [CI/CD](../ci-cd.md#cis-access-to-aws).
+CI runs Terraform too, with the AWS credentials of an OIDC role, never a stored key: `infra-plan.yml` runs `terraform plan -lock=false` for `base` and `demo` on every pull request that touches `infra/`, as the read-only role `szop-ci-plan` (`base` with `-refresh=false`, since that role may not decrypt the Better Auth secret that a refresh reads), and `demo-up.yml` runs `terraform apply` and `demo-down.yml` runs `terraform destroy` on `demo` as `szop-ci-deploy`. Neither changes anything in `base` or `bootstrap`. See [CI/CD](../ci-cd.md#cis-access-to-aws).
 
 Each module splits its files by concern: `versions.tf` (the Terraform and provider versions), `providers.tf` (the AWS provider's settings), `variables.tf`, `outputs.tf`, `backend.tf` (where the state lives) and one file per group of resources.
 
@@ -76,6 +78,16 @@ Values that should not be public, such as the account ID and the alert address, 
 ### Importing what already exists
 
 Some resources exist before Terraform knows them: buying the domain created its hosted zone. An **`import` block** names the resource in the code and the ID of the real object; the next plan shows it as *import* instead of *create*, and `apply` writes it into the state without touching AWS. The configuration must describe the object as it is, or the same plan also shows a change; the zone's plan still shows an update, but only for the default tags and Terraform's own `force_destroy` setting, never for the comment or the name. `infra/base/dns.tf` imports the zone this way ([ADR 0030](../../decisions/0030-domain-and-base-infrastructure-details.md), decision 4). The block stays in the code: once the resource is in state it does nothing.
+
+### Reading what another module owns: data sources
+
+A `resource` block creates an object and owns it; a **data source** (`data "aws_route53_zone" "main" { … }`) only reads one that exists and that this module does not manage. `infra/demo` needs base's hosted zone to write its records into, so `data.tf` asks AWS for the zone named `dzwoniec.com`, and the other files use `data.aws_route53_zone.main.zone_id`. The lookup fails if base has not been applied, which is the right error.
+
+The alternative, `terraform_remote_state`, reads another module's outputs from its state file. Szop does not use it: the reader would need to read base's whole state, which describes every IAM policy and the OIDC setup, and CI's deploy role is not meant to see base ([ADR 0034](../../decisions/0034-network-and-demo-up-details.md), decision 1). With a lookup by name, the role needs only the read permission for the one thing it looks up. The price is that the name is written in both modules (`locals.tf` of base and of demo, with a comment), and a rename in base breaks demo's next plan.
+
+### Refusing a bad apply: preconditions
+
+A `precondition` in a resource's `lifecycle` block is a condition Terraform checks before it creates or changes the resource, failing the plan with the block's message. The HTTPS listener in `infra/demo/load_balancer.tf` has one: `deployed_commit` must be set. The variable's default is `null`, so a destroy, which skips preconditions, never needs it, while an apply without `-var "deployed_commit=$(git rev-parse HEAD)"` stops before it creates anything ([ADR 0034](../../decisions/0034-network-and-demo-up-details.md), decision 7). `demo-up` passes it on the command line, and the value ends up in an output that `demo-down` reads.
 
 ### Secrets: ephemeral values and write-only arguments
 

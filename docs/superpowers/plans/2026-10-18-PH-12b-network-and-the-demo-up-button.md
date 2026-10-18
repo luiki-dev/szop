@@ -189,7 +189,7 @@ git push
 - Consumes: Tasks 1–3 as built; the spec's "Documentation and records".
 - Produces: the runbook sections Task 5 follows: "Spinning up" (with the button; from your machine), the updated "Tearing down", "Destroying base", and the `demo` checks in "CI's roles and variables".
 
-- [ ] **Step 1: The runbook**
+- [x] **Step 1: The runbook**
 
 As the spec's "Documentation and records" lists, including:
 - "Spinning up": *Actions → demo-up → Run workflow*, *Use workflow from* the branch, `ref` empty or a branch, tag or full hash; approve the `deploy` job (*Review deployments*); read the summary; open both URLs; what each failing step means (`enable-teardown`, credentials, the lock, the precondition, a permission error naming an action, the page wait timing out); the local fallback with `terraform apply -var deployed_commit=$(git rev-parse HEAD)` from the commit to deploy, and that `demo-down` then destroys with that commit.
@@ -198,15 +198,15 @@ As the spec's "Documentation and records" lists, including:
 - "CI's roles and variables": the `GitHubDemo` statement's expected `sub` and the absence of a `ref` condition; the three managed policies attached.
 - "Coming later" keeps only PH-12c's debugging and costs. `## Contents` in sync.
 
-- [ ] **Step 2: The other living docs**
+- [x] **Step 2: The other living docs**
 
 As the spec lists: `ci-cd.md` (the real `demo-up`, its two jobs, the approval, `infra-plan`'s `deployed_commit`); `github-settings.md` (the `demo` environment); `threat-model.md` (the load balancer as an entry point with its STRIDE row; the CI actor's `demo` path and what the deploy role now reaches, including the two record names); `architecture.md` (the demo's network and load balancer); `stack-overview.md` (VPC, subnets and availability zones, internet gateway and route tables, security groups, the application load balancer with listeners and actions, ACM DNS validation, alias records, tag-based IAM conditions, data sources); `glossary.md` (VPC, CIDR, AZ, ALB, ACM, IGW and any other new acronym).
 
-- [ ] **Step 3: Checks**
+- [x] **Step 3: Checks**
 
 Run: `pnpm format:check`. Expected: pass. Check every new link's anchor exists (`grep` the headings).
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```bash
 git add docs
