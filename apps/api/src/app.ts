@@ -33,6 +33,12 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
       stream: logStream,
       serializers: { req: requestSerializer },
     },
+    // The load balancer checks /api/health every few seconds; its request
+    // lines would bury everything else. Matched by route, so look-alike paths
+    // keep theirs, and the route's own warning still logs (ADR 0033,
+    // decision 7).
+    disableRequestLogging: (request) =>
+      request.routeOptions.url === "/api/health",
   });
 
   // The web baseline, before any route, so every response and request goes

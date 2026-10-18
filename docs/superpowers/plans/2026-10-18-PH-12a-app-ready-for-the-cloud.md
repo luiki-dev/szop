@@ -290,7 +290,7 @@ git commit -m "feat(api): bound the shutdown with a 10-second deadline"
 - Consumes: `captureLog()` (`test/log.ts`), `testConfig`, `useTestDatabase`.
 - Produces: —
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `health/routes.test.ts`, a `describe("the log")` with `captureLog()` and `testConfig({ logLevel: "info" })`:
 - a healthy `GET /api/health` writes no line whose `msg` is `incoming request` or `request completed`;
@@ -298,16 +298,16 @@ In `health/routes.test.ts`, a `describe("the log")` with `captureLog()` and `tes
 - with the unreachable database of the existing 503 test, a line with `msg: "database check failed"` is written and no request lines;
 - `GET /api/healthz` and `GET /api/health/x` each write an `incoming request` line.
 
-- [ ] **Step 2: Run them and see them fail**
+- [x] **Step 2: Run them and see them fail**
 
 Run: `pnpm vitest run apps/api/src/health/routes.test.ts`
 Expected: FAIL on the first two cases (request lines present).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `disableRequestLogging: (request) => request.routeOptions.url === "/api/health"` in `buildApp`'s Fastify options, with a comment: the load balancer checks every few seconds; the route's own warning still logs (ADR 0033, decision 7).
 
-- [ ] **Step 4: Run them and see them pass, then all checks; commit**
+- [x] **Step 4: Run them and see them pass, then all checks; commit**
 
 Run: `pnpm vitest run apps/api/src/health/routes.test.ts && pnpm test && pnpm lint && pnpm typecheck`
 Expected: PASS.
