@@ -1,0 +1,44 @@
+# Throwaway proof for PH-11 (ADR 0032, decision 9): both jobs are expected to
+# be refused. Never merged; the PR is closed and the branch deleted.
+name: oidc-proof
+
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  # A pull request's token must not get the deploy role's credentials.
+  pr-to-deploy-role:
+    name: pr-to-deploy-role
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      id-token: write # to ask GitHub for the OIDC token the proof sends to AWS
+    steps:
+      # Prints the token's sub claim only, decoded from its payload; the token
+      # itself is never printed.
+      - name: Show the token's subject
+        run: |
+          token=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+          payload=$(cut -d. -f2 <<<"$token" | tr '_-' '/+')
+          while (( ${#payload} % 4 )); do payload+="="; done
+          base64 -d <<<"$payload" | jq -r '"sub: \(.sub)"'
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gh-${{ github.run_id }}
+          aws-region: eu-central-1
+          retry-max-attempts: 1
+
+  # A branch other than main must not run a job in demo-teardown.
+  branch-to-teardown-env:
+    name: branch-to-teardown-env
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: demo-teardown
+    permissions: {}
+    steps:
+      - run: echo "This line must never run."
