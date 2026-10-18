@@ -70,8 +70,8 @@ jobs:
           terraform_version: ${{ steps.version.outputs.terraform }}
           terraform_wrapper: false
 
-      # deployed_commit is the output demo-up records (PH-12). Until then, and
-      # on every night with no demo up, the state has none and jq gives empty.
+      # deployed_commit is the output demo-up records. On every night with no
+      # demo up, the state has none and jq gives empty.
       - id: state
         run: |
           terraform -chdir=infra/demo init -input=false -lock-timeout=15m

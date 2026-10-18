@@ -75,10 +75,12 @@ jobs:
       # failed and does not stop the other one, and the step itself always ends
       # green: the plan is informative.
       - name: Plan each module and validate its IAM policies
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           plan_module() {
             local m=$1 out="$RUNNER_TEMP/$1" refresh=() rc item address kind doc n=0 result parsed
-            local type_args=()
+            local type_args=() var_args=()
             mkdir -p "$out"
             : > "$out/findings.jsonl"
             : > "$out/unchecked.txt"
@@ -92,6 +94,12 @@ jobs:
               refresh=(-refresh=false)
             fi
 
+            # demo refuses a plan without a commit (spec of PH-12b, decision 7),
+            # and the PR's head commit shows what demo-up on that branch would do.
+            if [ "$m" = demo ]; then
+              var_args=(-var "deployed_commit=$HEAD_SHA")
+            fi
+
             echo "::group::terraform init infra/$m"
             terraform -chdir="infra/$m" init -input=false -no-color
             rc=$?
@@ -101,7 +109,7 @@ jobs:
             # -lock=false: the role never writes the lock file.
             echo "::group::terraform plan infra/$m"
             terraform -chdir="infra/$m" plan -lock=false -input=false -no-color \
-              "${refresh[@]}" -out="$RUNNER_TEMP/$m.tfplan"
+              "${refresh[@]}" "${var_args[@]}" -out="$RUNNER_TEMP/$m.tfplan"
             rc=$?
             echo "::endgroup::"
             [ "$rc" -eq 0 ] || return 1

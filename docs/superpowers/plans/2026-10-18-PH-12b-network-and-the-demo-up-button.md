@@ -150,7 +150,7 @@ git push
 - Consumes: `vars.AWS_DEPLOY_ROLE_ARN`; Task 1's `deployed_commit` variable and `url` output.
 - Produces: the button as the spec's "demo-up.yml" describes: jobs `enable-teardown` and `deploy`.
 
-- [ ] **Step 1: `demo-up.yml`**
+- [x] **Step 1: `demo-up.yml`**
 
 As the spec describes, with these details:
 - Input `ref`: `required: false`, `type: string`, description "Branch, tag or full 40-digit commit hash; empty: the branch chosen in Use workflow from".
@@ -158,19 +158,19 @@ As the spec describes, with these details:
 - `deploy`: `actions/checkout` with `ref: ${{ inputs.ref }}` (an empty string checks out the dispatching commit), `fetch-depth: 1`, `persist-credentials: false`; a step with `id: commit` writing `sha=$(git rev-parse HEAD)` after checking it against `^[0-9a-f]{40}$`; the credentials, masked account ID, `.terraform-version` and `setup-terraform` steps copied from `demo-down.yml`; `terraform -chdir=infra/demo init -input=false -lock-timeout=15m`; `terraform -chdir=infra/demo apply -auto-approve -input=false -lock-timeout=15m -no-color -var "deployed_commit=$COMMIT"` with `COMMIT` from `env:`; the wait loop (`curl -fsS --max-time 10 https://szop.dzwoniec.com` every 10 s, 60 tries, success when the body contains `$COMMIT`); a `Summary` step with `if: always()` writing URL, commit, the apply's and the wait's outcomes, and "`demo-down` destroys it at 01:17 UTC tonight unless pressed sooner" to `$GITHUB_STEP_SUMMARY`.
 - A header comment in the style of `demo-down.yml`: what it does, the ADRs (0010 decisions 11 and 13, 0011 decision 7, 0012 decisions 16 and 18, 0032 decision 8, 0034), and that the `demo` environment with the owner as required reviewer must exist before this file is used.
 
-- [ ] **Step 2: `infra-plan.yml`**
+- [x] **Step 2: `infra-plan.yml`**
 
 In the plan step, for `infra/demo` only, add `-var "deployed_commit=$HEAD_SHA"` with `HEAD_SHA: ${{ github.event.pull_request.head.sha }}` in the step's `env:`, and a comment: the demo refuses a plan without a commit (spec, decision 7), and the PR's head commit shows what `demo-up` on that branch would do.
 
-- [ ] **Step 3: `demo-down.yml`**
+- [x] **Step 3: `demo-down.yml`**
 
 Comments only: "demo-up records (PH-12)" and similar become present tense; no behaviour change.
 
-- [ ] **Step 4: Checks**
+- [x] **Step 4: Checks**
 
 Run: `pnpm check:workflows`. Expected: actionlint and zizmor report nothing. Run: `pnpm format:check`. Expected: pass.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add .github/workflows docs/superpowers/plans
