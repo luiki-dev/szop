@@ -65,11 +65,11 @@
 - Consumes: the zone `dzwoniec.com` in base (by name).
 - Produces: `variable "deployed_commit"`; outputs `deployed_commit` and `url`; resource names and tags of the Global Constraints, which Task 2's policies must allow. Task 3 runs `terraform apply -var deployed_commit=<sha>`.
 
-- [ ] **Step 1: Prove a precondition is skipped on destroy (Review Focus 2)**
+- [x] **Step 1: Prove a precondition is skipped on destroy (Review Focus 2)**
 
 In `$CLAUDE_JOB_DIR/tmp/precondition-check/` (outside the repository), a configuration with local state: `variable "commit" { type = string, default = null }` and a `terraform_data` resource whose `lifecycle { precondition { condition = var.commit != null } }`. Run `terraform init`, `terraform apply -auto-approve -var commit=abc`, then `terraform destroy -auto-approve` with no `-var`. Expected: the destroy succeeds. If it fails, stop and report: decision 7 of the spec needs another mechanism.
 
-- [ ] **Step 2: Write the module**
+- [x] **Step 2: Write the module**
 
 As the spec's Design sections describe (The network; The load balancer and the placeholder page; The certificate and the DNS records; The deployed commit). Pinned details:
 - `locals.tf`: `domain = "dzwoniec.com"`, `app_hostname = "szop.${local.domain}"`, with a comment that both are base's and change with `infra/base/locals.tf` (spec, decision 1); the two zones; the four ranges; `placeholder_page` built with `var.deployed_commit` in the HTML of the spec.
@@ -80,15 +80,15 @@ As the spec's Design sections describe (The network; The load balancer and the p
 - `szop` record: type `A`, alias to `aws_lb.main`, `evaluate_target_health = false`.
 - `variable "deployed_commit"` with `validation { condition = var.deployed_commit == null || can(regex("^[0-9a-f]{40}$", var.deployed_commit)) }`.
 
-- [ ] **Step 3: Static checks**
+- [x] **Step 3: Static checks**
 
 Run: `pnpm check:infra`. Expected: `terraform fmt`, `validate` for the three modules and tflint pass with no findings.
 
-- [ ] **Step 4: A real plan with the owner's credentials**
+- [x] **Step 4: A real plan with the owner's credentials**
 
 `infra/demo/terraform.tfvars` from the example with base's `account_id` (copy it from `infra/base/terraform.tfvars`; never commit it). With `AWS_PROFILE=szop`: `terraform -chdir=infra/demo init` and `terraform -chdir=infra/demo plan -lock=false -var deployed_commit=$(git rev-parse HEAD)`. Expected: the zone lookup succeeds; `Plan: N to add, 0 to change, 0 to destroy` listing the VPC, 4 subnets, the gateway, the route table with its route and 2 associations, the security group with 2 rules, the load balancer, 2 listeners, the certificate, its validation record and validation, and the `szop` record. Then `terraform -chdir=infra/demo plan -lock=false` without the variable. Expected: fails on the precondition with its message. If the SSO session has expired, ask the owner to run `! aws sso login --profile szop`.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add infra/demo docs/superpowers/plans

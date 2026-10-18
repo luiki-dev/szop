@@ -1,3 +1,5 @@
 # Copy to terraform.tfvars (ignored by git) and fill in to run terraform plan
 # locally. CI sets TF_VAR_account_id from the role's own credentials instead.
+# A plan that creates the demo also needs
+# -var deployed_commit=$(git rev-parse HEAD).
 account_id = "123456789012"

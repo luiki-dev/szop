@@ -1,6 +1,6 @@
-# Only the backend and the provider until PH-12, so a destroy has nothing to do
-# (ADR 0011, decision 2). The demo's state, in the bucket bootstrap created
-# (ADR 0008, decision 7); S3's native lock: a .tflock file next to the state.
+# The demo's state, in the bucket bootstrap created (ADR 0008, decision 7);
+# S3's native lock: a .tflock file next to the state. Between sessions it is
+# empty, since demo-down destroys everything (ADR 0011, decision 2).
 terraform {
   backend "s3" {
     bucket       = "szop-tfstate-ntrtcr"
