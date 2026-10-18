@@ -236,7 +236,7 @@ In a second terminal:
 curl http://127.0.0.1:3000/api/health
 ```
 
-It answers `{"status":"ok","database":{"status":"up","schemaVersion":"0000_init"}}`. In the first terminal the log first shows `migrations applied` with the schema version, then a `Server listening at http://127.0.0.1:3000` line, then two lines for the request: `incoming request` and `request completed`, with the status code and the time it took. Vite's own output, with a `Local: http://localhost:5173/` line, is in the same terminal.
+It answers `{"status":"ok","database":{"status":"up","schemaVersion":"0000_init"}}`. In the first terminal the log first shows `migrations applied` with the schema version, then a `Server listening at http://127.0.0.1:3000` line, and nothing for the request: health checks are left out of the log ([ADR 0033](../decisions/0033-app-ready-for-the-cloud-details.md), decision 7). Any other path, such as `curl http://127.0.0.1:3000/api/missing`, logs two lines: `incoming request` and `request completed`, with the status code and the time it took. Vite's own output, with a `Local: http://localhost:5173/` line, is in the same terminal.
 
 - **Ctrl+C** stops both the API and Vite; the API's log says `shutting down` and pnpm prints `Done`.
 - **Editing a file** under `apps/api/src` restarts it by itself.
