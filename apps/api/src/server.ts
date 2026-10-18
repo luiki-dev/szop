@@ -4,6 +4,7 @@ import { createDatabase } from "./db/database.ts";
 import { runMigrations } from "./db/migrate.ts";
 import { checkMigrations } from "./db/migration-check.ts";
 import { currentSchemaVersion, readJournal } from "./db/schema-version.ts";
+import { startShutdownDeadline } from "./shutdown.ts";
 
 // The only file that reads process.env. Checked by hand, not by tests:
 // everything it calls is tested (ADR 0019, decision 10).
@@ -31,6 +32,16 @@ db.$client.on("error", (error: Error & { code?: string }) => {
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.once(signal, () => {
     app.log.info({ signal }, "shutting down");
+    // ECS kills a task 30 seconds after asking it to stop, so the shutdown
+    // ends well before that, even with a client that never finishes its
+    // request (ADR 0033, decision 6).
+    startShutdownDeadline({
+      server: app.server,
+      log: app.log,
+      deadlineMs: 10_000,
+      graceMs: 5_000,
+      exit: (code) => process.exit(code),
+    });
     app
       .close()
       .then(() => db.$client.end())

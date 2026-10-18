@@ -239,11 +239,11 @@ git commit -m "feat(api): add DATABASE_TLS for verified TLS to the database"
 - Consumes: Fastify's `app.server` (a Node `http.Server`) and `app.log`.
 - Produces: `startShutdownDeadline(options: { server: Pick<http.Server, "getConnections" | "closeAllConnections">; log: Pick<FastifyBaseLogger, "warn" | "error">; deadlineMs: number; graceMs: number; exit: (code: number) => void }): void`
 
-- [ ] **Step 1: The check (spec, decision 6)**
+- [x] **Step 1: The check (spec, decision 6)**
 
 `pnpm build`, then `pnpm start`. With the chrome-devtools MCP (the Linux Chrome), open `http://localhost:3000`, wait for the page, close the page. Send SIGTERM to the `node` process (`pkill -TERM -f "node --env-file=.env src/server.ts"`) and time from the signal to the exit (for example `time` around `pnpm start` in a second shell, or the log's timestamps of `shutting down` and the shell prompt). Note the seconds and Node's and Fastify's versions for the task summary, ADR 0033 and OP-085's comment. Expected: under a second, which confirms the hang of PH-06a was WSL's mirrored networking.
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 `shutdown.test.ts` with `vi.useFakeTimers()`, a fake server (`getConnections` calling back `(null, 2)`, `closeAllConnections` a spy), a fake log and an `exit` spy:
 - before 10 000 ms nothing is called;
@@ -251,25 +251,25 @@ git commit -m "feat(api): add DATABASE_TLS for verified TLS to the database"
 - at 15 000 ms `log.error` with `"shutdown did not finish, exiting"` and `exit(1)`;
 - the timers are unref'd: spy on `setTimeout` (`vi.spyOn(globalThis, "setTimeout")`) and check `hasRef()` is false on each returned handle.
 
-- [ ] **Step 3: Run them and see them fail**
+- [x] **Step 3: Run them and see them fail**
 
 Run: `pnpm vitest run apps/api/src/shutdown.test.ts`
 Expected: FAIL, module not found.
 
-- [ ] **Step 4: Implement `startShutdownDeadline`; run the tests**
+- [x] **Step 4: Implement `startShutdownDeadline`; run the tests**
 
 Run: `pnpm vitest run apps/api/src/shutdown.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Use it in `server.ts`**
+- [x] **Step 5: Use it in `server.ts`**
 
 In the signal handler, after logging `shutting down` and before `app.close()`: `startShutdownDeadline({ server: app.server, log: app.log, deadlineMs: 10_000, graceMs: 5_000, exit: (code) => process.exit(code) })`. The existing path is unchanged: when `app.close()` resolves (also after `closeAllConnections()`), the pool ends and the process exits with 0. Comment: ECS kills a task at 30 seconds (ADR 0033, decision 6).
 
-- [ ] **Step 6: Check by hand**
+- [x] **Step 6: Check by hand**
 
 `pnpm start`; in a second shell, `printf 'GET / HTTP/1.1\r\nHost: x\r\n' | nc -q 30 127.0.0.1 3000` (half a request held open); SIGTERM the server. Expected: the warning with `openConnections: 1` about 10 seconds after `shutting down`, then a clean exit with code 0. Without the `nc`, the exit stays immediate.
 
-- [ ] **Step 7: Run all checks and commit**
+- [x] **Step 7: Run all checks and commit**
 
 Run: `pnpm test && pnpm lint && pnpm typecheck`
 Expected: all pass.
