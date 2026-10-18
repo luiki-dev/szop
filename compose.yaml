@@ -51,6 +51,7 @@ services:
       DATABASE_NAME: szop
       DATABASE_USER: szop
       DATABASE_PASSWORD: szop
+      DATABASE_TLS: none
       TRUSTED_PROXIES: none
     # 8080 on the host, so pnpm dev and pnpm start keep 3000.
     ports:

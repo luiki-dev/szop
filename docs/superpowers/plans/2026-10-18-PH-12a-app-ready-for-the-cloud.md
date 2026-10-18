@@ -182,42 +182,42 @@ git commit -m "feat: add db:reset and document the migration check"
 - Consumes: —
 - Produces: `DatabaseSettings.tls: "none" | "verify-full"`; `export const rdsCaBundle: string` (absolute path) in `db/database.ts`.
 
-- [ ] **Step 1: Write the failing config tests**
+- [x] **Step 1: Write the failing config tests**
 
 In `config.test.ts`: `valid` gains `DATABASE_TLS: "none"`, the expected config's `database` gains `tls: "none"`; `verify-full` is read as `tls: "verify-full"`; `DATABASE_TLS` joins the "reported when missing" table (it is in `names` through `valid`); a value such as `require` is rejected and the message names `DATABASE_TLS`.
 
-- [ ] **Step 2: Run them and see them fail**
+- [x] **Step 2: Run them and see them fail**
 
 Run: `pnpm vitest run apps/api/src/config.test.ts`
 Expected: FAIL on the new expectations.
 
-- [ ] **Step 3: Implement the setting**
+- [x] **Step 3: Implement the setting**
 
 `DATABASE_TLS: z.enum(["none", "verify-full"])` in `envSchema`, with a comment (`verify-full` on RDS from PH-12c, `none` locally); `tls` in `DatabaseSettings` and `loadConfig`. `testConfig()`'s `database` gains `tls: "none"`.
 
-- [ ] **Step 4: Write the failing pool tests**
+- [x] **Step 4: Write the failing pool tests**
 
 `db/database.test.ts`, no connection opened (the pool connects on the first query; end it in `afterEach`):
 - `tls: "none"` gives `db.$client.options.ssl` falsy;
 - `tls: "verify-full"` gives `ssl.rejectUnauthorized === true` and `ssl.ca` equal to the content of `rdsCaBundle`, which starts with `-----BEGIN CERTIFICATE-----`;
 - `rdsCaBundle` ends with `apps/api/certs/rds-global-bundle.pem`.
 
-- [ ] **Step 5: Implement the pool's options; run the tests**
+- [x] **Step 5: Implement the pool's options; run the tests**
 
 `rdsCaBundle` from `new URL("../../certs/rds-global-bundle.pem", import.meta.url)`; for `verify-full`, `ssl: { ca: readFileSync(rdsCaBundle, "utf8"), rejectUnauthorized: true }`, read when the pool is created, so a missing bundle fails startup.
 
 Run: `pnpm vitest run apps/api/src/db/database.test.ts apps/api/src/config.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Set it everywhere the other settings are set**
+- [x] **Step 6: Set it everywhere the other settings are set**
 
 `DATABASE_TLS=none` in `apps/api/.env.example` (with a comment: `verify-full` on the demo) and `DATABASE_TLS: none` in `compose.yaml`'s app service; add the line to your own `apps/api/.env`. The `Dockerfile`'s bundle comment names PH-12a and PH-12c instead of PH-12. CI copies `.env.example`, so it needs nothing more.
 
-- [ ] **Step 7: Document**
+- [x] **Step 7: Document**
 
 `setup.md`: `DATABASE_TLS` where the API's `.env` is described, and a note that an `.env` made before PH-12a needs `DATABASE_TLS=none` added. `docker.md`: the bundle used by `DATABASE_TLS=verify-full`, set on the demo in PH-12c.
 
-- [ ] **Step 8: Run all checks and commit**
+- [x] **Step 8: Run all checks and commit**
 
 Run: `pnpm test && pnpm lint && pnpm typecheck && pnpm check:image`
 Expected: all pass; the image still starts healthy under Compose.

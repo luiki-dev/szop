@@ -22,7 +22,7 @@ Docker builds and runs **containers**: a program packed together with everything
   - **Three stages on one pinned `base`, plus a shared `manifests` stage** (decisions 6 and 7), pnpm through Corepack, and not `pnpm deploy`, which would copy `@szop/shared` into `node_modules`, where Node refuses to strip types.
   - **What the image sets** (decision 9): only `WEB_ROOT` and `NODE_ENV`; every other setting comes from whoever runs it.
   - **Non-root, read-only** (decision 10): the `node` user, code owned by root, no file written at run time.
-  - **The RDS certificate bundle committed** (decision 2), for the database connection's TLS from PH-12a.
+  - **The RDS certificate bundle committed** (decision 2), for the database connection's TLS: the API reads it from `apps/api/certs/rds-global-bundle.pem` when `DATABASE_TLS=verify-full`, which the demo sets from PH-12c ([ADR 0033](../../decisions/0033-app-ready-for-the-cloud-details.md), decision 5). Under Compose, `DATABASE_TLS` is `none`: the local PostgreSQL has no TLS.
   - **A startup check** (decisions 3, 4, 11 and 12): `scripts/check-image.sh`, the same locally and in CI.
 
 ## Configuration

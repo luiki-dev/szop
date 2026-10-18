@@ -7,7 +7,14 @@ export function testConfig(overrides: Partial<Config> = {}): Config {
     port: 3000,
     logLevel: "silent",
     // Not used: each test passes its own database to buildApp.
-    database: { host: "", port: 1, name: "", user: "", password: "" },
+    database: {
+      host: "",
+      port: 1,
+      name: "",
+      user: "",
+      password: "",
+      tls: "none",
+    },
     // Not served: tests that serve the SPA pass their own folder.
     webRoot: "/nonexistent/szop-web-root",
     trustedProxies: [],
