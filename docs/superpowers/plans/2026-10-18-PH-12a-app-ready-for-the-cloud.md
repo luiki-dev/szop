@@ -69,7 +69,7 @@
   - `class MigrationMismatchError extends Error { readonly mismatch: MigrationMismatch }`, message from `describeMismatch`.
   - `checkMigrations(db: Database, journal: Journal): Promise<void>`: throws `MigrationMismatchError` when any list is non-empty.
 
-- [ ] **Step 1: Write the failing unit tests for `compareMigrations` and `describeMismatch`**
+- [x] **Step 1: Write the failing unit tests for `compareMigrations` and `describeMismatch`**
 
 An `it.each` table over `compareMigrations`, with `L(name, createdAt, hash)` and `R(createdAt, hash)` helpers. Rows (expected lists as `{ unknown, skipped, edited }`, by name or `createdAt`):
 
@@ -85,25 +85,25 @@ An `it.each` table over `compareMigrations`, with `L(name, createdAt, hash)` and
 
 `describeMismatch` tests: the text contains `unknown`, the unknown one's timestamp, `skipped`, the skipped one's name, `edited`, the edited one's name, and the exact remedy line of Global Constraints; a case with an empty list is not mentioned.
 
-- [ ] **Step 2: Run them and see them fail**
+- [x] **Step 2: Run them and see them fail**
 
 Run: `pnpm vitest run apps/api/src/db/migration-check.test.ts`
 Expected: FAIL, module `./migration-check.ts` not found.
 
-- [ ] **Step 3: Implement `compareMigrations`, `describeMismatch` and `MigrationMismatchError`**
+- [x] **Step 3: Implement `compareMigrations`, `describeMismatch` and `MigrationMismatchError`**
 
 Match by timestamp: a recorded row whose `createdAt` is no local `createdAt` is unknown; a local migration with a recorded twin but another hash is edited; a local migration with no recorded twin and `createdAt` below the newest recorded `createdAt` is skipped. The message: a first line saying the database's migrations do not match this code's, one indented line per mismatched migration naming its case, then the remedy line.
 
-- [ ] **Step 4: Run them and see them pass**
+- [x] **Step 4: Run them and see them pass**
 
 Run: `pnpm vitest run apps/api/src/db/migration-check.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Write the failing tests for `readLocalMigrations`**
+- [x] **Step 5: Write the failing tests for `readLocalMigrations`**
 
 `readLocalMigrations(readJournal())` returns one migration, `{ name: "0000_init", createdAt: 1791307052475 }`, whose `hash` equals the SHA-256 hex of `apps/api/drizzle/0000_init.sql`'s content (computed in the test with `node:crypto`), which is also the `hash` the template database recorded (Step 6 compares them).
 
-- [ ] **Step 6: Write the failing database tests for `readRecordedMigrations` and `checkMigrations`**
+- [x] **Step 6: Write the failing database tests for `readRecordedMigrations` and `checkMigrations`**
 
 In a `describe` that creates its own database `szop_test_migrations_${VITEST_POOL_ID}` through the `postgres` maintenance database (`testDatabaseSettings("postgres")`) in `beforeEach`, and drops it `WITH (FORCE)` in `afterEach`, after ending the pool:
 
@@ -112,20 +112,20 @@ In a `describe` that creates its own database `szop_test_migrations_${VITEST_POO
 - after `runMigrations`, `readRecordedMigrations` returns one row with `createdAt` 1791307052475 and the hash `readLocalMigrations` gives, and `checkMigrations` resolves;
 - after inserting a row `(hash 'x', created_at 1891307052475)` into `drizzle.__drizzle_migrations`, `checkMigrations` rejects with a `MigrationMismatchError` whose `mismatch.unknown` holds `createdAt` 1891307052475.
 
-- [ ] **Step 7: Implement `readLocalMigrations`, `readRecordedMigrations` and `checkMigrations`; run the file**
+- [x] **Step 7: Implement `readLocalMigrations`, `readRecordedMigrations` and `checkMigrations`; run the file**
 
 Run: `pnpm vitest run apps/api/src/db/migration-check.test.ts`
 Expected: PASS.
 
-- [ ] **Step 8: Call the check in `server.ts`**
+- [x] **Step 8: Call the check in `server.ts`**
 
 In the startup `try`, `await checkMigrations(db, journal)` before `await runMigrations(db)`, reading the journal once (`const journal = readJournal()`) and passing it to `currentSchemaVersion` too. A mismatch reaches the existing `catch`, which logs `startup failed` with the error (its message carries the details) and exits with code 1. Add a comment naming ADR 0033, decision 3.
 
-- [ ] **Step 9: Check by hand**
+- [x] **Step 9: Check by hand**
 
 With PostgreSQL up: `pnpm --filter @szop/api start` logs `migrations applied`. Stop it, run `docker compose exec postgres psql -U szop -d szop -c "INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('x', 1891307052475)"`, start again: the log shows `startup failed` with the unknown migration and the remedy, and the exit code is 1. Remove the row with the matching `DELETE`; the next start succeeds.
 
-- [ ] **Step 10: Run all checks and commit**
+- [x] **Step 10: Run all checks and commit**
 
 Run: `pnpm test && pnpm lint && pnpm typecheck`
 Expected: all pass.
