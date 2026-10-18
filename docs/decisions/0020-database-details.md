@@ -1,6 +1,6 @@
 # ADR 0020 — Database details
 
-- **Status:** ✅ Accepted
+- **Status:** ✅ Accepted — the consequence on skipped migrations refined by [ADR 0033](0033-app-ready-for-the-cloud-details.md), decision 3 (the app refuses to start on a migration Drizzle would skip)
 - **Date:** 2026-10-05
 - **Refines:** [ADR 0007](0007-testing-strategy.md), decision 12 (in CI, PostgreSQL comes from `compose.yaml`, not a service container; see decision 6); [ADR 0010](0010-ci-cd.md), decision 7 (PostgreSQL in the test job comes from `compose.yaml`, not a service container; see decision 6)
 - **Completes:** [ADR 0005](0005-development-environment.md), decision 4 (the version and the Compose service; see decisions 8 and 9); [ADR 0007](0007-testing-strategy.md), decisions 12 and 13 (how test databases are made and emptied; see decisions 7, 10 and 13); [ADR 0008](0008-hosting.md), decisions 14, 15 and 19, and its consequence on the database settings (see decisions 3, 5, 8 and 11)

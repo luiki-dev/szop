@@ -55,6 +55,10 @@ const envSchema = z.object({
   DATABASE_NAME: z.string().min(1),
   DATABASE_USER: z.string().min(1),
   DATABASE_PASSWORD: z.string().min(1),
+  // TLS to the database: "verify-full" checks RDS's certificate and name
+  // (on AWS from PH-12c), "none" for the local container, which has no TLS
+  // (ADR 0033, decision 5).
+  DATABASE_TLS: z.enum(["none", "verify-full"]),
   // The built SPA (ADR 0023, decision 2). A folder that does not exist yet,
   // as in pnpm dev, is not an error: the API logs a warning and serves its
   // own routes only.
@@ -69,6 +73,7 @@ export interface DatabaseSettings {
   name: string;
   user: string;
   password: string;
+  tls: "none" | "verify-full";
 }
 
 export interface Config {
@@ -105,6 +110,7 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
       name: data.DATABASE_NAME,
       user: data.DATABASE_USER,
       password: data.DATABASE_PASSWORD,
+      tls: data.DATABASE_TLS,
     },
     webRoot: resolve(data.WEB_ROOT),
     trustedProxies: data.TRUSTED_PROXIES,

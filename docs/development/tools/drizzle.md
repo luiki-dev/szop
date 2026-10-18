@@ -24,10 +24,33 @@ Drizzle is a TypeScript object–relational mapper (ORM) that stays close to SQL
 
 Pitfalls:
 
-- **Never edit a migration once it is on `main`.** Drizzle 0.45 records a hash of each applied migration but never compares it, so an edited migration is silently not applied again: databases that ran the old version keep it, and only new ones get the edit. Write a new migration instead.
-- **Drizzle applies only migrations newer than the latest one recorded,** by the `when` timestamp. A migration generated on an older branch and merged after a newer one is skipped silently: regenerate it on top of `main` before merging.
+- **Never edit a migration once it is on `main`.** Drizzle 0.45 records a hash of each applied migration but never compares it, so an edited migration would silently not be applied again: databases that ran the old version would keep it, and only new ones would get the edit. The API refuses to start on such a database ([the migration check](#the-migration-check), "edited"). Write a new migration instead.
+- **Drizzle applies only migrations newer than the latest one recorded,** by the `when` timestamp. A migration generated on an older branch and merged after a newer one would be skipped silently, and the API refuses to start instead ([the migration check](#the-migration-check), "skipped"): regenerate it on top of `main` before merging.
 - **A migration runs inside one transaction** with the others of the same start.
 - **`pnpm audit` reports the GitHub Security Advisory (GHSA) [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99)** (moderate) in esbuild 0.24.2 or older, which drizzle-kit 0.31 reaches through the deprecated `@esbuild-kit` packages. It is harmless here: the advisory concerns esbuild's development server (`serve`), which drizzle-kit never runs, and drizzle-kit is a development dependency. It goes away with Drizzle 1.0 ([OP-077](https://github.com/luiki-dev/szop/issues/120)). Dependabot raises an alert for it; dismissing it or adding an override is the owner's call.
+
+## The migration check
+
+Before Drizzle migrates, the API compares the migrations recorded in `drizzle.__drizzle_migrations` with the ones in `apps/api/drizzle/`, matching them by their `when` timestamp ([ADR 0033](../../decisions/0033-app-ready-for-the-cloud-details.md), decision 3). Drizzle itself would pass over each of these cases in silence; the API refuses to start instead:
+
+- **unknown:** the database recorded a migration this code does not have. For example, you started the API on a branch that adds `0001_lists`, then switched back to `main`.
+- **skipped:** a migration in this code is older than the newest applied one and was never applied, so Drizzle would never apply it. For example, you generated `0001_items` on one branch, then generated and applied `0001_lists` on a newer branch, and then switched to a branch that has both.
+- **edited:** a migration's SQL changed after it was applied. For example, you started the API on your branch, then changed the branch's migration and started it again.
+
+A new, empty database passes, and so does a normal upgrade: migrations newer than every applied one are pending, not skipped. The check is the code in `apps/api/src/db/migration-check.ts`.
+
+On a mismatch the log shows `startup failed`, the API exits with code 1, and the error's message lists each migration with its case, then the remedy:
+
+```text
+The database's migrations do not match this code's:
+  unknown: applied at 1891307052475, not in this code
+Reset the database: `pnpm db:reset` locally; on the demo, `demo-down` then `demo-up`.
+```
+
+- **Locally:** `pnpm db:reset` wipes the database ([scripts](../scripts.md#the-database-and-the-container-image)); the next start migrates the empty one.
+- **On the demo:** `demo-down`, then `demo-up`, which the owner triggers.
+
+The remedy belongs to the environment, not to the check. Both environments keep no data worth saving today; once one does, it needs a different remedy, such as fixing the migrations by hand ([OP-097](https://github.com/luiki-dev/szop/issues/224)).
 
 ## Official documentation
 

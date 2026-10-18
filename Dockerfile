@@ -46,7 +46,8 @@ COPY apps/api/package.json ./apps/api/
 COPY apps/api/src ./apps/api/src
 # The migrations, with meta/_journal.json, which every start reads (OP-078).
 COPY apps/api/drizzle ./apps/api/drizzle
-# The RDS certificate authorities, for the pool's TLS from PH-12 (OP-017).
+# The RDS certificate authorities, for the pool's TLS: DATABASE_TLS=verify-full
+# (PH-12a), set on the demo in PH-12c (OP-017).
 COPY apps/api/certs ./apps/api/certs
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/shared/src ./packages/shared/src

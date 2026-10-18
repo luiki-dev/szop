@@ -1,6 +1,6 @@
 # CI/CD
 
-How Szop's continuous integration (CI) works: which checks run on which event, how to read a failed run, and the rules every workflow follows. Every pull request is checked in GitHub Actions, and a failing check blocks the merge; CodeQL scans the code and the workflows, and Dependabot proposes updates every week. *Why* it works this way is in [ADR 0010](../decisions/0010-ci-cd.md) (the direction) and [ADR 0018](../decisions/0018-ci-details.md) (the details). [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) added the workflows that reach AWS (`infra-plan` and `demo-down`, with a placeholder `demo-up`); later phases add to this guide: the real `demo-up` ([PH-12](../roadmap.md#ph-12-first-deploy)) and releases ([PH-13](../roadmap.md#ph-13-releases)).
+How Szop's continuous integration (CI) works: which checks run on which event, how to read a failed run, and the rules every workflow follows. Every pull request is checked in GitHub Actions, and a failing check blocks the merge; CodeQL scans the code and the workflows, and Dependabot proposes updates every week. *Why* it works this way is in [ADR 0010](../decisions/0010-ci-cd.md) (the direction) and [ADR 0018](../decisions/0018-ci-details.md) (the details). [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) added the workflows that reach AWS (`infra-plan` and `demo-down`, with a placeholder `demo-up`); later phases add to this guide: the real `demo-up` ([PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button)) and releases ([PH-13](../roadmap.md#ph-13-releases)).
 
 The checks run the PR's own code and configuration: its workflows, its `package.json` scripts, its `commitlint.config.js`. A PR could therefore weaken a check along with the change it checks; the owner's review of every changed file is what catches that.
 
@@ -31,7 +31,7 @@ The checks run the PR's own code and configuration: its workflows, its `package.
 | A push to `main` (every merge) | `ci.yml` and CodeQL |
 | Every Monday | Dependabot looks for updates and opens PRs, which then run like any PR |
 | Every night at 01:17 UTC, and when started by hand (*Actions → demo-down → Run workflow*) | `demo-down.yml` destroys `infra/demo` ([runbook](../operations/demo-environment.md#tearing-down)) |
-| When started by hand (*Actions → demo-up → Run workflow*) | `demo-up.yml`, a placeholder until [PH-12](../roadmap.md#ph-12-first-deploy): it fails on purpose with a message |
+| When started by hand (*Actions → demo-up → Run workflow*) | `demo-up.yml`, a placeholder until [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button): it fails on purpose with a message |
 
 `ci.yml` keeps one run per PR: a new push to the PR cancels the run still going for the previous push. On `main`, a running run is never cancelled, but a run still waiting to start can be replaced by a newer push: GitHub keeps at most one run waiting, so when several merges land in quick succession, not every merge necessarily gets its own run.
 
@@ -184,7 +184,7 @@ From [ADR 0010](../decisions/0010-ci-cd.md), decisions 4 and 20. zizmor checks m
 - **`persist-credentials: false`** on every `actions/checkout`, so the token is not left in `.git/config` for later steps.
 - **Nothing a PR author controls inside `${{ … }}` in a `run:` script** (titles, branch names): such a value goes through `env:` and is read as `"$NAME"`.
 - **No `pull_request_target` and no `workflow_run`**: they run with the repository's secrets on a fork's code or data.
-- **A job that holds AWS credentials runs no code a PR could change, besides Terraform's:** no project setup action (`./.github/actions/setup`), no `pnpm install` and no project script; Terraform, the AWS CLI, git, jq and `gh` only ([ADR 0012](../decisions/0012-security-baseline.md), decision 18). No job holds both AWS credentials and a write token for the repository, and a job never names the `demo` environment before PH-12 creates it protected: GitHub would create it with no protection.
+- **A job that holds AWS credentials runs no code a PR could change, besides Terraform's:** no project setup action (`./.github/actions/setup`), no `pnpm install` and no project script; Terraform, the AWS CLI, git, jq and `gh` only ([ADR 0012](../decisions/0012-security-baseline.md), decision 18). No job holds both AWS credentials and a write token for the repository, and a job never names the `demo` environment before PH-12b creates it protected: GitHub would create it with no protection.
 - **actionlint and zizmor run before every commit that stages a workflow, a local action or `dependabot.yml`:** the pre-commit hook runs them on the staged files, and `pnpm check:workflows` runs them over everything. Install them with the [setup guide](setup.md#9-actionlint-zizmor-and-uv); CI runs them anyway, and zizmor's online audits only there ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 2).
 
 ## CodeQL

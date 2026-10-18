@@ -25,7 +25,7 @@
 ## Consequences
 
 - **Every developer's `apps/api/.env` needs `TRUSTED_PROXIES`,** since every setting is required: an `.env` made before this phase must gain the line `TRUSTED_PROXIES=none` from `.env.example`, or the API and the tests stop with `TRUSTED_PROXIES: missing`.
-- **[PH-12](../roadmap.md#ph-12-first-deploy) sets `TRUSTED_PROXIES` to the VPC's range,** taken from Terraform, and checks once on the demo that the log shows the real client address behind a forged `X-Forwarded-For` ([OP-053](https://github.com/luiki-dev/szop/issues/26)).
+- **[PH-12](../roadmap.md#ph-12c-app-on-ecs-and-rds) sets `TRUSTED_PROXIES` to the VPC's range,** taken from Terraform, and checks once on the demo that the log shows the real client address behind a forged `X-Forwarded-For` ([OP-053](https://github.com/luiki-dev/szop/issues/26)).
 - **Tests send `Sec-Fetch-Site: same-origin` on unsafe requests,** or the cross-site check answers 403 before routing, and so must a `curl` that changes data on a running app. The [testing guide](../development/testing.md) says how.
 - **A non-browser client that must send unsafe requests,** such as a webhook or a native app, needs a decision of its own: the phase that brings it decides an exemption from decision 1 and records it.
 - **[PH-18](../roadmap.md#ph-18-registration-and-login) and [PH-29](../roadmap.md#ph-29-password-reset-and-change) build their own email links** with the token in the query string, through Better Auth's email callbacks, instead of its path-token default (decision 6, [OP-055](https://github.com/luiki-dev/szop/issues/109)).

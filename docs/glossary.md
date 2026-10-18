@@ -13,6 +13,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **ARN** | Amazon Resource Name | The unique identifier of an AWS resource, such as `arn:aws:ssm:eu-central-1:…:parameter/…`. |
 | **AWS** | Amazon Web Services | Amazon's cloud platform, the largest hyperscaler. Szop's demo environment runs on it (see ADR 0008). |
 | **AZ** | Availability Zone | One of several separate data centers within an AWS region, with independent power and networking. |
+| **CA** | Certificate Authority | An organisation whose signature on a TLS certificate vouches that the certificate belongs to the name it carries. A client trusts a list of CAs, a CA bundle; with `DATABASE_TLS=verify-full` the API trusts only Amazon's RDS bundle (see ADR 0033). |
 | **CAA** | Certification Authority Authorization | A DNS record naming the certificate authorities allowed to issue certificates for a domain. Szop's allows only Amazon (see ADR 0030). |
 | **CalVer** | Calendar Versioning | Version numbers built from the release date, such as `2026.10.0`. Considered, not used (see ADR 0009). |
 | **CDK** | Cloud Development Kit | AWS's infrastructure-as-code tool in general-purpose languages such as TypeScript. Considered, not used (see ADR 0008). |

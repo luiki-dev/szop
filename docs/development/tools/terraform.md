@@ -33,7 +33,7 @@ A **root module** is a folder of `.tf` files that Terraform runs as one unit, wi
 |---|---|---|
 | `infra/bootstrap` | The S3 bucket for every module's state, and the budget alerts | The owner, once |
 | `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group, the GitHub OIDC provider and CI's two roles | The owner |
-| `infra/demo` | One demo session: network, load balancer, containers, database. Only its backend, provider and variable until PH-12 | CI's `demo-up` button (PH-12), and `demo-down` by hand and every night |
+| `infra/demo` | One demo session: network, load balancer, containers, database. Only its backend, provider and variable until PH-12b | CI's `demo-up` button (PH-12b), and `demo-down` by hand and every night |
 
 CI runs Terraform too, with the AWS credentials of an OIDC role, never a stored key: `infra-plan.yml` runs `terraform plan -lock=false` for `base` and `demo` on every pull request that touches `infra/`, as the read-only role `szop-ci-plan` (`base` with `-refresh=false`, since that role may not decrypt the Better Auth secret that a refresh reads), and `demo-down.yml` runs `terraform destroy` on `demo` as `szop-ci-deploy`. Neither changes anything in `base` or `bootstrap`. See [CI/CD](../ci-cd.md#cis-access-to-aws).
 

@@ -342,7 +342,7 @@ This is the target state. The pieces arrive in the [roadmap](../roadmap.md)'s ph
 | Now (ADR 0009 merged) | Branches, PRs, merge commits only, the `main` and `v*` rulesets, the PR template |
 | [PH-01](../roadmap.md#ph-01-monorepo-and-toolchain) | The local loop of step 3, the pre-commit and commit-msg hooks |
 | [PH-02](../roadmap.md#ph-02-ci-checks) | CI checks (`ci.yml`, `pr-title.yml`), the required status checks, CodeQL and Dependabot |
-| [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12](../roadmap.md#ph-12-first-deploy) and [PH-13](../roadmap.md#ph-13-releases) | `demo-up`/`demo-down` (the nightly teardown and a placeholder `demo-up` merged before any demo, [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 2), release-please, versioned images |
+| [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net), [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) and [PH-13](../roadmap.md#ph-13-releases) | `demo-up`/`demo-down` (the nightly teardown and a placeholder `demo-up` merged before any demo, [ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 2), release-please, versioned images |
 | [PH-13](../roadmap.md#ph-13-releases), the end of the walking skeleton | The first release, `v0.1.0` |
 | When the MVP is done | `1.0.0`, set with a `Release-As: 1.0.0` footer |
 

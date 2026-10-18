@@ -2,7 +2,9 @@ import { buildApp } from "./app.ts";
 import { loadConfig, type Config } from "./config.ts";
 import { createDatabase } from "./db/database.ts";
 import { runMigrations } from "./db/migrate.ts";
+import { checkMigrations } from "./db/migration-check.ts";
 import { currentSchemaVersion, readJournal } from "./db/schema-version.ts";
+import { startShutdownDeadline } from "./shutdown.ts";
 
 // The only file that reads process.env. Checked by hand, not by tests:
 // everything it calls is tested (ADR 0019, decision 10).
@@ -30,6 +32,16 @@ db.$client.on("error", (error: Error & { code?: string }) => {
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.once(signal, () => {
     app.log.info({ signal }, "shutting down");
+    // ECS kills a task 30 seconds after asking it to stop, so the shutdown
+    // ends well before that, even with a client that never finishes its
+    // request (ADR 0033, decision 6).
+    startShutdownDeadline({
+      server: app.server,
+      log: app.log,
+      deadlineMs: 10_000,
+      graceMs: 5_000,
+      exit: (code) => process.exit(code),
+    });
     app
       .close()
       .then(() => db.$client.end())
@@ -48,8 +60,12 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
 // logged like everything else, then the process exits with code 1: on ECS a
 // new task tries again (ADR 0020, decision 11).
 try {
+  const journal = readJournal();
+  // Drizzle silently passes over a database migrated by other code, so the
+  // API refuses to start on one instead (ADR 0033, decision 3).
+  await checkMigrations(db, journal);
   await runMigrations(db);
-  const schemaVersion = await currentSchemaVersion(db, readJournal());
+  const schemaVersion = await currentSchemaVersion(db, journal);
   app.log.info({ schemaVersion }, "migrations applied");
   await app.listen({ host: config.host, port: config.port });
 } catch (error) {

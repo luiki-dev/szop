@@ -6,7 +6,7 @@ How to set up, run and take down Szop's environment on AWS, step by step. Szop r
 |---|---|---|---|
 | `infra/bootstrap` | The state bucket every module keeps its state in, and the budget alerts | Once, from the owner's machine | [Applying bootstrap](#applying-bootstrap) |
 | `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group, and CI's access to AWS: the GitHub OpenID Connect (OIDC) provider and the roles `szop-ci-plan` and `szop-ci-deploy` | From the owner's machine, when it changes | [Buying the domain](#buying-the-domain), [Applying base](#applying-base) |
-| `infra/demo` | One demo session: network, load balancer, containers, database. Empty until [PH-12](../roadmap.md#ph-12-first-deploy) | By CI's `demo-up` button (PH-12), and destroyed by `demo-down`, by hand and every night | [Tearing down](#tearing-down) |
+| `infra/demo` | One demo session: network, load balancer, containers, database. Empty until [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) | By CI's `demo-up` button (PH-12b), and destroyed by `demo-down`, by hand and every night | [Tearing down](#tearing-down) |
 
 Why each piece exists is in the [stack overview](../architecture/stack-overview.md#12-where-szop-runs); how Terraform works here is on the [Terraform page](../development/tools/terraform.md). The tools come from [setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli).
 
@@ -381,7 +381,7 @@ After the merge, apply base again from `main`, as for every base PR ([ADR 0011](
 
 ⚠️ **Don't:**
 
-- add `repo:luiki-dev@290870182/szop@1380292421:environment:demo` to the deploy role's trust by hand: PH-12 adds it in the PR in which you create the `demo` environment with its required reviewer, because GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
+- add `repo:luiki-dev@290870182/szop@1380292421:environment:demo` to the deploy role's trust by hand: PH-12b adds it in the PR in which you create the `demo` environment with its required reviewer, because GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
 - widen a CI role in the console: the plan comment and IAM Access Analyzer check the roles' policies only when they change in code.
 
 ### Cost allocation tags
@@ -392,7 +392,7 @@ Once the access portal works (step 5) and a resource that carries the tags exist
 
 ## Tearing down
 
-`infra/demo` is destroyed by the **`demo-down`** workflow, by hand and every night ([ADR 0010](../decisions/0010-ci-cd.md), decision 13). It is the safety net against a demo left running: a forgotten demo costs about $1.70 a day. Until [PH-12](../roadmap.md#ph-12-first-deploy) creates the first demo, `infra/demo` is empty and every run finds nothing to destroy, which still proves that the workflow, the role, the state bucket and the lock all work.
+`infra/demo` is destroyed by the **`demo-down`** workflow, by hand and every night ([ADR 0010](../decisions/0010-ci-cd.md), decision 13). It is the safety net against a demo left running: a forgotten demo costs about $1.70 a day. Until [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) creates the first demo, `infra/demo` is empty and every run finds nothing to destroy, which still proves that the workflow, the role, the state bucket and the lock all work.
 
 ### With the button
 
@@ -400,7 +400,7 @@ Once the access portal works (step 5) and a resource that carries the tags exist
 2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with an RDS database to delete.
 3. Read the run's **summary** (the run's page, *Summary*):
    - **Trigger:** `workflow_dispatch` (by hand) or `schedule` (the nightly run).
-   - **Code used:** which Terraform code destroyed the demo and why. If a demo recorded its commit (the `deployed_commit` output of `infra/demo`, written by `demo-up` from PH-12), it is that commit, so a resource added by a branch is destroyed by the code that created it; with no commit recorded, it is `main`'s code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 6).
+   - **Code used:** which Terraform code destroyed the demo and why. If a demo recorded its commit (the `deployed_commit` output of `infra/demo`, written by `demo-up` from PH-12b), it is that commit, so a resource added by a branch is destroyed by the code that created it; with no commit recorded, it is `main`'s code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 6).
    - **Result:** Terraform's own `Destroy complete! Resources: N destroyed.` (`0 destroyed` on a quiet night).
 
 **Check:** the run is green, and *Result* says `Destroy complete!`.
@@ -419,7 +419,7 @@ If two runs overlap, the second waits: `demo-down` runs one at a time and never 
 
 After any failure, check the result in the console or with the Tag Editor (*Resource Groups & Tag Editor*, tag `group` = `demo`) that nothing of the demo is left. The budget alerts ([Applying bootstrap](#applying-bootstrap)) are the second net.
 
-GitHub disables scheduled workflows of a public repository after 60 days without activity in it. `demo-up` re-enables `demo-down` every time it runs ([ADR 0010](../decisions/0010-ci-cd.md), decision 13; arriving in PH-12), so a demo cannot outlive a disabled schedule. Until then, glance at the *Actions → demo-down* page after a quiet spell: it shows a banner if the schedule was disabled.
+GitHub disables scheduled workflows of a public repository after 60 days without activity in it. `demo-up` re-enables `demo-down` every time it runs ([ADR 0010](../decisions/0010-ci-cd.md), decision 13; arriving in PH-12b), so a demo cannot outlive a disabled schedule. Until then, glance at the *Actions → demo-down* page after a quiet spell: it shows a banner if the schedule was disabled.
 
 ### From your machine
 
@@ -450,5 +450,5 @@ git switch -                                      # back to your branch
 
 ## Coming later
 
-- **Spinning the demo up** with the `demo-up` button ([PH-12](../roadmap.md#ph-12-first-deploy)). Until then the button exists but fails on purpose.
-- **Debugging** a running demo with ECS Exec and its logs, and **what it costs** ([PH-12](../roadmap.md#ph-12-first-deploy)).
+- **Spinning the demo up** with the `demo-up` button ([PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button)). Until then the button exists but fails on purpose.
+- **Debugging** a running demo with ECS Exec and its logs, and **what it costs** ([PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds)).

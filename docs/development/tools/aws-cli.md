@@ -1,6 +1,6 @@
 # AWS CLI
 
-The AWS Command Line Interface (CLI) runs AWS commands from a terminal: `aws s3 ls`, `aws sts get-caller-identity` and so on. In Szop it also signs the owner in to AWS: Terraform uses the credentials it obtains. The **Session Manager plugin** is a small companion program the CLI calls to open a shell inside a running container (ECS Exec), for debugging the demo from PH-12.
+The AWS Command Line Interface (CLI) runs AWS commands from a terminal: `aws s3 ls`, `aws sts get-caller-identity` and so on. In Szop it also signs the owner in to AWS: Terraform uses the credentials it obtains. The **Session Manager plugin** is a small companion program the CLI calls to open a shell inside a running container (ECS Exec), for debugging the demo from PH-12c.
 
 ## Why Szop uses it
 

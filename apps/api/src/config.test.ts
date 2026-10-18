@@ -11,6 +11,7 @@ const valid = {
   DATABASE_NAME: "szop",
   DATABASE_USER: "szop",
   DATABASE_PASSWORD: "szop",
+  DATABASE_TLS: "none",
   WEB_ROOT: "../web/dist",
   TRUSTED_PROXIES: "none",
 };
@@ -39,6 +40,7 @@ describe("loadConfig", () => {
         name: "szop",
         user: "szop",
         password: "szop",
+        tls: "none",
       },
       webRoot: resolve("../web/dist"),
       trustedProxies: [],
@@ -103,6 +105,21 @@ describe("loadConfig", () => {
       /LOG_LEVEL: (?!missing)/,
     );
   });
+
+  it("reads DATABASE_TLS=verify-full", () => {
+    expect(
+      loadConfig({ ...valid, DATABASE_TLS: "verify-full" }).database.tls,
+    ).toBe("verify-full");
+  });
+
+  it.each(["require", "VERIFY-FULL", ""])(
+    "rejects DATABASE_TLS=%j",
+    (value) => {
+      expect(errorFor({ ...valid, DATABASE_TLS: value })).toMatch(
+        /DATABASE_TLS: (?!missing)/,
+      );
+    },
+  );
 
   it.each([
     ["none", []],
