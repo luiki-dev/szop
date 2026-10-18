@@ -34,7 +34,8 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
 5. The settings CI needs to reach AWS, around the [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) PR ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md)):
    1. The [`demo-teardown` environment](#environments), before `demo-down.yml` reaches `main`: a job that names a missing environment creates it with no protection.
    2. The two [variables](#variables), after `infra/base` is applied from the PR's branch: they hold its outputs, and the PR's plan comment needs them.
-6. Check the result (see [Checking the settings](#checking-the-settings)).
+6. The [`demo` environment](#environments), around the [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) PR, before `infra/base` is applied with the deploy role's trust for it: a job that names a missing environment creates it with no protection, and that trust has no branch pin.
+7. Check the result (see [Checking the settings](#checking-the-settings)).
 
 ## Visibility
 
@@ -81,8 +82,12 @@ Leave **Allow auto-merge** off: the owner's manual merge is the approval (ADR 00
 | `demo-teardown` | **Required reviewers** | None | The nightly `demo-down` cannot wait for an approval at night. ADR 0012, decision 16. |
 | | **Deployment branches and tags** | **Selected branches and tags**, with one rule: branch **`main`** | The trust policy of `szop-ci-deploy` matches the environment, and the token of an environment job carries the same `sub` from any branch, so the policy cannot tell a branch from `main`. This rule does it in GitHub: a job on any other branch that names `demo-teardown` is refused before it runs and never gets a token. The policy also requires the token's `ref` to be `refs/heads/main`, so AWS refuses such a token too, if the rule were ever loosened ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 14). Keep both: the rule stops the job before it runs, the `ref` pin backs it in AWS. ADR 0012, decision 16; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decisions 9 and 10. |
 | | **Secrets and variables** | None | The role ARN is a repository variable (below). |
+| `demo` | **Required reviewers** | The owner | `demo-up` deploys any branch's Terraform with the deploy role's credentials, and the role's trust for `demo` has no branch condition, so the owner's approval of each run is the gate. The job waits at *Review deployments*. ADR 0012, decision 16; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decisions 10 and 14. |
+| | **Prevent self-review** | Off | The owner is the only person who can press the button; with it on, the person who started the run could never approve it. |
+| | **Deployment branches and tags** | **No restriction** | `demo-up` is pressed on the branch being checked, before it is merged, so any branch must be allowed. Unlike `demo-teardown`, the trust policy has no `ref` pin to back a rule, so nothing but the approval limits what a run deploys. |
+| | **Secrets and variables** | None | The role ARN is a repository variable (below). |
 
-Create it by hand, **before** `demo-down.yml` is merged: GitHub creates an environment, with no protection, the first time a job names a missing one. The environments `demo` (the owner as required reviewer, [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button)) and `release` (`main` only, [PH-13](../roadmap.md#ph-13-releases)) are created with the phases that use them; no job names them before that, and the deploy role does not trust `demo` until then.
+Create `demo-teardown` by hand, **before** `demo-down.yml` is merged: GitHub creates an environment, with no protection, the first time a job names a missing one. Create `demo` before base is applied with its trust and before `demo-up.yml` first runs ([PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button), [runbook](../operations/demo-environment.md#cis-roles-and-variables)). The environment `release` (`main` only, [PH-13](../roadmap.md#ph-13-releases)) is created with the phase that uses it; no job names it before that.
 
 ## Variables
 
@@ -91,7 +96,7 @@ Create it by hand, **before** `demo-down.yml` is merged: GitHub creates an envir
 | Variable | Value | Why |
 |---|---|---|
 | `AWS_PLAN_ROLE_ARN` | The ARN of `szop-ci-plan`: base's output `ci_plan_role_arn` | Read by `infra-plan.yml` (`vars.AWS_PLAN_ROLE_ARN`) to assume the read-only plan role. |
-| `AWS_DEPLOY_ROLE_ARN` | The ARN of `szop-ci-deploy`: base's output `ci_deploy_role_arn` | Read by `demo-down.yml` to assume the deploy role. |
+| `AWS_DEPLOY_ROLE_ARN` | The ARN of `szop-ci-deploy`: base's output `ci_deploy_role_arn` | Read by `demo-down.yml` and `demo-up.yml` to assume the deploy role. |
 
 They are variables, not secrets: an ARN is a name, not a credential, and what protects the roles is their trust policies. **No AWS access key and no account ID is stored in GitHub**; the workflows read the account ID from their own credentials. `gh variable set` sets them; the runbook has the commands ([CI's roles and variables](../operations/demo-environment.md#cis-roles-and-variables)). A variable that is missing makes the job fail at the credentials step, with an error about the role.
 
@@ -197,9 +202,10 @@ gh api repos/luiki-dev/szop/actions/oidc/customization/sub
 # CodeQL's default setup
 gh api repos/luiki-dev/szop/code-scanning/default-setup
 
-# The demo-teardown environment, its branch rule, and the variables
+# The demo-teardown and demo environments, the branch rule, and the variables
 gh api repos/luiki-dev/szop/environments/demo-teardown
 gh api repos/luiki-dev/szop/environments/demo-teardown/deployment-branch-policies
+gh api repos/luiki-dev/szop/environments/demo
 gh variable list --repo luiki-dev/szop
 
 # Labels, milestones and the project
@@ -215,6 +221,6 @@ Expected:
 - `sha_pinning_required` is `true`.
 - `default_workflow_permissions` is `read` and `can_approve_pull_request_reviews` is `false`.
 - `approval_policy` is `all_external_contributors`.
-- The environment `demo-teardown` exists with `protection_rules` empty (no reviewer) and `deployment_branch_policy` set to `custom_branch_policies: true`; its one branch policy has the name `main`. `gh variable list` shows `AWS_PLAN_ROLE_ARN` and `AWS_DEPLOY_ROLE_ARN`, and no other variable.
+- The environment `demo-teardown` exists with `protection_rules` empty (no reviewer) and `deployment_branch_policy` set to `custom_branch_policies: true`; its one branch policy has the name `main`. The environment `demo` has one `required_reviewers` rule naming the owner, with `prevent_self_review` `false`, and `deployment_branch_policy` `null` (no restriction). `gh variable list` shows `AWS_PLAN_ROLE_ARN` and `AWS_DEPLOY_ROLE_ARN`, and no other variable.
 - CodeQL's `state` is `configured`, with `actions` among its `languages` once the workflows are on `main` (until then, only the JavaScript and TypeScript entries; [OP-067](https://github.com/luiki-dev/szop/issues/27)).
 - Six labels; six milestones, with `Definition` and `Stage 1: Local foundations` closed; the project is public.

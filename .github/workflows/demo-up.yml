@@ -1,36 +1,158 @@
-# The button for the demo environment, registered on main before the real
-# workflow exists (ADR 0011, decision 2): GitHub lists a workflow_dispatch
-# workflow in the Actions tab only once its file is on the default branch.
-# The real demo-up arrives in PH-12 (#41). This placeholder has no
-# environment, because a job naming demo would create that environment
-# unprotected, and no AWS access.
+# Deploys the demo environment on demand: the push button of ADR 0010,
+# decisions 11 and 13. It applies infra/demo with the code of the branch the
+# button is pressed on (or of the ref typed in), records that commit in the
+# state so demo-down destroys with the same code (ADR 0011, decision 7), and
+# waits until the page answers with the commit. ADR 0012, decisions 16 and 18
+# (the deploy role is assumed only through the demo environment, and the job
+# that holds it runs nothing but Terraform), ADR 0032, decision 8 (the job that
+# holds a write token holds no AWS credentials) and ADR 0034 explain the rest.
+#
+# The GitHub environment demo, with the owner as its required reviewer, must
+# exist before this file is used: a job naming an environment that does not
+# exist creates it unprotected, and the deploy would then run with no approval.
 name: demo-up
 
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Branch, tag or commit to deploy
-        required: true
+        description: "Branch, tag or full 40-digit commit hash; empty: the branch chosen in Use workflow from"
+        required: false
         type: string
 
 permissions: {}
 
+# Every run: step uses bash with -e and -o pipefail; without this, GitHub's default is bash -e only.
 defaults:
   run:
     shell: bash
 
+# One deploy at a time, and a running one is never cancelled halfway.
+concurrency:
+  group: demo-up
+  cancel-in-progress: false
+
 jobs:
-  placeholder:
-    name: placeholder
+  # Runs first and needs no approval, so the nightly destroy is switched back
+  # on even if the deploy is rejected or fails halfway (GitHub disables a
+  # scheduled workflow after 60 days without repository activity). The deploy
+  # needs this job, so it never creates a demo while the safety net may be off.
+  # It holds a write token and no AWS credentials.
+  enable-teardown:
+    name: enable-teardown
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-    permissions: {}
+    permissions:
+      actions: write # to enable demo-down
     steps:
-      # The ref input is not used here: it would be a value from whoever
-      # presses the button.
-      - run: |
-          msg="\`demo-up\` arrives in PH-12 (#41). This placeholder only registers the button (ADR 0011, decision 2)."
-          echo "$msg" >> "$GITHUB_STEP_SUMMARY"
-          echo "::error::$msg"
+      # Enabling a workflow that is already enabled is not an error.
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow enable demo-down.yml
+
+  deploy:
+    name: deploy
+    needs: enable-teardown
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Waits for the owner's approval; trusted by szop-ci-deploy for this
+    # environment, from any branch.
+    environment:
+      name: demo
+      url: https://szop.dzwoniec.com
+    permissions:
+      contents: read # to check the repository out
+      id-token: write # to ask GitHub for the OIDC token AWS trusts
+    steps:
+      # The ref input reaches checkout through with:, never a shell script. An
+      # empty one checks out the commit the button was pressed on.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      # Whatever the ref was (branch, tag, hash), the demo is deployed and
+      # recorded by the full hash of what is checked out.
+      - name: Resolve the commit
+        id: commit
+        run: |
+          sha=$(git rev-parse HEAD)
+          if ! [[ "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::The checked out commit is not a full commit hash: $sha"
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gh-${{ github.run_id }}
+          aws-region: eu-central-1
+
+      # The account ID is read from the credentials, never stored in GitHub, and
+      # masked, so it shows as *** in every later log line (ARNs in the plan too).
+      - name: Set the account ID for Terraform
+        run: |
+          id=$(aws sts get-caller-identity --query Account --output text)
+          echo "::add-mask::$id"
+          echo "TF_VAR_account_id=$id" >> "$GITHUB_ENV"
+
+      # The one exact version, shared with tenv on the owner's machine.
+      - id: version
+        run: echo "terraform=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ steps.version.outputs.terraform }}
+          terraform_wrapper: false
+
+      - name: Terraform init
+        run: terraform -chdir=infra/demo init -input=false -lock-timeout=15m
+
+      # deployed_commit ends up in the state, where demo-down reads it.
+      - name: Terraform apply
+        id: apply
+        env:
+          COMMIT: ${{ steps.commit.outputs.sha }}
+        run: terraform -chdir=infra/demo apply -auto-approve -input=false -lock-timeout=15m -no-color -var "deployed_commit=$COMMIT"
+
+      # A new DNS name or a fresh load balancer can take a few minutes to
+      # answer: every 10 seconds, up to 10 minutes, until the page shows the
+      # commit that was just deployed.
+      - name: Wait for the page
+        id: wait
+        env:
+          COMMIT: ${{ steps.commit.outputs.sha }}
+        run: |
+          for try in $(seq 1 60); do
+            body=$(curl -fsS --max-time 10 https://szop.dzwoniec.com || true)
+            if [[ "$body" == *"$COMMIT"* ]]; then
+              echo "The page shows commit $COMMIT after $try tries."
+              exit 0
+            fi
+            echo "Try $try of 60: the page does not show the commit yet"
+            sleep 10
+          done
+          echo "::error::https://szop.dzwoniec.com did not show commit $COMMIT within 10 minutes"
           exit 1
+
+      - name: Summary
+        if: always()
+        env:
+          COMMIT: ${{ steps.commit.outputs.sha }}
+          APPLY: ${{ steps.apply.outcome }}
+          WAIT: ${{ steps.wait.outcome }}
+        run: |
+          {
+            echo "## demo-up"
+            echo
+            echo "- URL: https://szop.dzwoniec.com"
+            echo "- Commit: \`${COMMIT:-unknown}\`"
+            echo "- Apply: $APPLY"
+            echo "- Page shows the commit: $WAIT"
+            echo
+            echo "\`demo-down\` destroys the demo at the next 01:17 UTC unless pressed sooner."
+          } >> "$GITHUB_STEP_SUMMARY"

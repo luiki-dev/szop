@@ -6,7 +6,9 @@ How to set up, run and take down Szop's environment on AWS, step by step. Szop r
 |---|---|---|---|
 | `infra/bootstrap` | The state bucket every module keeps its state in, and the budget alerts | Once, from the owner's machine | [Applying bootstrap](#applying-bootstrap) |
 | `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group, and CI's access to AWS: the GitHub OpenID Connect (OIDC) provider and the roles `szop-ci-plan` and `szop-ci-deploy` | From the owner's machine, when it changes | [Buying the domain](#buying-the-domain), [Applying base](#applying-base) |
-| `infra/demo` | One demo session: network, load balancer, containers, database. Empty until [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) | By CI's `demo-up` button (PH-12b), and destroyed by `demo-down`, by hand and every night | [Tearing down](#tearing-down) |
+| `infra/demo` | One demo session: network, load balancer, certificate and the `szop` DNS record; containers and database follow in [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) | By CI's `demo-up` button, and destroyed by `demo-down`, by hand and every night | [Spinning up](#spinning-up), [Tearing down](#tearing-down) |
+
+Shutting Szop down for good is the reverse of this table: [Tearing down](#tearing-down) for `infra/demo`, then [Destroying base](#destroying-base), then [Destroying bootstrap](#destroying-bootstrap).
 
 Why each piece exists is in the [stack overview](../architecture/stack-overview.md#12-where-szop-runs); how Terraform works here is on the [Terraform page](../development/tools/terraform.md). The tools come from [setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli).
 
@@ -32,10 +34,16 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [Rotating the Better Auth secret](#rotating-the-better-auth-secret)
   - [CI's roles and variables](#cis-roles-and-variables)
   - [Cost allocation tags](#cost-allocation-tags)
+- [Spinning up](#spinning-up)
+  - [Pressing the button](#pressing-the-button)
+  - [When a run fails](#when-a-run-fails)
+  - [Spinning up from your machine](#spinning-up-from-your-machine)
 - [Tearing down](#tearing-down)
   - [With the button](#with-the-button)
+  - [Checking that nothing is left](#checking-that-nothing-is-left)
   - [The nightly run](#the-nightly-run)
   - [From your machine](#from-your-machine)
+- [Destroying base](#destroying-base)
 - [Coming later](#coming-later)
 
 ## One-time account setup
@@ -51,7 +59,7 @@ Sign in to the console the way you do today.
 3. **Leftover resources, in every region.** *Resource Groups & Tag Editor → Tag Editor*, Regions: *All regions*, Resource types: *All supported resource types*, *Search resources*. Delete anything you no longer need: instances, volumes, buckets, load balancers, databases. Then *Billing and Cost Management → Bills*: the charges by service for the last few months should be $0 or covered by credits; a service with charges is still running somewhere. The bill is the more complete list, since Tag Editor misses some resource types: a line for WAF (about $5 a month per web ACL), for example, means a web ACL is left, often next to the CloudFront distribution or load balancer it protects. Szop uses neither WAF nor CloudFront ([ADR 0008](../decisions/0008-hosting.md), decisions 11 and 18): detach the web ACL from its resources (its *Associated AWS resources* tab), delete it, then delete the resource if it is a leftover too.
 4. **The root user's access keys.** Signed in as root: *account menu (top right) → Security credentials → Access keys*. There must be none; delete any that exist.
 
-**Check:** Tag Editor shows nothing you did not mean to keep; the root user has no access keys.
+**Check:** Tag Editor (Regions: *All regions*) shows nothing you did not mean to keep; the root user has no access keys. (Global services such as Route 53 and IAM show up under us-east-1 there, and IAM roles never show up at all: the Tag Editor cannot list them, so IAM → Roles above is the check for those.)
 
 ### 2. Secure the root user
 
@@ -221,7 +229,7 @@ From now on, every `plan` and `apply` in bootstrap reads and writes the state in
 
 ## Destroying bootstrap
 
-Only when Szop is shut down for good, and only **after `infra/demo` and `infra/base` are destroyed**: their states live in this bucket.
+Only when Szop is shut down for good, and only **after `infra/demo` ([Tearing down](#tearing-down)) and `infra/base` ([Destroying base](#destroying-base)) are destroyed**: their states live in this bucket.
 
 1. Delete `infra/bootstrap/backend.tf`, then run `terraform init -migrate-state` and answer `yes`: the state moves back into a local file.
 2. Delete the `lifecycle { prevent_destroy = true }` block of `aws_s3_bucket.state` in `state_bucket.tf`.
@@ -347,7 +355,7 @@ In `secrets.tf`, raise `value_wo_version` by one, commit it on a branch, and app
 
 - set the parameter's value by hand: the next rotation overwrites it, and the code no longer says where it came from;
 - add a `value` argument to the parameter "to see it": it would write the secret into the state;
-- remove `prevent_destroy` from the zone, or run `terraform destroy` here, unless Szop is shut down for good, after `infra/demo` is destroyed.
+- remove `prevent_destroy` from the zone, or run `terraform destroy` here, unless Szop is shut down for good ([Destroying base](#destroying-base)).
 
 ### CI's roles and variables
 
@@ -357,12 +365,21 @@ The apply that adds the CI roles ([PH-11](../roadmap.md#ph-11-ci-access-to-aws-a
 terraform plan                  # "No changes. Your infrastructure matches the configuration."
 
 aws iam get-role --role-name szop-ci-deploy --query Role.AssumeRolePolicyDocument
-#   one statement; "token.actions.githubusercontent.com:sub" is exactly
-#   "repo:luiki-dev@290870182/szop@1380292421:environment:demo-teardown", and nothing else (never "environment:demo");
-#   "token.actions.githubusercontent.com:ref" is exactly "refs/heads/main"
+#   two statements, each with "token.actions.githubusercontent.com:sub" an exact value:
+#   GitHubDemoTeardown: "repo:luiki-dev@290870182/szop@1380292421:environment:demo-teardown",
+#     and "token.actions.githubusercontent.com:ref" exactly "refs/heads/main"
+#   GitHubDemo: "repo:luiki-dev@290870182/szop@1380292421:environment:demo",
+#     and NO "ref" condition: demo-up runs from any branch
 aws iam get-role --role-name szop-ci-plan --query Role.AssumeRolePolicyDocument
 #   "token.actions.githubusercontent.com:sub" is exactly "repo:luiki-dev@290870182/szop@1380292421:pull_request"
+
+aws iam list-attached-role-policies --role-name szop-ci-deploy --query 'AttachedPolicies[].PolicyName'
+#   szop-ci-deploy-demo-network, szop-ci-deploy-demo-load-balancer and szop-ci-deploy-demo-dns, in any order
+aws iam list-role-policies --role-name szop-ci-deploy
+#   one inline policy, "state"
 ```
+
+The `GitHubDemo` statement has no `ref` condition because `demo-up` runs from any branch; what stands between a branch's code and the deploy role is the owner's approval of the `demo` environment, so that environment must exist with its reviewer **before** this statement does ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decisions 10 and 14). If it is missing, a job that names `demo` creates it with no protection and gets credentials unapproved. The three managed policies hold what `infra/demo` needs (the network, the load balancer with its certificate, and the `szop` record and certificate-validation record in the zone), each limited to resources tagged `project` = `szop` and `group` = `demo`, or to those two record names in the zone ([PH-12b spec](../superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md#the-deploy-role)); the plan comment of the PR that changes them shows IAM Access Analyzer's findings.
 
 Both trust policies also hold `"token.actions.githubusercontent.com:aud": "sts.amazonaws.com"`. These two conditions are what keeps every other repository, branch and workflow from getting the roles' credentials. The `@` numbers are the owner's and the repository's GitHub IDs, which the immutable subject adds ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 13); they are public, unlike the account ID.
 
@@ -377,11 +394,19 @@ No access key and no account ID is stored in GitHub: the workflows read the acco
 
 **Create the `demo-teardown` environment first**, before `demo-down.yml` reaches `main` ([GitHub settings](../development/github-settings.md#environments)): no reviewer, deployment branches limited to `main`. A job that names an environment that does not exist creates it with no protection at all. The plan comment of the PR that adds the roles needs the variables, so these steps come before it.
 
+**Create the `demo` environment before applying base with the `GitHubDemo` statement** (the apply of [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button)): you as the only required reviewer, *Prevent self-review* off (you are the only person who can press the button, so with it on you could never approve your own run), and deployment branches set to *No restriction*. The same environment must exist before `demo-up.yml` runs on any branch. **Check that its protection is really saved** before applying: once created, run
+
+```bash
+gh api repos/luiki-dev/szop/environments/demo --jq '.protection_rules[].type'
+```
+
+It must print `required_reviewers`. The first `demo` environment of PH-12b was saved without its reviewer (GitHub reported no protection rules), and base was then applied with the trust that names it; an environment without the reviewer gives the deploy role to any run on any branch without your approval ([ADR 0034](../decisions/0034-network-and-demo-up-details.md), Settled while building). The apply adds the three managed policies and their attachments and updates the deploy role's trust; read the plan, which must change nothing else.
+
 After the merge, apply base again from `main`, as for every base PR ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 9); the plan must show no changes.
 
 ⚠️ **Don't:**
 
-- add `repo:luiki-dev@290870182/szop@1380292421:environment:demo` to the deploy role's trust by hand: PH-12b adds it in the PR in which you create the `demo` environment with its required reviewer, because GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
+- add `repo:luiki-dev@290870182/szop@1380292421:environment:demo` to the deploy role's trust by hand, or apply it before the `demo` environment exists with its required reviewer: GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
 - widen a CI role in the console: the plan comment and IAM Access Analyzer check the roles' policies only when they change in code.
 
 ### Cost allocation tags
@@ -390,22 +415,110 @@ Once the access portal works (step 5) and a resource that carries the tags exist
 
 **Check:** *Cost allocation tags* opens for your Identity Center user and lists `group` and `project` as *Active*.
 
+## Spinning up
+
+`infra/demo` is created by the **`demo-up`** workflow, by hand ([ADR 0010](../decisions/0010-ci-cd.md), decision 11; [ADR 0034](../decisions/0034-network-and-demo-up-details.md)). Until [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) puts the app behind it, a demo is 19 resources: the network (a VPC, two public and two private subnets, an internet gateway and the public route table with its two associations), the load balancer with its security group, the security group's two ingress rules (HTTP and HTTPS) and its two listeners, the HTTPS certificate with its DNS validation record and the validation that waits for the certificate to be issued (`aws_acm_certificate_validation`), and the `szop` DNS record. `https://szop.dzwoniec.com` then answers with a fixed placeholder page that says the demo is up and names the commit it was deployed from.
+
+Before the first press, base must be applied with PH-12b's trust and policies, and the `demo` environment must exist with you as its reviewer ([CI's roles and variables](#cis-roles-and-variables)).
+
+### Pressing the button
+
+1. On GitHub: *Actions → demo-up → Run workflow*. Choose the branch in *Use workflow from*: the one you want checked, usually the PR's branch. Leave `ref` empty to deploy that branch's latest commit, or type a branch, a tag or a **full 40-digit commit hash** to deploy that instead. A short hash is refused: checkout would look it up as a branch name. Then *Run workflow*.
+2. Open the run. The job `enable-teardown` starts at once and turns green in seconds: it switches the nightly `demo-down` back on if GitHub had disabled it. The job `deploy` waits for you: *Review deployments* → tick `demo` → *Approve and deploy*. Approve only code you have read; the job gets the deploy role's credentials ([threat model](../architecture/threat-model.md#who-can-act-and-through-which-path)). *Reject* ends the run without touching AWS.
+3. Wait for `deploy` to turn green. It checks the commit out, applies `infra/demo` with that commit passed as `deployed_commit`, then asks `https://szop.dzwoniec.com` every 10 seconds, for up to 10 minutes, until the page shows the commit. The certificate is issued first, which takes a few minutes ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 5), and the page can need a few more after that: a new DNS name and a fresh load balancer do not answer at once. The first run, on 2026-10-18, took about 4 minutes from the approval: about 3 minutes for the apply, of which the load balancer took 2¼, the certificate's validation half a minute and each DNS record another half minute; the page answered at the first try.
+4. Read the run's **summary**: the URL, the commit, the result of the apply, whether the page showed the commit, and that `demo-down` destroys the demo at the next 01:17 UTC unless pressed sooner.
+
+**Check:** open both addresses in a browser.
+
+- `https://szop.dzwoniec.com` shows "The Szop demo is up" and the commit hash of the summary, with a valid certificate (the padlock; issued by Amazon).
+- `http://szop.dzwoniec.com` redirects to the HTTPS address (a 301). From a terminal: `curl -sI http://szop.dzwoniec.com`, whose first line is `HTTP/1.1 301` and whose `location` header names the HTTPS address.
+
+The demo now exists until `demo-down` removes it ([Tearing down](#tearing-down)). Pressing `demo-up` again while it is up applies the new commit on top and records it; two presses never run at the same time (the second waits for the first). GitHub keeps only one waiting run per concurrency group, so a third press replaces a run that is still waiting: that run is cancelled.
+
+⚠️ **Don't:** leave a demo up by accident. An approved run stays up until `demo-down` runs, at the latest at 01:17 UTC; press `demo-down` when you are done.
+
+### When a run fails
+
+Open the run and read the failed step. `deploy` needs `enable-teardown`: if `enable-teardown` fails, `deploy` is skipped, so no demo is created while the nightly destroy may be off.
+
+| Failed step | What it means | What to do |
+|---|---|---|
+| `enable-teardown` (`gh workflow enable`) | GitHub refused or was unreachable. `deploy` is skipped, so nothing was created | *Re-run failed jobs*: `deploy` then runs after `enable-teardown` and waits for your approval as usual. If it keeps failing, enable `demo-down` by hand (*Actions → demo-down → ⋯ → Enable workflow*) and press `demo-up` again |
+| `deploy` stays on "Waiting" | It needs your approval | *Review deployments* ([Pressing the button](#pressing-the-button)). A run nobody approves expires after 30 days |
+| `actions/checkout` fails, often with `couldn't find remote ref` | `ref` is a short hash or a name that does not exist | Run again with a branch, a tag or the full 40-digit hash |
+| `Configure AWS credentials`, or `Not authorized to perform sts:AssumeRoleWithWebIdentity` | The trust policy or the variable `AWS_DEPLOY_ROLE_ARN` does not match: base was not applied with the `GitHubDemo` statement, or the environment is not called `demo` | [CI's roles and variables](#cis-roles-and-variables) |
+| `Terraform init` or `Terraform apply`: `Error acquiring the state lock` after 15 minutes | Another run holds the lock, a `demo-down` or an earlier `demo-up` | Wait for it, then *Re-run failed jobs*. A stale lock: `terraform force-unlock <lock-id>` from your machine, as in [The nightly run](#the-nightly-run) |
+| `Terraform apply`: `deployed_commit is required to create or change the demo` | The precondition: an apply without the commit. The workflow always passes it, so this appears only for a changed workflow or a local apply without `-var` | Pass `-var "deployed_commit=$(git rev-parse HEAD)"`; see [Spinning up from your machine](#spinning-up-from-your-machine) |
+| `Terraform apply`: `AccessDenied` or `UnauthorizedOperation`, `… is not authorized to perform: <service>:<Action>` | The deploy role lacks that action, or the resource does not carry the tags `project` = `szop` and `group` = `demo` its conditions check. The message names the action | Add the action to the matching managed policy (`szop-ci-deploy-demo-network`, `-load-balancer` or `-dns`) in `infra/base/ci_roles.tf`, in a PR; apply base, then press the button again. Terraform applies what is missing and leaves the rest |
+| `Terraform apply`: any other AWS error | A resource could not be created: a name already taken, a limit, a dependency | Read the error; fix it; press the button again. If the demo is half built and you give up, press `demo-down` and run [the check that nothing is left](#checking-that-nothing-is-left) |
+| `Wait for the page`: "did not show commit … within 10 minutes" | The apply succeeded, but the page never showed the commit: DNS not yet answering, the certificate not yet attached, or a different commit answering | From your machine: `dig +short szop.dzwoniec.com` (the load balancer's addresses) and `curl -sS https://szop.dzwoniec.com`. A resolver that looked the name up before the record existed can keep saying "no such name" for some minutes. Press the button again: the apply changes nothing and the wait starts over |
+
+### Spinning up from your machine
+
+When the workflow cannot run (GitHub is down, the role is broken, a permission is missing and you want to see the demo meanwhile), apply from your machine with your own credentials, from the commit you want to deploy:
+
+```bash
+export AWS_PROFILE=szop
+aws sso login
+git status -sb                                    # clean, and pushed: demo-down fetches this commit from GitHub
+cd infra/demo
+cp terraform.tfvars.example terraform.tfvars      # the first time only; edit account_id
+terraform init
+terraform plan  -var "deployed_commit=$(git rev-parse HEAD)"    # read it: only the demo's resources
+terraform apply -var "deployed_commit=$(git rev-parse HEAD)"    # type yes
+```
+
+Then do the check of [Pressing the button](#pressing-the-button), which the workflow's wait would have done for you.
+
+The commit is recorded as the `deployed_commit` output, so `demo-down` then destroys the demo with this commit's code, the same as after a button press. Without `-var`, the precondition stops the apply before it creates anything, so no demo exists that `demo-down` would destroy with the wrong code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7). Applying from your machine does not re-enable `demo-down`: if the schedule is off, *Actions → demo-down* shows a banner with an *Enable workflow* button.
+
+⚠️ **Don't:** apply from a dirty working tree or a commit you have not pushed: the demo would hold code that `demo-down` can neither fetch nor reproduce.
+
 ## Tearing down
 
-`infra/demo` is destroyed by the **`demo-down`** workflow, by hand and every night ([ADR 0010](../decisions/0010-ci-cd.md), decision 13). It is the safety net against a demo left running: a forgotten demo costs about $1.70 a day. Until [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) creates the first demo, `infra/demo` is empty and every run finds nothing to destroy, which still proves that the workflow, the role, the state bucket and the lock all work.
+`infra/demo` is destroyed by the **`demo-down`** workflow, by hand and every night ([ADR 0010](../decisions/0010-ci-cd.md), decision 13). It is the safety net against a demo left running: a forgotten demo costs about $1.70 a day. A real destroy removes everything [Spinning up](#spinning-up) created, in dependency order: the DNS records, the listeners and the load balancer, the certificate, the security group, then the gateway, the subnets and the VPC. It reads the state, so it removes exactly what the last apply recorded. On a quiet night there is nothing to destroy, which still proves that the workflow, the role, the state bucket and the lock all work.
 
 ### With the button
 
 1. On GitHub: *Actions → demo-down → Run workflow*, branch **`main`**, *Run workflow*. (The environment `demo-teardown` allows only `main`; on another branch the job is refused.)
-2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with an RDS database to delete.
+2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with an RDS database to delete. The first real destroy, of the placeholder demo, took about a minute and a half, most of it the two DNS records (half a minute each) and the load balancer (20 seconds).
 3. Read the run's **summary** (the run's page, *Summary*):
    - **Trigger:** `workflow_dispatch` (by hand) or `schedule` (the nightly run).
-   - **Code used:** which Terraform code destroyed the demo and why. If a demo recorded its commit (the `deployed_commit` output of `infra/demo`, written by `demo-up` from PH-12b), it is that commit, so a resource added by a branch is destroyed by the code that created it; with no commit recorded, it is `main`'s code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 6).
+   - **Code used:** which Terraform code destroyed the demo and why. If a demo recorded its commit (the `deployed_commit` output of `infra/demo`, written by every `demo-up` run), it is that commit, so a resource added by a branch is destroyed by the code that created it; with no commit recorded, it is `main`'s code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 6).
    - **Result:** Terraform's own `Destroy complete! Resources: N destroyed.` (`0 destroyed` on a quiet night).
 
-**Check:** the run is green, and *Result* says `Destroy complete!`.
+**Check:** the run is green, and *Result* says `Destroy complete!` with every resource `demo-up` created counted (19 until PH-12c). Then [check that nothing is left](#checking-that-nothing-is-left).
 
 If two runs overlap, the second waits: `demo-down` runs one at a time and never cancels a running destroy, and every Terraform command waits up to 15 minutes for the state lock.
+
+### Checking that nothing is left
+
+A destroy that reports success is the proof, and this is the second look, which also finds what a half-failed apply left behind. Two checks, because AWS has two kinds of resource here:
+
+1. **Everything that carries tags.** *Resource Groups & Tag Editor → Tag Editor*: **Regions: eu-central-1** (the Tag Editor searches only the regions you select, and every taggable resource of the demo lives in Frankfurt), *Resource types: All supported resource types*, tag key `group`, value `demo`, *Search resources*. It must list nothing. The same from a terminal:
+
+   ```bash
+   aws resourcegroupstaggingapi get-resources --region eu-central-1 --tag-filters Key=group,Values=demo \
+     --query 'ResourceTagMappingList[].ResourceARN'
+   #   []
+   ```
+
+   Right after a destroy, the list can still name resources that are already gone: the index behind the Tag Editor lags behind deletions, by minutes or longer. On the first real destroy it still listed the two security group rules (`security-group-rule/sgr-…`) after EC2 reported them deleted. Check such a leftover in its own service before acting on it, for example `aws ec2 describe-security-group-rules --region eu-central-1 --security-group-rule-ids <id>`, which answers `InvalidSecurityGroupRuleId.NotFound` for a rule that is gone.
+
+   Global services (Route 53, IAM, Budgets) show up in the Tag Editor only under *Regions: us-east-1*, and **IAM roles never show up there at all**: the API behind it does not return them. The demo creates no role until PH-12c, and the roles the app uses are base's.
+
+2. **The zone's records.** DNS records carry no tags, so the Tag Editor never lists them. The zone must hold no `szop` record and no certificate-validation record `_<token>.szop`:
+
+   ```bash
+   zone=$(aws route53 list-hosted-zones-by-name --dns-name dzwoniec.com --query 'HostedZones[0].Id' --output text)
+   aws route53 list-resource-record-sets --hosted-zone-id "$zone" \
+     --query "ResourceRecordSets[?starts_with(Name, 'szop.') || contains(Name, '.szop.')].[Name,Type]" --output text
+   #   prints nothing
+   ```
+
+   The apex records (CAA, MX, SPF), DKIM and DMARC stay: they belong to base.
+
+If something is left, find which resource it is and delete it in the console, newest dependency first (the load balancer before the subnets, the subnets before the VPC), then run the check again. The tagging search can lag a few minutes behind a deletion, so look at the service's own console before assuming a resource is still there. A leftover validation record is harmless: the next `demo-up` takes it over ([ADR 0034](../decisions/0034-network-and-demo-up-details.md)).
 
 ### The nightly run
 
@@ -413,13 +526,13 @@ If two runs overlap, the second waits: `demo-down` runs one at a time and never 
 
 - **Configure AWS credentials fails**, or `Not authorized to perform sts:AssumeRoleWithWebIdentity`: the trust policy or the repository variable `AWS_DEPLOY_ROLE_ARN` no longer matches ([CI's roles and variables](#cis-roles-and-variables)).
 - **`terraform init` or `destroy` says `Error acquiring the state lock`** after 15 minutes: another run holds it, usually a `demo-up` still working. Wait for it, then re-run (*Re-run failed jobs*). If no run is going and the lock is stale, `terraform force-unlock <lock-id>` from your machine (the ID is in the error) removes it.
-- **`Cannot fetch the recorded commit`:** the demo was deployed from a commit GitHub no longer serves, and the job refuses to destroy with other code. Destroy by hand, from your machine ([From your machine](#from-your-machine)). If the commit is missing on your machine too (`git cat-file -e <commit>` fails after `git fetch origin`), destroy with `main`'s code, then check with the Tag Editor (tag `group` = `demo`) that no resource of the demo is left; a resource that `main`'s code does not know has to be deleted by hand.
-- **A destroy error from AWS** (a resource that is in use, a dependency): the log names the resource. Re-run once; if it fails again, destroy by hand and read the error there.
+- **`Cannot fetch the recorded commit`:** the demo was deployed from a commit GitHub no longer serves, and the job refuses to destroy with other code. Destroy by hand, from your machine ([From your machine](#from-your-machine)). If the commit is missing on your machine too (`git cat-file -e <commit>` fails after `git fetch origin`), destroy with `main`'s code, then [check that nothing is left](#checking-that-nothing-is-left) (the Tag Editor with *Regions* set to eu-central-1 and tag `group` = `demo`); a resource that `main`'s code does not know has to be deleted by hand.
+- **A destroy error from AWS** (a resource that is in use, a dependency): the log names the resource. Re-run once; if it fails again, destroy by hand and read the error there. A destroy that fails halfway removes the `deployed_commit` output from the state, so a re-run (or the next nightly run) destroys with `main`'s code and its summary says that no commit is recorded. Before re-running, note the commit from the failed run's summary (*Code used*), and destroy by hand with that commit ([From your machine](#from-your-machine)): `git switch --detach <commit>`.
 - **A network error or a GitHub outage:** *Re-run failed jobs*.
 
-After any failure, check the result in the console or with the Tag Editor (*Resource Groups & Tag Editor*, tag `group` = `demo`) that nothing of the demo is left. The budget alerts ([Applying bootstrap](#applying-bootstrap)) are the second net.
+After any failure, [check that nothing of the demo is left](#checking-that-nothing-is-left): the Tag Editor with *Regions* set to eu-central-1 and tag `group` = `demo`, and the zone's records. The budget alerts ([Applying bootstrap](#applying-bootstrap)) are the second net.
 
-GitHub disables scheduled workflows of a public repository after 60 days without activity in it. `demo-up` re-enables `demo-down` every time it runs ([ADR 0010](../decisions/0010-ci-cd.md), decision 13; arriving in PH-12b), so a demo cannot outlive a disabled schedule. Until then, glance at the *Actions → demo-down* page after a quiet spell: it shows a banner if the schedule was disabled.
+GitHub disables scheduled workflows of a public repository after 60 days without activity in it. `demo-up` re-enables `demo-down` every time it runs, in its own job `enable-teardown` ([ADR 0010](../decisions/0010-ci-cd.md), decision 13), so a demo cannot outlive a disabled schedule. A demo applied from your machine does not do that: glance at the *Actions → demo-down* page, which shows a banner if the schedule was disabled.
 
 ### From your machine
 
@@ -435,7 +548,7 @@ terraform init
 terraform output deployed_commit                  # the commit the demo was deployed from
 ```
 
-With no such output (no demo has recorded one), destroy with `main`'s code: `git switch main` and `git pull`, so that you are on an up-to-date `main`, then `terraform init` again. Otherwise check out that commit, whose Terraform code and `.terraform-version` created the demo, and initialise again:
+With no such output (no demo has recorded one, or an earlier destroy failed halfway and dropped it from the state: then take the commit from that run's summary, *Code used*, and use it below), destroy with `main`'s code: `git switch main` and `git pull`, so that you are on an up-to-date `main`, then `terraform init` again. Otherwise check out that commit, whose Terraform code and `.terraform-version` created the demo, and initialise again:
 
 ```bash
 git switch --detach <commit>
@@ -446,9 +559,47 @@ terraform destroy                                 # type yes
 git switch -                                      # back to your branch
 ```
 
-⚠️ **Don't:** run `terraform destroy` in `infra/base` or `infra/bootstrap` to "clean up": they hold what outlives every demo, and the zone is protected for a reason.
+⚠️ **Don't:** run `terraform destroy` in `infra/base` or `infra/bootstrap` to "clean up": they hold what outlives every demo, and the zone is protected for a reason. Shutting Szop down for good is a different job: [Destroying base](#destroying-base).
+
+## Destroying base
+
+Only when Szop is shut down for good ([OP-093](https://github.com/luiki-dev/szop/issues/208)). `infra/base` holds what outlives every demo, so its destroy is guarded twice (`prevent_destroy` on the zone, `force_delete = false` on the registry), and deleting the zone takes the domain's DNS offline at once.
+
+**Order.** `infra/demo` first ([Tearing down](#tearing-down), with its check that nothing is left): it writes the `szop` and certificate-validation records into base's zone, and a zone that still holds records Terraform does not know cannot be deleted. Base second. [Destroying bootstrap](#destroying-bootstrap) last, because the state bucket holds base's state.
+
+**What goes.** The hosted zone and the records Terraform made in it (CAA, MX, SPF, DMARC and the three DKIM records); the SES identity for `dzwoniec.com`; the image registry `szop` with its lifecycle policy; the Better Auth secret; the log group `/szop/app` with its logs; the GitHub OIDC provider and the roles `szop-ci-plan` and `szop-ci-deploy` with their policies. Not touched: the domain's registration (Terraform never held it), the state bucket and the budget (bootstrap), and the cost allocation tags you activated in the billing console.
+
+**Decide about the domain first.** The registration of `dzwoniec.com` names the four name servers of today's zone. Once the zone is deleted, `dzwoniec.com` and every name under it stop resolving. Two ways on:
+
+- **Let the domain lapse.** Turn auto-renew off (*Route 53 → Domains → Registered domains → `dzwoniec.com`*), and the domain expires at the end of the year you paid for; there is no refund.
+- **Keep it.** A new zone, made by hand or by a new base, gets four **different** name servers, so the registration must be changed to them (*Registered domains → `dzwoniec.com` → Name servers → Edit*) or the domain stays broken until it is, and resolvers' caches can take up to two days to catch up.
+
+**Steps**, from `infra/base` with a current sign-in:
+
+1. Check `infra/demo` is gone: [Checking that nothing is left](#checking-that-nothing-is-left). Then disable the nightly teardown (*Actions → demo-down → ⋯ → Disable workflow*, or `gh workflow disable demo-down.yml --repo luiki-dev/szop`): once the roles and variables are gone it fails every night and emails you.
+2. **Lift the zone's guard**, as a local edit you never commit: delete the `lifecycle { prevent_destroy = true }` block of `aws_route53_zone.main` in `dns.tf`.
+3. **Empty the registry.** Terraform refuses to delete a repository that holds images (`force_delete = false`). Either delete the images:
+
+   ```bash
+   ids=$(aws ecr list-images --repository-name szop --max-items 100 --query 'imageIds[*]' --output json)
+   aws ecr batch-delete-image --repository-name szop --image-ids "$ids"
+   #   at most 100 images per call: run both lines again until list-images prints []
+   ```
+
+   or set `force_delete = true` in `registry.tf` (again local) and run `terraform apply` once, which changes that one attribute in the state: a destroy reads the state's value, not the file's, so editing the file alone is not enough.
+4. `terraform plan -destroy`, read it: only base's resources, and no change to anything you do not expect gone.
+5. `terraform destroy`, type `yes`.
+
+**Check:** the destroy ends with `Destroy complete!`; `dig +short NS dzwoniec.com` stops answering with the old servers once caches expire; `aws ecr describe-repositories --repository-names szop` (`RepositoryNotFoundException`) and `aws sesv2 get-email-identity --email-identity dzwoniec.com` report that the repository and the identity do not exist.
+
+Afterwards: delete the two repository variables (`gh variable delete AWS_PLAN_ROLE_ARN --repo luiki-dev/szop`, and the same for `AWS_DEPLOY_ROLE_ARN`), since the roles they name are gone and every workflow that assumes one fails at its credentials step; and `git restore infra/base` to drop the local edits. Then [Destroying bootstrap](#destroying-bootstrap).
+
+⚠️ **Don't:**
+
+- commit the lifted `prevent_destroy` or `force_delete = true`: the guards exist for the next person who runs `terraform destroy` by mistake;
+- delete the zone while the domain is still registered and in use, unless you mean to take it offline;
+- skip `terraform plan -destroy`: it is the last place to see that it names base's resources and nothing else.
 
 ## Coming later
 
-- **Spinning the demo up** with the `demo-up` button ([PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button)). Until then the button exists but fails on purpose.
 - **Debugging** a running demo with ECS Exec and its logs, and **what it costs** ([PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds)).
