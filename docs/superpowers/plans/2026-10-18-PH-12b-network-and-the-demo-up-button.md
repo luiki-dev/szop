@@ -277,7 +277,7 @@ In ADRs 0008, 0010 and 0011: the status line and a `🧩 **Completed by [ADR 003
 
 PH-12b's row: the plan and PR links, then ✅ Done before the merge; the README's diagram mirrors it (PH-12b `●`, the road `═` through it). PH-12c's entry: anything the phase moved to it.
 
-- [ ] **Step 4: GitHub**
+- [x] **Step 4: GitHub**
 
 - OP-014 (#82), OP-093 (#208): a "settled by" comment each (closed by the PR).
 - OP-013 (#66), OP-018 (#73), OP-019 (#77): PH-12b part ticked with the PR, re-parented to PH-12c (#221), Status ⬜ Backlog. OP-023 (#74): PH-12b part ticked, re-parented to PH-13 (#42), Status ⬜ Backlog.
