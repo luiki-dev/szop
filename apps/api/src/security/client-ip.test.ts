@@ -17,7 +17,9 @@ describe("the client address", () => {
     await app.close();
   });
 
-  // The remoteAddress the log recorded for one request.
+  // The remoteAddress the log recorded for one request. Not to /api/health,
+  // which writes no request lines (ADR 0033, decision 7): any other path
+  // logs the same way, and this one answers the API's 404.
   async function loggedAddress(
     trustedProxies: string[],
     remoteAddress: string,
@@ -31,7 +33,7 @@ describe("the client address", () => {
     });
     await app.inject({
       method: "GET",
-      url: "/api/health",
+      url: "/api/missing",
       remoteAddress,
       headers,
     });
