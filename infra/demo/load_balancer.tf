@@ -3,7 +3,7 @@
 # security group.
 resource "aws_security_group" "alb" {
   name        = "szop-demo-alb"
-  description = "The demo's load balancer"
+  description = "Load balancer of the Szop demo"
   vpc_id      = aws_vpc.main.id
 
   tags = { Name = "szop-demo-alb" }
