@@ -20,7 +20,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-09 AWS account and Terraform bootstrap](#ph-09-aws-account-and-terraform-bootstrap)
   - [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure)
   - [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net)
-  - [PH-12 First deploy](#ph-12-first-deploy)
+  - [PH-12a App ready for the cloud](#ph-12a-app-ready-for-the-cloud)
+  - [PH-12b Network and the demo-up button](#ph-12b-network-and-the-demo-up-button)
+  - [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds)
   - [PH-35 Security scanners](#ph-35-security-scanners)
   - [PH-13 Releases](#ph-13-releases)
   - [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status)
@@ -180,7 +182,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-09 AWS account and Terraform bootstrap](#ph-09-aws-account-and-terraform-bootstrap) | ✅ Done | [Spec](superpowers/specs/2026-10-14-PH-09-aws-account-and-terraform-bootstrap-design.md) | [Plan](superpowers/plans/2026-10-14-PH-09-aws-account-and-terraform-bootstrap.md) | [#203](https://github.com/luiki-dev/szop/pull/203) | [#38](https://github.com/luiki-dev/szop/issues/38) |
 | [PH-10 Domain and base infrastructure](#ph-10-domain-and-base-infrastructure) | ✅ Done | [Spec](superpowers/specs/2026-10-15-PH-10-domain-and-base-infrastructure-design.md) | [Plan](superpowers/plans/2026-10-16-PH-10-domain-and-base-infrastructure.md) | [#207](https://github.com/luiki-dev/szop/pull/207) | [#39](https://github.com/luiki-dev/szop/issues/39) |
 | [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | ✅ Done | [Spec](superpowers/specs/2026-10-17-PH-11-ci-access-to-aws-and-the-teardown-safety-net-design.md) | [Plan](superpowers/plans/2026-10-17-PH-11-ci-access-to-aws-and-the-teardown-safety-net.md) | [#215](https://github.com/luiki-dev/szop/pull/215) | [#40](https://github.com/luiki-dev/szop/issues/40) |
-| [PH-12 First deploy](#ph-12-first-deploy) | ⬜ Not started | — | — | — | [#41](https://github.com/luiki-dev/szop/issues/41) |
+| [PH-12a App ready for the cloud](#ph-12a-app-ready-for-the-cloud) | 🚧 In progress | — | — | — | [#219](https://github.com/luiki-dev/szop/issues/219) |
+| [PH-12b Network and the demo-up button](#ph-12b-network-and-the-demo-up-button) | ⬜ Not started | — | — | — | [#220](https://github.com/luiki-dev/szop/issues/220) |
+| [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds) | ⬜ Not started | — | — | — | [#221](https://github.com/luiki-dev/szop/issues/221) |
 | [PH-35 Security scanners](#ph-35-security-scanners) | ⬜ Not started | — | — | — | [#213](https://github.com/luiki-dev/szop/issues/213) |
 | [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
 | [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status) | ⬜ Not started | — | — | — | [#205](https://github.com/luiki-dev/szop/issues/205) |
@@ -212,20 +216,41 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#40](https://github.com/luiki-dev/szop/issues/40).
 
-### PH-12 First deploy
+### PH-12a App ready for the cloud
+
+- **Goal:** the app is ready for Elastic Container Service (ECS) and RDS before it gets there. It refuses to start, with a clear log message, against a database holding migrations it does not know or one it would skip; it connects to the database with TLS and full certificate verification when configured to; it exits within ECS's stop timeout even while connections stay open; and the load balancer's health checks no longer fill the log.
+- **Delivers:** the migration check at startup, refining [ADR 0008](decisions/0008-hosting.md), decisions 14 and 15; the pool's TLS settings, with the RDS certificate bundle of [ADR 0028](decisions/0028-container-image-details.md); a bounded shutdown, refining the graceful shutdown of [ADR 0019](decisions/0019-api-skeleton-details.md), decision 8; quieter request logs for `/api/health`.
+- **Split from:** PH-12 First deploy, now retired: it held about twenty tasks and two new concepts, the network with the push-button deploy, and the app running on ECS with a managed database ([ADR 0014](decisions/0014-roadmap.md), decision 6). The app's preparation for both became a phase of its own.
+- **Depends on:** —
+- **Owner steps:** none.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#219](https://github.com/luiki-dev/szop/issues/219).
+
+### PH-12b Network and the demo-up button
+
+- **Goal:** pressing `demo-up` on a branch creates the demo's network, load balancer and certificate, and `https://szop.dzwoniec.com` answers with a placeholder page. `demo-down` removes everything again.
+- **Delivers:** `infra/demo` with the network, the load balancer answering with a fixed placeholder page, the certificate for `szop.dzwoniec.com` with its validation record ([ADR 0030](decisions/0030-domain-and-base-infrastructure-details.md), decision 5) and the `szop` DNS record ([ADR 0008](decisions/0008-hosting.md)); `szop-ci-deploy` widened for these resources, and `demo` added to its trust ([ADR 0032](decisions/0032-ci-access-and-teardown-details.md), decisions 3 and 10); the real `demo-up.yml` in the `demo` environment, which writes the `deployed_commit` output `demo-down` reads and re-enables `demo-down` ([ADR 0010](decisions/0010-ci-cd.md), decision 11; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7); the runbook's sections on spinning up and tearing down, and on destroying base.
+- **Split from:** PH-12 First deploy, now retired (see [PH-12a](#ph-12a-app-ready-for-the-cloud)).
+- **Depends on:** PH-11 merged, and its first `demo-down` run seen succeeding.
+- **Owner steps:** create the `demo` environment with the owner as required reviewer and "prevent self-review" off; apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, check the placeholder page at `szop.dzwoniec.com`, then press `demo-down`.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#220](https://github.com/luiki-dev/szop/issues/220).
+
+### PH-12c App on ECS and RDS
 
 - **Goal:** pressing `demo-up` on a branch builds that commit's image and serves the walking skeleton at `szop.dzwoniec.com`. Redeploys are safe for the single instance, and `demo-down` removes everything again.
-- **Delivers:** `infra/demo` with the network, the load balancer, the service on Elastic Container Service (ECS), RDS, the certificate for `szop.dzwoniec.com` with its validation record ([ADR 0030](decisions/0030-domain-and-base-infrastructure-details.md), decision 5) and the `szop` DNS record ([ADR 0008](decisions/0008-hosting.md)); the app's task execution role and task role in `infra/base`; `szop-ci-deploy` widened for the resources it adds, and `demo` added to its trust ([ADR 0032](decisions/0032-ci-access-and-teardown-details.md), decisions 3 and 10); the real `demo-up.yml` in the `demo` environment, which writes the `deployed_commit` output `demo-down` reads and re-enables `demo-down` ([ADR 0010](decisions/0010-ci-cd.md), decision 11; [ADR 0011](decisions/0011-design-sanity-check-follow-ups.md), decision 7); safe redeploys and migration checks at startup; the TLS connection to RDS; the runbook's sections on spinning up, tearing down and debugging.
-- **Depends on:** PH-11 merged, and its first `demo-down` run seen succeeding.
-- **Owner steps:** create the `demo` environment with the owner as required reviewer and "prevent self-review" off; apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, check the demo (including that the log shows the owner's real IP address, and a Lighthouse run), then press `demo-down`.
+- **Delivers:** in `infra/demo`, the service on ECS and RDS, in place of the placeholder page ([ADR 0008](decisions/0008-hosting.md)); the app's task execution role and task role in `infra/base`; `szop-ci-deploy` widened for the resources it adds ([ADR 0032](decisions/0032-ci-access-and-teardown-details.md), decision 3), and `szop-ci-plan` denied the data reads they open, such as RDS log files; `demo-up`'s image job, which builds and pushes the commit's image ([ADR 0010](decisions/0010-ci-cd.md), decisions 10 and 11); safe redeploys; the TLS connection to RDS; the runbook's section on debugging.
+- **Split from:** PH-12 First deploy, now retired (see [PH-12a](#ph-12a-app-ready-for-the-cloud)).
+- **Depends on:** —
+- **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, check the demo (including that the log shows the owner's real IP address, and a Lighthouse run), then press `demo-down`.
 - **Expected path:** full.
-- **Open points:** the sub-issues of [#41](https://github.com/luiki-dev/szop/issues/41).
+- **Open points:** the sub-issues of [#221](https://github.com/luiki-dev/szop/issues/221).
 
 ### PH-35 Security scanners
 
 - **Goal:** CI scans the Terraform code for security misconfigurations and the container image for known vulnerabilities, and lints the Dockerfile.
 - **Delivers:** a misconfiguration scanner for `infra/` and the image scan with the Dockerfile lint, possibly one tool for both ([ADR 0010](decisions/0010-ci-cd.md), decision 19).
-- **Depends on:** PH-12, which brings the first real image, and the security groups, load balancer and RDS worth scanning.
+- **Depends on:** PH-12c, which brings the first real image, and RDS with PH-12b's security groups and load balancer, all worth scanning.
 - **Owner steps:** —
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#213](https://github.com/luiki-dev/szop/issues/213).
@@ -243,7 +268,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 - **Goal:** `dzwoniec.com` always serves a static page that shows whether Szop's demo is up, with a link to it when it is. While no demo runs, `szop.dzwoniec.com` redirects to the page instead of failing.
 - **Delivers:** the static page and its hosting; `szop.dzwoniec.com` redirecting to it while the demo is down, which changes how `demo-down` treats the `szop` record; the status check on the page ([ADR 0030](decisions/0030-domain-and-base-infrastructure-details.md), decision 13).
-- **Depends on:** PH-12.
+- **Depends on:** PH-12c.
 - **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge, if the phase changes it.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#205](https://github.com/luiki-dev/szop/issues/205).

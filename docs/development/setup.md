@@ -291,6 +291,6 @@ On every commit, a pre-commit hook formats and lints the staged files (a staged 
 
 ## 13. Coming later
 
-- **Spinning the demo up and down** with the buttons, in [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12](../roadmap.md#ph-12-first-deploy), through the [runbook](../operations/demo-environment.md).
+- **Spinning the demo up and down** with the buttons, in [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button), through the [runbook](../operations/demo-environment.md).
 
 This guide grows with those phases.
