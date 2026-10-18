@@ -394,7 +394,13 @@ No access key and no account ID is stored in GitHub: the workflows read the acco
 
 **Create the `demo-teardown` environment first**, before `demo-down.yml` reaches `main` ([GitHub settings](../development/github-settings.md#environments)): no reviewer, deployment branches limited to `main`. A job that names an environment that does not exist creates it with no protection at all. The plan comment of the PR that adds the roles needs the variables, so these steps come before it.
 
-**Create the `demo` environment before applying base with the `GitHubDemo` statement** (the apply of [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button)): you as the only required reviewer, *Prevent self-review* off (you are the only person who can press the button, so with it on you could never approve your own run), and deployment branches set to *No restriction*. The same environment must exist before `demo-up.yml` runs on any branch. The apply adds the three managed policies and their attachments and updates the deploy role's trust; read the plan, which must change nothing else.
+**Create the `demo` environment before applying base with the `GitHubDemo` statement** (the apply of [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button)): you as the only required reviewer, *Prevent self-review* off (you are the only person who can press the button, so with it on you could never approve your own run), and deployment branches set to *No restriction*. The same environment must exist before `demo-up.yml` runs on any branch. **Check that its protection is really saved** before applying: once created, run
+
+```bash
+gh api repos/luiki-dev/szop/environments/demo --jq '.protection_rules[].type'
+```
+
+It must print `required_reviewers`. The first `demo` environment of PH-12b was saved without its reviewer (GitHub reported no protection rules), and base was then applied with the trust that names it; an environment without the reviewer gives the deploy role to any run on any branch without your approval ([ADR 0034](../decisions/0034-network-and-demo-up-details.md), Settled while building). The apply adds the three managed policies and their attachments and updates the deploy role's trust; read the plan, which must change nothing else.
 
 After the merge, apply base again from `main`, as for every base PR ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 9); the plan must show no changes.
 

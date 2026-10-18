@@ -265,15 +265,15 @@ git push
 - Create: `docs/decisions/0034-network-and-demo-up-details.md`
 - Modify: `docs/decisions/0008-hosting.md`, `0010-ci-cd.md`, `0011-design-sanity-check-follow-ups.md` (status lines and decision notes); `docs/roadmap.md`; `README.md`
 
-- [ ] **Step 1: ADR 0034**
+- [x] **Step 1: ADR 0034**
 
 In the form of ADR 0032 and 0033: context, the spec's nine decisions with options and reasoning, "Settled while building" with what Tasks 1–5 found (the precondition on destroy, the actions each resource needed, the real timings, every permission added after a real run), and consequences for PH-12c (it adds ECS, RDS and the app's roles with the same tag scoping and managed policies; the private subnets wait for RDS; waiting for `/api/health` replaces the page wait). Header: `Completes:` ADR 0008, decisions 6 and 16; ADR 0010, decisions 11 and 13; ADR 0011, decision 7.
 
-- [ ] **Step 2: The notes**
+- [x] **Step 2: The notes**
 
 In ADRs 0008, 0010 and 0011: the status line and a `🧩 **Completed by [ADR 0034](0034-network-and-demo-up-details.md), decision N:** …` line at the bottom of each decision's cell, as CLAUDE.md "Documentation" describes.
 
-- [ ] **Step 3: Roadmap and README**
+- [x] **Step 3: Roadmap and README**
 
 PH-12b's row: the plan and PR links, then ✅ Done before the merge; the README's diagram mirrors it (PH-12b `●`, the road `═` through it). PH-12c's entry: anything the phase moved to it.
 
@@ -284,7 +284,7 @@ PH-12b's row: the plan and PR links, then ✅ Done before the merge; the README'
 - #220's body from the roadmap entry if the entry changed.
 - The PR: the template filled in; `Closes #220`, `Closes #82`, `Closes #208`, `Closes #148`, `Closes #217`, `Closes #222`; the list of every issue change made in the phase; marked ready for review.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add docs README.md
