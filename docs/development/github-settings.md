@@ -69,11 +69,12 @@ Leave **Allow auto-merge** off: the owner's manual merge is the approval (ADR 00
 | ↳ **Require actions to be pinned to a full-length commit SHA** | On | A workflow that refers to an action by a tag or branch fails to start, so a moved tag can never swap the code that runs. ADR 0010, decision 21. |
 | **Approval for running fork pull request workflows from contributors** | **Require approval for all external contributors** | A PR from anyone outside the repository runs no workflow until the owner approves it. ADR 0010, decision 21. |
 | **Workflow permissions** | **Read repository contents and packages permissions** | The default `GITHUB_TOKEN` can only read; a job that needs more asks for it in its `permissions:`. ADR 0010, decision 21. |
+| **OIDC subject claim** | The default claims, with **immutable subject** on (`use_immutable_subject: true`) | The token's `sub` names the owner and the repository with their numeric IDs (`repo:luiki-dev@290870182/szop@1380292421:…`), and the CI roles' trust policies match exactly that. Turning it off changes every `sub`, and both roles would refuse CI. [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 13. |
 | ↳ **Allow GitHub Actions to create and approve pull requests** | Off | No workflow uses `GITHUB_TOKEN` to open or approve PRs; release-please uses its own GitHub App ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 8). ADR 0010, decision 21. |
 
 ## Environments
 
-*Settings → Code and automation → Environments.* An environment is a named target that a job picks with `environment:`; its rules are checked before the job starts, and the token the job receives names the environment (`sub` `repo:luiki-dev/szop:environment:<name>`), which is what an AWS role's trust policy matches ([CI/CD](ci-cd.md#cis-access-to-aws)).
+*Settings → Code and automation → Environments.* An environment is a named target that a job picks with `environment:`; its rules are checked before the job starts, and the token the job receives names the environment (`sub` `repo:luiki-dev@290870182/szop@1380292421:environment:<name>`), which is what an AWS role's trust policy matches ([CI/CD](ci-cd.md#cis-access-to-aws)).
 
 | Environment | Setting | Value | Why |
 |---|---|---|---|
@@ -191,6 +192,8 @@ gh api repos/luiki-dev/szop/rules/branches/main
 gh api repos/luiki-dev/szop/actions/permissions
 gh api repos/luiki-dev/szop/actions/permissions/workflow
 gh api repos/luiki-dev/szop/actions/permissions/fork-pr-contributor-approval
+# The OIDC subject claim the CI roles match
+gh api repos/luiki-dev/szop/actions/oidc/customization/sub
 # CodeQL's default setup
 gh api repos/luiki-dev/szop/code-scanning/default-setup
 

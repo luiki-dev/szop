@@ -358,12 +358,12 @@ terraform plan                  # "No changes. Your infrastructure matches the c
 
 aws iam get-role --role-name szop-ci-deploy --query Role.AssumeRolePolicyDocument
 #   one statement; "token.actions.githubusercontent.com:sub" is exactly
-#   "repo:luiki-dev/szop:environment:demo-teardown", and nothing else (never "environment:demo")
+#   "repo:luiki-dev@290870182/szop@1380292421:environment:demo-teardown", and nothing else (never "environment:demo")
 aws iam get-role --role-name szop-ci-plan --query Role.AssumeRolePolicyDocument
-#   "token.actions.githubusercontent.com:sub" is exactly "repo:luiki-dev/szop:pull_request"
+#   "token.actions.githubusercontent.com:sub" is exactly "repo:luiki-dev@290870182/szop@1380292421:pull_request"
 ```
 
-Both trust policies also hold `"token.actions.githubusercontent.com:aud": "sts.amazonaws.com"`. These two conditions are what keeps every other repository, branch and workflow from getting the roles' credentials.
+Both trust policies also hold `"token.actions.githubusercontent.com:aud": "sts.amazonaws.com"`. These two conditions are what keeps every other repository, branch and workflow from getting the roles' credentials. The `@` numbers are the owner's and the repository's GitHub IDs, which the immutable subject adds ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 13); they are public, unlike the account ID.
 
 **Store the two role ARNs** (Amazon Resource Names, the roles' unique IDs) as repository variables, which the workflows read as `vars.AWS_PLAN_ROLE_ARN` and `vars.AWS_DEPLOY_ROLE_ARN`. They are base's outputs. In the browser: *Settings → Secrets and variables → Actions → Variables → New repository variable*. Or with the GitHub CLI, from `infra/base`:
 
@@ -380,7 +380,7 @@ After the merge, apply base again from `main`, as for every base PR ([ADR 0011](
 
 ⚠️ **Don't:**
 
-- add `repo:luiki-dev/szop:environment:demo` to the deploy role's trust by hand: PH-12 adds it in the PR in which you create the `demo` environment with its required reviewer, because GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
+- add `repo:luiki-dev@290870182/szop@1380292421:environment:demo` to the deploy role's trust by hand: PH-12 adds it in the PR in which you create the `demo` environment with its required reviewer, because GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
 - widen a CI role in the console: the plan comment and IAM Access Analyzer check the roles' policies only when they change in code.
 
 ### Cost allocation tags

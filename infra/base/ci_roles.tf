@@ -21,11 +21,14 @@ data "aws_iam_policy_document" "ci_plan_trust" {
     }
 
     # The token's subject for any workflow run triggered by a pull_request
-    # event in this repository.
+    # event in this repository. The repository uses GitHub's immutable
+    # subject, so the owner and the repository are named with their numeric
+    # IDs: a repository recreated under the same name gets another ID and is
+    # not trusted (ADR 0032, decision 13).
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:luiki-dev/szop:pull_request"]
+      values   = ["repo:luiki-dev@290870182/szop@1380292421:pull_request"]
     }
   }
 }
@@ -160,13 +163,14 @@ data "aws_iam_policy_document" "ci_deploy_trust" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # The token's subject for a job that names the demo-teardown environment.
+    # The token's subject, in the immutable form, for a job that names the
+    # demo-teardown environment (ADR 0032, decision 13).
     # demo is added in PH-12, in the pull request in which the owner creates
     # that environment with its required reviewer (ADR 0032, decision 10).
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:luiki-dev/szop:environment:demo-teardown"]
+      values   = ["repo:luiki-dev@290870182/szop@1380292421:environment:demo-teardown"]
     }
   }
 }
