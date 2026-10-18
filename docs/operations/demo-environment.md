@@ -358,7 +358,8 @@ terraform plan                  # "No changes. Your infrastructure matches the c
 
 aws iam get-role --role-name szop-ci-deploy --query Role.AssumeRolePolicyDocument
 #   one statement; "token.actions.githubusercontent.com:sub" is exactly
-#   "repo:luiki-dev@290870182/szop@1380292421:environment:demo-teardown", and nothing else (never "environment:demo")
+#   "repo:luiki-dev@290870182/szop@1380292421:environment:demo-teardown", and nothing else (never "environment:demo");
+#   "token.actions.githubusercontent.com:ref" is exactly "refs/heads/main"
 aws iam get-role --role-name szop-ci-plan --query Role.AssumeRolePolicyDocument
 #   "token.actions.githubusercontent.com:sub" is exactly "repo:luiki-dev@290870182/szop@1380292421:pull_request"
 ```

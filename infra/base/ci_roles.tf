@@ -172,6 +172,16 @@ data "aws_iam_policy_document" "ci_deploy_trust" {
       variable = "token.actions.githubusercontent.com:sub"
       values   = ["repo:luiki-dev@290870182/szop@1380292421:environment:demo-teardown"]
     }
+
+    # main only, in AWS too: the environment's branch rule is a GitHub setting
+    # that this policy cannot see, so a loosened rule still unlocks nothing
+    # (ADR 0032, decision 14). demo, which runs from any branch, gets its own
+    # statement in PH-12.
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:ref"
+      values   = ["refs/heads/main"]
+    }
   }
 }
 
