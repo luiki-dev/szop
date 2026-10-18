@@ -107,11 +107,11 @@ git push -u origin feat/ph-12b-network-and-demo-up
 - Consumes: Task 1's resources, names and tags.
 - Produces: `szop-ci-deploy` assumable from `environment:demo` on any ref; customer managed policies `szop-ci-deploy-demo-network` (EC2), `szop-ci-deploy-demo-load-balancer` (Elastic Load Balancing and ACM) and `szop-ci-deploy-demo-dns` (Route 53), each attached with `aws_iam_role_policy_attachment`. The output `ci_deploy_role_arn`'s description names `demo-up.yml` and `demo-down.yml`.
 
-- [ ] **Step 1: The trust statement**
+- [x] **Step 1: The trust statement**
 
 A second statement `GitHubDemo` in `data.aws_iam_policy_document.ci_deploy_trust` as the Global Constraints give it, with a comment: `demo` runs from any branch, so no `ref` pin; the owner's required review on the environment is the gate (ADR 0012, decision 16; ADR 0032, decisions 10 and 14). Update the role's header comment, which still says `demo` comes in PH-12.
 
-- [ ] **Step 2: The three policies**
+- [x] **Step 2: The three policies**
 
 As the spec's "The deploy role" describes. Work out, from the AWS Service Authorization Reference and the provider's calls for each resource of Task 1, the exact actions and which resource types and condition keys each supports, and write them so that:
 - reads (`ec2:Describe*`, `elasticloadbalancing:Describe*`, `acm:DescribeCertificate`, `acm:ListCertificates`, `acm:ListTagsForCertificate`, the Route 53 reads of the spec) are on `*` or the zone, as the action allows;
@@ -123,15 +123,15 @@ As the spec's "The deploy role" describes. Work out, from the AWS Service Author
 
 Each statement has a `sid` and a short comment; each policy stays under 6,144 characters (check with `jq -c` on the rendered JSON from `terraform console` or the plan).
 
-- [ ] **Step 3: Static checks**
+- [x] **Step 3: Static checks**
 
 Run: `pnpm check:infra`. Expected: pass. With `AWS_PROFILE=szop`: `terraform -chdir=infra/base plan -lock=false`. Expected: 3 policies and 3 attachments to add, the trust policy of `szop-ci-deploy` updated in place, nothing destroyed, and the output's description changed.
 
-- [ ] **Step 4: Validate and simulate (Review Focus 1)**
+- [x] **Step 4: Validate and simulate (Review Focus 1)**
 
 For each rendered policy: `aws accessanalyzer validate-policy --policy-type IDENTITY_POLICY`. Expected: no `ERROR` and no `SECURITY_WARNING`. For the trust policy: `--policy-type RESOURCE_POLICY`; only the findings ADR 0032, decision 4 accepted. Then `aws iam simulate-custom-policy` with the three documents together, once for each create action with context `aws:RequestTag/project=szop`, `aws:RequestTag/group=demo`, `aws:RequestedRegion=eu-central-1` (and `ec2:CreateAction`/`elasticloadbalancing:CreateAction` for the tagging actions), and for each change and delete action with `aws:ResourceTag/project=szop`, `aws:ResourceTag/group=demo`. Expected: `allowed`. Negative cases: a delete with `aws:ResourceTag/group=base`, a create without the request tags, `route53:ChangeResourceRecordSets` with name `dzwoniec.com` or type `MX`, `ec2:CreateTags` with no `ec2:CreateAction` on an untagged resource. Expected: `implicitDeny`. Fix the policies until both sets hold, and keep the commands in the task's report.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add infra/base docs/superpowers/plans
