@@ -354,7 +354,7 @@ git add docs/decisions docs/architecture docs/development/testing.md docs/glossa
 git commit -m "docs: add ADR 0033 and document the app's cloud readiness"
 ```
 
-- [ ] **Step 5: GitHub and the roadmap, before the PR**
+- [x] **Step 5: GitHub and the roadmap, before the PR**
 
 - OP-043 (#84) and OP-017 (#68): the PH-12a part ticked with the PR, re-parented to PH-12c (#221), Status ⬜ Backlog.
 - OP-085 (#88) and OP-072 (#85): `Closes` in the PR; OP-085's "settled by" comment names Task 4, step 1's result.
