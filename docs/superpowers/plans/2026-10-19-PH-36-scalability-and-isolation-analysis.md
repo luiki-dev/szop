@@ -153,10 +153,10 @@ git commit -am "docs(audit): analyse Szop's isolation in the AWS account"
 **Files:**
 - Modify: `docs/audits/2026-10-19-scalability-and-isolation-analysis.md` (`## Summary`, `## What the roadmap would look like`, `## Contents`)
 
-- [ ] **Step 1: Scan every Recommendation** in S1–S15 and I1–I7 for its source: a local check, a cited page, or "*(unconfirmed: …)*" with the confirming phase in **When**.
-- [ ] **Step 2: Write `## Summary`:** a table with a row per aspect (aspect linked to its section, today: ✅ built / 📝 designed / ⬜ future, the recommended option, adds a layer or rewires and its size, X, Y, phase); under it, the totals against today's cost and the guides, flagged if above, and the recommendation: go or no-go, and why.
-- [ ] **Step 3: Write `## What the roadmap would look like`:** each phase the recommendation adds or changes (goal, delivers, order, size in tasks, its one new concept), and each open point created, split, re-parented or closed, starting from the spec's "The roadmap and the open points".
-- [ ] **Step 4: Bring `## Contents` in line**, run the link check and the account grep, commit and push.
+- [x] **Step 1: Scan every Recommendation** in S1–S15 and I1–I7 for its source: a local check, a cited page, or "*(unconfirmed: …)*" with the confirming phase in **When**.
+- [x] **Step 2: Write `## Summary`:** a table with a row per aspect (aspect linked to its section, today: ✅ built / 📝 designed / ⬜ future, the recommended option, adds a layer or rewires and its size, X, Y, phase); under it, the totals against today's cost and the guides, flagged if above, and the recommendation: go or no-go, and why.
+- [x] **Step 3: Write `## What the roadmap would look like`:** each phase the recommendation adds or changes (goal, delivers, order, size in tasks, its one new concept), and each open point created, split, re-parented or closed, starting from the spec's "The roadmap and the open points".
+- [x] **Step 4: Bring `## Contents` in line**, run the link check and the account grep, commit and push.
 
 ```bash
 git commit -am "docs(audit): summarise the analysis and its recommendation"

@@ -52,7 +52,38 @@ Szop's design assumes exactly one task. [ADR 0008](../decisions/0008-hosting.md)
 
 ## Summary
 
-*Written in Task 4.*
+**Recommendation: ✅ go.** Running two or more tasks takes no rewiring of Szop's architecture: every change is a layer added next to what exists (a lock, a fan-out behind the event bus, shared counters, a connection budget, unique request IDs) or a setting, and most of them land in phases that have not been built yet, so they are built right the first time instead of reworked. The cost is **+$0.019 per demo hour** (about $0.098 in all) and **$0 a month**, far below the guides of $0.50 and $2. The one finding that is already a bug waiting to happen is S1: without a lock, two tasks apply a data migration twice, silently ([check A](#check-a-two-migrators-at-once)).
+
+Today: ✅ built, 📝 designed, ⬜ future. X per demo hour, Y per month, for the recommended option.
+
+| Aspect | Today | Recommended | Kind and size | X | Y | Phase |
+|---|---|---|---|---|---|---|
+| [S1 Migrations at startup](#s1-migrations-at-startup) | ✅ | an advisory lock around the check and the migration | adds a layer; `migrate.ts`, `server.ts`, a test | $0 | $0 | the move to two tasks |
+| [S2 Rolling deploys](#s2-rolling-deploys-and-two-versions-at-once) | ⬜ | 100% / 200% rolling deploys, expand-then-contract migrations, circuit breaker without rollback | adds a layer; service settings, a rule in `drizzle.md`; OP-043 changes | $0 | $0 | PH-12c |
+| [S3 Health checks](#s3-health-checks) | ✅ | one combined check, its grace period sized for S1 | no change; OP-075's tuning | $0 | $0 | PH-12c |
+| [S4 Shutdown and draining](#s4-graceful-shutdown-and-connection-draining) | ✅ | a 30-second deregistration delay; WebSocket reconnect and refetch | adds a layer; one argument, PH-33's client | $0 | $0 | PH-12c, PH-33 |
+| [S5 Event bus](#s5-the-event-bus-and-websockets) | 📝 | PostgreSQL `LISTEN/NOTIFY` behind the bus | adds a layer; the bus module | $0 | $0 | PH-33 |
+| [S6 Rate limits](#s6-the-rate-limit-counters) | 📝 | PostgreSQL stores for both limiters | adds a layer; a table, a store | $0 | $0 | PH-20 |
+| [S7 Cleanup job](#s7-the-cleanup-job) | 📝 | a try-lock per run | adds a layer; a few lines | $0 | $0 | PH-31 |
+| [S8 Sessions](#s8-sessions) | 📝 | no change | — | $0 | $0 | — |
+| [S9 Seed data](#s9-the-seed-data) | 📝 | no change | — | $0 | $0 | — |
+| [S10 Quotas](#s10-quotas) | 📝 | no change | — | $0 | $0 | — |
+| [S11 Other state](#s11-other-state-in-a-process) | ✅ | request IDs unique across tasks | adds a layer; `app.ts` | $0 | $0 | the move to two tasks |
+| [S12 Connections](#s12-database-connections) | ✅ | a pool of 5 and a connection budget | adds a layer; `database.ts` | $0 | $0 | the move to two tasks |
+| [S13 Database](#s13-database-availability-and-growth) | ⬜ | Single-AZ; Multi-AZ named for an always-on Szop | no change | $0 (Multi-AZ: +$0.022) | $0 | OP-033 |
+| [S14 Autoscaling](#s14-load-based-scaling) | ⬜ | target tracking, 2 to 4 tasks, on CPU | adds a layer; `infra/demo`, the deploy role, a load script | +$0.038 while scaled out | $0 | a new phase |
+| [S15 Testing](#s15-testing-with-several-instances) | ✅ | integration tests where the database is the channel; a two-instance Compose profile | adds a layer; a profile, a script, a test per feature | $0 | $0 | the move to two tasks, then each feature |
+| [I1 Account-wide pieces](#i1-account-wide-pieces) | ✅ | a shared stack for the zone, the domain-wide records and the OIDC provider; a budget per app | rewires `bootstrap` and `base`; moved without recreating | $0 | cents at most | PH-34 |
+| [I2 Reach](#i2-reach) | ✅ | accept the plan role's account-wide reads; say so in the threat model | no change | $0 | $0 | this phase |
+| [I3 Names and tags](#i3-names-and-tags) | ✅ | keep the scheme; retag the shared pieces when they move | no change | $0 | $0 | PH-34 |
+| [I4 Moving](#i4-moving-to-another-account) | ✅ | nothing now; one account per app kept open | no change | $0 | $0 | a second app |
+| [I5 Shared limits](#i5-shared-limits) | ✅ | no change; watch the VPC quota | — | $0 | $0 | — |
+| [I6 Domain and front page](#i6-the-domain-and-the-front-page) | ✅ / ⬜ | the zone, its records and the front page in the shared stack | rewires (with I1) | $0 | the front page's hosting | PH-34 |
+| [I7 On and off](#i7-each-app-on-and-off-on-its-own) | ✅ | a load balancer per app | no change | $0 | $0 | — |
+
+**Totals for the recommendation:** X **+$0.019** per demo hour for the second task (+$0.057 while scaled out to four), Y **$0** (the per-app budget at most cents, *unconfirmed*). Within the guides by a factor of about 25 for X; nothing flagged. The options that cost more (Valkey +$0.014, Multi-AZ +$0.022, RDS Proxy +$0.036) are all within the guides too, so choosing any of them is a question of what is worth learning, not of money ([Costs](#costs)).
+
+**What is not recommended, and why:** a one-off migration task per deploy (S1, option 2: the better shape for long migrations, more to build now); Redis or Valkey (S5, S6: a new component for what PostgreSQL does at this scale); RDS Proxy (S12: it pins exactly the connections Szop would rely on); blue/green deploys (S2); a shared load balancer (I7); one account per app (I4: right later, too much now).
 
 ## Part 1: scalability
 
@@ -85,7 +116,7 @@ Likely at every deploy that starts two tasks at once, and at every scale-out tha
 
 **Options.**
 
-1. **Rolling deploys with backward-compatible migrations (expand, then contract).** A minimum of 100% and a maximum of 200% with two tasks (ECS's defaults): two new tasks start, become healthy, and the old two drain and stop. Every migration is safe for the previous version: add before use, remove only in a later release once nothing reads it ("expand, then contract"). The deployment circuit breaker stops a failing deploy **without** rollback, and the fix rolls forward; the startup check keeps refusing an unknown migration, which still catches the branch switches it was made for. **Adds a layer** (a rule and its review, not code). Size: the ECS service's deployment settings in PH-12c, a section in `drizzle.md` and the definition of done, OP-043's PH-12c part changed; refines ADR 0008, decision 14 and OP-043. X $0 (two old and two new tasks overlap for a minute or two), Y $0. Running: deploys without downtime. Teaches: zero-downtime deploys and the expand-and-contract pattern.
+1. **Rolling deploys with backward-compatible migrations (expand, then contract).** A minimum of 100% and a maximum of 200% with two tasks (ECS's defaults for a rolling update, [Amazon ECS, rolling deployments](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html)): two new tasks start, become healthy, and the old two drain and stop. Every migration is safe for the previous version: add before use, remove only in a later release once nothing reads it ("expand, then contract"). The deployment circuit breaker stops a failing deploy **without** rollback, and the fix rolls forward; the startup check keeps refusing an unknown migration, which still catches the branch switches it was made for. **Adds a layer** (a rule and its review, not code). Size: the ECS service's deployment settings in PH-12c, a section in `drizzle.md` and the definition of done, OP-043's PH-12c part changed; refines ADR 0008, decision 14 and OP-043. X $0 (two old and two new tasks overlap for a minute or two), Y $0. Running: deploys without downtime. Teaches: zero-downtime deploys and the expand-and-contract pattern.
 2. **Stop-first deploys (OP-043 as planned) with several tasks.** Every deploy takes the site down for a minute or two. Simplest, and acceptable for a demo watched live, but gives up the main reason to run several tasks. **No change** in shape.
 3. **Blue/green deploys through CodeDeploy.** A second target group and a traffic switch; the old version stays up for a quick switch back. **Rewires** the deploy (CodeDeploy, an application, a deployment group, two target groups, `demo-up`'s deploy step). X: a few cents per deploy, Y $0. Much more to learn and to run than the demo needs; expand-and-contract is still required for the switch back.
 
@@ -112,7 +143,7 @@ Likely at every deploy that starts two tasks at once, and at every scale-out tha
 
 **Today.** ✅ Built in the app: on SIGTERM, [`server.ts`](../../apps/api/src/server.ts) stops accepting, lets requests finish, and [`shutdown.ts`](../../apps/api/src/shutdown.ts) ends the process within 10 seconds plus 5 of grace, well inside ECS's 30-second stop timeout ([ADR 0033](../decisions/0033-app-ready-for-the-cloud-details.md), decision 6). ⬜ Future in the load balancer.
 
-**With several tasks.** When ECS stops a task behind a load balancer, it first deregisters it from the target group and waits for the target group's **deregistration delay**, during which the load balancer sends no new requests but lets open ones finish; only then does the task get SIGTERM ([Elastic Load Balancing, deregistration delay](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html#deregistration-delay)). The default delay is 300 seconds, so a rolling deploy of two tasks would wait about five minutes per batch for requests that last milliseconds. WebSocket connections (S5) are long-lived: they stay open through the delay and close when the task stops, and the browser must reconnect, to another task.
+**With several tasks.** When ECS stops a task behind a load balancer, it first deregisters it from the target group and waits for the target group's **deregistration delay**, during which the load balancer sends no new requests but lets open ones finish; only then does the task get SIGTERM ([Elastic Load Balancing, deregistration delay](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html#deregistration-delay); [Amazon ECS, connection draining](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/load-balancer-connection-draining.html)). The default delay is 300 seconds, so a rolling deploy of two tasks would wait about five minutes per batch for requests that last milliseconds. WebSocket connections (S5) are long-lived: they stay open through the delay and close when the task stops, and the browser must reconnect, to another task.
 
 **Options.**
 
@@ -480,7 +511,28 @@ Everything else (the CI roles, the registry `szop`, the log group `/szop/app`, t
 
 ## What the roadmap would look like
 
-*Written in Task 4.*
+If the recommendation is taken as it stands. Sizes follow [ADR 0014](../decisions/0014-roadmap.md), decision 6: about 3 to 8 tasks and at most one big new concept per phase.
+
+**Stage 3, in order:** PH-12c, **two tasks** (new), PH-35, PH-13, PH-34 (split in two, below), **autoscaling** (new).
+
+| Phase | Change | Its one new concept | Size |
+|---|---|---|---|
+| [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) App on ECS and RDS | still **one task**, but its deploys are built the way two need: rolling deploys at 100% / 200% with the circuit breaker and no rollback (S2, replacing OP-043's 0% / 100%), the 30-second deregistration delay (S4), the health check's grace period (S3, OP-075), the expand-then-contract rule in `drizzle.md` (S2), and `SHOW max_connections` read on the first demo (S12). Its goal's "safe for the single instance" becomes "safe with old and new versions side by side". | (unchanged: ECS and RDS) | about the same; the settings replace OP-043's |
+| **New: Two tasks**, right after PH-12c | the migration lock (S1), the pool of 5 and the connection budget (S12), unique request IDs (S11), the service's desired count at 2, the Compose `scale` profile with its check script in CI's `docker` job (S15), S1's two-migrator test, the stack overview's scaling concepts. ADR 0008, decisions 10 and 32 superseded by ADR 0036. | running several instances | about 5 tasks |
+| [PH-34](../roadmap.md#ph-34-landing-page-and-demo-status) Landing page and demo status | **split**, since the shared stack is a concept of its own: **PH-34a Shared infrastructure**: `infra/shared` with the zone, the domain-wide records, the OIDC provider and the account budget moved out of Szop's stacks without recreating them, a budget per app, the shared pieces retagged (I1, I3, I6); **PH-34b Front page for the apps**: the page on the apex in the shared stack, showing Szop's demo status as the first entry (I6), with the redirect while the demo is down. | 34a: shared infrastructure; 34b: static hosting | about 4 and 5 tasks |
+| **New: Autoscaling**, last in Stage 3 | ECS Service Auto Scaling, 2 to 4 tasks on CPU, the deploy role's permissions, a load script and a runbook section (S14); the connection budget checked again (S12). | autoscaling | about 4 tasks |
+| [PH-20](../roadmap.md#ph-20-quotas-and-rate-limits) Quotas and rate limits | both limiters count in PostgreSQL from the start, with a two-instance test (S6, S15). | (unchanged) | +1 task |
+| [PH-31](../roadmap.md#ph-31-automatic-cleanup) Automatic cleanup | the try-lock per run, with a test of two runs at once (S7). | (unchanged) | no change in tasks |
+| [PH-33](../roadmap.md#ph-33-live-updates) Live updates | the event bus over `LISTEN/NOTIFY`, the client's reconnect and refetch, a test across two instances (S4, S5, S15). | (unchanged: live updates) | +1 task |
+
+**Open points.**
+
+- [OP-033](https://github.com/luiki-dev/szop/issues/116) loses its two scaling parts (the lock goes to the two-task phase, the shared store to PH-20) and gains Multi-AZ next to backups (S13); it stays a candidate.
+- [OP-043](https://github.com/luiki-dev/szop/issues/84): its PH-12c part becomes the rolling-deploy settings of S2.
+- [OP-075](https://github.com/luiki-dev/szop/issues/87): its grace period is sized for S1's wait.
+- **New candidates:** SES identities per app (I1, option 3), for when a second app sends mail; one account per app (I4, option 2), for when a second app becomes more than a demo.
+
+**Unchanged:** PH-35, PH-13 and every MVP phase other than PH-20, PH-31 and PH-33.
 
 ## Local checks
 
