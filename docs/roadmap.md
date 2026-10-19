@@ -22,6 +22,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net)
   - [PH-12a App ready for the cloud](#ph-12a-app-ready-for-the-cloud)
   - [PH-12b Network and the demo-up button](#ph-12b-network-and-the-demo-up-button)
+  - [PH-36 Scalability and isolation analysis](#ph-36-scalability-and-isolation-analysis)
   - [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds)
   - [PH-35 Security scanners](#ph-35-security-scanners)
   - [PH-13 Releases](#ph-13-releases)
@@ -184,6 +185,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-11 CI access to AWS and the teardown safety net](#ph-11-ci-access-to-aws-and-the-teardown-safety-net) | ✅ Done | [Spec](superpowers/specs/2026-10-17-PH-11-ci-access-to-aws-and-the-teardown-safety-net-design.md) | [Plan](superpowers/plans/2026-10-17-PH-11-ci-access-to-aws-and-the-teardown-safety-net.md) | [#215](https://github.com/luiki-dev/szop/pull/215) | [#40](https://github.com/luiki-dev/szop/issues/40) |
 | [PH-12a App ready for the cloud](#ph-12a-app-ready-for-the-cloud) | ✅ Done | [Spec](superpowers/specs/2026-10-18-PH-12a-app-ready-for-the-cloud-design.md) | [Plan](superpowers/plans/2026-10-18-PH-12a-app-ready-for-the-cloud.md) | [#226](https://github.com/luiki-dev/szop/pull/226) | [#219](https://github.com/luiki-dev/szop/issues/219) |
 | [PH-12b Network and the demo-up button](#ph-12b-network-and-the-demo-up-button) | ✅ Done | [Spec](superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md) | [Plan](superpowers/plans/2026-10-18-PH-12b-network-and-the-demo-up-button.md) | [#227](https://github.com/luiki-dev/szop/pull/227) | [#220](https://github.com/luiki-dev/szop/issues/220) |
+| [PH-36 Scalability and isolation analysis](#ph-36-scalability-and-isolation-analysis) | ⬜ Not started | — | — | — | [#229](https://github.com/luiki-dev/szop/issues/229) |
 | [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds) | ⬜ Not started | — | — | — | [#221](https://github.com/luiki-dev/szop/issues/221) |
 | [PH-35 Security scanners](#ph-35-security-scanners) | ⬜ Not started | — | — | — | [#213](https://github.com/luiki-dev/szop/issues/213) |
 | [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
@@ -235,6 +237,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** create the `demo` environment with the owner as required reviewer and "prevent self-review" off; apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, check the placeholder page at `szop.dzwoniec.com`, then press `demo-down`.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#220](https://github.com/luiki-dev/szop/issues/220).
+
+### PH-36 Scalability and isolation analysis
+
+- **Goal:** we know what it takes for Szop to run as two or more tasks, and whether it is worth it: which parts of the architecture depend on the number of tasks, how far each is built, what goes wrong with several, the solution and its cost, and how a problem shows up locally before AWS. The owner decides to go ahead or stay with one task, and the roadmap and the open points are adjusted to match. We also know whether what Szop deploys to AWS is isolated and marked well enough for other apps to share the account.
+- **Delivers:** an analysis of scalability: the app tier (migrations, the event bus and WebSockets, the rate-limit counters, the cleanup job, sessions, seed data, quotas, rolling deploys and connection draining, health checks), the database (connections per task against RDS's limit, Multi-AZ, scaling it) and load-based scaling, each with its current state, its impact, the options, the solution and its cost per demo hour and per month, and how two instances run locally and in the tests; an analysis of isolation of Szop's footprint in the AWS account (names, tags, IAM scope, network ranges, the shared hosted zone, budgets, the Terraform state); an ADR with the decisions, refining or superseding [ADR 0008](decisions/0008-hosting.md), decisions 10, 14 and 32, and [ADR 0012](decisions/0012-security-baseline.md), decision 15, if the owner goes ahead; the roadmap revisited: new or changed phases and open points, their goals, order and size, and the living docs in line. No code or infrastructure changes.
+- **Depends on:** —
+- **Owner steps:** —
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#229](https://github.com/luiki-dev/szop/issues/229).
 
 ### PH-12c App on ECS and RDS
 

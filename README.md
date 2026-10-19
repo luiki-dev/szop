@@ -20,20 +20,24 @@ Szop is built in phases, grouped into stages. The road below shows how far along
   ╔════════════════════●═══════●═══════●═══════●═══════●═══════●═══════●═══╝
   ║
   ║ Stage 3 · Walking skeleton, deployed and released
-  ║  PH-09   PH-10   PH-11   PH-12a  PH-12b  PH-12c  PH-35   PH-13   PH-34
+  ║  PH-09   PH-10   PH-11   PH-12a  PH-12b  PH-36   PH-12c  PH-35   PH-13
   ╚════●═══════●═══════●═══════●═══════●───────○───────○───────○───────○───╮
                                                                            │
-                                                            Stage 4 · MVP  │
-     PH-22   PH-21   PH-20   PH-19   PH-18   PH-17   PH-16   PH-15   PH-14 │
-  ╭────○───────○───────○───────○───────○───────○───────○───────○───────○───╯
+                                                                           │
+                                                                     PH-34 │
+  ╭────────────────────────────────────────────────────────────────────○───╯
   │
-  │
-  │  PH-23   PH-24   PH-25   PH-26   PH-27   PH-28   PH-29   PH-30   PH-31
+  │ Stage 4 · MVP
+  │  PH-14   PH-15   PH-16   PH-17   PH-18   PH-19   PH-20   PH-21   PH-22
   ╰────○───────○───────○───────○───────○───────○───────○───────○───────○───╮
                                                                            │
-                                                          Stage 5 · Later  │
-                                                             PH-33   PH-32 │
-                                                       DONE ───○───────○───╯
+                                                                           │
+     PH-31   PH-30   PH-29   PH-28   PH-27   PH-26   PH-25   PH-24   PH-23 │
+  ╭────○───────○───────○───────○───────○───────○───────○───────○───────○───╯
+  │
+  │ Stage 5 · Later
+  │  PH-32   PH-33
+  ╰────○───────○─── DONE
 
 
   ● done   ◐ in progress   ○ not started   ✕ dropped   ═ road travelled
