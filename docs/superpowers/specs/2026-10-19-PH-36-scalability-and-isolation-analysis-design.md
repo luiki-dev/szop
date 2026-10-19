@@ -44,9 +44,7 @@ The phase is done when:
 ## Out of scope
 
 - **Any change to code, infrastructure or workflows.** The changes the analysis recommends go to the phases it assigns them to.
-- **A spike that builds something to keep.** Only the migration race exists in code today; the event bus, the shared rate limits and the cleanup job are designs. The analysis reasons from the code, the docs and the providers' documentation, and confirms what it can with throwaway local checks ([decision 11](#decisions-taken-in-the-brainstorm)).
-- **Anything that needs AWS access.** The owner works from a remote session and cannot sign in to AWS during the phase; prices come from the public pages and quotas from AWS's published defaults.
-- **Moving the SPA off the API (to S3 and a CDN, say) or splitting the API into services** *(the owner's)*: not offered as options. The API keeps serving the SPA ([architecture.md](../../architecture/architecture.md)).
+- **A spike that builds something to keep.** Only the migration race exists in code today; the event bus, the shared rate limits and the cleanup job are designs. The analysis reasons from the code, the docs and the providers' documentation, and confirms what it can with throwaway local checks ([decision 11](#decisions-taken-in-the-brainstorm)).- **Moving the SPA off the API (to S3 and a CDN, say) or splitting the API into services** *(the owner's)*: not offered as options. The API keeps serving the SPA ([architecture.md](../../architecture/architecture.md)).
 - **Extracting a module shared with a future app** *(the owner's)*: nothing is pulled out of Szop for an app that does not exist. Part 2 says what would be shared and how, not how to build it.
 - **The rest of [OP-033](https://github.com/luiki-dev/szop/issues/116)** (backups, a CDN with a web application firewall, alarms and error tracking, SES production access, a storage alarm, a privacy notice): they need less rework than scaling and stay for later, as the owner put it. Only OP-033's scaling parts (the lock, the shared store) are in scope.
 - **Other clouds.** "Elsewhere" in Part 2 means another AWS account.
@@ -212,4 +210,4 @@ Checked locally where marked *(local check)*, from the documentation otherwise.
 - The prices in `eu-central-1` of a Fargate task's vCPU and memory, of the load balancer's capacity units, of public IPv4 addresses, of RDS Multi-AZ and RDS Proxy, on the day.
 - The load balancer's default deregistration delay and how it treats open WebSocket connections.
 - Whether the OIDC provider can be looked up by a second app's Terraform instead of created, and what deleting it would break.
-- The quotas named in Part 2, from AWS's published defaults *(Claude's call: the builder has no AWS access)*; the analysis says this account's values may differ and gives the read-only commands (`aws service-quotas get-service-quota`, `aws sesv2 get-account`) the owner can run if a quota matters to a decision.
+- The quotas named in Part 2 for this account, read with read-only commands (`aws service-quotas get-service-quota`, `aws sesv2 get-account`) once the owner has signed in, or AWS's published defaults, marked as such, if that is not possible.
