@@ -131,7 +131,7 @@ Likely at every deploy that starts two tasks at once, and at every scale-out tha
 **Options.**
 
 1. **PostgreSQL `LISTEN/NOTIFY` behind the bus.** Each task holds one connection that `LISTEN`s on a channel; publishing becomes `NOTIFY` (from the same transaction as the change, so an event is sent only if the change commits); each task's hub forwards what it hears to its own subscribers. **Adds a layer** behind the existing bus. Size: the bus module and one dedicated connection per task, in PH-33; refines architecture.md's event bus. X $0, Y $0. Limits: a payload of under 8000 bytes (the events are tiny), delivery only to listeners connected at the time (a reconnecting task misses events, which S4's refetch covers), and a dedicated connection that RDS Proxy cannot multiplex (S12) ([PostgreSQL, `NOTIFY`](https://www.postgresql.org/docs/current/sql-notify.html)). Teaches: fan-out between instances, and the database as a message channel.
-2. **Redis publish/subscribe behind the bus.** The same shape with ElastiCache for Redis (or Valkey) as the channel. **Adds a layer**, plus a new component: a cache cluster, its security group and subnet group in `infra/demo`, the deploy role's permissions, a client library, a Redis in `compose.yaml` for development and CI. X: the smallest Redis's hourly price ([Costs](#costs)). Y $0. Teaches: a dedicated message broker, the common choice at larger scale.
+2. **Redis publish/subscribe behind the bus.** The same shape with ElastiCache for Redis (or Valkey) as the channel. **Adds a layer**, plus a new component: a cache cluster, its security group and subnet group in `infra/demo`, the deploy role's permissions, a client library, a Redis in `compose.yaml` for development and CI. X **$0.0144 per hour** for the smallest node (`cache.t4g.micro`, Valkey; [Costs](#costs)). Y $0. Teaches: a dedicated message broker, the common choice at larger scale.
 3. **Sticky sessions on the load balancer.** Rejected: it keeps one browser on one task, but two people on one list may still sit on different tasks, which is the problem.
 
 **Recommendation.** Option 1: no new component, no cost, and transactional events. Option 2 earns its cost only together with S6, if S6 picks Redis too; see S6.
@@ -147,7 +147,7 @@ Likely at every deploy that starts two tasks at once, and at every scale-out tha
 **Options.**
 
 1. **PostgreSQL for both.** Better Auth's built-in `storage: "database"` (its `rateLimit` table, counted with conditional increments, shown correct across processes by check B). `@fastify/rate-limit` has no PostgreSQL store, but takes a custom `store` with `incr` and `child` methods ([its README](https://github.com/fastify/fastify-rate-limit#custom-store), version 11.2.1); a small one over a counters table is about 40 lines. **Adds a layer.** Size: a table and a store module in PH-20; refines ADR 0012, decision 15. X $0, Y $0. Running: a write per limited request; at the demo's traffic, nothing. Teaches: shared state in the database, and an atomic `INSERT … ON CONFLICT … RETURNING` counter.
-2. **Redis for both.** `@fastify/rate-limit`'s `redis` option (ioredis) and Better Auth's `secondaryStorage` with `increment`. **Adds a layer** and the Redis of S5, option 2. X: the Redis's hourly price, shared with S5 if both use it. Y $0. The standard choice for counters at scale.
+2. **Redis for both.** `@fastify/rate-limit`'s `redis` option (ioredis) and Better Auth's `secondaryStorage` with `increment`. **Adds a layer** and the Redis of S5, option 2. X $0.0144 per hour, the same node as S5's if both use it. Y $0. The standard choice for counters at scale.
 3. **Keep memory, accept looser limits.** Rejected: the limits are part of the security baseline (ADR 0012), and "N times looser, depending on the number of tasks" is not a limit anyone chose.
 
 **Recommendation.** Option 1, unless the owner wants Redis for its own sake; then option 2 together with S5, option 2, so one Redis serves both.
@@ -221,19 +221,76 @@ Likely at every deploy that starts two tasks at once, and at every scale-out tha
 
 ### S12 Database connections
 
-*Written in Task 2.*
+**Today.** ✅ Built: each task opens one `pg` pool with node-postgres's default maximum of **10 connections** ([`database.ts`](../../apps/api/src/db/database.ts) sets no `max`). ⬜ Future: RDS `db.t4g.micro`, PostgreSQL 18 ([ADR 0008](../decisions/0008-hosting.md), decision 19), whose default `max_connections` is `LEAST({DBInstanceClassMemory/9531392}, 5000)`, with 3 reserved for superusers (read from RDS's default parameters for `postgres18`, 2026-10-19). With 1 GiB of memory that is **at most 112**, and somewhat less in practice, since `DBInstanceClassMemory` leaves out what the operating system keeps *(unconfirmed: PH-12c reads `SHOW max_connections` on the first demo)*.
+
+**With several tasks.** Connections multiply: tasks × (pool + S1's lock connection at startup + S5's listening connection). Two tasks: 2 × 12 = 24. A rolling deploy briefly doubles the tasks (S2): 48. Autoscaling to 4 tasks (S14), during a deploy: 8 × 12 = 96, close to or over the limit, and then new connections fail with `too many clients`, on every task at once.
+
+**Options.**
+
+1. **A connection budget:** an explicit pool maximum (5), and an autoscaling maximum (S14) chosen so that the worst case, every task doubled by a deploy, stays under about 80% of `max_connections`: 8 × (5 + 2) = 56. **Adds a layer** (a number and its reasoning). Size: one setting in `database.ts`, a line in architecture.md; refines [ADR 0020](../decisions/0020-database-details.md). X $0, Y $0. Teaches: connections as the database's scarcest resource, and capacity arithmetic.
+2. **RDS Proxy** in front of the database: it pools connections across tasks. **Adds a layer** and a component (the proxy, its role, a secret in Secrets Manager, TLS to the proxy). X **$0.036 per hour** (two vCPUs at $0.018, the minimum charge). Y $0. It pins (cannot share) a connection that holds a session-level advisory lock or `LISTEN`s, which S1 and S5 rely on, so it saves least exactly where Szop would use it.
+3. **A larger instance** (`db.t4g.small`, 2 GiB, twice the connections and the price). **Rewires** nothing, but doubles the database's cost for a limit the budget avoids.
+
+**Recommendation.** Option 1.
+
+**When.** The pool maximum in the phase that moves to several tasks; the budget checked again in S14's phase.
 
 ### S13 Database availability and growth
 
-*Written in Task 2.*
+**Today.** ⬜ Future: one `db.t4g.micro` in one availability zone, 20 GB, no backups, destroyed with the demo ([ADR 0008](../decisions/0008-hosting.md), decision 19).
+
+**With several tasks.** Nothing breaks, but the database becomes the part that does not scale: two tasks in two availability zones share one database in one, so losing that zone loses the service anyway, and every scale-out adds load to the same instance. What a scalable design adds here, and what each costs per demo hour:
+
+| Step | What it gives | X per demo hour |
+|---|---|---|
+| **Multi-AZ** (a standby in the second zone) | survives the loss of a zone or the instance; failover in a minute or two | **+$0.022** (the instance $0.037 instead of $0.019; storage $0.274 instead of $0.137 per GB-month) |
+| A larger instance | more memory, connections and CPU, one restart | about twice the instance price per size |
+| Read replicas | reads spread over copies; the app must send reads there | a second instance and its storage, about **+$0.023** |
+| Aurora PostgreSQL | storage that grows by itself, replicas sharing it | not priced: a different engine and its own learning, which no demo-sized load needs |
+
+**Options.**
+
+1. **Single-AZ for the demo; Multi-AZ named as the always-on step** with backups ([OP-033](https://github.com/luiki-dev/szop/issues/116)). **No change.** X $0.
+2. **Multi-AZ for the demo too.** **Adds a layer** (one Terraform argument; a failover the owner can trigger to watch). X +$0.022. Teaches: failover, and why the app must reconnect after one (the pool does, ADR 0020, decision 12).
+
+**Recommendation.** Option 1. Multi-AZ is affordable and a good thing to see once, but it protects data and uptime the demo does not have; it belongs with backups in OP-033. *(The owner may well choose option 2 for the learning; it stays well inside the guides.)*
+
+**When.** OP-033, or the phase that moves to several tasks if option 2 is chosen.
 
 ### S14 Load-based scaling
 
-*Written in Task 2.*
+**Today.** ⬜ Future: one task of 0.25 vCPU and 0.5 GB, never more ([ADR 0008](../decisions/0008-hosting.md), decisions 10 and 32).
+
+**With several tasks.** A fixed count of two is enough to surface everything in S1 to S12. Load-based scaling adds the moving part: tasks starting and stopping while the demo is in use, which exercises S1 (migrations at scale-out), S4 (draining at scale-in) and S12 (the connection budget) without a deploy.
+
+**Options.**
+
+1. **ECS Service Auto Scaling with target tracking:** a minimum of 2, a maximum of 4, a target of 50% average CPU, ECS's default cool-downs. A scale-out is shown with a short load test run from the owner's machine (a few minutes of a load generator against `/api/health` and a list page). **Adds a layer.** Size: an `aws_appautoscaling_target` and `aws_appautoscaling_policy` in `infra/demo`, the deploy role's permissions for Application Auto Scaling and the two CloudWatch alarms target tracking creates, a load script, a runbook section. X: $0 at the minimum; at the maximum, two more tasks, **+$0.038 per hour** while scaled out; the alarms cost cents a month, prorated to the demo's hours. Y $0. Teaches: target tracking, cool-downs, and why scale-in is the harder half.
+2. **A fixed number of tasks** (two), no autoscaling. **No change** beyond the count.
+3. **Request-count tracking** (`ALBRequestCountPerTarget`) instead of CPU. The same shape; easier to predict with a load generator, but a number that depends on what the requests cost. A choice for that phase's brainstorm.
+
+**Recommendation.** Option 1, in a phase of its own: autoscaling is one new concept, and it should arrive after two fixed tasks run cleanly.
+
+**When.** A new phase after the move to two tasks.
 
 ### S15 Testing with several instances
 
-*Written in Task 2.*
+**Today.** ✅ Built: unit and integration tests in Vitest against the PostgreSQL of `compose.yaml`, Playwright end to end against one API, and the image checked by `pnpm check:image` ([testing.md](../development/testing.md); [ADR 0007](../decisions/0007-testing-strategy.md)). Everything runs one instance.
+
+**With several tasks.** No test today could catch S1, S5 or S6. [Check C](#check-c-two-api-instances-behind-a-proxy) ran two instances of the real image behind a proxy and reproduced S1 on its first start: one instance failed its migration and was restarted. It also showed what tests must watch for: [check B](#check-b-better-auths-state) found that two instances **inside one process** share module-level state and hide exactly the bugs a test is for, so a test with two instances in one Vitest process proves only what goes through the database.
+
+**Options.**
+
+1. **Per layer, as each feature arrives:**
+   - **Integration (Vitest), one process:** two migrators at once (S1); an event published through one app instance and received by a WebSocket client of another, each with its own pool (S5), valid because the channel is the database; two cleanup runs at once (S7).
+   - **Two processes, behind a proxy:** a Compose profile `scale` with two app containers and nginx, as in check C, for what in-process tests cannot show: rate limits counted across instances (S6), the migration race at real startup, a stop under load. Run by a script like `pnpm check:image`, locally and in CI's `docker` job, which already builds the image.
+
+   **Adds a layer.** Size: the profile and the script with the phase that moves to two tasks; each test with its feature's phase. X $0, Y $0. CI: the `docker` job gains about a minute *(unconfirmed: measured when built)*. Teaches: testing for concurrency, and which tests can and cannot see it.
+2. **Only end-to-end tests against two instances.** Slower, and a failure says less about its cause.
+
+**Recommendation.** Option 1.
+
+**When.** The profile and S1's test in the phase that moves to two tasks; S5's in PH-33, S6's in PH-20, S7's in PH-31.
 
 ## Part 2: isolation
 
@@ -269,7 +326,38 @@ Likely at every deploy that starts two tasks at once, and at every scale-out tha
 
 ## Costs
 
-*Written in Task 2.*
+**Source.** On-demand prices for `eu-central-1` in US dollars, from the AWS Price List API (`aws pricing get-products`), read 2026-10-19. It is the data behind AWS's public price pages ([Fargate](https://aws.amazon.com/fargate/pricing/), [Elastic Load Balancing](https://aws.amazon.com/elasticloadbalancing/pricing/), [VPC public IPv4 addresses](https://aws.amazon.com/vpc/pricing/), [RDS for PostgreSQL](https://aws.amazon.com/rds/postgresql/pricing/), [RDS Proxy](https://aws.amazon.com/rds/proxy/pricing/), [ElastiCache](https://aws.amazon.com/elasticache/pricing/)) and of the AWS Pricing Calculator. Taxes and the free tier are left out. A month is 730 hours.
+
+**Building blocks.**
+
+| Block | Price | Per demo hour |
+|---|---|---|
+| Fargate vCPU | $0.04656 per vCPU-hour | — |
+| Fargate memory | $0.00511 per GB-hour | — |
+| **One task** (0.25 vCPU, 0.5 GB) | 0.25 × 0.04656 + 0.5 × 0.00511 | **$0.0142** |
+| Public IPv4 address (in use or idle) | $0.005 per hour | $0.005 each |
+| Application load balancer | $0.027 per hour, plus $0.008 per load balancer capacity unit (LCU)-hour used | $0.027, LCUs about $0 at demo traffic |
+| RDS `db.t4g.micro`, PostgreSQL, Single-AZ / Multi-AZ | $0.019 / $0.037 per hour | $0.019 / $0.037 |
+| RDS gp3 storage, Single-AZ / Multi-AZ | $0.137 / $0.274 per GB-month | 20 GB: $0.0038 / $0.0075 |
+| RDS Proxy | $0.018 per vCPU-hour of the instance, two vCPUs minimum | $0.036 |
+| ElastiCache `cache.t4g.micro`, Valkey / Redis OSS | $0.0144 / $0.018 per hour | $0.0144 / $0.018 |
+
+**Today's baseline**, the demo as ADR 0008 and PH-12b/PH-12c build it: the load balancer ($0.027) and its public addresses (one per availability zone, $0.010), one task ($0.0142) with its public address ($0.005), the database ($0.019) and its storage ($0.0038): **about $0.079 per demo hour.** [ADR 0008](../decisions/0008-hosting.md)'s "roughly $0.07" holds, a little higher now that the public addresses and the storage are counted. Between sessions, unchanged: the domain (about $13–15 a year), the hosted zone ($0.50 a month), and cents for images, state and logs.
+
+**Each option's X and Y** are in its section. The ones that cost anything:
+
+| Option | X per demo hour | Y per month |
+|---|---|---|
+| A second task and its public address (S1–S12) | +$0.019 | $0 |
+| S1, option 2: a one-off migration task per deploy | under $0.01 per deploy | $0 |
+| S5 / S6, option 2: one Valkey node for both | +$0.014 | $0 |
+| S12, option 2: RDS Proxy | +$0.036 | $0 |
+| S13, option 2: Multi-AZ | +$0.022 | $0 |
+| S14, option 1: autoscaling, at its maximum of 4 | +$0.038 while scaled out | $0 |
+
+**The recommendation as a whole** (two fixed tasks, then autoscaling; PostgreSQL for the lock, the fan-out and the counters; Single-AZ): **+$0.019 per demo hour**, $0.098 in all, and up to $0.136 while scaled out to four tasks. **Y: $0**: nothing it adds outlives a demo. Both are far below the guides of $0.50 and $2. Choosing Valkey and Multi-AZ as well would add $0.036 more, still far below.
+
+**A forgotten demo**, up until the nightly teardown at most a day later: 24 × $0.098 ≈ **$2.35**, against about $1.90 today (ADR 0010, decision 13 estimated $1.70). The budget alerts of [ADR 0008](../decisions/0008-hosting.md), decision 26 (a forecast above $5, actual spending above $10 a month) still fit: a month of a forgotten demo every night would be about $70 and trip both, which is what they are for.
 
 ## What the roadmap would look like
 
@@ -306,4 +394,12 @@ All three ran on the owner's machine (WSL2, Docker 29.6.2, Node.js 24.21.0) agai
 
 ### Check C: two API instances behind a proxy
 
-*Written in Task 2.*
+**Setup.** A throwaway Compose project: PostgreSQL 18.6, two containers of Szop's image built from the branch's `Dockerfile` (as `pnpm image:up` builds it), each with `restart: on-failure` to stand in for ECS starting a new task, and nginx 1.28.0 in front of them, round robin, on a fixed address that `TRUSTED_PROXIES` names (`172.29.36.10/32`). Both app containers started at the same moment on an empty database.
+
+**Results.**
+
+- **Startup:** one instance failed with `Failed query: CREATE SCHEMA IF NOT EXISTS "drizzle" … duplicate key value violates unique constraint "pg_namespace_nspname_index"`, exited, was restarted, found the migration applied and started; the other started at once. S1's race at real startup, with the empty first migration.
+- **Spreading:** successive requests alternated between the two instances.
+- **Client IP:** a request carrying a forged `X-Forwarded-For: 203.0.113.99` was logged by either instance with the address nginx saw (Docker's gateway), not the forged one: `TRUSTED_PROXIES` works unchanged with two instances.
+- **Request IDs:** both instances logged `req-2` and `req-3` for different requests (S11).
+- **Stopping one instance under load** (400 requests to `/api/health`, 10 ms apart, `docker compose stop` on one instance midway; it shut down in 0.4 seconds): with nginx's default retry of a failed `GET` on the other instance, **400 of 400 succeeded**; with that retry off, closer to the AWS load balancer, which does not retry, **399 succeeded and 1 got a 502**: a request sent to the instance just after it closed its listener. On ECS, the task leaves the target group and drains before it gets SIGTERM (S4), which closes that gap; a proxy that does not know an instance is going cannot.
