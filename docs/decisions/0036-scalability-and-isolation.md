@@ -56,20 +56,22 @@ The change adds **$0.037 per demo hour** and nothing a month, within the guides 
 
 ## Roadmap changes
 
-Future phases in roadmap order; every phase not listed is unchanged. New phases and open points are marked **[new]**. Each phase stays within ADR 0014, decision 6: at most one big new concept, about 3 to 8 tasks.
+Every future phase in roadmap order, from PH-12c on; unchanged phases are grouped by their IDs. Open points are named by their first 25 characters. New phases and open points are marked **[new]**, and open points that move to another phase are in bold too. Each phase stays within ADR 0014, decision 6: at most one big new concept, about 3 to 8 tasks.
 
 | Phase | Previous OPs | OPs after change | New concepts |
 |---|---|---|---|
-| [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) App on ECS and RDS | OP-013<br>OP-016<br>OP-017<br>OP-018<br>OP-019<br>OP-020<br>OP-021<br>OP-043<br>OP-053<br>OP-074<br>OP-075<br>OP-096<br>OP-099 | OP-013<br>OP-016<br>OP-017<br>OP-018<br>OP-019<br>OP-020<br>OP-021<br>OP-043 (changed: rolling deploys, decision 3)<br>OP-053<br>OP-074<br>OP-075 (changed: the liveness route and the grace period, decision 4)<br>OP-096<br>OP-099 | ECS and RDS (unchanged); rolling deploys, liveness and readiness come with them |
-| **PH-37 Two tasks [new]** | — | OP-033 (part: the migration lock) | running several instances: the advisory lock, the connection budget, unique request IDs, the two-instance Compose profile |
+| [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) App on ECS and RDS | OP-013 Build what the dem<br>OP-016 Make "secret value<br>OP-017 Connect to RDS wit<br>OP-018 Write the runbook<br>OP-019 Write the workflow<br>OP-020 Create the AWS sid<br>OP-021 Confirm that \`demo<br>OP-043 Make redeploys saf<br>OP-053 Build the app-wide<br>OP-074 Choose the databas<br>OP-075 Tune the ECS healt<br>OP-096 Deny the plan role<br>OP-099 Keep the deployed | OP-013 Build what the dem<br>OP-016 Make "secret value<br>OP-017 Connect to RDS wit<br>OP-018 Write the runbook<br>OP-019 Write the workflow<br>OP-020 Create the AWS sid<br>OP-021 Confirm that \`demo<br>OP-043 Make redeploys saf (changed: rolling deploys, decision 3)<br>OP-053 Build the app-wide<br>OP-074 Choose the databas<br>OP-075 Tune the ECS healt (changed: the liveness route and the grace period, decision 4)<br>OP-096 Deny the plan role<br>OP-099 Keep the deployed | ECS and RDS (unchanged); rolling deploys, liveness and readiness come with them |
+| **PH-37 Two tasks [new]** | — | **OP-033 Before Szop ever r** (part: the migration lock) | running several instances: the advisory lock, the connection budget, unique request IDs, the two-instance Compose profile |
+| PH-35, PH-13, PH-34 | | | |
 | **PH-38 Autoscaling [new]** | — | — | autoscaling with target tracking |
+| PH-14:PH-19 | | | |
 | **PH-39 Redis in the stack [new]** | — | — | Redis on ElastiCache, and locally |
-| [PH-20](../roadmap.md#ph-20-quotas-and-rate-limits) Quotas and rate limits | OP-046<br>OP-047 | OP-046<br>OP-047<br>OP-033 (part: shared rate-limit counters, in Redis) | — (uses PH-39's Redis) |
-| [PH-31](../roadmap.md#ph-31-automatic-cleanup) Automatic cleanup | — | OP-033 (part: the cleanup job's lock) | — |
+| [PH-20](../roadmap.md#ph-20-quotas-and-rate-limits) Quotas and rate limits | OP-046 Set the E2E server<br>OP-047 Define bulk action | OP-046 Set the E2E server<br>OP-047 Define bulk action<br>**OP-033 Before Szop ever r** (part: shared rate-limit counters, in Redis) | — (uses PH-39's Redis) |
+| PH-21:PH-30 | | | |
+| [PH-31](../roadmap.md#ph-31-automatic-cleanup) Automatic cleanup | — | **OP-033 Before Szop ever r** (part: the cleanup job's lock) | — |
+| PH-32 | | | |
 | [PH-33](../roadmap.md#ph-33-live-updates) Live updates | — | — | fan-out between instances through Redis publish/subscribe |
-| Candidates (no phase) | OP-033 | OP-033 (changed: its scaling parts moved to PH-37, PH-20 and PH-31; Multi-AZ added next to backups)<br>**OP-100 Isolate Szop from other apps in the account [new]** | — |
-
-**Order in Stage 3:** PH-12c, **PH-37**, PH-35, PH-13, PH-34, **PH-38**. **In Stage 4:** **PH-39** right before PH-20.
+| Candidates (no phase) | OP-033 Before Szop ever r | OP-033 Before Szop ever r (changed: its scaling parts moved to PH-37, PH-20 and PH-31; Multi-AZ added next to backups)<br>**OP-100 Isolate Szop from [new]** | — |
 
 ## Consequences
 
