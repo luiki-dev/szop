@@ -186,14 +186,14 @@ git commit -m "docs(adr): add ADR 0036 on scalability and isolation"
 **Files:**
 - Modify: `docs/roadmap.md`, `README.md`
 
-- [ ] **Step 1: Change `roadmap.md`** as the owner decided: new phases with the next free `PH-` number, changed entries (goal, delivers, depends on, owner steps, expected path), the stage tables and `## Contents`; PH-36's row with the PR link, set to ✅ in the last commit before the merge. Redraw the README's diagram by the rules of [ADR 0017](../../decisions/0017-readme-roadmap-diagram.md) and [ADR 0035](../../decisions/0035-wider-roadmap-diagram.md) (at most eleven phases a row), every symbol under its ID.
-- [ ] **Step 2: Check each new or changed phase's size** against ADR 0014, decision 6: about 3 to 8 tasks, at most one big new concept. Propose a split to the owner for any that breaks it, before going on.
-- [ ] **Step 3: GitHub:** an issue per new phase (label `phase`, its stage's milestone, `Order` between its neighbours, `Path`); the bodies of changed phases' issues from their entries; OP-033 split (its scaling parts to new open points under the phases that do them, or re-parented parts), OP-043 and OP-075 updated, each with a comment naming ADR 0036; new open points with the next free ID (`gh issue list --repo luiki-dev/szop --label open-point --state all --limit 500 --json title --jq '[.[].title | capture("^OP-(?<n>[0-9]+)").n | tonumber] | max'` plus one).
-- [ ] **Step 4: Link check, the account grep, commit and push.**
+- [x] **Step 1: Change `roadmap.md`** as the owner decided: new phases with the next free `PH-` number, changed entries (goal, delivers, depends on, owner steps, expected path), the stage tables and `## Contents`; PH-36's row with the PR link, set to ✅ in the last commit before the merge. Redraw the README's diagram by the rules of [ADR 0017](../../decisions/0017-readme-roadmap-diagram.md) and [ADR 0035](../../decisions/0035-wider-roadmap-diagram.md) (at most eleven phases a row), every symbol under its ID.
+- [x] **Step 2: Check each new or changed phase's size** against ADR 0014, decision 6: about 3 to 8 tasks, at most one big new concept. Propose a split to the owner for any that breaks it, before going on.
+- [x] **Step 3: GitHub:** an issue per new phase (label `phase`, its stage's milestone, `Order` between its neighbours, `Path`); the bodies of changed phases' issues from their entries; OP-033 split (its scaling parts to new open points under the phases that do them, or re-parented parts), OP-043 and OP-075 updated, each with a comment naming ADR 0036; new open points with the next free ID (`gh issue list --repo luiki-dev/szop --label open-point --state all --limit 500 --json title --jq '[.[].title | capture("^OP-(?<n>[0-9]+)").n | tonumber] | max'` plus one).
+- [x] **Step 4: Link check, the account grep, commit and push.**
 
 ```bash
 git commit -am "docs(roadmap): revisit the roadmap after the scalability analysis"
 git push
 ```
 
-- [ ] **Step 5: Open the PR** with the template filled in: `Closes #229`, a `Closes` line for each open point settled, and the list of every issue change. Title: `docs: analyse scalability and isolation (PH-36)`.
+- [x] **Step 5: Open the PR** with the template filled in: `Closes #229`, a `Closes` line for each open point settled, and the list of every issue change. Title: `docs: analyse scalability and isolation (PH-36)`.
