@@ -31,6 +31,7 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
 - [18. Tracking the work: issues, milestones and projects](#18-tracking-the-work-issues-milestones-and-projects)
 - [19. End-to-end tests with Playwright and axe](#19-end-to-end-tests-with-playwright-and-axe)
 - [20. Container images](#20-container-images)
+- [21. Running several instances](#21-running-several-instances)
 
 ## 1. The big picture
 
@@ -265,7 +266,7 @@ What PH-12b builds, from the outside in, with the reason for each piece. The exa
 
 1. **Build and push.** The Dockerfile builds the image; it is pushed to ECR, tagged with the commit hash. The `demo-up` workflow runs this step (if the image is missing) and the next one at the press of a button ([ADR 0010](../decisions/0010-ci-cd.md)).
 2. **Spin up.** `terraform apply` in `infra/demo` creates the network, security groups, load balancer, database and ECS service, requests its certificate, and points `szop.dzwoniec.com` at the load balancer. This takes 10–15 minutes, mostly for the database. (Today, before PH-12c, it creates the network, the load balancer, the certificate and the record, and the load balancer answers with a placeholder page.)
-3. **Start.** ECS pulls the image, reads the secrets and starts the task. The app runs its migrations, then starts serving. Once `/api/health` answers, the load balancer sends traffic to it.
+3. **Start.** ECS pulls the image, reads the secrets and starts the task. The app runs its migrations, then starts serving. Once its liveness route answers, the load balancer sends traffic to it; `/api/health`, the readiness check, tells `demo-up` that the app also reaches its database ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 4).
 4. **Use.** The browser opens `https://szop.dzwoniec.com`: the same app as locally, with the same one-origin setup.
 5. **Tear down.** `terraform destroy` removes everything created in step 2. The logs stay in CloudWatch for a week. If a session is forgotten, the nightly `demo-down` workflow destroys it ([ADR 0010](../decisions/0010-ci-cd.md)).
 
@@ -377,3 +378,19 @@ Most teams plan on the same site that holds their code. On GitHub that means thr
 - **Tags and digests.** An image is named like `node:24-trixie-slim`: a repository and a **tag**. A tag is a label the publisher can move to a newer image at any time, which is how security fixes reach you, and also how a build can silently change. A **digest** (`sha256:173f…`) is a hash of the image's content: it names exactly one image, forever. Szop writes both, `node:24-trixie-slim@sha256:…`: the tag tells a reader what it is, the digest guarantees which one, and Dependabot proposes a new digest as a pull request when the tag moves, so every change is reviewed and tested.
 - **PID 1 and signals.** Inside a container, the first process gets process identifier (PID) 1, the role an init system plays on a normal machine. When AWS stops a task, it sends that process `SIGTERM`, waits, and then kills it. Szop's API is PID 1 itself and handles `SIGTERM`: it stops accepting requests, finishes the ones in flight and closes the database pool before it exits. An extra init process (`tini`) is only needed when the app starts child processes, which Szop's does not.
 
+
+## 21. Running several instances
+
+A single copy of an app is simple: whatever it keeps in memory is the whole truth. Running several copies behind a load balancer, which Szop does from PH-37 ([ADR 0036](../decisions/0036-scalability-and-isolation.md)), is how services survive a crashed process and grow with their load, but every shortcut that relied on being alone has to be replaced. The concepts, in the order they bite:
+
+- **Scaling up and scaling out.** Up means a bigger machine; out means more copies of the same one. Out is what a load balancer and ECS make easy, and what this section is about. The database usually scales up, since it is the one place the copies share.
+- **Stateless processes.** A copy that keeps nothing another copy needs can be started, stopped or replaced at any time, and any copy can answer any request. Szop's sessions are in PostgreSQL for this reason: the load balancer sends a user's requests to any task.
+- **Shared state lives outside the process.** What must be counted or seen by all copies goes to a store they share: the rate-limit counters and the event bus to Redis, everything else to PostgreSQL. Memory is per copy: two copies counting a limit in memory each allow the full limit, so together they allow twice as much.
+- **Locks across processes.** "Only one of us at a time" needs a lock both copies can see. A PostgreSQL **advisory lock** is one: the copy that holds it migrates the database while the others wait, and the cleanup job's try-lock lets one copy clean up while the others skip the round. Without the lock, two copies starting together each run a pending migration, and a data migration runs twice.
+- **Fan-out.** A change handled by one copy must reach browsers connected to another. Each copy subscribes to a shared channel (Redis publish/subscribe) and forwards what it hears to its own WebSocket clients.
+- **Rolling deploys and two versions at once.** ECS starts the new copies, waits until they are healthy, then drains and stops the old ones, so the app stays up. For that minute, old and new code run on the same database, so a migration may only add what the new code needs and remove what the old code used in a later release: **expand, then contract**.
+- **Liveness and readiness.** Liveness asks "is this process alive?", and a dead one is replaced. Readiness asks "can it do its work right now?", the database included. Replacing live copies because the database is down only adds churn, so Szop's load balancer checks liveness, and `/api/health` reports readiness for people and for `demo-up`.
+- **Draining.** Before ECS stops a copy, the load balancer stops sending it new requests and lets open ones finish (the deregistration delay). Requests last milliseconds; a WebSocket lasts until its copy stops, so the browser reconnects to another copy and refetches what it may have missed.
+- **Connections are the database's scarcest resource.** Every copy opens a pool; copies times pool size, doubled during a deploy, must stay under the database's `max_connections`. Szop keeps pools small and counts the worst case.
+- **Autoscaling.** ECS Service Auto Scaling adds copies when a metric (average CPU, say) stays above its target and removes them when it falls, within a minimum and a maximum: **target tracking**. Scaling in is the harder half, since it stops copies that are serving.
+- **Testing for it.** Two copies inside one test process share their module-level state and hide exactly these bugs. Szop tests what goes through a shared store in one process, and runs two real containers behind a proxy for the rest.

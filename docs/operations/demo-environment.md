@@ -476,7 +476,7 @@ The commit is recorded as the `deployed_commit` output, so `demo-down` then dest
 
 ## Tearing down
 
-`infra/demo` is destroyed by the **`demo-down`** workflow, by hand and every night ([ADR 0010](../decisions/0010-ci-cd.md), decision 13). It is the safety net against a demo left running: a forgotten demo costs about $1.70 a day. A real destroy removes everything [Spinning up](#spinning-up) created, in dependency order: the DNS records, the listeners and the load balancer, the certificate, the security group, then the gateway, the subnets and the VPC. It reads the state, so it removes exactly what the last apply recorded. On a quiet night there is nothing to destroy, which still proves that the workflow, the role, the state bucket and the lock all work.
+`infra/demo` is destroyed by the **`demo-down`** workflow, by hand and every night ([ADR 0010](../decisions/0010-ci-cd.md), decision 13). It is the safety net against a demo left running: a forgotten demo costs about $1.90 a day once PH-12c adds the task and the database, about $2.80 once PH-37 and PH-39 add a second task and Redis ([ADR 0036](../decisions/0036-scalability-and-isolation.md), costs). A real destroy removes everything [Spinning up](#spinning-up) created, in dependency order: the DNS records, the listeners and the load balancer, the certificate, the security group, then the gateway, the subnets and the VPC. It reads the state, so it removes exactly what the last apply recorded. On a quiet night there is nothing to destroy, which still proves that the workflow, the role, the state bucket and the lock all work.
 
 ### With the button
 
