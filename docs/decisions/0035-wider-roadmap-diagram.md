@@ -1,6 +1,6 @@
 # ADR 0035 — A wider roadmap diagram
 
-- **Status:** ✅ Accepted
+- **Status:** ✅ Accepted — decision 1 refined by [ADR 0037](0037-twelve-phases-a-diagram-row.md) (a row holds at most twelve phases, so the diagram is about 99 characters wide)
 - **Date:** 2026-10-19
 - **Refines:** [ADR 0017](0017-readme-roadmap-diagram.md), decision 2 (a row of the README's roadmap diagram holds at most nine phases, so the diagram stays about 75 characters wide)
 
@@ -12,7 +12,7 @@
 
 | # | Topic | Options considered | Decision and reasoning |
 |---|-------|--------------------|------------------------|
-| 1 | How many phases a row holds | Nine, wrapping Stage 3 onto a second row; eleven, 16 characters wider | **At most eleven, so the diagram is about 91 characters wide.** Stage 3's ten phases fit on one row, and so does every stage but Stage 4. The owner's choice. The wider block still fits GitHub's README column on a desktop; on a phone it scrolls sideways, as the narrower one did. *(Claude's call:)* a stage fills a row before continuing on the next, as before, so Stage 4's eighteen phases are eleven and seven. The rest of [ADR 0017](0017-readme-roadmap-diagram.md), decision 2 stays: the road snakes, the bends are three lines tall, and it runs from `START` to `DONE`. |
+| 1 | How many phases a row holds | Nine, wrapping Stage 3 onto a second row; eleven, 16 characters wider | **At most eleven, so the diagram is about 91 characters wide.** Stage 3's ten phases fit on one row, and so does every stage but Stage 4. The owner's choice. The wider block still fits GitHub's README column on a desktop; on a phone it scrolls sideways, as the narrower one did. *(Claude's call:)* a stage fills a row before continuing on the next, as before, so Stage 4's eighteen phases are eleven and seven. The rest of [ADR 0017](0017-readme-roadmap-diagram.md), decision 2 stays: the road snakes, the bends are three lines tall, and it runs from `START` to `DONE`. <br>✏️ **Refined by [ADR 0037](0037-twelve-phases-a-diagram-row.md), decision 1:** a row holds at most twelve phases, so the diagram is about 99 characters wide. |
 
 ## Consequences
 

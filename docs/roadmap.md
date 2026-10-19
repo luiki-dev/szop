@@ -24,9 +24,11 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-12b Network and the demo-up button](#ph-12b-network-and-the-demo-up-button)
   - [PH-36 Scalability and isolation analysis](#ph-36-scalability-and-isolation-analysis)
   - [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds)
+  - [PH-37 Two tasks](#ph-37-two-tasks)
   - [PH-35 Security scanners](#ph-35-security-scanners)
   - [PH-13 Releases](#ph-13-releases)
   - [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status)
+  - [PH-38 Autoscaling](#ph-38-autoscaling)
 - [Stage 4: MVP](#stage-4-mvp)
   - [PH-14 App shell and design system](#ph-14-app-shell-and-design-system)
   - [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only)
@@ -34,6 +36,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-17 List items](#ph-17-list-items)
   - [PH-18 Registration and login](#ph-18-registration-and-login)
   - [PH-19 Guest data on login](#ph-19-guest-data-on-login)
+  - [PH-39 Redis in the stack](#ph-39-redis-in-the-stack)
   - [PH-20 Quotas and rate limits](#ph-20-quotas-and-rate-limits)
   - [PH-21 Shop in a store](#ph-21-shop-in-a-store)
   - [PH-22 Offline state](#ph-22-offline-state)
@@ -187,9 +190,11 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-12b Network and the demo-up button](#ph-12b-network-and-the-demo-up-button) | ✅ Done | [Spec](superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md) | [Plan](superpowers/plans/2026-10-18-PH-12b-network-and-the-demo-up-button.md) | [#227](https://github.com/luiki-dev/szop/pull/227) | [#220](https://github.com/luiki-dev/szop/issues/220) |
 | [PH-36 Scalability and isolation analysis](#ph-36-scalability-and-isolation-analysis) | 🚧 In progress | [Spec](superpowers/specs/2026-10-19-PH-36-scalability-and-isolation-analysis-design.md) | [Plan](superpowers/plans/2026-10-19-PH-36-scalability-and-isolation-analysis.md) | — | [#229](https://github.com/luiki-dev/szop/issues/229) |
 | [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds) | ⬜ Not started | — | — | — | [#221](https://github.com/luiki-dev/szop/issues/221) |
+| [PH-37 Two tasks](#ph-37-two-tasks) | ⬜ Not started | — | — | — | [#233](https://github.com/luiki-dev/szop/issues/233) |
 | [PH-35 Security scanners](#ph-35-security-scanners) | ⬜ Not started | — | — | — | [#213](https://github.com/luiki-dev/szop/issues/213) |
 | [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
 | [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status) | ⬜ Not started | — | — | — | [#205](https://github.com/luiki-dev/szop/issues/205) |
+| [PH-38 Autoscaling](#ph-38-autoscaling) | ⬜ Not started | — | — | — | [#234](https://github.com/luiki-dev/szop/issues/234) |
 
 ### PH-09 AWS account and Terraform bootstrap
 
@@ -249,13 +254,22 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ### PH-12c App on ECS and RDS
 
-- **Goal:** pressing `demo-up` on a branch builds that commit's image and serves the walking skeleton at `szop.dzwoniec.com`. Redeploys are safe for the single instance, and `demo-down` removes everything again.
-- **Delivers:** in `infra/demo`, the service on ECS and RDS, in place of the placeholder page ([ADR 0008](decisions/0008-hosting.md)); the app's task execution role and task role in `infra/base`; `szop-ci-deploy` widened for the resources it adds ([ADR 0032](decisions/0032-ci-access-and-teardown-details.md), decision 3), and `szop-ci-plan` denied the data reads they open, such as RDS log files; `demo-up`'s image job, which builds and pushes the commit's image ([ADR 0010](decisions/0010-ci-cd.md), decisions 10 and 11), and its wait for `/api/health` in place of the placeholder page, with the timeouts revisited ([ADR 0034](decisions/0034-network-and-demo-up-details.md)); safe redeploys; the TLS connection to RDS; the runbook's section on debugging.
+- **Goal:** pressing `demo-up` on a branch builds that commit's image and serves the walking skeleton at `szop.dzwoniec.com`. Redeploys are safe with the old and the new version side by side, and `demo-down` removes everything again.
+- **Delivers:** in `infra/demo`, the service on ECS and RDS, in place of the placeholder page ([ADR 0008](decisions/0008-hosting.md)); the app's task execution role and task role in `infra/base`; `szop-ci-deploy` widened for the resources it adds ([ADR 0032](decisions/0032-ci-access-and-teardown-details.md), decision 3), and `szop-ci-plan` denied the data reads they open, such as RDS log files; `demo-up`'s image job, which builds and pushes the commit's image ([ADR 0010](decisions/0010-ci-cd.md), decisions 10 and 11), and its wait for `/api/health` in place of the placeholder page, with the timeouts revisited ([ADR 0034](decisions/0034-network-and-demo-up-details.md)); safe redeploys: rolling at a minimum of 100% and a maximum of 200% healthy, with the circuit breaker and no rollback, a 30-second deregistration delay, the load balancer checking a liveness route while `/api/health` stays the readiness check, and the expand-then-contract rule for migrations in `drizzle.md` ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 3 to 5); the TLS connection to RDS; the runbook's section on debugging.
 - **Split from:** PH-12 First deploy, now retired (see [PH-12a](#ph-12a-app-ready-for-the-cloud)).
 - **Depends on:** —
 - **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, check the demo (including that the log shows the owner's real IP address, and a Lighthouse run), then press `demo-down`.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#221](https://github.com/luiki-dev/szop/issues/221).
+
+### PH-37 Two tasks
+
+- **Goal:** the demo runs two tasks, one in each availability zone. They migrate the database one at a time, a request does not depend on which task answers it, and a deploy or a stopped task loses no request. Two instances run locally and in CI too, so a problem between tasks shows up there first.
+- **Delivers:** a PostgreSQL advisory lock around the migration check and the migration, with a test of two migrators at once; a pool of at most 5 connections per task and the connection budget, checked against `SHOW max_connections` on the demo; request IDs unique across tasks; the ECS service's desired count at 2; a Compose profile `scale` with two app containers behind nginx, and its check script in CI's `docker` job; the stack overview's section on running several instances brought in line ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 1, 2, 10, 11 and 14).
+- **Depends on:** PH-12c.
+- **Owner steps:** —
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#233](https://github.com/luiki-dev/szop/issues/233).
 
 ### PH-35 Security scanners
 
@@ -284,6 +298,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#205](https://github.com/luiki-dev/szop/issues/205).
 
+### PH-38 Autoscaling
+
+- **Goal:** the demo's service scales between two and four tasks with its load, and a short load test shows it scaling out and back in.
+- **Delivers:** ECS Service Auto Scaling with target tracking (on average CPU, or on requests per target, as the brainstorm decides) between two and four tasks; the deploy role's permissions for Application Auto Scaling and the alarms it creates; a load script run from the owner's machine; the runbook's section on watching a scale-out; the connection budget checked again ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 11 and 13).
+- **Depends on:** PH-37.
+- **Owner steps:** —
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#234](https://github.com/luiki-dev/szop/issues/234).
+
 ## Stage 4: MVP
 
 **Exit:** every 🎯 requirement is delivered and meets [NFR-1](requirements/functional-requirements.md#nfr-1) to [NFR-3](requirements/functional-requirements.md#nfr-3), every MVP use case has a passing E2E journey, and `1.0.0` is released: a `Release-As: 1.0.0` footer reaches `main` and the owner merges the release PR ([ADR 0009](decisions/0009-git-workflow.md)).
@@ -296,6 +319,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-17 List items](#ph-17-list-items) | ⬜ Not started | — | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
 | [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
+| [PH-39 Redis in the stack](#ph-39-redis-in-the-stack) | ⬜ Not started | — | — | — | [#235](https://github.com/luiki-dev/szop/issues/235) |
 | [PH-20 Quotas and rate limits](#ph-20-quotas-and-rate-limits) | ⬜ Not started | — | — | — | [#49](https://github.com/luiki-dev/szop/issues/49) |
 | [PH-21 Shop in a store](#ph-21-shop-in-a-store) | ⬜ Not started | — | — | — | [#50](https://github.com/luiki-dev/szop/issues/50) |
 | [PH-22 Offline state](#ph-22-offline-state) | ⬜ Not started | — | — | — | [#51](https://github.com/luiki-dev/szop/issues/51) |
@@ -363,11 +387,20 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#48](https://github.com/luiki-dev/szop/issues/48).
 
+### PH-39 Redis in the stack
+
+- **Goal:** Redis runs next to PostgreSQL wherever Szop runs: one ElastiCache node in the demo, a container locally and in CI. The API connects to it and reports it in `/api/health`, ready for the rate limits and the event bus.
+- **Delivers:** ElastiCache for Redis OSS, one `cache.t4g.micro` node in `infra/demo`'s private subnets, with encryption in transit, an AUTH token and a security group open only to the tasks; the deploy and plan roles' permissions for it; Redis in `compose.yaml` and in CI; the API's Redis client and its settings, and Redis in the readiness check; the threat model's second data store ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 6).
+- **Depends on:** PH-37.
+- **Owner steps:** —
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#235](https://github.com/luiki-dev/szop/issues/235).
+
 ### PH-20 Quotas and rate limits
 
 - **Goal:** a workspace cannot outgrow its quotas, and a script cannot flood the API, guest creation, registration or login. A user who hits a limit is told which one and what to do about it.
-- **Delivers:** [LIM-1](requirements/functional-requirements.md#lim-1) (part: lists and items), [LIM-3](requirements/functional-requirements.md#lim-3), [LIM-4](requirements/functional-requirements.md#lim-4) (part: everything except password reset); `@fastify/rate-limit`. Later phases add their own quotas and limits.
-- **Depends on:** —
+- **Delivers:** [LIM-1](requirements/functional-requirements.md#lim-1) (part: lists and items), [LIM-3](requirements/functional-requirements.md#lim-3), [LIM-4](requirements/functional-requirements.md#lim-4) (part: everything except password reset); `@fastify/rate-limit`; both limiters counting in Redis, so a limit holds across tasks, with a test across two instances ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 8). Later phases add their own quotas and limits.
+- **Depends on:** PH-39.
 - **Owner steps:** none.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#49](https://github.com/luiki-dev/szop/issues/49).
@@ -465,7 +498,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-31 Automatic cleanup
 
 - **Goal:** guest workspaces and unverified accounts are deleted on schedule, and a guest who returns after theirs was deleted understands what happened.
-- **Delivers:** [ACC-7](requirements/functional-requirements.md#acc-7), [ACC-8](requirements/functional-requirements.md#acc-8); the scheduled cleanup inside the API, tested with a controllable clock ([ADR 0007](decisions/0007-testing-strategy.md)).
+- **Delivers:** [ACC-7](requirements/functional-requirements.md#acc-7), [ACC-8](requirements/functional-requirements.md#acc-8); the scheduled cleanup inside the API, tested with a controllable clock ([ADR 0007](decisions/0007-testing-strategy.md)); each run takes a PostgreSQL try-lock, so one task cleans up per round, with a test of two runs at once ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 9).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -494,7 +527,7 @@ Both phases are rough: each is split into smaller phases once the MVP is done ([
 ### PH-33 Live updates
 
 - **Goal:** everyone viewing a shared list sees the others' changes within a few seconds, without reloading.
-- **Delivers:** [SYN-1](requirements/functional-requirements.md#syn-1), [SYN-2](requirements/functional-requirements.md#syn-2); completes [UC-10](requirements/functional-requirements.md#uc-10-share-with-a-household-member) and [UC-11](requirements/functional-requirements.md#uc-11-hand-off-shopping-to-someone-without-an-account).
+- **Delivers:** [SYN-1](requirements/functional-requirements.md#syn-1), [SYN-2](requirements/functional-requirements.md#syn-2); completes [UC-10](requirements/functional-requirements.md#uc-10-share-with-a-household-member) and [UC-11](requirements/functional-requirements.md#uc-11-hand-off-shopping-to-someone-without-an-account); the event bus over Redis publish/subscribe, the client's reconnect and refetch, and a test across two instances ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 5 and 7).
 - **Depends on:** —
 - **Owner steps:** none known yet.
 - **Expected path:** split into several phases first.
@@ -509,4 +542,5 @@ Optional technical phases that change no behavior, in no particular order. A can
 | Load testing | k6 runs against the demo environment | [OP-029](https://github.com/luiki-dev/szop/issues/114) |
 | Supply-chain provenance | Signed attestations, a software bill of materials (SBOM) and an OpenSSF Scorecard | [OP-030](https://github.com/luiki-dev/szop/issues/115) |
 | Storybook | A workshop and documentation for the components; to look at again after the first few feature phases | [OP-060](https://github.com/luiki-dev/szop/issues/117) |
-| Always-on readiness | What an always-on deployment would need: backups, a content delivery network (CDN) with a web application firewall, alarms, SES production access, a privacy notice and more; only if one is ever planned | [OP-033](https://github.com/luiki-dev/szop/issues/116) |
+| Always-on readiness | What an always-on deployment would need: backups and a Multi-AZ database, a content delivery network (CDN) with a web application firewall, alarms, SES production access, a privacy notice and more; only if one is ever planned | [OP-033](https://github.com/luiki-dev/szop/issues/116) |
+| Isolation from other apps | What a second app in the account would need: a stack of its own for the shared pieces (the hosted zone and its domain-wide records, the OIDC provider, the budget), a budget per app, SES identities per app, or an account per app | [OP-100](https://github.com/luiki-dev/szop/issues/236) |
