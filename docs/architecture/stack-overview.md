@@ -266,7 +266,7 @@ What PH-12b builds, from the outside in, with the reason for each piece. The exa
 
 1. **Build and push.** The Dockerfile builds the image; it is pushed to ECR, tagged with the commit hash. The `demo-up` workflow runs this step (if the image is missing) and the next one at the press of a button ([ADR 0010](../decisions/0010-ci-cd.md)).
 2. **Spin up.** `terraform apply` in `infra/demo` creates the network, security groups, load balancer, database and ECS service, requests its certificate, and points `szop.dzwoniec.com` at the load balancer. This takes 10–15 minutes, mostly for the database. (Today, before PH-12c, it creates the network, the load balancer, the certificate and the record, and the load balancer answers with a placeholder page.)
-3. **Start.** ECS pulls the image, reads the secrets and starts the task. The app runs its migrations, then starts serving. Once `/api/health` answers, the load balancer sends traffic to it.
+3. **Start.** ECS pulls the image, reads the secrets and starts the task. The app runs its migrations, then starts serving. Once its liveness route answers, the load balancer sends traffic to it; `/api/health`, the readiness check, tells `demo-up` that the app also reaches its database ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 4).
 4. **Use.** The browser opens `https://szop.dzwoniec.com`: the same app as locally, with the same one-origin setup.
 5. **Tear down.** `terraform destroy` removes everything created in step 2. The logs stay in CloudWatch for a week. If a session is forgotten, the nightly `demo-down` workflow destroys it ([ADR 0010](../decisions/0010-ci-cd.md)).
 

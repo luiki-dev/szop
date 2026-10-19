@@ -259,7 +259,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Split from:** PH-12 First deploy, now retired (see [PH-12a](#ph-12a-app-ready-for-the-cloud)).
 - **Depends on:** —
 - **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, check the demo (including that the log shows the owner's real IP address, and a Lighthouse run), then press `demo-down`.
-- **Expected path:** full.
+- **Expected path:** full. ADR 0036 added to an entry already near the upper bound of a phase's size, so its brainstorm checks first whether it needs a split.
 - **Open points:** the sub-issues of [#221](https://github.com/luiki-dev/szop/issues/221).
 
 ### PH-37 Two tasks
@@ -267,7 +267,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Goal:** the demo runs two tasks, one in each availability zone. They migrate the database one at a time, a request does not depend on which task answers it, and a deploy or a stopped task loses no request. Two instances run locally and in CI too, so a problem between tasks shows up there first.
 - **Delivers:** a PostgreSQL advisory lock around the migration check and the migration, with a test of two migrators at once; a pool of at most 5 connections per task and the connection budget, checked against `SHOW max_connections` on the demo; request IDs unique across tasks; the ECS service's desired count at 2; a Compose profile `scale` with two app containers behind nginx, and its check script in CI's `docker` job; the stack overview's section on running several instances brought in line ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 1, 2, 10, 11 and 14).
 - **Depends on:** PH-12c.
-- **Owner steps:** —
+- **Owner steps:** press `demo-up` on the branch, check that requests reach both tasks, then press `demo-down`.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#233](https://github.com/luiki-dev/szop/issues/233).
 
@@ -303,7 +303,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Goal:** the demo's service scales between two and four tasks with its load, and a short load test shows it scaling out and back in.
 - **Delivers:** ECS Service Auto Scaling with target tracking (on average CPU, or on requests per target, as the brainstorm decides) between two and four tasks; the deploy role's permissions for Application Auto Scaling and the alarms it creates; a load script run from the owner's machine; the runbook's section on watching a scale-out; the connection budget checked again ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 11 and 13).
 - **Depends on:** PH-37.
-- **Owner steps:** —
+- **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, run the load test and watch the service scale out and back in, then press `demo-down`.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#234](https://github.com/luiki-dev/szop/issues/234).
 
@@ -392,7 +392,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Goal:** Redis runs next to PostgreSQL wherever Szop runs: one ElastiCache node in the demo, a container locally and in CI. The API connects to it and reports it in `/api/health`, ready for the rate limits and the event bus.
 - **Delivers:** ElastiCache for Redis OSS, one `cache.t4g.micro` node in `infra/demo`'s private subnets, with encryption in transit, an AUTH token and a security group open only to the tasks; the deploy and plan roles' permissions for it; Redis in `compose.yaml` and in CI; the API's Redis client and its settings, and Redis in the readiness check; the threat model's second data store ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 6).
 - **Depends on:** PH-37.
-- **Owner steps:** —
+- **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, check that `/api/health` reports Redis, then press `demo-down`.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#235](https://github.com/luiki-dev/szop/issues/235).
 

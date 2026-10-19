@@ -1,6 +1,6 @@
 # ADR 0002 — Technical architecture and technology choices
 
-- **Status:** ✅ Accepted — decision 8 refined by [ADR 0003](0003-abuse-protection.md); decisions 7 and 16 refined by [ADR 0012](0012-security-baseline.md), decisions 3–7 (the cookie's attributes and protection against cross-site request forgery; every referenced ID resolved within the workspace, through an access layer and scoped repositories, backed by composite foreign keys); decision 10 completed by [ADR 0021](0021-spa-skeleton-details.md) (React Router's data router)
+- **Status:** ✅ Accepted — decision 8 refined by [ADR 0003](0003-abuse-protection.md); decisions 7 and 16 refined by [ADR 0012](0012-security-baseline.md), decisions 3–7 (the cookie's attributes and protection against cross-site request forgery; every referenced ID resolved within the workspace, through an access layer and scoped repositories, backed by composite foreign keys); decision 10 completed by [ADR 0021](0021-spa-skeleton-details.md) (React Router's data router); decision 18 completed by [ADR 0036](0036-scalability-and-isolation.md) (the shared channel is Redis publish/subscribe, since Szop runs several tasks)
 - **Date:** 2026-09-22
 - **Supersedes:** decision 1 of [ADR 0001](0001-functional-requirements-scope.md) (where guest data lives)
 
@@ -36,7 +36,7 @@ The resulting design is described in [architecture.md](../architecture/architect
 | 15 | Backend code structure | Framework-imposed structure; our own layering | **Feature modules with routes / service / repository layers**, dependencies passed explicitly, no dependency-injection container. |
 | 16 | Access control | Per-query scoping; central list-access check | **Every query scoped by the session's workspace**; with sharing, one central `requireListAccess` check. "Not found" and "no access" both return 404. <br>✏️ **Refined by [ADR 0012](0012-security-baseline.md), decisions 3–6:** every referenced ID resolved within the workspace, through an access layer and scoped repositories, backed by composite foreign keys. |
 | 17 | Money representation | Floating point; decimal; integer minor units | **Integer minor units** (cents, grosze) to avoid rounding errors. |
-| 18 | Live updates mechanism (Later) | WebSocket with invalidate-and-refetch; WebSocket pushing data; polling | **WebSocket + in-process event bus; clients refetch the changed list.** Simple and correct; pushing the data itself or a shared channel for several server processes (PostgreSQL `LISTEN/NOTIFY`, Redis) come only if needed. |
+| 18 | Live updates mechanism (Later) | WebSocket with invalidate-and-refetch; WebSocket pushing data; polling | **WebSocket + in-process event bus; clients refetch the changed list.** Simple and correct; pushing the data itself or a shared channel for several server processes (PostgreSQL `LISTEN/NOTIFY`, Redis) come only if needed. <br>🧩 **Completed by [ADR 0036](0036-scalability-and-isolation.md), decision 7:** the bus is backed by Redis publish/subscribe, so an event reaches the subscribers on every task. |
 | 19 | Offline behavior | Block changes; queue changes | **Block** changes while offline and show a banner ([NET-1](../requirements/functional-requirements.md#net-1)); queueing is the "offline check-off" future extension. |
 
 ## Consequences

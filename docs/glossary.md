@@ -100,6 +100,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **SVG** | Scalable Vector Graphics | An image format describing shapes rather than pixels, so it stays sharp at any size. Lucide's icons and Szop's raccoon are SVG. |
 | **TDD** | Test-Driven Development | Writing a failing test first, then the code that makes it pass, then tidying up ("red, green, refactor"). Szop uses it for domain rules, services and API routes (see ADR 0007). |
 | **TLS** | Transport Layer Security | The encryption behind HTTPS. |
+| **UUID** | Universally Unique Identifier | A 128-bit random identifier, such as `3f2c…`, practically never repeated. Szop's request IDs fall back to one where the load balancer sent no trace ID (ADR 0036). |
 | **vCPU** | Virtual CPU | A share of a processor as cloud providers sell it. Szop's demo task gets a quarter of one. |
 | **VPC** | Virtual Private Cloud | A private network inside AWS, divided into subnets. |
 | **VPS** | Virtual Private Server | A rented virtual machine you manage yourself (Hetzner, DigitalOcean). Considered, not used (see ADR 0008). |
