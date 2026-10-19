@@ -138,11 +138,11 @@ git commit -am "docs(audit): analyse the database, autoscaling, testing and the 
 **Interfaces:**
 - Consumes: the costs table from Task 2.
 
-- [ ] **Step 1: Stop: ask the owner to sign in** with `aws sso login --profile szop`. If they cannot, use AWS's published defaults for I5, each marked "default, not read from the account".
-- [ ] **Step 2: Read the quotas for I5** with `aws service-quotas get-service-quota` (VPCs per region, Elastic IP addresses, application load balancers, Fargate On-Demand vCPU) and `aws sesv2 get-account --profile szop --region eu-central-1`; keep the values, never the IDs.
-- [ ] **Step 3: Read `infra/` and `.github/workflows/`** for I1–I4: account-wide resources and who creates them, each role's reach (`ReadOnlyAccess`, the deploy role's tag conditions and its unconditioned actions, the trust policies), names and tags of every resource, and everything hard-coded to the account or region (`grep -rn` for the region, account-shaped numbers, bucket names).
-- [ ] **Step 4: Write I1–I7** from the spec's Part 2 with the five parts each, each ending with what changes and when: before PH-12c, in PH-34, or when a second app arrives. I6 covers the hosted zone's name servers on recreation and the shared front page owned by neither app; I7 covers one load balancer shared by both apps and its coupling.
-- [ ] **Step 5: Link check and commit**, as in Task 1, step 7.
+- [x] **Step 1: Stop: ask the owner to sign in** with `aws sso login --profile szop`. If they cannot, use AWS's published defaults for I5, each marked "default, not read from the account".
+- [x] **Step 2: Read the quotas for I5** with `aws service-quotas get-service-quota` (VPCs per region, Elastic IP addresses, application load balancers, Fargate On-Demand vCPU) and `aws sesv2 get-account --profile szop --region eu-central-1`; keep the values, never the IDs.
+- [x] **Step 3: Read `infra/` and `.github/workflows/`** for I1–I4: account-wide resources and who creates them, each role's reach (`ReadOnlyAccess`, the deploy role's tag conditions and its unconditioned actions, the trust policies), names and tags of every resource, and everything hard-coded to the account or region (`grep -rn` for the region, account-shaped numbers, bucket names).
+- [x] **Step 4: Write I1–I7** from the spec's Part 2 with the five parts each, each ending with what changes and when: before PH-12c, in PH-34, or when a second app arrives. I6 covers the hosted zone's name servers on recreation and the shared front page owned by neither app; I7 covers one load balancer shared by both apps and its coupling.
+- [x] **Step 5: Link check and commit**, as in Task 1, step 7.
 
 ```bash
 git commit -am "docs(audit): analyse Szop's isolation in the AWS account"

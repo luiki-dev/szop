@@ -294,35 +294,154 @@ Likely at every deploy that starts two tasks at once, and at every scale-out tha
 
 ## Part 2: isolation
 
-*Written in Task 3.*
+What lets Szop and a second app each go up and down on its own, and each move to another AWS account on its own. A second app would sit next to Szop much like it: its own subdomain of `dzwoniec.com`, an on-demand demo first. The apps share nothing but the apex domain, unless sharing saves money and each app still runs without the other; a shared piece is created when the first app needs it and removed when the last one stops using it (the spec's decision 5). Read from `infra/` and `.github/workflows/` on the branch, and from the account with read-only calls on 2026-10-19.
 
 ### I1 Account-wide pieces
 
-*Written in Task 3.*
+**Today.** ✅ Built. Szop's stacks own five things that are one per account or one per domain:
+
+| Piece | Where | One per |
+|---|---|---|
+| GitHub's OIDC provider, `token.actions.githubusercontent.com` | `infra/base/github_oidc.tf` | account and URL: a second `CreateOpenIDConnectProvider` for the same URL fails |
+| The budget `szop-monthly` ($5 forecast, $10 actual, to the owner) | `infra/bootstrap/budgets.tf` | — but it has no filter, so it counts **the whole account's** costs |
+| The hosted zone `dzwoniec.com` and its domain-wide records: CAA (only Amazon's authority issues certificates), null MX, SPF (`v=spf1 -all`) and DMARC (`p=reject`) | `infra/base/dns.tf`, `email.tf` | domain |
+| SES's sender identity for the whole domain, and its three DKIM records ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 7) | `infra/base/email.tf` | domain |
+| The state bucket `szop-tfstate-ntrtcr` | `infra/bootstrap/state_bucket.tf` | Szop (bucket names are global) |
+
+Everything else (the CI roles, the registry `szop`, the log group `/szop/app`, the parameter `/szop/better-auth-secret`, the whole demo) is Szop's alone.
+
+**With a second app.**
+
+- **The OIDC provider:** the second app's roles must trust the one Szop created; if Szop's base were ever destroyed or moved, the other app's CI would lose AWS.
+- **The budget:** an alert says the account went over, not which app did.
+- **The zone and its domain-wide records:** the second app needs its records in a zone that Szop's base owns. A second TXT value on the apex has to join `apex_txt`'s list, since Route 53 keeps one record set per name and type.
+- **SES:** both apps would send as the domain, with one set of DKIM keys and one sandbox quota (I5).
+- **The state bucket:** the second app needs its own, or a prefix in Szop's, which couples their access.
+
+**Options.**
+
+1. **A shared stack for the shared pieces:** a fourth Terraform root module (`infra/shared`, tagged `project = dzwoniec`, with its own state) owning the zone, the domain-wide records, the OIDC provider and the account-wide budget. Szop's base then looks them up by name, as `infra/demo` already finds the zone ([ADR 0034](../decisions/0034-network-and-demo-up-details.md), decision 1). Moved with Terraform's `removed` and `import` blocks, so nothing is recreated. **Rewires** Szop's bootstrap and base. Size: a new module; `infra/base` and `bootstrap` lose those resources and gain lookups; the runbook and the CI roles' state permissions change. Refines [ADR 0008](../decisions/0008-hosting.md), decision 6 and ADR 0030. X $0, Y $0. Teaches: ownership of shared infrastructure, and moving resources between states.
+2. **A budget per app**, filtered on `project = szop`, next to the account-wide one. The cost allocation tags `project` and `group` are already active (read 2026-10-19). **Adds a layer.** Size: one resource in `bootstrap`. X $0, Y: AWS Budgets' price for a second budget, at most cents a month *(unconfirmed: check the Budgets pricing page in that phase)*.
+3. **SES identities per app** (`szop.dzwoniec.com` rather than the domain). **Rewires** ADR 0030, decision 7, before PH-18 picks a sender address. X $0, Y $0.
+4. **Keep everything in Szop:** a second app looks the pieces up. **No change**, but Szop becomes the owner of everything shared, against "share nothing but the domain".
+
+**Recommendation.** Option 1 for the zone, the domain-wide records and the OIDC provider, together with the shared front page (I6), which needs the same home. Option 2 with it. Option 3 when a second app actually sends mail; until then the domain identity is the simpler one, and it moves to the shared stack with option 1.
+
+**When.** [PH-34](../roadmap.md#ph-34-landing-page-and-demo-status), which builds the shared front page and so needs the shared stack anyway. Option 3 when a second app arrives.
 
 ### I2 Reach
 
-*Written in Task 3.*
+**Today.** ✅ Built.
+
+- **`szop-ci-plan`** has AWS's `ReadOnlyAccess` on the whole account. It is denied secret values, log contents, billing and contacts, and S3 objects outside Szop's state ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md)). Only Szop's pull requests can assume it.
+- **`szop-ci-deploy`** can create only what carries both `project = szop` and `group = demo`, and change or delete only what already does, in `eu-central-1`. It may change only the `szop` and `_….szop` DNS records ([ADR 0034](../decisions/0034-network-and-demo-up-details.md), decision 8; the record names in `infra/base/ci_roles.tf`). Its `Describe` and `List` reads are account-wide.
+- **Both roles' trust** names Szop's repository by its immutable IDs.
+
+**With a second app.** The deploy role cannot touch the other app's resources: their `project` tag differs, and their DNS names are outside its list. The plan role can read the other app's configuration, though not its secrets, logs or objects, and the other app's plan role would read Szop's alike. That is configuration, not data, and it is visible only to the owner's own pull requests.
+
+**Options.**
+
+1. **Accept it, and say it in the threat model.** **No change.** `ReadOnlyAccess` cannot be narrowed by tag in general (most `Describe` and `List` calls take no tag conditions).
+2. **One account per app** (I4, option 2) removes the overlap entirely.
+
+**Recommendation.** Option 1 now. Option 2 if a second app holds anything sensitive.
+
+**When.** The threat model's line in this phase's PR.
 
 ### I3 Names and tags
 
-*Written in Task 3.*
+**Today.** ✅ Built. Every resource carries `project = szop` and its group (`bootstrap`, `base`, `demo`) through each module's provider default tags ([ADR 0008](../decisions/0008-hosting.md), decision 26). Names start with `szop`: `szop-demo` (VPC, load balancer), `szop-demo-public-a`, `szop-demo-alb`, `szop-ci-plan`, `szop-ci-deploy-demo-network`, `szop-monthly`, `szop-tfstate-ntrtcr`, the registry `szop`, the log group `/szop/app` and the parameter `/szop/…`. DNS records carry no tags; the Tag Editor never lists them. `project` and `group` are active cost allocation tags.
+
+**With a second app.** Each app's resources, costs and IAM conditions can be told apart by `project`. The exceptions are the shared pieces of I1, tagged `project = szop` today, which would wrongly count as Szop's.
+
+**Options.**
+
+1. **Keep the scheme;** retag the shared pieces `project = dzwoniec` when they move (I1, option 1); PH-12c names and tags ECS and RDS like the rest (`szop-demo` and the provider's tags). **No change.**
+
+**Recommendation.** Option 1.
+
+**When.** PH-12c follows the scheme, which needs no decision; the retagging comes with I1's move in PH-34.
 
 ### I4 Moving to another account
 
-*Written in Task 3.*
+**Today.** ✅ Built.
+
+- **Account IDs:** none in `infra/` or the workflows. The workflows find their roles through the GitHub variables `AWS_PLAN_ROLE_ARN` and `AWS_DEPLOY_ROLE_ARN`.
+- **The region:** `eu-central-1` is written in about 25 places: each module's provider and backend, the deploy role's conditions, the demo's availability zones, and the three workflows.
+- **The state bucket's name** is written in the three backends and the roles' policies.
+
+**With a second app**, or to give Szop its own account: in the same region, Szop moves by applying bootstrap, base and demo in the new account and updating the two GitHub variables. The state bucket needs a new name, since S3 names are global and the old one stays taken until it is deleted. Also on the list:
+
+- **SES:** a new identity, with new DKIM records, and production access requested again (it is per account and region).
+- **The domain:** either transferred between the accounts, or left where it is, with the zone delegating `szop.dzwoniec.com` to a zone in Szop's new account.
+- **Another region:** every region literal changes.
+
+**Options.**
+
+1. **Nothing now;** the runbook gains a "moving to another account" section when a move is planned. **No change.**
+2. **One account per app** under AWS Organizations, the domain and the shared stack in their own account, and each app's subdomain delegated to a zone in the app's account. This is AWS's recommended isolation boundary: separate billing, quotas, IAM and blast radius. **Rewires** where everything lives. Size: a phase of its own (the organisation, the accounts, IAM Identity Center access, the delegation, moving Szop). X $0. Y: each delegated zone adds $0.50 a month. Teaches: multi-account AWS.
+3. **One `region` local per module.** Pointless while Szop stays in Frankfurt. **No change.**
+
+**Recommendation.** Option 1, keeping option 2 open: I1's shared stack is what option 2 would build on, in its own account.
+
+**When.** When a second app becomes more than a demo.
 
 ### I5 Shared limits
 
-*Written in Task 3.*
+**Today.** Quotas in `eu-central-1`, read from Service Quotas and SES on 2026-10-19:
+
+| Quota | Value | Szop uses |
+|---|---|---|
+| VPCs per region | 5 | the default VPC, and one while a demo runs |
+| Internet gateways per region | 5 | the same |
+| Elastic IP addresses | 5 | none (the load balancer's and the tasks' public addresses are not Elastic IPs) |
+| Application load balancers per region | 50 | one while a demo runs |
+| Fargate On-Demand vCPUs | 30 | 0.25 per task, at most 1 with S14's maximum of 4 |
+| RDS DB instances | 40 | one while a demo runs |
+| SES | sandbox: 200 messages a day, 1 a second | none until PH-18 |
+
+**With a second app.** Every quota is shared by every app in the account. VPCs are the tightest: each app's demo takes one, so four demos plus the default VPC fill the quota. Raising it is a free request. SES's sandbox is shared too, and its production access is per account.
+
+**Options.** None needed: Szop's footprint is far below every quota. The VPC quota is the one to watch.
+
+**Recommendation.** No change.
+
+**When.** —
 
 ### I6 The domain and the front page
 
-*Written in Task 3.*
+**Today.**
+
+- ✅ **Built:** the zone `dzwoniec.com` in Szop's base, with `prevent_destroy`. Recreating it would give it new name servers, and the domain would stop resolving until the registration pointed at them. The domain-wide records of I1 sit there too.
+- ✅ **Built:** Szop's own records. `szop.dzwoniec.com` and its certificate's validation record are created by `demo-up` and removed by `demo-down`, each demo session getting its own certificate ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 5).
+- ⬜ **Future:** the front page on the apex ([PH-34](../roadmap.md#ph-34-landing-page-and-demo-status)), shared by the owner's apps (the spec's decision 6).
+
+**With a second app.** Its subdomain records and certificate work like Szop's, in the same zone. The rule "created when the first app needs it, removed when the last one stops" fits records, which cost nothing to keep. It does not fit the zone, which has to stay. The apex records and the front page's hosting belong to neither app, so they cannot live in either app's stacks.
+
+**Options.**
+
+1. **The zone, the domain-wide records and the front page in the shared stack** (I1, option 1). Each app keeps its own subdomain records in its own demo stack, as today. **Rewires** (part of I1's move). Y: the front page's hosting, decided in PH-34.
+2. **And a delegated zone per app** (`szop.dzwoniec.com` in Szop's stacks, an NS record for it in the shared zone): each app's DNS fully its own, ready for I4's option 2. **Adds a layer.** Y **+$0.50 a month** per app zone.
+
+**Recommendation.** Option 1 in PH-34. Option 2 only with I4's option 2.
+
+**When.** PH-34, whose entry becomes "a front page for the owner's apps, in a shared stack, showing each app's demo status".
 
 ### I7 Each app on and off on its own
 
-*Written in Task 3.*
+**Today.** ✅ Built. `demo-up` and `demo-down` touch only Szop's demo state, resources tagged `project = szop` and `group = demo`, and the `szop` and `_….szop` records. Nothing they do reaches another app.
+
+**With a second app.** Each app turns on and off on its own. The one money-saving shared piece is the load balancer: one for both apps would save about $0.037 per hour (the load balancer and its two addresses) while both demos run, with a host rule and a certificate per app on one listener. But it has to exist whenever either app runs. "Create when the first needs it, remove when the last stops" would then need a count of users across two repositories' workflows, and a broken count leaves one app without a load balancer or the other's costs running.
+
+**Options.**
+
+1. **A load balancer per app**, as today. **No change.**
+2. **A shared load balancer in the shared stack, always on:** Y +$27 a month ($0.037 × 730). This breaks the guide by far.
+3. **A shared load balancer, counted in and out by the apps' workflows.** **Rewires** both apps' deploys around a shared piece, for $0.037 an hour.
+
+**Recommendation.** Option 1. Sharing saves too little for the coupling it brings.
+
+**When.** —
 
 ## Costs
 
