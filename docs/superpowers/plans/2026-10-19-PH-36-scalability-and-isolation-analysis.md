@@ -163,7 +163,7 @@ git commit -am "docs(audit): summarise the analysis and its recommendation"
 git push
 ```
 
-- [ ] **Step 5: Stop for the owner's decision.** Link the document on GitHub and ask for: go or no-go; the option per aspect, or "no change"; whether the phase placement stands. Record the answers in chat; nothing in the analysis is rewritten for them (it stays a point-in-time record), except obvious errors the owner points out, fixed in a new commit.
+- [x] **Step 5: Stop for the owner's decision.** Link the document on GitHub and ask for: go or no-go; the option per aspect, or "no change"; whether the phase placement stands. Record the answers in chat; nothing in the analysis is rewritten for them (it stays a point-in-time record), except obvious errors the owner points out, fixed in a new commit.
 
 ### Task 5: ADR 0036 and the living docs
 
