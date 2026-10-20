@@ -24,6 +24,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-12b Network and the demo-up button](#ph-12b-network-and-the-demo-up-button)
   - [PH-36 Scalability and isolation analysis](#ph-36-scalability-and-isolation-analysis)
   - [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds)
+  - [PH-12d Safe redeploys](#ph-12d-safe-redeploys)
   - [PH-37 Two tasks](#ph-37-two-tasks)
   - [PH-35 Security scanners](#ph-35-security-scanners)
   - [PH-13 Releases](#ph-13-releases)
@@ -189,7 +190,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-12a App ready for the cloud](#ph-12a-app-ready-for-the-cloud) | ✅ Done | [Spec](superpowers/specs/2026-10-18-PH-12a-app-ready-for-the-cloud-design.md) | [Plan](superpowers/plans/2026-10-18-PH-12a-app-ready-for-the-cloud.md) | [#226](https://github.com/luiki-dev/szop/pull/226) | [#219](https://github.com/luiki-dev/szop/issues/219) |
 | [PH-12b Network and the demo-up button](#ph-12b-network-and-the-demo-up-button) | ✅ Done | [Spec](superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md) | [Plan](superpowers/plans/2026-10-18-PH-12b-network-and-the-demo-up-button.md) | [#227](https://github.com/luiki-dev/szop/pull/227) | [#220](https://github.com/luiki-dev/szop/issues/220) |
 | [PH-36 Scalability and isolation analysis](#ph-36-scalability-and-isolation-analysis) | ✅ Done | [Spec](superpowers/specs/2026-10-19-PH-36-scalability-and-isolation-analysis-design.md) | [Plan](superpowers/plans/2026-10-19-PH-36-scalability-and-isolation-analysis.md) | [#242](https://github.com/luiki-dev/szop/pull/242) | [#229](https://github.com/luiki-dev/szop/issues/229) |
-| [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds) | ⬜ Not started | — | — | — | [#221](https://github.com/luiki-dev/szop/issues/221) |
+| [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds) | 🚧 In progress | — | — | — | [#221](https://github.com/luiki-dev/szop/issues/221) |
+| [PH-12d Safe redeploys](#ph-12d-safe-redeploys) | ⬜ Not started | — | — | — | [#244](https://github.com/luiki-dev/szop/issues/244) |
 | [PH-37 Two tasks](#ph-37-two-tasks) | ⬜ Not started | — | — | — | [#233](https://github.com/luiki-dev/szop/issues/233) |
 | [PH-35 Security scanners](#ph-35-security-scanners) | ⬜ Not started | — | — | — | [#213](https://github.com/luiki-dev/szop/issues/213) |
 | [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
@@ -254,19 +256,29 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ### PH-12c App on ECS and RDS
 
-- **Goal:** pressing `demo-up` on a branch builds that commit's image and serves the walking skeleton at `szop.dzwoniec.com`. Redeploys are safe with the old and the new version side by side, and `demo-down` removes everything again.
-- **Delivers:** in `infra/demo`, the service on ECS and RDS, in place of the placeholder page ([ADR 0008](decisions/0008-hosting.md)); the app's task execution role and task role in `infra/base`; `szop-ci-deploy` widened for the resources it adds ([ADR 0032](decisions/0032-ci-access-and-teardown-details.md), decision 3), and `szop-ci-plan` denied the data reads they open, such as RDS log files; `demo-up`'s image job, which builds and pushes the commit's image ([ADR 0010](decisions/0010-ci-cd.md), decisions 10 and 11), and its wait for `/api/health` in place of the placeholder page, with the timeouts revisited ([ADR 0034](decisions/0034-network-and-demo-up-details.md)); safe redeploys: rolling at a minimum of 100% and a maximum of 200% healthy, with the circuit breaker and no rollback, a 30-second deregistration delay, the load balancer checking a liveness route while `/api/health` stays the readiness check, and the expand-then-contract rule for migrations in `drizzle.md` ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 3 to 5); the TLS connection to RDS; the runbook's section on debugging.
-- **Split from:** PH-12 First deploy, now retired (see [PH-12a](#ph-12a-app-ready-for-the-cloud)).
+- **Goal:** pressing `demo-up` on a branch builds that commit's image and serves the walking skeleton from one ECS task backed by RDS: `https://szop.dzwoniec.com` shows the API and the database up, with the schema version. `demo-down` removes everything again.
+- **Delivers:** in `infra/demo`, the service on ECS and RDS, in place of the placeholder page ([ADR 0008](decisions/0008-hosting.md)); the app's task execution role and task role in `infra/base`; `szop-ci-deploy` widened for the resources it adds ([ADR 0032](decisions/0032-ci-access-and-teardown-details.md), decision 3), and `szop-ci-plan` denied the data reads they open, such as RDS log files; `demo-up`'s image job, which builds and pushes the commit's image ([ADR 0010](decisions/0010-ci-cd.md), decisions 10 and 11), and its wait for `/api/health` in place of the placeholder page, with the timeouts revisited ([ADR 0034](decisions/0034-network-and-demo-up-details.md)); the TLS connection to RDS; `TRUSTED_PROXIES` set from Terraform; the runbook's section on debugging, with the migration check's message and how to switch branches.
+- **Split from:** PH-12 First deploy, now retired (see [PH-12a](#ph-12a-app-ready-for-the-cloud)). Its safe redeploys, which [ADR 0036](decisions/0036-scalability-and-isolation.md) added, became [PH-12d](#ph-12d-safe-redeploys).
 - **Depends on:** —
 - **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, check the demo (including that the log shows the owner's real IP address, and a Lighthouse run), then press `demo-down`.
-- **Expected path:** full. ADR 0036 added to an entry already near the upper bound of a phase's size, so its brainstorm checks first whether it needs a split.
+- **Expected path:** full.
 - **Open points:** the sub-issues of [#221](https://github.com/luiki-dev/szop/issues/221).
+
+### PH-12d Safe redeploys
+
+- **Goal:** redeploying a running demo keeps it up: the old and the new version serve side by side until the new one is healthy, a deploy whose tasks keep failing is marked failed instead of retrying for ever, and a database outage no longer replaces healthy tasks.
+- **Delivers:** rolling deploys at a minimum of 100% and a maximum of 200% healthy, with the deployment circuit breaker and no rollback; a 30-second deregistration delay on the target group; the load balancer checking a process-only liveness route while `/api/health` stays the readiness check, with the health check's grace period, interval and thresholds tuned; the expand-then-contract rule for migrations in `drizzle.md` ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 3 to 5).
+- **Split from:** [PH-12c](#ph-12c-app-on-ecs-and-rds): with safe redeploys it held about twelve tasks and three concepts new to the project, ECS, RDS and rolling deploys with two versions at once ([ADR 0014](decisions/0014-roadmap.md), decision 6).
+- **Depends on:** PH-12c.
+- **Owner steps:** press `demo-up` on the branch, press it again while the demo is up and check that the site keeps answering during the redeploy, then press `demo-down`.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#244](https://github.com/luiki-dev/szop/issues/244).
 
 ### PH-37 Two tasks
 
 - **Goal:** the demo runs two tasks, one in each availability zone. They migrate the database one at a time, a request does not depend on which task answers it, and a deploy or a stopped task loses no request. Two instances run locally and in CI too, so a problem between tasks shows up there first.
 - **Delivers:** a PostgreSQL advisory lock around the migration check and the migration, with a test of two migrators at once; a pool of at most 5 connections per task and the connection budget, checked against `SHOW max_connections` on the demo; request IDs unique across tasks; the ECS service's desired count at 2; a Compose profile `scale` with two app containers behind nginx, and its check script in CI's `docker` job; the stack overview's section on running several instances brought in line ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 1, 2, 10, 11 and 14).
-- **Depends on:** PH-12c.
+- **Depends on:** PH-12d.
 - **Owner steps:** press `demo-up` on the branch, check that requests reach both tasks, then press `demo-down`.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#233](https://github.com/luiki-dev/szop/issues/233).
