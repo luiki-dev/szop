@@ -171,27 +171,27 @@ git push
 - Consumes: Task 1's settings names and command; Task 2's role and parameter names; PH-12b's subnets, `aws_security_group.alb`, `aws_lb_listener.https`, `var.deployed_commit`.
 - Produces: outputs `cluster` (`szop-demo`), `db_setup_task_definition` (the ARN of the revision), `service` (`szop-demo-app`), `task_subnets` (the two public subnets' IDs, comma-separated), `task_security_group` (its ID); `deployed_commit` and `url` unchanged. Task 4 reads them with `terraform output -raw`.
 
-- [ ] **Step 1: Locals and lookups**
+- [x] **Step 1: Locals and lookups**
 
 `locals.tf`: base's new names beside the domain (the two roles, `/szop/db-app-password`, `szop`, `/szop/app`), with the existing comment that they change with base; `trusted_proxies = join(",", [local.public_a_cidr, local.public_b_cidr])`; the placeholder page removed. `data.tf`: `aws_iam_role` for the two roles, `aws_ecr_repository` for the registry, `aws_caller_identity` for the parameter's ARN (built from the account and the name, never `data "aws_ssm_parameter"`, which reads the value).
 
-- [ ] **Step 2: The database**
+- [x] **Step 2: The database**
 
 `database.tf`, as the spec's "infra/demo: the database" and the Global Constraints give it; the security group with one ingress rule (5432 from `szop-demo-task`) as an `aws_vpc_security_group_ingress_rule`.
 
-- [ ] **Step 3: The service**
+- [x] **Step 3: The service**
 
 `service.tf`, as the spec's "infra/demo: the service" gives it. The task's security group: ingress 3000 from `szop-demo-alb`; egress 443 to `0.0.0.0/0` and 5432 to `szop-demo-db`. Container definitions with `jsonencode`; the image `"${data.aws_ecr_repository.app.repository_url}:${var.deployed_commit}"`; `secrets` with `valueFrom` = the parameter's ARN and, for `db-setup`'s master password, `"${aws_db_instance.main.master_user_secret[0].secret_arn}:password::"`; `logConfiguration` `awslogs` with group `/szop/app`, region, stream prefix. The service: `launch_type = "FARGATE"`, `network_configuration` with `assign_public_ip = true`, `load_balancer` block to the target group and container `app`/3000, `depends_on` the HTTPS listener (a service cannot attach to a target group no listener uses).
 
-- [ ] **Step 4: The listener and the load balancer's egress**
+- [x] **Step 4: The listener and the load balancer's egress**
 
 `load_balancer.tf`: the HTTPS listener's default action `forward` to the target group; the `deployed_commit` precondition stays, the length check goes; an `aws_vpc_security_group_egress_rule` on `szop-demo-alb` to `szop-demo-task` on 3000; the file's comments brought up to date.
 
-- [ ] **Step 5: Checks and the plan**
+- [x] **Step 5: Checks and the plan**
 
 Run: `pnpm check:infra`. Expected: pass. The plan needs base's new roles to exist (the lookups fail otherwise), so it runs once the owner has applied Task 2's base; until then `pnpm check:infra` is the check, and this plan moves to Task 6, step 3. With `AWS_PROFILE=szop`: `terraform -chdir=infra/demo plan -lock=false -var deployed_commit=$(git rev-parse HEAD)`. Expected: the database, its subnet group, two security groups and their rules, the cluster, two task definitions, the target group and the service to add, everything of PH-12b too (no demo is up), and no secret value in the output. Check that RDS offers 18: `aws rds describe-db-engine-versions --engine postgres --engine-version 18 --region eu-central-1 --query 'DBEngineVersions[].EngineVersion'`; if empty, stop and ask the owner.
 
-- [ ] **Step 6: Commit and push**
+- [x] **Step 6: Commit and push**
 
 ```bash
 git add infra/demo docs/superpowers/plans

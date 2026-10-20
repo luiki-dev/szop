@@ -1,6 +1,5 @@
-# Open to the internet on the two web ports. No egress rule yet: a fixed
-# response sends nothing onward. PH-12c adds egress towards the task's
-# security group.
+# Open to the internet on the two web ports; out only to the app's tasks, on
+# the app's port.
 resource "aws_security_group" "alb" {
   name        = "szop-demo-alb"
   description = "Load balancer of the Szop demo"
@@ -29,6 +28,17 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http" {
   cidr_ipv4         = "0.0.0.0/0"
 
   tags = { Name = "szop-demo-alb-http" }
+}
+
+resource "aws_vpc_security_group_egress_rule" "alb_to_task" {
+  security_group_id            = aws_security_group.alb.id
+  description                  = "The app's port on the app's tasks"
+  ip_protocol                  = "tcp"
+  from_port                    = 3000
+  to_port                      = 3000
+  referenced_security_group_id = aws_security_group.task.id
+
+  tags = { Name = "szop-demo-alb-to-task" }
 }
 
 resource "aws_lb" "main" {
@@ -72,7 +82,7 @@ resource "aws_lb_listener" "http" {
   tags = { Name = "szop-demo-http" }
 }
 
-# The placeholder answers until PH-12c forwards to the app.
+# Forwards to the app's tasks (PH-12c spec, infra/demo: the service).
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.main.arn
   port              = 443
@@ -84,13 +94,8 @@ resource "aws_lb_listener" "https" {
   certificate_arn = aws_acm_certificate_validation.main.certificate_arn
 
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/html"
-      status_code  = "200"
-      message_body = local.placeholder_page
-    }
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app.arn
   }
 
   # Preconditions are skipped when the listener is destroyed, so demo-down
@@ -99,11 +104,6 @@ resource "aws_lb_listener" "https" {
     precondition {
       condition     = var.deployed_commit != null
       error_message = "deployed_commit is required to create or change the demo, so that demo-down can destroy it with the same code (ADR 0011, decision 7). Pass -var deployed_commit=$(git rev-parse HEAD)."
-    }
-
-    precondition {
-      condition     = length(local.placeholder_page) <= 1024
-      error_message = "The placeholder page is longer than 1024 bytes, the limit of a fixed response's body."
     }
   }
 
