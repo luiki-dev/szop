@@ -124,34 +124,34 @@ git push
 - Consumes: the registry `szop`, the log group `/szop/app`, the parameter pattern of `better_auth_secret`.
 - Produces: roles `szop-app-task-execution` and `szop-app-task` (Task 3 finds them with `data "aws_iam_role"`); parameter `/szop/db-app-password`; managed policies `szop-ci-deploy-demo-database`, `szop-ci-deploy-demo-service`, `szop-ci-deploy-image` attached to `szop-ci-deploy`; statement `DenyDataReads` in `ci_plan_denies`. Outputs `app_task_execution_role_arn` and `app_task_role_arn`.
 
-- [ ] **Step 1: The app's roles**
+- [x] **Step 1: The app's roles**
 
 `app_roles.tf`, as the spec's "infra/base: the app's roles and secret" describes. Trust: `ecs-tasks.amazonaws.com` with `aws:SourceAccount` = the account and `ArnLike aws:SourceArn` = `arn:aws:ecs:eu-central-1:<account>:*`. Execution role: inline policy with the ECR pull (registry ARN; `GetAuthorizationToken` on `*`), `logs:CreateLogStream`/`PutLogEvents` on `<log group ARN>:log-stream:*`, `ssm:GetParameters` on `/szop/db-app-password`'s ARN, `secretsmanager:GetSecretValue` on `arn:aws:secretsmanager:eu-central-1:<account>:secret:rds!db-*` (narrowed in Task 6 if RDS tags its secrets). Task role: `ssmmessages:CreateControlChannel`, `CreateDataChannel`, `OpenControlChannel`, `OpenDataChannel` on `*`. A comment on each says what uses it and that SES comes in PH-18.
 
-- [ ] **Step 2: The password**
+- [x] **Step 2: The password**
 
 In `secrets.tf`, `ephemeral "random_password" "db_app_password"` (64, `special = false`) and `aws_ssm_parameter.db_app_password` with `value_wo`/`value_wo_version = 1`, commented like the Better Auth secret, including how to rotate it (raise the version, apply base, then `demo-up` runs `db-setup`, which sets the new password).
 
-- [ ] **Step 3: The plan role's deny**
+- [x] **Step 3: The plan role's deny**
 
 `DenyDataReads` in `ci_plan_denies`: `rds:DownloadDBLogFilePortion`, `rds:DownloadCompleteDBLogFile`, `dynamodb:GetItem`, `dynamodb:BatchGetItem`, `dynamodb:Query`, `dynamodb:Scan`, plus any other data-plane read of RDS, ECS or ECR found in `ReadOnlyAccess`'s current default version (`aws iam get-policy-version --policy-arn arn:aws:iam::aws:policy/ReadOnlyAccess --version-id $(aws iam get-policy --policy-arn arn:aws:iam::aws:policy/ReadOnlyAccess --query Policy.DefaultVersionId --output text)`). Pulling images stays allowed, with a comment: the image holds only the public code (spec, The plan role).
 
-- [ ] **Step 4: The deploy role's policies**
+- [x] **Step 4: The deploy role's policies**
 
 As the spec's "The deploy role" describes, in `ci_roles.tf`'s style (one `data "aws_iam_policy_document"`, `aws_iam_policy` and attachment per policy, a `sid` and a comment per statement). Work out the exact actions from the AWS Service Authorization Reference and the provider's calls for every resource of Task 3, with these pinned:
 - **database:** `rds:CreateDBInstance`, `rds:CreateDBSubnetGroup`, `rds:AddTagsToResource` (on create only, where RDS supports a create-action condition; otherwise with the request tags), `rds:Describe*`, `rds:ListTagsForResource`, `rds:ModifyDBInstance`, `rds:DeleteDBInstance`, `rds:ModifyDBSubnetGroup`, `rds:DeleteDBSubnetGroup`, `rds:RemoveTagsFromResource`; the Secrets Manager actions `manage_master_user_password` needs of the caller (at least `secretsmanager:CreateSecret` and `secretsmanager:TagResource`, scoped to `rds!db-*` names); the security group's egress rules (`ec2:AuthorizeSecurityGroupEgress` with tags) if `szop-ci-deploy-demo-network` lacks them.
 - **service:** ECS `CreateCluster`, `DeleteCluster`, `RegisterTaskDefinition`, `DeregisterTaskDefinition`, `CreateService`, `UpdateService`, `DeleteService`, `Describe*`, `List*`, `TagResource` (with `ecs:CreateAction`), `UntagResource`; `ecs:RunTask` on `task-definition/szop-demo-db-setup:*` with `ecs:cluster` = the cluster's ARN; `ecs:DescribeTasks`; Elastic Load Balancing `CreateTargetGroup`, `ModifyTargetGroup`, `ModifyTargetGroupAttributes`, `DeleteTargetGroup`, `RegisterTargets`/`DeregisterTargets` if the provider calls them, tagged as in `szop-ci-deploy-demo-load-balancer`; `iam:GetRole` and `iam:PassRole` on the two app roles, `PassRole` with `iam:PassedToService = ecs-tasks.amazonaws.com`; `ssm:DescribeParameters` (metadata only).
 - **image:** `ecr:GetAuthorizationToken` on `*`; `ecr:BatchCheckLayerAvailability`, `InitiateLayerUpload`, `UploadLayerPart`, `CompleteLayerUpload`, `PutImage`, `DescribeImages`, `DescribeRepositories`, `BatchGetImage` on the registry's ARN.
 
-- [ ] **Step 5: Static checks and the plan**
+- [x] **Step 5: Static checks and the plan**
 
 Run: `pnpm check:infra`. Expected: pass. With `AWS_PROFILE=szop`: `terraform -chdir=infra/base plan -lock=false`. Expected: two roles with their policies, the parameter, three policies and their attachments to add, `ci_plan_denies` changed in place, nothing destroyed.
 
-- [ ] **Step 6: Validate and simulate (Review Focus 3)**
+- [x] **Step 6: Validate and simulate (Review Focus 3)**
 
 Each rendered policy through `aws accessanalyzer validate-policy` (identity policies) and the two trust policies as resource policies. Expected: no `ERROR`, no `SECURITY_WARNING`. Then `aws iam simulate-custom-policy` with the deploy role's six managed policies together, for every create (with the request tags, the region, and `ecs:CreateAction`/`elasticloadbalancing:CreateAction` for tagging), every change and delete (with the resource tags), `ecs:RunTask` with `ecs:cluster`, and `iam:PassRole` with `iam:PassedToService`. Expected: `allowed`. Negative cases: `RunTask` of `szop-demo-app`; `PassRole` of `szop-ci-deploy` or to `ec2.amazonaws.com`; `ecr:PutImage` on another repository; `rds:DeleteDBInstance` with `aws:ResourceTag/group=base`; the plan role's `rds:DownloadDBLogFilePortion` against `ReadOnlyAccess` plus its denies. Expected: `implicitDeny` or `explicitDeny`. Keep the commands in the task's report.
 
-- [ ] **Step 7: Commit and push**
+- [x] **Step 7: Commit and push**
 
 ```bash
 git add infra/base docs/superpowers/plans
