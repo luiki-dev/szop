@@ -14,7 +14,7 @@ resource "aws_security_group" "db" {
 
 resource "aws_vpc_security_group_ingress_rule" "db_from_task" {
   security_group_id            = aws_security_group.db.id
-  description                  = "PostgreSQL from the app's tasks"
+  description                  = "PostgreSQL from the app tasks"
   ip_protocol                  = "tcp"
   from_port                    = 5432
   to_port                      = 5432

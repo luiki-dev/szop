@@ -16,7 +16,7 @@ resource "aws_security_group" "task" {
 
 resource "aws_vpc_security_group_ingress_rule" "task_from_alb" {
   security_group_id            = aws_security_group.task.id
-  description                  = "The app's port from the load balancer"
+  description                  = "The app port from the load balancer"
   ip_protocol                  = "tcp"
   from_port                    = 3000
   to_port                      = 3000
@@ -27,7 +27,7 @@ resource "aws_vpc_security_group_ingress_rule" "task_from_alb" {
 
 resource "aws_vpc_security_group_egress_rule" "task_https" {
   security_group_id = aws_security_group.task.id
-  description       = "HTTPS to AWS's endpoints"
+  description       = "HTTPS to AWS endpoints"
   ip_protocol       = "tcp"
   from_port         = 443
   to_port           = 443

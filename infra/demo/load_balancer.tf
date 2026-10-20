@@ -32,7 +32,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http" {
 
 resource "aws_vpc_security_group_egress_rule" "alb_to_task" {
   security_group_id            = aws_security_group.alb.id
-  description                  = "The app's port on the app's tasks"
+  description                  = "The app port on the app tasks"
   ip_protocol                  = "tcp"
   from_port                    = 3000
   to_port                      = 3000
