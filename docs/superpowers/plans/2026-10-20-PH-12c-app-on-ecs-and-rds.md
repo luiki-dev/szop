@@ -210,11 +210,11 @@ git push
 - Consumes: Task 3's outputs; Task 2's deploy-role permissions; Task 1's `db-setup` exit codes.
 - Produces: jobs `enable-teardown` (unchanged), `build`, `deploy`, as the spec's "demo-up.yml" describes.
 
-- [ ] **Step 1: The `build` job**
+- [x] **Step 1: The `build` job**
 
 No environment; `permissions: { contents: read }`; `timeout-minutes: 20`; checkout as `deploy` does (`ref: ${{ inputs.ref }}`) and the same commit check, written to an output `sha`; `docker/setup-buildx-action` and `docker/build-push-action` with `load: true`, `push: false`, `tags: szop:<sha>` (through the step output, not a shell), no `cache-from`/`cache-to` (an image that is deployed restores no cache, as the release job of C10); `docker save szop:<sha> | gzip > "$RUNNER_TEMP/image.tar.gz"`; `actions/upload-artifact` named `image`, `retention-days: 1`, `if-no-files-found: error`. The header comment says why it is a job of its own (spec, decision 9; ADR 0012, decisions 16 and 18).
 
-- [ ] **Step 2: The `deploy` job**
+- [x] **Step 2: The `deploy` job**
 
 `needs: [enable-teardown, build]`; it uses `needs.build.outputs.sha` and checks that its own checkout resolves to the same commit, failing otherwise. New steps after the credential and Terraform setup steps, each with an `id`:
 - `push`: `actions/download-artifact` (`name: image`); `gunzip -c … | docker load`; `aws ecr get-login-password | docker login --username AWS --password-stdin <registry host>`; `aws ecr describe-images --repository-name szop --image-ids imageTag=$COMMIT` decides; tag and push only if missing; output `pushed=true|false`.
@@ -227,15 +227,15 @@ No environment; `permissions: { contents: read }`; `timeout-minutes: 20`; checko
 
 The header comment updated (it no longer waits for a page with the commit).
 
-- [ ] **Step 3: `demo-down.yml`**
+- [x] **Step 3: `demo-down.yml`**
 
 Comments only that still mention the placeholder or PH-12c.
 
-- [ ] **Step 4: Checks**
+- [x] **Step 4: Checks**
 
 Run: `pnpm check:workflows`. Expected: actionlint and zizmor report nothing. Run: `pnpm format:check`. Expected: pass.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add .github/workflows docs/superpowers/plans
