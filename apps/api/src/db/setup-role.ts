@@ -1,3 +1,4 @@
+import { createHash, createHmac, pbkdf2Sync, randomBytes } from "node:crypto";
 import pg from "pg";
 import { z } from "zod";
 import type { DatabaseSettings } from "../config.ts";
@@ -17,7 +18,14 @@ const envSchema = z.object({
   DATABASE_TLS: z.enum(["none", "verify-full"]),
   // A plain lower-case identifier, at most PostgreSQL's 63 bytes.
   APP_DATABASE_USER: z.string().regex(/^[a-z_][a-z0-9_]{0,62}$/),
-  APP_DATABASE_PASSWORD: z.string().min(1),
+  // Printable ASCII only: PostgreSQL would normalize other characters
+  // (SASLprep) before hashing, and scramVerifier does not.
+  APP_DATABASE_PASSWORD: z
+    .string()
+    .regex(
+      /^[\x20-\x7e]+$/,
+      "must be printable ASCII characters (no SASLprep normalization)",
+    ),
 });
 
 export interface AppRole {
@@ -62,6 +70,24 @@ export function loadSetupConfig(
   };
 }
 
+// The password as PostgreSQL stores it, a SCRAM-SHA-256 verifier (RFC 5802),
+// made here so the cleartext never reaches the server: a failed CREATE ROLE
+// or ALTER ROLE has its statement written to the server's log, and with the
+// password inside it that would be a secret in a log line. PostgreSQL keeps a
+// string in this format as it is.
+export function scramVerifier(password: string): string {
+  const iterations = 4096; // PostgreSQL's default scram_iterations
+  const salt = randomBytes(16);
+  const saltedPassword = pbkdf2Sync(password, salt, iterations, 32, "sha256");
+  const hmac = (key: Buffer, data: string) =>
+    createHmac("sha256", key).update(data).digest();
+  const storedKey = createHash("sha256")
+    .update(hmac(saltedPassword, "Client Key"))
+    .digest("base64");
+  const serverKey = hmac(saltedPassword, "Server Key").toString("base64");
+  return `SCRAM-SHA-256$${String(iterations)}:${salt.toString("base64")}$${storedKey}:${serverKey}`;
+}
+
 // Creates the app's role, or sets its password again, and makes it the owner
 // of the database `db` is connected to, which on PostgreSQL 15 and later makes
 // it the owner of the public schema too. `db` is the master user, who holds
@@ -71,10 +97,10 @@ export async function setupAppRole(
   db: Database,
   appRole: AppRole,
 ): Promise<{ created: boolean }> {
-  // The statements take no parameters, so the name and the password are
+  // The statements take no parameters, so the name and the verifier are
   // quoted into the text.
   const name = pg.escapeIdentifier(appRole.name);
-  const password = pg.escapeLiteral(appRole.password);
+  const password = pg.escapeLiteral(scramVerifier(appRole.password));
   const client = await db.$client.connect();
   try {
     await client.query("BEGIN");

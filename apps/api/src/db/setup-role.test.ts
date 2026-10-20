@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { testDatabaseSettings } from "../test/database.ts";
 import { createDatabase, type Database } from "./database.ts";
 import { runMigrations } from "./migrate.ts";
-import { loadSetupConfig, setupAppRole } from "./setup-role.ts";
+import { loadSetupConfig, scramVerifier, setupAppRole } from "./setup-role.ts";
 
 const valid = {
   DATABASE_HOST: "127.0.0.1",
@@ -82,6 +82,16 @@ describe("loadSetupConfig", () => {
     }
   });
 
+  it.each(["pässword", "pass\nword", "密码"])(
+    "rejects a non-ASCII or control APP_DATABASE_PASSWORD=%j",
+    (password) => {
+      const message = errorFor({ ...valid, APP_DATABASE_PASSWORD: password });
+
+      expect(message).toMatch(/APP_DATABASE_PASSWORD: (?!missing)/);
+      expect(message).not.toContain(password);
+    },
+  );
+
   it("never puts a password in the message", () => {
     const message = errorFor({
       ...valid,
@@ -93,6 +103,22 @@ describe("loadSetupConfig", () => {
     expect(message).toContain("DATABASE_PORT");
     expect(message).not.toContain(valid.APP_DATABASE_PASSWORD);
     expect(message).not.toContain(valid.DATABASE_PASSWORD);
+  });
+});
+
+describe("scramVerifier", () => {
+  const format =
+    /^SCRAM-SHA-256\$4096:[A-Za-z0-9+/=]{24}\$[A-Za-z0-9+/=]{44}:[A-Za-z0-9+/=]{44}$/;
+
+  it("has PostgreSQL's SCRAM-SHA-256 format and hides the password", () => {
+    const verifier = scramVerifier("a-password");
+
+    expect(verifier).toMatch(format);
+    expect(verifier).not.toContain("a-password");
+  });
+
+  it("differs between two calls, since the salt is random", () => {
+    expect(scramVerifier("a-password")).not.toBe(scramVerifier("a-password"));
   });
 });
 
@@ -189,6 +215,29 @@ describe("setupAppRole", () => {
         rolcreaterole: false,
       },
     ]);
+  });
+
+  it("stores a SCRAM verifier, never the password", async () => {
+    await setupAppRole(admin, { name: appName, password: appPassword });
+
+    // pg_authid is for superusers only, so the check goes through one.
+    const client = new pg.Client({
+      host: superuser.host,
+      port: superuser.port,
+      database: superuser.name,
+      user: superuser.user,
+      password: superuser.password,
+    });
+    await client.connect();
+    try {
+      const { rows } = await client.query<{ rolpassword: string }>(
+        "SELECT rolpassword FROM pg_authid WHERE rolname = $1",
+        [appName],
+      );
+      expect(rows[0]?.rolpassword).toMatch(/^SCRAM-SHA-256\$4096:/);
+    } finally {
+      await client.end();
+    }
   });
 
   it("lets the role migrate and use the database", async () => {
