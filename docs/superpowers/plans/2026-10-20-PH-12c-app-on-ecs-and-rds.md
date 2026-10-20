@@ -73,7 +73,7 @@
   - `loadSetupConfig(env: Record<string, string | undefined>): SetupConfig`, where `SetupConfig = { database: DatabaseSettings; appRole: { name: string; password: string } }`; throws `Error("Invalid configuration:\n  NAME: problem…")` listing names and Zod's messages only, as `loadConfig` does. `APP_DATABASE_USER` must match `^[a-z_][a-z0-9_]{0,62}$`.
   - `setupAppRole(db: Database, appRole: { name: string; password: string }): Promise<{ created: boolean }>`, run against the database it should own (`current_database()`).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `setup-role.test.ts`:
 - `loadSetupConfig`: valid settings give the expected object; a missing `APP_DATABASE_PASSWORD` gives `APP_DATABASE_PASSWORD: missing`; `APP_DATABASE_USER = "Szop-App"` and `"a; DROP ROLE x"` are rejected; no error message contains a given password value.
@@ -84,27 +84,27 @@ In `setup-role.test.ts`:
   - `is safe to run again`: a second call returns `{ created: false }` and the role still owns the database.
   - `applies a changed password`: after a second call with another password, the old one fails to log in and the new one succeeds.
 
-- [ ] **Step 2: Run them to see them fail**
+- [x] **Step 2: Run them to see them fail**
 
 Run: `pnpm --filter @szop/api exec vitest run src/db/setup-role.test.ts`. Expected: FAIL, `setup-role.ts` not found.
 
-- [ ] **Step 3: Implement `loadSetupConfig` and `setupAppRole` in `setup-role.ts`**
+- [x] **Step 3: Implement `loadSetupConfig` and `setupAppRole` in `setup-role.ts`**
 
 `setupAppRole` runs in one transaction, quoting with `pg`'s `escapeIdentifier` and `escapeLiteral` on a client taken from `db.$client`: look the role up in `pg_roles`; `CREATE ROLE <name> LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT PASSWORD <literal>` when missing, otherwise `ALTER ROLE <name> PASSWORD <literal>` only (a non-superuser may not touch the `SUPERUSER` attribute, even to keep it off); `GRANT <name> TO CURRENT_USER` (PostgreSQL 16 and later give a role's creator `ADMIN OPTION` but not membership, and `ALTER DATABASE … OWNER TO` needs the right to `SET ROLE` to the new owner as well as `CREATEDB`); `ALTER DATABASE <current_database()> OWNER TO <name>`. If a test shows a statement needs another form on PostgreSQL 18, change it and say why in a comment.
 
-- [ ] **Step 4: Run the tests to see them pass**
+- [x] **Step 4: Run the tests to see them pass**
 
 Run: `pnpm --filter @szop/api exec vitest run src/db/setup-role.test.ts`. Expected: PASS.
 
-- [ ] **Step 5: The entry point `db-setup.ts`**
+- [x] **Step 5: The entry point `db-setup.ts`**
 
 Like `server.ts`: `loadSetupConfig(process.env)` (on error, print the message to stderr and exit `1`); `createDatabase(config.database)`, so TLS works as the app's does; `setupAppRole`; end the pool; print one JSON line to stdout, `{"msg":"db-setup done","role":"<name>","created":<bool>}`; on any error print `{"msg":"db-setup failed","error":"<error.message>"}` and exit `1`. Never print the configuration. Check by hand against Compose's PostgreSQL: `docker compose up -d`, then from `apps/api/` run `node src/db-setup.ts` with the `.env` values plus `APP_DATABASE_USER=szop_manual_check APP_DATABASE_PASSWORD=x` on the `szop` database; expected the JSON line with `"created":true`, then `"created":false`; then drop the role again (`ALTER DATABASE szop OWNER TO szop; DROP ROLE szop_manual_check;`).
 
-- [ ] **Step 6: Comments and the full check**
+- [x] **Step 6: Comments and the full check**
 
 The two comments in `config.ts` and `compose.yaml`. Run: `pnpm check`. Expected: pass. Run: `pnpm check:image` (builds the image and starts it). Expected: pass, and `docker run --rm --entrypoint node szop:local src/db-setup.ts` with no settings prints the "Invalid configuration" message and exits `1`.
 
-- [ ] **Step 7: Commit and push**
+- [x] **Step 7: Commit and push**
 
 ```bash
 git add apps/api compose.yaml docs/superpowers/plans
