@@ -254,19 +254,19 @@ git push
 - Consumes: Tasks 1–4 as built; the spec's "Documentation and records".
 - Produces: the runbook sections Task 6 follows: "Spinning up" (the new steps), "Debugging", the state check, the costs.
 
-- [ ] **Step 1: The runbook**
+- [x] **Step 1: The runbook**
 
 As the spec lists. "Debugging" gives the exact commands: `aws logs tail /szop/app --follow --since 1h`; finding the task (`aws ecs list-tasks --cluster szop-demo --service-name szop-demo-app`); `aws ecs execute-command --cluster szop-demo --task <id> --container app --interactive --command "/bin/sh"`; the Node one-liner that queries with the app's settings from inside the task (spec, decision 13), shown with `SELECT ssl FROM pg_stat_ssl WHERE pid = pg_backend_pid()`; reading a failed `db-setup` (its log stream, its exit code); the migration check's message and switching branches (`demo-down`, then `demo-up`); a failed destroy (the commit from the summary, spec decision 8). The state check: `terraform state pull` for base and demo, searched (`grep -c`) for the two passwords read with the owner's credentials, expected `0`. Costs per hour and per forgotten day with the database and the task. `## Contents` in sync.
 
-- [ ] **Step 2: The other living docs**
+- [x] **Step 2: The other living docs**
 
 As the spec lists: `ci-cd.md` (the `build` job and `deploy`'s steps, the artifact, why `build` needs no approval); `threat-model.md` (the task and the database; the master user and `szop_app`, who can reach each secret; the deploy role's new reach; `DenyDataReads`); `architecture.md` (the service, the database, `db-setup`); `stack-overview.md` (ECS: cluster, task definition, task, service, Fargate, `awsvpc`; execution role and task role; ECS `secrets`; RDS: instance, subnet group, managed master password; one-off tasks; ECS Exec; and correct any line that says the container runs read-only on ECS); `glossary.md` (new acronyms).
 
-- [ ] **Step 3: Checks**
+- [x] **Step 3: Checks**
 
 Run: `pnpm format:check`. Expected: pass. Check every new link's anchor exists.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```bash
 git add docs
