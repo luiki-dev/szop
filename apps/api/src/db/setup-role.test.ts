@@ -191,7 +191,8 @@ describe("setupAppRole", () => {
 
   afterEach(async () => {
     await Promise.all(opened.map((db) => db.$client.end()));
-    await runSuperuser(`DROP DATABASE ${databaseName} WITH (FORCE)`);
+    await runSuperuser(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
+    await runSuperuser(`DROP ROLE IF EXISTS ${appName}_other`);
     await runSuperuser(`DROP ROLE IF EXISTS ${appName}`);
     await runSuperuser(`DROP ROLE IF EXISTS ${adminName}`);
   });
@@ -205,7 +206,7 @@ describe("setupAppRole", () => {
     expect(result).toEqual({ created: true });
     expect(await ownerOfDatabase()).toBe(appName);
     const { rows } = await admin.execute(
-      sql`SELECT rolcanlogin, rolsuper, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname = ${appName}`,
+      sql`SELECT rolcanlogin, rolsuper, rolcreatedb, rolcreaterole, rolinherit FROM pg_roles WHERE rolname = ${appName}`,
     );
     expect(rows).toEqual([
       {
@@ -213,6 +214,7 @@ describe("setupAppRole", () => {
         rolsuper: false,
         rolcreatedb: false,
         rolcreaterole: false,
+        rolinherit: false,
       },
     ]);
   });
