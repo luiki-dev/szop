@@ -332,15 +332,15 @@ git push
 - Create: `docs/decisions/0039-safe-redeploys-details.md`
 - Modify: ADRs 0019, 0020, 0034, 0036 and 0038 (status lines and decision notes, where the spec's "Documentation and records" names them); `docs/roadmap.md`; `README.md`
 
-- [ ] **Step 1: ADR 0039 "Safe redeploys details"**
+- [x] **Step 1: ADR 0039 "Safe redeploys details"**
 
 In the form of ADR 0038: context, the spec's sixteen decisions with options and reasoning (decision 3 noting `GIT_COMMIT` is required, per ADR 0019, decision 2), "Settled while building" with what Tasks 1–7 found (the keep-alive timeout, the IAM conditions that worked, whether `--force-new-deployment` was needed, the timings), consequences for PH-37 (the grace period with the lock; OP-103). Header: `Completes:` ADR 0036, decisions 3, 4 and 5; ADR 0038, decision 12; `Extends:` the ADR 0020 decision that defines `/api/health`'s body; `Refines:` any ADR 0034 decision on `demo-up`'s waits.
 
-- [ ] **Step 2: The notes**
+- [x] **Step 2: The notes**
 
 In each ADR named: the status line, and the line at the bottom of the decision's cell, as CLAUDE.md "Documentation" describes.
 
-- [ ] **Step 3: Roadmap and README**
+- [x] **Step 3: Roadmap and README**
 
 PH-12d's row: the PR link, then ✅ Done before the merge; the README's diagram mirrors it. PH-12d's entry: **Delivers** gains the commit in `/api/health`, the watch script, `pnpm check` and OP-101's hardening; **Owner steps** the base apply, the failed deploy and the fix-forward run.
 
@@ -348,7 +348,7 @@ PH-12d's row: the PR link, then ✅ Done before the merge; the README's diagram 
 
 "Settled by" comments on OP-043 (#84, its PH-12d part ticked), OP-075 (#87) and OP-101 (#247); #244's body from the roadmap entry. The PR: the template filled in; `Closes #244`, `#84`, `#87`, `#247`, #245 and the base-apply issue; the list of every issue change made in the phase (OP-103 #249 created, the owner-step issues, the fields); marked ready for review.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add docs README.md
