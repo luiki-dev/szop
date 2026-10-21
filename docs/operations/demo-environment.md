@@ -558,11 +558,13 @@ Since [PH-37](../roadmap.md#ph-37-two-tasks) the demo runs two tasks, one in eac
 
 1. **In the ECS console** (eu-central-1, cluster `szop-demo`, service `szop-demo-app`, tab *Tasks*): two tasks *Running*, one in `eu-central-1a` and one in `eu-central-1b`. From a terminal: `aws ecs describe-tasks --cluster szop-demo --tasks $(aws ecs list-tasks --cluster szop-demo --service-name szop-demo-app --query 'taskArns' --output text) --query 'tasks[].[lastStatus, availabilityZone]' --output text`.
 2. **Requests reach both:** run `scripts/watch-demo.sh` for about half a minute and stop it with Ctrl+C. The summary names two instances, each with about half the answers, all `200`. Each task draws its instance ID when it starts, so after a redeploy the IDs are new ones.
-3. **The database's connection limit:** each task logs `max_connections` at startup, as `maxConnections` in its `migrations applied` line ([The app's log](#the-apps-log)). The budget, every task doubled by a deploy times 5 connections, must stay under about 80% of it ([ADR 0040](../decisions/0040-two-tasks-details.md), decision 7).
+3. **The database's connection limit:** each task logs `max_connections` at startup, as `maxConnections` in its `migrations applied` line ([The app's log](#the-apps-log)). The budget, every task doubled by a deploy times 5 connections, must stay under about 80% of it ([ADR 0040](../decisions/0040-two-tasks-details.md), decision 7). On `db.t4g.micro` it is **79** (PH-37's demo, 2026-10-21), so 80% is about 63: two tasks need at most 20 and four, PH-38's maximum, 40, plus one for `db-setup`.
 
 **A stopped task loses no request:** while the watch script runs, stop one task in the console (*Stop*). The load balancer stops sending it requests, every line stays `200`, and once ECS has started a replacement the summary shows a third instance. This is optional; PH-37 relied on PH-12d's proof of the same mechanism.
 
-**The migration lock:** in the two tasks' logs, both print `waiting for the migration lock` and `migration lock taken`; the one that waited took the lock only after the other's `migrations applied`.
+**The migration lock:** every task's log prints `waiting for the migration lock`, `migration lock taken` and `migrations applied`. On a fresh demo the tasks start seconds apart and the migrations take milliseconds, so each usually takes the lock at once; the waiting itself shows in `pnpm check:scale`.
+
+**PH-37's demo** (run 39675322988, 2026-10-21): the deploy job 11:46, *Start the app* 4:27. Four task log streams for two tasks: as on PH-12d, scaling from zero with `--force-new-deployment` also scaled Terraform's empty first deployment, whose two tasks were drained a minute or so later, so the start step printed `3 of 2 task(s) running` for a while. One start failed with `CannotPullContainerError … i/o timeout` on the image registry and ECS started another 40 seconds later. The two tasks ran in `eu-central-1a` and `eu-central-1b`; the watch script's 18 requests were all `200`, 9 from each instance.
 
 ### A failed deployment
 
