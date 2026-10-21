@@ -333,15 +333,15 @@ git push
 - Create: `docs/decisions/0038-app-on-ecs-and-rds-details.md`
 - Modify: `docs/decisions/0008-hosting.md`, `0010-ci-cd.md`, `0012-security-baseline.md`, `0028-container-image-details.md`, `0036-scalability-and-isolation.md`, `0037-twelve-phases-a-diagram-row.md` (status lines and decision notes); `docs/roadmap.md`; `README.md`
 
-- [ ] **Step 1: ADR 0038 "App on ECS and RDS details"**
+- [x] **Step 1: ADR 0038 "App on ECS and RDS details"**
 
 In the form of ADR 0034: context, the spec's sixteen decisions with options and reasoning, "Settled while building" with what Tasks 1–6 found (the statements `db-setup` needed on PostgreSQL 18, every permission added after a real run, the secret's tags, the real timings, the pull left to the plan role), and consequences for PH-12d (the defaults it tunes) and PH-18 (SES and the Better Auth secret in the task role and task definition). Header: `Completes:` ADR 0008, decisions 19, 22 and 23; `Refines:` ADR 0008, decision 20; ADR 0010, decisions 10 and 11; ADR 0012, decision 16; ADR 0028, decision 10; ADR 0036, decisions 3 to 5; ADR 0037, decision 1.
 
-- [ ] **Step 2: The notes**
+- [x] **Step 2: The notes**
 
 In each ADR named: the status line, and the line at the bottom of the decision's cell (`🧩 **Completed by …**` or `✏️ **Refined by [ADR 0038](0038-app-on-ecs-and-rds-details.md), decision N:** …`), as CLAUDE.md "Documentation" describes.
 
-- [ ] **Step 3: Roadmap and README**
+- [x] **Step 3: Roadmap and README**
 
 PH-12c's row: the plan and PR links, then ✅ Done before the merge; the README's diagram mirrors it (PH-12c `●`, the road `═` through it). PH-12c's entry: **Delivers** gains `db-setup` and `szop_app`, **Owner steps** the forged-header and ECS Exec checks.
 
