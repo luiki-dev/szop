@@ -38,6 +38,7 @@ describe("HealthPage", () => {
     const databaseDown = {
       status: "error",
       commit: "unknown",
+      instance: "00000000",
       database: { status: "down" },
     } satisfies Health;
     server.use(

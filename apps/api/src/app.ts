@@ -3,6 +3,7 @@ import type { Config } from "./config.ts";
 import type { Database } from "./db/database.ts";
 import { readJournal } from "./db/schema-version.ts";
 import { healthRoutes } from "./health/routes.ts";
+import { instanceId } from "./instance.ts";
 import { crossSite } from "./security/cross-site.ts";
 import { headers } from "./security/headers.ts";
 import { jsonOnly } from "./security/json-only.ts";
@@ -59,6 +60,7 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
     db,
     journal: readJournal(),
     commit: config.commit,
+    instance: instanceId,
   });
 
   // The built SPA, and index.html for the app's own paths. Registered last:

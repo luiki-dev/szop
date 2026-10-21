@@ -3,6 +3,7 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../app.ts";
 import { createDatabase } from "../db/database.ts";
+import { instanceId } from "../instance.ts";
 import { testConfig } from "../test/config.ts";
 import { testDatabaseSettings, useTestDatabase } from "../test/database.ts";
 import { captureLog, type LogLine } from "../test/log.ts";
@@ -28,6 +29,7 @@ describe("GET /api/health", () => {
     expect(response.json()).toEqual({
       status: "ok",
       commit,
+      instance: instanceId,
       database: { status: "up", schemaVersion: "0000_init" },
     });
 
@@ -35,6 +37,17 @@ describe("GET /api/health", () => {
     // the API adds without the schema would fail here.
     const body: unknown = response.json();
     expect(healthSchema.parse(body)).toEqual(body);
+  });
+
+  it("names this process with 8 hexadecimal characters, the same on every answer", async () => {
+    app = buildApp({ config, db: database.db });
+
+    const first = await app.inject({ method: "GET", url: "/api/health" });
+    const second = await app.inject({ method: "GET", url: "/api/health" });
+
+    const instance: unknown = first.json<{ instance: unknown }>().instance;
+    expect(instance).toMatch(/^[0-9a-f]{8}$/);
+    expect(second.json<{ instance: unknown }>().instance).toBe(instance);
   });
 
   it("answers 503 when the database cannot be reached", async () => {
@@ -52,6 +65,7 @@ describe("GET /api/health", () => {
       expect(response.json()).toEqual({
         status: "error",
         commit,
+        instance: instanceId,
         database: { status: "down" },
       });
 

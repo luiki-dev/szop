@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Asks /api/health once a second and prints what answered: the time, the HTTP
-# status (000 for no answer), the commit and the schema version. Run it during
-# a demo-up redeploy to see that the demo keeps answering and the moment the new
-# commit takes over (PH-12d). Ctrl+C prints a summary and stops.
+# status (000 for no answer), the commit, the instance and the schema version.
+# Run it during a demo-up redeploy to see that the demo keeps answering and the
+# moment the new commit takes over (PH-12d), or for a while on a running demo to
+# see that requests reach every task (PH-37). Ctrl+C prints a summary and stops.
 #
 #   scripts/watch-demo.sh [url]      default: https://szop.dzwoniec.com/api/health
 #
@@ -18,6 +19,10 @@ last_commit=""
 commits=() # every commit seen, in the order first seen
 first=()   # the time each was first seen
 last=()    # the time each was last seen
+instances=()   # every instance seen, in the order first seen
+answers=()     # how many answers each gave
+inst_first=()  # the time each was first seen
+inst_last=()   # the time each was last seen
 
 summary() {
   echo
@@ -25,6 +30,9 @@ summary() {
   local i
   for i in "${!commits[@]}"; do
     echo "Commit ${commits[$i]:0:12}: first seen ${first[$i]}, last seen ${last[$i]}"
+  done
+  for i in "${!instances[@]}"; do
+    echo "Instance ${instances[$i]}: ${answers[$i]} answers, first seen ${inst_first[$i]}, last seen ${inst_last[$i]}"
   done
   exit 0
 }
@@ -40,8 +48,10 @@ while true; do
   [[ $status =~ ^[0-9]{3}$ ]] || status=000
 
   commit=""
+  instance="-"
   schema="-"
   [[ $body =~ \"commit\":\"([^\"]*)\" ]] && commit=${BASH_REMATCH[1]}
+  [[ $body =~ \"instance\":\"([^\"]*)\" ]] && instance=${BASH_REMATCH[1]}
   [[ $body =~ \"schemaVersion\":\"([^\"]*)\" ]] && schema=${BASH_REMATCH[1]}
 
   note=""
@@ -63,9 +73,25 @@ while true; do
     fi
   fi
 
+  if [[ $instance != - ]]; then
+    found=-1
+    for i in "${!instances[@]}"; do
+      if [[ ${instances[$i]} == "$instance" ]]; then found=$i; fi
+    done
+    if ((found < 0)); then
+      instances+=("$instance")
+      answers+=(1)
+      inst_first+=("$now")
+      inst_last+=("$now")
+    else
+      answers[found]=$((answers[found] + 1))
+      inst_last[found]=$now
+    fi
+  fi
+
   requests=$((requests + 1))
   if [[ $status != 200 ]]; then failures=$((failures + 1)); fi
 
-  echo "$now  $status  $short  $schema$note"
+  echo "$now  $status  $short  $instance  $schema$note"
   sleep 1
 done
