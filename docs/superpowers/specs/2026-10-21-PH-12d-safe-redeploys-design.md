@@ -34,7 +34,7 @@ The roadmap's goal: redeploying a running demo keeps it up. The old and the new 
 
 The phase is done when:
 
-- `pnpm lint`, `pnpm format:check`, `pnpm typecheck` and `pnpm test` pass, with tests for the commit in the configuration and in `/api/health`'s two bodies, and for `/api/live` answering `200` while the database is down;
+- the new `pnpm check` ([decision 16](#decisions-taken-in-the-brainstorm)) passes, with tests for the commit in the configuration and in `/api/health`'s two bodies, and for `/api/live` answering `200` while the database is down;
 - `pnpm check:image` builds the image with a commit and finds that commit in `/api/health`'s answer; `pnpm check:infra` and `pnpm check:workflows` pass;
 - `infra/base` is applied from the owner's machine with the deploy role's new permissions, a second `terraform plan` shows no changes, and IAM Access Analyzer reports no errors and no security warnings for the changed policies in the phase PR's plan comment;
 - **a fresh demo:** `demo-up` on the phase branch finishes green, and `https://szop.dzwoniec.com/api/health` answers `200` with the branch's commit;
@@ -77,6 +77,7 @@ PH-12c's redeploy took about 3 minutes, and the old task was gone about a minute
 | 13 | The runbook's timings *(Claude's call)* | Keep the 300-second explanation; measure and explain | **Measure the redeploy and the destroy again with the 30-second delay, and replace the explanation** with what AWS documents ([What PH-12c showed](#what-ph-12c-showed)). If the destroy still waits much longer than 30 seconds for the service, the runbook says what the measurement showed, without guessing. |
 | 14 | Where the expand-then-contract rule lives *(Claude's call)* | `drizzle.md`; the testing guide; an ADR only | **A section in `docs/development/tools/drizzle.md`**, next to the migration check, as [ADR 0036](../../decisions/0036-scalability-and-isolation.md), decision 3 placed it, before PH-16's first table. ADR 0039 points to it. |
 | 15 | A page load mixing two versions of the SPA | Sticky sessions on the target group now; the gap recorded, decided in PH-37; ignored | **Recorded, decided in PH-37** *(the owner's choice)*, as [OP-103](https://github.com/luiki-dev/szop/issues/249). While both tasks are healthy, the load balancer routes each request on its own, so a browser can get `index.html` from the new task and ask the old one for an asset only the new build has; the old task answers `404` and the page loads blank. With one task the window lasts seconds; with PH-37's two tasks replaced one at a time it lasts minutes, and sticky sessions there must be weighed against PH-37's goal that a request does not depend on which task answers it. The runbook and the architecture name the gap. Found by the spec's builder check. |
+| 16 | One command for the code checks | None (four scripts by hand); `pnpm check` running the four; `pnpm check` running every check, including the image, Terraform and the workflows | **`pnpm check`, running `pnpm lint`, `pnpm format:check`, `pnpm typecheck` and `pnpm test` in that order, stopping at the first failure** *(the owner asked for the script; what it runs is Claude's call)*. These are the checks of CI's `lint`, `typecheck` and `test` jobs that need nothing beyond the setup guide's Node and PostgreSQL (`pnpm db:up` first, as for `pnpm test`). The build with the E2E tests, `check:image`, `check:infra` and `check:workflows` stay separate: they need Docker, browsers, Terraform or the workflow linters, take minutes, and matter only when their files change, as CI's change detection already decides. The cheapest checks run first, so a formatting slip fails in seconds, not after the tests. The PH-12c spec's mentions of `pnpm check`, written when it did not exist, stay as written: specs are point-in-time records. |
 
 ## Design
 
@@ -84,6 +85,7 @@ PH-12c's redeploy took about 3 minutes, and the old task was gone about a minute
 
 | File | Change |
 |---|---|
+| `package.json` | `"check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test"` |
 | `Dockerfile` | `ARG GIT_COMMIT=unknown` and `ENV GIT_COMMIT=$GIT_COMMIT` in the final stage, after the copies, so the argument invalidates no earlier layer |
 | `compose.yaml` | The app's build passes `GIT_COMMIT: ${GIT_COMMIT:-unknown}` |
 | `scripts/check-image.sh` | Builds with `GIT_COMMIT` set to the checked-out commit and checks that `/api/health` answers it |
@@ -146,6 +148,7 @@ A section in `drizzle.md`, "Migrations and rolling deploys": during a deploy the
 - **`docs/architecture/architecture.md`**: the two health routes and the deployment's behaviour, with the SPA's version gap ([OP-103](https://github.com/luiki-dev/szop/issues/249)).
 - **`docs/architecture/stack-overview.md`**: rolling deploys, liveness and readiness, the deployment circuit breaker, the deregistration delay and draining, build arguments.
 - **`docs/architecture/threat-model.md`**: the commit on a public route; `ecs:StopTask` for the deploy role.
+- **`docs/development/scripts.md`**: `pnpm check`, and when to run it. **`docs/development/setup.md`**: its "Check that everything works" section runs `pnpm check` in place of the four scripts, if it lists them. **`docs/development/testing.md`** and the PR template, wherever they list the four scripts to run before a PR.
 - **`docs/glossary.md`**: any term the phase brings that is not there yet.
 - **`docs/development/testing.md`**, if the health route's tests change how a layer is described.
 
@@ -174,7 +177,7 @@ Step 1 comes before the PR's plan comment can show clean Access Analyzer results
 
 About eight, for the plan to detail:
 
-1. The commit: the Dockerfile, Compose, the configuration, `/api/health`, the shared schema, the startup log, `check:image`, `build`'s build argument; `pnpm typecheck`, `pnpm test` and `pnpm check:image` pass.
+1. The commit: the Dockerfile, Compose, the configuration, `/api/health`, the shared schema, the startup log, `check:image`, `build`'s build argument; first, `pnpm check` and its docs, so every later task runs it; `pnpm check` and `pnpm check:image` pass.
 2. `/api/live` and its tests; the request logging.
 3. `db-setup`'s timeouts and their tests.
 4. `infra/demo`'s target group and service; `infra/base`'s deploy role; `pnpm check:infra` passes and a local plan shows the expected changes.
