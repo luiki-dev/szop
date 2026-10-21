@@ -1,6 +1,6 @@
 # ADR 0037 — Twelve phases a diagram row
 
-- **Status:** ✅ Accepted
+- **Status:** ✅ Accepted — decision 1 refined by [ADR 0038](0038-app-on-ecs-and-rds-details.md), decision 2 (at most ten phases a row, so the diagram is about 84 characters wide)
 - **Date:** 2026-10-20
 - **Refines:** [ADR 0035](0035-wider-roadmap-diagram.md), decision 1 (a row of the README's roadmap diagram holds at most eleven phases, so the diagram is about 91 characters wide)
 
@@ -12,7 +12,7 @@
 
 | # | Topic | Options considered | Decision and reasoning |
 |---|-------|--------------------|------------------------|
-| 1 | How many phases a row holds | Eleven, with PH-38 moved to Stage 4 or 5; eleven, with Stage 3 wrapped; twelve, 8 characters wider | **At most twelve, so the diagram is about 99 characters wide** *(the owner's choice)*. Stage 3 keeps PH-38 where ADR 0036 placed it and stays on one row. The block still fits GitHub's README column on a desktop; on a phone it scrolls sideways, as before. A stage fills a row before continuing on the next, so Stage 4's nineteen phases are twelve and seven. The rest of [ADR 0017](0017-readme-roadmap-diagram.md), decision 2 stays. |
+| 1 | How many phases a row holds | Eleven, with PH-38 moved to Stage 4 or 5; eleven, with Stage 3 wrapped; twelve, 8 characters wider | **At most twelve, so the diagram is about 99 characters wide** *(the owner's choice)*. Stage 3 keeps PH-38 where ADR 0036 placed it and stays on one row. The block still fits GitHub's README column on a desktop; on a phone it scrolls sideways, as before. A stage fills a row before continuing on the next, so Stage 4's nineteen phases are twelve and seven. The rest of [ADR 0017](0017-readme-roadmap-diagram.md), decision 2 stays. <br>✏️ **Refined by [ADR 0038](0038-app-on-ecs-and-rds-details.md), decision 2:** at most ten phases a row, about 84 characters wide; Stage 3 wraps after PH-35, and Stage 4's nineteen phases are ten and nine. |
 
 ## Consequences
 

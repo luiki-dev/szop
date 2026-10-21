@@ -63,7 +63,7 @@ const envSchema = z.object({
   // as in pnpm dev, is not an error: the API logs a warning and serves its
   // own routes only.
   WEB_ROOT: z.string().min(1),
-  // In AWS, the VPC's range, where the load balancer lives; "none" locally.
+  // In AWS, the load balancer's subnets; "none" locally.
   TRUSTED_PROXIES: trustedProxies,
 });
 

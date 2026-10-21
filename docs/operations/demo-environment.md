@@ -5,8 +5,8 @@ How to set up, run and take down Szop's environment on AWS, step by step. Szop r
 | Module | Holds | Applied | Chapter |
 |---|---|---|---|
 | `infra/bootstrap` | The state bucket every module keeps its state in, and the budget alerts | Once, from the owner's machine | [Applying bootstrap](#applying-bootstrap) |
-| `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the log group, and CI's access to AWS: the GitHub OpenID Connect (OIDC) provider and the roles `szop-ci-plan` and `szop-ci-deploy` | From the owner's machine, when it changes | [Buying the domain](#buying-the-domain), [Applying base](#applying-base) |
-| `infra/demo` | One demo session: network, load balancer, certificate and the `szop` DNS record; containers and database follow in [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) | By CI's `demo-up` button, and destroyed by `demo-down`, by hand and every night | [Spinning up](#spinning-up), [Tearing down](#tearing-down) |
+| `infra/base` | Permanent resources: the DNS zone, the email identity, the image registry, the Better Auth secret, the password of the app's database role, the log group, the app's two roles for Elastic Container Service (ECS), and CI's access to AWS: the GitHub OpenID Connect (OIDC) provider and the roles `szop-ci-plan` and `szop-ci-deploy` | From the owner's machine, when it changes | [Buying the domain](#buying-the-domain), [Applying base](#applying-base) |
+| `infra/demo` | One demo session: network, load balancer, certificate, the `szop` DNS record, the database on Amazon Relational Database Service (RDS) and the app on ECS | By CI's `demo-up` button, and destroyed by `demo-down`, by hand and every night | [Spinning up](#spinning-up), [Debugging](#debugging), [Tearing down](#tearing-down) |
 
 Shutting Szop down for good is the reverse of this table: [Tearing down](#tearing-down) for `infra/demo`, then [Destroying base](#destroying-base), then [Destroying bootstrap](#destroying-bootstrap).
 
@@ -32,19 +32,32 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [The first apply](#the-first-apply)
   - [Checks](#checks)
   - [Rotating the Better Auth secret](#rotating-the-better-auth-secret)
+  - [The app's roles and database password](#the-apps-roles-and-database-password)
   - [CI's roles and variables](#cis-roles-and-variables)
   - [Cost allocation tags](#cost-allocation-tags)
 - [Spinning up](#spinning-up)
+  - [Service-linked roles](#service-linked-roles)
   - [Pressing the button](#pressing-the-button)
   - [When a run fails](#when-a-run-fails)
   - [Spinning up from your machine](#spinning-up-from-your-machine)
+- [Debugging](#debugging)
+  - [The app's log](#the-apps-log)
+  - [Finding the task](#finding-the-task)
+  - [A shell in the task](#a-shell-in-the-task)
+  - [Querying the database](#querying-the-database)
+  - [Checking the client address](#checking-the-client-address)
+  - [Reading a failed db-setup](#reading-a-failed-db-setup)
+  - [A task that does not stay up](#a-task-that-does-not-stay-up)
+  - [The migration check](#the-migration-check)
+  - [A failed destroy](#a-failed-destroy)
+- [Checking that no password is in a state](#checking-that-no-password-is-in-a-state)
+- [What a demo costs](#what-a-demo-costs)
 - [Tearing down](#tearing-down)
   - [With the button](#with-the-button)
   - [Checking that nothing is left](#checking-that-nothing-is-left)
   - [The nightly run](#the-nightly-run)
   - [From your machine](#from-your-machine)
 - [Destroying base](#destroying-base)
-- [Coming later](#coming-later)
 
 ## One-time account setup
 
@@ -290,7 +303,7 @@ The domains API exists only in `us-east-1`, hence `--region`.
 
 ## Applying base
 
-`infra/base` holds what outlives every demo: the domain's zone with its Certification Authority Authorization (CAA), Mail Exchanger (MX) and mail records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)), and CI's access to AWS: the GitHub OIDC provider and the two roles `szop-ci-plan` and `szop-ci-deploy` ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
+`infra/base` holds what outlives every demo: the domain's zone with its Certification Authority Authorization (CAA), Mail Exchanger (MX) and mail records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)), the app's two roles and the password of its database role ([PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds)), and CI's access to AWS: the GitHub OIDC provider and the two roles `szop-ci-plan` and `szop-ci-deploy` ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
 
 ### The first apply
 
@@ -331,14 +344,14 @@ aws sesv2 get-email-identity --email-identity dzwoniec.com \
 
 aws resourcegroupstaggingapi get-resources --tag-filters Key=group,Values=base \
   --query 'ResourceTagMappingList[].ResourceARN'
-#   the repository, the log group, the parameter and the SES identity
+#   the repository, the log group, the two parameters and the SES identity
 
 aws resourcegroupstaggingapi get-resources --region us-east-1 --tag-filters Key=group,Values=base \
   --query 'ResourceTagMappingList[].ResourceARN'
 #   the zone: Route 53 is global, and its tags are listed in us-east-1
 ```
 
-**The secret is not in the state.** Once, after the first apply, and after every rotation:
+**The secret is not in the state.** Once, after the first apply, and after every rotation (the same check for `szop_app`'s password, and for the master password in the demo's state, is in [Checking that no password is in a state](#checking-that-no-password-is-in-a-state)):
 
 ```bash
 secret=$(aws ssm get-parameter --name /szop/better-auth-secret --with-decryption \
@@ -356,6 +369,37 @@ In `secrets.tf`, raise `value_wo_version` by one, commit it on a branch, and app
 - set the parameter's value by hand: the next rotation overwrites it, and the code no longer says where it came from;
 - add a `value` argument to the parameter "to see it": it would write the secret into the state;
 - remove `prevent_destroy` from the zone, or run `terraform destroy` here, unless Szop is shut down for good ([Destroying base](#destroying-base)).
+
+### The app's roles and database password
+
+[PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) adds to base what the app on ECS needs before a demo can run it ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md)):
+
+- the two roles `szop-app-task-execution` and `szop-app-task`, each trusted by `ecs-tasks.amazonaws.com` for tasks of this account only. The **task execution role** is what ECS uses to start a task: it pulls the image from the registry `szop`, writes to the log group `/szop/app` and fetches the secrets into the container's environment (`/szop/db-app-password`, and the master password RDS keeps in Secrets Manager, which only `db-setup`'s task definition names). The code in the container never holds it. The **task role** is what the code in the container may call: today only the four `ssmmessages:` actions that ECS Exec needs;
+- the SSM parameter `/szop/db-app-password`, the password of the database role `szop_app` that the app connects as. Terraform generates it (64 letters and digits) and sends it through a write-only argument, as for the Better Auth secret, so it never enters the state. It lives in base because the database is recreated for every session, and the role with it, but the password need not change: `db-setup` creates the role with it at each `demo-up`;
+- the deploy role's three new managed policies, `szop-ci-deploy-demo-database`, `szop-ci-deploy-demo-service` and `szop-ci-deploy-image`, with the extra egress rules in `szop-ci-deploy-demo-network`, and the plan role's `DenyDataReads` statement.
+
+Apply it from the PR's branch as for every base change, then check:
+
+```bash
+terraform plan                  # "No changes. Your infrastructure matches the configuration."
+
+aws iam list-attached-role-policies --role-name szop-ci-deploy --query 'AttachedPolicies[].PolicyName'
+#   six, in any order: szop-ci-deploy-demo-network, -load-balancer, -dns, -database, -service, and szop-ci-deploy-image
+aws iam get-role --role-name szop-app-task-execution --query Role.AssumeRolePolicyDocument
+#   "ecs-tasks.amazonaws.com", with aws:SourceAccount and aws:SourceArn conditions; the same for szop-app-task
+aws ssm describe-parameters --parameter-filters Key=Name,Values=/szop/db-app-password \
+  --query 'Parameters[].[Name,Type]' --output text
+#   /szop/db-app-password   SecureString
+```
+
+The plan comment of the PR shows IAM Access Analyzer's findings for the new and changed policies; the known trust-policy findings stay accepted ([CI/CD](../development/ci-cd.md#the-plan-comment)). After the merge, apply base again from `main`; the plan must show no changes. Then check that the password is not in the state ([Checking that no password is in a state](#checking-that-no-password-is-in-a-state)).
+
+**Rotating `szop_app`'s password.** In `secrets.tf`, raise `value_wo_version` of `aws_ssm_parameter.db_app_password` by one, commit it on a branch and apply: the plan shows one change. The next `demo-up` runs `db-setup`, which sets the new password on the role, and starts tasks that read it. A task that a running demo restarts before then reads the new password, which the database does not know yet, so rotate while the demo is down, or press `demo-up` right after.
+
+⚠️ **Don't:**
+
+- put `szop_app`'s password, or the master password, anywhere by hand: a `value` argument, a `data "aws_ssm_parameter"` or a `data "aws_secretsmanager_secret_version"` would write it into the state;
+- set the parameter in the console: the next rotation overwrites it, and the role's password and the parameter would disagree until `db-setup` runs.
 
 ### CI's roles and variables
 
@@ -375,11 +419,12 @@ aws iam get-role --role-name szop-ci-plan --query Role.AssumeRolePolicyDocument
 
 aws iam list-attached-role-policies --role-name szop-ci-deploy --query 'AttachedPolicies[].PolicyName'
 #   szop-ci-deploy-demo-network, szop-ci-deploy-demo-load-balancer and szop-ci-deploy-demo-dns, in any order
+#   (and since PH-12c also -database, -service and szop-ci-deploy-image: see "The app's roles and database password")
 aws iam list-role-policies --role-name szop-ci-deploy
 #   one inline policy, "state"
 ```
 
-The `GitHubDemo` statement has no `ref` condition because `demo-up` runs from any branch; what stands between a branch's code and the deploy role is the owner's approval of the `demo` environment, so that environment must exist with its reviewer **before** this statement does ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decisions 10 and 14). If it is missing, a job that names `demo` creates it with no protection and gets credentials unapproved. The three managed policies hold what `infra/demo` needs (the network, the load balancer with its certificate, and the `szop` record and certificate-validation record in the zone), each limited to resources tagged `project` = `szop` and `group` = `demo`, or to those two record names in the zone ([PH-12b spec](../superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md#the-deploy-role)); the plan comment of the PR that changes them shows IAM Access Analyzer's findings.
+The `GitHubDemo` statement has no `ref` condition because `demo-up` runs from any branch; what stands between a branch's code and the deploy role is the owner's approval of the `demo` environment, so that environment must exist with its reviewer **before** this statement does ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decisions 10 and 14). If it is missing, a job that names `demo` creates it with no protection and gets credentials unapproved. The first three managed policies hold what PH-12b's `infra/demo` needs (the network, the load balancer with its certificate, and the `szop` record and certificate-validation record in the zone); PH-12c adds three more for the database, the ECS service and the image push. Each is limited to resources tagged `project` = `szop` and `group` = `demo`, or to those two record names in the zone ([PH-12b spec](../superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md#the-deploy-role)); the plan comment of the PR that changes them shows IAM Access Analyzer's findings.
 
 Both trust policies also hold `"token.actions.githubusercontent.com:aud": "sts.amazonaws.com"`. These two conditions are what keeps every other repository, branch and workflow from getting the roles' credentials. The `@` numbers are the owner's and the repository's GitHub IDs, which the immutable subject adds ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 13); they are public, unlike the account ID.
 
@@ -417,77 +462,310 @@ Once the access portal works (step 5) and a resource that carries the tags exist
 
 ## Spinning up
 
-`infra/demo` is created by the **`demo-up`** workflow, by hand ([ADR 0010](../decisions/0010-ci-cd.md), decision 11; [ADR 0034](../decisions/0034-network-and-demo-up-details.md)). Until [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) puts the app behind it, a demo is 19 resources: the network (a VPC, two public and two private subnets, an internet gateway and the public route table with its two associations), the load balancer with its security group, the security group's two ingress rules (HTTP and HTTPS) and its two listeners, the HTTPS certificate with its DNS validation record and the validation that waits for the certificate to be issued (`aws_acm_certificate_validation`), and the `szop` DNS record. `https://szop.dzwoniec.com` then answers with a fixed placeholder page that says the demo is up and names the commit it was deployed from.
+`infra/demo` is created by the **`demo-up`** workflow, by hand ([ADR 0010](../decisions/0010-ci-cd.md), decision 11; [ADR 0034](../decisions/0034-network-and-demo-up-details.md); the app and its database since [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds)). A demo is 33 resources:
 
-Before the first press, base must be applied with PH-12b's trust and policies, and the `demo` environment must exist with you as its reviewer ([CI's roles and variables](#cis-roles-and-variables)).
+- the network, the load balancer and the DNS: a VPC, two public and two private subnets, an internet gateway and the public route table with its two associations; the load balancer with its security group, that group's two ingress rules (HTTP and HTTPS) and its egress rule to the app's tasks, and the load balancer's two listeners; the HTTPS certificate with its DNS validation record and the validation that waits for the certificate to be issued (`aws_acm_certificate_validation`); the `szop` DNS record (19 resources, plus the egress rule);
+- the database: its security group and the one ingress rule on port 5432, a subnet group of the two private subnets, and the RDS instance `szop-demo` (PostgreSQL 18, `db.t4g.micro`, 20 GB);
+- the app: the tasks' security group with its three rules, the ECS cluster `szop-demo`, the task definitions `szop-demo-app` and `szop-demo-db-setup`, the target group `szop-demo-app` and the ECS service `szop-demo-app`.
+
+RDS also creates a secret in Secrets Manager for the database's master password. Terraform does not count it as a resource, and RDS deletes it with the instance. `https://szop.dzwoniec.com` then shows the app's status page: `API: ok`, `Database: up` and the schema version.
+
+Before the first press, base must be applied with PH-12c's roles and policies ([The app's roles and database password](#the-apps-roles-and-database-password)), the `demo` environment must exist with you as its reviewer ([CI's roles and variables](#cis-roles-and-variables)), and the service-linked roles must exist ([Service-linked roles](#service-linked-roles)).
+
+### Service-linked roles
+
+ECS and RDS each use a **service-linked role**, an IAM role that AWS creates and manages for one service. If the account does not have one yet, the first `terraform apply` that needs it fails with an error that names it; the deploy role cannot create service-linked roles on purpose, so the owner creates each once:
+
+```bash
+aws iam get-role --role-name AWSServiceRoleForECS --query Role.Arn --output text
+aws iam get-role --role-name AWSServiceRoleForRDS --query Role.Arn --output text
+#   an ARN each; "NoSuchEntity" means the role is missing
+aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com   # only if missing
+aws iam create-service-linked-role --aws-service-name rds.amazonaws.com   # only if missing
+```
+
+The load balancer's role, `AWSServiceRoleForElasticLoadBalancing`, has existed since [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button).
 
 ### Pressing the button
 
 1. On GitHub: *Actions → demo-up → Run workflow*. Choose the branch in *Use workflow from*: the one you want checked, usually the PR's branch. Leave `ref` empty to deploy that branch's latest commit, or type a branch, a tag or a **full 40-digit commit hash** to deploy that instead. A short hash is refused: checkout would look it up as a branch name. Then *Run workflow*.
-2. Open the run. The job `enable-teardown` starts at once and turns green in seconds: it switches the nightly `demo-down` back on if GitHub had disabled it. The job `deploy` waits for you: *Review deployments* → tick `demo` → *Approve and deploy*. Approve only code you have read; the job gets the deploy role's credentials ([threat model](../architecture/threat-model.md#who-can-act-and-through-which-path)). *Reject* ends the run without touching AWS.
-3. Wait for `deploy` to turn green. It checks the commit out, applies `infra/demo` with that commit passed as `deployed_commit`, then asks `https://szop.dzwoniec.com` every 10 seconds, for up to 10 minutes, until the page shows the commit. The certificate is issued first, which takes a few minutes ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 5), and the page can need a few more after that: a new DNS name and a fresh load balancer do not answer at once. The first run, on 2026-10-18, took about 4 minutes from the approval: about 3 minutes for the apply, of which the load balancer took 2¼, the certificate's validation half a minute and each DNS record another half minute; the page answered at the first try.
-4. Read the run's **summary**: the URL, the commit, the result of the apply, whether the page showed the commit, and that `demo-down` destroys the demo at the next 01:17 UTC unless pressed sooner.
+2. Open the run. Two jobs start at once and need no approval. `enable-teardown` turns green in seconds: it switches the nightly `demo-down` back on if GitHub had disabled it. `build` builds the image of the commit with Docker, holding no AWS credentials, and keeps it as the workflow artifact `image` (under a minute on PH-12c's first demo). The job `deploy` waits for you and for both: *Review deployments* → tick `demo` → *Approve and deploy*. Approve only code you have read; the job gets the deploy role's credentials ([threat model](../architecture/threat-model.md#who-can-act-and-through-which-path)). *Reject* ends the run without touching AWS. **Approve within a day:** the artifact is kept for one day. If it has expired, `deploy` fails at *Download the image*; press `demo-up` again.
+3. Wait for `deploy` to turn green. It does these steps, in order:
+   1. checks the commit out and compares it with the one `build` built the image from; if the branch moved while you were approving, it stops (press `demo-up` again);
+   2. takes the deploy role and runs `terraform init`;
+   3. downloads the image, loads it into Docker and **pushes it to the registry** `szop` as `szop:<commit>`, unless that tag is already there (tags are immutable, so an image that was pushed once is kept). The push comes before the apply because on a redeploy Terraform swaps the task definition at once, and the new task must find its image;
+   4. **applies `infra/demo`** with the commit passed as `deployed_commit`. The service is created with zero tasks. The certificate is issued first, which takes a few minutes ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 5), and a new database takes about 5 minutes (5 minutes 0 seconds on the first demo);
+   5. **runs `db-setup`** as a one-off ECS task: it connects to the database as the master user and creates or updates the role `szop_app`, which the app connects as, and makes it the database's owner. It must stop with exit code 0 within 10 minutes (it needs about a minute: Fargate pulls the image and starts);
+   6. **starts the app**: sets the service's wanted count to 1 and waits, up to 15 minutes, until one deployment remains with one task running. The task pulls the image, runs the migrations and passes the load balancer's health check;
+   7. **waits for the app**: asks `https://szop.dzwoniec.com/api/health` every 10 seconds, for up to 10 minutes, until it answers `200` with `"status":"ok"`, so DNS, the certificate, the load balancer, the app and its database all work.
+
+   The first demo with the app took about 9 minutes from the approval: about 6 for the apply, 5 of them the database, then a minute each for `db-setup` and the start; the job's limit is 30 minutes. **A redeploy** over a running demo takes about 3 minutes: the push, an apply that only registers the two new task definitions, `db-setup`, which finds the role and resets its password, and about a minute and a half while the new task starts, passes the health check and replaces the old one. The first run before PH-12c, with no database, took about 4 minutes.
+4. Read the run's **summary**: the URL, the commit and the image (and whether this run pushed it or found it in the registry), the result of each step above, and that `demo-down` destroys the demo at the next 01:17 UTC unless pressed sooner.
 
 **Check:** open both addresses in a browser.
 
-- `https://szop.dzwoniec.com` shows "The Szop demo is up" and the commit hash of the summary, with a valid certificate (the padlock; issued by Amazon).
+- `https://szop.dzwoniec.com` shows the status page: `API: ok`, `Database: up` and the schema version (`0000_init` today), with a valid certificate (the padlock; issued by Amazon).
 - `http://szop.dzwoniec.com` redirects to the HTTPS address (a 301). From a terminal: `curl -sI http://szop.dzwoniec.com`, whose first line is `HTTP/1.1 301` and whose `location` header names the HTTPS address.
 
-The demo now exists until `demo-down` removes it ([Tearing down](#tearing-down)). Pressing `demo-up` again while it is up applies the new commit on top and records it; two presses never run at the same time (the second waits for the first). GitHub keeps only one waiting run per concurrency group, so a third press replaces a run that is still waiting: that run is cancelled.
+The demo now exists until `demo-down` removes it ([Tearing down](#tearing-down)). Pressing `demo-up` again while it is up deploys the new commit on top: it pushes the new image, registers a new task definition revision and updates the service in place, and leaves the database alone. A redeploy is slow until [PH-12d](../roadmap.md#ph-12d-safe-redeploys): ECS starts the new task beside the old one and drains the old one for the load balancer's default 300 seconds. Two presses never run at the same time (the second waits for the first). GitHub keeps only one waiting run per concurrency group, so a third press replaces a run that is still waiting: that run is cancelled.
 
-⚠️ **Don't:** leave a demo up by accident. An approved run stays up until `demo-down` runs, at the latest at 01:17 UTC; press `demo-down` when you are done.
+⚠️ **Don't:** leave a demo up by accident. An approved run stays up until `demo-down` runs, at the latest at 01:17 UTC; press `demo-down` when you are done. A demo costs about $0.08 an hour ([What a demo costs](#what-a-demo-costs)).
 
 ### When a run fails
 
-Open the run and read the failed step. `deploy` needs `enable-teardown`: if `enable-teardown` fails, `deploy` is skipped, so no demo is created while the nightly destroy may be off.
+Open the run and read the failed step. `deploy` needs `enable-teardown` and `build`: if either fails, `deploy` is skipped, so no demo is created while the nightly destroy may be off or the image is missing.
 
 | Failed step | What it means | What to do |
 |---|---|---|
 | `enable-teardown` (`gh workflow enable`) | GitHub refused or was unreachable. `deploy` is skipped, so nothing was created | *Re-run failed jobs*: `deploy` then runs after `enable-teardown` and waits for your approval as usual. If it keeps failing, enable `demo-down` by hand (*Actions → demo-down → ⋯ → Enable workflow*) and press `demo-up` again |
-| `deploy` stays on "Waiting" | It needs your approval | *Review deployments* ([Pressing the button](#pressing-the-button)). A run nobody approves expires after 30 days |
+| `build`: the Docker build fails | The Dockerfile's `pnpm install` or build failed on that commit | Read the step's log as you would a failed `docker` job of CI ([Reading a failed run](../development/ci-cd.md#reading-a-failed-run), item 10); fix it on the branch and press `demo-up` again. Nothing in AWS was touched |
+| `deploy` stays on "Waiting" | It needs your approval | *Review deployments* ([Pressing the button](#pressing-the-button)). A run nobody approves expires after 30 days, but its image artifact after one |
 | `actions/checkout` fails, often with `couldn't find remote ref` | `ref` is a short hash or a name that does not exist | Run again with a branch, a tag or the full 40-digit hash |
+| `Resolve the commit`: "is not the one the image was built from" | The branch moved between `build` and the approval, so the image and the infrastructure would come from different commits | Press `demo-up` again |
 | `Configure AWS credentials`, or `Not authorized to perform sts:AssumeRoleWithWebIdentity` | The trust policy or the variable `AWS_DEPLOY_ROLE_ARN` does not match: base was not applied with the `GitHubDemo` statement, or the environment is not called `demo` | [CI's roles and variables](#cis-roles-and-variables) |
+| `Download the image`: "Artifact not found" | The artifact is older than a day (the approval took too long), or `build` was re-run and replaced it | Press `demo-up` again |
+| `Push the image`: `AccessDenied`, or "Cannot tell whether szop:… is in the registry" | The deploy role lacks an ECR action (its policy `szop-ci-deploy-image`), or the registry could not be reached | Read the message; add the action in `infra/base/ci_roles.tf` in a PR, apply base, press the button again. A push that stopped halfway leaves no tag, so the next run pushes again |
 | `Terraform init` or `Terraform apply`: `Error acquiring the state lock` after 15 minutes | Another run holds the lock, a `demo-down` or an earlier `demo-up` | Wait for it, then *Re-run failed jobs*. A stale lock: `terraform force-unlock <lock-id>` from your machine, as in [The nightly run](#the-nightly-run) |
 | `Terraform apply`: `deployed_commit is required to create or change the demo` | The precondition: an apply without the commit. The workflow always passes it, so this appears only for a changed workflow or a local apply without `-var` | Pass `-var "deployed_commit=$(git rev-parse HEAD)"`; see [Spinning up from your machine](#spinning-up-from-your-machine) |
-| `Terraform apply`: `AccessDenied` or `UnauthorizedOperation`, `… is not authorized to perform: <service>:<Action>` | The deploy role lacks that action, or the resource does not carry the tags `project` = `szop` and `group` = `demo` its conditions check. The message names the action | Add the action to the matching managed policy (`szop-ci-deploy-demo-network`, `-load-balancer` or `-dns`) in `infra/base/ci_roles.tf`, in a PR; apply base, then press the button again. Terraform applies what is missing and leaves the rest |
-| `Terraform apply`: any other AWS error | A resource could not be created: a name already taken, a limit, a dependency | Read the error; fix it; press the button again. If the demo is half built and you give up, press `demo-down` and run [the check that nothing is left](#checking-that-nothing-is-left) |
-| `Wait for the page`: "did not show commit … within 10 minutes" | The apply succeeded, but the page never showed the commit: DNS not yet answering, the certificate not yet attached, or a different commit answering | From your machine: `dig +short szop.dzwoniec.com` (the load balancer's addresses) and `curl -sS https://szop.dzwoniec.com`. A resolver that looked the name up before the record existed can keep saying "no such name" for some minutes. Press the button again: the apply changes nothing and the wait starts over |
+| `Terraform apply`: `AccessDenied` or `UnauthorizedOperation`, `… is not authorized to perform: <service>:<Action>` | The deploy role lacks that action, or the resource does not carry the tags `project` = `szop` and `group` = `demo` its conditions check. The message names the action | Add the action to the matching managed policy (`szop-ci-deploy-demo-network`, `-load-balancer`, `-dns`, `-database` or `-service`) in `infra/base/ci_roles.tf`, in a PR; apply base, then press the button again. Terraform applies what is missing and leaves the rest |
+| `Terraform apply`: "Service-linked role … has not been created", or "Unable to assume the service linked role" | The account has no role for ECS or RDS yet | [Service-linked roles](#service-linked-roles), then *Re-run failed jobs* |
+| `Terraform apply`: any other AWS error | A resource could not be created: a name already taken, a limit, a dependency, an engine version RDS does not offer | Read the error; fix it; press the button again. If the demo is half built and you give up, press `demo-down` and run [the check that nothing is left](#checking-that-nothing-is-left) |
+| `Run db-setup`: "db-setup exited with code …" or "run-task started no task" | The one-off task failed, or ECS refused to start it | [Reading a failed db-setup](#reading-a-failed-db-setup) |
+| `Run db-setup`: "did not stop within 10 minutes" | The task never finished: stuck pulling the image or connecting | Read its log stream ([Reading a failed db-setup](#reading-a-failed-db-setup)); then *Re-run failed jobs* |
+| `Start the app`: "was not stable within 15 minutes", with the service's latest events | The task starts and stops, or never passes the load balancer's health check | [A task that does not stay up](#a-task-that-does-not-stay-up) |
+| `Wait for the app`: "did not answer ok within 10 minutes" | The service is stable, but `/api/health` never said `"status":"ok"`: DNS not yet answering, the certificate not yet attached, or the database down | From your machine: `dig +short szop.dzwoniec.com` (the load balancer's addresses) and `curl -sS https://szop.dzwoniec.com/api/health`. `"database":{"status":"down"}` means the app cannot reach RDS: read its log ([Debugging](#debugging)). A resolver that looked the name up before the record existed can keep saying "no such name" for some minutes. Press the button again: the apply changes nothing and the waits start over |
 
 ### Spinning up from your machine
 
-When the workflow cannot run (GitHub is down, the role is broken, a permission is missing and you want to see the demo meanwhile), apply from your machine with your own credentials, from the commit you want to deploy:
+When the workflow cannot run (GitHub is down, the role is broken, a permission is missing and you want to see the demo meanwhile), do the workflow's steps from your machine with your own credentials, from the commit you want to deploy:
 
 ```bash
 export AWS_PROFILE=szop
 aws sso login
 git status -sb                                    # clean, and pushed: demo-down fetches this commit from GitHub
+commit=$(git rev-parse HEAD)
+
+# 1. Build the image and push it, unless the registry has the tag already
+docker build -t "szop:$commit" .
+uri=$(aws ecr describe-repositories --repository-names szop --query 'repositories[0].repositoryUri' --output text)
+aws ecr get-login-password | docker login --username AWS --password-stdin "${uri%%/*}"
+aws ecr describe-images --repository-name szop --image-ids "imageTag=$commit"   # ImageNotFoundException: push it
+docker tag "szop:$commit" "$uri:$commit" && docker push "$uri:$commit"
+
+# 2. Apply
 cd infra/demo
 cp terraform.tfvars.example terraform.tfvars      # the first time only; edit account_id
 terraform init
-terraform plan  -var "deployed_commit=$(git rev-parse HEAD)"    # read it: only the demo's resources
-terraform apply -var "deployed_commit=$(git rev-parse HEAD)"    # type yes
+terraform plan  -var "deployed_commit=$commit"    # read it: only the demo's resources
+terraform apply -var "deployed_commit=$commit"    # type yes
+
+# 3. Run db-setup, then start the app
+cluster=$(terraform output -raw cluster)
+task=$(aws ecs run-task --cluster "$cluster" --task-definition "$(terraform output -raw db_setup_task_definition)" \
+  --launch-type FARGATE --propagate-tags TASK_DEFINITION \
+  --network-configuration "awsvpcConfiguration={subnets=[$(terraform output -raw task_subnets)],securityGroups=[$(terraform output -raw task_security_group)],assignPublicIp=ENABLED}" \
+  --query 'tasks[0].taskArn' --output text)
+aws ecs wait tasks-stopped --cluster "$cluster" --tasks "$task"
+aws ecs describe-tasks --cluster "$cluster" --tasks "$task" --query 'tasks[0].containers[0].exitCode'   # must print 0
+aws ecs update-service --cluster "$cluster" --service "$(terraform output -raw service)" --desired-count 1
 ```
 
-Then do the check of [Pressing the button](#pressing-the-button), which the workflow's wait would have done for you.
+Then do the check of [Pressing the button](#pressing-the-button), which the workflow's waits would have done for you.
 
 The commit is recorded as the `deployed_commit` output, so `demo-down` then destroys the demo with this commit's code, the same as after a button press. Without `-var`, the precondition stops the apply before it creates anything, so no demo exists that `demo-down` would destroy with the wrong code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7). Applying from your machine does not re-enable `demo-down`: if the schedule is off, *Actions → demo-down* shows a banner with an *Enable workflow* button.
 
-⚠️ **Don't:** apply from a dirty working tree or a commit you have not pushed: the demo would hold code that `demo-down` can neither fetch nor reproduce.
+⚠️ **Don't:**
+
+- apply from a dirty working tree or a commit you have not pushed: the demo would hold code that `demo-down` can neither fetch nor reproduce;
+- apply before the image is in the registry: the service has no tasks yet, so nothing fails at once, but the task you start later cannot pull it.
+
+## Debugging
+
+A running demo has two ways in: its **log** in CloudWatch, and a **shell inside the task** through ECS Exec. Both need your sign-in (`aws sso login`) and, for the shell, the Session Manager plugin ([setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli)). The names below are fixed: the cluster and the service are `szop-demo` and `szop-demo-app`, the log group is `/szop/app`, and the container is `app`.
+
+### The app's log
+
+Both the app and `db-setup` write to the log group `/szop/app`, each task into a stream named `<prefix>/<container>/<task id>`: `app/app/…` and `db-setup/db-setup/…`. The app logs one JSON line per event, and every request except `GET /api/health`.
+
+```bash
+aws logs tail /szop/app --follow --since 1h                          # everything, live
+aws logs tail /szop/app --since 1h --log-stream-name-prefix app/     # the app only
+aws logs tail /szop/app --since 5m --filter-pattern '"startup failed"'
+```
+
+The log keeps 7 days. Tokens in URLs are redacted and secrets never logged, but read it as if it were public.
+
+### Finding the task
+
+```bash
+aws ecs list-tasks --cluster szop-demo --service-name szop-demo-app \
+  --query 'taskArns[0]' --output text
+#   arn:aws:ecs:eu-central-1:<account>:task/szop-demo/<task id>: the id is the last part
+```
+
+`None` means the service has no running task: it has not been started yet, or it is failing ([A task that does not stay up](#a-task-that-does-not-stay-up)).
+
+### A shell in the task
+
+```bash
+aws ecs execute-command --cluster szop-demo --task <task id> --container app \
+  --interactive --command "/bin/sh"
+```
+
+`Starting session with SessionId: ecs-execute-command-…` and a prompt mean it works; `exit` ends the session. The shell runs inside the container, so it has the app's environment variables, `DATABASE_PASSWORD` among them, as the first real demo showed. The image has no `psql` and no `curl`. An ECS Exec session needs a writable root filesystem, which is why the task's is writable ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md)).
+
+`TargetNotConnectedException` means the task's ECS Exec agent is not connected yet (wait a minute after the task starts) or the task role lacks the four `ssmmessages:` actions. A task started before the service allowed ECS Exec cannot be entered: use a task the current service started.
+
+### Querying the database
+
+Inside the shell, Node connects with the app's own settings, TLS included, and prints a query's rows:
+
+```bash
+cd /app/apps/api
+node --input-type=module -e '
+import pg from "pg";
+import { readFileSync } from "node:fs";
+const e = process.env;
+const pool = new pg.Pool({
+  host: e.DATABASE_HOST, port: Number(e.DATABASE_PORT), database: e.DATABASE_NAME,
+  user: e.DATABASE_USER, password: e.DATABASE_PASSWORD,
+  ssl: { ca: readFileSync("certs/rds-global-bundle.pem", "utf8"), rejectUnauthorized: true },
+});
+console.table((await pool.query(process.argv[1])).rows);
+await pool.end();
+' "SELECT ssl FROM pg_stat_ssl WHERE pid = pg_backend_pid()"
+```
+
+The query in the last line is the one to change. This one asks PostgreSQL whether *this* connection is encrypted; it must print `ssl` as `true` ([OP-017](https://github.com/luiki-dev/szop/issues/68)). Others worth running: `SELECT current_user, current_database()` (`szop_app`, `szop`), `SELECT rolname, rolsuper, rolcreaterole, rolcreatedb FROM pg_roles WHERE rolname = 'szop_app'` (all three `false`), `SELECT * FROM drizzle.__drizzle_migrations` (the applied migrations). Nothing in the demo holds data worth keeping, so a write is safe, but it is gone at the next `demo-down`.
+
+Why Node and not `psql`: adding the PostgreSQL client to the image would grow it for a tool used by hand now and then ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md), refining [ADR 0008](../decisions/0008-hosting.md), decision 20). The command runs the same way anywhere the app's settings are set; on the first real demo, run inside the task, it printed `true`.
+
+### Checking the client address
+
+The load balancer is the one hop the app trusts, so the log must show the address a request really came from, whatever `X-Forwarded-For` claims ([ADR 0012](../decisions/0012-security-baseline.md), decision 13; [OP-053](https://github.com/luiki-dev/szop/issues/26)):
+
+```bash
+curl -s https://checkip.amazonaws.com                                       # your address
+curl -s -o /dev/null https://szop.dzwoniec.com/
+curl -s -o /dev/null -H 'X-Forwarded-For: 203.0.113.7' https://szop.dzwoniec.com/
+aws logs tail /szop/app --since 5m --filter-pattern '"incoming request"'
+#   both lines show "remoteAddress":"<your address>"; 203.0.113.7 appears in neither
+```
+
+### Reading a failed db-setup
+
+`Run db-setup` names the task and the stream (`db-setup/db-setup/<task id>`) and the exit code. Read what the task printed:
+
+```bash
+aws logs tail /szop/app --since 1h --log-stream-name-prefix db-setup/
+```
+
+What the stream and the exit code say:
+
+- **`{"msg":"db-setup done","role":"szop_app","created":true}`** and exit code 0: it worked. `created` is `false` on a redeploy: the role existed, and only its password was set again.
+- **`{"msg":"db-setup failed","error":"…"}`** and exit code 1: a statement failed; the error is PostgreSQL's message. `password authentication failed for user "szop_admin"` is the master password (the secret RDS keeps); `permission denied` or `must be able to SET ROLE` means the master user lacks a right the statements need; `ECONNREFUSED`, a timeout or `no pg_hba.conf entry` means the task cannot reach the database (a security group, or the database not yet available). The message never holds a password: `db-setup` sends `szop_app`'s password as a hash made in the task, so even PostgreSQL's own log has none.
+- **`Invalid configuration:` and lines naming variables** and exit code 1: a setting is missing or invalid, never shown with its value. `APP_DATABASE_PASSWORD: must be printable ASCII characters (no SASLprep normalization)` means the password in `/szop/db-app-password` has other characters. Simple Authentication and Security Layer preparation (SASLprep) is the normalization PostgreSQL applies to a password before hashing it; `db-setup` does not, so it refuses such a password. Terraform generates letters and digits only, so this means the parameter was set by hand.
+- **No stream, or exit code `none`:** ECS could not start the container, so no log exists. Ask the task itself:
+
+  ```bash
+  aws ecs describe-tasks --cluster szop-demo --tasks <task id> \
+    --query 'tasks[0].[stopCode,stoppedReason,containers[0].reason]' --output text
+  ```
+
+  `CannotPullContainerError` means the image tag is not in the registry. `ResourceInitializationError: unable to pull secrets` names a secret the execution role cannot read: the parameter or the master secret does not exist (check `aws ssm describe-parameters`; the master secret is created with the instance) or the role's policy no longer allows it. A task ECS stopped shows for about an hour.
+
+Run `db-setup` again by pressing `demo-up` again: it is safe to repeat.
+
+### A task that does not stay up
+
+When `Start the app` times out, ask the service why, then read the task's log:
+
+```bash
+aws ecs describe-services --cluster szop-demo --services szop-demo-app \
+  --query 'services[0].events[:8].message' --output text
+aws ecs list-tasks --cluster szop-demo --service-name szop-demo-app --desired-status STOPPED
+aws ecs describe-tasks --cluster szop-demo --tasks <task id> \
+  --query 'tasks[0].[stopCode,stoppedReason,containers[0].exitCode]' --output text
+aws logs tail /szop/app --since 30m --log-stream-name-prefix app/
+```
+
+The events say `(service szop-demo-app) has started 1 tasks`, `… has reached a steady state`, or `… (instance …) is unhealthy in (target-group …) due to (reason Health checks failed)`. Until PH-12d, ECS keeps starting replacement tasks, backing off between tries, with no circuit breaker to stop it, so a task that always fails fills the log. Common causes:
+
+- **The app stops at startup**, with `startup failed` in its log and exit code 1: the migration check below, an unreachable database (the log names the error), or an invalid setting (named, never its value).
+- **The task runs but the health checks fail:** the target group asks `/api/health`, which answers 503 while the database is unreachable. The service ignores failed checks for the first 60 seconds, for the migrations. Check the app's log for the database error, then query from a shell ([Querying the database](#querying-the-database)).
+- **The task never starts**, with `CannotPullContainerError` or `ResourceInitializationError`: as for `db-setup` above.
+
+### The migration check
+
+A new task runs the migrations when it starts, after checking that the database holds no migration this branch's code lacks. If the demo was last deployed from another branch, the check fails, the task exits with code 1 and `Start the app` times out. The task's log says:
+
+```text
+The database's migrations do not match this code's:
+  unknown: applied at 1891307052475, not in this code
+Reset the database: `pnpm db:reset` locally; on the demo, `demo-down` then `demo-up`.
+```
+
+The remedy for a demo is to start from an empty database: press `demo-down` (from `main`; it destroys with the code of the commit the demo was last deployed from, which after a failed redeploy is already the new branch's, since the apply recorded it), wait for it, then press `demo-up` on the branch you want. The old task keeps serving while the new one fails, so the demo stays up meanwhile. The cases are described in the [Drizzle page](../development/tools/drizzle.md#the-migration-check) ([OP-043](https://github.com/luiki-dev/szop/issues/84)).
+
+### A failed destroy
+
+A `demo-down` that fails halfway leaves some resources and drops the `deployed_commit` output from the state, so a re-run (or the nightly run) destroys with `main`'s code. `main`'s code still removes everything the state lists, since a destroy is driven by the state, but a resource a branch added is destroyed by the code that created it, so use the commit. Before re-running, note the commit from the failed run's summary (*Code used*), then destroy by hand with it ([From your machine](#from-your-machine)): `git switch --detach <commit>` ([OP-099](https://github.com/luiki-dev/szop/issues/228)). Then [check that nothing is left](#checking-that-nothing-is-left). Failures to expect now that the demo has a task and a database:
+
+- **A security group or subnet "has a dependent object" or "is in use":** a task's network interface is still being released after the service stopped. Wait a few minutes and re-run.
+- **The database takes long to delete:** RDS needed under 2 minutes on the first demo (1 min 52 s; creating it took 5 minutes), and the job's limit is 60. Re-run once if it timed out.
+
+## Checking that no password is in a state
+
+Terraform's state must hold neither `szop_app`'s password nor the master password ([OP-016](https://github.com/luiki-dev/szop/issues/75); [ADR 0008](../decisions/0008-hosting.md), decision 22). Once after the first demo, and after every rotation, run this from the repository's root: it reads both passwords with your own credentials and searches both states for them. The demo must be up for the master password to exist:
+
+```bash
+export AWS_PROFILE=szop
+app_pw=$(aws ssm get-parameter --name /szop/db-app-password --with-decryption \
+  --query Parameter.Value --output text)
+master_pw=$(aws secretsmanager get-secret-value \
+  --secret-id "$(aws rds describe-db-instances --db-instance-identifier szop-demo \
+    --query 'DBInstances[0].MasterUserSecret.SecretArn' --output text)" \
+  --query SecretString --output text | jq -r .password)
+for module in base demo; do
+  for pw in "$app_pw" "$master_pw"; do
+    terraform -chdir=infra/$module state pull | grep -c -F -- "$pw"
+  done
+done
+unset app_pw master_pw
+```
+
+It must print `0` four times. Both modules must be initialised (`terraform init`) on your machine. A `1` or more means a password reached the state: stop, find the resource that holds it, and rotate the password.
+
+## What a demo costs
+
+The figures are estimates from AWS's list prices for Frankfurt; the first real run's Cost Explorer figures replace them (to be measured). The bill is per hour from the moment a resource exists to the moment it is deleted.
+
+| Resource | Per hour | Per day |
+|---|---|---|
+| Application load balancer (the hourly charge and a little capacity) | about $0.03 | $0.72 |
+| Public IPv4 addresses: two for the load balancer, one for the task | about $0.015 | $0.36 |
+| Database `db.t4g.micro` with 20 GB of `gp3` | about $0.022 | $0.53 |
+| The Fargate task (0.25 vCPU, 0.5 GB) | about $0.012 | $0.29 |
+| **Total** | **about $0.08** | **about $1.90** |
+
+The load balancer's and the database's charges dominate. A three-hour session costs about $0.25. A demo someone forgets is destroyed at 01:17 UTC, so it costs at most a day, about $1.90. If the nightly run fails and nobody notices, about $13 a week or $57 a month: the budget alerts of [Applying bootstrap](#applying-bootstrap) fire well before, and the nightly run's failure email comes first. Log lines, the DNS queries and the data transfer of a demo add cents. A second task and Redis will add about $0.9 a day ([ADR 0036](../decisions/0036-scalability-and-isolation.md), costs).
+
+What stays between sessions costs little: the hosted zone ($0.50 a month), the domain ($15 a year), the registry's images (cents), the log group and the parameters (free at this size). The budget alerts count spending, not credits, so a day of demos can raise one even when credits cover the bill.
 
 ## Tearing down
 
-`infra/demo` is destroyed by the **`demo-down`** workflow, by hand and every night ([ADR 0010](../decisions/0010-ci-cd.md), decision 13). It is the safety net against a demo left running: a forgotten demo costs about $1.90 a day once PH-12c adds the task and the database, about $2.80 once PH-37 and PH-39 add a second task and Redis ([ADR 0036](../decisions/0036-scalability-and-isolation.md), costs). A real destroy removes everything [Spinning up](#spinning-up) created, in dependency order: the DNS records, the listeners and the load balancer, the certificate, the security group, then the gateway, the subnets and the VPC. It reads the state, so it removes exactly what the last apply recorded. On a quiet night there is nothing to destroy, which still proves that the workflow, the role, the state bucket and the lock all work.
+`infra/demo` is destroyed by the **`demo-down`** workflow, by hand and every night ([ADR 0010](../decisions/0010-ci-cd.md), decision 13). It is the safety net against a demo left running: a forgotten demo costs about $1.90 a day with the task and the database ([What a demo costs](#what-a-demo-costs)), about $2.80 once PH-37 and PH-39 add a second task and Redis ([ADR 0036](../decisions/0036-scalability-and-isolation.md), costs). A real destroy removes everything [Spinning up](#spinning-up) created, in dependency order: the DNS records, the service and its tasks, the listeners and the load balancer, the database, the certificate, the security groups, then the gateway, the subnets and the VPC. It reads the state, so it removes exactly what the last apply recorded. On a quiet night there is nothing to destroy, which still proves that the workflow, the role, the state bucket and the lock all work.
 
 ### With the button
 
 1. On GitHub: *Actions → demo-down → Run workflow*, branch **`main`**, *Run workflow*. (The environment `demo-teardown` allows only `main`; on another branch the job is refused.)
-2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with an RDS database to delete. The first real destroy, of the placeholder demo, took about a minute and a half, most of it the two DNS records (half a minute each) and the load balancer (20 seconds).
+2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with the app and the database (9½ minutes on PH-12c's first demo: 7 for the service, which waits out the load balancer's default draining of 300 seconds before its task stops, which PH-12d shortens, and under 2 for the database). The first real destroy, of the placeholder demo before PH-12c, took about a minute and a half, most of it the two DNS records (half a minute each) and the load balancer (20 seconds).
 3. Read the run's **summary** (the run's page, *Summary*):
    - **Trigger:** `workflow_dispatch` (by hand) or `schedule` (the nightly run).
    - **Code used:** which Terraform code destroyed the demo and why. If a demo recorded its commit (the `deployed_commit` output of `infra/demo`, written by every `demo-up` run), it is that commit, so a resource added by a branch is destroyed by the code that created it; with no commit recorded, it is `main`'s code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 6).
    - **Result:** Terraform's own `Destroy complete! Resources: N destroyed.` (`0 destroyed` on a quiet night).
 
-**Check:** the run is green, and *Result* says `Destroy complete!` with every resource `demo-up` created counted (19 until PH-12c). Then [check that nothing is left](#checking-that-nothing-is-left).
+**Check:** the run is green, and *Result* says `Destroy complete!` with every resource `demo-up` created counted (33). Then [check that nothing is left](#checking-that-nothing-is-left).
 
 If two runs overlap, the second waits: `demo-down` runs one at a time and never cancels a running destroy, and every Terraform command waits up to 15 minutes for the state lock.
 
@@ -495,17 +773,19 @@ If two runs overlap, the second waits: `demo-down` runs one at a time and never 
 
 A destroy that reports success is the proof, and this is the second look, which also finds what a half-failed apply left behind. Two checks, because AWS has two kinds of resource here:
 
-1. **Everything that carries tags.** *Resource Groups & Tag Editor → Tag Editor*: **Regions: eu-central-1** (the Tag Editor searches only the regions you select, and every taggable resource of the demo lives in Frankfurt), *Resource types: All supported resource types*, tag key `group`, value `demo`, *Search resources*. It must list nothing. The same from a terminal:
+1. **Everything that carries tags.** *Resource Groups & Tag Editor → Tag Editor*: **Regions: eu-central-1** (the Tag Editor searches only the regions you select, and every taggable resource of the demo lives in Frankfurt), *Resource types: All supported resource types*, tag key `group`, value `demo`, *Search resources*. It must list nothing but inactive task definition revisions. The same from a terminal:
 
    ```bash
    aws resourcegroupstaggingapi get-resources --region eu-central-1 --tag-filters Key=group,Values=demo \
      --query 'ResourceTagMappingList[].ResourceARN'
-   #   []
+   #   []   (or only the inactive task definition revisions, below)
    ```
 
-   Right after a destroy, the list can still name resources that are already gone: the index behind the Tag Editor lags behind deletions, by minutes or longer. On the first real destroy it still listed the two security group rules (`security-group-rule/sgr-…`) after EC2 reported them deleted. Check such a leftover in its own service before acting on it, for example `aws ec2 describe-security-group-rules --region eu-central-1 --security-group-rule-ids <id>`, which answers `InvalidSecurityGroupRuleId.NotFound` for a rule that is gone.
+   Right after a destroy, the list can still name resources that are already gone: the index behind the Tag Editor lags behind deletions, by minutes or longer. On the first real destroy it still listed the two security group rules (`security-group-rule/sgr-…`) after EC2 reported them deleted; after PH-12c's first destroy it still listed the subnets, the rules, the service and its stopped tasks, and the cluster, which ECS keeps as `INACTIVE` for a while (`aws ecs describe-clusters --clusters szop-demo --query 'clusters[].status'`). Check such a leftover in its own service before acting on it, for example `aws ec2 describe-security-group-rules --region eu-central-1 --security-group-rule-ids <id>`, which answers `InvalidSecurityGroupRuleId.NotFound` for a rule that is gone.
 
-   Global services (Route 53, IAM, Budgets) show up in the Tag Editor only under *Regions: us-east-1*, and **IAM roles never show up there at all**: the API behind it does not return them. The demo creates no role until PH-12c, and the roles the app uses are base's.
+   **Inactive task definition revisions may remain, and are expected.** Terraform deregisters each revision of `szop-demo-app` and `szop-demo-db-setup` when it destroys them, which leaves it `INACTIVE`: it costs nothing, cannot start a task and keeps its tags, so the Tag Editor still lists it as `task-definition/szop-demo-app:<n>`. Check one: `aws ecs describe-task-definition --task-definition szop-demo-app:1 --query taskDefinition.status --output text` prints `INACTIVE`. Anything else in the list is a leftover. The database's master secret is not in the list: RDS deletes it with the instance, and `aws secretsmanager list-secrets --query "SecretList[?starts_with(Name, 'rds!db-')].Name"` prints `[]`.
+
+   Global services (Route 53, IAM, Budgets) show up in the Tag Editor only under *Regions: us-east-1*, and **IAM roles never show up there at all**: the API behind it does not return them. The demo creates no role, and the roles the app uses are base's.
 
 2. **The zone's records.** DNS records carry no tags, so the Tag Editor never lists them. The zone must hold no `szop` record and no certificate-validation record `_<token>.szop`:
 
@@ -567,7 +847,7 @@ Only when Szop is shut down for good ([OP-093](https://github.com/luiki-dev/szop
 
 **Order.** `infra/demo` first ([Tearing down](#tearing-down), with its check that nothing is left): it writes the `szop` and certificate-validation records into base's zone, and a zone that still holds records Terraform does not know cannot be deleted. Base second. [Destroying bootstrap](#destroying-bootstrap) last, because the state bucket holds base's state.
 
-**What goes.** The hosted zone and the records Terraform made in it (CAA, MX, SPF, DMARC and the three DKIM records); the SES identity for `dzwoniec.com`; the image registry `szop` with its lifecycle policy; the Better Auth secret; the log group `/szop/app` with its logs; the GitHub OIDC provider and the roles `szop-ci-plan` and `szop-ci-deploy` with their policies. Not touched: the domain's registration (Terraform never held it), the state bucket and the budget (bootstrap), and the cost allocation tags you activated in the billing console.
+**What goes.** The hosted zone and the records Terraform made in it (CAA, MX, SPF, DMARC and the three DKIM records); the SES identity for `dzwoniec.com`; the image registry `szop` with its lifecycle policy; the Better Auth secret and `szop_app`'s password; the log group `/szop/app` with its logs; the app's roles `szop-app-task-execution` and `szop-app-task`; the GitHub OIDC provider and the roles `szop-ci-plan` and `szop-ci-deploy` with their policies. Not touched: the domain's registration (Terraform never held it), the state bucket and the budget (bootstrap), and the cost allocation tags you activated in the billing console.
 
 **Decide about the domain first.** The registration of `dzwoniec.com` names the four name servers of today's zone. Once the zone is deleted, `dzwoniec.com` and every name under it stop resolving. Two ways on:
 
@@ -599,7 +879,3 @@ Afterwards: delete the two repository variables (`gh variable delete AWS_PLAN_RO
 - commit the lifted `prevent_destroy` or `force_delete = true`: the guards exist for the next person who runs `terraform destroy` by mistake;
 - delete the zone while the domain is still registered and in use, unless you mean to take it offline;
 - skip `terraform plan -destroy`: it is the last place to see that it names base's resources and nothing else.
-
-## Coming later
-
-- **Debugging** a running demo with ECS Exec and its logs, and **what it costs** ([PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds)).

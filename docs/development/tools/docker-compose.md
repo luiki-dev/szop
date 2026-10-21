@@ -25,7 +25,7 @@ Docker Compose starts the services a project needs from one file. Szop's everyda
   - `depends_on: postgres: condition: service_healthy`: PostgreSQL is started first, and the app only once its health check passes.
   - `environment`: every setting the image does not set itself. `HOST: 0.0.0.0`, because inside the container the API must listen on every interface for Docker's port mapping to reach it; `DATABASE_HOST: postgres`, the service's name on the network Compose creates for the project; the rest as in `apps/api/.env.example`.
   - `ports: "127.0.0.1:8080:3000"`: the API listens on 3000 inside the container and is reached on 8080 on this machine, so `pnpm dev` and `pnpm start` keep 3000.
-  - `read_only: true`: the container's root filesystem is read-only, which proves the API writes nothing to disk, as AWS's container service will require.
+  - `read_only: true`: the container's root filesystem is read-only, which proves the API writes nothing to disk. On ECS the root filesystem is writable instead, because ECS Exec needs it ([ADR 0038](../../decisions/0038-app-on-ecs-and-rds-details.md)).
   - `healthcheck`: `node -e` with `fetch` on `/api/health`, since the slim image has no `curl`; `docker compose up --wait` waits for it.
 
 ## Everyday use

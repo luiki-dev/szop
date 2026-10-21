@@ -1,11 +1,10 @@
 # The demo's network (ADR 0008, decision 16; PH-12b spec, decision 2): a VPC
-# with two public subnets for the load balancer and two private ones that
-# stay empty until PH-12c puts RDS in them. No NAT gateway and no VPC
-# endpoints.
+# with two public subnets for the load balancer and the app's tasks and two
+# private ones for RDS. No NAT gateway and no VPC endpoints.
 resource "aws_vpc" "main" {
   cidr_block = local.vpc_cidr
 
-  # RDS and the ECS task need both in PH-12c.
+  # RDS and the ECS task need both.
   enable_dns_support   = true
   enable_dns_hostnames = true
 

@@ -96,6 +96,35 @@ data "aws_iam_policy_document" "ci_plan_denies" {
     resources = ["*"]
   }
 
+  # Data, not configuration: the database's log files, the SQL text
+  # Performance Insights keeps (the demo turns it off; this keeps a later
+  # change from publishing it) and DynamoDB's items (Szop has no table). These
+  # are every such read ReadOnlyAccess grants for RDS, ECS, ECR and DynamoDB
+  # (checked against v190; OP-096, PH-12c spec, The plan role). ECS's reads
+  # return configuration only: task definitions hold no secret values. Pulling
+  # an image (ecr:BatchGetImage, ecr:GetDownloadUrlForLayer) stays allowed:
+  # the image holds only the public code.
+  statement {
+    sid    = "DenyDataReads"
+    effect = "Deny"
+    actions = [
+      "rds:DownloadDBLogFilePortion",
+      "rds:DownloadCompleteDBLogFile",
+      "pi:DescribeDimensionKeys",
+      "pi:GetDimensionKeyDetails",
+      "pi:GetResourceMetrics",
+      "dynamodb:GetItem",
+      "dynamodb:BatchGetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:PartiQLSelect",
+      "dynamodb:GetRecords",
+      "dynamodb:ReadDataForReplication",
+      "dynamodb:SearchVectors",
+    ]
+    resources = ["*"]
+  }
+
   # What the account spends is not public. ReadOnlyAccess grants reads in
   # these services; the whole service is denied, since the plan role needs no
   # billing action (OP-094, ADR 0032).
@@ -266,11 +295,14 @@ resource "aws_iam_role_policy" "ci_deploy_state" {
 # project = szop and group = demo: in the request when creating, on the
 # resource when changing or deleting. Base and bootstrap carry project = szop
 # too, so group = demo is what keeps the role away from base (ADR 0010,
-# decision 16; PH-12b spec, decision 8). Nothing in IAM: the load balancer's
-# service-linked role already exists in the account.
+# decision 16; PH-12b spec, decision 8). No IAM role is created or changed:
+# the app's roles are base's (app_roles.tf) and are only passed, and the
+# service-linked roles of Elastic Load Balancing, ECS and RDS already exist in
+# the account.
 
 # The VPC, its subnets, the internet gateway, the public route table and the
-# load balancer's security group (EC2).
+# security groups with their rules: the load balancer's, and from PH-12c the
+# task's and the database's (EC2).
 data "aws_iam_policy_document" "ci_deploy_demo_network" {
   # Refresh and the provider's waits. EC2's Describe actions support no
   # resource scoping.
@@ -347,10 +379,11 @@ data "aws_iam_policy_document" "ci_deploy_demo_network" {
     }
   }
 
-  # aws_vpc_security_group_ingress_rule tags the rule it creates.
+  # aws_vpc_security_group_ingress_rule and _egress_rule tag the rule they
+  # create.
   statement {
     sid       = "CreateSecurityGroupRule"
-    actions   = ["ec2:AuthorizeSecurityGroupIngress"]
+    actions   = ["ec2:AuthorizeSecurityGroupIngress", "ec2:AuthorizeSecurityGroupEgress"]
     resources = ["arn:aws:ec2:*:*:security-group-rule/*"]
 
     condition {
@@ -395,6 +428,7 @@ data "aws_iam_policy_document" "ci_deploy_demo_network" {
         "CreateRouteTable",
         "CreateSecurityGroup",
         "AuthorizeSecurityGroupIngress",
+        "AuthorizeSecurityGroupEgress",
       ]
     }
   }
@@ -425,6 +459,7 @@ data "aws_iam_policy_document" "ci_deploy_demo_network" {
       "ec2:CreateSecurityGroup",
       "ec2:AuthorizeSecurityGroupIngress",
       "ec2:RevokeSecurityGroupIngress",
+      "ec2:AuthorizeSecurityGroupEgress",
       "ec2:RevokeSecurityGroupEgress",
       "ec2:ModifySecurityGroupRules",
       "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
@@ -741,4 +776,508 @@ resource "aws_iam_policy" "ci_deploy_demo_dns" {
 resource "aws_iam_role_policy_attachment" "ci_deploy_demo_dns" {
   role       = aws_iam_role.ci_deploy.name
   policy_arn = aws_iam_policy.ci_deploy_demo_dns.arn
+}
+
+# The database: the RDS instance, its subnet group, and the secret RDS keeps
+# the master password in (RDS, Secrets Manager and KMS). The database's
+# security group is in szop-ci-deploy-demo-network.
+data "aws_iam_policy_document" "ci_deploy_demo_database" {
+  # Refresh and the provider's waits; the engine versions a create checks.
+  statement {
+    sid       = "ReadDatabases"
+    actions   = ["rds:Describe*", "rds:ListTagsForResource"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+  }
+
+  # Creates, with both tags in the request. The subnet group an instance names
+  # is allowed by DemoDatabases only when it carries the tags, so the two
+  # creates have a statement each, as in the network policy.
+  statement {
+    sid       = "CreateSubnetGroup"
+    actions   = ["rds:CreateDBSubnetGroup"]
+    resources = ["arn:aws:rds:*:*:subgrp:*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  statement {
+    sid       = "CreateInstance"
+    actions   = ["rds:CreateDBInstance"]
+    resources = ["arn:aws:rds:*:*:db:*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  # The instance uses the engine's default parameter and option groups, which
+  # RDS owns and which carry no tags.
+  statement {
+    sid     = "UseDefaultGroups"
+    actions = ["rds:CreateDBInstance"]
+    resources = [
+      "arn:aws:rds:*:*:pg:default.*",
+      "arn:aws:rds:*:*:og:default:*",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+  }
+
+  # Tagging within those creates. RDS has no key like ec2:CreateAction, so
+  # AddTagsToResource with these tags could also tag an existing instance or
+  # subnet group and bring it within reach. Accepted: the account holds no
+  # RDS resource outside the demo, as for ACM.
+  statement {
+    sid     = "TagOnCreate"
+    actions = ["rds:AddTagsToResource"]
+    resources = [
+      "arn:aws:rds:*:*:db:*",
+      "arn:aws:rds:*:*:subgrp:*",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  # Changes, tag changes and deletes, and the subnet group an instance's
+  # create names, on what already carries both tags.
+  statement {
+    sid = "DemoDatabases"
+    actions = [
+      "rds:CreateDBInstance",
+      "rds:ModifyDBInstance",
+      "rds:DeleteDBInstance",
+      "rds:ModifyDBSubnetGroup",
+      "rds:DeleteDBSubnetGroup",
+      "rds:AddTagsToResource",
+      "rds:RemoveTagsFromResource",
+    ]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  # manage_master_user_password: RDS creates the master password's secret
+  # with the caller's permissions, and deletes it with the instance itself.
+  # It names its secrets rds!db-<id>. The caller never reads the value.
+  statement {
+    sid       = "CreateMasterSecret"
+    actions   = ["secretsmanager:CreateSecret", "secretsmanager:TagResource"]
+    resources = ["arn:aws:secretsmanager:*:*:secret:rds!db-*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+  }
+
+  # RDS also describes the key that encrypts that secret, Secrets Manager's
+  # AWS managed key aws/secretsmanager (metadata only).
+  statement {
+    sid       = "DescribeSecretKey"
+    actions   = ["kms:DescribeKey"]
+    resources = ["arn:aws:kms:*:*:key/*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "ci_deploy_demo_database" {
+  name        = "szop-ci-deploy-demo-database"
+  description = "The demo's database instance, its subnet group and its master password's secret."
+  policy      = data.aws_iam_policy_document.ci_deploy_demo_database.json
+}
+
+resource "aws_iam_role_policy_attachment" "ci_deploy_demo_database" {
+  role       = aws_iam_role.ci_deploy.name
+  policy_arn = aws_iam_policy.ci_deploy_demo_database.arn
+}
+
+# The app's service: the ECS cluster, the two task definitions, the service
+# and its target group (ECS and Elastic Load Balancing), passing the app's
+# roles to ECS (IAM), and what demo-up does after the apply: run db-setup and
+# scale the service.
+data "aws_iam_policy_document" "ci_deploy_demo_service" {
+  # Refresh, the provider's waits, and demo-up's describe-tasks and waits.
+  # ECS's reads return configuration and task states, never a secret value.
+  statement {
+    sid       = "ReadEcs"
+    actions   = ["ecs:Describe*", "ecs:List*"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+  }
+
+  # Creates, with both tags in the request: a cluster, a task definition of
+  # the families szop-demo-*, and a service in the cluster szop-demo.
+  statement {
+    sid     = "CreateEcsResources"
+    actions = ["ecs:CreateCluster", "ecs:RegisterTaskDefinition", "ecs:CreateService"]
+    resources = [
+      "arn:aws:ecs:*:*:cluster/*",
+      "arn:aws:ecs:*:*:task-definition/szop-demo-*:*",
+      "arn:aws:ecs:*:*:service/szop-demo/*",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  # Tagging within those creates only, and on db-setup's task, which run-task
+  # tags with its task definition's tags (--propagate-tags TASK_DEFINITION).
+  statement {
+    sid       = "TagOnCreate"
+    actions   = ["ecs:TagResource"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "ecs:CreateAction"
+      values   = ["CreateCluster", "RegisterTaskDefinition", "CreateService", "RunTask"]
+    }
+  }
+
+  # Changes, tag changes and deletes on what already carries both tags.
+  # demo-up's update-service sets the service's count; Terraform scales it to
+  # zero before deleting it.
+  statement {
+    sid = "DemoEcsResources"
+    actions = [
+      "ecs:UpdateService",
+      "ecs:DeleteService",
+      "ecs:DeleteCluster",
+      "ecs:TagResource",
+      "ecs:UntagResource",
+    ]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  # Terraform deregisters a revision when it replaces or destroys a task
+  # definition. The action supports no resource and no tag condition, so it
+  # reaches every revision; the account holds none outside the demo, and a
+  # deregistered revision only stops starting new tasks.
+  statement {
+    sid       = "DeregisterTaskDefinitions"
+    actions   = ["ecs:DeregisterTaskDefinition"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+  }
+
+  # demo-up's one-off db-setup task, in the demo's cluster only. The app's
+  # task definition is started by the service, never by run-task.
+  statement {
+    sid       = "RunDbSetup"
+    actions   = ["ecs:RunTask"]
+    resources = ["arn:aws:ecs:eu-central-1:${var.account_id}:task-definition/szop-demo-db-setup:*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = ["arn:aws:ecs:eu-central-1:${var.account_id}:cluster/szop-demo"]
+    }
+  }
+
+  # The target group, with both tags in the request. ECS registers and
+  # deregisters the tasks itself, through its service-linked role.
+  statement {
+    sid       = "CreateTargetGroup"
+    actions   = ["elasticloadbalancing:CreateTargetGroup"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  # The tags CreateTargetGroup puts on the new group, allowed only within that
+  # create (elasticloadbalancing:CreateAction), as TagOnCreate does for the
+  # load balancer and its listeners.
+  statement {
+    sid       = "TagTargetGroupOnCreate"
+    actions   = ["elasticloadbalancing:AddTags"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "elasticloadbalancing:CreateAction"
+      values   = ["CreateTargetGroup"]
+    }
+  }
+
+  # Changes and deletes on a target group that carries both tags. Its tag
+  # changes and reads are in szop-ci-deploy-demo-load-balancer, which covers
+  # every load balancing resource.
+  statement {
+    sid = "DemoTargetGroups"
+    actions = [
+      "elasticloadbalancing:ModifyTargetGroup",
+      "elasticloadbalancing:ModifyTargetGroupAttributes",
+      "elasticloadbalancing:DeleteTargetGroup",
+    ]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  # The two task definitions name the app's roles, and run-task starts a task
+  # with them; both need the caller to pass them, to ECS tasks only. IAM is
+  # global: no region condition.
+  statement {
+    sid       = "PassAppRoles"
+    actions   = ["iam:PassRole"]
+    resources = [aws_iam_role.app_task_execution.arn, aws_iam_role.app_task.arn]
+
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values   = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+
+  # infra/demo finds the two roles by name.
+  statement {
+    sid       = "ReadAppRoles"
+    actions   = ["iam:GetRole"]
+    resources = [aws_iam_role.app_task_execution.arn, aws_iam_role.app_task.arn]
+  }
+
+  # The parameters' metadata, never their values. The action supports no
+  # resource scoping.
+  statement {
+    sid       = "DescribeParameters"
+    actions   = ["ssm:DescribeParameters"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "ci_deploy_demo_service" {
+  name        = "szop-ci-deploy-demo-service"
+  description = "The demo's ECS cluster, task definitions, service and target group, db-setup's run and the app's roles."
+  policy      = data.aws_iam_policy_document.ci_deploy_demo_service.json
+}
+
+resource "aws_iam_role_policy_attachment" "ci_deploy_demo_service" {
+  role       = aws_iam_role.ci_deploy.name
+  policy_arn = aws_iam_policy.ci_deploy_demo_service.arn
+}
+
+# Pushing the app's image to the registry szop (ECR), and infra/demo's lookup
+# of the registry. Pushing is not a change to base's infrastructure: tags are
+# immutable, so no image can be overwritten, and the lifecycle policy stays
+# base's (ADR 0010, decision 16; PH-12c spec, The deploy role).
+data "aws_iam_policy_document" "ci_deploy_image" {
+  # A registry login token is account-wide, so it supports no resource.
+  statement {
+    sid       = "LogInToRegistry"
+    actions   = ["ecr:GetAuthorizationToken"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+  }
+
+  # docker push uploads the missing layers and the manifest; demo-up's
+  # describe-images checks whether the tag is there already. The lookup reads
+  # the repository, its tags and its newest images.
+  statement {
+    sid = "PushImage"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:InitiateLayerUpload",
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload",
+      "ecr:PutImage",
+      "ecr:BatchGetImage",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:ListTagsForResource",
+    ]
+    resources = [aws_ecr_repository.app.arn]
+  }
+}
+
+resource "aws_iam_policy" "ci_deploy_image" {
+  name        = "szop-ci-deploy-image"
+  description = "Pushing the app's image to the registry szop."
+  policy      = data.aws_iam_policy_document.ci_deploy_image.json
+}
+
+resource "aws_iam_role_policy_attachment" "ci_deploy_image" {
+  role       = aws_iam_role.ci_deploy.name
+  policy_arn = aws_iam_policy.ci_deploy_image.arn
 }

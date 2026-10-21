@@ -18,6 +18,16 @@ output "better_auth_secret_arn" {
   value       = aws_ssm_parameter.better_auth_secret.arn
 }
 
+output "app_task_execution_role_arn" {
+  description = "The role ECS uses to start the app's and db-setup's tasks; infra/demo finds it by name."
+  value       = aws_iam_role.app_task_execution.arn
+}
+
+output "app_task_role_arn" {
+  description = "The role the app's code runs with; infra/demo finds it by name."
+  value       = aws_iam_role.app_task.arn
+}
+
 output "zone_id" {
   description = "The hosted zone of dzwoniec.com; infra/demo writes the szop record and the certificate's validation record into it."
   value       = aws_route53_zone.main.zone_id

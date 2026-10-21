@@ -56,8 +56,8 @@ services:
     # 8080 on the host, so pnpm dev and pnpm start keep 3000.
     ports:
       - "127.0.0.1:8080:3000"
-    # The API writes nothing to disk (logs go to stdout), as ECS's
-    # readonlyRootFilesystem will require.
+    # Proves the API writes nothing to disk (logs go to stdout). On ECS the
+    # root filesystem stays writable, for ECS Exec.
     read_only: true
     # The slim image has no curl, so Node itself asks for /api/health.
     healthcheck:
