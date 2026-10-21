@@ -302,19 +302,19 @@ From the phase branch: `git switch -c test/ph-12d-failing-start`; in `server.ts`
 
 Ask the owner to press `demo-up` on the phase branch. On a missing permission: fix under Task 4's rules, simulate, commit `fix(infra): …`, push, the owner applies base and re-runs. Then: `curl -s https://szop.dzwoniec.com/api/health` shows the branch's commit; `aws ecs describe-services --cluster szop-demo --services szop-demo-app --query 'services[0].deployments[].[status,rolloutState]'` shows `PRIMARY COMPLETED` (Review Focus 2); the target group's health check and attributes as set (`aws elbv2 describe-target-groups`, `describe-target-group-attributes`). Record the start's duration and how long the new target took to turn healthy.
 
-- [ ] **Step 5: Owner checkpoint 3: the redeploy**
+- [x] **Step 5: Owner checkpoint 3: the redeploy**
 
 Push a small commit to the phase branch first if it holds no newer commit than the deployed one (this plan's ticks do). Ask the owner to start `scripts/watch-demo.sh`, press `demo-up` on the branch, stop the script when the run is green, and share its output. Meanwhile, every 10 seconds, `aws elbv2 describe-target-health` to see the old target `draining` and when it goes. Expected: every line `200`, one switch of commit, the run green. Record the redeploy's duration and the old target's draining time.
 
-- [ ] **Step 6: Owner checkpoint 4: the failed deploy and the fix**
+- [x] **Step 6: Owner checkpoint 4: the failed deploy and the fix**
 
 Ask the owner to start the script again and press `demo-up` with `ref` = `test/ph-12d-failing-start`. Expected: *Start the app* fails with `FAILED` and the circuit breaker's reason, in well under 15 minutes; the script shows only `200` with the old commit. Record the time to `FAILED`. Then ask the owner to press `demo-up` on the phase branch again (fix forward); expected green, `/api/health` back on the branch's commit.
 
-- [ ] **Step 7: Owner checkpoint 5: demo-down**
+- [x] **Step 7: Owner checkpoint 5: demo-down**
 
 Ask the owner to press `demo-down`, then delete `test/ph-12d-failing-start` on GitHub. Expected: `Destroy complete!`; the Tag Editor search (or `aws resourcegroupstaggingapi get-resources --region eu-central-1 --tag-filters Key=group,Values=demo`) lists only inactive task definitions and what the index still lags on. Record how long the service took to go.
 
-- [ ] **Step 8: Timings and fixes**
+- [x] **Step 8: Timings and fixes**
 
 Into the runbook and `demo-up`'s comments: the measured start, redeploy, draining, time to `FAILED` and destroy, with the explanation the measurements support (spec, decision 13); the watch script's output into the PR. Commit and push.
 

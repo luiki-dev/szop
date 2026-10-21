@@ -130,6 +130,7 @@ jobs:
     # and 10 (/api/health), 35 together, and the apply (the database takes
     # about 5) and the state lock's wait (up to 15 minutes) come on top
     # (PH-12d spec, decision 11). Each wait stops the run well before this.
+    # PH-12d's demo: a fresh demo took about 10 minutes, a redeploy about 4.
     timeout-minutes: 45
     # Waits for the owner's approval; trusted by szop-ci-deploy for this
     # environment, from any branch.
