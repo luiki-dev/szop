@@ -96,6 +96,7 @@ Start PostgreSQL first, with `pnpm db:up` (Docker Desktop must be running). Then
 - [Architecture](docs/architecture/architecture.md) — how Szop is built
 - [Stack overview](docs/architecture/stack-overview.md) — the technologies and concepts behind it, explained
 - [Threat model](docs/architecture/threat-model.md) — what Szop protects, from whom, and how
+- [AWS resources](docs/architecture/aws-resources.md) — every AWS resource Terraform creates, drawn by service and stack
 - [Visual design](docs/architecture/visual-design.md) — what Szop looks like, and the design system its screens are built from
 - [Glossary](docs/glossary.md) — acronyms and terms used in the docs
 - [Roadmap](docs/roadmap.md) — what is built in which order, and how far along it is
