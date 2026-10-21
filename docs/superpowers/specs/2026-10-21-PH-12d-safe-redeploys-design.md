@@ -90,7 +90,8 @@ PH-12c's redeploy took about 3 minutes, and the old task was gone about a minute
 | `compose.yaml` | The app's build passes `GIT_COMMIT: ${GIT_COMMIT:-unknown}` |
 | `scripts/check-image.sh` | Builds with `GIT_COMMIT` set to the checked-out commit and checks that `/api/health` answers it |
 | `.github/workflows/ci.yml` | The `docker` job's image build passes `GIT_COMMIT` from `git rev-parse HEAD`, so `check-image.sh --no-build` finds the commit in CI too |
-| `apps/api/src/config.ts` and its test | `GIT_COMMIT`: optional; `unknown` when unset; otherwise 40 lowercase hex characters or `unknown`, anything else refused like any other bad setting |
+| `apps/api/src/config.ts` and its test | `GIT_COMMIT`: required like every setting ([ADR 0019](../../decisions/0019-api-skeleton-details.md), decision 2), 40 lowercase hex characters or `unknown`, anything else refused like any other bad setting. The image always sets it (the Dockerfile's default is `unknown`) *(changed while planning: the spec first made it optional, against ADR 0019, decision 2)* |
+| `apps/api/.env.example` | `GIT_COMMIT=unknown`, with a comment; a developer's own `apps/api/.env` needs the line too |
 | `packages/shared/src/health.ts` | `commit: z.string()` in both bodies |
 | `apps/api/src/health/routes.ts` and its test | `commit` in both bodies; `GET /live` |
 | `apps/api/src/app.ts` | The commit passed to the health routes; `/api/live` not request-logged; the comment on logging updated |
