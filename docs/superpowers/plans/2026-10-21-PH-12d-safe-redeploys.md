@@ -121,7 +121,7 @@ git push -u origin feat/ph-12d-safe-redeploys
 - Consumes: Task 1's `healthRoutes` options.
 - Produces: `GET /api/live`.
 
-- [ ] **Step 1: Failing tests**
+- [x] **Step 1: Failing tests**
 
 In `routes.test.ts`, a `describe("GET /api/live")`:
 - `it("answers 200 while the database is up")`: `200`, JSON, body `{ status: "ok" }`.
@@ -130,11 +130,11 @@ In `routes.test.ts`, a `describe("GET /api/live")`:
 
 In `describe("the log")`: the `it.each` with no request lines gains `"/api/live"`; the one that keeps them gains `"/api/live/x"` and `"/api/livez"`. Run `pnpm test apps/api/src/health`. Expected: the new tests fail (404, request lines).
 
-- [ ] **Step 2: The route and its logging**
+- [x] **Step 2: The route and its logging**
 
 `GET /live` in `healthRoutes`, returning `{ status: "ok" }`, with a comment (the load balancer's check; touches only the process, so a database outage does not replace the task; ADR 0036, decision 4). `app.ts`'s `disableRequestLogging` matches `/api/health` or `/api/live`; its comment says the load balancer asks `/api/live` every 10 seconds and the watch script `/api/health` every second. Run `pnpm check`. Expected: pass. If the keep-alive test fails, set Fastify's `keepAliveTimeout: 65_000` with a comment instead of relying on the default.
 
-- [ ] **Step 3: Commit and push**
+- [x] **Step 3: Commit and push**
 
 ```bash
 git add apps

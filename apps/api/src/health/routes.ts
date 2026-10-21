@@ -8,13 +8,18 @@ export interface HealthRoutesOptions {
   commit: string;
 }
 
-// GET /api/health: the load balancer's check (ADR 0008, decision 15). One
-// query proves the database reachable and gives the schema version; the body
-// also names the commit the API was built from, up or down.
+// GET /api/health: the readiness check (ADR 0008, decision 15). One query
+// proves the database reachable and gives the schema version; the body also
+// names the commit the API was built from, up or down.
 export function healthRoutes(
   app: FastifyInstance,
   { db, journal, commit }: HealthRoutesOptions,
 ): void {
+  // GET /api/live: the load balancer's check. It touches only the process, so
+  // a database outage does not make the load balancer replace the task
+  // (ADR 0036, decision 4).
+  app.get("/live", () => ({ status: "ok" }));
+
   app.get("/health", async (request, reply) => {
     try {
       const schemaVersion = await currentSchemaVersion(db, journal);

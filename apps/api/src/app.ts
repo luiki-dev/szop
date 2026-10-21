@@ -33,14 +33,16 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
       stream: logStream,
       serializers: { req: requestSerializer },
     },
-    // The load balancer checks /api/health every few seconds; its request
-    // lines would bury everything else. Matched by route, so look-alike paths
-    // keep theirs, and the route's own warning still logs. Fastify's own
-    // error lines for the route go too, which is safe while the route
-    // catches its every error (ADR 0033, decision 7).
+    // The load balancer asks /api/live every 10 seconds and the watch script
+    // /api/health every second; their request lines would bury everything
+    // else. Matched by route, so look-alike paths keep theirs, and the
+    // health route's own warning still logs. Fastify's own error lines for
+    // the routes go too, which is safe while /api/health catches its every
+    // error and /api/live has nothing to fail (ADR 0033, decision 7).
     logController: new LogController({
       disableRequestLogging: (request) =>
-        request.routeOptions.url === "/api/health",
+        request.routeOptions.url === "/api/health" ||
+        request.routeOptions.url === "/api/live",
     }),
   });
 

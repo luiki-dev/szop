@@ -63,6 +63,51 @@ describe("GET /api/health", () => {
   });
 });
 
+describe("GET /api/live", () => {
+  const database = useTestDatabase();
+  let app: FastifyInstance;
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it("answers 200 while the database is up", async () => {
+    app = buildApp({ config, db: database.db });
+
+    const response = await app.inject({ method: "GET", url: "/api/live" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toMatch(/^application\/json/);
+    expect(response.json()).toEqual({ status: "ok" });
+  });
+
+  it("answers 200 while the database cannot be reached", async () => {
+    const unreachable = createDatabase(
+      testDatabaseSettings("szop_test_missing"),
+    );
+    app = buildApp({ config, db: unreachable });
+
+    try {
+      const live = await app.inject({ method: "GET", url: "/api/live" });
+      const health = await app.inject({ method: "GET", url: "/api/health" });
+
+      expect(live.statusCode).toBe(200);
+      expect(live.json()).toEqual({ status: "ok" });
+      expect(health.statusCode).toBe(503);
+    } finally {
+      await unreachable.$client.end();
+    }
+  });
+
+  // The load balancer reuses a connection for up to 60 seconds; a shorter
+  // timeout would let the API close it just as a request arrives (a 502).
+  it("keeps idle connections longer than the load balancer's 60 seconds", () => {
+    app = buildApp({ config, db: database.db });
+
+    expect(app.server.keepAliveTimeout).toBeGreaterThan(60_000);
+  });
+});
+
 describe("the log", () => {
   const database = useTestDatabase();
   let app: FastifyInstance;
@@ -76,7 +121,7 @@ describe("the log", () => {
       ({ msg }) => msg === "incoming request" || msg === "request completed",
     );
 
-  it.each(["/api/health", "/api/health?probe=1"])(
+  it.each(["/api/health", "/api/health?probe=1", "/api/live"])(
     "has no request lines for a healthy GET %s",
     async (url) => {
       const log = captureLog();
@@ -130,7 +175,7 @@ describe("the log", () => {
     }
   });
 
-  it.each(["/api/healthz", "/api/health/x"])(
+  it.each(["/api/healthz", "/api/health/x", "/api/live/x", "/api/livez"])(
     "keeps the request lines for GET %s",
     async (url) => {
       const log = captureLog();
