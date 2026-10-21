@@ -38,6 +38,8 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
 - [Spinning up](#spinning-up)
   - [Service-linked roles](#service-linked-roles)
   - [Pressing the button](#pressing-the-button)
+  - [Watching a redeploy](#watching-a-redeploy)
+  - [A failed deployment](#a-failed-deployment)
   - [When a run fails](#when-a-run-fails)
   - [Spinning up from your machine](#spinning-up-from-your-machine)
 - [Debugging](#debugging)
@@ -492,14 +494,15 @@ The load balancer's role, `AWSServiceRoleForElasticLoadBalancing`, has existed s
 2. Open the run. Two jobs start at once and need no approval. `enable-teardown` turns green in seconds: it switches the nightly `demo-down` back on if GitHub had disabled it. `build` builds the image of the commit with Docker, holding no AWS credentials, and keeps it as the workflow artifact `image` (under a minute on PH-12c's first demo). The job `deploy` waits for you and for both: *Review deployments* → tick `demo` → *Approve and deploy*. Approve only code you have read; the job gets the deploy role's credentials ([threat model](../architecture/threat-model.md#who-can-act-and-through-which-path)). *Reject* ends the run without touching AWS. **Approve within a day:** the artifact is kept for one day. If it has expired, `deploy` fails at *Download the image*; press `demo-up` again.
 3. Wait for `deploy` to turn green. It does these steps, in order:
    1. checks the commit out and compares it with the one `build` built the image from; if the branch moved while you were approving, it stops (press `demo-up` again);
-   2. takes the deploy role and runs `terraform init`;
-   3. downloads the image, loads it into Docker and **pushes it to the registry** `szop` as `szop:<commit>`, unless that tag is already there (tags are immutable, so an image that was pushed once is kept). The push comes before the apply because on a redeploy Terraform swaps the task definition at once, and the new task must find its image;
-   4. **applies `infra/demo`** with the commit passed as `deployed_commit`. The service is created with zero tasks. The certificate is issued first, which takes a few minutes ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 5), and a new database takes about 5 minutes (5 minutes 0 seconds on the first demo);
-   5. **runs `db-setup`** as a one-off ECS task: it connects to the database as the master user and creates or updates the role `szop_app`, which the app connects as, and makes it the database's owner. It must stop with exit code 0 within 10 minutes (it needs about a minute: Fargate pulls the image and starts);
-   6. **starts the app**: sets the service's wanted count to 1 and waits, up to 15 minutes, until one deployment remains with one task running. The task pulls the image, runs the migrations and passes the load balancer's health check;
-   7. **waits for the app**: asks `https://szop.dzwoniec.com/api/health` every 10 seconds, for up to 10 minutes, until it answers `200` with `"status":"ok"`, so DNS, the certificate, the load balancer, the app and its database all work.
+   2. downloads the image and loads it into Docker, before any AWS credentials exist, so the artifact is in hand first ([ADR 0012](../decisions/0012-security-baseline.md), decision 18);
+   3. takes the deploy role and runs `terraform init`;
+   4. **pushes the image to the registry** `szop` as `szop:<commit>`, unless that tag is already there (tags are immutable, so an image that was pushed once is kept). The push comes before the apply because on a redeploy Terraform swaps the task definition at once, and the new task must find its image;
+   5. **applies `infra/demo`** with the commit passed as `deployed_commit`. The service is created with zero tasks. The certificate is issued first, which takes a few minutes ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 5), and a new database takes about 5 minutes (5 minutes 0 seconds on the first demo);
+   6. **runs `db-setup`** as a one-off ECS task: it connects to the database as the master user and creates or updates the role `szop_app`, which the app connects as, and makes it the database's owner. It must stop with exit code 0 within 10 minutes (it needs about a minute: Fargate pulls the image and starts). At the deadline the workflow stops the task itself, so a stuck one does not run on;
+   7. **starts the app**. On a fresh demo (the service wants 0 tasks) it sets the wanted count to 1 and forces a new deployment, so the circuit breaker watches the first start too; on a redeploy Terraform's new task definition has already started a deployment, and the count is left alone. Then, every 10 seconds for up to 15 minutes, it reads the primary deployment: `COMPLETED` with one deployment left and as many tasks running as wanted is success, and `FAILED` stops the run at once ([A failed deployment](#a-failed-deployment)). The task pulls the image, runs the migrations and passes the load balancer's health checks;
+   8. **waits for the app**: asks `https://szop.dzwoniec.com/api/health` every 10 seconds, for up to 10 minutes, until it answers `200` with `"status":"ok"` and the commit just deployed, so DNS, the certificate, the load balancer, the app and its database all work, and the old task no longer answers. Every wait runs to a deadline in seconds, not to a count of tries, so a slow request cannot stretch it.
 
-   The first demo with the app took about 9 minutes from the approval: about 6 for the apply, 5 of them the database, then a minute each for `db-setup` and the start; the job's limit is 30 minutes. **A redeploy** over a running demo takes about 3 minutes: the push, an apply that only registers the two new task definitions, `db-setup`, which finds the role and resets its password, and about a minute and a half while the new task starts, passes the health check and replaces the old one. The first run before PH-12c, with no database, took about 4 minutes.
+   The first demo with the app took about 9 minutes from the approval: about 6 for the apply, 5 of them the database, then a minute each for `db-setup` and the start; the job's limit is 45 minutes, which the three deadlines (35 minutes together), the apply and the state lock's wait need. **A redeploy** over a running demo took about 3 minutes on PH-12c's defaults: the push, an apply that only registers the two new task definitions, `db-setup`, which finds the role and resets its password, and about a minute and a half while the new task starts, passes the health check and replaces the old one. PH-12d's settings change that; its timings are to be measured in PH-12d's demo. The first run before PH-12c, with no database, took about 4 minutes.
 4. Read the run's **summary**: the URL, the commit and the image (and whether this run pushed it or found it in the registry), the result of each step above, and that `demo-down` destroys the demo at the next 01:17 UTC unless pressed sooner.
 
 **Check:** open both addresses in a browser.
@@ -507,9 +510,53 @@ The load balancer's role, `AWSServiceRoleForElasticLoadBalancing`, has existed s
 - `https://szop.dzwoniec.com` shows the status page: `API: ok`, `Database: up` and the schema version (`0000_init` today), with a valid certificate (the padlock; issued by Amazon).
 - `http://szop.dzwoniec.com` redirects to the HTTPS address (a 301). From a terminal: `curl -sI http://szop.dzwoniec.com`, whose first line is `HTTP/1.1 301` and whose `location` header names the HTTPS address.
 
-The demo now exists until `demo-down` removes it ([Tearing down](#tearing-down)). Pressing `demo-up` again while it is up deploys the new commit on top: it pushes the new image, registers a new task definition revision and updates the service in place, and leaves the database alone. A redeploy is slow until [PH-12d](../roadmap.md#ph-12d-safe-redeploys): ECS starts the new task beside the old one and drains the old one for the load balancer's default 300 seconds. Two presses never run at the same time (the second waits for the first). GitHub keeps only one waiting run per concurrency group, so a third press replaces a run that is still waiting: that run is cancelled.
+The demo now exists until `demo-down` removes it ([Tearing down](#tearing-down)). Pressing `demo-up` again while it is up deploys the new commit on top: it pushes the new image, registers a new task definition revision and updates the service in place, and leaves the database alone. A redeploy keeps the demo up: ECS starts the new task beside the old one and stops the old one only once the new one is healthy ([Watching a redeploy](#watching-a-redeploy)). Two presses never run at the same time (the second waits for the first). GitHub keeps only one waiting run per concurrency group, so a third press replaces a run that is still waiting: that run is cancelled.
 
 ⚠️ **Don't:** leave a demo up by accident. An approved run stays up until `demo-down` runs, at the latest at 01:17 UTC; press `demo-down` when you are done. A demo costs about $0.08 an hour ([What a demo costs](#what-a-demo-costs)).
+
+### Watching a redeploy
+
+[PH-12d](../roadmap.md#ph-12d-safe-redeploys) makes a redeploy keep the demo up: ECS starts the new task beside the old one, and the old one stops only once the new one is healthy ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 3). `scripts/watch-demo.sh` shows it from your machine. It asks `/api/health` once a second and prints the time, the HTTP status (`000` for no answer), the first 12 characters of the commit and the schema version. It needs bash and `curl`, and no AWS credentials.
+
+```bash
+scripts/watch-demo.sh                                  # https://szop.dzwoniec.com/api/health
+scripts/watch-demo.sh http://127.0.0.1:8080/api/health # another URL, for instance pnpm image:up's
+```
+
+To watch a redeploy, start the script on a running demo, press `demo-up` with another commit ([Pressing the button](#pressing-the-button)), and let the script run until the run is green. Ctrl+C stops it and prints a summary: the requests, how many were not `200`, and each commit seen with the times it was first and last seen. The format, with made-up commits:
+
+```text
+16:52:48  200  5ee7d2e04b90  0000_init
+16:52:49  200  5ee7d2e04b90  0000_init
+16:52:50  200  b1c4f0a97d3e  0000_init  <- new commit
+...
+Requests: 412, not 200: 0
+Commit 5ee7d2e04b90: first seen 16:41:02, last seen 16:52:49
+Commit b1c4f0a97d3e: first seen 16:52:50, last seen 16:58:31
+```
+
+A good redeploy shows `200` on every line from the press to the end, and the switch to the new commit once. A `000` or a `503` line means a request found no task able to answer. The same script is the check for the redeploys of [PH-37](../roadmap.md#ph-37-two-tasks) and PH-38.
+
+What happens in a redeploy, and why it takes the time it does:
+
+1. Terraform registers the new task definition and updates the service. ECS starts the new task beside the old one (the service allows up to 200% of its wanted count and demands 100% healthy).
+2. The new task runs its migrations, then listens. The load balancer asks `/api/live` every 10 seconds and sends it requests after 2 answers, so about 20 seconds after it listens. ECS ignores failed checks for the first 120 seconds of a task, so a slow image pull or a long migration does not get it killed.
+3. ECS deregisters the old task. The load balancer stops sending it new requests at once and gives it up to 30 seconds (the deregistration delay) to finish those it holds; then ECS sends `SIGTERM`, and the app closes within 15 seconds ([ADR 0033](../decisions/0033-app-ready-for-the-cloud-details.md), decision 6). AWS documents that a deregistering target with no in-flight requests and no active connections is deregistered at once, without waiting for the delay. This is why PH-12c's redeploy did not wait the default 300 seconds, and why the runbook's earlier explanation of that wait was wrong.
+
+How long each part takes is to be measured in PH-12d's demo; this section gets the numbers then.
+
+**A page load can mix two versions of the SPA during the overlap** ([OP-103](https://github.com/luiki-dev/szop/issues/249), decided in [PH-37](../roadmap.md#ph-37-two-tasks)). While both tasks are healthy, the load balancer routes each request on its own, so a browser can get `index.html` from the new task and ask the old one for an asset only the new build has. The old task answers `404` and the page loads blank until a reload. With one task the window lasts seconds. The watch script does not see it, since it asks the API, not the SPA.
+
+### A failed deployment
+
+When the new task keeps failing, the deployment is marked `FAILED` and the old task keeps serving. ECS's deployment circuit breaker does this after the default threshold of three tasks in a row that fail to start or fail their health checks; with `rollback` off, it only stops launching tasks ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 3). How long three failures take is to be measured in PH-12d's demo.
+
+What you see:
+
+- **In the run:** `Start the app` fails at once, not after its 15 minutes. Its log prints the deployment's reason (it begins with `ECS deployment circuit breaker`), the service's latest five events, and `The deployment failed: the circuit breaker stopped it; the previous version keeps serving`. The summary shows the step failed and `Wait for the app` skipped.
+- **On the demo:** the watch script keeps printing `200` with the old commit. `/api/health` never shows the new one.
+
+What to do: fix forward. A rollback would start the old version on a database its migration check may refuse. Find why the task failed ([A task that does not stay up](#a-task-that-does-not-stay-up)), fix it on the branch and press `demo-up` again; the new run deploys the fix. The failed run's apply has already recorded the new commit as `deployed_commit`, so a `demo-down` before the fix-forward run destroys with the failed branch's code ([A failed destroy](#a-failed-destroy)). If the failed task had already run a migration, the database holds it: the fix must keep working with it ([Migrations and rolling deploys](../development/tools/drizzle.md#migrations-and-rolling-deploys)).
 
 ### When a run fails
 
@@ -531,8 +578,10 @@ Open the run and read the failed step. `deploy` needs `enable-teardown` and `bui
 | `Terraform apply`: "Service-linked role … has not been created", or "Unable to assume the service linked role" | The account has no role for ECS or RDS yet | [Service-linked roles](#service-linked-roles), then *Re-run failed jobs* |
 | `Terraform apply`: any other AWS error | A resource could not be created: a name already taken, a limit, a dependency, an engine version RDS does not offer | Read the error; fix it; press the button again. If the demo is half built and you give up, press `demo-down` and run [the check that nothing is left](#checking-that-nothing-is-left) |
 | `Run db-setup`: "db-setup exited with code …" or "run-task started no task" | The one-off task failed, or ECS refused to start it | [Reading a failed db-setup](#reading-a-failed-db-setup) |
-| `Run db-setup`: "did not stop within 10 minutes" | The task never finished: stuck pulling the image or connecting | Read its log stream ([Reading a failed db-setup](#reading-a-failed-db-setup)); then *Re-run failed jobs* |
-| `Start the app`: "was not stable within 15 minutes", with the service's latest events | The task starts and stops, or never passes the load balancer's health check | [A task that does not stay up](#a-task-that-does-not-stay-up) |
+| `Run db-setup`: "did not stop within 10 minutes" | The task never finished: stuck pulling the image or connecting. The step has already asked ECS to stop it (reason `demo-up: db-setup did not stop within 10 minutes`); a warning says if that failed | Read its log stream ([Reading a failed db-setup](#reading-a-failed-db-setup)); then *Re-run failed jobs* |
+| `Start the app`: "The deployment failed: the circuit breaker stopped it" | The new tasks failed to start or failed their health checks three times in a row. The old task keeps serving | [A failed deployment](#a-failed-deployment) |
+| `Start the app`: "was not stable within 15 minutes", with the service's latest events | The deployment neither completed nor failed in 15 minutes: tasks that start slowly, or ones that do not become healthy yet | [A task that does not stay up](#a-task-that-does-not-stay-up) |
+| `Wait for the app`: "still answers with commit …, not …" | The service called the deployment complete, but `/api/health` still answers with the old commit after 10 minutes | Ask the service for its deployments and tasks ([A task that does not stay up](#a-task-that-does-not-stay-up)); then press the button again |
 | `Wait for the app`: "did not answer ok within 10 minutes" | The service is stable, but `/api/health` never said `"status":"ok"`: DNS not yet answering, the certificate not yet attached, or the database down | From your machine: `dig +short szop.dzwoniec.com` (the load balancer's addresses) and `curl -sS https://szop.dzwoniec.com/api/health`. `"database":{"status":"down"}` means the app cannot reach RDS: read its log ([Debugging](#debugging)). A resolver that looked the name up before the record existed can keep saying "no such name" for some minutes. Press the button again: the apply changes nothing and the waits start over |
 
 ### Spinning up from your machine
@@ -664,6 +713,7 @@ What the stream and the exit code say:
 
 - **`{"msg":"db-setup done","role":"szop_app","created":true}`** and exit code 0: it worked. `created` is `false` on a redeploy: the role existed, and only its password was set again.
 - **`{"msg":"db-setup failed","error":"…"}`** and exit code 1: a statement failed; the error is PostgreSQL's message. `password authentication failed for user "szop_admin"` is the master password (the secret RDS keeps); `permission denied` or `must be able to SET ROLE` means the master user lacks a right the statements need; `ECONNREFUSED`, a timeout or `no pg_hba.conf entry` means the task cannot reach the database (a security group, or the database not yet available). The message never holds a password: `db-setup` sends `szop_app`'s password as a hash made in the task, so even PostgreSQL's own log has none.
+- **`{"msg":"db-setup failed","error":"canceling statement due to lock timeout"}`** (or `… statement timeout`): `db-setup` gives its statements 30 seconds and its lock waits 10, so a lock it cannot get, for instance from a migration that hangs, fails it with a clear error instead of hanging. Find what holds the lock ([Querying the database](#querying-the-database)), then press `demo-up` again.
 - **`Invalid configuration:` and lines naming variables** and exit code 1: a setting is missing or invalid, never shown with its value. `APP_DATABASE_PASSWORD: must be printable ASCII characters (no SASLprep normalization)` means the password in `/szop/db-app-password` has other characters. Simple Authentication and Security Layer preparation (SASLprep) is the normalization PostgreSQL applies to a password before hashing it; `db-setup` does not, so it refuses such a password. Terraform generates letters and digits only, so this means the parameter was set by hand.
 - **No stream, or exit code `none`:** ECS could not start the container, so no log exists. Ask the task itself:
 
@@ -678,7 +728,7 @@ Run `db-setup` again by pressing `demo-up` again: it is safe to repeat.
 
 ### A task that does not stay up
 
-When `Start the app` times out, ask the service why, then read the task's log:
+When `Start the app` fails or times out, ask the service why, then read the task's log:
 
 ```bash
 aws ecs describe-services --cluster szop-demo --services szop-demo-app \
@@ -689,15 +739,15 @@ aws ecs describe-tasks --cluster szop-demo --tasks <task id> \
 aws logs tail /szop/app --since 30m --log-stream-name-prefix app/
 ```
 
-The events say `(service szop-demo-app) has started 1 tasks`, `… has reached a steady state`, or `… (instance …) is unhealthy in (target-group …) due to (reason Health checks failed)`. Until PH-12d, ECS keeps starting replacement tasks, backing off between tries, with no circuit breaker to stop it, so a task that always fails fills the log. Common causes:
+The events say `(service szop-demo-app) has started 1 tasks`, `… has reached a steady state`, or `… (instance …) is unhealthy in (target-group …) due to (reason Health checks failed)`. A task that always fails is retried until the circuit breaker marks the deployment `FAILED` ([A failed deployment](#a-failed-deployment)). Common causes:
 
 - **The app stops at startup**, with `startup failed` in its log and exit code 1: the migration check below, an unreachable database (the log names the error), or an invalid setting (named, never its value).
-- **The task runs but the health checks fail:** the target group asks `/api/health`, which answers 503 while the database is unreachable. The service ignores failed checks for the first 60 seconds, for the migrations. Check the app's log for the database error, then query from a shell ([Querying the database](#querying-the-database)).
+- **The task runs but the health checks fail:** the target group asks `/api/live` every 10 seconds, which answers `200` whenever the process runs and touches no database, so a database outage does not replace tasks. A task that listens but never answers is unhealthy after 3 failed checks. The service ignores failed checks for the first 120 seconds of a task, for the image pull and the migrations. `/api/health`, which answers 503 while the database is unreachable, is what `Wait for the app` and the watch script ask. Check the app's log for the database error, then query from a shell ([Querying the database](#querying-the-database)).
 - **The task never starts**, with `CannotPullContainerError` or `ResourceInitializationError`: as for `db-setup` above.
 
 ### The migration check
 
-A new task runs the migrations when it starts, after checking that the database holds no migration this branch's code lacks. If the demo was last deployed from another branch, the check fails, the task exits with code 1 and `Start the app` times out. The task's log says:
+A new task runs the migrations when it starts, after checking that the database holds no migration this branch's code lacks. If the demo was last deployed from another branch, the check fails, the task exits with code 1, the circuit breaker fails the deployment and `Start the app` fails. The task's log says:
 
 ```text
 The database's migrations do not match this code's:
@@ -759,7 +809,7 @@ What stays between sessions costs little: the hosted zone ($0.50 a month), the d
 ### With the button
 
 1. On GitHub: *Actions → demo-down → Run workflow*, branch **`main`**, *Run workflow*. (The environment `demo-teardown` allows only `main`; on another branch the job is refused.)
-2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with the app and the database (9½ minutes on PH-12c's first demo: 7 for the service, which waits out the load balancer's default draining of 300 seconds before its task stops, which PH-12d shortens, and under 2 for the database). The first real destroy, of the placeholder demo before PH-12c, took about a minute and a half, most of it the two DNS records (half a minute each) and the load balancer (20 seconds).
+2. Open the run and wait for the job `destroy` to turn green: a few seconds when there is nothing to destroy, about ten minutes with the app and the database (9½ minutes on PH-12c's first demo: 7 for the service, and under 2 for the database; PH-12c explained the 7 minutes with the load balancer's default draining of 300 seconds, but AWS deregisters a target with no in-flight requests at once, so the cause is not known. PH-12d sets the delay to 30 seconds, which bounds any draining, and measures the destroy again: to be measured in PH-12d's demo). The first real destroy, of the placeholder demo before PH-12c, took about a minute and a half, most of it the two DNS records (half a minute each) and the load balancer (20 seconds).
 3. Read the run's **summary** (the run's page, *Summary*):
    - **Trigger:** `workflow_dispatch` (by hand) or `schedule` (the nightly run).
    - **Code used:** which Terraform code destroyed the demo and why. If a demo recorded its commit (the `deployed_commit` output of `infra/demo`, written by every `demo-up` run), it is that commit, so a resource added by a branch is destroyed by the code that created it; with no commit recorded, it is `main`'s code ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7; [ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 6).

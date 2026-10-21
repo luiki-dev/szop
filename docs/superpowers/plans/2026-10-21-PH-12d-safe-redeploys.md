@@ -257,19 +257,19 @@ git push
 - Create: `scripts/watch-demo.sh` (executable)
 - Modify: `docs/operations/demo-environment.md`, `docs/development/tools/drizzle.md`, `docs/development/ci-cd.md`, `docs/architecture/architecture.md`, `docs/architecture/stack-overview.md`, `docs/architecture/threat-model.md`, `docs/glossary.md`; `docs/development/testing.md` and `.github/pull_request_template.md` if they list the four check scripts
 
-- [ ] **Step 1: The script**
+- [x] **Step 1: The script**
 
 `scripts/watch-demo.sh [url]`, `set -euo pipefail`, default `https://szop.dzwoniec.com/api/health`. Every second: `curl --silent --max-time 2 --write-out '\n%{http_code}'`; one line `HH:MM:SS  <status>  <commit, 12 chars or ->  <schemaVersion or ->`, plus `<- new commit` when the commit differs from the previous answer's. Body fields read with bash's `[[ =~ ]]`, no `jq`. A `trap` on `INT` prints the summary: requests, how many were not `200`, and for each commit seen its first and last time. A header comment says what it is for and links the runbook.
 
-- [ ] **Step 2: Try it locally**
+- [x] **Step 2: Try it locally**
 
 `pnpm image:up` in one terminal; `scripts/watch-demo.sh http://127.0.0.1:8080/api/health` in another: lines with `200` and the commit. Stop the container: lines with `000`. Start it again: `200` again. Ctrl+C: the summary counts the `000` lines. Run `shellcheck scripts/watch-demo.sh` if installed. Expected: as described, no findings.
 
-- [ ] **Step 3: The docs**
+- [x] **Step 3: The docs**
 
 As the spec's "Documentation and records" lists, apart from ADR 0039 (Task 8): the runbook's redeploy section with the watch script, what a `FAILED` deployment looks like and what to do, `db-setup`'s stop, the SPA version gap (OP-103), and the 300-second explanation replaced by AWS's documented behaviour (timings stay "to be measured" until Task 7); `drizzle.md`'s "Migrations and rolling deploys" section, with a `## Contents` entry if it has one; `ci-cd.md`'s `build` and `deploy` rows; the architecture's health routes and deployment; the stack overview's rolling deploys, liveness and readiness, circuit breaker, deregistration delay and build arguments; the threat model's commit on a public route and `ecs:StopTask`; the glossary's new terms. Run `pnpm format:check`. Expected: pass.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```bash
 git add scripts docs .github
