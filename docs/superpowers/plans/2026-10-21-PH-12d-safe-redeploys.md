@@ -152,15 +152,15 @@ git push
 **Interfaces:**
 - Produces: `export interface SetupTimeouts { statement: string; lock: string }`; `export const setupTimeouts: SetupTimeouts = { statement: "30s", lock: "10s" }`; `setupAppRole(db: Database, appRole: AppRole, timeouts: SetupTimeouts = setupTimeouts): Promise<{ created: boolean }>`.
 
-- [ ] **Step 1: Failing test**
+- [x] **Step 1: Failing test**
 
 In `describe("setupAppRole")`: `it("gives up on a lock it cannot get")`: run `setupAppRole` once to create the role; on a second connection from the same pool, `BEGIN` and `ALTER ROLE <role> PASSWORD 'held'` and keep the transaction open; then `setupAppRole(db, appRole, { statement: "30s", lock: "100ms" })` rejects with an error whose `code` is `55P03` within 2 seconds; finally `ROLLBACK` and release the holder. Run `pnpm test apps/api/src/db/setup-role.test.ts`. Expected: fails (it waits, then the test times out).
 
-- [ ] **Step 2: The timeouts**
+- [x] **Step 2: The timeouts**
 
 Right after `BEGIN`: `SELECT set_config('statement_timeout', $1, true), set_config('lock_timeout', $2, true)` with the two values, so they last for this transaction only. Comment: a hanging `db-setup` would hold `demo-up` for 10 minutes and block `demo-down` (OP-101). Run `pnpm check`. Expected: pass.
 
-- [ ] **Step 3: Commit and push**
+- [x] **Step 3: Commit and push**
 
 ```bash
 git add apps
