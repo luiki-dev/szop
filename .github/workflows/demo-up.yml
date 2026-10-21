@@ -129,8 +129,8 @@ jobs:
     # The three waits have deadlines of 10 minutes (db-setup), 15 (the start)
     # and 10 (/api/health), 35 together, and the apply (the database takes
     # about 5) and the state lock's wait (up to 15 minutes) come on top
-    # (PH-12d spec, decision 11). Each wait stops the run well before this.
-    # PH-12d's demo: a fresh demo took about 10 minutes, a redeploy about 4.
+    # (PH-12d spec, decision 11). 45 minutes covers the deadlines and a normal
+    # apply; a long wait for the lock can still reach it. PH-12d's demo: a fresh demo took about 10 minutes, a redeploy about 4.
     timeout-minutes: 45
     # Waits for the owner's approval; trusted by szop-ci-deploy for this
     # environment, from any branch.
@@ -289,31 +289,57 @@ jobs:
       # so the circuit breaker watches the first start too; on a redeploy the
       # count is already one and Terraform's new task definition has started
       # the deployment (PH-12c spec, decision 6; PH-12d spec, decision 10).
+      # When the last deployment failed and this run changes no task
+      # definition, Terraform starts none, so a new one is forced here: the
+      # retry after a transient failure (the database unreachable during the
+      # migrations, a Fargate or ECR hiccup), by pressing demo-up again on the
+      # same commit or by Re-run failed jobs. Without it the run would read the
+      # old failure and stop at once.
+      # The run waits for the deployment it expects: the one it started, or
+      # the primary one before the wait. Another primary deployment, as a read
+      # just after update-service can still show, counts as still in progress.
       # Then, every 10 seconds, to a deadline of 15 minutes: the primary
       # deployment's rollout state. COMPLETED with one deployment left and as
-      # many tasks running as wanted is success; FAILED means the circuit
-      # breaker stopped the deployment (ADR 0036, decision 3), so the run
-      # fails at once instead of waiting out the deadline. A redeploy can take
-      # several minutes: a new task's health checks, then the old one's 30
-      # seconds of draining.
+      # many tasks running as wanted, at least one, is success; FAILED means
+      # the circuit breaker stopped the deployment (ADR 0036, decision 3), so
+      # the run fails at once instead of waiting out the deadline. A redeploy
+      # can take several minutes: a new task's health checks, then the old
+      # one's 30 seconds of draining.
       - name: Start the app
         id: start
         run: |
           cluster=$(terraform -chdir=infra/demo output -raw cluster)
           service=$(terraform -chdir=infra/demo output -raw service)
-          count=$(aws ecs describe-services --cluster "$cluster" --services "$service" --query 'services[0].desiredCount' --output text)
+          # The backticks are JMESPath's literal quotes, not a command substitution.
+          # shellcheck disable=SC2016
+          state=$(aws ecs describe-services --cluster "$cluster" --services "$service" \
+            --query 'services[0].[desiredCount, deployments[?status==`PRIMARY`] | [0].rolloutState, deployments[?status==`PRIMARY`] | [0].id]' --output text)
+          read -r count rollout expected <<< "$state"
           if [ "$count" = 0 ]; then
-            aws ecs update-service --cluster "$cluster" --service "$service" --desired-count 1 --force-new-deployment --query 'service.serviceName' --output text
+            # shellcheck disable=SC2016
+            expected=$(aws ecs update-service --cluster "$cluster" --service "$service" --desired-count 1 --force-new-deployment \
+              --query 'service.deployments[?status==`PRIMARY`] | [0].id' --output text)
+            echo "Started the deployment $expected with one task."
+          elif [ "$rollout" = FAILED ]; then
+            echo "The last deployment ($expected) failed; this run starts a new one."
+            # shellcheck disable=SC2016
+            expected=$(aws ecs update-service --cluster "$cluster" --service "$service" --force-new-deployment \
+              --query 'service.deployments[?status==`PRIMARY`] | [0].id' --output text)
+            echo "Started the deployment $expected."
           else
-            echo "The service already wants $count task(s); its count is left alone."
+            echo "The service already wants $count task(s); its count is left alone. Waiting for the deployment $expected."
           fi
           deadline=$((SECONDS + 900))
           while (( SECONDS < deadline )); do
-            # The backticks are JMESPath's literal quotes, not a command substitution.
             # shellcheck disable=SC2016
             state=$(aws ecs describe-services --cluster "$cluster" --services "$service" \
-              --query 'services[0].[length(deployments), deployments[?status==`PRIMARY`] | [0].rolloutState, runningCount, desiredCount]' --output text)
-            read -r deployments rollout running desired <<< "$state"
+              --query 'services[0].[length(deployments), deployments[?status==`PRIMARY`] | [0].id, deployments[?status==`PRIMARY`] | [0].rolloutState, runningCount, desiredCount]' --output text)
+            read -r deployments primary rollout running desired <<< "$state"
+            if [ "$primary" != "$expected" ]; then
+              echo "After $SECONDS seconds: the primary deployment is $primary, not $expected yet"
+              sleep 10
+              continue
+            fi
             if [ "$rollout" = FAILED ]; then
               # shellcheck disable=SC2016
               aws ecs describe-services --cluster "$cluster" --services "$service" \
@@ -323,7 +349,7 @@ jobs:
               echo "::error::The deployment failed: the circuit breaker stopped it; the previous version keeps serving"
               exit 1
             fi
-            if [ "$deployments" = 1 ] && [ "$rollout" = COMPLETED ] && [ "$running" = "$desired" ]; then
+            if [ "$deployments" = 1 ] && [ "$rollout" = COMPLETED ] && [ "$desired" != 0 ] && [ "$running" = "$desired" ]; then
               echo "The service is stable with $running task(s) after $SECONDS seconds."
               exit 0
             fi
