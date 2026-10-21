@@ -236,6 +236,8 @@ Email was built without proof of who sent a message: anyone can write any addres
 
 ### The pieces, from the network inwards
 
+How the pieces connect, resource by resource, is drawn in [AWS resources](aws-resources.md).
+
 | Piece | What it is | Szop's use |
 |---|---|---|
 | **Region, availability zone (AZ)** | A region is a geographic area (`eu-central-1` is Frankfurt) made of several **availability zones**: separate data centers with independent power and networking. | Everything runs in Frankfurt. The load balancer and the database require subnets in two AZs. |

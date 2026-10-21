@@ -278,7 +278,7 @@ React Hook Form with the Zod resolver and the shared schemas: the browser and th
 
 ## 5. Deployment
 
-Szop runs on AWS as an **on-demand demo environment**: created for a session, destroyed afterwards, starting each time with an empty database. There is no always-on production and no staging. Decisions and alternatives are in [ADR 0008](../decisions/0008-hosting.md); the AWS concepts are explained in the [stack overview](stack-overview.md#12-where-szop-runs).
+Szop runs on AWS as an **on-demand demo environment**: created for a session, destroyed afterwards, starting each time with an empty database. There is no always-on production and no staging. Decisions and alternatives are in [ADR 0008](../decisions/0008-hosting.md); the AWS concepts are explained in the [stack overview](stack-overview.md#12-where-szop-runs). Every AWS resource Terraform creates, and how the resources refer to each other, is drawn in [AWS resources](aws-resources.md).
 
 ```
  Internet

@@ -10,7 +10,7 @@ How to set up, run and take down Szop's environment on AWS, step by step. Szop r
 
 Shutting Szop down for good is the reverse of this table: [Tearing down](#tearing-down) for `infra/demo`, then [Destroying base](#destroying-base), then [Destroying bootstrap](#destroying-bootstrap).
 
-Why each piece exists is in the [stack overview](../architecture/stack-overview.md#12-where-szop-runs); how Terraform works here is on the [Terraform page](../development/tools/terraform.md). The tools come from [setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli).
+Why each piece exists is in the [stack overview](../architecture/stack-overview.md#12-where-szop-runs); how Terraform works here is on the [Terraform page](../development/tools/terraform.md); what each module creates is drawn in [AWS resources](../architecture/aws-resources.md). The tools come from [setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli).
 
 **Every command in this runbook assumes `export AWS_PROFILE=szop`** in the terminal, and a current sign-in (`aws sso login`). Lines marked **⚠️ Don't** are mistakes that are hard to undo; read them before the step, not after.
 
