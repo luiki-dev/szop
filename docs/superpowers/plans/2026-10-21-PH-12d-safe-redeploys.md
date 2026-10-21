@@ -216,15 +216,15 @@ git push
 **Files:**
 - Modify: `.github/workflows/demo-up.yml`
 
-- [ ] **Step 1: Order and timeout**
+- [x] **Step 1: Order and timeout**
 
 Move *Download the image* above *Configure AWS credentials*, and `gunzip -c … | docker load` into a step right after it (*Load the image*); *Push the image* no longer loads. `timeout-minutes: 45`, its comment updated (the three deadlines, the apply, the state lock's wait). Update the header comment's list of steps if it names them.
 
-- [ ] **Step 2: `db-setup`'s wait**
+- [x] **Step 2: `db-setup`'s wait**
 
 Replace `aws ecs wait tasks-stopped` with a loop to `deadline=$((SECONDS + 600))`, every 10 seconds `describe-tasks … --query 'tasks[0].lastStatus'` until `STOPPED`. At the deadline: `aws ecs stop-task --cluster … --task … --reason "demo-up: db-setup did not stop within 10 minutes"`, then the existing `::error::` with the log stream, exit 1.
 
-- [ ] **Step 3: The start**
+- [x] **Step 3: The start**
 
 Read `desiredCount` first. At `0`: `update-service --desired-count 1 --force-new-deployment`; otherwise no call (Review Focus 2). Then to `deadline=$((SECONDS + 900))`, every 10 seconds, one `describe-services` with `--query 'services[0].[length(deployments), deployments[?status==`PRIMARY`] | [0].rolloutState, runningCount, desiredCount]'`:
 - `1`, `COMPLETED`, running = desired: success, print the elapsed seconds;
@@ -233,15 +233,15 @@ Read `desiredCount` first. At `0`: `update-service --desired-count 1 --force-new
 
 At the deadline: the latest events and the existing error. The comment above says why (ADR 0036, decision 3; spec, decision 10) and drops the 300-second explanation.
 
-- [ ] **Step 4: The wait for the app**
+- [x] **Step 4: The wait for the app**
 
 A loop to `deadline=$((SECONDS + 600))`. Success needs `"status":"ok"` and `"commit":"$COMMIT"` (the deployed commit, from `steps.commit.outputs.sha` through `env`); print the body. If the deadline passes with `ok` but another commit, the error says the old version still answers. The summary gains a line with the commit `/api/health` reported.
 
-- [ ] **Step 5: Check**
+- [x] **Step 5: Check**
 
 Run `pnpm check:workflows`. Expected: no findings. Read the job top to bottom once against `docs/development/ci-cd.md`'s rules (no project code in `deploy`, nothing user-controlled in `${{ }}` inside `run:`).
 
-- [ ] **Step 6: Commit and push**
+- [x] **Step 6: Commit and push**
 
 ```bash
 git add .github
