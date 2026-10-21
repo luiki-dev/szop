@@ -286,19 +286,19 @@ The controller runs this task itself, with the owner; no subagent.
 **Files:**
 - Modify: whatever the runs show to be wrong; `docs/operations/demo-environment.md` (timings); this plan.
 
-- [ ] **Step 1: Owner checkpoint 1: base**
+- [x] **Step 1: Owner checkpoint 1: base**
 
 Create the owner-step issue for the base apply (as `docs/development/project-tracking.md` describes owner steps), and update #245's text with the watch script, the failed deploy, the fix-forward run and the branch's deletion. Ask the owner to apply `infra/base` from the branch and see a second plan with no changes. Wait.
 
-- [ ] **Step 2: The draft PR**
+- [x] **Step 2: The draft PR**
 
 `gh pr create --draft`, title `feat: make redeploys of the demo safe`, the template filled in as far as it goes, `Closes #244`. Check `infra-plan`'s comment: base without changes, demo with Task 4's values, Access Analyzer without errors or security warnings.
 
-- [ ] **Step 3: The throwaway branch**
+- [x] **Step 3: The throwaway branch**
 
 From the phase branch: `git switch -c test/ph-12d-failing-start`; in `server.ts`, right after the config is loaded, `console.error("PH-12d: failing on purpose to test the circuit breaker"); process.exit(1);`; commit `test: fail at startup on purpose (PH-12d, not for merging)`; `git push -u origin test/ph-12d-failing-start`; `git switch feat/ph-12d-safe-redeploys`.
 
-- [ ] **Step 4: Owner checkpoint 2: a fresh demo**
+- [x] **Step 4: Owner checkpoint 2: a fresh demo**
 
 Ask the owner to press `demo-up` on the phase branch. On a missing permission: fix under Task 4's rules, simulate, commit `fix(infra): …`, push, the owner applies base and re-runs. Then: `curl -s https://szop.dzwoniec.com/api/health` shows the branch's commit; `aws ecs describe-services --cluster szop-demo --services szop-demo-app --query 'services[0].deployments[].[status,rolloutState]'` shows `PRIMARY COMPLETED` (Review Focus 2); the target group's health check and attributes as set (`aws elbv2 describe-target-groups`, `describe-target-group-attributes`). Record the start's duration and how long the new target took to turn healthy.
 
