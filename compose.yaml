@@ -33,7 +33,12 @@ services:
   # starts it and checks it.
   app:
     profiles: [app]
-    build: .
+    # The commit goes into the image (Dockerfile); pnpm check:image and CI set
+    # it, and a bare `docker compose build` leaves it "unknown".
+    build:
+      context: .
+      args:
+        GIT_COMMIT: "${GIT_COMMIT:-unknown}"
     image: szop:local
     depends_on:
       postgres:

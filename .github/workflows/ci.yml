@@ -199,6 +199,12 @@ jobs:
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # The commit the image is built from, which /api/health reports (PH-12d
+      # spec, decision 3). Read from the checkout, so a pull request's merge
+      # commit is what the image names.
+      - name: Resolve the commit
+        id: commit
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       # Builds without pushing (ADR 0010, decisions 7 and 10) and loads the
       # image into the runner's Docker as szop:local. The layers of every
       # stage are cached in GitHub's cache (ADR 0010, decision 9). The app's
@@ -210,11 +216,15 @@ jobs:
           load: true
           push: false
           tags: szop:local
+          build-args: GIT_COMMIT=${{ steps.commit.outputs.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       # Starts the image next to PostgreSQL from compose.yaml and checks it
-      # (ADR 0028); on failure it prints the app's logs.
+      # (ADR 0028); on failure it prints the app's logs. It checks that
+      # /api/health reports the commit the image was built with.
       - run: scripts/check-image.sh --no-build
+        env:
+          GIT_COMMIT: ${{ steps.commit.outputs.sha }}
 
   infra:
     name: infra

@@ -52,7 +52,12 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
 
   // Each feature's routes are a plugin; later ones get their services as
   // plugin options.
-  app.register(healthRoutes, { prefix: "/api", db, journal: readJournal() });
+  app.register(healthRoutes, {
+    prefix: "/api",
+    db,
+    journal: readJournal(),
+    commit: config.commit,
+  });
 
   // The built SPA, and index.html for the app's own paths. Registered last:
   // its not-found handler answers every path no route above claims.

@@ -52,6 +52,12 @@ COPY apps/api/certs ./apps/api/certs
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/shared/src ./packages/shared/src
 COPY --from=build /app/apps/web/dist ./apps/web/dist
+# The commit the image is built from, which /api/health reports: passed by
+# whoever builds it (Compose, CI, demo-up), "unknown" when nobody does (PH-12d
+# spec, decision 3). Last among the instructions that change, so a new commit
+# rebuilds nothing above it.
+ARG GIT_COMMIT=unknown
+ENV GIT_COMMIT=$GIT_COMMIT
 USER node
 WORKDIR /app/apps/api
 EXPOSE 3000

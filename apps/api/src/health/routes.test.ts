@@ -7,7 +7,8 @@ import { testConfig } from "../test/config.ts";
 import { testDatabaseSettings, useTestDatabase } from "../test/database.ts";
 import { captureLog, type LogLine } from "../test/log.ts";
 
-const config = testConfig();
+const commit = "0123456789abcdef0123456789abcdef01234567";
+const config = testConfig({ commit });
 
 describe("GET /api/health", () => {
   const database = useTestDatabase();
@@ -17,7 +18,7 @@ describe("GET /api/health", () => {
     await app.close();
   });
 
-  it("answers 200 with the schema version when the database is up", async () => {
+  it("answers 200 with the commit and the schema version when the database is up", async () => {
     app = buildApp({ config, db: database.db });
 
     const response = await app.inject({ method: "GET", url: "/api/health" });
@@ -26,6 +27,7 @@ describe("GET /api/health", () => {
     expect(response.headers["content-type"]).toMatch(/^application\/json/);
     expect(response.json()).toEqual({
       status: "ok",
+      commit,
       database: { status: "up", schemaVersion: "0000_init" },
     });
 
@@ -49,6 +51,7 @@ describe("GET /api/health", () => {
       expect(response.statusCode).toBe(503);
       expect(response.json()).toEqual({
         status: "error",
+        commit,
         database: { status: "down" },
       });
 

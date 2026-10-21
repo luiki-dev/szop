@@ -14,6 +14,7 @@ const valid = {
   DATABASE_TLS: "none",
   WEB_ROOT: "../web/dist",
   TRUSTED_PROXIES: "none",
+  GIT_COMMIT: "0123456789abcdef0123456789abcdef01234567",
 };
 
 const names = Object.keys(valid);
@@ -44,6 +45,7 @@ describe("loadConfig", () => {
       },
       webRoot: resolve("../web/dist"),
       trustedProxies: [],
+      commit: "0123456789abcdef0123456789abcdef01234567",
     });
   });
 
@@ -148,6 +150,27 @@ describe("loadConfig", () => {
       /TRUSTED_PROXIES: (?!missing)/,
     );
   });
+
+  it("reads the commit", () => {
+    expect(loadConfig(valid).commit).toBe(
+      "0123456789abcdef0123456789abcdef01234567",
+    );
+  });
+
+  it("accepts unknown", () => {
+    expect(loadConfig({ ...valid, GIT_COMMIT: "unknown" }).commit).toBe(
+      "unknown",
+    );
+  });
+
+  it.each(["", "0123456", "0123456789ABCDEF0123456789ABCDEF01234567", "main"])(
+    "refuses the commit %j",
+    (value) => {
+      expect(errorFor({ ...valid, GIT_COMMIT: value })).toMatch(
+        /GIT_COMMIT: (?!missing)/,
+      );
+    },
+  );
 
   it("never puts a value in the error", () => {
     const secret = "s3cr3t-value";

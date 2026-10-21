@@ -68,11 +68,11 @@
 **Interfaces:**
 - Produces: `Config.commit: string`; `testConfig()` defaults `commit` to `"unknown"`; `HealthRoutesOptions.commit: string`; `healthSchema` with `commit: z.string()` in both variants; `pnpm check`.
 
-- [ ] **Step 1: `pnpm check`**
+- [x] **Step 1: `pnpm check`**
 
 Add `"check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test"` after `"test:coverage"`. A row in `scripts.md`'s "Checks" table (what it runs, in that order, stopping at the first failure; needs `pnpm db:up` first; no CI job runs it, CI runs its parts as `lint`, `typecheck`, `test`), and the intro sentence there pointing to it. Run `pnpm db:up && pnpm check`. Expected: all four pass.
 
-- [ ] **Step 2: Failing tests for `GIT_COMMIT`**
+- [x] **Step 2: Failing tests for `GIT_COMMIT`**
 
 In `config.test.ts`, add `GIT_COMMIT: "0123456789abcdef0123456789abcdef01234567"` to `valid`, and:
 - `it("reads the commit")`: `loadConfig(valid).commit` equals that hash.
@@ -82,27 +82,27 @@ In `config.test.ts`, add `GIT_COMMIT: "0123456789abcdef0123456789abcdef01234567"
 
 Run `pnpm test apps/api/src/config.test.ts`. Expected: the new tests fail.
 
-- [ ] **Step 3: `GIT_COMMIT` in `config.ts`**
+- [x] **Step 3: `GIT_COMMIT` in `config.ts`**
 
 `GIT_COMMIT: z.string().regex(/^([0-9a-f]{40}|unknown)$/, 'must be a full commit hash or "unknown"')` with a comment (baked into the image by the build, `unknown` outside it; spec, decision 3), mapped to `commit`. `testConfig` gets `commit: "unknown"`. `.env.example` gets `GIT_COMMIT=unknown` with a comment saying the image sets the real value. Copy the line into your own `apps/api/.env` too. Run the config tests. Expected: pass.
 
-- [ ] **Step 4: Failing tests for the health body**
+- [x] **Step 4: Failing tests for the health body**
 
 In `routes.test.ts`: build with `testConfig({ commit: "0123456789abcdef0123456789abcdef01234567" })`; the `200` test expects `commit` with that hash beside `status`; the `503` test the same; both keep the `healthSchema.parse` round trip. Run `pnpm test apps/api/src/health`. Expected: fail.
 
-- [ ] **Step 5: The commit in the schema, the routes, the log**
+- [x] **Step 5: The commit in the schema, the routes, the log**
 
 `healthSchema`: `commit: z.string()` in both variants, the comment naming it. `healthRoutes` takes `commit` in its options and puts it in both bodies; `app.ts` passes `config.commit`. `server.ts`'s `migrations applied` line logs `{ schemaVersion, commit: config.commit }`. `apps/web/src/test/server.ts`'s `healthyBody` gets `commit: "unknown"`. Run `pnpm check`. Expected: pass.
 
-- [ ] **Step 6: The image, Compose and their check**
+- [x] **Step 6: The image, Compose and their check**
 
 Dockerfile as the Global Constraints say, with a comment (who passes it, spec, decision 3). `compose.yaml`'s `app.build` becomes `{ context: ., args: { GIT_COMMIT: "${GIT_COMMIT:-unknown}" } }`. `check-image.sh`: `export GIT_COMMIT="${GIT_COMMIT:-$(git rev-parse HEAD)}"` before the build; a new check after `/`: `curl --silent --max-time 10 http://127.0.0.1:8080/api/health` must contain `"commit":"$GIT_COMMIT"`, else `fail "…"`; the final `OK:` line names the commit. Run `pnpm check:image`. Expected: `OK: …` with the branch's commit.
 
-- [ ] **Step 7: The build argument in CI and in demo-up**
+- [x] **Step 7: The build argument in CI and in demo-up**
 
 `ci.yml`'s `docker` job: a step `id: commit` writing `sha=$(git rev-parse HEAD)` to `$GITHUB_OUTPUT`, then `build-args: GIT_COMMIT=${{ steps.commit.outputs.sha }}` on the build, and `GIT_COMMIT: ${{ steps.commit.outputs.sha }}` in the `env` of the `check-image.sh --no-build` step. `demo-up.yml`'s `build` job: `build-args: GIT_COMMIT=${{ steps.commit.outputs.sha }}`. Comments say why. Run `pnpm check:workflows`. Expected: no findings.
 
-- [ ] **Step 8: Commit and push**
+- [x] **Step 8: Commit and push**
 
 ```bash
 git add package.json docs/development apps packages Dockerfile compose.yaml scripts .github

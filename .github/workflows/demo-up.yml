@@ -103,6 +103,9 @@ jobs:
           provenance: false
           sbom: false
           tags: szop:${{ steps.commit.outputs.sha }}
+          # The image reports the commit it was built from in /api/health,
+          # which the deploy job's check reads (PH-12d spec, decision 3).
+          build-args: GIT_COMMIT=${{ steps.commit.outputs.sha }}
 
       - name: Save the image
         env:

@@ -32,16 +32,17 @@ These call Docker Compose with `compose.yaml` ([Docker Compose](tools/docker-com
 | `pnpm db:reset` | Wipe the local database | `docker compose down --volumes && docker compose up -d --wait`: removes PostgreSQL's container and its volume, then starts it again on an empty one | When the API refuses to start because the database's migrations do not match the code's ([the migration check](tools/drizzle.md#the-migration-check)), or to start from empty. It also removes the test databases, which the next `pnpm test` recreates |
 | `pnpm image:up` | Start Szop in containers | `docker compose --profile app up --build`: builds the container image and runs it next to PostgreSQL, in the foreground, on `http://127.0.0.1:8080` | Trying the app as AWS will run it. Ctrl+C stops it; `pnpm image:up -d --wait` runs it in the background |
 | `pnpm image:down` | Stop and remove Szop's containers | `docker compose --profile app down`: removes the app's and PostgreSQL's containers (the data stays in its volume) | After `pnpm image:up`. Then `pnpm db:up` brings PostgreSQL back for `pnpm dev` and the tests |
-| `pnpm check:image` | Prove the container image works | `scripts/check-image.sh`: builds the image, starts it next to PostgreSQL, checks that it is healthy, runs as `node` and serves the page, then removes it | After changing the `Dockerfile`, `.dockerignore`, `compose.yaml` or the dependencies. CI's `docker` job runs it with `--no-build` on every code PR |
+| `pnpm check:image` | Prove the container image works | `scripts/check-image.sh`: builds the image, starts it next to PostgreSQL, checks that it is healthy, runs as `node`, serves the page and reports the commit it was built from in `/api/health`, then removes it | After changing the `Dockerfile`, `.dockerignore`, `compose.yaml` or the dependencies. CI's `docker` job runs it with `--no-build` on every code PR |
 
 `db:reset` leaves the profile out, so a running app container keeps running; stop it first with `pnpm image:down`. `image:down` takes the profile with it on purpose: a plain `docker compose down` leaves out every service behind a profile and warns that the network is still in use ([Docker](tools/docker.md#everyday-use)).
 
 ## Checks
 
-The same commands CI runs in its jobs ([CI/CD](ci-cd.md#the-jobs)); run them before pushing.
+The same commands CI runs in its jobs ([CI/CD](ci-cd.md#the-jobs)); run them before pushing, all four at once with `pnpm check`.
 
 | Script | Purpose | Runs | CI job |
 |---|---|---|---|
+| `pnpm check` | Run the everyday checks in one go | `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test`, in that order, stopping at the first failure. Needs PostgreSQL (`pnpm db:up`) for the tests | — (CI runs its parts as `lint`, `typecheck` and `test`) |
 | `pnpm lint` | Find code problems | `eslint .`: ESLint over the whole repository ([ESLint](tools/eslint.md)) | `lint` |
 | `pnpm format:check` | Check the formatting | `prettier --check .`: lists the files Prettier would change, and fails if there are any ([Prettier](tools/prettier.md)) | `lint` |
 | `pnpm typecheck` | Check the types | `tsc --noEmit` for the root, then each package's own `typecheck` ([TypeScript](tools/typescript.md)) | `typecheck` |

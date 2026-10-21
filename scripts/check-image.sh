@@ -8,6 +8,11 @@ cd "$(dirname "$0")/.."
 build=--build
 if [[ "${1:-}" == --no-build ]]; then build=--no-build; fi
 
+# The commit the image is built from, which compose.yaml passes on as a build
+# argument. CI sets it; locally it is the checked-out commit.
+GIT_COMMIT="${GIT_COMMIT:-$(git rev-parse HEAD)}"
+export GIT_COMMIT
+
 compose=(docker compose --profile app)
 
 # Always remove the app's container; PostgreSQL keeps running.
@@ -42,4 +47,10 @@ read -r status type < <(curl --silent --max-time 10 --output /dev/null \
 [[ "$status" == 200 ]] || fail "GET / answered $status, not 200"
 [[ "$type" == text/html* ]] || fail "GET / answered '$type', not text/html"
 
-echo "OK: the image starts, migrates, runs as $user (uid $uid) and serves the app"
+# The image must carry the commit it was built from, so a redeploy can tell
+# versions apart.
+echo "==> Checking that /api/health reports the commit"
+health=$(curl --silent --max-time 10 http://127.0.0.1:8080/api/health) || fail "GET /api/health did not answer within 10 seconds"
+[[ "$health" == *"\"commit\":\"$GIT_COMMIT\""* ]] || fail "/api/health answered '$health', which lacks the commit $GIT_COMMIT"
+
+echo "OK: the image starts, migrates, runs as $user (uid $uid), serves the app and reports commit $GIT_COMMIT"
