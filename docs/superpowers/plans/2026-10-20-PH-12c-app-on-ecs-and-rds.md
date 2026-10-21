@@ -283,39 +283,39 @@ The controller runs this task itself, with the owner; no subagent.
 **Files:**
 - Modify: whatever the real runs show to be wrong (most likely `infra/base/ci_roles.tf` or `app_roles.tf`); `docs/operations/demo-environment.md` (real timings); `.github/workflows/demo-up.yml` (the timeout); this plan.
 
-- [ ] **Step 1: Before the owner applies**
+- [x] **Step 1: Before the owner applies**
 
 With the owner's credentials: `aws iam get-role --role-name AWSServiceRoleForECS` and `AWSServiceRoleForRDS`. If one is missing, add its creation (`aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com` or `rds.amazonaws.com`) to the runbook and to the owner's step.
 
-- [ ] **Step 2: Owner checkpoint 1: base**
+- [x] **Step 2: Owner checkpoint 1: base**
 
 Ask the owner to do owner step 1: create any missing service-linked role, apply `infra/base` from the branch, see a second plan with no changes. Wait for confirmation.
 
-- [ ] **Step 3: The draft PR and its plan comment**
+- [x] **Step 3: The draft PR and its plan comment**
 
 Open the phase PR as a draft (`gh pr create --draft`, title `feat: run the app on ECS and RDS`, the template filled in as far as it goes, `Closes #221`). Check `infra-plan`'s comment: base with no changes, demo with Task 3's resources, Access Analyzer with no errors and no security warnings.
 
-- [ ] **Step 4: Owner checkpoint 2: the first demo**
+- [x] **Step 4: Owner checkpoint 2: the first demo**
 
 Ask the owner to press `demo-up` on `feat/ph-12c-app-on-ecs-and-rds` and approve. Watch with `gh run watch`/`gh run view --log-failed`. On a missing permission: fix it under Task 2's rules, simulate again, commit (`fix(infra): …`), push, and ask the owner to apply base and re-run. Record each step's duration.
 
-- [ ] **Step 5: Check the demo**
+- [x] **Step 5: Check the demo**
 
 From here: `curl -s https://szop.dzwoniec.com/api/health` (expected `"status":"ok"` and the schema version); `curl -s https://szop.dzwoniec.com` (the SPA's HTML); `curl -s -H 'X-Forwarded-For: 203.0.113.7' https://szop.dzwoniec.com/api/health`, then in the log (`aws logs tail /szop/app --since 10m`) that request's address is this machine's public address, not `203.0.113.7`. With the owner's credentials: `aws rds describe-db-parameters --db-parameter-group-name <the instance's group> --query "Parameters[?ParameterName=='rds.force_ssl' || ParameterName=='log_statement'].[ParameterName,ParameterValue]"` (expected `1` and `none`, Review Focus 2); whether the master secret carries the instance's tags (`aws secretsmanager describe-secret`), and if so narrow the execution role's secret statement by `aws:ResourceTag/group = demo`. Ask the owner to do the rest of owner step 2 in the browser: the status page, their IP in the log, the forged-header request from their machine, a Lighthouse run (scores into the PR), ECS Exec and the TLS query following the runbook (expected `t`).
 
-- [ ] **Step 6: A redeploy's plan (Review Focus 4)**
+- [x] **Step 6: A redeploy's plan (Review Focus 4)**
 
 While the demo is up, with `AWS_PROFILE=szop`: `terraform -chdir=infra/demo plan -lock=false -var deployed_commit=<another full commit hash on the branch>`. Expected: the two task definitions replaced, the service updated in place to the new app revision, `db_setup_task_definition` changed, and nothing else.
 
-- [ ] **Step 7: The state check (Review Focus 2)**
+- [x] **Step 7: The state check (Review Focus 2)**
 
 Follow the runbook's state check. Expected: neither password appears in either state.
 
-- [ ] **Step 8: Owner checkpoint 3: demo-down (Review Focus 5)**
+- [x] **Step 8: Owner checkpoint 3: demo-down (Review Focus 5)**
 
 Ask the owner to press `demo-down` (from the branch's recorded commit, as the summary shows). Expected: `Destroy complete!` with every resource `demo-up` created. Then `aws resourcegroupstaggingapi get-resources --region eu-central-1 --tag-filters Key=group,Values=demo` lists only `task-definition/szop-demo-*` revisions (spec, decision 15), and `aws secretsmanager list-secrets --filters Key=name,Values=rds!db` lists nothing for the deleted instance. Record the destroy's duration; if it is close to `demo-down`'s timeout, raise it.
 
-- [ ] **Step 9: Commit and push**
+- [x] **Step 9: Commit and push**
 
 Real timings into the runbook, `demo-up`'s timeout from the measured run (about twice the longest seen), the ticked boxes, every fix.
 

@@ -122,9 +122,9 @@ jobs:
     name: deploy
     needs: [enable-teardown, build]
     runs-on: ubuntu-24.04
-    # Until PH-12c's first real run measures it: a new database takes about
-    # ten minutes, and each wait below is bounded on its own.
-    timeout-minutes: 45
+    # PH-12c's first demo took about 9 minutes from the approval (the database
+    # 5 of them), a redeploy about 3: 30 leaves room for the state lock's wait.
+    timeout-minutes: 30
     # Waits for the owner's approval; trusted by szop-ci-deploy for this
     # environment, from any branch.
     environment:
