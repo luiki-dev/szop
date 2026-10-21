@@ -79,12 +79,25 @@ data "aws_iam_policy_document" "app_task_execution" {
   # The master password RDS keeps in Secrets Manager, for db-setup's
   # DATABASE_PASSWORD. Only a task definition that names the secret gets it,
   # and only the deploy role registers task definitions, so the app's
-  # container never sees it. RDS names its secrets rds!db-<id>; Task 6
-  # narrows this if RDS copies the instance's tags to the secret.
+  # container never sees it. RDS names its secrets rds!db-<id> and copies the
+  # instance's tags onto them (seen on the first demo), so the statement also
+  # requires the demo's tags: another app's RDS secret stays out of reach.
   statement {
     sid       = "ReadMasterPassword"
     actions   = ["secretsmanager:GetSecretValue"]
     resources = ["arn:aws:secretsmanager:eu-central-1:${var.account_id}:secret:rds!db-*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/group"
+      values   = ["demo"]
+    }
   }
 }
 
