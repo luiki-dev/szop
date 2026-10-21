@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import Fastify, { LogController, type FastifyInstance } from "fastify";
 import type { Config } from "./config.ts";
 import type { Database } from "./db/database.ts";
@@ -29,6 +30,11 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
   const app = Fastify({
     // By address, never a hop count or true (ADR 0025, decision 7).
     trustProxy: config.trustedProxies,
+    // Unique across tasks, so two tasks never log the same ID for different
+    // requests. Never taken from the request: the load balancer keeps a
+    // trace ID's Root the client sends, and Fastify's requestIdHeader stays
+    // at its default, off (ADR 0036, decision 10; PH-37 spec, decision 4).
+    genReqId: () => randomUUID(),
     logger: {
       level: config.logLevel,
       stream: logStream,
