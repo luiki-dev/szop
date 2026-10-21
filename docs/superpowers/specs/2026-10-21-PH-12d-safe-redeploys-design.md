@@ -34,7 +34,7 @@ The roadmap's goal: redeploying a running demo keeps it up. The old and the new 
 
 The phase is done when:
 
-- `pnpm check` passes, with tests for the commit in the configuration and in `/api/health`'s two bodies, and for `/api/live` answering `200` while the database is down;
+- `pnpm lint`, `pnpm format:check`, `pnpm typecheck` and `pnpm test` pass, with tests for the commit in the configuration and in `/api/health`'s two bodies, and for `/api/live` answering `200` while the database is down;
 - `pnpm check:image` builds the image with a commit and finds that commit in `/api/health`'s answer; `pnpm check:infra` and `pnpm check:workflows` pass;
 - `infra/base` is applied from the owner's machine with the deploy role's new permissions, a second `terraform plan` shows no changes, and IAM Access Analyzer reports no errors and no security warnings for the changed policies in the phase PR's plan comment;
 - **a fresh demo:** `demo-up` on the phase branch finishes green, and `https://szop.dzwoniec.com/api/health` answers `200` with the branch's commit;
@@ -174,7 +174,7 @@ Step 1 comes before the PR's plan comment can show clean Access Analyzer results
 
 About eight, for the plan to detail:
 
-1. The commit: the Dockerfile, Compose, the configuration, `/api/health`, the shared schema, the startup log, `check:image`, `build`'s build argument; `pnpm check` and `pnpm check:image` pass.
+1. The commit: the Dockerfile, Compose, the configuration, `/api/health`, the shared schema, the startup log, `check:image`, `build`'s build argument; `pnpm typecheck`, `pnpm test` and `pnpm check:image` pass.
 2. `/api/live` and its tests; the request logging.
 3. `db-setup`'s timeouts and their tests.
 4. `infra/demo`'s target group and service; `infra/base`'s deploy role; `pnpm check:infra` passes and a local plan shows the expected changes.
