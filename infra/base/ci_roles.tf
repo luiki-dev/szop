@@ -796,7 +796,7 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
   }
 
   # Creates, with both tags in the request. The subnet group an instance names
-  # is allowed by DemoDatabases only when it carries the tags, so the two
+  # is allowed by UseSubnetGroup only when it carries the tags, so the two
   # creates have a statement each, as in the network policy.
   statement {
     sid       = "CreateSubnetGroup"
@@ -829,7 +829,8 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
   # internet (PH-12d spec, decision 12). A request that omits a key does not
   # match either, which is the safe side. The security group and the private
   # subnet group still keep the database off the internet; this condition
-  # guards the request too.
+  # guards the request too. No other statement grants CreateDBInstance on
+  # db: resources, or these conditions would be bypassed.
   statement {
     sid       = "CreateInstance"
     actions   = ["rds:CreateDBInstance"]
@@ -914,12 +915,39 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
     }
   }
 
-  # Changes, tag changes and deletes, and the subnet group an instance's
-  # create names, on what already carries both tags.
+  # The subnet group an instance's create names, once it carries both tags. Its
+  # own statement, on subnet groups only: CreateDBInstance on the instance
+  # itself must stay with CreateInstance, whose conditions on the password and
+  # public access would otherwise be bypassed by a grant on "*" that matches
+  # the instance's tags (PH-12d task review).
+  statement {
+    sid       = "UseSubnetGroup"
+    actions   = ["rds:CreateDBInstance"]
+    resources = ["arn:aws:rds:*:*:subgrp:*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  # Changes, tag changes and deletes on what already carries both tags.
   statement {
     sid = "DemoDatabases"
     actions = [
-      "rds:CreateDBInstance",
       "rds:ModifyDBInstance",
       "rds:DeleteDBInstance",
       "rds:ModifyDBSubnetGroup",
