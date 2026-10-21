@@ -21,7 +21,7 @@ Every AWS resource the Terraform code under `infra/` creates, drawn as diagrams.
   - grey with a dashed border: something Terraform does not create, such as the internet or the secret RDS creates for itself
 - **Frames** group the boxes by AWS service. In the overview, the outer frames are the stacks.
 - **Arrows** point from the resource that refers to another to the one it refers to, and the label says how it uses it. A Terraform reference (`aws_vpc.main.id`) or a `depends_on` draws a solid arrow.
-- **Dashed arrows** are references made by name or by an Amazon Resource Name (ARN) put together from a name, not through Terraform's own graph. That is how demo reaches base's resources ([PH-12b spec](../docs/superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md), decision 1).
+- **Dashed arrows** are references made by name or by an Amazon Resource Name (ARN) put together from a name, not through Terraform's own graph. That is how demo reaches base's resources ([PH-12b spec](../superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md), decision 1).
 - **Thick arrows** are the traffic security groups let through, with the protocol and port. Each one stands for the pair of rules behind it: the sender's egress rule and the receiver's ingress rule.
 - **Folded resources.** A box can hold more than one resource. Settings resources are folded into the resource they configure: the bucket's versioning, or a role's inline policy. Look-alike resources share a box with a count: the three DKIM records, the two public subnets. The table under each diagram lists every Terraform resource and the box that holds it. The `aws_iam_policy_document` data sources are left out: they only build JSON at plan time.
 
