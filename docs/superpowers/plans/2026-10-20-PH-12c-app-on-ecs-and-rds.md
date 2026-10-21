@@ -345,11 +345,11 @@ In each ADR named: the status line, and the line at the bottom of the decision's
 
 PH-12c's row: the plan and PR links, then ✅ Done before the merge; the README's diagram mirrors it (PH-12c `●`, the road `═` through it). PH-12c's entry: **Delivers** gains `db-setup` and `szop_app`, **Owner steps** the forged-header and ECS Exec checks.
 
-- [ ] **Step 4: GitHub**
+- [x] **Step 4: GitHub**
 
 As the spec's "Roadmap and GitHub changes" lists: "settled by" comments on OP-016, OP-017, OP-018, OP-021, OP-074, OP-096, OP-099; OP-013 and OP-053 ticked and re-parented to PH-18 (#47), OP-019 and OP-020 to PH-13 (#42), OP-043 to PH-12d (#244), each with Status ⬜ Backlog; OP-033 (#116) gains its part; #221's body from the roadmap entry; #233's **Depends on** PH-12d (#244); #149's text. The PR: the template filled in; `Closes #221` and `Closes` for each settled open point and #223, #149; the list of every issue change made in the phase; marked ready for review.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add docs README.md
