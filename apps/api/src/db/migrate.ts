@@ -8,7 +8,8 @@ export const migrationsFolder = fileURLToPath(
 );
 
 // Applies the pending migrations in one transaction. Drizzle takes no lock,
-// which is safe while exactly one instance runs (ADR 0008, decision 14).
+// so server.ts runs it inside withMigrationLock, one task at a time
+// (ADR 0036, decision 2).
 export async function runMigrations(db: Database): Promise<void> {
   await migrate(db, { migrationsFolder });
 }

@@ -22,6 +22,11 @@ export function createDatabase(settings: DatabaseSettings): Database {
     database: settings.name,
     user: settings.user,
     password: settings.password,
+    // node-postgres opens up to 10 by default. The budget: every task doubled
+    // by a deploy, times 5, stays under about 80% of the database's
+    // max_connections; the migration lock's connection is one of the 5
+    // (ADR 0036, decision 11; ADR 0040).
+    max: 5,
     // Fail fast when the database is unreachable, including in the health
     // check, instead of waiting for the operating system's timeout.
     connectionTimeoutMillis: 2000,

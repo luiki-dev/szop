@@ -1,9 +1,12 @@
+import { sql } from "drizzle-orm";
 import { buildApp } from "./app.ts";
 import { loadConfig, type Config } from "./config.ts";
 import { createDatabase } from "./db/database.ts";
 import { runMigrations } from "./db/migrate.ts";
 import { checkMigrations } from "./db/migration-check.ts";
+import { withMigrationLock } from "./db/migration-lock.ts";
 import { currentSchemaVersion, readJournal } from "./db/schema-version.ts";
+import { instanceId } from "./instance.ts";
 import { startShutdownDeadline } from "./shutdown.ts";
 
 // The only file that reads process.env. Checked by hand, not by tests:
@@ -61,12 +64,29 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
 // new task tries again (ADR 0020, decision 11).
 try {
   const journal = readJournal();
-  // Drizzle silently passes over a database migrated by other code, so the
-  // API refuses to start on one instead (ADR 0033, decision 3).
-  await checkMigrations(db, journal);
-  await runMigrations(db);
+  // One task at a time checks and migrates; the others wait, then find
+  // nothing pending (ADR 0036, decision 2). Drizzle silently passes over a
+  // database migrated by other code, so the API refuses to start on one
+  // instead (ADR 0033, decision 3).
+  await withMigrationLock(db, app.log, async () => {
+    await checkMigrations(db, journal);
+    await runMigrations(db);
+  });
   const schemaVersion = await currentSchemaVersion(db, journal);
-  app.log.info({ schemaVersion, commit: config.commit }, "migrations applied");
+  // The database's connection limit, for the budget of ADR 0036, decision 11
+  // (PH-37 spec, decision 8).
+  const { rows } = await db.execute<{ max_connections: string }>(
+    sql`SHOW max_connections`,
+  );
+  app.log.info(
+    {
+      schemaVersion,
+      commit: config.commit,
+      instance: instanceId,
+      maxConnections: Number(rows[0]?.max_connections),
+    },
+    "migrations applied",
+  );
   await app.listen({ host: config.host, port: config.port });
 } catch (error) {
   app.log.error(error, "startup failed");

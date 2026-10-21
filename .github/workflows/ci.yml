@@ -225,6 +225,13 @@ jobs:
       - run: scripts/check-image.sh --no-build
         env:
           GIT_COMMIT: ${{ steps.commit.outputs.sha }}
+      # Starts two instances of the same image behind nginx on a fresh
+      # database: both must migrate, one waiting for the other's lock, and
+      # both must answer through nginx (ADR 0036, decision 14; PH-37 spec,
+      # decision 10). On failure it prints both apps' and nginx's logs.
+      - run: scripts/check-scale.sh --no-build
+        env:
+          GIT_COMMIT: ${{ steps.commit.outputs.sha }}
 
   infra:
     name: infra

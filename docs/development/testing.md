@@ -33,6 +33,7 @@ The guide grows as the layers arrive: property tests and mutation testing in [PH
 | Unit tests | next to the code, for example `apps/api/src/config.test.ts` | One function does its job for each kind of input, with no server involved | `api` |
 | End-to-end (E2E) journeys | `e2e/tests/*.spec.ts`, for example `health.spec.ts` | A real browser drives the production build through the SPA, the API and PostgreSQL, on three projects (desktop Chromium, desktop Firefox and an emulated phone), checks every page with axe and fails on any Content Security Policy (CSP) violation | ➖ N/A: Playwright |
 | The image check | `scripts/check-image.sh` | The container image builds, starts next to PostgreSQL, migrates, runs as the `node` user and serves the SPA at `/` ([ADR 0028](../decisions/0028-container-image-details.md)) | ➖ N/A: a bash script |
+| The scale check | `scripts/check-scale.sh` | Two instances of the image start together behind nginx (the `scale` profile): one migrates while the other waits for the lock, and requests reach both. It catches what two instances inside one test process hide, since those share module-level state ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 14) | ➖ N/A: a bash script |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
 
 Layer still to come: **property tests and mutation testing** for the domain rules, in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
@@ -80,6 +81,16 @@ pnpm check:image                                 # build the image, start it nex
 - A passing run ends with `OK: the image starts, migrates, runs as node (uid 1000) and serves the app`.
 - A failing run prints a `FAIL:` line, then the app's logs, and exits 1. `the app did not become healthy` means the API did not start or never answered `/api/health`: the logs say why (a missing migrations journal, an unreachable database, an invalid setting). `GET / answered 404, not 200` means the SPA is not where `WEB_ROOT` points. `GET / did not answer within 10 seconds` means the app accepted the request but never replied. `the image's user is 'root', not node` means the Dockerfile's `USER` changed. In every case the `app` container is removed afterwards.
 - CI runs the same script in its `docker` job, on an image it built itself ([CI/CD](ci-cd.md#the-jobs)). More on the image and the check: [Docker](tools/docker.md#running-it-the-app-profile-and-the-check).
+
+The scale check runs two instances of the image behind nginx. Like the image check, it needs Docker Desktop and is not part of `pnpm test`.
+
+```bash
+pnpm check:scale                                 # build the image, start two behind nginx on a fresh database, check them, remove them
+```
+
+- A passing run ends with `OK: two instances (<id>, <id>) behind nginx, each migration recorded once`.
+- A failing run prints a `FAIL:` line, then the logs of `app-a`, `app-b` and nginx, and exits 1. `the scale profile did not become healthy` means an instance did not start: its log says why. `nginx reached 1 instance(s), not 2` means requests went to one instance only: an upstream missing from `compose/nginx-scale.conf`, or its shared `zone` gone ([nginx](tools/nginx.md#configuration)). `a migration was recorded twice` means two instances migrated at once: the lock is not taken ([`db/migration-lock.ts`](../../apps/api/src/db/migration-lock.ts)).
+- Two instances inside one Vitest process would share the module-level state of the API (its instance ID, for one), so this check runs real containers. What can be proven through the database alone, such as two migrators at once, is a database test instead (`db/migration-lock.test.ts`).
 
 ## Writing an API test
 
@@ -191,7 +202,7 @@ A database test runs against a real PostgreSQL, so a query, a migration or a cle
 - **Empty tables, before each test.** Every table of the `public` schema is emptied before each test (`TRUNCATE … RESTART IDENTITY CASCADE`), so a test starts clean even if the previous one crashed. Drizzle's own record of applied migrations lives in another schema and is kept.
 - **A test that creates its own table drops it** in `finally`, as `test/database.test.ts` does, so the table does not leak into the next file that uses the same worker's database.
 - **A test that creates its own `Database` closes it** with `db.$client.end()`.
-- **A test that needs a database of its own** (one never migrated, or one whose `drizzle.__drizzle_migrations` it changes) creates `szop_test_<name>_${VITEST_POOL_ID}` through the `postgres` maintenance database in `beforeEach` and drops it `WITH (FORCE)` in `afterEach`, after closing its pool, as `db/migration-check.test.ts` does. Changing Drizzle's table in the worker's shared copy would break the next file's tests, and the truncation before each test leaves that table alone.
+- **A test that needs a database of its own** (one never migrated, or one whose `drizzle.__drizzle_migrations` it changes) creates `szop_test_<name>_${VITEST_POOL_ID}` through the `postgres` maintenance database in `beforeEach` and drops it `WITH (FORCE)` in `afterEach`, after closing its pool, as `db/migration-check.test.ts` and `db/migration-lock.test.ts` do. Changing Drizzle's table in the worker's shared copy would break the next file's tests, and the truncation before each test leaves that table alone.
 - **Inspecting after a failure.** Nothing is dropped when a run ends, so the databases stay until the next run: `docker compose exec postgres psql -U szop -d szop_test_1`.
 - **The development database `szop` is never touched.** Tests only connect to `postgres` (to create the others) and to `szop_test_*`.
 

@@ -40,6 +40,12 @@ describe("createDatabase", () => {
     });
   });
 
+  it("opens at most 5 connections", () => {
+    db = createDatabase(settings);
+
+    expect(db.$client.options.max).toBe(5);
+  });
+
   it("finds the bundle next to the API, wherever it starts from", () => {
     expect(rdsCaBundle).toMatch(/\/apps\/api\/certs\/rds-global-bundle\.pem$/);
   });

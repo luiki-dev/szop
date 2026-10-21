@@ -3,11 +3,11 @@
 # on (or of the ref typed in), pushes it to the registry szop if it is not
 # there yet, applies infra/demo with that commit and records it in the state
 # so demo-down destroys with the same code (ADR 0011, decision 7). Then it runs
-# db-setup once, starts the app's one task and waits until /api/health answers
+# db-setup once, starts the app's two tasks and waits until /api/health answers
 # ok with that commit (PH-12c spec, decisions 5, 6 and 9; PH-12d spec,
-# decisions 10 and 11). ADR 0012, decisions 16 and 18 (the
-# deploy role is assumed only through the demo environment, and the job that
-# holds it runs no project code), ADR 0032, decision 8 (the job that holds a
+# decisions 10 and 11; PH-37 spec, decision 11). ADR 0012, decisions 16 and
+# 18 (the deploy role is assumed only through the demo environment, and the
+# job that holds it runs no project code), ADR 0032, decision 8 (the job that holds a
 # write token holds no AWS credentials) and ADR 0034 explain the rest.
 #
 # The GitHub environment demo, with the owner as its required reviewer, must
@@ -284,17 +284,22 @@ jobs:
           fi
           echo "db-setup exited with code 0."
 
-      # Terraform creates the service at zero tasks and ignores its count from
-      # then on. At zero (a fresh demo) the start is forced to be a deployment,
-      # so the circuit breaker watches the first start too; on a redeploy the
-      # count is already one and Terraform's new task definition has started
-      # the deployment (PH-12c spec, decision 6; PH-12d spec, decision 10).
+      # The demo runs two tasks, one in each availability zone (ADR 0036,
+      # decision 1; PH-37 spec, decision 11). Terraform creates the service at
+      # zero tasks and ignores its count from then on, so this step sets it.
+      # At zero (a fresh demo) the start is forced to be a deployment, so the
+      # circuit breaker watches the first start too; on a redeploy the count
+      # is already two and Terraform's new task definition has started the
+      # deployment (PH-12c spec, decision 6; PH-12d spec, decision 10). A
+      # service at another count, a demo started before PH-37, is set to two
+      # without forcing: Terraform's deployment, if it started one, goes on
+      # with two tasks.
       # When the last deployment failed and this run changes no task
       # definition, Terraform starts none, so a new one is forced here: the
       # retry after a transient failure (the database unreachable during the
       # migrations, a Fargate or ECR hiccup), by pressing demo-up again on the
       # same commit or by Re-run failed jobs. Without it the run would read the
-      # old failure and stop at once.
+      # old failure and stop at once. It sets two tasks as well.
       # The run waits for the deployment it expects: the one it started, or
       # the primary one before the wait. Another primary deployment, as a read
       # just after update-service can still show, counts as still in progress.
@@ -303,8 +308,8 @@ jobs:
       # many tasks running as wanted, at least one, is success; FAILED means
       # the circuit breaker stopped the deployment (ADR 0036, decision 3), so
       # the run fails at once instead of waiting out the deadline. A redeploy
-      # can take several minutes: a new task's health checks, then the old
-      # one's 30 seconds of draining.
+      # can take several minutes: the new tasks' health checks, then the old
+      # ones' 30 seconds of draining.
       - name: Start the app
         id: start
         run: |
@@ -317,17 +322,22 @@ jobs:
           read -r count rollout expected <<< "$state"
           if [ "$count" = 0 ]; then
             # shellcheck disable=SC2016
-            expected=$(aws ecs update-service --cluster "$cluster" --service "$service" --desired-count 1 --force-new-deployment \
+            expected=$(aws ecs update-service --cluster "$cluster" --service "$service" --desired-count 2 --force-new-deployment \
               --query 'service.deployments[?status==`PRIMARY`] | [0].id' --output text)
-            echo "Started the deployment $expected with one task."
+            echo "Started the deployment $expected with two tasks."
           elif [ "$rollout" = FAILED ]; then
             echo "The last deployment ($expected) failed; this run starts a new one."
             # shellcheck disable=SC2016
-            expected=$(aws ecs update-service --cluster "$cluster" --service "$service" --force-new-deployment \
+            expected=$(aws ecs update-service --cluster "$cluster" --service "$service" --desired-count 2 --force-new-deployment \
               --query 'service.deployments[?status==`PRIMARY`] | [0].id' --output text)
-            echo "Started the deployment $expected."
+            echo "Started the deployment $expected with two tasks."
+          elif [ "$count" != 2 ]; then
+            # shellcheck disable=SC2016
+            expected=$(aws ecs update-service --cluster "$cluster" --service "$service" --desired-count 2 \
+              --query 'service.deployments[?status==`PRIMARY`] | [0].id' --output text)
+            echo "The service wanted $count task(s); it now wants two. Waiting for the deployment $expected."
           else
-            echo "The service already wants $count task(s); its count is left alone. Waiting for the deployment $expected."
+            echo "The service already wants two tasks. Waiting for the deployment $expected."
           fi
           deadline=$((SECONDS + 900))
           while (( SECONDS < deadline )); do

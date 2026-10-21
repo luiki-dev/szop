@@ -26,6 +26,7 @@
     "image:up": "docker compose --profile app up --build",
     "image:down": "docker compose --profile app down",
     "check:image": "scripts/check-image.sh",
+    "check:scale": "scripts/check-scale.sh",
     "check:infra": "scripts/check-infra.sh",
     "check:workflows": "scripts/check-workflows.sh",
     "infra:fmt": "terraform fmt -recursive infra",
