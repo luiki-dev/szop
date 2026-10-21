@@ -33,6 +33,7 @@ These call Docker Compose with `compose.yaml` ([Docker Compose](tools/docker-com
 | `pnpm image:up` | Start Szop in containers | `docker compose --profile app up --build`: builds the container image and runs it next to PostgreSQL, in the foreground, on `http://127.0.0.1:8080` | Trying the app as AWS will run it. Ctrl+C stops it; `pnpm image:up -d --wait` runs it in the background |
 | `pnpm image:down` | Stop and remove Szop's containers | `docker compose --profile app down`: removes the app's and PostgreSQL's containers (the data stays in its volume) | After `pnpm image:up`. Then `pnpm db:up` brings PostgreSQL back for `pnpm dev` and the tests |
 | `pnpm check:image` | Prove the container image works | `scripts/check-image.sh`: builds the image, starts it next to PostgreSQL, checks that it is healthy, runs as `node`, serves the page and reports the commit it was built from in `/api/health`, then removes it | After changing the `Dockerfile`, `.dockerignore`, `compose.yaml` or the dependencies. CI's `docker` job runs it with `--no-build` on every code PR |
+| `pnpm check:scale` | Prove two instances work together | `scripts/check-scale.sh`: builds the image, starts two of it (`app-a`, `app-b`) behind nginx on a fresh database `szop_scale` (the `scale` profile), checks that both become healthy, that 10 requests through nginx reach both and that each migration is recorded once, then removes them and the database | After changing anything about startup, the migrations, the database connection or `compose.yaml`. CI's `docker` job runs it with `--no-build` after `check:image` |
 
 `db:reset` leaves the profile out, so a running app container keeps running; stop it first with `pnpm image:down`. `image:down` takes the profile with it on purpose: a plain `docker compose down` leaves out every service behind a profile and warns that the network is still in use ([Docker](tools/docker.md#everyday-use)).
 
@@ -61,6 +62,7 @@ How to run, filter and read them: the [testing guide](testing.md#running-the-tes
 | `pnpm test:e2e` | Run the end-to-end journeys in real browsers | `pnpm build`, then Playwright's journeys on desktop Chromium, desktop Firefox and an emulated phone ([Playwright](tools/playwright.md)) | After a change to the web app, the API's responses or the security headers; needs PostgreSQL and Playwright's browsers | `e2e` |
 | `pnpm test:e2e:report` | Read an end-to-end report | `playwright show-report`: serves the HTML report of the last E2E run, or of a folder given to it | After a failed E2E run, locally or downloaded from CI | — |
 | `pnpm check:image` | Prove the container image works | See [the database and the container image](#the-database-and-the-container-image) | — | `docker` |
+| `pnpm check:scale` | Prove two instances work together | See [the database and the container image](#the-database-and-the-container-image) | — | `docker` |
 
 ## Formatting
 

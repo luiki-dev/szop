@@ -1,5 +1,42 @@
-# PostgreSQL for local development and CI (ADR 0005, decision 4; ADR 0020), and the container image under the app profile (ADR 0028).
+# PostgreSQL for local development and CI (ADR 0005, decision 4; ADR 0020), the container image under the app profile (ADR 0028), and two of it behind nginx under the scale profile (ADR 0036, decision 14).
 name: szop
+# The settings every container of the image shares: the app profile's one
+# and the scale profile's two. Compose ignores top-level keys starting with x-.
+x-app: &app
+  image: szop:local
+  depends_on:
+    postgres:
+      condition: service_healthy
+  # Every setting the image does not set itself (it sets WEB_ROOT and
+  # NODE_ENV). Inside the container the API listens on every interface, so
+  # Docker's port mapping reaches it; the published port stays on the host's
+  # 127.0.0.1.
+  environment: &app-environment
+    HOST: 0.0.0.0
+    PORT: "3000"
+    LOG_LEVEL: info
+    DATABASE_HOST: postgres
+    DATABASE_PORT: "5432"
+    DATABASE_NAME: szop
+    DATABASE_USER: szop
+    DATABASE_PASSWORD: szop
+    DATABASE_TLS: none
+    TRUSTED_PROXIES: none
+  # Proves the API writes nothing to disk (logs go to stdout). On ECS the
+  # root filesystem stays writable, for ECS Exec.
+  read_only: true
+  # The slim image has no curl, so Node itself asks for /api/health.
+  healthcheck:
+    test:
+      [
+        "CMD",
+        "node",
+        "-e",
+        "fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
+      ]
+    interval: 2s
+    timeout: 2s
+    retries: 15
 services:
   postgres:
     # The same major version as RDS (ADR 0008, decision 19). Debian-based, so
@@ -32,6 +69,7 @@ services:
   # `docker compose up` alone still starts PostgreSQL only. pnpm check:image
   # starts it and checks it.
   app:
+    <<: *app
     profiles: [app]
     # The commit goes into the image (Dockerfile); pnpm check:image and CI set
     # it, and a bare `docker compose build` leaves it "unknown".
@@ -39,42 +77,41 @@ services:
       context: .
       args:
         GIT_COMMIT: "${GIT_COMMIT:-unknown}"
-    image: szop:local
-    depends_on:
-      postgres:
-        condition: service_healthy
-    # Every setting the image does not set itself (it sets WEB_ROOT and
-    # NODE_ENV). Inside the container the API listens on every interface, so
-    # Docker's port mapping reaches it; the published port stays on the host's
-    # 127.0.0.1.
-    environment:
-      HOST: 0.0.0.0
-      PORT: "3000"
-      LOG_LEVEL: info
-      DATABASE_HOST: postgres
-      DATABASE_PORT: "5432"
-      DATABASE_NAME: szop
-      DATABASE_USER: szop
-      DATABASE_PASSWORD: szop
-      DATABASE_TLS: none
-      TRUSTED_PROXIES: none
     # 8080 on the host, so pnpm dev and pnpm start keep 3000.
     ports:
       - "127.0.0.1:8080:3000"
-    # Proves the API writes nothing to disk (logs go to stdout). On ECS the
-    # root filesystem stays writable, for ECS Exec.
-    read_only: true
-    # The slim image has no curl, so Node itself asks for /api/health.
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
-        ]
-      interval: 2s
-      timeout: 2s
-      retries: 15
+  # Two instances of the image behind nginx, started only with --profile
+  # scale: what one process hides shows up here, such as two tasks migrating
+  # at once (ADR 0036, decision 14). pnpm check:scale builds the image as the
+  # app service, then starts these. Named, so a failure says which one
+  # (PH-37 spec, decision 9). Their own database, so the developer's stays as
+  # it is and they always start on a fresh one.
+  app-a:
+    <<: *app
+    profiles: [scale]
+    environment:
+      <<: *app-environment
+      DATABASE_NAME: szop_scale
+  app-b:
+    <<: *app
+    profiles: [scale]
+    environment:
+      <<: *app-environment
+      DATABASE_NAME: szop_scale
+  # Stands in for the load balancer: sends each request to app-a or app-b in
+  # turn (compose/nginx-scale.conf).
+  nginx:
+    profiles: [scale]
+    image: nginx:1.30.6-alpine
+    depends_on:
+      app-a:
+        condition: service_healthy
+      app-b:
+        condition: service_healthy
+    volumes:
+      - ./compose/nginx-scale.conf:/etc/nginx/conf.d/default.conf:ro
+    # 8081, so the app profile's 8080 stays free.
+    ports:
+      - "127.0.0.1:8081:8080"
 volumes:
   postgres-data:

@@ -42,7 +42,7 @@ updates:
       include: scope
 
   - package-ecosystem: docker-compose
-    # PostgreSQL's image in compose.yaml, which CI uses too.
+    # PostgreSQL's and nginx's images in compose.yaml, which CI uses too.
     directory: /
     schedule:
       interval: weekly
