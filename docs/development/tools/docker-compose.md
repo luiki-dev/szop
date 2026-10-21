@@ -31,7 +31,7 @@ Docker Compose starts the services a project needs from one file. Szop's everyda
   - `healthcheck`: `node -e` with `fetch` on `/api/health`, since the slim image has no `curl`; `docker compose up --wait` waits for it.
 - **The `scale` profile** ([ADR 0036](../../decisions/0036-scalability-and-isolation.md), decision 14): two instances of the image behind nginx, as the demo runs two tasks behind its load balancer. `pnpm check:scale` starts and checks it.
   - `app-a` and `app-b`: the `x-app` block with `DATABASE_NAME: szop_scale`, a database of their own that the check creates fresh, so both migrate at the same time. They use the image the `app` service builds (`szop:local`) and publish no port: only nginx reaches them. Two named services, not one with `deploy.replicas: 2`, so a failure says which one, and nginx can name each in its configuration.
-  - `nginx`: the [nginx](nginx.md) image, configured by `compose/nginx-scale.conf` (mounted read-only), published on `127.0.0.1:8081`, so the `app` profile's 8080 stays free. It starts once both apps are healthy.
+  - `nginx`: the [nginx](nginx.md) image, configured by `compose/nginx-scale.conf` (mounted read-only), published on `127.0.0.1:8081`, so the `app` profile's 8080 stays free. It starts once both apps are healthy. Its `healthcheck` asks `/api/live` through itself with BusyBox's `wget`, so `docker compose up --wait` returns only once nginx answers, and the check's first request cannot race nginx's start.
 
 ## Everyday use
 

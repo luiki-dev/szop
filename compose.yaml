@@ -113,5 +113,21 @@ services:
     # 8081, so the app profile's 8080 stays free.
     ports:
       - "127.0.0.1:8081:8080"
+    # What `up --wait` waits for: nginx answers through to an app, so the
+    # check's first request does not race nginx's start. BusyBox's wget is in
+    # the Alpine image.
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://127.0.0.1:8080/api/live",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 15
 volumes:
   postgres-data:
