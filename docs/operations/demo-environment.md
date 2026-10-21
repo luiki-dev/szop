@@ -39,6 +39,7 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [Service-linked roles](#service-linked-roles)
   - [Pressing the button](#pressing-the-button)
   - [Watching a redeploy](#watching-a-redeploy)
+  - [Checking both tasks](#checking-both-tasks)
   - [A failed deployment](#a-failed-deployment)
   - [When a run fails](#when-a-run-fails)
   - [Spinning up from your machine](#spinning-up-from-your-machine)
@@ -499,8 +500,8 @@ The load balancer's role, `AWSServiceRoleForElasticLoadBalancing`, has existed s
    4. **pushes the image to the registry** `szop` as `szop:<commit>`, unless that tag is already there (tags are immutable, so an image that was pushed once is kept). The push comes before the apply because on a redeploy Terraform swaps the task definition at once, and the new task must find its image;
    5. **applies `infra/demo`** with the commit passed as `deployed_commit`. The service is created with zero tasks. The certificate is issued first, which takes a few minutes ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md), decision 5), and a new database takes about 5 minutes (5 minutes 0 seconds on the first demo);
    6. **runs `db-setup`** as a one-off ECS task: it connects to the database as the master user and creates or updates the role `szop_app`, which the app connects as, and makes it the database's owner. It must stop with exit code 0 within 10 minutes (it needs about a minute: Fargate pulls the image and starts). At the deadline the workflow stops the task itself, so a stuck one does not run on;
-   7. **starts the app**. On a fresh demo (the service wants 0 tasks) it sets the wanted count to 1 and forces a new deployment, so the circuit breaker watches the first start too; on a redeploy Terraform's new task definition has already started a deployment, and the count is left alone. If the last deployment failed and this run changes no task definition (the same commit pressed again), it forces a new deployment, since Terraform starts none. Then, every 10 seconds for up to 15 minutes, it reads the primary deployment, waiting until it is the one this run expects: `COMPLETED` with one deployment left and as many tasks running as wanted, at least one, is success, and `FAILED` stops the run at once ([A failed deployment](#a-failed-deployment)). The task pulls the image, runs the migrations and passes the load balancer's health checks;
-   8. **waits for the app**: asks `https://szop.dzwoniec.com/api/health` every 10 seconds, for up to 10 minutes, until it answers `200` with `"status":"ok"` and the commit just deployed, so DNS, the certificate, the load balancer, the app and its database all work, and the old task no longer answers. Every wait runs to a deadline in seconds, not to a count of tries, so a slow request cannot stretch it.
+   7. **starts the app**. On a fresh demo (the service wants 0 tasks) it sets the wanted count to 2 and forces a new deployment, so the circuit breaker watches the first start too; on a redeploy Terraform's new task definition has already started a deployment, and a count of 2 is left alone (a demo started before PH-37, at 1, is set to 2). If the last deployment failed and this run changes no task definition (the same commit pressed again), it forces a new deployment with two tasks, since Terraform starts none. Then, every 10 seconds for up to 15 minutes, it reads the primary deployment, waiting until it is the one this run expects: `COMPLETED` with one deployment left and as many tasks running as wanted, at least one, is success, and `FAILED` stops the run at once ([A failed deployment](#a-failed-deployment)). Each task pulls the image, takes the migration lock, runs the migrations (the second finds nothing left) and passes the load balancer's health checks;
+   8. **waits for the app**: asks `https://szop.dzwoniec.com/api/health` every 10 seconds, for up to 10 minutes, until it answers `200` with `"status":"ok"` and the commit just deployed, so DNS, the certificate, the load balancer, the app and its database all work, and no old task answers any more. Every wait runs to a deadline in seconds, not to a count of tries, so a slow request cannot stretch it.
 
    The first demo with the app took about 9 minutes from the approval: about 6 for the apply, 5 of them the database, then a minute each for `db-setup` and the start; the job's limit is 45 minutes, which the three deadlines (35 minutes together), the apply and the state lock's wait need. **A redeploy** over a running demo took about 3 minutes on PH-12c's defaults: the push, an apply that only registers the two new task definitions, `db-setup`, which finds the role and resets its password, and about a minute and a half while the new task starts, passes the health check and replaces the old one. **On PH-12d's settings** a redeploy takes about 4 minutes from the approval (3 minutes 41 seconds on its last demo): a minute for the push and Terraform's setup, 12 seconds of apply, a minute for `db-setup` and a minute and a half for the start, most of it the 60-second grace period. With a grace period of 120 seconds the start took 3 minutes, which is why it is 60 ([PH-12d spec](../superpowers/specs/2026-10-21-PH-12d-safe-redeploys-design.md), decision 8). A fresh demo on PH-12d took about 10 minutes from the approval, the database 5 of them; its start took 3 minutes (2:55), because that run had the 120-second grace period: a redeploy at 120 seconds took as long (3:03), and the fix-forward at 60 seconds 1:34. Scaling from zero with `--force-new-deployment` also started two tasks and stopped one a minute later, which added no time. The first run before PH-12c, with no database, took about 4 minutes.
 4. Read the run's **summary**: the URL, the commit and the image (and whether this run pushed it or found it in the registry), the result of each step above, and that `demo-down` destroys the demo at the next 01:17 UTC unless pressed sooner.
@@ -510,42 +511,58 @@ The load balancer's role, `AWSServiceRoleForElasticLoadBalancing`, has existed s
 - `https://szop.dzwoniec.com` shows the status page: `API: ok`, `Database: up` and the schema version (`0000_init` today), with a valid certificate (the padlock; issued by Amazon).
 - `http://szop.dzwoniec.com` redirects to the HTTPS address (a 301). From a terminal: `curl -sI http://szop.dzwoniec.com`, whose first line is `HTTP/1.1 301` and whose `location` header names the HTTPS address.
 
-The demo now exists until `demo-down` removes it ([Tearing down](#tearing-down)). Pressing `demo-up` again while it is up deploys the new commit on top: it pushes the new image, registers a new task definition revision and updates the service in place, and leaves the database alone. A redeploy keeps the demo up: ECS starts the new task beside the old one and stops the old one only once the new one is healthy ([Watching a redeploy](#watching-a-redeploy)). Two presses never run at the same time (the second waits for the first). GitHub keeps only one waiting run per concurrency group, so a third press replaces a run that is still waiting: that run is cancelled.
+The demo now exists until `demo-down` removes it ([Tearing down](#tearing-down)). Pressing `demo-up` again while it is up deploys the new commit on top: it pushes the new image, registers a new task definition revision and updates the service in place, and leaves the database alone. A redeploy keeps the demo up: ECS starts the two new tasks beside the two old ones and stops the old ones only once the new ones are healthy ([Watching a redeploy](#watching-a-redeploy)). Two presses never run at the same time (the second waits for the first). GitHub keeps only one waiting run per concurrency group, so a third press replaces a run that is still waiting: that run is cancelled.
 
 ⚠️ **Don't:** leave a demo up by accident. An approved run stays up until `demo-down` runs, at the latest at 01:17 UTC; press `demo-down` when you are done. A demo costs about $0.08 an hour ([What a demo costs](#what-a-demo-costs)).
 
 ### Watching a redeploy
 
-[PH-12d](../roadmap.md#ph-12d-safe-redeploys) makes a redeploy keep the demo up: ECS starts the new task beside the old one, and the old one stops only once the new one is healthy ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 3). `scripts/watch-demo.sh` shows it from your machine. It asks `/api/health` once a second and prints the time, the HTTP status (`000` for no answer), the first 12 characters of the commit and the schema version. It needs bash and `curl`, and no AWS credentials.
+[PH-12d](../roadmap.md#ph-12d-safe-redeploys) makes a redeploy keep the demo up: ECS starts the new tasks beside the old ones, and the old ones stop only once the new ones are healthy ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 3). `scripts/watch-demo.sh` shows it from your machine. It asks `/api/health` once a second and prints the time, the HTTP status (`000` for no answer), the first 12 characters of the commit, the instance that answered and the schema version. It needs bash and `curl`, and no AWS credentials.
 
 ```bash
 scripts/watch-demo.sh                                  # https://szop.dzwoniec.com/api/health
 scripts/watch-demo.sh http://127.0.0.1:8080/api/health # another URL, for instance pnpm image:up's
 ```
 
-To watch a redeploy, start the script on a running demo, press `demo-up` with another commit ([Pressing the button](#pressing-the-button)), and let the script run until the run is green. Ctrl+C stops it and prints a summary: the requests, how many were not `200`, and each commit seen with the times it was first and last seen. The format, with made-up commits:
+To watch a redeploy, start the script on a running demo, press `demo-up` with another commit ([Pressing the button](#pressing-the-button)), and let the script run until the run is green. Ctrl+C stops it and prints a summary: the requests, how many were not `200`, each commit seen with the times it was first and last seen, and each instance with how many answers it gave and when. The format, with made-up commits and instances:
 
 ```text
-16:52:48  200  5ee7d2e04b90  0000_init
-16:52:49  200  5ee7d2e04b90  0000_init
-16:52:50  200  b1c4f0a97d3e  0000_init  <- new commit
+16:52:48  200  5ee7d2e04b90  3f9a0c1e  0000_init
+16:52:49  200  5ee7d2e04b90  77d2b641  0000_init
+16:52:50  200  b1c4f0a97d3e  c01e5a93  0000_init  <- new commit
 ...
 Requests: 412, not 200: 0
 Commit 5ee7d2e04b90: first seen 16:41:02, last seen 16:52:49
 Commit b1c4f0a97d3e: first seen 16:52:50, last seen 16:58:31
+Instance 3f9a0c1e: 118 answers, first seen 16:41:02, last seen 16:52:48
+Instance 77d2b641: 117 answers, first seen 16:41:03, last seen 16:52:49
+Instance c01e5a93: 89 answers, first seen 16:52:50, last seen 16:58:31
+Instance 0b84e7d2: 88 answers, first seen 16:52:51, last seen 16:58:30
 ```
 
 A good redeploy shows `200` on every line from the press to the end, and the switch to the new commit. While both tasks are healthy the load balancer routes each request on its own, so the commits may alternate for a few lines before the new one stays; `<- new commit` marks every change, including a line back to the old commit. A `000` or a `503` line means a request found no task able to answer. The same script is the check for the redeploys of [PH-37](../roadmap.md#ph-37-two-tasks) and [PH-38](../roadmap.md#ph-38-autoscaling).
 
 What happens in a redeploy, and why it takes the time it does:
 
-1. Terraform registers the new task definition and updates the service. ECS starts the new task beside the old one (the service allows up to 200% of its wanted count and demands 100% healthy).
-2. The new task runs its migrations, then listens. The load balancer asks `/api/live` every 10 seconds and sends it requests after 2 answers, so about 20 seconds after it listens. ECS ignores failed checks for the first 60 seconds of a task, so a slow image pull or a long migration does not get it killed, and counts the new task healthy only once those 60 seconds have passed: until then both versions serve.
+1. Terraform registers the new task definition and updates the service. ECS starts two new tasks beside the two old ones (the service allows up to 200% of its wanted count and demands 100% healthy).
+2. Each new task takes the migration lock and runs its migrations (the second finds nothing left), then listens. The load balancer asks `/api/live` every 10 seconds and sends it requests after 2 answers, so about 20 seconds after it listens. ECS ignores failed checks for the first 60 seconds of a task, so a slow image pull or a long migration does not get it killed, and counts the new task healthy only once those 60 seconds have passed: until then both versions serve.
 3. ECS deregisters the old task. The load balancer stops sending it new requests at once and gives it up to 30 seconds (the deregistration delay) to finish those it holds; then ECS sends `SIGTERM`, and the app closes within 15 seconds ([ADR 0033](../decisions/0033-app-ready-for-the-cloud-details.md), decision 6). AWS documents that a deregistering target with no in-flight requests and no active connections is deregistered at once, without waiting for the delay. This is why PH-12c's redeploy did not wait the default 300 seconds, and why the runbook's earlier explanation of that wait was wrong.
 
 Measured on PH-12d's last demo, with a request every second from two machines: the new task registered 21 seconds after it started and was healthy 10 to 15 seconds later; ECS deregistered the old task 62 seconds after the new one registered, the grace period; the old target drained for about 25 seconds, the requests it held keeping it from ending at once; the deployment completed a minute later, once the old task had stopped. Both versions answered for about 50 seconds. With the grace period at 120 seconds they answered for two minutes. Every request was answered `200`.
 
-**A page load can mix two versions of the SPA during the overlap** ([OP-103](https://github.com/luiki-dev/szop/issues/249), decided in [PH-37](../roadmap.md#ph-37-two-tasks)). While both tasks are healthy, the load balancer routes each request on its own, so a browser can get `index.html` from the new task and ask the old one for an asset only the new build has. The old task answers `404` and the page loads blank until a reload. With one task the window lasts about a minute, the grace period. The watch script does not see it, since it asks the API, not the SPA.
+**A page load can mix two versions of the SPA during the overlap**, a gap Szop accepts ([OP-103](https://github.com/luiki-dev/szop/issues/249); [ADR 0040](../decisions/0040-two-tasks-details.md), decision 1). While both tasks are healthy, the load balancer routes each request on its own, so a browser can get `index.html` from the new task and ask the old one for an asset only the new build has. The old task answers `404` and the page loads blank until a reload, which fixes it. The window lasts about a minute, the grace period. The watch script does not see it, since it asks the API, not the SPA.
+
+### Checking both tasks
+
+Since [PH-37](../roadmap.md#ph-37-two-tasks) the demo runs two tasks, one in each availability zone ([ADR 0040](../decisions/0040-two-tasks-details.md)). After `demo-up`:
+
+1. **In the ECS console** (eu-central-1, cluster `szop-demo`, service `szop-demo-app`, tab *Tasks*): two tasks *Running*, one in `eu-central-1a` and one in `eu-central-1b`. From a terminal: `aws ecs describe-tasks --cluster szop-demo --tasks $(aws ecs list-tasks --cluster szop-demo --service-name szop-demo-app --query 'taskArns' --output text) --query 'tasks[].[lastStatus, availabilityZone]' --output text`.
+2. **Requests reach both:** run `scripts/watch-demo.sh` for about half a minute and stop it with Ctrl+C. The summary names two instances, each with about half the answers, all `200`. Each task draws its instance ID when it starts, so after a redeploy the IDs are new ones.
+3. **The database's connection limit:** each task logs `max_connections` at startup, as `maxConnections` in its `migrations applied` line ([The app's log](#the-apps-log)). The budget, every task doubled by a deploy times 5 connections, must stay under about 80% of it ([ADR 0040](../decisions/0040-two-tasks-details.md), decision 7).
+
+**A stopped task loses no request:** while the watch script runs, stop one task in the console (*Stop*). The load balancer stops sending it requests, every line stays `200`, and once ECS has started a replacement the summary shows a third instance. This is optional; PH-37 relied on PH-12d's proof of the same mechanism.
+
+**The migration lock:** in the two tasks' logs, both print `waiting for the migration lock` and `migration lock taken`; the one that waited took the lock only after the other's `migrations applied`.
 
 ### A failed deployment
 
@@ -652,7 +669,7 @@ aws ecs list-tasks --cluster szop-demo --service-name szop-demo-app \
 #   arn:aws:ecs:eu-central-1:<account>:task/szop-demo/<task id>: the id is the last part
 ```
 
-`None` means the service has no running task: it has not been started yet, or it is failing ([A task that does not stay up](#a-task-that-does-not-stay-up)).
+`taskArns[0]` picks one of the two tasks; `--query 'taskArns'` lists both. `None` means the service has no running task: it has not been started yet, or it is failing ([A task that does not stay up](#a-task-that-does-not-stay-up)).
 
 ### A shell in the task
 

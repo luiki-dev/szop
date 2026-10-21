@@ -39,6 +39,8 @@ Before Drizzle migrates, the API compares the migrations recorded in `drizzle.__
 
 A new, empty database passes, and so does a normal upgrade: migrations newer than every applied one are pending, not skipped. The check is the code in `apps/api/src/db/migration-check.ts`.
 
+**The check and the migration run under a lock.** Drizzle takes none, so two instances starting together would both read the same "last applied" migration and both apply what follows: a data migration would run twice. `server.ts` runs the check and `runMigrations` inside `withMigrationLock` (`apps/api/src/db/migration-lock.ts`), which holds a PostgreSQL advisory lock on a pooled connection; the other instances wait, then find nothing pending ([ADR 0036](../../decisions/0036-scalability-and-isolation.md), decision 2; [ADR 0040](../../decisions/0040-two-tasks-details.md), decisions 4 to 6). The log shows `waiting for the migration lock` and `migration lock taken`. `db/migration-lock.test.ts` proves it with two migrators at once, and `pnpm check:scale` with two containers.
+
 On a mismatch the log shows `startup failed`, the API exits with code 1, and the error's message lists each migration with its case, then the remedy:
 
 ```text

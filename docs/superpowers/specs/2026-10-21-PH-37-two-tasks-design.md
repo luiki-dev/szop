@@ -43,7 +43,7 @@ The phase is done when:
 ## Out of scope
 
 - **Autoscaling** and checking the budget again at four tasks: [PH-38](../../roadmap.md#ph-38-autoscaling).
-- **Shared state for features not built yet:** the rate-limit counters in Redis ([PH-20](../../roadmap.md)), the cleanup job's try-lock ([PH-31](../../roadmap.md)), fan-out of live updates ([PH-33](../../roadmap.md#ph-33-live-updates)). [ADR 0036](../../decisions/0036-scalability-and-isolation.md) places each in its phase.
+- **Shared state for features not built yet:** the rate-limit counters in Redis ([PH-20](../../roadmap.md#ph-20-quotas-and-rate-limits)), the cleanup job's try-lock ([PH-31](../../roadmap.md#ph-31-automatic-cleanup)), fan-out of live updates ([PH-33](../../roadmap.md#ph-33-live-updates)). [ADR 0036](../../decisions/0036-scalability-and-isolation.md) places each in its phase.
 - **Fixing OP-103's gap** ([decision 1](#decisions-taken-in-the-brainstorm)).
 - **Sticky sessions**, for any reason.
 - **Multi-AZ RDS** and separate migration and runtime roles: OP-033's always-on parts.
