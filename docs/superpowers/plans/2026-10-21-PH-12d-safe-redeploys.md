@@ -175,11 +175,11 @@ git push
 **Files:**
 - Modify: `infra/demo/service.tf`, `infra/base/ci_roles.tf`
 
-- [ ] **Step 1: `infra/demo`**
+- [x] **Step 1: `infra/demo`**
 
 Set the target group's and the service's values from the Global Constraints. Comments: the target group's says why each number (spec, decisions 6 and 9) and that ECS takes a task out before `SIGTERM`; the service's cites ADR 0036, decisions 3 to 5 and the spec's decisions 7 and 8, and that a `FAILED` deployment launches no more tasks while the old one keeps serving. Remove "until PH-12d" wording. Run `pnpm check:infra`. Expected: pass.
 
-- [ ] **Step 2: `infra/base`**
+- [x] **Step 2: `infra/base`**
 
 In `ci_roles.tf`:
 - `StopDbSetup`: `ecs:StopTask` on `arn:aws:ecs:eu-central-1:${var.account_id}:task/szop-demo/*`, conditions `aws:RequestedRegion`, `ArnEquals ecs:cluster` = the cluster, `StringEquals aws:ResourceTag/Name = szop-demo-db-setup`; in the policy that holds `RunDbSetup`.
@@ -188,7 +188,7 @@ In `ci_roles.tf`:
 
 Run `pnpm check:infra`. Expected: pass. Check each changed policy's rendered size under 6,144 characters (`terraform -chdir=infra/base plan -lock=false` with `AWS_PROFILE=szop`, or `jq -c . | wc -c` on the rendered document).
 
-- [ ] **Step 3: Simulate (Review Focus 5)**
+- [x] **Step 3: Simulate (Review Focus 5)**
 
 With `AWS_PROFILE=szop`, render the changed policies and run `aws iam simulate-custom-policy`:
 - `ecs:StopTask` on a task ARN in `szop-demo` with context `aws:ResourceTag/Name=szop-demo-db-setup`, `ecs:cluster=<cluster ARN>`: `allowed`; with `Name=szop-demo-app`: `implicitDeny`.
@@ -197,11 +197,11 @@ With `AWS_PROFILE=szop`, render the changed policies and run `aws iam simulate-c
 
 `aws accessanalyzer validate-policy` on each changed policy: no errors, no security warnings. Look up whether CloudTrail holds any `secretsmanager:TagResource` event by the deploy role (`aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=TagResource`); if none, drop `TagResource` from `CreateMasterSecret`.
 
-- [ ] **Step 4: The demo's plan**
+- [x] **Step 4: The demo's plan**
 
 With `AWS_PROFILE=szop`: `terraform -chdir=infra/demo plan -lock=false -var deployed_commit=$(git rev-parse HEAD)`. Expected (no demo up): everything to add, with the target group's and the service's new values in the output.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add infra

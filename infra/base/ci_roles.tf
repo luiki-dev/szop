@@ -822,6 +822,14 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
     }
   }
 
+  # The instance's password must be RDS-managed and the instance must not be
+  # publicly accessible: the provider sends both, as CloudTrail shows
+  # ("manageMasterUserPassword":true, "publiclyAccessible":false), so the role
+  # cannot create an instance with a password of its own or one open to the
+  # internet (PH-12d spec, decision 12). A request that omits a key does not
+  # match either, which is the safe side. The security group and the private
+  # subnet group still keep the database off the internet; this condition
+  # guards the request too.
   statement {
     sid       = "CreateInstance"
     actions   = ["rds:CreateDBInstance"]
@@ -843,6 +851,18 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
       test     = "StringEquals"
       variable = "aws:RequestTag/group"
       values   = ["demo"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "rds:ManageMasterUserPassword"
+      values   = ["true"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "rds:PubliclyAccessible"
+      values   = ["false"]
     }
   }
 
@@ -931,15 +951,27 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
   # manage_master_user_password: RDS creates the master password's secret
   # with the caller's permissions, and deletes it with the instance itself.
   # It names its secrets rds!db-<id>. The caller never reads the value.
+  # Only through RDS: CloudTrail shows PH-12c's two CreateSecret calls made
+  # with this role's identity but with invokedBy rds.amazonaws.com, and with
+  # no tags in the request, so aws:ViaAWSService is the condition that fits
+  # and aws:RequestTag has nothing to match. The role cannot call Secrets
+  # Manager for such a secret itself. CloudTrail shows no TagResource call on
+  # these secrets, so it is not allowed (PH-12d spec, decision 12).
   statement {
     sid       = "CreateMasterSecret"
-    actions   = ["secretsmanager:CreateSecret", "secretsmanager:TagResource"]
+    actions   = ["secretsmanager:CreateSecret"]
     resources = ["arn:aws:secretsmanager:*:*:secret:rds!db-*"]
 
     condition {
       test     = "StringEquals"
       variable = "aws:RequestedRegion"
       values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "aws:ViaAWSService"
+      values   = ["true"]
     }
   }
 
@@ -1104,6 +1136,34 @@ data "aws_iam_policy_document" "ci_deploy_demo_service" {
       test     = "ArnEquals"
       variable = "ecs:cluster"
       values   = ["arn:aws:ecs:eu-central-1:${var.account_id}:cluster/szop-demo"]
+    }
+  }
+
+  # demo-up stops a db-setup task that outlives its deadline. Only db-setup's
+  # tasks: the task's Name tag comes from its task definition (run-task
+  # --propagate-tags), and the app's tasks carry another, so the role cannot
+  # stop the running app (PH-12d spec, decision 12).
+  statement {
+    sid       = "StopDbSetup"
+    actions   = ["ecs:StopTask"]
+    resources = ["arn:aws:ecs:eu-central-1:${var.account_id}:task/szop-demo/*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = ["arn:aws:ecs:eu-central-1:${var.account_id}:cluster/szop-demo"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Name"
+      values   = ["szop-demo-db-setup"]
     }
   }
 
