@@ -980,14 +980,15 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
   # with the caller's permissions, and deletes it with the instance itself.
   # It names its secrets rds!db-<id>. The caller never reads the value.
   # Only through RDS: CloudTrail shows PH-12c's two CreateSecret calls made
-  # with this role's identity but with invokedBy rds.amazonaws.com, and with
-  # no tags in the request, so aws:ViaAWSService is the condition that fits
-  # and aws:RequestTag has nothing to match. The role cannot call Secrets
-  # Manager for such a secret itself. CloudTrail shows no TagResource call on
-  # these secrets, so it is not allowed (PH-12d spec, decision 12).
+  # with this role's identity but with invokedBy rds.amazonaws.com, so
+  # aws:ViaAWSService is the condition that fits; the role cannot call Secrets
+  # Manager for such a secret itself. TagResource is needed too: RDS copies
+  # the instance's tags onto the secret as it creates it, which CloudTrail
+  # logs as no call of its own, and PH-12d's first demo was refused without
+  # it (PH-12d spec, decision 12).
   statement {
     sid       = "CreateMasterSecret"
-    actions   = ["secretsmanager:CreateSecret"]
+    actions   = ["secretsmanager:CreateSecret", "secretsmanager:TagResource"]
     resources = ["arn:aws:secretsmanager:*:*:secret:rds!db-*"]
 
     condition {
