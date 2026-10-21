@@ -603,7 +603,7 @@ aws ecs list-tasks --cluster szop-demo --service-name szop-demo-app \
 #   arn:aws:ecs:eu-central-1:<account>:task/szop-demo/<task id>: the id is the last part
 ```
 
-An empty answer means the service has no running task: it has not been started yet, or it is failing ([A task that does not stay up](#a-task-that-does-not-stay-up)).
+`None` means the service has no running task: it has not been started yet, or it is failing ([A task that does not stay up](#a-task-that-does-not-stay-up)).
 
 ### A shell in the task
 
@@ -705,18 +705,18 @@ The database's migrations do not match this code's:
 Reset the database: `pnpm db:reset` locally; on the demo, `demo-down` then `demo-up`.
 ```
 
-The remedy for a demo is to start from an empty database: press `demo-down` (from `main`; it destroys with the code of the commit the demo was deployed from, the old branch), wait for it, then press `demo-up` on the branch you want. The old task keeps serving while the new one fails, so the demo stays up meanwhile. The cases are described in the [Drizzle page](../development/tools/drizzle.md#the-migration-check) ([OP-043](https://github.com/luiki-dev/szop/issues/84)).
+The remedy for a demo is to start from an empty database: press `demo-down` (from `main`; it destroys with the code of the commit the demo was last deployed from, which after a failed redeploy is already the new branch's, since the apply recorded it), wait for it, then press `demo-up` on the branch you want. The old task keeps serving while the new one fails, so the demo stays up meanwhile. The cases are described in the [Drizzle page](../development/tools/drizzle.md#the-migration-check) ([OP-043](https://github.com/luiki-dev/szop/issues/84)).
 
 ### A failed destroy
 
 A `demo-down` that fails halfway leaves some resources and drops the `deployed_commit` output from the state, so a re-run (or the nightly run) destroys with `main`'s code. `main`'s code still removes everything the state lists, since a destroy is driven by the state, but a resource a branch added is destroyed by the code that created it, so use the commit. Before re-running, note the commit from the failed run's summary (*Code used*), then destroy by hand with it ([From your machine](#from-your-machine)): `git switch --detach <commit>` ([OP-099](https://github.com/luiki-dev/szop/issues/228)). Then [check that nothing is left](#checking-that-nothing-is-left). Failures to expect now that the demo has a task and a database:
 
 - **A security group or subnet "has a dependent object" or "is in use":** a task's network interface is still being released after the service stopped. Wait a few minutes and re-run.
-- **The database takes long to delete:** RDS needs 5 to 10 minutes, and the job's limit is 60. Re-run once if it timed out.
+- **The database takes long to delete:** RDS needed under 2 minutes on the first demo (1 min 52 s; creating it took 5 minutes), and the job's limit is 60. Re-run once if it timed out.
 
 ## Checking that no password is in a state
 
-Terraform's state must hold neither `szop_app`'s password nor the master password ([OP-016](https://github.com/luiki-dev/szop/issues/75); [ADR 0008](../decisions/0008-hosting.md), decision 22). Once after the first demo, and after every rotation, read both passwords with your own credentials and search both states for them. The demo must be up for the master password to exist:
+Terraform's state must hold neither `szop_app`'s password nor the master password ([OP-016](https://github.com/luiki-dev/szop/issues/75); [ADR 0008](../decisions/0008-hosting.md), decision 22). Once after the first demo, and after every rotation, run this from the repository's root: it reads both passwords with your own credentials and searches both states for them. The demo must be up for the master password to exist:
 
 ```bash
 export AWS_PROFILE=szop
@@ -742,10 +742,10 @@ The figures are estimates from AWS's list prices for Frankfurt; the first real r
 
 | Resource | Per hour | Per day |
 |---|---|---|
-| Application load balancer (the hourly charge and a little capacity) | about $0.03 | $0.77 |
+| Application load balancer (the hourly charge and a little capacity) | about $0.03 | $0.72 |
 | Public IPv4 addresses: two for the load balancer, one for the task | about $0.015 | $0.36 |
 | Database `db.t4g.micro` with 20 GB of `gp3` | about $0.022 | $0.53 |
-| The Fargate task (0.25 vCPU, 0.5 GB) | about $0.012 | $0.30 |
+| The Fargate task (0.25 vCPU, 0.5 GB) | about $0.012 | $0.29 |
 | **Total** | **about $0.08** | **about $1.90** |
 
 The load balancer's and the database's charges dominate. A three-hour session costs about $0.25. A demo someone forgets is destroyed at 01:17 UTC, so it costs at most a day, about $1.90. If the nightly run fails and nobody notices, about $13 a week or $57 a month: the budget alerts of [Applying bootstrap](#applying-bootstrap) fire well before, and the nightly run's failure email comes first. Log lines, the DNS queries and the data transfer of a demo add cents. A second task and Redis will add about $0.9 a day ([ADR 0036](../decisions/0036-scalability-and-isolation.md), costs).

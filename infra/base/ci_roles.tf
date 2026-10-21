@@ -1133,6 +1133,9 @@ data "aws_iam_policy_document" "ci_deploy_demo_service" {
     }
   }
 
+  # The tags CreateTargetGroup puts on the new group, allowed only within that
+  # create (elasticloadbalancing:CreateAction), as TagOnCreate does for the
+  # load balancer and its listeners.
   statement {
     sid       = "TagTargetGroupOnCreate"
     actions   = ["elasticloadbalancing:AddTags"]
