@@ -251,8 +251,12 @@ resource "aws_ecs_service" "app" {
 
   # The migrations run at startup, and ECS ignores the load balancer's verdict
   # for this long after a task starts, so a slow image pull or a long migration
-  # does not get the task killed before it listens (PH-12d spec, decision 8).
-  health_check_grace_period_seconds = 120
+  # does not get the task killed before it listens. ECS also counts a new task
+  # healthy only once this has passed, so it sets how long the old and the new
+  # version serve side by side: 120 seconds made PH-12d's redeploy overlap for
+  # two minutes, while the task listened about 30 seconds after it started
+  # (PH-12d spec, decision 8).
+  health_check_grace_period_seconds = 60
 
   # ECS Exec, for debugging (ADR 0008, decision 20; PH-12c spec, decision 16).
   enable_execute_command = true
