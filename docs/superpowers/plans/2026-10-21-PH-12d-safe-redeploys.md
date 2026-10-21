@@ -344,7 +344,7 @@ In each ADR named: the status line, and the line at the bottom of the decision's
 
 PH-12d's row: the PR link, then ✅ Done before the merge; the README's diagram mirrors it. PH-12d's entry: **Delivers** gains the commit in `/api/health`, the watch script, `pnpm check` and OP-101's hardening; **Owner steps** the base apply, the failed deploy and the fix-forward run.
 
-- [ ] **Step 4: GitHub**
+- [x] **Step 4: GitHub**
 
 "Settled by" comments on OP-043 (#84, its PH-12d part ticked), OP-075 (#87) and OP-101 (#247); #244's body from the roadmap entry. The PR: the template filled in; `Closes #244`, `#84`, `#87`, `#247`, #245 and the base-apply issue; the list of every issue change made in the phase (OP-103 #249 created, the owner-step issues, the fields); marked ready for review.
 
