@@ -84,7 +84,7 @@ cp apps/api/.env.example apps/api/.env
 
 `apps/api/.env` is the API's local configuration. Every variable in it is required (the API refuses to start without one), and `.env.example` documents each. `.env` is git-ignored and never committed.
 
-**An `.env` copied before a setting existed lacks it.** `DATABASE_TLS`, added in [PH-12a](../roadmap.md#ph-12a-app-ready-for-the-cloud), is the latest: an existing `apps/api/.env` needs the line `DATABASE_TLS=none` from `.env.example` (the local database container has no TLS; the demo uses `verify-full`, [ADR 0033](../decisions/0033-app-ready-for-the-cloud-details.md), decision 5). Before it came `TRUSTED_PROXIES`, added in [PH-06b](../roadmap.md#ph-06b-web-security-baseline), which needs the line `TRUSTED_PROXIES=none` (no proxy sits in front of the API on your machine; [ADR 0025](../decisions/0025-web-security-baseline-details.md), decision 7). Without such a line, the API and the API tests, which read the database settings from the same file, stop with `Invalid configuration` and, for example, `DATABASE_TLS: missing`.
+**An `.env` copied before a setting existed lacks it.** `GIT_COMMIT`, added in [PH-12d](../roadmap.md#ph-12d-safe-redeploys), is the latest: an existing `apps/api/.env` needs the line `GIT_COMMIT=unknown` from `.env.example` (the container image sets the real commit when it is built). Before it came `DATABASE_TLS`, added in [PH-12a](../roadmap.md#ph-12a-app-ready-for-the-cloud): an existing `apps/api/.env` needs the line `DATABASE_TLS=none` from `.env.example` (the local database container has no TLS; the demo uses `verify-full`, [ADR 0033](../decisions/0033-app-ready-for-the-cloud-details.md), decision 5). Before it came `TRUSTED_PROXIES`, added in [PH-06b](../roadmap.md#ph-06b-web-security-baseline), which needs the line `TRUSTED_PROXIES=none` (no proxy sits in front of the API on your machine; [ADR 0025](../decisions/0025-web-security-baseline-details.md), decision 7). Without such a line, the API and the API tests, which read the database settings from the same file, stop with `Invalid configuration` and, for example, `DATABASE_TLS: missing`.
 
 `pnpm install` also sets up the git hooks. Pushing over HTTPS needs credentials: run `gh auth login` (GitHub CLI) or set up Git Credential Manager. If it stops with `ERR_PNPM_IGNORED_BUILDS`, a dependency wants to run an install script; see [pnpm](tools/pnpm.md) before allowing it.
 
@@ -182,19 +182,16 @@ cd ~/workspace/szop && pnpm check:workflows
 ## 10. Check that everything works
 
 ```bash
-pnpm lint
-pnpm typecheck
-pnpm format:check
+pnpm check
 pnpm check:workflows
-pnpm test
 ```
 
-Success looks like this:
+`pnpm check` runs, in this order and stopping at the first failure, `pnpm lint`, `pnpm format:check`, `pnpm typecheck` and `pnpm test`. Success looks like this, per script:
 
 - `pnpm lint` (ESLint) and `pnpm typecheck` (the TypeScript compiler) print only the command they ran and exit with no errors or warnings.
 - `pnpm format:check` (Prettier) lists the files Prettier would change and exits with an error if there are any; when all is well it prints `All matched files use Prettier code style!`.
-- `pnpm check:workflows` (actionlint and zizmor) ends with `No findings to report. Good job!`.
 - `pnpm test` (Vitest) ends with the lines `Test Files … passed` and `Tests … passed`, with no `failed` in between.
+- `pnpm check:workflows` (actionlint and zizmor) ends with `No findings to report. Good job!`.
 
 What each check is, and how it is configured: [TypeScript](tools/typescript.md), [ESLint](tools/eslint.md), [Prettier](tools/prettier.md), [actionlint](tools/actionlint.md), [zizmor](tools/zizmor.md) and [Vitest](tools/vitest.md). CI runs the same scripts, except that it runs `pnpm test:coverage`, which is `pnpm test --coverage`: the same tests, plus coverage, and it runs actionlint and zizmor directly, with zizmor's online audits too. Every script, with what it runs and when, is listed in [Scripts](scripts.md).
 

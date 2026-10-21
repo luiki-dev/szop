@@ -4,7 +4,8 @@
 # there yet, applies infra/demo with that commit and records it in the state
 # so demo-down destroys with the same code (ADR 0011, decision 7). Then it runs
 # db-setup once, starts the app's one task and waits until /api/health answers
-# ok (PH-12c spec, decisions 5, 6 and 9). ADR 0012, decisions 16 and 18 (the
+# ok with that commit (PH-12c spec, decisions 5, 6 and 9; PH-12d spec,
+# decisions 10 and 11). ADR 0012, decisions 16 and 18 (the
 # deploy role is assumed only through the demo environment, and the job that
 # holds it runs no project code), ADR 0032, decision 8 (the job that holds a
 # write token holds no AWS credentials) and ADR 0034 explain the rest.
@@ -103,6 +104,9 @@ jobs:
           provenance: false
           sbom: false
           tags: szop:${{ steps.commit.outputs.sha }}
+          # The image reports the commit it was built from in /api/health,
+          # which the deploy job's check reads (PH-12d spec, decision 3).
+          build-args: GIT_COMMIT=${{ steps.commit.outputs.sha }}
 
       - name: Save the image
         env:
@@ -122,9 +126,12 @@ jobs:
     name: deploy
     needs: [enable-teardown, build]
     runs-on: ubuntu-24.04
-    # PH-12c's first demo took about 9 minutes from the approval (the database
-    # 5 of them), a redeploy about 3: 30 leaves room for the state lock's wait.
-    timeout-minutes: 30
+    # The three waits have deadlines of 10 minutes (db-setup), 15 (the start)
+    # and 10 (/api/health), 35 together, and the apply (the database takes
+    # about 5) and the state lock's wait (up to 15 minutes) come on top
+    # (PH-12d spec, decision 11). 45 minutes covers the deadlines and a normal
+    # apply; a long wait for the lock can still reach it. PH-12d's demo: a fresh demo took about 10 minutes, a redeploy about 4.
+    timeout-minutes: 45
     # Waits for the owner's approval; trusted by szop-ci-deploy for this
     # environment, from any branch.
     environment:
@@ -157,6 +164,18 @@ jobs:
           fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
+      # The image comes in and is loaded before any AWS credentials exist
+      # (PH-12d spec, decision 11; ADR 0012, decision 18).
+      - name: Download the image
+        id: download
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: image
+          path: ${{ runner.temp }}/image
+
+      - name: Load the image
+        run: gunzip -c "$RUNNER_TEMP/image/image.tar.gz" | docker load
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
@@ -184,13 +203,6 @@ jobs:
       - name: Terraform init
         run: terraform -chdir=infra/demo init -input=false -lock-timeout=15m
 
-      - name: Download the image
-        id: download
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: image
-          path: ${{ runner.temp }}/image
-
       # Before the apply: on a redeploy Terraform swaps the task definition at
       # once, and the new task must find its image (PH-12c spec, decision 9).
       # The registry's tags are immutable, so an image already there for this
@@ -200,7 +212,6 @@ jobs:
         env:
           COMMIT: ${{ steps.commit.outputs.sha }}
         run: |
-          gunzip -c "$RUNNER_TEMP/image/image.tar.gz" | docker load
           uri=$(aws ecr describe-repositories --repository-names szop --query 'repositories[0].repositoryUri' --output text)
           aws ecr get-login-password | docker login --username AWS --password-stdin "${uri%%/*}"
           if found=$(aws ecr describe-images --repository-name szop --image-ids "imageTag=$COMMIT" 2>&1); then
@@ -225,8 +236,10 @@ jobs:
         run: terraform -chdir=infra/demo apply -auto-approve -input=false -lock-timeout=15m -no-color -var "deployed_commit=$COMMIT"
 
       # Creates or updates szop_app, the role the app connects as, before the
-      # app starts (PH-12c spec, decisions 5 and 6). The waiter gives up after
-      # 10 minutes; db-setup takes well under one.
+      # app starts (PH-12c spec, decisions 5 and 6). It waits to a deadline of
+      # 10 minutes, measured in seconds (PH-12d spec, decision 11); db-setup
+      # takes well under one. A task that is still running then is stopped, so
+      # it cannot go on holding a lock on the database.
       - name: Run db-setup
         id: db-setup
         run: |
@@ -245,7 +258,20 @@ jobs:
           fi
           stream="db-setup/db-setup/${task##*/}"
           echo "Started task ${task##*/}; its log is the stream $stream in /szop/app."
-          if ! aws ecs wait tasks-stopped --cluster "$cluster" --tasks "$task"; then
+          deadline=$((SECONDS + 600))
+          status=""
+          while (( SECONDS < deadline )); do
+            status=$(aws ecs describe-tasks --cluster "$cluster" --tasks "$task" --query 'tasks[0].lastStatus' --output text)
+            if [ "$status" = STOPPED ]; then
+              break
+            fi
+            echo "db-setup is $status after $SECONDS seconds"
+            sleep 10
+          done
+          if [ "$status" != STOPPED ]; then
+            aws ecs stop-task --cluster "$cluster" --task "$task" --reason "demo-up: db-setup did not stop within 10 minutes" \
+              --query 'task.lastStatus' --output text \
+              || echo "::warning::Could not stop the db-setup task $task"
             echo "::error::db-setup did not stop within 10 minutes; see the stream $stream in /szop/app"
             exit 1
           fi
@@ -259,27 +285,75 @@ jobs:
           echo "db-setup exited with code 0."
 
       # Terraform creates the service at zero tasks and ignores its count from
-      # then on; on a redeploy the count is already one (PH-12c spec, decision
-      # 6). ECS's services-stable waiter gives up after 10 minutes, and a
-      # redeploy can take about that long (a new task's health checks, then the
-      # old one's 300 seconds of draining), so the loop allows 15: every 10
-      # seconds until one deployment remains with as many tasks running as
-      # wanted.
+      # then on. At zero (a fresh demo) the start is forced to be a deployment,
+      # so the circuit breaker watches the first start too; on a redeploy the
+      # count is already one and Terraform's new task definition has started
+      # the deployment (PH-12c spec, decision 6; PH-12d spec, decision 10).
+      # When the last deployment failed and this run changes no task
+      # definition, Terraform starts none, so a new one is forced here: the
+      # retry after a transient failure (the database unreachable during the
+      # migrations, a Fargate or ECR hiccup), by pressing demo-up again on the
+      # same commit or by Re-run failed jobs. Without it the run would read the
+      # old failure and stop at once.
+      # The run waits for the deployment it expects: the one it started, or
+      # the primary one before the wait. Another primary deployment, as a read
+      # just after update-service can still show, counts as still in progress.
+      # Then, every 10 seconds, to a deadline of 15 minutes: the primary
+      # deployment's rollout state. COMPLETED with one deployment left and as
+      # many tasks running as wanted, at least one, is success; FAILED means
+      # the circuit breaker stopped the deployment (ADR 0036, decision 3), so
+      # the run fails at once instead of waiting out the deadline. A redeploy
+      # can take several minutes: a new task's health checks, then the old
+      # one's 30 seconds of draining.
       - name: Start the app
         id: start
         run: |
           cluster=$(terraform -chdir=infra/demo output -raw cluster)
           service=$(terraform -chdir=infra/demo output -raw service)
-          aws ecs update-service --cluster "$cluster" --service "$service" --desired-count 1 --query 'service.serviceName' --output text
-          for try in $(seq 1 90); do
+          # The backticks are JMESPath's literal quotes, not a command substitution.
+          # shellcheck disable=SC2016
+          state=$(aws ecs describe-services --cluster "$cluster" --services "$service" \
+            --query 'services[0].[desiredCount, deployments[?status==`PRIMARY`] | [0].rolloutState, deployments[?status==`PRIMARY`] | [0].id]' --output text)
+          read -r count rollout expected <<< "$state"
+          if [ "$count" = 0 ]; then
+            # shellcheck disable=SC2016
+            expected=$(aws ecs update-service --cluster "$cluster" --service "$service" --desired-count 1 --force-new-deployment \
+              --query 'service.deployments[?status==`PRIMARY`] | [0].id' --output text)
+            echo "Started the deployment $expected with one task."
+          elif [ "$rollout" = FAILED ]; then
+            echo "The last deployment ($expected) failed; this run starts a new one."
+            # shellcheck disable=SC2016
+            expected=$(aws ecs update-service --cluster "$cluster" --service "$service" --force-new-deployment \
+              --query 'service.deployments[?status==`PRIMARY`] | [0].id' --output text)
+            echo "Started the deployment $expected."
+          else
+            echo "The service already wants $count task(s); its count is left alone. Waiting for the deployment $expected."
+          fi
+          deadline=$((SECONDS + 900))
+          while (( SECONDS < deadline )); do
+            # shellcheck disable=SC2016
             state=$(aws ecs describe-services --cluster "$cluster" --services "$service" \
-              --query 'services[0].[length(deployments), runningCount, desiredCount]' --output text)
-            read -r deployments running desired <<< "$state"
-            if [ "$deployments" = 1 ] && [ "$running" = "$desired" ]; then
-              echo "The service is stable with $running task(s) after $try tries."
+              --query 'services[0].[length(deployments), deployments[?status==`PRIMARY`] | [0].id, deployments[?status==`PRIMARY`] | [0].rolloutState, runningCount, desiredCount]' --output text)
+            read -r deployments primary rollout running desired <<< "$state"
+            if [ "$primary" != "$expected" ]; then
+              echo "After $SECONDS seconds: the primary deployment is $primary, not $expected yet"
+              sleep 10
+              continue
+            fi
+            if [ "$rollout" = FAILED ]; then
+              # shellcheck disable=SC2016
+              aws ecs describe-services --cluster "$cluster" --services "$service" \
+                --query 'services[0].deployments[?status==`PRIMARY`] | [0].rolloutStateReason' --output text
+              echo "The service's latest events:"
+              aws ecs describe-services --cluster "$cluster" --services "$service" --query 'services[0].events[:5].message' --output text
+              echo "::error::The deployment failed: the circuit breaker stopped it; the previous version keeps serving"
+              exit 1
+            fi
+            if [ "$deployments" = 1 ] && [ "$rollout" = COMPLETED ] && [ "$desired" != 0 ] && [ "$running" = "$desired" ]; then
+              echo "The service is stable with $running task(s) after $SECONDS seconds."
               exit 0
             fi
-            echo "Try $try of 90: $deployments deployment(s), $running of $desired task(s) running"
+            echo "After $SECONDS seconds: $deployments deployment(s), the primary one $rollout, $running of $desired task(s) running"
             sleep 10
           done
           echo "The service's latest events:"
@@ -288,20 +362,38 @@ jobs:
           exit 1
 
       # A new DNS name or a fresh load balancer can take a few minutes to
-      # answer: every 10 seconds, up to 10 minutes, until the app reports
-      # itself and its database up.
+      # answer: every 10 seconds, to a deadline of 10 minutes, until the app
+      # reports itself and its database up with the commit just deployed. An
+      # ok from another commit is the old task, still answering (PH-12d spec,
+      # decision 11).
       - name: Wait for the app
         id: wait
+        env:
+          COMMIT: ${{ steps.commit.outputs.sha }}
         run: |
-          for try in $(seq 1 60); do
+          deadline=$((SECONDS + 600))
+          reported=""
+          old_answers=false
+          while (( SECONDS < deadline )); do
             body=$(curl -fsS --max-time 10 https://szop.dzwoniec.com/api/health || true)
+            reported=$(jq -r '.commit // empty' <<< "$body" 2>/dev/null || true)
+            old_answers=false
             if [[ "$body" == *'"status":"ok"'* ]]; then
-              echo "/api/health answers ok after $try tries: $body"
-              exit 0
+              if [[ "$body" == *"\"commit\":\"$COMMIT\""* ]]; then
+                echo "/api/health answers ok after $SECONDS seconds: $body"
+                echo "reported=$reported" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              old_answers=true
             fi
-            echo "Try $try of 60: /api/health does not answer ok yet"
+            echo "After $SECONDS seconds: /api/health does not answer ok with $COMMIT yet"
             sleep 10
           done
+          echo "reported=$reported" >> "$GITHUB_OUTPUT"
+          if [ "$old_answers" = true ]; then
+            echo "::error::https://szop.dzwoniec.com/api/health still answers with commit ${reported:-unknown}, not $COMMIT: the old version is still serving after 10 minutes"
+            exit 1
+          fi
           echo "::error::https://szop.dzwoniec.com/api/health did not answer ok within 10 minutes"
           exit 1
 
@@ -315,6 +407,7 @@ jobs:
           DB_SETUP: ${{ steps.db-setup.outcome }}
           START: ${{ steps.start.outcome }}
           WAIT: ${{ steps.wait.outcome }}
+          REPORTED: ${{ steps.wait.outputs.reported }}
         run: |
           case "$PUSHED" in
             true) image_note="pushed by this run" ;;
@@ -332,6 +425,7 @@ jobs:
             echo "- db-setup: $DB_SETUP"
             echo "- Start the app: $START"
             echo "- /api/health answers ok: $WAIT"
+            echo "- Commit /api/health reported: \`${REPORTED:-none}\`"
             echo
             echo "\`demo-down\` destroys the demo at the next 01:17 UTC unless pressed sooner."
           } >> "$GITHUB_STEP_SUMMARY"

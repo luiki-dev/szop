@@ -65,6 +65,15 @@ const envSchema = z.object({
   WEB_ROOT: z.string().min(1),
   // In AWS, the load balancer's subnets; "none" locally.
   TRUSTED_PROXIES: trustedProxies,
+  // The commit this code was built from: the image build bakes it in, and
+  // outside the image it is "unknown". /api/health and the startup log report
+  // it, so a redeploy shows which version answers (PH-12d spec, decision 3).
+  GIT_COMMIT: z
+    .string()
+    .regex(
+      /^([0-9a-f]{40}|unknown)$/,
+      'must be a full commit hash or "unknown"',
+    ),
 });
 
 export interface DatabaseSettings {
@@ -85,6 +94,8 @@ export interface Config {
   webRoot: string;
   // Passed to Fastify's trustProxy; empty trusts nothing.
   trustedProxies: string[];
+  // The full hash of the commit the image was built from, or "unknown".
+  commit: string;
 }
 
 export function loadConfig(env: Record<string, string | undefined>): Config {
@@ -114,5 +125,6 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     },
     webRoot: resolve(data.WEB_ROOT),
     trustedProxies: data.TRUSTED_PROXIES,
+    commit: data.GIT_COMMIT,
   };
 }

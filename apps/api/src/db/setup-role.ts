@@ -88,6 +88,14 @@ export function scramVerifier(password: string): string {
   return `SCRAM-SHA-256$${String(iterations)}:${salt.toString("base64")}$${storedKey}:${serverKey}`;
 }
 
+export interface SetupTimeouts {
+  // PostgreSQL duration strings, such as "30s".
+  statement: string;
+  lock: string;
+}
+
+export const setupTimeouts: SetupTimeouts = { statement: "30s", lock: "10s" };
+
 // Creates the app's role, or sets its password again, and makes it the owner
 // of the database `db` is connected to, which on PostgreSQL 15 and later makes
 // it the owner of the public schema too. `db` is the master user, who holds
@@ -96,6 +104,7 @@ export function scramVerifier(password: string): string {
 export async function setupAppRole(
   db: Database,
   appRole: AppRole,
+  timeouts: SetupTimeouts = setupTimeouts,
 ): Promise<{ created: boolean }> {
   // The statements take no parameters, so the name and the verifier are
   // quoted into the text.
@@ -104,6 +113,13 @@ export async function setupAppRole(
   const client = await db.$client.connect();
   try {
     await client.query("BEGIN");
+    // A hanging db-setup would hold demo-up for 10 minutes and block
+    // demo-down (OP-101), so it fails instead. Set for this transaction only
+    // (the third argument), which leaves the pooled connection as it was.
+    await client.query(
+      "SELECT set_config('statement_timeout', $1, true), set_config('lock_timeout', $2, true)",
+      [timeouts.statement, timeouts.lock],
+    );
     const { rowCount } = await client.query(
       "SELECT 1 FROM pg_roles WHERE rolname = $1",
       [appRole.name],

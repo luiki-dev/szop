@@ -52,6 +52,19 @@ Reset the database: `pnpm db:reset` locally; on the demo, `demo-down` then `demo
 
 The remedy belongs to the environment, not to the check. Both environments keep no data worth saving today; once one does, it needs a different remedy, such as fixing the migrations by hand ([OP-097](https://github.com/luiki-dev/szop/issues/224)).
 
+## Migrations and rolling deploys
+
+During a deploy, the old version runs for a minute or more on the new schema: ECS starts the new task, which migrates the database when it starts, and stops the old task only once the new one is healthy ([ADR 0036](../../decisions/0036-scalability-and-isolation.md), decision 3). So **every migration must work with the code of the release before it.** The rule is **expand, then contract**:
+
+- **Expand first:** add tables, add columns that are nullable or have a default, add indexes. The old code ignores them.
+- **Switch the code over** in the same release or a later one.
+- **Contract later:** drop or rename only in a release after the one that stopped using the old shape, once no task runs the old code.
+- **A rename is three steps:** add the new column, backfill it and read from it, and drop the old column in a later release. During the overlap the new code writes both columns, since rows the old code writes lack the new one.
+
+A migration that breaks the old code makes the old task fail its requests while the new one starts. A failed deploy is fixed forward, not rolled back, because a rollback would start the old version on a schema its [migration check](#the-migration-check) refuses (`unknown`): the fix is another migration. Szop has no tables yet; the rule applies from the first one ([PH-16](../../roadmap.md#ph-16-guest-workspace-and-lists)).
+
+**The startup budget:** the migrations run before the server listens, and with the 60-second grace period ([ADR 0039](../../decisions/0039-safe-redeploys-details.md), decision 8) a task must be listening within about a minute of starting, or the load balancer marks it unhealthy, ECS replaces it, and after three tries the deployment fails.
+
 ## Official documentation
 
 - Drizzle with PostgreSQL: <https://orm.drizzle.team/docs/get-started-postgresql>

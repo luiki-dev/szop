@@ -18,7 +18,7 @@ The `|` sends the server's output into pino-pretty's input. That makes the scrip
 
 ## Everyday use
 
-Every request logs two lines with the same `reqId`, except `GET /api/health`, which logs none ([ADR 0033](../../decisions/0033-app-ready-for-the-cloud-details.md), decision 7): `incoming request`, with the method, the URL and where it came from, and `request completed`, with the status code and the response time in milliseconds. At startup there is one more, `Server listening at http://127.0.0.1:3000`.
+Every request logs two lines with the same `reqId`, except `GET /api/health` and `GET /api/live`, which log none ([ADR 0033](../../decisions/0033-app-ready-for-the-cloud-details.md), decision 7): `incoming request`, with the method, the URL and where it came from, and `request completed`, with the status code and the response time in milliseconds. At startup there is one more, `Server listening at http://127.0.0.1:3000`.
 
 ```
 [18:41:48.819] INFO (1320666): incoming request

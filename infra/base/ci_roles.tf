@@ -796,7 +796,7 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
   }
 
   # Creates, with both tags in the request. The subnet group an instance names
-  # is allowed by DemoDatabases only when it carries the tags, so the two
+  # is allowed by UseSubnetGroup only when it carries the tags, so the two
   # creates have a statement each, as in the network policy.
   statement {
     sid       = "CreateSubnetGroup"
@@ -822,6 +822,15 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
     }
   }
 
+  # The instance's password must be RDS-managed and the instance must not be
+  # publicly accessible: the provider sends both, as CloudTrail shows
+  # ("manageMasterUserPassword":true, "publiclyAccessible":false), so the role
+  # cannot create an instance with a password of its own or one open to the
+  # internet (PH-12d spec, decision 12). A request that omits a key does not
+  # match either, which is the safe side. The security group and the private
+  # subnet group still keep the database off the internet; this condition
+  # guards the request too. No other statement grants CreateDBInstance on
+  # db: resources, or these conditions would be bypassed.
   statement {
     sid       = "CreateInstance"
     actions   = ["rds:CreateDBInstance"]
@@ -843,6 +852,18 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
       test     = "StringEquals"
       variable = "aws:RequestTag/group"
       values   = ["demo"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "rds:ManageMasterUserPassword"
+      values   = ["true"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "rds:PubliclyAccessible"
+      values   = ["false"]
     }
   }
 
@@ -894,12 +915,39 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
     }
   }
 
-  # Changes, tag changes and deletes, and the subnet group an instance's
-  # create names, on what already carries both tags.
+  # The subnet group an instance's create names, once it carries both tags. Its
+  # own statement, on subnet groups only: CreateDBInstance on the instance
+  # itself must stay with CreateInstance, whose conditions on the password and
+  # public access would otherwise be bypassed by a grant on "*" that matches
+  # the instance's tags (PH-12d task review).
+  statement {
+    sid       = "UseSubnetGroup"
+    actions   = ["rds:CreateDBInstance"]
+    resources = ["arn:aws:rds:*:*:subgrp:*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/project"
+      values   = ["szop"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/group"
+      values   = ["demo"]
+    }
+  }
+
+  # Changes, tag changes and deletes on what already carries both tags.
   statement {
     sid = "DemoDatabases"
     actions = [
-      "rds:CreateDBInstance",
       "rds:ModifyDBInstance",
       "rds:DeleteDBInstance",
       "rds:ModifyDBSubnetGroup",
@@ -931,6 +979,13 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
   # manage_master_user_password: RDS creates the master password's secret
   # with the caller's permissions, and deletes it with the instance itself.
   # It names its secrets rds!db-<id>. The caller never reads the value.
+  # Only through RDS: CloudTrail shows PH-12c's two CreateSecret calls made
+  # with this role's identity but with invokedBy rds.amazonaws.com, so
+  # aws:ViaAWSService is the condition that fits; the role cannot call Secrets
+  # Manager for such a secret itself. TagResource is needed too: RDS copies
+  # the instance's tags onto the secret as it creates it, which CloudTrail
+  # logs as no call of its own, and PH-12d's first demo was refused without
+  # it (PH-12d spec, decision 12).
   statement {
     sid       = "CreateMasterSecret"
     actions   = ["secretsmanager:CreateSecret", "secretsmanager:TagResource"]
@@ -940,6 +995,12 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
       test     = "StringEquals"
       variable = "aws:RequestedRegion"
       values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "aws:ViaAWSService"
+      values   = ["true"]
     }
   }
 
@@ -1104,6 +1165,34 @@ data "aws_iam_policy_document" "ci_deploy_demo_service" {
       test     = "ArnEquals"
       variable = "ecs:cluster"
       values   = ["arn:aws:ecs:eu-central-1:${var.account_id}:cluster/szop-demo"]
+    }
+  }
+
+  # demo-up stops a db-setup task that outlives its deadline. Only db-setup's
+  # tasks: the task's Name tag comes from its task definition (run-task
+  # --propagate-tags), and the app's tasks carry another, so the role cannot
+  # stop the running app (PH-12d spec, decision 12).
+  statement {
+    sid       = "StopDbSetup"
+    actions   = ["ecs:StopTask"]
+    resources = ["arn:aws:ecs:eu-central-1:${var.account_id}:task/szop-demo/*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = ["arn:aws:ecs:eu-central-1:${var.account_id}:cluster/szop-demo"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Name"
+      values   = ["szop-demo-db-setup"]
     }
   }
 

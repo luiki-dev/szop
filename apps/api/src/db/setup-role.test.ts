@@ -301,6 +301,30 @@ describe("setupAppRole", () => {
     ).resolves.toBeDefined();
   });
 
+  it("gives up on a lock it cannot get", async () => {
+    const role = { name: appName, password: appPassword };
+    await setupAppRole(admin, role);
+    // A second connection holds the role's row lock, as a stuck run would.
+    const holder = await admin.$client.connect();
+    try {
+      await holder.query("BEGIN");
+      await holder.query(`ALTER ROLE ${appName} PASSWORD 'held'`);
+      const started = Date.now();
+
+      const failure = setupAppRole(admin, role, {
+        statement: "30s",
+        lock: "100ms",
+      });
+
+      // 55P03 is lock_not_available.
+      await expect(failure).rejects.toMatchObject({ code: "55P03" });
+      expect(Date.now() - started).toBeLessThan(2000);
+    } finally {
+      await holder.query("ROLLBACK");
+      holder.release();
+    }
+  });
+
   it("never puts the password in the error of a failed setup", async () => {
     await setupAppRole(admin, { name: appName, password: appPassword });
     // The app's role may not create roles, so this run fails.

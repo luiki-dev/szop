@@ -180,18 +180,31 @@ resource "aws_ecs_task_definition" "db_setup" {
   tags = { Name = "szop-demo-db-setup" }
 }
 
-# The tasks register by IP address (awsvpc). The health check and the
-# deregistration delay keep the load balancer's defaults until PH-12d tunes
-# them (PH-12c spec, decision 12; OP-075).
+# The tasks register by IP address (awsvpc). The health check asks /api/live,
+# which touches no database, so a database outage does not make the load
+# balancer take every task out of rotation (PH-12d spec, decisions 5 and 6).
+# Every 10 seconds with 2 successes in a row: a new task gets traffic about 20
+# seconds after it listens, not minutes. 3 failures in a row, about 30
+# seconds, take a hung task out; one slow answer does not. The deregistration
+# delay is 30 seconds, not the default 300 (ADR 0036, decision 5; PH-12d spec,
+# decision 9): ECS deregisters a task before it sends SIGTERM, so the old task
+# stops getting new requests at once and has 30 seconds to finish the ones it
+# holds, and the app then closes within 15 seconds (ADR 0033, decision 6).
 resource "aws_lb_target_group" "app" {
-  name        = "szop-demo-app"
-  vpc_id      = aws_vpc.main.id
-  target_type = "ip"
-  protocol    = "HTTP"
-  port        = 3000
+  name                 = "szop-demo-app"
+  vpc_id               = aws_vpc.main.id
+  target_type          = "ip"
+  protocol             = "HTTP"
+  port                 = 3000
+  deregistration_delay = 30
 
   health_check {
-    path = "/api/health"
+    path                = "/api/live"
+    interval            = 10
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    matcher             = "200"
   }
 
   tags = { Name = "szop-demo-app" }
@@ -220,8 +233,29 @@ resource "aws_ecs_service" "app" {
     container_port   = 3000
   }
 
-  # The migrations run at startup; failed health checks count only after a
-  # minute (PH-12c spec, decision 12).
+  # A rolling deployment: the new task starts and must be healthy before the
+  # old one stops, so the minimum stays at 100% and the maximum allows 200%
+  # (ADR 0036, decision 3; PH-12d spec, decision 7). The circuit breaker marks
+  # the deployment FAILED after three tasks in a row fail to start or fail
+  # their health checks (ECS's default threshold for one task); a FAILED
+  # deployment launches no more tasks, and the old task keeps serving. Rollback
+  # is off: demo-up reads the failure and stops the run, and the old task never
+  # left.
+  deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
+
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = false
+  }
+
+  # The migrations run at startup, and ECS ignores the load balancer's verdict
+  # for this long after a task starts, so a slow image pull or a long migration
+  # does not get the task killed before it listens. ECS also counts a new task
+  # healthy only once this has passed, so it sets how long the old and the new
+  # version serve side by side: 120 seconds made PH-12d's redeploy overlap for
+  # two minutes, while the task listened about 30 seconds after it started
+  # (PH-12d spec, decision 8).
   health_check_grace_period_seconds = 60
 
   # ECS Exec, for debugging (ADR 0008, decision 20; PH-12c spec, decision 16).

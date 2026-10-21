@@ -4,6 +4,7 @@ import { setupServer } from "msw/node";
 
 export const healthyBody = {
   status: "ok",
+  commit: "unknown",
   database: { status: "up", schemaVersion: "0000_init" },
 } satisfies Health;
 

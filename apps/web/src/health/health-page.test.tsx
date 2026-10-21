@@ -37,6 +37,7 @@ describe("HealthPage", () => {
   it("says the database is down when the API reports it", async () => {
     const databaseDown = {
       status: "error",
+      commit: "unknown",
       database: { status: "down" },
     } satisfies Health;
     server.use(

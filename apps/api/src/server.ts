@@ -66,7 +66,7 @@ try {
   await checkMigrations(db, journal);
   await runMigrations(db);
   const schemaVersion = await currentSchemaVersion(db, journal);
-  app.log.info({ schemaVersion }, "migrations applied");
+  app.log.info({ schemaVersion, commit: config.commit }, "migrations applied");
   await app.listen({ host: config.host, port: config.port });
 } catch (error) {
   app.log.error(error, "startup failed");

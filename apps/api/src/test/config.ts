@@ -18,6 +18,7 @@ export function testConfig(overrides: Partial<Config> = {}): Config {
     // Not served: tests that serve the SPA pass their own folder.
     webRoot: "/nonexistent/szop-web-root",
     trustedProxies: [],
+    commit: "unknown",
     ...overrides,
   };
 }
