@@ -535,7 +535,7 @@ Commit 5ee7d2e04b90: first seen 16:41:02, last seen 16:52:49
 Commit b1c4f0a97d3e: first seen 16:52:50, last seen 16:58:31
 ```
 
-A good redeploy shows `200` on every line from the press to the end, and the switch to the new commit once. A `000` or a `503` line means a request found no task able to answer. The same script is the check for the redeploys of [PH-37](../roadmap.md#ph-37-two-tasks) and PH-38.
+A good redeploy shows `200` on every line from the press to the end, and the switch to the new commit. While both tasks are healthy the load balancer routes each request on its own, so the commits may alternate for a few lines before the new one stays; `<- new commit` marks every change, including a line back to the old commit. A `000` or a `503` line means a request found no task able to answer. The same script is the check for the redeploys of [PH-37](../roadmap.md#ph-37-two-tasks) and PH-38.
 
 What happens in a redeploy, and why it takes the time it does:
 
@@ -595,7 +595,7 @@ git status -sb                                    # clean, and pushed: demo-down
 commit=$(git rev-parse HEAD)
 
 # 1. Build the image and push it, unless the registry has the tag already
-docker build -t "szop:$commit" .
+docker build --build-arg GIT_COMMIT="$commit" -t "szop:$commit" .
 uri=$(aws ecr describe-repositories --repository-names szop --query 'repositories[0].repositoryUri' --output text)
 aws ecr get-login-password | docker login --username AWS --password-stdin "${uri%%/*}"
 aws ecr describe-images --repository-name szop --image-ids "imageTag=$commit"   # ImageNotFoundException: push it
@@ -616,7 +616,7 @@ task=$(aws ecs run-task --cluster "$cluster" --task-definition "$(terraform outp
   --query 'tasks[0].taskArn' --output text)
 aws ecs wait tasks-stopped --cluster "$cluster" --tasks "$task"
 aws ecs describe-tasks --cluster "$cluster" --tasks "$task" --query 'tasks[0].containers[0].exitCode'   # must print 0
-aws ecs update-service --cluster "$cluster" --service "$(terraform output -raw service)" --desired-count 1
+aws ecs update-service --cluster "$cluster" --service "$(terraform output -raw service)" --desired-count 1 --force-new-deployment   # at a count of 0, so the circuit breaker watches the first start
 ```
 
 Then do the check of [Pressing the button](#pressing-the-button), which the workflow's waits would have done for you.
@@ -742,7 +742,7 @@ aws logs tail /szop/app --since 30m --log-stream-name-prefix app/
 The events say `(service szop-demo-app) has started 1 tasks`, `… has reached a steady state`, or `… (instance …) is unhealthy in (target-group …) due to (reason Health checks failed)`. A task that always fails is retried until the circuit breaker marks the deployment `FAILED` ([A failed deployment](#a-failed-deployment)). Common causes:
 
 - **The app stops at startup**, with `startup failed` in its log and exit code 1: the migration check below, an unreachable database (the log names the error), or an invalid setting (named, never its value).
-- **The task runs but the health checks fail:** the target group asks `/api/live` every 10 seconds, which answers `200` whenever the process runs and touches no database, so a database outage does not replace tasks. A task that listens but never answers is unhealthy after 3 failed checks. The service ignores failed checks for the first 120 seconds of a task, for the image pull and the migrations. `/api/health`, which answers 503 while the database is unreachable, is what `Wait for the app` and the watch script ask. Check the app's log for the database error, then query from a shell ([Querying the database](#querying-the-database)).
+- **The task runs but the health checks fail:** the target group asks `/api/live` every 10 seconds, which answers `200` whenever the process runs and touches no database, so a database outage does not replace tasks. A task that listens but never answers is unhealthy after 3 failed checks. The service ignores failed checks for the first 120 seconds of a task, for the image pull and the migrations. `/api/health`, which answers 503 while the database is unreachable, is what `Wait for the app` and the watch script ask, so a database outage shows there, not here. A task that fails `/api/live` listens but does not answer, or is still starting after the grace period: read the app's log and the service events (the commands above).
 - **The task never starts**, with `CannotPullContainerError` or `ResourceInitializationError`: as for `db-setup` above.
 
 ### The migration check
