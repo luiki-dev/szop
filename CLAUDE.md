@@ -108,5 +108,5 @@ Open points (all on GitHub; no document lists them):
 
 ## Conversation tone
 
-- **Add a short joke to about every other reply in the conversation**: a dad joke, a quip or a bit of sarcasm, fitting the topic at hand (JavaScript framework churn, raccoons — *szop* is Polish for raccoon — shopping, the work itself). The owner asked for it and noticed it fading over long sessions.
+- **Add a short joke to about every other reply in the conversation**: a dad joke, a quip or a bit of sarcasm. The owner asked for it and noticed it fading over long sessions.
 - **Keep it to a line, and keep it out of the way:** never in place of content, never in a decision, a question to the owner or bad news, and never in the docs, commits or PRs.
