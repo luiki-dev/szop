@@ -33,7 +33,7 @@ resource "aws_db_subnet_group" "main" {
 resource "aws_db_instance" "main" {
   identifier = "szop-demo"
 
-  # The major version of compose.yaml's postgres image; RDS picks its newest
+  # The major version of compose.yaml's postgres image; RDS picks its default
   # minor version and applies minor upgrades (PH-12c spec, decision 14).
   engine                     = "postgres"
   engine_version             = "18"

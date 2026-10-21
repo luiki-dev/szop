@@ -612,7 +612,7 @@ aws ecs execute-command --cluster szop-demo --task <task id> --container app \
   --interactive --command "/bin/sh"
 ```
 
-`Starting session with SessionId: ecs-execute-command-…` and a prompt mean it works; `exit` ends the session. The shell runs inside the container, so it has the app's environment variables, `DATABASE_PASSWORD` among them (the first real demo confirms this). The image has no `psql` and no `curl`. An ECS Exec session needs a writable root filesystem, which is why the task's is writable ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md)).
+`Starting session with SessionId: ecs-execute-command-…` and a prompt mean it works; `exit` ends the session. The shell runs inside the container, so it has the app's environment variables, `DATABASE_PASSWORD` among them, as the first real demo showed. The image has no `psql` and no `curl`. An ECS Exec session needs a writable root filesystem, which is why the task's is writable ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md)).
 
 `TargetNotConnectedException` means the task's ECS Exec agent is not connected yet (wait a minute after the task starts) or the task role lacks the four `ssmmessages:` actions. A task started before the service allowed ECS Exec cannot be entered: use a task the current service started.
 
@@ -638,7 +638,7 @@ await pool.end();
 
 The query in the last line is the one to change. This one asks PostgreSQL whether *this* connection is encrypted; it must print `ssl` as `true` ([OP-017](https://github.com/luiki-dev/szop/issues/68)). Others worth running: `SELECT current_user, current_database()` (`szop_app`, `szop`), `SELECT rolname, rolsuper, rolcreaterole, rolcreatedb FROM pg_roles WHERE rolname = 'szop_app'` (all three `false`), `SELECT * FROM drizzle.__drizzle_migrations` (the applied migrations). Nothing in the demo holds data worth keeping, so a write is safe, but it is gone at the next `demo-down`.
 
-Why Node and not `psql`: adding the PostgreSQL client to the image would grow it for a tool used by hand now and then ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md), refining [ADR 0008](../decisions/0008-hosting.md), decision 20). The command was written from the code and runs the same way anywhere the app's settings are set; the first real demo confirms it inside the task.
+Why Node and not `psql`: adding the PostgreSQL client to the image would grow it for a tool used by hand now and then ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md), refining [ADR 0008](../decisions/0008-hosting.md), decision 20). The command runs the same way anywhere the app's settings are set; on the first real demo, run inside the task, it printed `true`.
 
 ### Checking the client address
 
