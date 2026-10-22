@@ -1,5 +1,17 @@
 # Every quality check, on every PR to main and every push to main
 # (ADR 0010, decisions 5-8; details in ADR 0018). The required check is ci-ok.
+#
+# One job, plan, assumes an AWS role: szop-ci-plan, read-only and trusted for
+# pull requests of this repository only. It plans infra/base and infra/demo
+# and has IAM Access Analyzer validate every IAM policy, and a failed plan or
+# a serious finding fails the job (PH-35 spec, decision 4; ADR 0010, decisions
+# 14 and 16; ADR 0032, decisions 4, 8 and 11). The plan was a workflow of its
+# own until PH-35 folded it in, so that one workflow gives one gate, ci-ok.
+#
+# The jobs are split so that no job holds both AWS credentials and a write
+# token: plan holds id-token: write and hands what it found to the other jobs
+# as an artifact. What it finds can hold names a PR author chose, so it only
+# ever travels as files, never through ${{ }}.
 name: CI
 
 on:
@@ -383,6 +395,211 @@ jobs:
           retention-days: 1
           if-no-files-found: ignore
 
+  # Pull requests of this repository only: the role trusts nothing else (no
+  # OIDC token for forks, none on a push), and the plan is of the PR's merge
+  # into main. Never on a push to main.
+  plan:
+    name: plan
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.infra == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # to check the repository out
+      id-token: write # to ask GitHub for the OIDC token AWS trusts
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          role-session-name: gh-${{ github.run_id }}
+          aws-region: eu-central-1
+
+      # The account ID is read from the credentials, never stored in GitHub, and
+      # masked, so it shows as *** in every later log line (ARNs in the plan too).
+      - name: Set the account ID for Terraform
+        run: |
+          id=$(aws sts get-caller-identity --query Account --output text)
+          echo "::add-mask::$id"
+          echo "TF_VAR_account_id=$id" >> "$GITHUB_ENV"
+
+      # The one exact version, shared with tenv on the owner's machine.
+      - id: version
+        run: echo "terraform=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ steps.version.outputs.terraform }}
+          terraform_wrapper: false
+
+      # One folder per module under $RUNNER_TEMP/plan, holding what the comment
+      # needs: result (ok or failed), counts.json, changes.json, findings.jsonl,
+      # unchecked.txt, aa-errors.txt and checked. A module that fails is
+      # recorded as failed and does not stop the other one, and the step itself
+      # always ends green, so the artifact below is always written; the last
+      # step decides whether the job fails.
+      - name: Plan each module and validate its IAM policies
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          plan_module() {
+            local m=$1 out="$RUNNER_TEMP/plan/$1" refresh=() rc item address kind doc n=0 result parsed
+            local type_args=() var_args=()
+            mkdir -p "$out"
+            : > "$out/findings.jsonl"
+            : > "$out/unchecked.txt"
+            : > "$out/aa-errors.txt"
+
+            # base is planned without refreshing the live resources: the AWS
+            # provider decrypts the Better Auth secret when it refreshes it,
+            # and szop-ci-plan is denied that. The plan still shows what the
+            # code changes (ADR 0032, decision 11).
+            if [ "$m" = base ]; then
+              refresh=(-refresh=false)
+            fi
+
+            # demo refuses a plan without a commit (spec of PH-12b, decision 7),
+            # and the PR's head commit shows what demo-up on that branch would do.
+            if [ "$m" = demo ]; then
+              var_args=(-var "deployed_commit=$HEAD_SHA")
+            fi
+
+            echo "::group::terraform init infra/$m"
+            terraform -chdir="infra/$m" init -input=false -no-color
+            rc=$?
+            echo "::endgroup::"
+            [ "$rc" -eq 0 ] || return 1
+
+            # -lock=false: the role never writes the lock file. The plan takes
+            # no lock, so cancelling it halfway (a newer push to the PR) is safe.
+            echo "::group::terraform plan infra/$m"
+            terraform -chdir="infra/$m" plan -lock=false -input=false -no-color \
+              "${refresh[@]}" "${var_args[@]}" -out="$RUNNER_TEMP/$m.tfplan"
+            rc=$?
+            echo "::endgroup::"
+            [ "$rc" -eq 0 ] || return 1
+
+            terraform -chdir="infra/$m" show -json "$RUNNER_TEMP/$m.tfplan" > "$RUNNER_TEMP/$m.json" || return 1
+
+            # Data source reads and untouched resources are not changes. A
+            # replace counts as one add and one destroy, as Terraform's own
+            # summary does.
+            jq '[(.resource_changes // [])[] | select(.change.actions | . != ["no-op"] and . != ["read"])]
+                | {
+                    add: ([.[] | select(.change.actions | index("create"))] | length),
+                    change: ([.[] | select(.change.actions == ["update"])] | length),
+                    destroy: ([.[] | select(.change.actions | index("delete"))] | length)
+                  }' "$RUNNER_TEMP/$m.json" > "$out/counts.json" || return 1
+            jq '[(.resource_changes // [])[] | select(.change.actions | . != ["no-op"] and . != ["read"])
+                | {address, action: (.change.actions | if length == 2 then "replace" else .[0] end)}]' \
+              "$RUNNER_TEMP/$m.json" > "$out/changes.json" || return 1
+
+            # Every role's trust policy and every inline or managed policy, in
+            # the root module and the child modules. A document missing from
+            # planned_values is still unknown: it is read as null.
+            jq -c '.planned_values.root_module | recurse(.child_modules[]?) | .resources[]?
+                | select(.type == "aws_iam_role" or .type == "aws_iam_role_policy" or .type == "aws_iam_policy")
+                | (if .type == "aws_iam_role" then .values.assume_role_policy else .values.policy end) as $doc
+                | {
+                    address,
+                    kind: (if .type == "aws_iam_role" then "trust" else "identity" end),
+                    doc: (if ($doc | type) == "string" then $doc else null end)
+                  }' "$RUNNER_TEMP/$m.json" > "$out/policies.jsonl" || return 1
+
+            while read -r item; do
+              address=$(jq -r '.address' <<<"$item")
+              kind=$(jq -r '.kind' <<<"$item")
+              doc=$(jq -r '.doc // empty' <<<"$item")
+              if [ -z "$doc" ]; then
+                echo "$address" >> "$out/unchecked.txt"
+                continue
+              fi
+              n=$((n + 1))
+              printf '%s' "$doc" > "$out/policy-$n.json"
+              if [ "$kind" = trust ]; then
+                type_args=(--policy-type RESOURCE_POLICY --validate-policy-resource-type AWS::IAM::AssumeRolePolicyDocument)
+              else
+                type_args=(--policy-type IDENTITY_POLICY)
+              fi
+              echo "::group::Access Analyzer: $address"
+              result=$(aws accessanalyzer validate-policy --policy-document "file://$out/policy-$n.json" \
+                "${type_args[@]}" --output json </dev/null)
+              rc=$?
+              # A response that is not the expected JSON counts as a failed
+              # validation, never as "no findings".
+              if [ "$rc" -eq 0 ] && parsed=$(jq -c --arg address "$address" \
+                '.findings[] | {address: $address, findingType, issueCode, findingDetails}' <<<"$result"); then
+                if [ -n "$parsed" ]; then
+                  tee -a "$out/findings.jsonl" <<<"$parsed"
+                fi
+              else
+                echo "$address" >> "$out/aa-errors.txt"
+              fi
+              echo "::endgroup::"
+            done < "$out/policies.jsonl"
+            echo "$n" > "$out/checked"
+          }
+
+          for m in base demo; do
+            if plan_module "$m"; then
+              echo ok > "$RUNNER_TEMP/plan/$m/result"
+            else
+              echo "::error::The plan of infra/$m failed"
+              echo failed > "$RUNNER_TEMP/plan/$m/result"
+            fi
+          done
+
+      # Only the results are kept: the policy documents the validation read
+      # (policy-*.json, policies.jsonl) are its inputs, already in the log.
+      - name: Keep the results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: plan
+          path: |
+            ${{ runner.temp }}/plan
+            !${{ runner.temp }}/plan/*/policy-*.json
+            !${{ runner.temp }}/plan/*/policies.jsonl
+          retention-days: 1
+          if-no-files-found: error
+
+      # Last, so that the artifact above exists whatever happens. A failed
+      # plan, a finding Access Analyzer rates ERROR or SECURITY_WARNING and a
+      # policy it could not validate fail the job; WARNING and SUGGESTION do
+      # not, nor does a policy that is unknown until applied. One ::error::
+      # line per cause. A finding's address and code come from the PR: control
+      # characters are removed so they cannot start a workflow command.
+      - name: Block on a failed plan or a serious finding
+        if: ${{ !cancelled() }}
+        run: |
+          failed=0
+          for m in base demo; do
+            out="$RUNNER_TEMP/plan/$m"
+            if [ "$(cat "$out/result" 2>/dev/null)" != ok ]; then
+              echo "::error::The plan of infra/$m failed"
+              failed=1
+            fi
+            if [ -s "$out/aa-errors.txt" ]; then
+              while IFS= read -r address; do
+                echo "::error::Access Analyzer could not validate the policy of ${address//[[:cntrl:]]/ } in infra/$m"
+              done < "$out/aa-errors.txt"
+              failed=1
+            fi
+            if [ -f "$out/findings.jsonl" ]; then
+              serious=$(jq -r 'select(.findingType == "ERROR" or .findingType == "SECURITY_WARNING")
+                  | "::error::Access Analyzer \(.findingType) \(.issueCode) on \(.address) in infra/" + $m
+                  | gsub("[[:cntrl:]]"; " ")' --arg m "$m" "$out/findings.jsonl")
+              if [ -n "$serious" ]; then
+                echo "$serious"
+                failed=1
+              fi
+            fi
+          done
+          exit "$failed"
+
   commits:
     name: commits
     # Every PR, whatever it changes, so no need to wait for changes.
@@ -455,6 +672,7 @@ jobs:
         infra,
         scan-config,
         scan-image,
+        plan,
         commits,
         workflows,
       ]

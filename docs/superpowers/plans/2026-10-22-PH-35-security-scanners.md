@@ -170,21 +170,21 @@ Then check the PR's run: `scan-config` and `scan-image` green, their artifacts p
 - Consumes: `changes`' `infra` output.
 - Produces: job `plan`, artifact `plan` holding `base/` and `demo/` (each `result`, `counts.json`, `changes.json`, `findings.jsonl`, `unchecked.txt`, `aa-errors.txt`, `checked`) and nothing else; the comment's Markdown is no longer written here.
 
-- [ ] **Step 1: Move the job**
+- [x] **Step 1: Move the job**
 
 `plan` from `infra-plan.yml` into `ci.yml`, steps unchanged except: `needs: changes`; `if: github.event_name == 'pull_request' && needs.changes.outputs.infra == 'true' && github.event.pull_request.head.repo.full_name == github.repository`; the *Write the comment* step is replaced by uploading `$RUNNER_TEMP/base` and `$RUNNER_TEMP/demo` as artifact `plan` on `!cancelled()` (Task 4 writes the comment); the `concurrency` and `-lock=false` comments carried over where they still apply. `ci.yml`'s header says one job assumes an AWS role and why (spec, decision 4), with the job-split explanation from `infra-plan.yml`'s header.
 
-- [ ] **Step 2: The gate step**
+- [x] **Step 2: The gate step**
 
 Last step of `plan`, on `!cancelled()`: fails with an `::error::` line per cause when a module's `result` is not `ok`, when `findings.jsonl` holds a `findingType` of `ERROR` or `SECURITY_WARNING`, or when `aa-errors.txt` is not empty. The plan step keeps ending green itself, so the artifact is always written.
 
-- [ ] **Step 3: Delete `infra-plan.yml`, update `ci-ok` and the mentions**
+- [x] **Step 3: Delete `infra-plan.yml`, update `ci-ok` and the mentions**
 
 `ci-ok` needs `plan`. Every `infra-plan` mention under `infra/` and in workflow comments now names `ci.yml`'s `plan` job.
 Run: `pnpm check:workflows` and `grep -rn "infra-plan" .github infra scripts`
 Expected: no findings; no match.
 
-- [ ] **Step 4: Commit, push and check the run**
+- [x] **Step 4: Commit, push and check the run**
 
 ```bash
 git add -A .github/workflows infra docs/superpowers/plans
