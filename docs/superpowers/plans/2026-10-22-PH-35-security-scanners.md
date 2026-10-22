@@ -236,7 +236,7 @@ git push
 
 The PR gets one `<!-- ci-scans -->` comment with ✅, the plan, Access Analyzer's three findings, the three exceptions, the waiting and unfixed sections; a second push updates it.
 
-- [ ] **Step 5: The deliberate failure, once**
+- [x] **Step 5: The deliberate failure, once**
 
 Commit `test: open SSH to the world to see the scanners block` adding to `infra/demo/service.tf` an `aws_vpc_security_group_ingress_rule` on the task's group, port 22, `0.0.0.0/0`; push. Expected: `scan-config` red, `ci-ok` red, the comment ❌ with the finding under *Blocking*. Then `git revert` it (`revert: …`), push, and see `ci-ok` green. Note the run URL for the ADR.
 

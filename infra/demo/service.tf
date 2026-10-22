@@ -274,13 +274,3 @@ resource "aws_ecs_service" "app" {
 
   tags = { Name = "szop-demo-app" }
 }
-
-# DELIBERATE TEST: this rule must make scan-config fail (PH-35 plan, Task 4).
-resource "aws_vpc_security_group_ingress_rule" "test_ssh_open" {
-  security_group_id = aws_security_group.task.id
-  description       = "SSH from anywhere"
-  ip_protocol       = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_ipv4         = "0.0.0.0/0"
-}
