@@ -250,21 +250,21 @@ Commit `test: open SSH to the world to see the scanners block` adding to `infra/
 **Interfaces:**
 - Produces: statement `DenyUnmanagedMasterPassword`; the simulator commands and results for Task 6's ADR.
 
-- [ ] **Step 1: The statement**
+- [x] **Step 1: The statement**
 
 In `data.aws_iam_policy_document.ci_deploy_demo_database`: `effect = "Deny"`, `actions = ["rds:ModifyDBInstance"]`, `resources` the demo instance's ARN pattern as `DemoDatabases` scopes it, `condition { test = "Bool", variable = "rds:ManageMasterUserPassword", values = ["false"] }`, with a comment: a modify that leaves the key out (Terraform's ordinary changes) does not match; the public-address half has no condition key and stays a residual risk (threat model; OP-104).
 
-- [ ] **Step 2: Simulate it**
+- [x] **Step 2: Simulate it**
 
 `terraform -chdir=infra/base plan -refresh=false -out=…` with `AWS_PROFILE=szop` (read-only), take the rendered policy document from `terraform show -json` (scratchpad, never committed), then `aws iam simulate-custom-policy --policy-input-list file://… --action-names rds:ModifyDBInstance --resource-arns <the demo instance's ARN with the account replaced by the real one only on the command line> --context-entries` three times: `rds:ManageMasterUserPassword=false` (expected `explicitDeny`), `=true` (`allowed`), none (`allowed`; the allow statement's own conditions passed as context entries too: region, tags).
 Expected: the three results as listed. Record the commands with the account ID replaced by `<account>`.
 
-- [ ] **Step 3: The `StopDbSetup` comment and AWS-0342**
+- [x] **Step 3: The `StopDbSetup` comment and AWS-0342**
 
 The comment above `StopDbSetup` says what holds: the app's tasks carry no `Name` tag (the service has no `propagate_tags`), so the condition on `db-setup`'s tag is what keeps the role from stopping them; read the statement's conditions to word it exactly. Read `PassAppRoles` and note for the ADR that it names the two roles and conditions on `iam:PassedToService`, and why Trivy's `AWS-0342` still reports it (its check's logic, from `PrimaryURL`).
 Run: `pnpm check:infra`, `scripts/scan.sh config`. Expected: pass; no new finding.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```bash
 git add infra/base/ci_roles.tf docs/superpowers/plans
