@@ -81,12 +81,15 @@ tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
 # One Trivy run, written as JSON to $2. A Trivy that fails, writes no file or
-# writes JSON without Results is a failed scan, never "no findings".
+# writes JSON without Results is a failed scan, never "no findings". The
+# empty --ignorefile and --config keep Trivy from loading a .trivyignore or a
+# trivy.yaml at the root, which could hide a finding from the list without
+# appearing as an exception.
 # Usage: run_trivy config|image OUTPUT ARGS...
 run_trivy() {
   local kind="$1" out="$2"
   shift 2
-  "$trivy" "$kind" --quiet --format json --output "$out" "$@" \
+  "$trivy" "$kind" --quiet --ignorefile "" --config "" --format json --output "$out" "$@" \
     || { echo "FAIL: trivy ${kind}" >&2; exit 1; }
   jq -e .Results "$out" > /dev/null \
     || { echo "FAIL: trivy ${kind} wrote no usable JSON" >&2; exit 1; }
@@ -129,11 +132,23 @@ config_findings() {
 
 # Every `# trivy:ignore:<ID> -- <reason>` line as {id, reason, file, line}.
 # Trivy leaves suppressed findings out of its JSON, so they are read here.
+# Trivy also honours other forms (`//`, `*`, a comment at the end of a line,
+# the long IDs, tfsec:ignore), which would hide a finding from this list: any
+# line under infra/ or in the Dockerfile that names trivy:ignore or
+# tfsec:ignore and is not the one form, with an ID like AWS-0104 and a reason,
+# fails the scan.
 config_exceptions() {
-  { grep -rnE --include='*.tf' '^[[:space:]]*#[[:space:]]*trivy:ignore:' infra || true
-    grep -nE '^[[:space:]]*#[[:space:]]*trivy:ignore:' Dockerfile | sed 's/^/Dockerfile:/' || true
-  } | jq -R 'capture("^(?<file>[^:]+):(?<line>[0-9]+):\\s*#\\s*trivy:ignore:(?<id>[A-Za-z0-9-]+)\\s*(--\\s*)?(?<reason>.*)$")
-      | {id, reason, file, line: (.line | tonumber)}' | jq -s .
+  local lines bad
+  lines="$({ grep -rnIE --exclude-dir=.terraform '(trivy|tfsec):ignore' infra || true
+             grep -nIE '(trivy|tfsec):ignore' Dockerfile | sed 's/^/Dockerfile:/' || true; })"
+  [ -n "$lines" ] || { echo "[]"; return; }
+  bad="$(grep -vE '^[^:]+:[0-9]+:[[:space:]]*# trivy:ignore:[A-Z]+-[0-9]+ -- [^[:space:]]' <<< "$lines" || true)"
+  if [ -n "$bad" ]; then
+    sed -E 's/^([^:]+:[0-9]+):.*/FAIL: non-standard trivy:ignore at \1/' <<< "$bad" >&2
+    exit 1
+  fi
+  jq -R 'capture("^(?<file>[^:]+):(?<line>[0-9]+):\\s*# trivy:ignore:(?<id>[A-Z]+-[0-9]+) -- (?<reason>.*)$")
+      | {id, reason, file, line: (.line | tonumber)}' <<< "$lines" | jq -s .
 }
 
 scan_config() {
