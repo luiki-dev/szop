@@ -579,8 +579,9 @@ jobs:
       # plan, a finding Access Analyzer rates ERROR or SECURITY_WARNING and a
       # policy it could not validate fail the job; WARNING and SUGGESTION do
       # not, nor does a policy that is unknown until applied. One ::error::
-      # line per cause. A finding's address and code come from the PR: control
-      # characters are removed so they cannot start a workflow command.
+      # line per cause. A finding's address comes from the PR, and its code
+      # from AWS: control characters are removed so neither can start a
+      # workflow command.
       - name: Block on a failed plan or a serious finding
         if: ${{ !cancelled() }}
         run: |
@@ -679,7 +680,7 @@ jobs:
   # (a Markdown-only PR, a push to main).
   comment:
     name: comment
-    needs: [changes, plan, scan-config, scan-image]
+    needs: [changes, docker, plan, scan-config, scan-image]
     if: ${{ !cancelled() && github.event_name == 'pull_request' && (needs.plan.result != 'skipped' || needs.scan-config.result != 'skipped' || needs.scan-image.result != 'skipped') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -718,14 +719,17 @@ jobs:
       # What the jobs found can hold names a PR author or Trivy's database
       # chose: the writer filters them, and the text only ever travels as a
       # file. The env values below are the jobs' results, fixed words, and
-      # whether a fork's PR changed infra/ (a boolean).
+      # booleans: whether the PR changed code, and whether a fork's PR
+      # changed infra/.
       - name: Write the comment
         env:
-          PLANNED_SHA: ${{ github.event.pull_request.head.sha }}
+          CHECKED_SHA: ${{ github.event.pull_request.head.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           PLAN_RESULT: ${{ needs.plan.result }}
           SCAN_CONFIG_RESULT: ${{ needs.scan-config.result }}
           SCAN_IMAGE_RESULT: ${{ needs.scan-image.result }}
+          DOCKER_RESULT: ${{ needs.docker.result }}
+          CODE_CHANGED: ${{ needs.changes.outputs.code }}
           FORK_INFRA: ${{ needs.changes.outputs.infra == 'true' && github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           mkdir -p "$RUNNER_TEMP/results"

@@ -8,36 +8,43 @@
 #   scan-config.json    from scan-config (scripts/scan.sh config --json)
 #   scan-image.json     from scan-image (scripts/scan.sh image --json)
 # Each of them can be missing. The environment says why:
-#   PLANNED_SHA, RUN_URL                      the planned commit, the run's link
+#   CHECKED_SHA, RUN_URL                      the checked commit, the run's link
 #   PLAN_RESULT, SCAN_CONFIG_RESULT,
-#   SCAN_IMAGE_RESULT                         each job's result (success,
+#   SCAN_IMAGE_RESULT, DOCKER_RESULT          each job's result (success,
 #                                             failure, skipped ...); unset
 #                                             counts as "ran"
+#   CODE_CHANGED=true                         the PR changed code, so docker
+#                                             had to build the image to scan
 #   FORK_INFRA=true                           a fork's PR changed infra/, so
 #                                             plan could not run
 # A job that ran but left no artifact (a failed checkout, no AWS credentials,
 # a crashed scan) is shown as failed and counts as blocking, never as "no
-# findings". A job that was skipped is left out.
+# findings", and so does an image scan that could not run because docker did
+# not succeed. A job that was skipped is left out.
 #
 # Everything that came from a PR or from Trivy's database (titles, package
 # names, paths, reasons, Access Analyzer's messages) passes through a filter:
 # a name that goes into a code span only loses backticks and line breaks
 # (`code`, the brackets of dkim[0] stay); text that goes into the prose also
-# loses angle and square brackets (no HTML, no links) and gets no @ that would
-# mention someone. A link is written only for an avd.aquasec.com address. The
-# filter covers what an honest scan prints; the real boundary is that the
-# comment job holds only pull-requests: write and no AWS credentials.
+# loses angle and square brackets (no HTML and no Markdown links) and gets no
+# @ that would mention someone. A link is written only for an avd.aquasec.com
+# address, though GitHub may still turn a bare URL in a title or a message
+# into a link of its own. The filter covers what an honest scan prints; the
+# real boundary is the comment job's permissions: pull-requests: write and no
+# AWS credentials.
 #
-# Usage: PLANNED_SHA=... RUN_URL=... scripts/write-ci-comment.sh DIR
+# Usage: CHECKED_SHA=... RUN_URL=... scripts/write-ci-comment.sh DIR
 set -euo pipefail
 
 dir="${1:-}"
 [ -d "$dir" ] || { echo "FAIL: usage: write-ci-comment.sh DIR" >&2; exit 1; }
-planned_sha="${PLANNED_SHA:-unknown}"
+checked_sha="${CHECKED_SHA:-unknown}"
 run_url="${RUN_URL:-}"
 plan_result="${PLAN_RESULT:-success}"
 config_result="${SCAN_CONFIG_RESULT:-success}"
 image_result="${SCAN_IMAGE_RESULT:-success}"
+docker_result="${DOCKER_RESULT:-success}"
+code_changed="${CODE_CHANGED:-false}"
 fork_infra="${FORK_INFRA:-false}"
 
 tmp="$(mktemp -d)"
@@ -53,7 +60,7 @@ modules=(base demo)
 defs='
   def code: (. // "" | tostring) | gsub("[`\\r\\n]"; " ");
   def text: (. // "" | tostring) | gsub("[`<>\\[\\]\\r\\n]"; " ") | gsub("@"; "@​");
-  def rank: {"CRITICAL": 0, "ERROR": 0, "HIGH": 1, "SECURITY_WARNING": 1, "MEDIUM": 2, "LOW": 3}[.] // 4;
+  def rank: {"CRITICAL": 0, "ERROR": 0, "HIGH": 1, "SECURITY_WARNING": 1, "MEDIUM": 2, "WARNING": 2, "LOW": 3, "SUGGESTION": 3}[.] // 4;
   def by_severity: group_by(.severity) | sort_by(.[0].severity | rank) | map("\(length) \(.[0].severity | text)") | join(", ");
   def link: if (.url | type) == "string" and (.url | test("^https://avd\\.aquasec\\.com/[A-Za-z0-9/_.-]+$"))
             then "[`\(.id | code)`](\(.url))" else "`\(.id | code)`" end;
@@ -92,6 +99,12 @@ fi
 if [ "$image_result" != skipped ] && [ ! -f "$image_json" ]; then
   failure "The Trivy image scan: see the log."
 fi
+# scan-image is skipped when docker fails, so its part would vanish.
+image_not_run=false
+if [ "$code_changed" = true ] && [ "$docker_result" != success ]; then
+  image_not_run=true
+  jq -cn '{rank: -1, key: "docker", line: "Trivy image: not run, the docker job did not succeed."}' >> "$blocking"
+fi
 
 if [ -f "$config_json" ]; then
   jq -c "$defs"'.blocking[] | {rank: (.severity | rank), key: .id, line: (config_line + " (Trivy config)")}' "$config_json" >> "$blocking"
@@ -122,7 +135,7 @@ else
   echo "**✅ nothing blocking**"
 fi
 echo
-echo "Planned commit: \`$planned_sha\` (the PR's head, merged into \`main\`). [Run log]($run_url)"
+echo "Checked commit: \`$checked_sha\` (the PR's head, merged into \`main\`). [Run log]($run_url)"
 
 if [ "$count" -gt 0 ]; then
   echo
@@ -198,6 +211,12 @@ if [ -f "$config_json" ]; then
 fi
 
 # --- Trivy image -----------------------------------------------------------
+if [ "$image_not_run" = true ]; then
+  echo
+  echo "### Trivy image"
+  echo
+  echo "❌ Trivy image: not run, the docker job did not succeed."
+fi
 if [ -f "$image_json" ]; then
   echo
   echo "### Trivy image"
@@ -220,7 +239,7 @@ if [ -f "$image_json" ]; then
   jq -r "$defs"'
       if (.unfixed | length) == 0 then empty else
         "", "**Unfixed** (\(.unfixed | by_severity))", "",
-        "No fix exists yet. These do not block: they are in the base image'"'"'s operating-system packages, which the app does not use; the container runs as `node`, not root, and exposes only the app'"'"'s port behind the load balancer. When a fix appears, the finding moves to the section above (PH-35 spec, decision 7).",
+        "No fix exists yet. These do not block: most are in the base image'"'"'s operating-system packages, which the app does not use; the container runs as `node`, not root, and exposes only the app'"'"'s port behind the load balancer. When a fix appears, a finding in an operating-system package moves to the section above, and one in a Node package blocks if it is `CRITICAL` or `HIGH` (PH-35 spec, decision 7).",
         "", "<details><summary>\(.unfixed | length) finding(s)</summary>", "",
         (.unfixed[] | "- " + image_line),
         "", "</details>"

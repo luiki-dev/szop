@@ -28,6 +28,9 @@
 # with no Docker daemon (CI). TRIVY names the Trivy binary (default: trivy on
 # the PATH).
 set -euo pipefail
+# Kept before the cd, so that `all` can run this script again from any
+# directory.
+self="$(realpath "$0")"
 cd "$(dirname "$0")/.."
 
 trivy="${TRIVY:-trivy}"
@@ -69,8 +72,8 @@ if [ "$mode" = all ]; then
   [ -z "$input" ] && [ -z "$json" ] \
     || { echo "FAIL: all takes no --input or --json" >&2; exit 1; }
   status=0
-  "$0" config || status=1
-  if [ "$build" = true ]; then "$0" image || status=1; else "$0" image --no-build || status=1; fi
+  "$self" config || status=1
+  if [ "$build" = true ]; then "$self" image || status=1; else "$self" image --no-build || status=1; fi
   exit "$status"
 fi
 
@@ -96,11 +99,13 @@ run_trivy() {
 }
 
 # jq definitions both scans share: the order of severities, the table's
-# padding and "2 HIGH, 5 MEDIUM" for the categories that only show a count.
+# padding and "(7): 2 HIGH, 5 MEDIUM" for the categories that only show a
+# count ("(0)" alone when empty).
 jq_defs='
   def rank: {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}[.] // 4;
   def pad(n): . + (if n > length then (" " * (n - length)) else "" end);
   def count_by_severity: group_by(.severity) | sort_by(.[0].severity | rank) | map("\(length) \(.[0].severity)") | join(", ");
+  def counted: "(\(length))" + (if length > 0 then ": \(count_by_severity)" else "" end);
 '
 
 # Writes the sorted JSON when asked, and fails when anything blocks.
@@ -217,8 +222,8 @@ scan_image() {
   jq -r "$jq_defs"'
     def rows: .[] | "  \(.severity | pad(9))  \(.id | pad(18))  \("\(.pkg) \(.installed) -> \(.fixed)" | pad(48))  \(.target)";
     "BLOCKING (\(.blocking | length))", (.blocking | rows),
-    "", "WAITING FOR THE BASE IMAGE (\(.waiting | length)): \(.waiting | count_by_severity)",
-    "", "UNFIXED (\(.unfixed | length)): \(.unfixed | count_by_severity)",
+    "", "WAITING FOR THE BASE IMAGE \(.waiting | counted)",
+    "", "UNFIXED \(.unfixed | counted)",
     "", "LISTED (\(.listed | length))", (.listed | rows)
   ' "$tmp/result.json"
 
