@@ -311,19 +311,19 @@ git push
 **Files:**
 - Modify: this plan (ticks), `docs/roadmap.md`, `README.md`, `docs/decisions/0041-security-scanners-details.md` (the demo run)
 
-- [ ] **Step 1: The owner's steps** *(the owner)*
+- [x] **Step 1: The owner's steps** *(the owner)*
 
 Apply `infra/base` from the branch; `demo-up` on the branch's head, `/api/health` `200`, `demo-down` `Destroy complete!`. Claude records the `demo-up` run and its commit for the PR.
 
-- [ ] **Step 2: GitHub**
+- [x] **Step 2: GitHub**
 
 OP-090 (#194), OP-091 (#201) and OP-104 (#253) get a "settled by" comment naming the PR (closed by it); OP-019 (#77) gets a comment with the finding, and is closed or re-parented as its parts say; #213's body copied from the roadmap entry; the owner-step issues closed when the owner says.
 
-- [ ] **Step 3: The PR**
+- [x] **Step 3: The PR**
 
 Stage table row and README diagram in line, with the PR link. PR titled `feat: scan the infrastructure and the image with Trivy`, the template filled in, `Closes #213`, `Closes #194`, `Closes #201`, `Closes #253`, and the list of issue changes.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```bash
 git add docs README.md
