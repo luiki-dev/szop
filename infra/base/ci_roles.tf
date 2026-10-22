@@ -983,7 +983,8 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
   # not match and still passes. On every instance, not only the tagged ones:
   # it can only narrow what DemoDatabases allows. The public-address half has
   # no condition key on ModifyDBInstance and stays a residual risk, guarded by
-  # the security group and the private subnet group (threat model; OP-104).
+  # the security group and the private subnet group, which the same role
+  # manages (threat model; OP-104).
   statement {
     sid       = "DenyUnmanagedMasterPassword"
     effect    = "Deny"

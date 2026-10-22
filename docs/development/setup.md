@@ -104,7 +104,7 @@ Szop's infrastructure on AWS is Terraform code in `infra/` ([Terraform](tools/te
 
 - **tenv** installs Terraform in the exact version of `.terraform-version`, the way nvm installs Node from `.nvmrc`. Terraform itself is never installed with `apt`, `snap` or a zip.
 - **tflint** finds mistakes `terraform validate` does not ([tflint](tools/tflint.md)).
-- **Trivy** scans the Terraform code and the `Dockerfile` for security misconfigurations ([Trivy](tools/trivy.md)).
+- **Trivy** scans the Terraform code and the `Dockerfile` for security misconfigurations, and the container image for known vulnerabilities ([Trivy](tools/trivy.md)).
 - **The AWS CLI v2** signs in to AWS and runs single commands ([AWS CLI](tools/aws-cli.md)).
 - **The Session Manager plugin** lets the AWS CLI open a shell in a running container, for debugging the demo.
 
