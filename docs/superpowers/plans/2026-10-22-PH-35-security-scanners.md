@@ -206,7 +206,7 @@ The PR's run: `plan` runs (the branch changes `infra/`), assumes `szop-ci-plan`,
 - Consumes: artifacts `plan` (Task 3), `scan-config` (Task 1), `scan-image` (Task 2), each possibly missing.
 - Produces: `scripts/write-ci-comment.sh DIR` → Markdown on stdout, `DIR` holding `plan/{base,demo}/…`, `scan-config.json`, `scan-image.json`; env `PLANNED_SHA`, `RUN_URL`.
 
-- [ ] **Step 1: Write the writer**
+- [x] **Step 1: Write the writer**
 
 Moves `infra-plan.yml`'s `defs` (`code`, `text`) and its plan and Access Analyzer `jq` unchanged in meaning. Prints, in the spec's order (*The comment*): the marker `<!-- ci-scans -->`; the verdict line (`❌ N blocking finding(s)` or `✅ nothing blocking`) counting blocking scan findings, blocking Access Analyzer findings, failed validations and failed plans; planned commit and run link; **Blocking** (every scanner, by severity); **Terraform plan** per module; **IAM Access Analyzer** with `ERROR` and `SECURITY_WARNING` marked blocking; **Trivy config** (listed folded in `<details>`, then *Accepted exceptions* with their reasons); **Trivy image** (listed folded; *Fixed in Debian, waiting for the base image* folded with counts and its note; *Unfixed* folded with counts and its note). A part is printed only when its artifact is present; when `plan` is missing on a PR that changed `infra/` from a fork, a line says the plan and Access Analyzer did not run. Every title, package name, path and reason passes `text` or `code`.
 
@@ -214,19 +214,19 @@ The two notes, as text:
 - **Fixed in Debian, waiting for the base image:** "Debian has published a fix, but the official `node:24-trixie-slim` image does not include it yet. These do not block: no change in this repository can install the fix. Dependabot proposes the new base image once it is published (PH-35 spec, decision 17)."
 - **Unfixed:** "No fix exists yet. These do not block: they are in the base image's operating-system packages, which the app does not use; the container runs as `node`, not root, and exposes only the app's port behind the load balancer. When a fix appears, the finding moves to the section above (PH-35 spec, decision 7)."
 
-- [ ] **Step 2: Try it on fixtures**
+- [x] **Step 2: Try it on fixtures**
 
 In the scratchpad, a `DIR` with the real artifacts of the PR's last run (`gh run download`) and a copy of `scan-image.json` whose first title is ``a`b<c>[d](e)@f\ng``.
 Run: `scripts/write-ci-comment.sh DIR`
 Expected: every part present in order; the fixture title prints with no backtick, angle or square bracket and `@` followed by a zero-width space; with `scan-image.json` removed, the image part is gone and the rest unchanged.
 
-- [ ] **Step 3: The `comment` job**
+- [x] **Step 3: The `comment` job**
 
 Moved from `infra-plan.yml`: `needs: [changes, plan, scan-config, scan-image]`, `if: ${{ !cancelled() && github.event_name == 'pull_request' && (needs.plan.result != 'skipped' || needs.scan-config.result != 'skipped' || needs.scan-image.result != 'skipped') }}`. It needs the script, so it checks out with `persist-credentials: false` and `sparse-checkout: scripts/write-ci-comment.sh` (or the builder's equivalent that fetches nothing else) — the comment's text still travels only as a file. Downloads the three artifacts (missing ones tolerated), runs the writer to `comment.md`, appends it to `$GITHUB_STEP_SUMMARY`, then, unless the PR comes from a fork, posts or updates the comment found by `<!-- ci-scans -->` as `infra-plan.yml` did. `pull-requests: write` and `contents: read` only. Not in `ci-ok`'s needs.
 Then walk every job's `if` for a Markdown-only PR (`code=false`, `infra=false`) and for a push to `main`, and write the result in the commit message's body.
 Run: `pnpm check:workflows`. Expected: no findings; for both cases `scan-config`, `scan-image`, `plan` and `comment` skip, and `ci-ok` would pass.
 
-- [ ] **Step 4: Commit, push, read the comment**
+- [x] **Step 4: Commit, push, read the comment**
 
 ```bash
 git add scripts/write-ci-comment.sh .github/workflows/ci.yml docs/superpowers/plans

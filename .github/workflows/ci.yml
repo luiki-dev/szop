@@ -8,10 +8,17 @@
 # 14 and 16; ADR 0032, decisions 4, 8 and 11). The plan was a workflow of its
 # own until PH-35 folded it in, so that one workflow gives one gate, ci-ok.
 #
+# Two jobs scan with Trivy, scan-config (the Terraform code and the
+# Dockerfile) and scan-image (the image docker built), and block on serious
+# findings (PH-35 spec, decisions 1 to 3 and 11). A last job, comment, puts
+# what plan and both scans found into one PR comment and the run's summary. It
+# is not part of ci-ok: the gate is the jobs themselves, not their report.
+#
 # The jobs are split so that no job holds both AWS credentials and a write
-# token: plan holds id-token: write and hands what it found to the other jobs
-# as an artifact. What it finds can hold names a PR author chose, so it only
-# ever travels as files, never through ${{ }}.
+# token: plan holds id-token: write, comment holds pull-requests: write, and
+# plan hands what it found to comment as an artifact. What it finds can hold
+# names a PR author chose, so it only ever travels as files, never through
+# ${{ }}.
 name: CI
 
 on:
@@ -439,8 +446,10 @@ jobs:
       # needs: result (ok or failed), counts.json, changes.json, findings.jsonl,
       # unchecked.txt, aa-errors.txt and checked. A module that fails is
       # recorded as failed and does not stop the other one, and the step itself
-      # always ends green, so the artifact below is always written; the last
-      # step decides whether the job fails.
+      # ends green, so once it has started the artifact below is written; the
+      # last step decides whether the job fails. When an earlier step fails
+      # (the checkout, the AWS credentials) the step never starts, there is no
+      # artifact, and the comment job shows both modules as failed.
       - name: Plan each module and validate its IAM policies
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -566,7 +575,7 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
-      # Last, so that the artifact above exists whatever happens. A failed
+      # Last, so that the artifact above is uploaded first. A failed
       # plan, a finding Access Analyzer rates ERROR or SECURITY_WARNING and a
       # policy it could not validate fail the job; WARNING and SUGGESTION do
       # not, nor does a policy that is unknown until applied. One ::error::
@@ -657,6 +666,88 @@ jobs:
           version: 1.30.1
           advanced-security: false
           annotations: true
+
+  # Puts the plan, Access Analyzer and both scans into one PR comment and the
+  # run's summary (PH-35 spec, decisions 6 and 14). It holds the only write
+  # token (pull-requests: write) and no AWS credentials, and it is not in
+  # ci-ok's needs: a failed comment hides the findings from the conversation,
+  # not from the summary, and lets nothing through. The checkout fetches the
+  # writer script and nothing else. Skipped when none of the three jobs ran
+  # (a Markdown-only PR, a push to main).
+  comment:
+    name: comment
+    needs: [changes, plan, scan-config, scan-image]
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && (needs.plan.result != 'skipped' || needs.scan-config.result != 'skipped' || needs.scan-image.result != 'skipped') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read # to check the writer script out
+      pull-requests: write # to post or update the comment
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: /scripts/write-ci-comment.sh
+          sparse-checkout-cone-mode: false
+
+      # Each artifact only when its job ran, and a missing one is tolerated:
+      # a job that ran but left nothing (a failed checkout, a crashed scan) is
+      # shown in the comment as failed, never as "no findings".
+      - if: needs.plan.result != 'skipped'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: plan
+          path: ${{ runner.temp }}/results/plan
+      - if: needs.scan-config.result != 'skipped'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: scan-config
+          path: ${{ runner.temp }}/results
+      - if: needs.scan-image.result != 'skipped'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: scan-image
+          path: ${{ runner.temp }}/results
+
+      # What the jobs found can hold names a PR author or Trivy's database
+      # chose: the writer filters them, and the text only ever travels as a
+      # file. The env values below are the jobs' results, fixed words, and
+      # whether a fork's PR changed infra/ (a boolean).
+      - name: Write the comment
+        env:
+          PLANNED_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PLAN_RESULT: ${{ needs.plan.result }}
+          SCAN_CONFIG_RESULT: ${{ needs.scan-config.result }}
+          SCAN_IMAGE_RESULT: ${{ needs.scan-image.result }}
+          FORK_INFRA: ${{ needs.changes.outputs.infra == 'true' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/results"
+          scripts/write-ci-comment.sh "$RUNNER_TEMP/results" > "$RUNNER_TEMP/comment.md"
+          cat "$RUNNER_TEMP/comment.md" >> "$GITHUB_STEP_SUMMARY"
+
+      # Not for a fork's PR, whose token is read-only; the summary has the
+      # text. The comment is found by its hidden marker, among the ones this
+      # workflow's bot wrote, and updated, so a push never adds a second one.
+      # comment.md is passed as a file (-F body=@), never through ${{ }}.
+      - name: Post or update the comment
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          ids=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- ci-scans -->"))) | .id')
+          id=${ids%%$'\n'*}
+          if [ -n "$id" ]; then
+            gh api --method PATCH "repos/$REPO/issues/comments/$id" -F body=@"$RUNNER_TEMP/comment.md"
+          else
+            gh api --method POST "repos/$REPO/issues/$PR/comments" -F body=@"$RUNNER_TEMP/comment.md"
+          fi
 
   ci-ok:
     name: ci-ok
