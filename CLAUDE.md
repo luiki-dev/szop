@@ -99,6 +99,7 @@ Open points (all on GitHub; no document lists them):
   - 🚧 in progress: open point or phase being worked on, `🚧 In progress` on the project
   - ⏳ deferred or waiting: finding deferred to an open point, `⏳ Blocked` on the project
   - ✖️ rejected or dropped: finding rejected, open point dropped without being done, `✖️ Dropped` on the project
+  - ❌ failed or blocking: a failed plan, a blocking finding in the PR comment
   - ❔ pending: not decided or triaged yet
   - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
   - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell
