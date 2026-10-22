@@ -720,7 +720,10 @@ jobs:
       # chose: the writer filters them, and the text only ever travels as a
       # file. The env values below are the jobs' results, fixed words, and
       # booleans: whether the PR changed code, and whether a fork's PR
-      # changed infra/.
+      # changed infra/. The summary always gets the full text; GitHub refuses
+      # a comment over 65,536 characters, which would leave the old comment
+      # and its verdict in place, so past 60,000 the post gets the short text
+      # (ADR 0041, Settled while building).
       - name: Write the comment
         env:
           CHECKED_SHA: ${{ github.event.pull_request.head.sha }}
@@ -735,6 +738,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/results"
           scripts/write-ci-comment.sh "$RUNNER_TEMP/results" > "$RUNNER_TEMP/comment.md"
           cat "$RUNNER_TEMP/comment.md" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$(LC_ALL=C.UTF-8 wc -m < "$RUNNER_TEMP/comment.md")" -gt 60000 ]; then
+            scripts/write-ci-comment.sh --short "$RUNNER_TEMP/results" > "$RUNNER_TEMP/comment.md"
+          fi
 
       # Not for a fork's PR, whose token is read-only; the summary has the
       # text. The comment is found by its hidden marker, among the ones this

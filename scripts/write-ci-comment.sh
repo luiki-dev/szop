@@ -22,6 +22,11 @@
 # findings", and so does an image scan that could not run because docker did
 # not succeed. A job that was skipped is left out.
 #
+# --short leaves out the individual lines of the folded listed, waiting and
+# unfixed sections, keeping their counts and notes, for a comment that would
+# pass GitHub's limit of 65,536 characters; the job summary keeps the full
+# text. The verdict, Blocking, the plan and Access Analyzer always stay.
+#
 # Everything that came from a PR or from Trivy's database (titles, package
 # names, paths, reasons, Access Analyzer's messages) passes through a filter:
 # a name that goes into a code span only loses backticks and line breaks
@@ -33,11 +38,16 @@
 # real boundary is the comment job's permissions: pull-requests: write and no
 # AWS credentials.
 #
-# Usage: CHECKED_SHA=... RUN_URL=... scripts/write-ci-comment.sh DIR
+# Usage: CHECKED_SHA=... RUN_URL=... scripts/write-ci-comment.sh [--short] DIR
 set -euo pipefail
 
+short=false
+if [ "${1:-}" = --short ]; then
+  short=true
+  shift
+fi
 dir="${1:-}"
-[ -d "$dir" ] || { echo "FAIL: usage: write-ci-comment.sh DIR" >&2; exit 1; }
+[ -d "$dir" ] || { echo "FAIL: usage: write-ci-comment.sh [--short] DIR" >&2; exit 1; }
 checked_sha="${CHECKED_SHA:-unknown}"
 run_url="${RUN_URL:-}"
 plan_result="${PLAN_RESULT:-success}"
@@ -136,6 +146,10 @@ else
 fi
 echo
 echo "Checked commit: \`$checked_sha\` (the PR's head, merged into \`main\`). [Run log]($run_url)"
+if [ "$short" = true ]; then
+  echo
+  echo "Shortened to fit GitHub's comment limit: the full report is in the [run's summary]($run_url)."
+fi
 
 if [ "$count" -gt 0 ]; then
   echo
@@ -197,8 +211,10 @@ if [ -f "$config_json" ]; then
   echo "### Trivy config"
   echo
   jq -r '"\(.blocking | length) blocking, \(.listed | length) listed, \(.exceptions | length) accepted exception(s)"' "$config_json"
-  jq -r "$defs"'
-      if (.listed | length) == 0 then empty else
+  jq -r --argjson short "$short" "$defs"'
+      if (.listed | length) == 0 then empty
+      elif $short then "", "**Listed findings** (MEDIUM and LOW, \(.listed | length): \(.listed | by_severity))"
+      else
         "", "<details><summary>Listed findings (MEDIUM and LOW, \(.listed | length))</summary>", "",
         (.listed[] | "- " + config_line),
         "", "</details>"
@@ -222,26 +238,32 @@ if [ -f "$image_json" ]; then
   echo "### Trivy image"
   echo
   jq -r '"\(.blocking | length) blocking, \(.waiting | length) waiting for the base image, \(.unfixed | length) unfixed, \(.listed | length) listed"' "$image_json"
-  jq -r "$defs"'
-      if (.listed | length) == 0 then empty else
+  jq -r --argjson short "$short" "$defs"'
+      if (.listed | length) == 0 then empty
+      elif $short then "", "**Listed findings** (fixed, not blocking, \(.listed | length): \(.listed | by_severity))"
+      else
         "", "<details><summary>Listed findings (fixed, not blocking, \(.listed | length))</summary>", "",
         (.listed[] | "- " + image_line),
         "", "</details>"
       end' "$image_json"
-  jq -r "$defs"'
+  jq -r --argjson short "$short" "$defs"'
       if (.waiting | length) == 0 then empty else
         "", "**Fixed in Debian, waiting for the base image** (\(.waiting | by_severity))", "",
         "Debian has published a fix, but the official `node:24-trixie-slim` image does not include it yet. These do not block: no change in this repository can install the fix. Dependabot proposes the new base image once it is published (PH-35 spec, decision 17).",
-        "", "<details><summary>\(.waiting | length) finding(s)</summary>", "",
-        (.waiting[] | "- " + image_line),
-        "", "</details>"
+        if $short then empty else
+          "", "<details><summary>\(.waiting | length) finding(s)</summary>", "",
+          (.waiting[] | "- " + image_line),
+          "", "</details>"
+        end
       end' "$image_json"
-  jq -r "$defs"'
+  jq -r --argjson short "$short" "$defs"'
       if (.unfixed | length) == 0 then empty else
         "", "**Unfixed** (\(.unfixed | by_severity))", "",
         "No fix exists yet. These do not block: most are in the base image'"'"'s operating-system packages, which the app does not use; the container runs as `node`, not root, and exposes only the app'"'"'s port behind the load balancer. When a fix appears, a finding in an operating-system package moves to the section above, and one in a Node package blocks if it is `CRITICAL` or `HIGH` (PH-35 spec, decision 7).",
-        "", "<details><summary>\(.unfixed | length) finding(s)</summary>", "",
-        (.unfixed[] | "- " + image_line),
-        "", "</details>"
+        if $short then empty else
+          "", "<details><summary>\(.unfixed | length) finding(s)</summary>", "",
+          (.unfixed[] | "- " + image_line),
+          "", "</details>"
+        end
       end' "$image_json"
 fi
