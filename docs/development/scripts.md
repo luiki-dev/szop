@@ -49,6 +49,7 @@ The same commands CI runs in its jobs ([CI/CD](ci-cd.md#the-jobs)); run them bef
 | `pnpm typecheck` | Check the types | `tsc --noEmit` for the root, then each package's own `typecheck` ([TypeScript](tools/typescript.md)) | `typecheck` |
 | `pnpm check:infra` | Check the Terraform code | `scripts/check-infra.sh`: `terraform fmt -check`, then `terraform init -backend=false` and `terraform validate` in every module under `infra/`, then tflint; no AWS access ([Terraform](tools/terraform.md), [tflint](tools/tflint.md)). Needs the tools of the [setup guide](setup.md#8-terraform-tflint-and-the-aws-cli) | `infra` |
 | `pnpm check:workflows` | Check the workflow files | `scripts/check-workflows.sh`: `actionlint` over every workflow, then `zizmor --offline .github`; no network access, so zizmor's online audits are skipped ([actionlint](tools/actionlint.md), [zizmor](tools/zizmor.md)). Needs the tools of the [setup guide](setup.md#9-actionlint-zizmor-and-uv). No CI job runs the script: CI's `workflows` job runs the two tools directly, with zizmor's online audits | — |
+| `pnpm check:scan` | Scan the code for security problems | `scripts/scan.sh config`: Trivy over the Terraform code under `infra/` and the `Dockerfile`; `CRITICAL` and `HIGH` findings fail it, `MEDIUM` and `LOW` are listed, and so are the exceptions the code accepts with `# trivy:ignore` comments ([Trivy](tools/trivy.md)). Needs Trivy from the [setup guide](setup.md#8-terraform-tflint-and-the-aws-cli) | `scan-config` (pull requests only) |
 
 ## Tests
 

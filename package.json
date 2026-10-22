@@ -29,6 +29,7 @@
     "check:scale": "scripts/check-scale.sh",
     "check:infra": "scripts/check-infra.sh",
     "check:workflows": "scripts/check-workflows.sh",
+    "check:scan": "scripts/scan.sh config",
     "infra:fmt": "terraform fmt -recursive infra",
     "prepare": "husky"
   },

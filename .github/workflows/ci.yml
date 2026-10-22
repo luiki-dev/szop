@@ -274,6 +274,52 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+  # A job of its own, not a step of infra or docker: Trivy then holds nothing
+  # but contents: read, and never the AWS credentials or the build cache token
+  # of the jobs that have them (PH-35 spec, decision 11). Pull requests only:
+  # the artifact step gives the job the Actions runtime token, harmless on a
+  # PR but able to write main's cache on a push to main. Every commit on main
+  # came through a PR that was scanned.
+  scan-config:
+    name: scan-config
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      # Updated by hand: Dependabot cannot see versions inside run steps
+      # (docs/development/tools/trivy.md).
+      TRIVY_VERSION: 0.75.0
+      TRIVY_SHA256: c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Trivy
+        run: |
+          archive="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${archive}"
+          echo "${TRIVY_SHA256}  $RUNNER_TEMP/$archive" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/bin"
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP/bin" trivy
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      # Fails on a blocking finding or a scan that did not run. The JSON is
+      # written first, so the artifact holds the findings of a failed scan too.
+      - run: scripts/scan.sh config --json "$RUNNER_TEMP/scan-config.json"
+
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: scan-config
+          path: ${{ runner.temp }}/scan-config.json
+          retention-days: 1
+          if-no-files-found: ignore
+
   commits:
     name: commits
     # Every PR, whatever it changes, so no need to wait for changes.
@@ -344,6 +390,7 @@ jobs:
         e2e,
         docker,
         infra,
+        scan-config,
         commits,
         workflows,
       ]

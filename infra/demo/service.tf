@@ -25,6 +25,7 @@ resource "aws_vpc_security_group_ingress_rule" "task_from_alb" {
   tags = { Name = "szop-demo-task-from-alb" }
 }
 
+# trivy:ignore:AWS-0104 -- HTTPS to ECR, Secrets Manager and CloudWatch, which the task reaches without VPC endpoints (ADR 0041)
 resource "aws_vpc_security_group_egress_rule" "task_https" {
   security_group_id = aws_security_group.task.id
   description       = "HTTPS to AWS endpoints"

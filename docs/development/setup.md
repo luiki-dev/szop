@@ -100,10 +100,11 @@ pnpm db:up
 
 ## 8. Terraform, tflint and the AWS CLI
 
-Szop's infrastructure on AWS is Terraform code in `infra/` ([Terraform](tools/terraform.md)). Four tools work with it, all in Ubuntu:
+Szop's infrastructure on AWS is Terraform code in `infra/` ([Terraform](tools/terraform.md)). Five tools work with it, all in Ubuntu:
 
 - **tenv** installs Terraform in the exact version of `.terraform-version`, the way nvm installs Node from `.nvmrc`. Terraform itself is never installed with `apt`, `snap` or a zip.
 - **tflint** finds mistakes `terraform validate` does not ([tflint](tools/tflint.md)).
+- **Trivy** scans the Terraform code and the `Dockerfile` for security misconfigurations ([Trivy](tools/trivy.md)).
 - **The AWS CLI v2** signs in to AWS and runs single commands ([AWS CLI](tools/aws-cli.md)).
 - **The Session Manager plugin** lets the AWS CLI open a shell in a running container, for debugging the demo.
 
@@ -123,6 +124,11 @@ curl -fsSLO https://github.com/terraform-linters/tflint/releases/download/v0.64.
 echo "cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537  tflint_linux_amd64.zip" | sha256sum --check
 mkdir -p ~/.local/bin && unzip -o tflint_linux_amd64.zip -d ~/.local/bin && tflint --version
 
+# Trivy
+curl -fsSLO https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz
+echo "c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f  trivy_0.75.0_Linux-64bit.tar.gz" | sha256sum --check
+tar -xzf trivy_0.75.0_Linux-64bit.tar.gz -C ~/.local/bin trivy && trivy --version     # Version: 0.75.0
+
 # AWS CLI v2: skip if `aws --version` already prints aws-cli/2.x
 curl -fsSL -o awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
 unzip -q awscliv2.zip && sudo ./aws/install --update && aws --version
@@ -132,11 +138,12 @@ curl -fsSLO https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubu
 sudo apt install ./session-manager-plugin.deb && session-manager-plugin --version
 
 # Back in the repository
-cd ~/workspace/szop && pnpm check:infra
+cd ~/workspace/szop && pnpm check:infra && pnpm check:scan
 ```
 
 - If `tflint --version` says `command not found`, `~/.local/bin` did not exist before and is not on your `PATH` yet: close the terminal, open a new one and try again (Ubuntu's `~/.profile` adds the folder when it exists).
 - `pnpm check:infra` ends with tflint's output and exits with no `FAIL:` line. What it runs is in [Scripts](scripts.md).
+- `pnpm check:scan` prints `BLOCKING (0)`, the findings that are only listed, and the exceptions the code accepts on purpose, and exits with no `FAIL:` line. What it runs is in [Scripts](scripts.md); the rules and exceptions are in [Trivy](tools/trivy.md).
 - Signing in to AWS is not part of this guide: it needs the account set up first, and the [runbook](../operations/demo-environment.md) covers both. Do not run `aws configure` or create access keys.
 
 ## 9. actionlint, zizmor and uv

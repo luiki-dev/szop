@@ -67,43 +67,43 @@ Each list is sorted by severity (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `UNKNOWN`)
 **Interfaces:**
 - Produces: `scripts/scan.sh config [--json FILE]`, exit 0 (nothing blocking) or 1; the config JSON above; the `scan-config` job, which uploads `scan-config.json` as artifact `scan-config`.
 
-- [ ] **Step 1: Write `scan.sh config`**
+- [x] **Step 1: Write `scan.sh config`**
 
 Bash with `set -euo pipefail`, `cd` to the repository root, header comment in the style of `check-infra.sh`. Runs `trivy config --quiet --skip-check-update --format json --output "$tmp" infra` and the same for `Dockerfile` (two runs, results concatenated, or one run over a list; builder's choice), fails with `FAIL: trivy config` if Trivy exits non-zero or `jq -e .Results` fails. Sorts `Status == "FAIL"` findings by the thresholds; `target` is the path from the repository root, `line` is `CauseMetadata.StartLine`, `url` is `PrimaryURL`. Exceptions: every `# trivy:ignore:<ID> -- <reason>` line under `infra/` and in `Dockerfile` (`grep -rn`), as `{id, reason, file, line}`. Prints a table (severity, ID, file:line, title) with `BLOCKING` and `LISTED` headings and the exceptions, writes `--json` if given, exits 1 if `blocking` is not empty with `FAIL: N blocking finding(s)`.
 
-- [ ] **Step 2: Run it on `main`'s code and see it fail**
+- [x] **Step 2: Run it on `main`'s code and see it fail**
 
 Run: `scripts/scan.sh config`
 Expected: exit 1, BLOCKING lists `AWS-0104`, `AWS-0053`, `AWS-0132`; LISTED the 11 others of the spec's baseline.
 
-- [ ] **Step 3: The three exceptions**
+- [x] **Step 3: The three exceptions**
 
 Above each resource, one comment line with the reason in the file's comment style, then the ignore line:
 - `aws_vpc_security_group_egress_rule.task_https`: `# trivy:ignore:AWS-0104 -- HTTPS to ECR, Secrets Manager and CloudWatch, which the task reaches without VPC endpoints (ADR 0041)`
 - `aws_lb.main`: `# trivy:ignore:AWS-0053 -- the demo is reached from the internet through this load balancer (ADR 0041)`
 - the state bucket's server-side encryption resource: `# trivy:ignore:AWS-0132 -- SSE-S3 is enough for the state, which holds no secret values; a customer-managed KMS key costs about $1 a month and more IAM (ADR 0041)`
 
-- [ ] **Step 4: Run it again**
+- [x] **Step 4: Run it again**
 
 Run: `scripts/scan.sh config; echo "exit $?"` and `pnpm check:infra`
 Expected: `exit 0`, nothing BLOCKING, the three exceptions listed with their reasons; `check:infra` passes.
 
-- [ ] **Step 5: A failed scan is a failure**
+- [x] **Step 5: A failed scan is a failure**
 
 `scan.sh` runs Trivy as `${TRIVY:-trivy}`, so a Trivy that fails can be stood in.
 Run: `TRIVY=false scripts/scan.sh config; echo "exit $?"` and `TRIVY=true scripts/scan.sh config; echo "exit $?"` (exits 0 and writes no JSON)
 Expected: both `FAIL: trivy config`, exit 1. Task 2 repeats both for `scan.sh image`.
 
-- [ ] **Step 6: `check:scan` and the job**
+- [x] **Step 6: `check:scan` and the job**
 
 `package.json`: `"check:scan": "scripts/scan.sh all"` (Task 2 adds `all`; until then `config` alone, changed in Task 2). `ci.yml`: job `scan-config`, `needs: changes`, `if: github.event_name == 'pull_request' && needs.changes.outputs.code == 'true'`, `contents: read`, `timeout-minutes: 10`, `env: TRIVY_VERSION`, `TRIVY_SHA256` with the comment "Updated by hand: Dependabot cannot see versions inside run steps (docs/development/tools/trivy.md)"; steps: checkout (`persist-credentials: false`), install Trivy as the tflint step does (`curl`, `sha256sum --check`, `tar -xzf … trivy`, `$RUNNER_TEMP/bin` on `GITHUB_PATH`), `scripts/scan.sh config --json "$RUNNER_TEMP/scan-config.json"`, then on `!cancelled()` upload it as `scan-config` (retention 1 day). A comment above the job gives the reason it is a job of its own (spec, decision 11). `ci-ok` needs `scan-config`.
 Run: `pnpm check:workflows`. Expected: no findings.
 
-- [ ] **Step 7: Docs**
+- [x] **Step 7: Docs**
 
 `docs/development/tools/trivy.md`: what it is; why (spec decisions 3 and 10, the March 2026 incident with [CVE-2026-33634](https://cve.circl.lu/cve/CVE-2026-33634)); the two scans and the thresholds; exceptions and how to add one; install, version and the bump rule; running it locally. `setup.md`: install Trivy at v0.75.0 with the checksum, as tflint's block does, and what `pnpm check:scan` shows. `scripts.md`: `check:scan`.
 
-- [ ] **Step 8: Commit and push**
+- [x] **Step 8: Commit and push**
 
 ```bash
 git add scripts/scan.sh package.json .github/workflows/ci.yml infra docs docs/superpowers/plans
