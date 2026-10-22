@@ -193,7 +193,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-12c App on ECS and RDS](#ph-12c-app-on-ecs-and-rds) | ✅ Done | [Spec](superpowers/specs/2026-10-20-PH-12c-app-on-ecs-and-rds-design.md) | [Plan](superpowers/plans/2026-10-20-PH-12c-app-on-ecs-and-rds.md) | [#246](https://github.com/luiki-dev/szop/pull/246) | [#221](https://github.com/luiki-dev/szop/issues/221) |
 | [PH-12d Safe redeploys](#ph-12d-safe-redeploys) | ✅ Done | [Spec](superpowers/specs/2026-10-21-PH-12d-safe-redeploys-design.md) | [Plan](superpowers/plans/2026-10-21-PH-12d-safe-redeploys.md) | [#251](https://github.com/luiki-dev/szop/pull/251) | [#244](https://github.com/luiki-dev/szop/issues/244) |
 | [PH-37 Two tasks](#ph-37-two-tasks) | ✅ Done | [Spec](superpowers/specs/2026-10-21-PH-37-two-tasks-design.md) | [Plan](superpowers/plans/2026-10-21-PH-37-two-tasks.md) | [#254](https://github.com/luiki-dev/szop/pull/254) | [#233](https://github.com/luiki-dev/szop/issues/233) |
-| [PH-35 Security scanners](#ph-35-security-scanners) | 🚧 In progress | [Spec](superpowers/specs/2026-10-22-PH-35-security-scanners-design.md) | — | — | [#213](https://github.com/luiki-dev/szop/issues/213) |
+| [PH-35 Security scanners](#ph-35-security-scanners) | 🚧 In progress | [Spec](superpowers/specs/2026-10-22-PH-35-security-scanners-design.md) | [Plan](superpowers/plans/2026-10-22-PH-35-security-scanners.md) | — | [#213](https://github.com/luiki-dev/szop/issues/213) |
 | [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
 | [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status) | ⬜ Not started | — | — | — | [#205](https://github.com/luiki-dev/szop/issues/205) |
 | [PH-38 Autoscaling](#ph-38-autoscaling) | ⬜ Not started | — | — | — | [#234](https://github.com/luiki-dev/szop/issues/234) |
@@ -288,7 +288,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Goal:** CI scans the Terraform code for security misconfigurations and the container image for known vulnerabilities, and lints the Dockerfile.
 - **Delivers:** a misconfiguration scanner for `infra/` and the image scan with the Dockerfile lint, possibly one tool for both ([ADR 0010](decisions/0010-ci-cd.md), decision 19).
 - **Depends on:** PH-12c, which brings the first real image, and RDS with PH-12b's security groups and load balancer, all worth scanning.
-- **Owner steps:** —
+- **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, check that `/api/health` answers `200`, then press `demo-down`.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#213](https://github.com/luiki-dev/szop/issues/213).
 
