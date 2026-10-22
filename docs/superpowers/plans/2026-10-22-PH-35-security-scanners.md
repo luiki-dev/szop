@@ -282,21 +282,21 @@ The PR's comment shows the plan's change to `szop-ci-deploy-demo-database` and n
 - Create: `docs/decisions/0041-security-scanners-details.md`
 - Modify: `docs/decisions/0010-ci-cd.md`, `docs/decisions/0032-ci-access-and-teardown-details.md`, `docs/development/ci-cd.md`, `docs/development/tools/github-actions.md`, `docs/development/tools/terraform.md`, `docs/architecture/threat-model.md`, `docs/architecture/architecture.md`, `docs/architecture/stack-overview.md`, `docs/development/github-settings.md`, `docs/development/phase-walkthrough.md`, `docs/glossary.md`, `docs/roadmap.md` (PH-35's entry), `docs/architecture/aws-resources.md` only if it names the role's statements
 
-- [ ] **Step 1: ADR 0041**
+- [x] **Step 1: ADR 0041**
 
 The spec's decisions 1–17 with options and reasons, and *Settled while building*: the exception syntax, Trivy's JSON not reporting suppressed findings, the `--input` check, the simulator commands and results (Task 5), AWS-0342's explanation, the deliberate failure's run (Task 4), OP-019's answer (Dependabot gets OIDC and a write token). Header: `Supersedes in part: ADR 0010, decisions 5 and 14`, `Completes: ADR 0010, decision 19`, `Refines: ADR 0032, decisions 4 and 8`.
 
-- [ ] **Step 2: The notes on the earlier ADRs**
+- [x] **Step 2: The notes on the earlier ADRs**
 
 Status lines of ADR 0010 and ADR 0032; the cell notes (`🔁 **Superseded in part by [ADR 0041](0041-security-scanners-details.md), decision 4:** …` on decisions 5 and 14; `🧩 **Completed by …**` on 19; `✏️ **Refined by …**` on 0032's 4 and 8), oldest first.
 
-- [ ] **Step 3: The living docs**
+- [x] **Step 3: The living docs**
 
 As the spec's *Documentation and records* lists them. `ci-cd.md`: the trigger table, the `infra-plan.yml` row and *The plan comment* rewritten as `ci.yml`'s `plan`, `scan-config`, `scan-image` and `comment` jobs; the comment's parts; the thresholds; reading a blocked PR and adding an exception; the rules list (the one job with `id-token: write`); the Dependabot/OIDC paragraph settled. Threat model: the scanners as a guard, Trivy as a supply-chain risk and how it runs, OP-104's residual. Stack overview: a short section on vulnerability and misconfiguration scanning. Glossary: CVE, SSE-S3, KMS, customer-managed key, misconfiguration scanner. Roadmap: PH-35's **Delivers** and **Owner steps** as the spec's *Roadmap and GitHub changes* and *Owner steps*. Every `## Contents` in sync.
 Run: `pnpm format:check`, `grep -rn "infra-plan" docs --include=*.md | grep -v "docs/decisions\|docs/superpowers\|docs/archive\|docs/audits"`
 Expected: pass; only intended historical mentions remain.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```bash
 git add docs

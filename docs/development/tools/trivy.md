@@ -1,8 +1,8 @@
 # Trivy
 
-Trivy is a security scanner from Aqua Security. It reads things that describe how Szop is built and compares them with what is known to go wrong: Terraform code and Dockerfiles against a library of misconfiguration rules (a security group open to the world, a bucket without encryption), and a container image against a database of published vulnerabilities (CVEs, see the [glossary](../../glossary.md)). In Szop it runs in `pnpm check:scan`, on the owner's machine and in CI's `scan-config` and `scan-image` jobs.
+Trivy is a security scanner from Aqua Security. It reads things that describe how Szop is built and compares them with what is known to go wrong: Terraform code and Dockerfiles against a library of misconfiguration rules (a security group open to the world, a bucket without encryption), and a container image against a database of published vulnerabilities, Common Vulnerabilities and Exposures (CVEs, see the [glossary](../../glossary.md#acronyms)). In Szop it runs in `pnpm check:scan`, on the owner's machine and in CI's `scan-config` and `scan-image` jobs.
 
-This page covers the tool, the **config scan**, which checks the Terraform code under `infra/` and the `Dockerfile`, and the **image scan**.
+This page covers the tool, the **config scan**, which checks the Terraform code under `infra/` and the `Dockerfile`, and the **image scan**. The decisions are recorded in [ADR 0041](../../decisions/0041-security-scanners-details.md); how CI runs the scans and reports them in one PR comment is in [CI/CD](../ci-cd.md#the-security-scans-and-the-pr-comment).
 
 ## Why Szop uses it
 

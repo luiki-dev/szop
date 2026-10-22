@@ -395,7 +395,7 @@ aws ssm describe-parameters --parameter-filters Key=Name,Values=/szop/db-app-pas
 #   /szop/db-app-password   SecureString
 ```
 
-The plan comment of the PR shows IAM Access Analyzer's findings for the new and changed policies; the known trust-policy findings stay accepted ([CI/CD](../development/ci-cd.md#the-plan-comment)). After the merge, apply base again from `main`; the plan must show no changes. Then check that the password is not in the state ([Checking that no password is in a state](#checking-that-no-password-is-in-a-state)).
+The PR's comment shows IAM Access Analyzer's findings for the new and changed policies; the known trust-policy findings stay accepted ([CI/CD](../development/ci-cd.md#the-pr-comment)). After the merge, apply base again from `main`; the plan must show no changes. Then check that the password is not in the state ([Checking that no password is in a state](#checking-that-no-password-is-in-a-state)).
 
 **Rotating `szop_app`'s password.** In `secrets.tf`, raise `value_wo_version` of `aws_ssm_parameter.db_app_password` by one, commit it on a branch and apply: the plan shows one change. The next `demo-up` runs `db-setup`, which sets the new password on the role, and starts tasks that read it. A task that a running demo restarts before then reads the new password, which the database does not know yet, so rotate while the demo is down, or press `demo-up` right after.
 
@@ -455,7 +455,7 @@ After the merge, apply base again from `main`, as for every base PR ([ADR 0011](
 ⚠️ **Don't:**
 
 - add `repo:luiki-dev@290870182/szop@1380292421:environment:demo` to the deploy role's trust by hand, or apply it before the `demo` environment exists with its required reviewer: GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
-- widen a CI role in the console: the plan comment and IAM Access Analyzer check the roles' policies only when they change in code.
+- widen a CI role in the console: the plan and IAM Access Analyzer in the PR's checks see the roles' policies only when they change in code.
 
 ### Cost allocation tags
 

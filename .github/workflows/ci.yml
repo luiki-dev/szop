@@ -672,7 +672,10 @@ jobs:
   # token (pull-requests: write) and no AWS credentials, and it is not in
   # ci-ok's needs: a failed comment hides the findings from the conversation,
   # not from the summary, and lets nothing through. The checkout fetches the
-  # writer script and nothing else. Skipped when none of the three jobs ran
+  # writer script and nothing else, from the PR's merge commit; that gives a
+  # PR author nothing new, since a same-repository author can change this job
+  # in ci.yml anyway, and a fork's token is read-only and its post is skipped
+  # (ADR 0041, Settled while building). Skipped when none of the three jobs ran
   # (a Markdown-only PR, a push to main).
   comment:
     name: comment

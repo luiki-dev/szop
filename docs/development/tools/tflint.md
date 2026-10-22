@@ -6,7 +6,7 @@ tflint is a linter for Terraform code. `terraform validate` checks that the code
 
 - **Terraform checks beyond `validate`:** [ADR 0008](../../decisions/0008-hosting.md), decision 30 and [ADR 0010](../../decisions/0010-ci-cd.md), decision 7. A mistake `validate` misses otherwise shows up only when `apply` fails halfway, against AWS.
 - **A pinned release binary, checked against its checksum:** [ADR 0029](../../decisions/0029-aws-account-and-terraform-bootstrap-details.md), decision 11, the same approach as [actionlint](actionlint.md). The project's install script runs whatever its `master` branch holds that day.
-- **Security posture is not its job:** tflint does not judge whether a bucket is too open or a policy too broad. A scanner for that is an open point, [OP-091](https://github.com/luiki-dev/szop/issues/201).
+- **Security posture is not its job:** tflint does not judge whether a bucket is too open or a policy too broad. [Trivy](trivy.md)'s config scan does that ([ADR 0041](../../decisions/0041-security-scanners-details.md)).
 
 ## Configuration
 

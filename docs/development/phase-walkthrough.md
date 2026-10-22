@@ -138,10 +138,12 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
  feat/templates ─── ● 7 ──push──▶  PR #12  "feat(templates): add templates"
                                       │
                                       ├─▶ ci.yml         lint · typecheck · test · e2e · docker
-                                      │                  · commits · infra · workflows → ci-ok
+                                      │                  · commits · infra · workflows
+                                      │                  · scan-config · scan-image
+                                      │                  · plan (only if infra/ changed) → ci-ok
+                                      │                  · comment: plan and scans as one PR comment
                                       ├─▶ pr-title.yml   title follows Conventional Commits
-                                      ├─▶ CodeQL         no new high/critical alerts
-                                      └─▶ infra-plan.yml only if infra/ changed: plan as a PR comment
+                                      └─▶ CodeQL         no new high/critical alerts
 ```
 
 - Claude reviews its own diff first, then opens the PR with the **template** filled in.
@@ -324,7 +326,7 @@ The highest bump wins: a `feat` and three `fix`es since `v0.3.0` make `0.4.0`. A
 |---|---|
 | `git commit` (local) | pre-commit (format, lint), commit-msg (commitlint) |
 | Push to a branch **without** a PR | Nothing |
-| PR opened, or push to a PR branch | `ci.yml`, CodeQL, `infra-plan.yml` if `infra/` changed |
+| PR opened, or push to a PR branch | `ci.yml` (with the security scans, and the plan if `infra/` changed, in one PR comment), CodeQL |
 | PR opened, title edited, or pushed to | `pr-title.yml` |
 | Push to `main` (any merge) | `ci.yml`, CodeQL, `release-please.yml` |
 | Release PR merged | release-please tags and publishes the release; the follow-up job tags the image |
