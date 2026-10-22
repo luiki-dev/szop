@@ -233,6 +233,19 @@ jobs:
         env:
           GIT_COMMIT: ${{ steps.commit.outputs.sha }}
 
+      # The image as a file for scan-image, which scans it in a job of its own
+      # so Trivy never runs next to this job's build cache token (PH-35 spec,
+      # decision 11). Pull requests only: nothing scans a push to main.
+      - if: github.event_name == 'pull_request'
+        run: docker save szop:local -o "$RUNNER_TEMP/szop.tar"
+      - if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: image
+          path: ${{ runner.temp }}/szop.tar
+          retention-days: 1
+          if-no-files-found: error
+
   infra:
     name: infra
     needs: changes
@@ -320,6 +333,56 @@ jobs:
           retention-days: 1
           if-no-files-found: ignore
 
+  # Scans the image docker built, from the archive it saved: no Docker daemon,
+  # and Trivy holds nothing but contents: read, as in scan-config. The
+  # vulnerability database is downloaded on every run (a few seconds), not
+  # cached: a cache would give the job the cache token for a saving that does
+  # not matter (PH-35 spec, Installing Trivy).
+  scan-image:
+    name: scan-image
+    needs: [changes, docker]
+    if: github.event_name == 'pull_request' && needs.docker.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      # Updated by hand: Dependabot cannot see versions inside run steps
+      # (docs/development/tools/trivy.md). The same as scan-config's.
+      TRIVY_VERSION: 0.75.0
+      TRIVY_SHA256: c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Trivy
+        run: |
+          archive="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${archive}"
+          echo "${TRIVY_SHA256}  $RUNNER_TEMP/$archive" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/bin"
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP/bin" trivy
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: image
+          path: ${{ runner.temp }}
+
+      # Fails on a blocking finding or a scan that did not run. The JSON is
+      # written first, so the artifact holds the findings of a failed scan too.
+      - run: scripts/scan.sh image --input "$RUNNER_TEMP/szop.tar" --json "$RUNNER_TEMP/scan-image.json"
+
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: scan-image
+          path: ${{ runner.temp }}/scan-image.json
+          retention-days: 1
+          if-no-files-found: ignore
+
   commits:
     name: commits
     # Every PR, whatever it changes, so no need to wait for changes.
@@ -391,6 +454,7 @@ jobs:
         docker,
         infra,
         scan-config,
+        scan-image,
         commits,
         workflows,
       ]

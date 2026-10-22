@@ -143,7 +143,7 @@ cd ~/workspace/szop && pnpm check:infra && pnpm check:scan
 
 - If `tflint --version` says `command not found`, `~/.local/bin` did not exist before and is not on your `PATH` yet: close the terminal, open a new one and try again (Ubuntu's `~/.profile` adds the folder when it exists).
 - `pnpm check:infra` ends with tflint's output and exits with no `FAIL:` line. What it runs is in [Scripts](scripts.md).
-- `pnpm check:scan` prints `BLOCKING (0)`, the findings that are only listed, and the exceptions the code accepts on purpose, and exits with no `FAIL:` line. What it runs is in [Scripts](scripts.md); the rules and exceptions are in [Trivy](tools/trivy.md).
+- `pnpm check:scan` prints `BLOCKING (0)` twice (the config scan, then the image scan, which builds the image first and takes a few minutes), the findings that are only listed, and the exceptions the code accepts on purpose, and exits with no `FAIL:` line. What it runs is in [Scripts](scripts.md); the rules and exceptions are in [Trivy](tools/trivy.md).
 - Signing in to AWS is not part of this guide: it needs the account set up first, and the [runbook](../operations/demo-environment.md) covers both. Do not run `aws configure` or create access keys.
 
 ## 9. actionlint, zizmor and uv

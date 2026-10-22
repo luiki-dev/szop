@@ -122,32 +122,32 @@ git push
 - Consumes: Task 1's `scan.sh` and install step.
 - Produces: `scan.sh image [--no-build | --input ARCHIVE] [--json FILE]`, `scan.sh all`; the image JSON above; artifact `image` (`szop.tar`) from `docker`; the `scan-image` job, which uploads `scan-image.json` as artifact `scan-image`.
 
-- [ ] **Step 1: Write `scan.sh image` and see it fail on today's image**
+- [x] **Step 1: Write `scan.sh image` and see it fail on today's image**
 
 Without options it builds `szop:local` as `check-image.sh` does; `--no-build` scans the existing `szop:local`; `--input` scans an archive (`trivy image --input`). Runs `trivy image --quiet --scanners vuln --format json`, fails with `FAIL: trivy image` on a non-zero exit or no `.Results`. Sorts by the thresholds using each result's `Class`. Table headings `BLOCKING`, `WAITING FOR THE BASE IMAGE` (count by severity only), `UNFIXED` (count by severity only), `LISTED`. `all` runs `config`, then `image`, and exits 1 if either did.
 Run: `scripts/scan.sh image; echo "exit $?"`
 Expected: exit 1; BLOCKING holds the seven npm findings of the spec's baseline (`brace-expansion`, `tar`, `undici`, `ip-address`); UNFIXED counts 43 `HIGH` in the OS (numbers may have moved since 2026-10-22).
 
-- [ ] **Step 2: Remove npm from the final stage**
+- [x] **Step 2: Remove npm from the final stage**
 
 After `FROM base` and before `USER node`: one `RUN rm -rf` of `/usr/local/lib/node_modules/npm`, `/usr/local/lib/node_modules/corepack` and `/usr/local/bin/{npm,npx,corepack,pnpm,pnpx,yarn,yarnpkg}`, with a comment: nothing in the image runs them (the app and `db-setup` start with `node`), and npm's own dependencies carried the image's fixable vulnerabilities (PH-35 spec, decision 8).
 
-- [ ] **Step 3: Run the scan and the image checks**
+- [x] **Step 3: Run the scan and the image checks**
 
 Run: `scripts/scan.sh image; echo "exit $?"`, then `pnpm check:image` and `pnpm check:scale`
 Expected: `exit 0`, BLOCKING empty; both checks pass. If a fixable `lang-pkgs` finding remains in the app's own dependencies, stop and report it to the owner.
 
-- [ ] **Step 4: `--input` finds the same**
+- [x] **Step 4: `--input` finds the same**
 
 Run: `docker save szop:local -o /tmp/…/szop.tar` (scratchpad), `scripts/scan.sh image --input <that file> --json a.json`, `scripts/scan.sh image --no-build --json b.json`, `diff <(jq -S . a.json) <(jq -S . b.json)` ignoring `target` if it differs.
 Expected: the same findings.
 
-- [ ] **Step 5: The jobs**
+- [x] **Step 5: The jobs**
 
 `docker`: after `check-scale.sh`, `docker save szop:local -o "$RUNNER_TEMP/szop.tar"` and upload it as `image` (retention 1 day), on `pull_request` only. Job `scan-image`: `needs: [changes, docker]`, `if: github.event_name == 'pull_request' && needs.docker.result == 'success'`, `contents: read`, the same Trivy install, download `image`, `scripts/scan.sh image --input szop.tar --json "$RUNNER_TEMP/scan-image.json"`, upload `scan-image` on `!cancelled()`. Whether to cache Trivy's database with `actions/cache` keyed by the date is the builder's call (spec, *Installing Trivy*). `ci-ok` needs `scan-image`. `package.json`: `check:scan` → `scripts/scan.sh all`.
 Run: `pnpm check:workflows`. Expected: no findings.
 
-- [ ] **Step 6: Commit and push**
+- [x] **Step 6: Commit and push**
 
 ```bash
 git add Dockerfile scripts/scan.sh package.json .github/workflows/ci.yml docs docs/superpowers/plans

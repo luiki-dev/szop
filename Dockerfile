@@ -37,6 +37,13 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 # What runs: no pnpm, no development dependencies, no tests. Files stay owned
 # by root, so the node user cannot change its own code.
 FROM base
+# No npm, Corepack, pnpm or Yarn: nothing in the image runs them (the app and
+# db-setup start with node), and npm's own dependencies carried the image's
+# fixable vulnerabilities (PH-35 spec, decision 8). Corepack enabled pnpm in
+# base; the shims go too. As root, first, so a new commit does not rebuild it.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+    /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+    /usr/local/bin/pnpm /usr/local/bin/pnpx /usr/local/bin/yarn /usr/local/bin/yarnpkg
 ENV NODE_ENV=production
 ENV WEB_ROOT=/app/apps/web/dist
 COPY --from=prod-deps /app/node_modules ./node_modules

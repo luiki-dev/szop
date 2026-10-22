@@ -1,8 +1,8 @@
 # Trivy
 
-Trivy is a security scanner from Aqua Security. It reads things that describe how Szop is built and compares them with what is known to go wrong: Terraform code and Dockerfiles against a library of misconfiguration rules (a security group open to the world, a bucket without encryption), and, in later parts of the phase, a container image against a database of published vulnerabilities (CVEs, see the [glossary](../../glossary.md)). In Szop it runs in `pnpm check:scan`, on the owner's machine and in CI's `scan-config` job.
+Trivy is a security scanner from Aqua Security. It reads things that describe how Szop is built and compares them with what is known to go wrong: Terraform code and Dockerfiles against a library of misconfiguration rules (a security group open to the world, a bucket without encryption), and a container image against a database of published vulnerabilities (CVEs, see the [glossary](../../glossary.md)). In Szop it runs in `pnpm check:scan`, on the owner's machine and in CI's `scan-config` and `scan-image` jobs.
 
-This page covers the tool and the **config scan**, which checks the Terraform code under `infra/` and the `Dockerfile`.
+This page covers the tool, the **config scan**, which checks the Terraform code under `infra/` and the `Dockerfile`, and the **image scan**.
 
 ## Why Szop uses it
 
@@ -23,6 +23,23 @@ The script fails, rather than reporting "no findings", whenever the scan itself 
 
 With `--json FILE` it also writes the findings, sorted by severity and then rule ID, as `{kind: "config", blocking, listed, exceptions}`. CI uploads that file as the `scan-config` artifact for one day.
 
+## The image scan
+
+`scripts/scan.sh image` scans the container image for known vulnerabilities (`trivy image --scanners vuln`). By default it builds `szop:local` the way `pnpm check:image` does; `--no-build` scans the `szop:local` that exists, and `--input ARCHIVE` scans a file made by `docker save`, which needs no Docker daemon. CI's `docker` job saves the image it built and uploads it as the `image` artifact, and `scan-image` downloads it and uses `--input`: Trivy then runs in a job that holds `contents: read` and nothing else, never next to the build cache token ([design](../../superpowers/specs/2026-10-22-PH-35-security-scanners-design.md), decision 11). Both ways find the same vulnerabilities; only the `target` text differs (the archive's path or `szop:local`).
+
+Every vulnerability goes in the first of four categories it fits (Trivy's `Class` says whether a package is the operating system's or a language's):
+
+| Category | What it holds | What happens |
+|---|---|---|
+| `UNFIXED` | No fixed version exists, whatever the severity or class | Counted by severity, never blocks: nothing can be done yet |
+| `WAITING FOR THE BASE IMAGE` | A fixed version exists, in an operating-system package (`os-pkgs`), whatever the severity | Counted by severity, never blocks: Debian has shipped the fix, but the official `node` image is rebuilt weeks later and Dependabot proposes the new one; no PR can speed that up (decision 17) |
+| `BLOCKING` | `CRITICAL` or `HIGH`, with a fixed version, in a language package (`lang-pkgs`): the Node packages the lockfile or the Dockerfile controls | Fails the scan, so the PR is red until the dependency is updated |
+| `LISTED` | The rest: fixed, in a language package, `MEDIUM` or lower | Listed, never fails |
+
+The script fails, rather than reporting "no findings", when Trivy exits non-zero or writes no JSON (`FAIL: trivy image`). With `--json FILE` it writes `{kind: "image", blocking, waiting, unfixed, listed}`, each finding `{severity, id, title, url, target, pkg, installed, fixed}`, sorted by severity and then ID; CI keeps it as the `scan-image` artifact for one day. Trivy downloads its vulnerability database on every run. CI does not cache it: a cache would give the job the cache token for a saving of a few seconds.
+
+**npm is not in the image.** The first scan of the image found seven fixable `HIGH` vulnerabilities, all in npm's own bundled dependencies (`brace-expansion`, `tar`, `undici`, `ip-address`), under `/usr/local/lib/node_modules/npm`. Nothing in the image runs npm: the app and `db-setup` start with `node`. So the final stage of the `Dockerfile` removes npm, Corepack and the links in `/usr/local/bin` (`npm`, `npx`, `corepack`, and the `pnpm`, `pnpx`, `yarn` and `yarnpkg` shims that Corepack added), which fixes them and leaves an attacker in the container fewer tools ([design](../../superpowers/specs/2026-10-22-PH-35-security-scanners-design.md), decision 8). Exceptions would have hidden a problem that one line removes. If a fixable `HIGH` shows up in a package the app itself depends on, update the dependency (Dependabot proposes it); do not add the vulnerability to an ignore list.
+
 ## Exceptions
 
 A finding that is accepted on purpose gets an inline comment on the line above its resource, with the reason after `--`:
@@ -42,7 +59,7 @@ Trivy leaves a suppressed finding out of its JSON, so the script finds the excep
 
 ## Install and version
 
-CI's `scan-config` job holds `TRIVY_VERSION` and `TRIVY_SHA256` in its `env`, downloads `trivy_<version>_Linux-64bit.tar.gz` from the release, checks it with `sha256sum --check`, extracts only the `trivy` binary and puts it on the `PATH`. The job runs on pull requests only and holds `contents: read` and nothing else: Trivy never runs in a job with AWS credentials, a write token or the build cache.
+CI's `scan-config` and `scan-image` jobs each hold `TRIVY_VERSION` and `TRIVY_SHA256` in their `env`, download `trivy_<version>_Linux-64bit.tar.gz` from the release, check it with `sha256sum --check`, extract only the `trivy` binary and put it on the `PATH`. The jobs run on pull requests only and hold `contents: read` and nothing else: Trivy never runs in a job with AWS credentials, a write token or the build cache.
 
 On the owner's machine, the [setup guide](../setup.md#8-terraform-tflint-and-the-aws-cli) installs the same version with the same checksum.
 
@@ -52,12 +69,12 @@ Dependabot does not see Trivy, which lives in a `run:` step, so it is updated by
 
 1. On the [releases page](https://github.com/aquasecurity/trivy/releases), pick a release at least **two weeks** old, and read its release notes. Read [Aqua's security advisories](https://github.com/aquasecurity/trivy/security/advisories) too: the March 2026 incident is the reason for the wait.
 2. From the release's `trivy_<version>_checksums.txt`, copy the hash on the `trivy_<version>_Linux-64bit.tar.gz` line.
-3. Put the version and hash in `TRIVY_VERSION` and `TRIVY_SHA256` in `.github/workflows/ci.yml`, and in the commands of the [setup guide](../setup.md#8-terraform-tflint-and-the-aws-cli).
+3. Put the version and hash in `TRIVY_VERSION` and `TRIVY_SHA256` in both the `scan-config` and `scan-image` jobs of `.github/workflows/ci.yml`, and in the commands of the [setup guide](../setup.md#8-terraform-tflint-and-the-aws-cli).
 4. Install it locally with those commands and run `pnpm check:scan`. A new version can bring new rules: list the findings that are new, and fix or accept each one in the same PR. Commit as `ci: update Trivy to <version>`.
 
 ## Everyday use
 
-`pnpm check:scan` runs the config scan. Success looks like `BLOCKING (0)`, the listed findings, the exceptions and an exit code of 0. A blocking finding looks like this:
+`pnpm check:scan` runs the config scan, then the image scan (`scripts/scan.sh config` or `scripts/scan.sh image --no-build` run one of them). Success looks like `BLOCKING (0)` under each, the listed findings, the exceptions and an exit code of 0. A blocking finding looks like this:
 
 ```
 BLOCKING (1)
