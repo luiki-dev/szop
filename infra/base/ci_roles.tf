@@ -1,7 +1,7 @@
 # The roles GitHub Actions assumes through the OIDC provider (github_oidc.tf):
 # ADR 0010, decisions 15 and 16; ADR 0012, decision 17; ADR 0032.
 
-# The plan role: what infra-plan.yml assumes on a pull request from this
+# The plan role: what the plan job of ci.yml assumes on a pull request from this
 # repository. It can read the infrastructure and nothing else. A pull request
 # from a fork gets no OIDC token, so it never reaches this role.
 data "aws_iam_policy_document" "ci_plan_trust" {
@@ -43,7 +43,7 @@ resource "aws_iam_role" "ci_plan" {
 
 # Read access to every service's configuration, which is what terraform plan
 # needs to refresh state. It includes access-analyzer:ValidatePolicy, which
-# infra-plan.yml uses (checked against the live policy, version v190).
+# the plan job uses (checked against the live policy, version v190).
 resource "aws_iam_role_policy_attachment" "ci_plan_read_only" {
   role       = aws_iam_role.ci_plan.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
@@ -51,11 +51,11 @@ resource "aws_iam_role_policy_attachment" "ci_plan_read_only" {
 
 # ReadOnlyAccess is broader than a public plan log should show, so explicit
 # denies take back what must stay private (an explicit deny beats any allow).
-# Everything infra-plan.yml prints is public (ADR 0010, decision 16).
+# Everything the plan job prints is public (ADR 0010, decision 16).
 data "aws_iam_policy_document" "ci_plan_denies" {
   # Secret values. ssm:DescribeParameters, which returns metadata only, stays
   # allowed through ReadOnlyAccess. The AWS provider calls GetParameter with
-  # decryption when it refreshes aws_ssm_parameter, so infra-plan.yml plans
+  # decryption when it refreshes aws_ssm_parameter, so the plan job plans
   # base with -refresh=false instead of loosening this deny (ADR 0032, decision 11).
   statement {
     sid    = "DenySecretValues"
@@ -976,6 +976,28 @@ data "aws_iam_policy_document" "ci_deploy_demo_database" {
     }
   }
 
+  # DemoDatabases lets the role modify the instance it created, and
+  # ModifyDBInstance can turn off the RDS-managed password CreateInstance
+  # requires. This Deny refuses a modify that sets ManageMasterUserPassword to
+  # false. A modify that leaves the key out (Terraform's ordinary changes) does
+  # not match and still passes. On every instance, not only the tagged ones:
+  # it can only narrow what DemoDatabases allows. The public-address half has
+  # no condition key on ModifyDBInstance and stays a residual risk, guarded by
+  # the security group and the private subnet group, which the same role
+  # manages (threat model; OP-104).
+  statement {
+    sid       = "DenyUnmanagedMasterPassword"
+    effect    = "Deny"
+    actions   = ["rds:ModifyDBInstance"]
+    resources = ["arn:aws:rds:*:*:db:*"]
+
+    condition {
+      test     = "Bool"
+      variable = "rds:ManageMasterUserPassword"
+      values   = ["false"]
+    }
+  }
+
   # manage_master_user_password: RDS creates the master password's secret
   # with the caller's permissions, and deletes it with the instance itself.
   # It names its secrets rds!db-<id>. The caller never reads the value.
@@ -1169,9 +1191,11 @@ data "aws_iam_policy_document" "ci_deploy_demo_service" {
   }
 
   # demo-up stops a db-setup task that outlives its deadline. Only db-setup's
-  # tasks: the task's Name tag comes from its task definition (run-task
-  # --propagate-tags), and the app's tasks carry another, so the role cannot
-  # stop the running app (PH-12d spec, decision 12).
+  # tasks: the statement requires the task's Name tag to be
+  # szop-demo-db-setup, which db-setup's task gets from its task definition
+  # (run-task --propagate-tags TASK_DEFINITION). The app's tasks carry no Name
+  # tag at all (the service sets no propagate_tags), so they never match and
+  # the role cannot stop the running app (PH-12d spec, decision 12).
   statement {
     sid       = "StopDbSetup"
     actions   = ["ecs:StopTask"]

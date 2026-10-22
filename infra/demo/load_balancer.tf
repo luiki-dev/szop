@@ -41,6 +41,7 @@ resource "aws_vpc_security_group_egress_rule" "alb_to_task" {
   tags = { Name = "szop-demo-alb-to-task" }
 }
 
+# trivy:ignore:AWS-0053 -- the demo is reached from the internet through this load balancer (ADR 0041)
 resource "aws_lb" "main" {
   name               = "szop-demo"
   load_balancer_type = "application"

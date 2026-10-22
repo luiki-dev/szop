@@ -39,7 +39,7 @@ A **root module** is a folder of `.tf` files that Terraform runs as one unit, wi
 
 Every resource in each module, and how the resources refer to each other, is drawn in [AWS resources](../../architecture/aws-resources.md).
 
-CI runs Terraform too, with the AWS credentials of an OIDC role, never a stored key: `infra-plan.yml` runs `terraform plan -lock=false` for `base` and `demo` on every pull request that touches `infra/`, as the read-only role `szop-ci-plan` (`base` with `-refresh=false`, since that role may not decrypt the Better Auth secret that a refresh reads), and `demo-up.yml` runs `terraform apply` and `demo-down.yml` runs `terraform destroy` on `demo` as `szop-ci-deploy`. Neither changes anything in `base` or `bootstrap`. See [CI/CD](../ci-cd.md#cis-access-to-aws).
+CI runs Terraform too, with the AWS credentials of an OIDC role, never a stored key: `ci.yml`'s `plan` job runs `terraform plan -lock=false` for `base` and `demo` on every pull request that touches `infra/`, as the read-only role `szop-ci-plan` (`base` with `-refresh=false`, since that role may not decrypt the Better Auth secret that a refresh reads), and fails the PR's checks when a plan fails or IAM Access Analyzer rates a policy `ERROR` or `SECURITY_WARNING`, and `demo-up.yml` runs `terraform apply` and `demo-down.yml` runs `terraform destroy` on `demo` as `szop-ci-deploy`. Neither changes anything in `base` or `bootstrap`. See [CI/CD](../ci-cd.md#cis-access-to-aws).
 
 Each module splits its files by concern: `versions.tf` (the Terraform and provider versions), `providers.tf` (the AWS provider's settings), `variables.tf`, `outputs.tf`, `backend.tf` (where the state lives) and one file per group of resources.
 

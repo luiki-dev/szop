@@ -395,7 +395,7 @@ aws ssm describe-parameters --parameter-filters Key=Name,Values=/szop/db-app-pas
 #   /szop/db-app-password   SecureString
 ```
 
-The plan comment of the PR shows IAM Access Analyzer's findings for the new and changed policies; the known trust-policy findings stay accepted ([CI/CD](../development/ci-cd.md#the-plan-comment)). After the merge, apply base again from `main`; the plan must show no changes. Then check that the password is not in the state ([Checking that no password is in a state](#checking-that-no-password-is-in-a-state)).
+The PR's comment shows IAM Access Analyzer's findings for the new and changed policies; the known trust-policy findings stay accepted ([CI/CD](../development/ci-cd.md#the-pr-comment)). After the merge, apply base again from `main`; the plan must show no changes. Then check that the password is not in the state ([Checking that no password is in a state](#checking-that-no-password-is-in-a-state)).
 
 **Rotating `szop_app`'s password.** In `secrets.tf`, raise `value_wo_version` of `aws_ssm_parameter.db_app_password` by one, commit it on a branch and apply: the plan shows one change. The next `demo-up` runs `db-setup`, which sets the new password on the role, and starts tasks that read it. A task that a running demo restarts before then reads the new password, which the database does not know yet, so rotate while the demo is down, or press `demo-up` right after.
 
@@ -427,7 +427,7 @@ aws iam list-role-policies --role-name szop-ci-deploy
 #   one inline policy, "state"
 ```
 
-The `GitHubDemo` statement has no `ref` condition because `demo-up` runs from any branch; what stands between a branch's code and the deploy role is the owner's approval of the `demo` environment, so that environment must exist with its reviewer **before** this statement does ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decisions 10 and 14). If it is missing, a job that names `demo` creates it with no protection and gets credentials unapproved. The first three managed policies hold what PH-12b's `infra/demo` needs (the network, the load balancer with its certificate, and the `szop` record and certificate-validation record in the zone); PH-12c adds three more for the database, the ECS service and the image push. Each is limited to resources tagged `project` = `szop` and `group` = `demo`, or to those two record names in the zone ([PH-12b spec](../superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md#the-deploy-role)); the plan comment of the PR that changes them shows IAM Access Analyzer's findings.
+The `GitHubDemo` statement has no `ref` condition because `demo-up` runs from any branch; what stands between a branch's code and the deploy role is the owner's approval of the `demo` environment, so that environment must exist with its reviewer **before** this statement does ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decisions 10 and 14). If it is missing, a job that names `demo` creates it with no protection and gets credentials unapproved. The first three managed policies hold what PH-12b's `infra/demo` needs (the network, the load balancer with its certificate, and the `szop` record and certificate-validation record in the zone); PH-12c adds three more for the database, the ECS service and the image push. Each is limited to resources tagged `project` = `szop` and `group` = `demo`, or to those two record names in the zone ([PH-12b spec](../superpowers/specs/2026-10-18-PH-12b-network-and-the-demo-up-button-design.md#the-deploy-role)); the PR comment of the PR that changes them shows IAM Access Analyzer's findings.
 
 Both trust policies also hold `"token.actions.githubusercontent.com:aud": "sts.amazonaws.com"`. These two conditions are what keeps every other repository, branch and workflow from getting the roles' credentials. The `@` numbers are the owner's and the repository's GitHub IDs, which the immutable subject adds ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 13); they are public, unlike the account ID.
 
@@ -440,7 +440,7 @@ gh variable set AWS_DEPLOY_ROLE_ARN --repo luiki-dev/szop --body "$(terraform ou
 
 No access key and no account ID is stored in GitHub: the workflows read the account ID from the credentials they receive. The ARNs contain the account ID. It is not a secret, and the credentials step of both workflows prints the ARN in its public log; still, keep the ARNs and the account ID out of commits, issues and PRs, where nothing needs them.
 
-**Create the `demo-teardown` environment first**, before `demo-down.yml` reaches `main` ([GitHub settings](../development/github-settings.md#environments)): no reviewer, deployment branches limited to `main`. A job that names an environment that does not exist creates it with no protection at all. The plan comment of the PR that adds the roles needs the variables, so these steps come before it.
+**Create the `demo-teardown` environment first**, before `demo-down.yml` reaches `main` ([GitHub settings](../development/github-settings.md#environments)): no reviewer, deployment branches limited to `main`. A job that names an environment that does not exist creates it with no protection at all. The PR comment of the PR that adds the roles needs the variables, so these steps come before it.
 
 **Create the `demo` environment before applying base with the `GitHubDemo` statement** (the apply of [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button)): you as the only required reviewer, *Prevent self-review* off (you are the only person who can press the button, so with it on you could never approve your own run), and deployment branches set to *No restriction*. The same environment must exist before `demo-up.yml` runs on any branch. **Check that its protection is really saved** before applying: once created, run
 
@@ -455,7 +455,7 @@ After the merge, apply base again from `main`, as for every base PR ([ADR 0011](
 ⚠️ **Don't:**
 
 - add `repo:luiki-dev@290870182/szop@1380292421:environment:demo` to the deploy role's trust by hand, or apply it before the `demo` environment exists with its required reviewer: GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);
-- widen a CI role in the console: the plan comment and IAM Access Analyzer check the roles' policies only when they change in code.
+- widen a CI role in the console: the plan and IAM Access Analyzer in the PR's checks see the roles' policies only when they change in code.
 
 ### Cost allocation tags
 

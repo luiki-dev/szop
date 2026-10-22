@@ -33,7 +33,7 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
 4. The labels, milestones and project, with [ADR 0024](../decisions/0024-github-project-tracking.md): see [Labels](#labels), [Milestones](#milestones) and [Project](#project).
 5. The settings CI needs to reach AWS, around the [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) PR ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md)):
    1. The [`demo-teardown` environment](#environments), before `demo-down.yml` reaches `main`: a job that names a missing environment creates it with no protection.
-   2. The two [variables](#variables), after `infra/base` is applied from the PR's branch: they hold its outputs, and the PR's plan comment needs them.
+   2. The two [variables](#variables), after `infra/base` is applied from the PR's branch: they hold its outputs, and the PR's `plan` job needs them.
 6. The [`demo` environment](#environments), around the [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) PR, before `infra/base` is applied with the deploy role's trust for it: a job that names a missing environment creates it with no protection, and that trust has no branch pin.
 7. Check the result (see [Checking the settings](#checking-the-settings)).
 
@@ -95,7 +95,7 @@ Create `demo-teardown` by hand, **before** `demo-down.yml` is merged: GitHub cre
 
 | Variable | Value | Why |
 |---|---|---|
-| `AWS_PLAN_ROLE_ARN` | The ARN of `szop-ci-plan`: base's output `ci_plan_role_arn` | Read by `infra-plan.yml` (`vars.AWS_PLAN_ROLE_ARN`) to assume the read-only plan role. |
+| `AWS_PLAN_ROLE_ARN` | The ARN of `szop-ci-plan`: base's output `ci_plan_role_arn` | Read by `ci.yml`'s `plan` job (`vars.AWS_PLAN_ROLE_ARN`) to assume the read-only plan role. |
 | `AWS_DEPLOY_ROLE_ARN` | The ARN of `szop-ci-deploy`: base's output `ci_deploy_role_arn` | Read by `demo-down.yml` and `demo-up.yml` to assume the deploy role. |
 
 They are variables, not secrets: an ARN is a name, not a credential, and what protects the roles is their trust policies. **No AWS access key and no account ID is stored in GitHub**; the workflows read the account ID from their own credentials. `gh variable set` sets them; the runbook has the commands ([CI's roles and variables](../operations/demo-environment.md#cis-roles-and-variables)). A variable that is missing makes the job fail at the credentials step, with an error about the role.
