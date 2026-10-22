@@ -141,13 +141,16 @@ config_findings() {
 # the long IDs, tfsec:ignore), which would hide a finding from this list: any
 # line under infra/ or in the Dockerfile that names trivy:ignore or
 # tfsec:ignore and is not the one form, with an ID like AWS-0104 and a reason,
-# fails the scan.
+# fails the scan. So does a line with a second token, such as one in the reason:
+# Trivy honours that one too.
 config_exceptions() {
   local lines bad
   lines="$({ grep -rnIE --exclude-dir=.terraform '(trivy|tfsec):ignore' infra || true
              grep -nIE '(trivy|tfsec):ignore' Dockerfile | sed 's/^/Dockerfile:/' || true; })"
   [ -n "$lines" ] || { echo "[]"; return; }
-  bad="$(grep -vE '^[^:]+:[0-9]+:[[:space:]]*# trivy:ignore:[A-Z]+-[0-9]+ -- [^[:space:]]' <<< "$lines" || true)"
+  bad="$({ grep -vE '^[^:]+:[0-9]+:[[:space:]]*# trivy:ignore:[A-Z]+-[0-9]+ -- [^[:space:]]' <<< "$lines" || true
+           grep -E '(trivy|tfsec):ignore.*(trivy|tfsec):ignore' <<< "$lines" || true; } \
+         | sort -t: -k1,1 -k2,2n -u)"
   if [ -n "$bad" ]; then
     sed -E 's/^([^:]+:[0-9]+):.*/FAIL: non-standard trivy:ignore at \1/' <<< "$bad" >&2
     exit 1
