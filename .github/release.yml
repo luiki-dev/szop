@@ -5,8 +5,7 @@ changelog:
     # Set by hand on a PR whose change readers of the notes do not need.
     labels:
       - skip-changelog
-    # Dependabot's weekly updates. Its PRs carry the login dependabot[bot];
-    # GitHub's docs name it dependabot, so both are listed.
+    # Dependabot's weekly updates, by its bot login: a plain dependabot does
+    # not match (checked with the generate-notes API, ADR 0042).
     authors:
-      - dependabot
       - dependabot[bot]

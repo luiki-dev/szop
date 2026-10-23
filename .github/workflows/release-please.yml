@@ -1,0 +1,212 @@
+# Cuts releases: ADR 0009, decision 11 and ADR 0010, decision 17. On every
+# push to main, release-please opens or updates the release PR; when the owner
+# merges that PR, it tags the version and publishes the GitHub Release, and
+# the image of the release commit gets the version as a second tag in the
+# registry szop (szop:0.1.0 next to szop:<commit hash>). Release notes come
+# from GitHub, one line per merged PR (ADR 0042).
+#
+# release-please acts as the szop-release GitHub App, not with the workflow's
+# GITHUB_TOKEN: a PR opened with that token triggers no workflow, so the
+# release PR would never get its required checks. The App's private key lives
+# in the release environment, which only main may use.
+#
+# The GitHub environment release, limited to the branch main, must exist
+# before this file is used: a job naming an environment that does not exist
+# creates it with no branch rule.
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+# Every run: step uses bash with -e and -o pipefail; without this, GitHub's default is bash -e only.
+defaults:
+  run:
+    shell: bash
+
+# One run at a time, in push order; a running release is never cancelled
+# halfway.
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  # The App's token does all the writing, so the job's own token gets nothing.
+  release-please:
+    name: release-please
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: release
+    permissions: {}
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+      sha: ${{ steps.release.outputs.sha }}
+    steps:
+      # A token for this repository only, limited to the App's two
+      # permissions, that expires within an hour.
+      - name: Get the App's token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      # Reads release-please-config.json and .release-please-manifest.json.
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+  # Builds the release commit's image in a job of its own, with no AWS
+  # credentials and no environment, as demo-up does: the Dockerfile's install
+  # and build run project code, which must never run beside the release
+  # role's token (ADR 0012, decision 18). No build cache is restored into a
+  # release (the design sanity check's C10). Runs only when a release was
+  # just published.
+  build:
+    name: build
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # to check the repository out
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          load: true
+          push: false
+          provenance: false
+          sbom: false
+          tags: szop:${{ needs.release-please.outputs.sha }}
+          build-args: GIT_COMMIT=${{ needs.release-please.outputs.sha }}
+
+      - name: Save the image
+        env:
+          COMMIT: ${{ needs.release-please.outputs.sha }}
+        run: docker save "szop:$COMMIT" | gzip > "$RUNNER_TEMP/image.tar.gz"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: image
+          path: ${{ runner.temp }}/image.tar.gz
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+
+  # Gives the release commit's image its version tag. If the registry has the
+  # commit's image already (a re-run after a partial push), only the tag is
+  # added, through the image's manifest; otherwise the image built above is
+  # pushed with both tags. It checks out no code and runs no project script.
+  publish:
+    name: publish
+    needs: [release-please, build]
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: read # for the artifact download
+      id-token: write # to ask GitHub for the OIDC token AWS trusts
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_RELEASE_ROLE_ARN }}
+          role-session-name: gh-${{ github.run_id }}
+          aws-region: eu-central-1
+
+      # Only "not found" means the image is missing; any other error stops the
+      # job rather than pushing on a guess.
+      - name: Look for the commit's image
+        id: lookup
+        env:
+          COMMIT: ${{ needs.release-please.outputs.sha }}
+        run: |
+          if found=$(aws ecr describe-images --repository-name szop --image-ids "imageTag=$COMMIT" 2>&1); then
+            echo "szop:$COMMIT is in the registry; adding the version tag to it."
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$found" != *ImageNotFoundException* ]]; then
+            echo "$found"
+            echo "::error::Cannot tell whether szop:$COMMIT is in the registry"
+            exit 1
+          fi
+          echo "present=false" >> "$GITHUB_OUTPUT"
+
+      # put-image with the same manifest adds a tag to the same digest, without
+      # pulling a layer.
+      - name: Tag the commit's image
+        if: steps.lookup.outputs.present == 'true'
+        env:
+          COMMIT: ${{ needs.release-please.outputs.sha }}
+          VERSION: ${{ needs.release-please.outputs.version }}
+        run: |
+          image=$(aws ecr batch-get-image --repository-name szop --image-ids "imageTag=$COMMIT" \
+            --accepted-media-types \
+              application/vnd.docker.distribution.manifest.v2+json \
+              application/vnd.docker.distribution.manifest.list.v2+json \
+              application/vnd.oci.image.manifest.v1+json \
+              application/vnd.oci.image.index.v1+json \
+            --output json)
+          if [ "$(jq '.images | length' <<< "$image")" != 1 ]; then
+            jq '.failures' <<< "$image"
+            echo "::error::Cannot read the manifest of szop:$COMMIT"
+            exit 1
+          fi
+          aws ecr put-image --repository-name szop --image-tag "$VERSION" \
+            --image-manifest "$(jq -r '.images[0].imageManifest' <<< "$image")" \
+            --image-manifest-media-type "$(jq -r '.images[0].imageManifestMediaType' <<< "$image")" \
+            > /dev/null
+
+      - name: Download the image
+        if: steps.lookup.outputs.present == 'false'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: image
+          path: ${{ runner.temp }}/image
+
+      - name: Push the image
+        if: steps.lookup.outputs.present == 'false'
+        env:
+          COMMIT: ${{ needs.release-please.outputs.sha }}
+          VERSION: ${{ needs.release-please.outputs.version }}
+        run: |
+          gunzip -c "$RUNNER_TEMP/image/image.tar.gz" | docker load
+          uri=$(aws ecr describe-repositories --repository-names szop --query 'repositories[0].repositoryUri' --output text)
+          aws ecr get-login-password | docker login --username AWS --password-stdin "${uri%%/*}"
+          for tag in "$COMMIT" "$VERSION"; do
+            docker tag "szop:$COMMIT" "$uri:$tag"
+            docker push "$uri:$tag"
+          done
+
+      - name: Summary
+        env:
+          COMMIT: ${{ needs.release-please.outputs.sha }}
+          VERSION: ${{ needs.release-please.outputs.version }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: |
+          digest=$(aws ecr describe-images --repository-name szop --image-ids "imageTag=$VERSION" --query 'imageDetails[0].imageDigest' --output text)
+          {
+            echo "### Release $TAG"
+            echo
+            echo "- \`szop:$VERSION\` and \`szop:$COMMIT\`"
+            echo "- digest \`$digest\`"
+          } >> "$GITHUB_STEP_SUMMARY"
