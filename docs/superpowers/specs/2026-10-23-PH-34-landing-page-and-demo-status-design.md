@@ -65,8 +65,9 @@ All in `infra/base/dns.tf`, next to the existing records, so `infra/base` stays 
 ### The page
 
 - One column, centred: the picture (with alternative text), the owner's text below it (English, written by the owner), and the footer with the link and the dot.
-- Colours and typography follow [the design system](../../architecture/visual-design.md) where they fit a single page. The page shares no code with the application.
-- The approved mockup is committed next to this spec, as the definition of done asks for new screens; its details (spacing, size of the picture, the text's style) are decided on the mockup during the session.
+- **The page is paper.** The picture is a coloured-pencil drawing on paper, so the page's background is the colour of the picture's edges (`#fbf8f2`, sampled from the file) and a soft mask fades the picture into it. There is **no dark scheme**: the paper is the design. The page uses neither the application's `fur` background nor its sage accent, and shares no code with the application; it keeps [the design system's](../../architecture/visual-design.md) typeface, Gabarito (the 34 KB Latin file, self-hosted with its licence), and its rule that every text pair meets 4.5:1 and every UI part 3:1.
+- **Layout:** the picture at its real size (600 × 600, scaled down on a narrow screen) in the middle of the page, the text under it in one paragraph (the species name in bold and dark, the rest lighter), and the footer at the bottom. The picture and its text are centred as one block. The picture is drawn onto the paper when the page loads (a 0.9 s fade and rise), and not at all when the system asks for reduced motion.
+- **The approved mockups** are screenshots of the page with both dot states, in [the folder next to this spec](2026-10-23-PH-34-landing-page-and-demo-status/): [desktop, demo up](2026-10-23-PH-34-landing-page-and-demo-status/desktop-up.png), [desktop, demo down](2026-10-23-PH-34-landing-page-and-demo-status/desktop-down.png), [phone, demo up](2026-10-23-PH-34-landing-page-and-demo-status/phone-up.png) and [phone, demo down](2026-10-23-PH-34-landing-page-and-demo-status/phone-down.png).
 
 ### The status check
 

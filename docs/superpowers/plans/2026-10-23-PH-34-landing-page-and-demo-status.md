@@ -158,19 +158,19 @@ The push runs `pages.yml`, which fails at `deploy` until the owner has done thei
 **Interfaces:**
 - Produces: the markup Task 4 wires: in the footer, `<a id="szop-link" href="https://szop.dzwoniec.com">Szop</a>` followed by `<span id="demo-dot" class="dot"></span>` and `<span id="demo-text" class="sr-only"></span>`. Until the script runs, `#demo-dot` has no `data-state` and is not drawn. The CSP `<meta>` is already in the head.
 
-- [ ] **Step 1: Inputs and mockup**
+- [x] **Step 1: Inputs and mockup**
 
 Ask the owner for the text under the picture (English) and check that the picture is at `apps/landing/dzwoniec.<ext>`. Design the page as a mockup in the visual companion with the tokens of [the design system](../../architecture/visual-design.md) (the light page `fur`, text `gray-800`, dark `gray-900` and `gray-200`, the sage accent, Gabarito if it is wanted; spacing, size of the picture and the text's style are decided there). When the owner approves, commit screenshots of the mockup, phone and desktop, in the folder named above, and link them from the spec's "The page" section.
 
-- [ ] **Step 2: Build the page**
+- [x] **Step 2: Build the page**
 
 `index.html`: the picture (`<img>` with `width` and `height` attributes and descriptive `alt`), the text, the footer as in Interfaces. `style.css`: the tokens as custom properties, a dark scheme under `prefers-color-scheme: dark`, a `.sr-only` class, `.dot` hidden until it has `data-state` (Task 4 draws it). If the mockup uses Gabarito, copy its Latin variable font from `apps/web/node_modules/@fontsource-variable/gabarito/files/` into `apps/landing/fonts/` with its licence note, and load it with `@font-face` (`'self'` already allows it). CSP `<meta>` as in the Global Constraints.
 
-- [ ] **Step 3: Check it in a browser**
+- [x] **Step 3: Check it in a browser**
 
 With a small Playwright script kept in the scratchpad, not committed, serve `apps/landing/` (any static server) and open it in Chromium at 390×844 in light and dark and at 1280×800 in light. Expected: matches the mockup; the console shows no message about a Content Security Policy violation. Keep the screenshots for the PR.
 
-- [ ] **Step 4: Check and commit**
+- [x] **Step 4: Check and commit**
 
 Run: `pnpm check`
 Expected: pass.
