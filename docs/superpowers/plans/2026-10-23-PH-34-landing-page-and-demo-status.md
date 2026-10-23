@@ -112,28 +112,28 @@ Then stop. **Owner:** run `terraform plan` in `infra/base` from the branch and c
 **Interfaces:**
 - Produces: the workflow `pages`, with job `build` (`contents: read`; uploads `apps/landing`) and job `deploy` (`pages: write`, `id-token: write`; `environment: github-pages`). Later tasks only change files in `apps/landing/`, which redeploys the page.
 
-- [ ] **Step 1: Pin the actions**
+- [x] **Step 1: Pin the actions**
 
 Resolve the commit of the newest release of `actions/upload-pages-artifact` and `actions/deploy-pages` that is at least a week old (the Dependabot cooldown), as an annotated tag's commit: `git ls-remote --tags https://github.com/actions/deploy-pages 'refs/tags/v5*'` (the `^{}` line, where there is one, is the commit). Candidates: `upload-pages-artifact` v5.0.0 `fc324d3547104276b827a68afc52ff2a11cc49c9`, `deploy-pages` v5.0.1 `368f82528645a54fb793d4d04e342629a3f51346`. `actions/checkout` is pinned as in the other workflows (`3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1`).
 
-- [ ] **Step 2: Write `pages.yml`**
+- [x] **Step 2: Write `pages.yml`**
 
 Header comment in the style of the other workflows (what it does, ADR 0044, which environment). `on:` `push` to `main` and to `feat/landing-page`, paths `apps/landing/**` and `.github/workflows/pages.yml`; and `workflow_dispatch`. A comment marks the `feat/landing-page` trigger as **temporary: the first deployment comes from the branch, and Task 5 removes it**. `permissions: {}` at the top, `defaults: run: shell: bash`, `concurrency: group: pages, cancel-in-progress: false`. Job `build`: checkout (`persist-credentials: false`), `upload-pages-artifact` with `path: apps/landing`. Job `deploy`: `needs: build`, the two permissions, `environment: { name: github-pages, url: ${{ steps.deployment.outputs.page_url }} }`, `deploy-pages` with `id: deployment`. `timeout-minutes` on both jobs.
 
-- [ ] **Step 3: The placeholder and the Docker ignore**
+- [x] **Step 3: The placeholder and the Docker ignore**
 
 `apps/landing/index.html`: a valid HTML5 page (`lang="en"`, charset, viewport, `<title>dzwoniec.com</title>`) whose body says the page is on its way. `.dockerignore`: add `apps/landing` under "Docs and tests: not run in the image" with a comment.
 
-- [ ] **Step 4: Check**
+- [x] **Step 4: Check**
 
 Run: `pnpm check:workflows` and `pnpm format:check`
 Expected: no findings from actionlint or zizmor; Prettier passes.
 
-- [ ] **Step 5: Docs and spec**
+- [x] **Step 5: Docs and spec**
 
 `ci-cd.md`: describe `pages.yml` (trigger, jobs, permissions, why it is separate from `ci.yml`: the page deploys on `main` only). `github-settings.md`: the Pages settings (source _GitHub Actions_, custom domain `dzwoniec.com`, _Enforce HTTPS_) and the `github-pages` environment's deployment-branch rule with the temporary exception, each with why. In the spec's "Hosting and deployment": say the workflow also has a temporary trigger on `feat/landing-page` for the first deployment (a manual run needs the workflow on the default branch, a push does not), and replace the `ci.yml` bullet with "`ci.yml` needs no change: `changes` already treats every file that is not Markdown as code and everything under `.github/workflows/` as workflows."
 
-- [ ] **Step 6: Commit and push**
+- [x] **Step 6: Commit and push**
 
 ```bash
 git add .github .dockerignore apps/landing docs

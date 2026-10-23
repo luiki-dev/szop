@@ -30,3 +30,6 @@ docs
 **/*.test.ts
 **/*.test.tsx
 apps/api/src/test
+
+# The landing page is served by GitHub Pages, not by the image (PH-34)
+apps/landing

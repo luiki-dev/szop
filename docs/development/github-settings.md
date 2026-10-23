@@ -11,6 +11,7 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
 - [Pull requests](#pull-requests)
 - [Actions](#actions)
 - [Environments](#environments)
+- [Pages](#pages)
 - [Variables](#variables)
 - [Ruleset for `main`](#ruleset-for-main)
 - [Ruleset for version tags](#ruleset-for-version-tags)
@@ -40,7 +41,8 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
    1. The [`release` environment](#environments): a job that names a missing environment creates it with no branch rule.
    2. The [release App](#the-release-app): created, installed, its client ID and private key stored in `release`, and put on the [version tags ruleset](#ruleset-for-version-tags)'s bypass list.
    3. The variable `AWS_RELEASE_ROLE_ARN` (see [Variables](#variables)), after `infra/base` is applied from the PR's branch.
-8. Check the result (see [Checking the settings](#checking-the-settings)).
+8. The Pages settings, around the [PH-34](../roadmap.md#ph-34-landing-page-and-demo-status) PR ([ADR 0044](../decisions/0044-landing-page-details.md)): the domain verified for the account, `infra/base` applied with the records, then the [Pages settings](#pages) and the `github-pages` environment's branch rule, so the certificate is issued while the rest of the phase is built.
+9. Check the result (see [Checking the settings](#checking-the-settings)).
 
 ## Visibility
 
@@ -91,11 +93,23 @@ Leave **Allow auto-merge** off: the owner's manual merge is the approval (ADR 00
 | | **Prevent self-review** | Off | The owner is the only person who can press the button; with it on, the person who started the run could never approve it. |
 | | **Deployment branches and tags** | **No restriction** | `demo-up` is pressed on the branch being checked, before it is merged, so any branch must be allowed. Unlike `demo-teardown`, the trust policy has no `ref` pin to back a rule, so nothing but the approval limits what a run deploys. |
 | | **Secrets and variables** | None | The role ARN is a repository variable (below). |
+| `github-pages` | **Deployment branches and tags** | **Selected branches and tags**: branch **`main`**, and, **only while PH-34 is open, `feat/landing-page`** | GitHub creates this environment when Pages is switched on, restricted to the default branch. The landing page is first deployed from the phase's branch so the certificate can be issued early; the owner removes that rule once the PR is merged. It holds no secrets and grants no AWS access. [ADR 0044](../decisions/0044-landing-page-details.md). |
 | `release` | **Required reviewers** | None | `release-please.yml` runs on every push to `main`, so a reviewer would mean approving every merge; the owner's merge of the release PR is the approval. [ADR 0042](../decisions/0042-releases-details.md), decision 8. |
 | | **Deployment branches and tags** | **Selected branches and tags**, with one rule: branch **`main`** | No PR or branch workflow can use the environment, read its secret or get the release role's token. The role's trust also requires the `ref` `refs/heads/main`, as for `demo-teardown`. |
 | | **Secrets and variables** | Variable `RELEASE_APP_CLIENT_ID`; secret `RELEASE_APP_PRIVATE_KEY` | The [release App](#the-release-app)'s client ID and private key, kept in the environment so only `main`'s jobs that name it can read them. The release role's ARN is a repository variable (below). |
 
 Create `demo-teardown` by hand, **before** `demo-down.yml` is merged: GitHub creates an environment, with no protection, the first time a job names a missing one. Create `demo` before base is applied with its trust and before `demo-up.yml` first runs ([PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button), [runbook](../operations/demo-environment.md#cis-roles-and-variables)). Create `release` before the [PH-13](../roadmap.md#ph-13-releases) PR is merged: the merge runs `release-please.yml`, whose jobs name it.
+
+## Pages
+
+*Settings → Code and automation → Pages*, and, for the verification, the account's *Settings → Pages* ([ADR 0044](../decisions/0044-landing-page-details.md)).
+
+| Setting | Value | Why |
+|---|---|---|
+| Account: **verified domain** | `dzwoniec.com`, with the TXT record `_github-pages-challenge-luiki-dev.dzwoniec.com` in `infra/base` | Another account's Pages site cannot claim a domain this account has verified. |
+| **Build and deployment → Source** | **GitHub Actions** | `pages.yml` uploads and deploys `apps/landing/`. The branch source publishes only the root or `/docs`, and `docs/` holds the documentation. |
+| **Custom domain** | `dzwoniec.com` | The apex serves the page; GitHub redirects `www.dzwoniec.com` to it. There is no `CNAME` file: with the Actions source the setting is the only place. |
+| **Enforce HTTPS** | On, once the certificate is issued | The certificate is Let's Encrypt's, issued by GitHub after the DNS check passes; the CAA record in `infra/base` has to allow it first. |
 
 ## Variables
 
