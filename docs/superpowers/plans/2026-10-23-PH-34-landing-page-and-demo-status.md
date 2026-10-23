@@ -285,7 +285,7 @@ git commit -m "docs: record PH-34's decisions and update the living docs"
 git push
 ```
 
-- [ ] **Step 6: Open the pull request**
+- [x] **Step 6: Open the pull request**
 
 Fill in `.github/pull_request_template.md`: title `feat(landing): serve a landing page with the demo's status`; links to the roadmap entry, spec, plan and ADR 0044; `Closes #205` and `Closes #202` on their own lines; the list of issue changes from Step 4; the screenshots of Tasks 3 and 4 (phone and desktop, both dot states; the page has no dark scheme); the definition of done: tests (unit tests, no end-to-end test by decision), CI after the push, **the demo check `➖ N/A: the page is not part of the demo; checked on dzwoniec.com`**, `infra/base` applied from the branch (owner; again from `main` after the merge), docs, ADR, open points, commits. Do not merge.
 
