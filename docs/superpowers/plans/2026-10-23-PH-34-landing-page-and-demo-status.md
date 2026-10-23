@@ -195,44 +195,44 @@ Stop. The push redeploys the page; the owner can look at `https://dzwoniec.com`.
 - Produces: `export async function checkDemo(fetchFn: typeof fetch, url: string, timeoutMs: number): Promise<"up" | "down">` in `check-demo.js`. `status.js` imports it, and sets `data-state` (`"up"` or `"down"`) and `title` on `#demo-dot` and the text of `#demo-text`.
 - Consumes: the footer markup of Task 3.
 
-- [ ] **Step 1: Tooling**
+- [x] **Step 1: Tooling**
 
 `apps/landing/tsconfig.json`: extends `../../tsconfig.base.json`, `noEmit`, `allowJs`, `checkJs`, `lib: ["es2024", "dom"]`, `include: ["*.js"]`, so ESLint's type-aware rules read these files. `vitest.config.ts`: a project `{ test: { name: "landing", environment: "node", include: ["apps/landing/**/*.test.js"] } }` next to `hooks`. `package.json`: `typecheck` becomes `tsc --noEmit && tsc --noEmit -p apps/landing && pnpm -r typecheck`.
 
-- [ ] **Step 2: Write the failing tests** in `check-demo.test.js`
+- [x] **Step 2: Write the failing tests** in `check-demo.test.js`
 
 With a fake `fetchFn` (a `vi.fn()`):
 - `it("is up when the request is answered, whatever the answer")`: resolves with `{ type: "opaque" }`; expects `"up"`, and one call with the URL and an options object holding `mode: "no-cors"`, `cache: "no-store"` and a `signal` that is an `AbortSignal`.
 - `it("is down when the request fails")`: rejects with `new TypeError("Failed to fetch")`; expects `"down"`.
 - `it("is down when the request outlives the timeout")`: `timeoutMs` 20; the fake returns a promise that rejects with the signal's `reason` when the signal aborts and never settles otherwise; expects `"down"`.
 
-- [ ] **Step 3: Run them and see them fail**
+- [x] **Step 3: Run them and see them fail**
 
 Run: `pnpm vitest run --project landing`
 Expected: FAIL, `check-demo.js` does not exist.
 
-- [ ] **Step 4: Implement `checkDemo`**
+- [x] **Step 4: Implement `checkDemo`**
 
 In `check-demo.js`: call `fetchFn(url, { mode: "no-cors", cache: "no-store", signal: AbortSignal.timeout(timeoutMs) })`; resolved is `"up"`, any rejection is `"down"`. A comment says why `no-cors` is enough and what it cannot tell.
 
-- [ ] **Step 5: Run them and see them pass**
+- [x] **Step 5: Run them and see them pass**
 
 Run: `pnpm vitest run --project landing`
 Expected: 3 passed.
 
-- [ ] **Step 6: Wire the page**
+- [x] **Step 6: Wire the page**
 
 `status.js` (loaded from `index.html` with `<script type="module" src="status.js">`): constants `HEALTH_URL` (`https://szop.dzwoniec.com/api/health`), `TIMEOUT_MS` 5000, `INTERVAL_MS` 30000. A function that runs one check unless one is in flight and applies the result to `#demo-dot` and `#demo-text` ("Szop demo is up" or "Szop demo is down", also as the dot's `title`). It runs on load, every `INTERVAL_MS` while `document.visibilityState` is `"visible"`, and when the tab becomes visible. `style.css`: `.dot[data-state]` draws a circle the height of a capital "O" (about `0.75em`), `up` filled green, `down` a grey ring with no fill; the colours come from the tokens and meet 3:1 against the page in both schemes (checked on the mockup's colours).
 
-- [ ] **Step 7: Check by hand**
+- [x] **Step 7: Check by hand**
 
 Extend the scratchpad script: open the page with the health request fulfilled (expect the green dot and text "Szop demo is up"), aborted (expect the grey ring and "down"), and with JavaScript disabled (expect the "Szop" link and no dot). Fail on any console message about a policy violation in all three. Keep screenshots of the two states for the PR.
 
-- [ ] **Step 8: Docs and spec**
+- [x] **Step 8: Docs and spec**
 
 `testing.md`: the new `landing` project and what it covers. In the spec's "The status check", say that `checkDemo` is in `check-demo.js`, imported by the tests, and the few lines that call it are in `status.js`.
 
-- [ ] **Step 9: Check and commit**
+- [x] **Step 9: Check and commit**
 
 Run: `pnpm check`
 Expected: lint, format, typecheck and tests pass.

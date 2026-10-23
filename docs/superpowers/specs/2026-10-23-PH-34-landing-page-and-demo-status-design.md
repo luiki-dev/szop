@@ -71,7 +71,7 @@ All in `infra/base/dns.tf`, next to the existing records, so `infra/base` stays 
 
 ### The status check
 
-`status.js` has two parts: a function `checkDemo(fetch, url, timeoutMs)` that returns `"up"` or `"down"`, and a few lines that call it and update the page.
+The check has two files: `check-demo.js` holds `checkDemo(fetch, url, timeoutMs)`, which returns `"up"` or `"down"` and is what the tests import, and `status.js` holds the few lines that call it and update the page.
 
 - `checkDemo` calls `fetch(url, { mode: "no-cors", cache: "no-store", signal: AbortSignal.timeout(timeoutMs) })`. A resolved promise means `"up"`; a rejection (no DNS, no connection, a timeout) means `"down"`.
 - Until the first answer the link has no dot. Without JavaScript only the link shows.
@@ -80,7 +80,7 @@ All in `infra/base/dns.tf`, next to the existing records, so `infra/base` stays 
 
 ## Tests
 
-- **Unit tests (Vitest)** for `checkDemo` with a fake `fetch`: a response gives `"up"`, a rejection gives `"down"`, and a request that outlives the timeout gives `"down"`. The function lives in a module that the page loads and the tests import.
+- **Unit tests (Vitest)** for `checkDemo` with a fake `fetch`: a response gives `"up"`, a rejection gives `"down"`, and a request that outlives the timeout gives `"down"`. The function lives in `check-demo.js`, which `status.js` and the tests import.
 - **The repository's linting and formatting** for the new HTML, CSS and JavaScript.
 - **`terraform validate`, the plan and the scanners** that CI already runs on `infra/base`.
 - **A manual check on the real domain** by the owner: HTTPS works, `www` redirects, the dot is grey with the demo down and green with it up (the owner's decision whether to use a demo session for the green case, see below).

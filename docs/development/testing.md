@@ -34,6 +34,7 @@ The guide grows as the layers arrive: property tests and mutation testing in [PH
 | End-to-end (E2E) journeys | `e2e/tests/*.spec.ts`, for example `health.spec.ts` | A real browser drives the production build through the SPA, the API and PostgreSQL, on three projects (desktop Chromium, desktop Firefox and an emulated phone), checks every page with axe and fails on any Content Security Policy (CSP) violation | ➖ N/A: Playwright |
 | The image check | `scripts/check-image.sh` | The container image builds, starts next to PostgreSQL, migrates, runs as the `node` user and serves the SPA at `/` ([ADR 0028](../decisions/0028-container-image-details.md)) | ➖ N/A: a bash script |
 | The scale check | `scripts/check-scale.sh` | Two instances of the image start together behind nginx (the `scale` profile): one migrates while the other waits for the lock, and requests reach both. It catches what two instances inside one test process hide, since those share module-level state ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 14) | ➖ N/A: a bash script |
+| The landing page | `apps/landing/check-demo.test.js` | `checkDemo`, the function behind the footer's dot, says up when the demo answers (whatever the answer), and down when the request fails or outlives its timeout, with a fake `fetch`. The page itself has no browser test: it is checked by hand on `dzwoniec.com` ([PH-34 spec](../superpowers/specs/2026-10-23-PH-34-landing-page-and-demo-status-design.md), decision 9) | `landing` |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
 
 Layer still to come: **property tests and mutation testing** for the domain rules, in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
@@ -45,7 +46,7 @@ All commands run from the repository root. PostgreSQL must be running first for 
 ```bash
 pnpm test                       # every project once, the same tests CI runs (CI adds `--coverage`)
 pnpm test:watch                 # stays running and re-runs the tests a change affects, on every save
-pnpm test --project api         # one project only: api, web or hooks
+pnpm test --project api         # one project only: api, web, landing or hooks
 pnpm test --project web         # for example, only the component tests
 pnpm test health                # only the files whose path contains "health"
 pnpm test:coverage              # every project, plus a coverage report
