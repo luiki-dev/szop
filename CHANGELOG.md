@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 (2026-10-23)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+* feat(landing): serve a landing page with the demo's status by @luiki-dev in https://github.com/luiki-dev/szop/pull/271
+
+
+**Full Changelog**: https://github.com/luiki-dev/szop/compare/v0.1.0...v0.2.0
+
 ## 0.1.0 (2026-10-23)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
