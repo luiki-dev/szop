@@ -54,7 +54,7 @@ One per stage, named after the stage's heading, with its **Exit:** line as the d
 | `owner` | Only the owner can do it: an AWS, domain or GitHub setting, a manual check, a purchase |
 | `adr` | Decision work whose result is one ADR, made outside a phase |
 
-No other labels are used. Dependabot creates `dependencies` and one label per ecosystem on its own pull requests.
+No other labels are used on issues. On pull requests, `skip-changelog` leaves a PR out of the release notes ([release-please](tools/release-please.md#release-notes)), and Dependabot creates `dependencies` and one label per ecosystem on its own.
 
 ## Issues
 
