@@ -21,6 +21,7 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
 - [12. What the git hooks do](#12-what-the-git-hooks-do)
 - [13. Claude Code sessions in the cloud](#13-claude-code-sessions-in-the-cloud)
   - [Allowed hosts](#allowed-hosts)
+  - [All hosts, to paste](#all-hosts-to-paste)
   - [The setup script](#the-setup-script)
   - [At the start of every session](#at-the-start-of-every-session)
   - [What a cloud session cannot do](#what-a-cloud-session-cannot-do)
@@ -313,9 +314,11 @@ A cloud environment reaches the internet through an egress proxy, and only the h
 | `registry.npmjs.org`, `pypi.org`, `files.pythonhosted.org` | pnpm and the project's packages; zizmor |
 | `releases.hashicorp.com` | the Terraform binary |
 | `registry.terraform.io` | `terraform init`, which downloads the AWS provider: without it `pnpm check:infra` fails at its first step |
-| `github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com` | the release binaries of tflint, its AWS ruleset and Trivy |
+| `github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com` | the release binaries of tflint, its AWS ruleset and Trivy; cloning |
+| `api.github.com` | the GitHub API: issues, labels, sub-issues, comments and PRs, through REST |
 | `awscli.amazonaws.com` | the AWS CLI |
-| `ghcr.io`, `registry-1.docker.io` | Trivy's vulnerability database, and the container images (`postgres`, Node) that `pnpm db:up` and `pnpm check:image` pull |
+| `ghcr.io`, `mirror.gcr.io` | Trivy's vulnerability database and its mirror |
+| `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com` | the container images (`postgres`, Node) that `pnpm db:up` and `pnpm check:image` pull from Docker Hub: the registry, its sign-in and its file store |
 | `proxy.golang.org`, `sum.golang.org` | actionlint, installed with `go install` |
 | `servicereference.us-east-1.amazonaws.com` | AWS's list of IAM actions, when a policy is written |
 
@@ -332,6 +335,54 @@ A cloud environment reaches the internet through an egress proxy, and only the h
 **For the MVP phases** ([Stage 4](../roadmap.md#stage-4-mvp)), the documentation of what the app is built with: `react.dev`, `reactrouter.com`, `tanstack.com`, `vite.dev`, `vitest.dev`, `fastify.dev`, `orm.drizzle.team`, `zod.dev`, `tailwindcss.com`, `playwright.dev`, `better-auth.com`, `typescriptlang.org`, `pnpm.io`, `www.postgresql.org` and `developer.mozilla.org`.
 
 **Not needed:** `cdn.playwright.dev` (the image carries Playwright's browsers; never run `playwright install` there), `checkpoint-api.hashicorp.com` (Terraform's version check; the setup script sets `CHECKPOINT_DISABLE`).
+
+### All hosts, to paste
+
+Every host of the three groups above, one per line, for *Network access*. Hosts the environment allows already do no harm there. Of these, `docs.github.com`, `developer.hashicorp.com`, `aquasecurity.github.io`, `aws.amazon.com` and the documentation of the MVP phases were refused on 2026-10-23; the rest answered.
+
+```text
+nodejs.org
+registry.npmjs.org
+pypi.org
+files.pythonhosted.org
+releases.hashicorp.com
+registry.terraform.io
+github.com
+api.github.com
+raw.githubusercontent.com
+objects.githubusercontent.com
+awscli.amazonaws.com
+ghcr.io
+mirror.gcr.io
+registry-1.docker.io
+auth.docker.io
+production.cloudflare.docker.com
+proxy.golang.org
+sum.golang.org
+servicereference.us-east-1.amazonaws.com
+docs.aws.amazon.com
+docs.github.com
+developer.hashicorp.com
+aquasecurity.github.io
+aws.amazon.com
+react.dev
+reactrouter.com
+tanstack.com
+vite.dev
+vitest.dev
+fastify.dev
+orm.drizzle.team
+zod.dev
+tailwindcss.com
+playwright.dev
+better-auth.com
+typescriptlang.org
+pnpm.io
+www.postgresql.org
+developer.mozilla.org
+```
+
+Add a host here, and to the table above, when a tool or a phase starts needing it; the table says why each one is there.
 
 ### The setup script
 
@@ -377,7 +428,7 @@ tar xzf "$TMP/trivy.tgz" -C /usr/local/bin trivy
 # AWS CLI, zizmor and actionlint
 curl -sSfL -o "$TMP/awscli.zip" https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
 unzip -oq "$TMP/awscli.zip" -d "$TMP" && "$TMP/aws/install" --update >/dev/null
-pip install -q --break-system-packages zizmor==1.31.1 || pip install -q zizmor==1.31.1
+pip install -q --break-system-packages zizmor==1.30.1 || pip install -q zizmor==1.30.1
 GOBIN=/usr/local/bin go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
 
 # Dependencies, and the API's settings for the tests
@@ -414,7 +465,7 @@ The script is pasted into the environment's settings, so this page is its master
 | Trivy `0.75.0` and its SHA-256 | `ci.yml` (both scan jobs), [setup, section 8](#8-terraform-tflint-and-the-aws-cli) | change all four; paste the script again |
 | tflint `0.64.0` and its SHA-256 | `ci.yml`'s `infra` job, section 8 | the same |
 | actionlint `1.7.12` | `ci.yml`, section 9 | the same |
-| zizmor `1.31.1` | section 9 | the same |
+| zizmor `1.30.1` | `ci.yml` (the `version:` of its step), section 9 | the same |
 | Terraform, the AWS ruleset, pnpm | `.terraform-version`, `infra/.tflint.hcl`, `packageManager` | nothing: the script reads them |
 
 ## 14. Coming later
