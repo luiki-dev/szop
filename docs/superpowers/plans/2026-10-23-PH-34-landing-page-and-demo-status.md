@@ -44,7 +44,7 @@
 | `infra/base/dns.tf`, `infra/base/locals.tf` | The Pages records, the verification TXT and the CAA changes |
 | `.github/workflows/pages.yml` (new) | Builds nothing: uploads `apps/landing/` and deploys it to Pages |
 | `apps/landing/index.html` (new) | The page: picture, text, footer, the CSP |
-| `apps/landing/style.css` (new) | Layout, colours and typography from the design tokens, light and dark, the dot |
+| `apps/landing/style.css` (new) | Layout, the paper colours and typography, the dot |
 | `apps/landing/check-demo.js` (new) | `checkDemo`, the pure status function the tests import |
 | `apps/landing/status.js` (new) | Wires `checkDemo` to the page and repeats it |
 | `apps/landing/check-demo.test.js` (new) | Unit tests of `checkDemo` |
@@ -168,7 +168,7 @@ Ask the owner for the text under the picture (English) and check that the pictur
 
 - [x] **Step 3: Check it in a browser**
 
-With a small Playwright script kept in the scratchpad, not committed, serve `apps/landing/` (any static server) and open it in Chromium at 390×844 in light and dark and at 1280×800 in light. Expected: matches the mockup; the console shows no message about a Content Security Policy violation. Keep the screenshots for the PR.
+With a small Playwright script kept in the scratchpad, not committed, serve `apps/landing/` (any static server) and open it in Chromium at 390×844 and at 1280×800. Expected: matches the mockup; the console shows no message about a Content Security Policy violation. Keep the screenshots for the PR.
 
 - [x] **Step 4: Check and commit**
 
@@ -287,7 +287,7 @@ git push
 
 - [ ] **Step 6: Open the pull request**
 
-Fill in `.github/pull_request_template.md`: title `feat(landing): serve a landing page with the demo's status`; links to the roadmap entry, spec, plan and ADR 0044; `Closes #205` and `Closes #202` on their own lines; the list of issue changes from Step 4; the screenshots of Tasks 3 and 4 (phone light and dark, desktop light); the definition of done: tests (unit tests, no end-to-end test by decision), CI after the push, **the demo check `➖ N/A: the page is not part of the demo; checked on dzwoniec.com`**, `infra/base` applied from the branch (owner; again from `main` after the merge), docs, ADR, open points, commits. Do not merge.
+Fill in `.github/pull_request_template.md`: title `feat(landing): serve a landing page with the demo's status`; links to the roadmap entry, spec, plan and ADR 0044; `Closes #205` and `Closes #202` on their own lines; the list of issue changes from Step 4; the screenshots of Tasks 3 and 4 (phone and desktop, both dot states; the page has no dark scheme); the definition of done: tests (unit tests, no end-to-end test by decision), CI after the push, **the demo check `➖ N/A: the page is not part of the demo; checked on dzwoniec.com`**, `infra/base` applied from the branch (owner; again from `main` after the merge), docs, ADR, open points, commits. Do not merge.
 
 ---
 
