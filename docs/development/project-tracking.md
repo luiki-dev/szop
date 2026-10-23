@@ -41,7 +41,7 @@ How Szop's work is tracked on GitHub: the roadmap's phases, the open points and 
 
 ## Milestones
 
-One per stage, named after the stage's heading, with its **Exit:** line as the description, and `Definition` for ADR 0001 to 0015. No due dates: the roadmap has none. A stage's milestone is closed when its last phase is done, in the same session that sets the last row of its table to ✅. Closed today: `Definition` and `Stage 1: Local foundations`.
+One per stage, named after the stage's heading, with its **Exit:** line as the description, and `Definition` for ADR 0001 to 0015. No due dates: the roadmap has none. A stage's milestone is closed when its last phase is done, in the same session that sets the last row of its table to ✅. Closed today: `Definition`, `Stage 1: Local foundations` and `Stage 3: Walking skeleton, deployed and released`.
 
 ## Labels
 

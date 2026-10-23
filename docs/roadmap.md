@@ -29,7 +29,6 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-35 Security scanners](#ph-35-security-scanners)
   - [PH-13 Releases](#ph-13-releases)
   - [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status)
-  - [PH-38 Autoscaling](#ph-38-autoscaling)
 - [Stage 4: MVP](#stage-4-mvp)
   - [PH-14 App shell and design system](#ph-14-app-shell-and-design-system)
   - [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only)
@@ -53,6 +52,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - [Stage 5: Later](#stage-5-later)
   - [PH-32 Sharing](#ph-32-sharing)
   - [PH-33 Live updates](#ph-33-live-updates)
+  - [PH-38 Autoscaling](#ph-38-autoscaling)
 - [Candidates](#candidates)
 
 ## How it works
@@ -196,7 +196,6 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-35 Security scanners](#ph-35-security-scanners) | ✅ Done | [Spec](superpowers/specs/2026-10-22-PH-35-security-scanners-design.md) | [Plan](superpowers/plans/2026-10-22-PH-35-security-scanners.md) | [#260](https://github.com/luiki-dev/szop/pull/260) | [#213](https://github.com/luiki-dev/szop/issues/213) |
 | [PH-13 Releases](#ph-13-releases) | ✅ Done | [Spec](superpowers/specs/2026-10-23-PH-13-releases-design.md) | [Plan](superpowers/plans/2026-10-23-PH-13-releases.md) | [#263](https://github.com/luiki-dev/szop/pull/263) | [#42](https://github.com/luiki-dev/szop/issues/42) |
 | [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status) | ✅ Done | [Spec](superpowers/specs/2026-10-23-PH-34-landing-page-and-demo-status-design.md) | [Plan](superpowers/plans/2026-10-23-PH-34-landing-page-and-demo-status.md) | [#271](https://github.com/luiki-dev/szop/pull/271) | [#205](https://github.com/luiki-dev/szop/issues/205) |
-| [PH-38 Autoscaling](#ph-38-autoscaling) | ⬜ Not started | — | — | — | [#234](https://github.com/luiki-dev/szop/issues/234) |
 
 ### PH-09 AWS account and Terraform bootstrap
 
@@ -309,15 +308,6 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** add `dzwoniec.com` as a verified domain in the account's Pages settings; apply `infra/base` from the branch, and again from `main` after the merge; set Pages up (source _GitHub Actions_, custom domain `dzwoniec.com`), allow the phase's branch in the `github-pages` environment, wait for the certificate and tick _Enforce HTTPS_; after the merge, remove the branch from the environment's rule. The page is not part of the demo, so there is no `demo-up` check.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#205](https://github.com/luiki-dev/szop/issues/205).
-
-### PH-38 Autoscaling
-
-- **Goal:** the demo's service scales between two and four tasks with its load, and a short load test shows it scaling out and back in.
-- **Delivers:** ECS Service Auto Scaling with target tracking (on average CPU, or on requests per target, as the brainstorm decides) between two and four tasks; the deploy role's permissions for Application Auto Scaling and the alarms it creates; a load script run from the owner's machine; the runbook's section on watching a scale-out; the connection budget checked again ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 11 and 13).
-- **Depends on:** PH-37.
-- **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, run the load test and watch the service scale out and back in, then press `demo-down`.
-- **Expected path:** full.
-- **Open points:** the sub-issues of [#234](https://github.com/luiki-dev/szop/issues/234).
 
 ## Stage 4: MVP
 
@@ -518,14 +508,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ## Stage 5: Later
 
-**Exit:** every 🔜 requirement is delivered.
+**Exit:** every 🔜 requirement is delivered, and the demo's service scales with its load.
 
-Both phases are rough: each is split into smaller phases once the MVP is done ([ADR 0014](decisions/0014-roadmap.md), decision 3).
+PH-32 and PH-33 are rough: each is split into smaller phases once the MVP is done ([ADR 0014](decisions/0014-roadmap.md), decision 3).
 
 | Phase | Status | Spec | Plan | PR | Issue |
 |---|---|---|---|---|---|
 | [PH-32 Sharing](#ph-32-sharing) | ⬜ Not started | — | — | — | [#61](https://github.com/luiki-dev/szop/issues/61) |
 | [PH-33 Live updates](#ph-33-live-updates) | ⬜ Not started | — | — | — | [#62](https://github.com/luiki-dev/szop/issues/62) |
+| [PH-38 Autoscaling](#ph-38-autoscaling) | ⬜ Not started | — | — | — | [#234](https://github.com/luiki-dev/szop/issues/234) |
 
 ### PH-32 Sharing
 
@@ -544,6 +535,15 @@ Both phases are rough: each is split into smaller phases once the MVP is done ([
 - **Owner steps:** none known yet.
 - **Expected path:** split into several phases first.
 - **Open points:** the sub-issues of [#62](https://github.com/luiki-dev/szop/issues/62).
+
+### PH-38 Autoscaling
+
+- **Goal:** the demo's service scales between two and four tasks with its load, and a short load test shows it scaling out and back in.
+- **Delivers:** ECS Service Auto Scaling with target tracking (on average CPU, or on requests per target, as the brainstorm decides) between two and four tasks; the deploy role's permissions for Application Auto Scaling and the alarms it creates; a load script run from the owner's machine; the runbook's section on watching a scale-out; the connection budget checked again ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 11 and 13).
+- **Depends on:** PH-37.
+- **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; press `demo-up` on the branch, run the load test and watch the service scale out and back in, then press `demo-down`.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#234](https://github.com/luiki-dev/szop/issues/234).
 
 ## Candidates
 
