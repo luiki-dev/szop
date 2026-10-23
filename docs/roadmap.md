@@ -295,9 +295,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-13 Releases
 
 - **Goal:** merging release-please's PR tags a version, publishes a GitHub Release and pushes the versioned image. The walking skeleton is released as `v0.1.0`.
-- **Delivers:** `release-please.yml` and its configuration ([ADR 0009](decisions/0009-git-workflow.md); [ADR 0010](decisions/0010-ci-cd.md), decision 17); the `szop-ci-release` role; the versioned image.
-- **Depends on:** the trial of release-please with merge commits in a throwaway repository, before the brainstorm.
-- **Owner steps:** run that trial; create the `release` environment; create the `szop-release` GitHub App, install it on the repository, store its private key in the `release` environment and put the App on the `version-tags` ruleset's bypass list; store the release role's ARN as a GitHub variable; merge the first release PR.
+- **Delivers:** `release-please.yml` and its configuration ([ADR 0009](decisions/0009-git-workflow.md); [ADR 0010](decisions/0010-ci-cd.md), decision 17; [ADR 0042](decisions/0042-releases-details.md)), with release notes from GitHub, one line per merged PR, leaving out Dependabot's and those labelled `skip-changelog`; the `szop-ci-release` role; the versioned image `szop:X.Y.Z`, which ECR's lifecycle policy keeps; the plan role denied the remaining reads of log contents ([OP-102](https://github.com/luiki-dev/szop/issues/248)).
+- **Depends on:** the trial of release-please with merge commits in a throwaway repository, before the brainstorm: done on 2026-10-23 ([#150](https://github.com/luiki-dev/szop/issues/150)).
+- **Owner steps:** run that trial; create the `release` environment; create the `szop-release` GitHub App, install it on the repository, store its client ID and private key in the `release` environment and put the App on the `version-tags` ruleset's bypass list; apply `infra/base` from the branch, and again from `main` after the merge; store the release role's ARN as a GitHub variable; press `demo-up` on the branch, check that `/api/health` answers `200`, then press `demo-down`; merge the first release PR, then check the tag `v0.1.0`, the GitHub Release and `szop:0.1.0` in ECR.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#42](https://github.com/luiki-dev/szop/issues/42).
 
