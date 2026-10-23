@@ -1,0 +1,35 @@
+# ADR 0043 — Cloud session setup and the tag bypass check
+
+- **Status:** ✅ Accepted
+- **Date:** 2026-10-23
+- **Extends:** [ADR 0005](0005-development-environment.md), decision 1 (a second place where things run: a Claude Code session in the cloud, with its own setup, see decisions 1 to 4)
+- **Refines:** [ADR 0011](0011-design-sanity-check-follow-ups.md), decision 8 (the release App is on the `version-tags` ruleset's bypass list, and the owner checks that it was saved, see decision 5)
+
+## Context
+
+Two things came out of [PH-13](../roadmap.md#ph-13-releases), the first phase worked on largely in a Claude Code session in the cloud.
+
+**The cloud session.** A session runs in a fresh Linux container made from an image, with the repository cloned into it, and the container is thrown away after a period of inactivity. Nothing installed in one session exists in the next. The image has Node 22, pnpm, Docker's client, `psql` and Python; it lacks Node 24 (which `engines` requires), Terraform, tflint, Trivy, the AWS CLI, zizmor and actionlint, so `pnpm check` and `pnpm check:infra` could not run until each was installed by hand, and it took several hosts being allowed by the owner before they could. The guide ([setup](../development/setup.md)) described only the owner's own machine.
+
+**The tag bypass.** On 2026-10-23 the owner merged the first release PR and `release-please.yml` failed seven seconds in: `Cannot create ref due to creations being restricted`. The `version-tags` ruleset restricts creating `v*` tags and only the release App may bypass it ([ADR 0011](0011-design-sanity-check-follow-ups.md), decision 8), but the ruleset's `bypass_actors` was empty: the App had not been saved on the list. Nothing was tagged and nothing was lost. After the owner added the App again, *Re-run failed jobs* created the tag `v0.1.0`, the GitHub Release and the image `szop:0.1.0`. The same kind of slip happened to the `demo` environment's reviewer in [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) ([ADR 0034](0034-network-and-demo-up-details.md)): a GitHub setting made in the browser looked saved and was not, and nothing in the repository showed it until a run depended on it.
+
+The owner chose where the setup script lives; the rest was Claude's call.
+
+## Decisions
+
+| # | Topic | Options considered | Decision and reasoning |
+|---|---|---|---|
+| 1 | How tools reach a cloud session | Install them by hand in every session; a setup script in the environment's settings; a script in the repository that the setting calls; a custom container image | **A setup script in the environment's settings,** which the environment runs as root when each session starts. By hand costs a session's first stretch every time, and was how PH-13 started. A custom image is more machinery than a learning project needs. |
+| 2 | Where the script lives | (A) only in the documentation, pasted into the settings; (B) `scripts/cloud-setup.sh`, called by a one-line setting | **A: the documentation, [setup, section 13](../development/setup.md#13-claude-code-sessions-in-the-cloud), is the script's master copy** _(the owner's choice)_. It keeps the change small and adds no code to maintain. B would version and review the script and let it read every version from the repository, but needs a new script, an entry in `scripts.md` and a session on an old branch that lacks the file would fail its setup. **Cost:** the copy in the settings can drift from the page; the page has a table of the pins that live in two places, and says to paste the script again after a bump. |
+| 3 | What the script pins | Pin every version in the script; read each from the file that already pins it | **Read what a file already pins** (`.terraform-version`, `infra/.tflint.hcl`'s ruleset, `packageManager`); pin only what has no such file (Node 24's latest patch, Trivy, tflint, actionlint, zizmor) and give those the version **and the checksum CI uses.** Every download is checked, as in CI; the script was assembled from steps run one by one in a cloud session and has not run end to end on a clean container. |
+| 4 | What stays out of the script | Start Docker and the database in it; do it at the start of the session | **The session starts `dockerd` and the database itself** (`setsid nohup dockerd … &`, then `pnpm db:up`): a daemon started by the setup script is not known to outlive it, and a daemon started from a session's shell stops with that shell unless it is detached. The page lists what a cloud session cannot do: reach AWS (the keys in the environment are placeholders, and `apply` is the owner's step), press `demo-up` or `demo-down`, merge, write the Szop project's fields (GraphQL is not allowed) or read another repository through the GitHub API (hence the AWS ruleset for tflint is downloaded by hand). |
+| 5 | The tag bypass | Trust the settings page; check the bypass list from the command line after setting it | **Check it, with a command, every time it is set:** `gh api repos/luiki-dev/szop/rulesets/<id> --jq .bypass_actors` must show the release App (`actor_type` `Integration`, `bypass_mode` `always`). [github-settings](../development/github-settings.md) has the command in "Checking the settings" and a warning in "The release App". A run that fails on a missing bypass costs one merged release PR and a re-run; the check costs one command and would have caught it before the merge. |
+| 6 | Allowed hosts | Allow everything; allow what the checks need; also allow the documentation | **A list in the guide, in three tiers** _(the owner offered to allow hosts, and asked which)_: what the setup script and the checks need; documentation worth allowing for the work in hand (`docs.aws.amazon.com`, `docs.github.com`, `developer.hashicorp.com`, `aquasecurity.github.io`, `aws.amazon.com`); and the documentation of the app's own stack for the MVP phases. Each host was probed from a session: of the second and third tiers only `docs.aws.amazon.com` answered on 2026-10-23, after the owner allowed it. The first tier is a hard need: without `registry.terraform.io`, `pnpm check:infra` stops at `terraform init`. |
+
+## Consequences
+
+- A new cloud session needs the owner to paste the script once per environment and allow the hosts; after that its first command can be `pnpm check`, after starting Docker and the database.
+- A version bump of Trivy, tflint, actionlint or zizmor changes up to four places, now listed in one table; forgetting the script means a cloud session runs another version than CI, and a check that passes there can fail in CI or the reverse.
+- A cloud session still cannot validate IAM policies against AWS or run `terraform plan`; the PR's `plan` job and IAM Access Analyzer do, as before.
+- Every GitHub setting the workflow depends on has, or should have, a command that proves it was saved. The bypass list now has one; `github-settings.md` lists the others.
+- The release itself is unchanged: the failed run left no tag, so the re-run completed it, and `publish` is safe to repeat.

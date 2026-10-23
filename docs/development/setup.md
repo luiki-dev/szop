@@ -1,6 +1,6 @@
 # Setup guide
 
-How to get from a clean Windows machine to a Szop checkout whose checks pass. It is steps only: each tool's page, linked from its step, explains what the tool is and why Szop uses it. Szop is developed in Windows Subsystem for Linux (WSL) with Ubuntu ([ADR 0005](../decisions/0005-development-environment.md)); every command below runs in the Ubuntu terminal unless a step says otherwise.
+How to get from a clean Windows machine to a Szop checkout whose checks pass. It is steps only: each tool's page, linked from its step, explains what the tool is and why Szop uses it. Szop is developed in Windows Subsystem for Linux (WSL) with Ubuntu ([ADR 0005](../decisions/0005-development-environment.md)); every command below runs in the Ubuntu terminal unless a step says otherwise. A Claude Code session in the cloud needs a different setup, in [section 13](#13-claude-code-sessions-in-the-cloud).
 
 ## Contents
 
@@ -19,7 +19,14 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
   - [Run the production build](#run-the-production-build)
   - [Run the container image](#run-the-container-image)
 - [12. What the git hooks do](#12-what-the-git-hooks-do)
-- [13. Coming later](#13-coming-later)
+- [13. Claude Code sessions in the cloud](#13-claude-code-sessions-in-the-cloud)
+  - [Allowed hosts](#allowed-hosts)
+  - [All hosts, to paste](#all-hosts-to-paste)
+  - [The setup script](#the-setup-script)
+  - [At the start of every session](#at-the-start-of-every-session)
+  - [What a cloud session cannot do](#what-a-cloud-session-cannot-do)
+  - [Keeping the script in step](#keeping-the-script-in-step)
+- [14. Coming later](#14-coming-later)
 
 ## 1. Windows: WSL and Ubuntu
 
@@ -293,7 +300,175 @@ Open `http://localhost:8080`: the same page as `pnpm start`, served from inside 
 
 On every commit, a pre-commit hook formats and lints the staged files (a staged workflow under `.github/` goes through actionlint and zizmor, installed in section 9), and a commit-msg hook checks that the message follows Conventional Commits. See [husky and lint-staged](tools/husky-and-lint-staged.md) and [commitlint](tools/commitlint.md).
 
-## 13. Coming later
+## 13. Claude Code sessions in the cloud
+
+Everything above sets up your own machine. A Claude Code session in the cloud runs in a fresh Linux container instead, created from an image, with the repository cloned into it, and thrown away after a period of inactivity ([ADR 0043](../decisions/0043-cloud-session-setup.md)). Nothing installed in one session is there in the next, so the tools the checks need are installed by a **setup script** that the environment runs when each session starts. The image has Node 22, pnpm, Docker's client, `psql` and Python; it lacks Node 24 (which `engines` requires), Terraform, tflint, Trivy, the AWS CLI, zizmor and actionlint.
+
+### Allowed hosts
+
+A cloud environment reaches the internet through an egress proxy, and only the hosts its network policy allows ( *the cloud environment menu in the session's title bar → Edit → Network access*). A host that is not allowed fails with a refused connection (`curl` prints `CONNECT tunnel failed, response 403`, or exit code 000). The setup script and the checks need these:
+
+| Host | Needed for |
+|---|---|
+| `nodejs.org` | Node 24 and its checksums |
+| `registry.npmjs.org`, `pypi.org`, `files.pythonhosted.org` | pnpm and the project's packages; zizmor |
+| `releases.hashicorp.com` | the Terraform binary |
+| `registry.terraform.io` | `terraform init`, which downloads the AWS provider: without it `pnpm check:infra` fails at its first step |
+| `github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com` | the release binaries of tflint, its AWS ruleset and Trivy; cloning |
+| `api.github.com` | the GitHub API: issues, labels, sub-issues, comments and PRs, through REST |
+| `awscli.amazonaws.com` | the AWS CLI |
+| `ghcr.io`, `mirror.gcr.io` | Trivy's vulnerability database and its mirror |
+| `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com` | the container images (`postgres`, Node) that `pnpm db:up` and `pnpm check:image` pull from Docker Hub: the registry, its sign-in and its file store |
+| `proxy.golang.org`, `sum.golang.org` | actionlint, installed with `go install` |
+| `servicereference.us-east-1.amazonaws.com` | AWS's list of IAM actions, when a policy is written |
+
+**Worth allowing as well,** because a session reads documentation while it works. Without them it works from memory, which is wrong for what changes often. In order of use:
+
+| Host | Why |
+|---|---|
+| `docs.aws.amazon.com` | IAM actions, managed policies, service behaviour: every `infra/` change |
+| `docs.github.com` | Actions, rulesets, environments, GitHub Apps, release notes: every workflow change |
+| `developer.hashicorp.com` | Terraform's language and CLI |
+| `aquasecurity.github.io` | Trivy's rules and the syntax of its exceptions |
+| `aws.amazon.com` | prices, when a decision weighs cost |
+
+**For the MVP phases** ([Stage 4](../roadmap.md#stage-4-mvp)), the documentation of what the app is built with: `react.dev`, `reactrouter.com`, `tanstack.com`, `vite.dev`, `vitest.dev`, `fastify.dev`, `orm.drizzle.team`, `zod.dev`, `tailwindcss.com`, `playwright.dev`, `better-auth.com`, `typescriptlang.org`, `pnpm.io`, `www.postgresql.org` and `developer.mozilla.org`.
+
+**Not needed:** `cdn.playwright.dev` (the image carries Playwright's browsers; never run `playwright install` there), `checkpoint-api.hashicorp.com` (Terraform's version check; the setup script sets `CHECKPOINT_DISABLE`).
+
+### All hosts, to paste
+
+Every host of the three groups above, one per line, for *Network access*. Hosts the environment allows already do no harm there. Of these, `docs.github.com`, `developer.hashicorp.com`, `aquasecurity.github.io`, `aws.amazon.com` and the documentation of the MVP phases were refused on 2026-10-23; the rest answered.
+
+```text
+nodejs.org
+registry.npmjs.org
+pypi.org
+files.pythonhosted.org
+releases.hashicorp.com
+registry.terraform.io
+github.com
+api.github.com
+raw.githubusercontent.com
+objects.githubusercontent.com
+awscli.amazonaws.com
+ghcr.io
+mirror.gcr.io
+registry-1.docker.io
+auth.docker.io
+production.cloudflare.docker.com
+proxy.golang.org
+sum.golang.org
+servicereference.us-east-1.amazonaws.com
+docs.aws.amazon.com
+docs.github.com
+developer.hashicorp.com
+aquasecurity.github.io
+aws.amazon.com
+react.dev
+reactrouter.com
+tanstack.com
+vite.dev
+vitest.dev
+fastify.dev
+orm.drizzle.team
+zod.dev
+tailwindcss.com
+playwright.dev
+better-auth.com
+typescriptlang.org
+pnpm.io
+www.postgresql.org
+developer.mozilla.org
+```
+
+Add a host here, and to the table above, when a tool or a phase starts needing it; the table says why each one is there.
+
+### The setup script
+
+*The cloud environment menu in the session's title bar → Edit → Setup script.* The script runs as root, from the directory above the checkout, which is why it starts with `cd szop`. It cannot read the environment's secrets. Versions come from the files that already pin them (`.terraform-version`, `infra/.tflint.hcl`, `packageManager`), except Trivy's, which is pinned here and in `ci.yml`.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+TMP=$(mktemp -d)
+cd szop
+
+# Node 24 (engines: >=24.12 <25) and the pnpm of packageManager
+NODE=$(curl -sSf https://nodejs.org/dist/index.json | python3 -c "import json,sys;print([r['version'] for r in json.load(sys.stdin) if r['version'].startswith('v24.')][0])")
+curl -sSfL -o "$TMP/node.tar.xz" "https://nodejs.org/dist/$NODE/node-$NODE-linux-x64.tar.xz"
+curl -sSfL "https://nodejs.org/dist/$NODE/SHASUMS256.txt" | grep "node-$NODE-linux-x64.tar.xz" | sed "s|node-$NODE-linux-x64.tar.xz|$TMP/node.tar.xz|" | sha256sum -c -
+tar xJf "$TMP/node.tar.xz" -C /usr/local --strip-components=1
+export PATH=/usr/local/bin:$PATH
+npm i -g "pnpm@$(python3 -c "import json;print(json.load(open('package.json'))['packageManager'].split('@')[1])")"
+
+# Terraform, from .terraform-version, checked against HashiCorp's checksums
+TF=$(cat .terraform-version); B="https://releases.hashicorp.com/terraform/$TF"
+curl -sSfL -o "$TMP/tf.zip" "$B/terraform_${TF}_linux_amd64.zip"
+curl -sSfL "$B/terraform_${TF}_SHA256SUMS" | grep linux_amd64.zip | sed "s|terraform_${TF}_linux_amd64.zip|$TMP/tf.zip|" | sha256sum -c -
+unzip -oq "$TMP/tf.zip" terraform -d /usr/local/bin
+
+# tflint, and its AWS ruleset by hand: tflint --init asks api.github.com for
+# the ruleset's release, which a session may not do for another repository
+curl -sSfL -o "$TMP/tflint.zip" https://github.com/terraform-linters/tflint/releases/download/v0.64.0/tflint_linux_amd64.zip
+echo "cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537  $TMP/tflint.zip" | sha256sum -c -
+unzip -oq "$TMP/tflint.zip" tflint -d /usr/local/bin
+RS=$(grep -A2 'plugin "aws"' infra/.tflint.hcl | sed -n 's/.*version *= *"\(.*\)"/\1/p')
+RB="https://github.com/terraform-linters/tflint-ruleset-aws/releases/download/v$RS"
+curl -sSfL -o "$TMP/tflint-ruleset-aws_linux_amd64.zip" "$RB/tflint-ruleset-aws_linux_amd64.zip"
+(cd "$TMP" && curl -sSfL "$RB/checksums.txt" | grep linux_amd64.zip | sha256sum -c -)
+P=~/.tflint.d/plugins/github.com/terraform-linters/tflint-ruleset-aws/$RS
+mkdir -p "$P" && unzip -oq "$TMP/tflint-ruleset-aws_linux_amd64.zip" -d "$P"
+
+# Trivy, with the checksum of ci.yml
+curl -sSfL -o "$TMP/trivy.tgz" https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz
+echo "c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f  $TMP/trivy.tgz" | sha256sum -c -
+tar xzf "$TMP/trivy.tgz" -C /usr/local/bin trivy
+
+# AWS CLI, zizmor and actionlint
+curl -sSfL -o "$TMP/awscli.zip" https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+unzip -oq "$TMP/awscli.zip" -d "$TMP" && "$TMP/aws/install" --update >/dev/null
+pip install -q --break-system-packages zizmor==1.30.1 || pip install -q zizmor==1.30.1
+GOBIN=/usr/local/bin go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+
+# Dependencies, and the API's settings for the tests
+pnpm install --frozen-lockfile
+[ -f apps/api/.env ] || cp apps/api/.env.example apps/api/.env
+echo 'export CHECKPOINT_DISABLE=1' >> /etc/profile.d/szop.sh
+rm -rf "$TMP"
+```
+
+Every download is checked against a checksum (Node's, HashiCorp's, tflint's and Trivy's from `ci.yml`, the ruleset's from its release), as CI does. The script was assembled from steps run one by one in a cloud session; it has not run end to end on a clean container, so the first session after a change shows which command failed.
+
+### At the start of every session
+
+The setup script runs before the session, and a daemon it starts would not outlive it, so two things are done in the session itself. Claude does them when a task needs the tests:
+
+```bash
+setsid nohup dockerd > /tmp/dockerd.log 2>&1 < /dev/null &   # Docker's daemon; detached, or it stops with the shell
+pnpm db:up                                                    # PostgreSQL, for the API tests
+```
+
+### What a cloud session cannot do
+
+- **Reach AWS.** The AWS keys in the environment are placeholders (`aws sts get-caller-identity` answers `InvalidClientTokenId`), by design: CI reaches AWS with OIDC, and `terraform apply` is the owner's step ([definition of done](definition-of-done.md)). A session validates `infra/` with `pnpm check:infra` and `scripts/scan.sh config`; the plan and IAM Access Analyzer run in the PR's checks.
+- **Press `demo-up` or `demo-down`,** merge, or write the Szop project's fields: the first two are the owner's, and the project is reachable only through GraphQL, which a session may not call. Issues, labels, sub-issues, comments and PRs work through the REST API.
+- **Read another repository** through the GitHub API, such as `terraform-linters/tflint-ruleset-aws`'s releases (hence the manual ruleset install). A public repository can be cloned.
+- **Run the checks if Docker is down.** `pnpm check` fails with `Cannot reach PostgreSQL` until `dockerd` and the database are up.
+
+### Keeping the script in step
+
+The script is pasted into the environment's settings, so this page is its master copy, and a change here is not a change there. Its versions and the places they live:
+
+| Pin | Also in | After a bump |
+|---|---|---|
+| Trivy `0.75.0` and its SHA-256 | `ci.yml` (both scan jobs), [setup, section 8](#8-terraform-tflint-and-the-aws-cli) | change all four; paste the script again |
+| tflint `0.64.0` and its SHA-256 | `ci.yml`'s `infra` job, section 8 | the same |
+| actionlint `1.7.12` | `ci.yml`, section 9 | the same |
+| zizmor `1.30.1` | `ci.yml` (the `version:` of its step), section 9 | the same |
+| Terraform, the AWS ruleset, pnpm | `.terraform-version`, `infra/.tflint.hcl`, `packageManager` | nothing: the script reads them |
+
+## 14. Coming later
 
 - **Spinning the demo up and down** with the buttons, in [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button), through the [runbook](../operations/demo-environment.md).
 
