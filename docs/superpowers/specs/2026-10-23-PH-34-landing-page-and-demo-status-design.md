@@ -58,7 +58,7 @@ All in `infra/base/dns.tf`, next to the existing records, so `infra/base` stays 
 
 - **A and AAAA** for the apex: GitHub Pages' addresses, which are taken from GitHub's documentation when the plan is written.
 - **CNAME `www`** to `luiki-dev.github.io`. Pages redirects `www` to the apex.
-- **TXT `_github-pages-challenge-luiki-dev`**: the verification value, which GitHub issues. It is a Terraform variable the owner sets, like the other values that live outside the code.
+- **TXT `_github-pages-challenge-luiki-dev`**: the verification value, which GitHub issues. It is a constant in `locals.tf`: GitHub issues it and it is public in DNS.
 - **CAA**: the apex record lists `amazon.com` and `letsencrypt.org`; a new record on `szop.dzwoniec.com` lists only `amazon.com`. A CAA record on a name takes precedence over its parent's, and the `szop` name carries an A record only while the demo runs, so the two do not conflict.
 - The deploy role's scope is unchanged: `infra/demo` touches none of these records.
 

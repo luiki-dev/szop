@@ -63,11 +63,11 @@
 **Interfaces:**
 - Produces: Route 53 records for the apex (A, AAAA), `www` (CNAME), `_github-pages-challenge-luiki-dev` (TXT) and `szop` (CAA); the apex CAA with two authorities. A local `github_pages_challenge` holds the verification value.
 
-- [ ] **Step 1: Get the verification value**
+- [x] **Step 1: Get the verification value**
 
 The owner's step 1 (spec, "Order of work"): add `dzwoniec.com` as a verified domain in the account's Pages settings (GitHub → Settings → Pages → _Add a domain_) and copy the value of the TXT record GitHub shows. It is public in DNS once applied. If the value is not in the conversation, stop and ask for it before the next step.
 
-- [ ] **Step 2: Add the value and the records**
+- [x] **Step 2: Add the value and the records**
 
 In `locals.tf`, `github_pages_challenge = "<value>"`, with a comment saying what it is and that GitHub issues it. In `dns.tf` add, in the style of the existing records (`zone_id = aws_route53_zone.main.zone_id`, `ttl = 3600`, a comment on each saying why it exists):
 - `aws_route53_record.pages_a`: apex, `A`, `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
@@ -78,20 +78,20 @@ In `locals.tf`, `github_pages_challenge = "<value>"`, with a comment saying what
 
 Before relying on the addresses, compare both lists with [GitHub's documentation of custom domains](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) and correct them if GitHub's differ.
 
-- [ ] **Step 3: Allow Let's Encrypt at the apex**
+- [x] **Step 3: Allow Let's Encrypt at the apex**
 
 Change `aws_route53_record.caa`'s `records` to `["0 issue \"amazon.com\"", "0 issue \"letsencrypt.org\""]` and rewrite its comment: Amazon's authority issues the app's certificates, and Let's Encrypt is there because GitHub Pages obtains the page's certificate from it (ADR 0044, written in Task 5); `szop` has its own record below.
 
-- [ ] **Step 4: Check**
+- [x] **Step 4: Check**
 
 Run: `pnpm check:infra` and `pnpm check:scan`
 Expected: both pass (format, validate, tflint; no new blocking finding).
 
-- [ ] **Step 5: Docs**
+- [x] **Step 5: Docs**
 
 `aws-resources.md`: add the new records to the Base diagram's Route 53 group and their rows to its table (the existing DKIM, CAA and MX boxes show the shape), and mention the CAA change. In the spec, replace "It is a Terraform variable the owner sets, like the other values that live outside the code." with "It is a constant in `locals.tf`: GitHub issues it and it is public in DNS."
 
-- [ ] **Step 6: Commit and push**
+- [x] **Step 6: Commit and push**
 
 ```bash
 git add infra docs

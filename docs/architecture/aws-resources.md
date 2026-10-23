@@ -40,7 +40,7 @@ flowchart LR
         end
     end
 
-    base["<b>base stack</b><br/>34 resources: IAM, Route 53, SES,<br/>ECR, CloudWatch Logs, SSM<br/><i>base</i>"]
+    base["<b>base stack</b><br/>39 resources: IAM, Route 53, SES,<br/>ECR, CloudWatch Logs, SSM<br/><i>base</i>"]
     demo["<b>demo stack</b><br/>33 resources: VPC, Elastic Load Balancing,<br/>ACM, Route 53, ECS, RDS<br/><i>demo</i>"]
 
     base -->|"keeps its state in<br/>base/terraform.tfstate"| bucket
@@ -85,7 +85,11 @@ flowchart LR
 
     subgraph route53["Route 53"]
         zone["Hosted zone<br/><b>dzwoniec.com</b><br/><i>base</i>"]
-        caa["CAA record<br/><b>dzwoniec.com</b><br/>only Amazon issues certificates<br/><i>base</i>"]
+        caa["CAA record<br/><b>dzwoniec.com</b><br/>Amazon and Let's Encrypt issue certificates<br/><i>base</i>"]
+        caaApp["CAA record<br/><b>szop.dzwoniec.com</b><br/>only Amazon issues certificates<br/><i>base</i>"]
+        pagesA["A and AAAA records<br/><b>dzwoniec.com</b><br/>GitHub Pages<br/><i>base</i>"]
+        pagesWww["CNAME record<br/><b>www.dzwoniec.com</b><br/>GitHub Pages<br/><i>base</i>"]
+        pagesChallenge["TXT record<br/><b>_github-pages-challenge-luiki-dev.dzwoniec.com</b><br/>domain verification<br/><i>base</i>"]
         mx["MX record<br/><b>dzwoniec.com</b><br/>null MX: no mail received<br/><i>base</i>"]
         spf["TXT record<br/><b>dzwoniec.com</b><br/>SPF: no server sends mail<br/><i>base</i>"]
         dmarc["TXT record<br/><b>_dmarc.dzwoniec.com</b><br/>DMARC: reject<br/><i>base</i>"]
@@ -127,6 +131,10 @@ flowchart LR
     execRole -->|can write to| logGroup
     execRole -->|can read| dbPass
     caa -->|in| zone
+    caaApp -->|in| zone
+    pagesA -->|in| zone
+    pagesWww -->|in| zone
+    pagesChallenge -->|in| zone
     mx -->|in| zone
     spf -->|in| zone
     dmarc -->|in| zone
@@ -135,7 +143,7 @@ flowchart LR
 
     classDef base fill:#bfdbfe,stroke:#1d4ed8,color:#1f2937
     class oidc,ciPlan,ciDeploy,ciRelease,polNetwork,polLb,polDns,polDb,polService,polImage,execRole,taskRole base
-    class zone,caa,mx,spf,dmarc,dkim,identity,repo,logGroup,authSecret,dbPass base
+    class zone,caa,caaApp,pagesA,pagesWww,pagesChallenge,mx,spf,dmarc,dkim,identity,repo,logGroup,authSecret,dbPass base
 ```
 
 The managed policies attached to `szop-ci-deploy` reach demo's resources by their tags and ARN patterns, not by reference, so the diagram draws no arrows from them into demo. The overview shows that link. The same goes for the task execution role's grant on the master password secret RDS creates in demo.
@@ -155,7 +163,11 @@ The managed policies attached to `szop-ci-deploy` reach demo's resources by thei
 | Role `szop-app-task-execution` | `aws_iam_role.app_task_execution`, `aws_iam_role_policy.app_task_execution` |
 | Role `szop-app-task` | `aws_iam_role.app_task`, `aws_iam_role_policy.app_task` |
 | Hosted zone `dzwoniec.com` | `aws_route53_zone.main` |
-| CAA record | `aws_route53_record.caa` |
+| CAA record (`dzwoniec.com`) | `aws_route53_record.caa` |
+| CAA record (`szop.dzwoniec.com`) | `aws_route53_record.caa_app` |
+| A and AAAA records (GitHub Pages) | `aws_route53_record.pages_a`, `aws_route53_record.pages_aaaa` |
+| CNAME record (`www`) | `aws_route53_record.pages_www` |
+| TXT record (domain verification) | `aws_route53_record.pages_challenge` |
 | MX record | `aws_route53_record.null_mx` |
 | TXT record (SPF) | `aws_route53_record.apex_txt` |
 | TXT record (DMARC) | `aws_route53_record.dmarc` |
