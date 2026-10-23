@@ -14,7 +14,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **AWS** | Amazon Web Services | Amazon's cloud platform, the largest hyperscaler. Szop's demo environment runs on it (see ADR 0008). |
 | **AZ** | Availability Zone | One of several separate data centers within an AWS region, with independent power and networking. |
 | **CA** | Certificate Authority | An organisation whose signature on a TLS certificate vouches that the certificate belongs to the name it carries. A client trusts a list of CAs, a CA bundle; with `DATABASE_TLS=verify-full` the API trusts only Amazon's RDS bundle (see ADR 0033). |
-| **CAA** | Certification Authority Authorization | A DNS record naming the certificate authorities allowed to issue certificates for a domain. Szop's allows only Amazon (see ADR 0030). |
+| **CAA** | Certification Authority Authorization | A DNS record naming the certificate authorities allowed to issue certificates for a domain. Szop's allows Amazon and Let's Encrypt at the apex and only Amazon on `szop.dzwoniec.com` (see ADR 0030 and ADR 0044). |
 | **CalVer** | Calendar Versioning | Version numbers built from the release date, such as `2026.10.0`. Considered, not used (see ADR 0009). |
 | **CDK** | Cloud Development Kit | AWS's infrastructure-as-code tool in general-purpose languages such as TypeScript. Considered, not used (see ADR 0008). |
 | **CDN** | Content Delivery Network | A network of servers around the world that serves static files close to users and can absorb or filter traffic floods in front of the application. |
@@ -217,6 +217,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **GitHub Actions: workflow, job, runner** | GitHub's CI/CD service. A **workflow** is a YAML file in `.github/workflows/` started by an event (a push, a PR, a schedule, a button); it holds **jobs**, which run in parallel unless one needs another, each on a fresh virtual machine, the **runner**. |
 | **GitHub App** | An integration registered on GitHub with its own identity (`name[bot]`) and narrowly chosen permissions; it gets tokens that expire within an hour. Szop's release-please runs as one (see ADR 0010). |
 | **GitHub flow** | A branching model where `main` is always releasable and every change is made on a short-lived branch merged through a pull request. Szop uses it (see ADR 0009). |
+| **GitHub Pages** | GitHub's free hosting for static files. Szop's landing page, `apps/landing/`, is deployed to it by `pages.yml` and served on `dzwoniec.com`; Pages obtains the HTTPS certificate itself, from Let's Encrypt. |
 | **GitHub Projects** | GitHub's planning tool: a project collects issues from one or more repositories and shows them as a table, a board or a timeline, with custom fields such as a status. Szop's project tracks its phases, open points and decision work (see ADR 0024). |
 | **GitOps** | Running infrastructure from git: merging a change to the main branch applies it automatically. Considered for `infra/base`, not used (see ADR 0010). |
 | **Grace period (ECS)** | The seconds after a task starts during which ECS ignores the load balancer's health checks, so a slow image pull or a long migration does not get the task killed before it listens. ECS also counts a new task healthy only once it has passed, so it sets how long two versions serve side by side during a deploy. Szop's is 60 seconds (PH-12d). |
@@ -239,6 +240,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Job summary** | The page of a GitHub Actions run (its *Summary* tab) where a job can write Markdown. Szop's `test` job shows Vitest's test report and a coverage table there. |
 | **jsdom** | A simulated browser DOM that runs inside Node.js, so component tests can render and click without a real browser. It has no layout engine. |
 | **k-anonymity** | Sending only part of a secret's hash, so that the answer covers many possible secrets and the server cannot tell which one was meant. Have I Been Pwned's password check works this way: only the first 5 characters of a SHA-1 hash leave the server. |
+| **Let's Encrypt** | A free certificate authority that issues certificates automatically. GitHub Pages gets the landing page's certificate from it, so the CAA record on `dzwoniec.com` has to allow `letsencrypt.org`. |
 | **Lazy creation** | Creating something only when it is first needed. Szop creates a guest's workspace on their first change, not on their first visit. |
 | **Least privilege** | Giving every identity only the permissions it needs, so a leak or bug can do little harm. Szop's app role may only accept ECS Exec sessions today (and send email from PH-18). |
 | **Lighthouse** | Google's tool, built into Chrome, that loads a page while simulating a slow phone and reports performance, accessibility and other scores. |
@@ -259,6 +261,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Named volume** | Storage that Docker keeps apart from any container, so data survives the container's removal. PostgreSQL's data lives in one (`postgres-data` in `compose.yaml`); `docker compose down -v` deletes it. |
 | **Nonce (CSP)** | A random value the server puts in the Content Security Policy and on the inline scripts or styles it allows, new for every response. Szop serves a static `index.html`, so it uses none. |
 | **One-off task (ECS)** | A task started once with `aws ecs run-task`, outside any service: it runs its command, stops and leaves an exit code. `db-setup` is one. |
+| **Opaque response** | What a browser gives a page for a `no-cors` request to another origin that sends no CORS headers: the request completes, but the page can read neither the status nor the body. The landing page uses it to tell that the demo answers, without a change to the application. |
 | **Open point** | Something still undecided or not yet done that has been left to a later topic or phase. Szop tracks every one, open or closed, as a GitHub issue labelled `open-point`, with an `OP-` ID, a sub-issue of the phase that will settle it (see [ADR 0027](decisions/0027-open-points-on-github.md), decision 2). The register that held them before is archived in `docs/archive/`. |
 | **OpenAPI** | A standard, machine-readable description of a REST API, from which documentation and clients can be generated. |
 | **Optimistic update** | Updating the screen immediately as if a request succeeded, then correcting it if the server disagrees. |

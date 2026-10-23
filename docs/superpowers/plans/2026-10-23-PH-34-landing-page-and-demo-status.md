@@ -253,11 +253,11 @@ Stop. **Owner:** open `https://dzwoniec.com`; with the demo down the dot is a gr
 - Create: `docs/decisions/0044-landing-page-details.md`
 - Modify: `docs/decisions/0030-domain-and-base-infrastructure-details.md`, `docs/roadmap.md`, `README.md`, `docs/architecture/threat-model.md`, `docs/architecture/stack-overview.md`, `docs/architecture/architecture.md`, `docs/glossary.md`, `docs/operations/demo-environment.md`, `.github/workflows/pages.yml`
 
-- [ ] **Step 1: The ADR**
+- [x] **Step 1: The ADR**
 
 `0044-landing-page-details.md`, shaped like [ADR 0041](../../decisions/0041-security-scanners-details.md), with the spec's nine decisions, their alternatives and reasons, and the consequences. Header: `Refines:` ADR 0030, decision 13 (the redirect is dropped; OP-092 is settled differently). Note it in the three places CLAUDE.md asks: ADR 0030's status line, and a `✏️ **Refined by [ADR 0044](0044-landing-page-details.md), decision 2:**` line at the bottom of decision 13's cell. Also note in ADR 0030's consequences that the CAA now names Let's Encrypt.
 
-- [ ] **Step 2: The living docs**
+- [x] **Step 2: The living docs**
 
 - `roadmap.md`: rewrite PH-34's entry (goal and delivers without the redirect, the owner steps of the spec, the plan link in its stage-table row, then the PR link when the PR opens) and update the README's diagram with it.
 - `threat-model.md`: the page as a public entry point on third-party hosting; domain takeover and the verification record that guards against it; the CAA change.
@@ -266,15 +266,15 @@ Stop. **Owner:** open `https://dzwoniec.com`; with the demo down the dot is a gr
 - `glossary.md`: CAA, Let's Encrypt, GitHub Pages and any other new term.
 - `demo-environment.md`: a section for the landing page with the owner's steps, including restoring the `github-pages` environment to `main` only after the merge.
 
-- [ ] **Step 3: Remove the temporary trigger**
+- [x] **Step 3: Remove the temporary trigger**
 
 Only after the owner confirms that `https://dzwoniec.com` is served with HTTPS: remove `feat/landing-page` from `pages.yml`'s `push` branches and its comment, and run `pnpm check:workflows`.
 
-- [ ] **Step 4: Tracking on GitHub**
+- [x] **Step 4: Tracking on GitHub**
 
 Close [#202](https://github.com/luiki-dev/szop/issues/202) (OP-092) as completed with the comment "settled by PH-34 and ADR 0044: the page is on GitHub Pages; the redirect was dropped". Rewrite [#206](https://github.com/luiki-dev/szop/issues/206) and add owner-step issues for the roadmap entry's new owner steps, as sub-issues of [#205](https://github.com/luiki-dev/szop/issues/205); update #205's body to match the roadmap entry. Anything the owner steps change in the Szop project's fields (Status, Spec, Plan) is the owner's.
 
-- [ ] **Step 5: Check, commit and push**
+- [x] **Step 5: Check, commit and push**
 
 Run: `pnpm check` and `pnpm check:workflows`
 Expected: pass.

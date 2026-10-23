@@ -19,6 +19,7 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
   - [Infrastructure as code and Terraform](#infrastructure-as-code-and-terraform)
   - [The AWS account](#the-aws-account)
   - [Domains, DNS and email authentication](#domains-dns-and-email-authentication)
+  - [Static hosting: the landing page](#static-hosting-the-landing-page)
   - [The pieces, from the network inwards](#the-pieces-from-the-network-inwards)
   - [The demo's network and load balancer](#the-demos-network-and-load-balancer)
   - [ECS and RDS: the app and its database](#ecs-and-rds-the-app-and-its-database)
@@ -235,6 +236,16 @@ Email was built without proof of who sent a message: anyone can write any addres
 - **DKIM** (DomainKeys Identified Mail): the sender signs each message, and the receiver checks the signature against a public key published in DNS under the signing domain (`d=`). SES signs Szop's mail for `dzwoniec.com`, with its keys behind three CNAME records that point at Amazon.
 - **SPF** (Sender Policy Framework): a TXT record listing the servers allowed to send with the domain as the **envelope sender**, the hidden return address that bounces go to. SES uses its own `amazonses.com` as envelope sender, so nothing sends with `dzwoniec.com` there, and Szop's SPF record, `v=spf1 -all`, allows no one.
 - **DMARC** (Domain-based Message Authentication, Reporting and Conformance): a TXT record at `_dmarc.<domain>` telling receivers what to do with a message whose `From` domain is not backed by a passing DKIM or SPF check for the same domain (**alignment**; "relaxed" alignment lets a subdomain count as the same domain). Szop's, `p=reject`, asks receivers to refuse such messages. Szop's own mail passes through DKIM; a forgery in its name passes neither and is rejected.
+
+### Static hosting: the landing page
+
+`dzwoniec.com` itself serves a **static** page, one that is only files: HTML, CSS, a script and a picture, the same for every visitor, with no server code that runs per request ([ADR 0044](../decisions/0044-landing-page-details.md)). A static page needs no application server and no database, so it can be served by any host of files; Szop's is on **GitHub Pages**, GitHub's free host for them.
+
+- **Deployment.** A workflow, `pages.yml`, uploads the folder `apps/landing/` as a Pages **artifact** and a second job deploys it. The page has no build step: what is in the folder is what visitors get. The alternative, publishing a branch, can serve only a repository's root or its `docs/` folder, which here hold the application and the documentation.
+- **DNS.** The apex of a domain cannot be a CNAME, so Route 53 holds **A** and **AAAA** records with GitHub's addresses; `www` is a CNAME to Pages, which redirects it to the apex. A **TXT** record proves that the owner's account controls the domain, so no one else's Pages site can claim it.
+- **The certificate.** Pages obtains its own, from **Let's Encrypt**, a free certificate authority that issues and renews certificates automatically. AWS's certificates (ACM) work only inside AWS services and cannot be exported, so they cannot serve the page. Because of the CAA record ([above](#domains-dns-and-email-authentication)), Let's Encrypt refuses to issue unless the record names it, so the apex's record allows `amazon.com` and `letsencrypt.org`. A CAA record on a name takes precedence over its parent's, and `szop.dzwoniec.com` has one of its own, so the app's name stays with Amazon.
+- **The status dot.** The page asks the demo whether it answers: `fetch` of `https://szop.dzwoniec.com/api/health`. The page and the demo are on different **origins**, and the application sends no **CORS** headers, so a normal request would be blocked and its result unreadable. A `no-cors` request is still sent, and the browser hands the page an **opaque response**: it cannot read the status or the body, but it knows the request completed. If the demo is down there is no DNS record, so the request fails; if the request outlives five seconds it is cancelled. So the page can tell "an answer" from "none", and nothing more: a `503` from the load balancer while the tasks start counts as an answer. Reading the status would need CORS headers on `/api/health`, which a later phase can add.
+- **No redirect.** While the demo is down, `szop.dzwoniec.com` has no DNS record and shows a browser error. Redirecting it to the page would need a second Pages site (one site serves one domain) or CloudFront, plus a way to put the record back when the demo is destroyed; the owner left it out.
 
 ### The pieces, from the network inwards
 

@@ -9,13 +9,7 @@ name: pages
 
 on:
   push:
-    branches:
-      - main
-      # Temporary: the first deployment comes from the phase's branch, so the
-      # owner can set up the domain and its certificate while the rest is built.
-      # A manual run needs this file on the default branch; a push does not.
-      # The last task of PH-34 removes this line.
-      - feat/landing-page
+    branches: [main]
     paths:
       - apps/landing/**
       - .github/workflows/pages.yml

@@ -276,7 +276,7 @@ The App, its permissions and the ruleset's bypass are in [GitHub settings](githu
 
 `pages.yml` deploys `apps/landing/` to GitHub Pages, which serves it on `dzwoniec.com` ([ADR 0044](../decisions/0044-landing-page-details.md), written in PH-34). It is a workflow of its own, not a job of `ci.yml`: the page is deployed after the merge and never from a PR, and its permissions (`pages: write` and `id-token: write`) belong to no job of `ci.yml`.
 
-- **Trigger:** a push to `main` that changes `apps/landing/**` or `pages.yml` itself, and a manual run. While PH-34 is open it also runs on pushes to `feat/landing-page`, so the first deployment comes before the merge; the last task of the phase removes that.
+- **Trigger:** a push to `main` that changes `apps/landing/**` or `pages.yml` itself, and a manual run. While PH-34 was open it also ran on pushes to its branch, `feat/landing-page`, so the first deployment came before the merge (a manual run needs the workflow on the default branch, a push does not); that trigger is gone.
 - **Two jobs.** `build` holds `contents: read`, checks the repository out and uploads `apps/landing` as the Pages artifact, with no build step. `deploy` holds `pages: write` and `id-token: write`, names the `github-pages` environment and deploys the artifact; the id token is how Pages checks that the deployment comes from this workflow.
 - **The checks of the page's files** (ESLint, Prettier, the unit tests) run in `ci.yml` on the PR, as for any code: the page counts as code in [change detection](#change-detection), and a change to `pages.yml` runs the `workflows` job.
 - **The environment** `github-pages` and its deployment-branch rule are in the [GitHub settings](github-settings.md#environments).

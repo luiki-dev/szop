@@ -303,10 +303,10 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ### PH-34 Landing page and demo status
 
-- **Goal:** `dzwoniec.com` always serves a static page that shows whether Szop's demo is up, with a link to it when it is. While no demo runs, `szop.dzwoniec.com` redirects to the page instead of failing.
-- **Delivers:** the static page and its hosting; `szop.dzwoniec.com` redirecting to it while the demo is down, which changes how `demo-down` treats the `szop` record; the status check on the page ([ADR 0030](decisions/0030-domain-and-base-infrastructure-details.md), decision 13).
+- **Goal:** `dzwoniec.com` always serves a static page, hosted on GitHub Pages, with a drawing of the greenfinch, a short text and a footer link to Szop whose dot shows whether the demo is up.
+- **Delivers:** the page in `apps/landing/` (plain HTML, CSS and JavaScript, no build, on paper like the drawing, with a dot for the demo's state: a filled green dot for up, a grey ring for down) and `pages.yml`, which deploys it to GitHub Pages; the DNS records Pages needs in `infra/base` (A and AAAA for the apex, `www`, the domain's verification TXT), the apex's CAA record also allowing Let's Encrypt and a CAA record of its own on `szop.dzwoniec.com` that keeps the app's name with Amazon; the status check, a `no-cors` request to `/api/health` every 30 seconds while the tab is visible, with unit tests; **no redirect** from `szop.dzwoniec.com` while the demo is down, which [ADR 0030](decisions/0030-domain-and-base-infrastructure-details.md), decision 13, had planned and which needed a second repository or CloudFront. The details are in [ADR 0044](decisions/0044-landing-page-details.md).
 - **Depends on:** PH-12c.
-- **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge, if the phase changes it.
+- **Owner steps:** add `dzwoniec.com` as a verified domain in the account's Pages settings; apply `infra/base` from the branch, and again from `main` after the merge; set Pages up (source _GitHub Actions_, custom domain `dzwoniec.com`), allow the phase's branch in the `github-pages` environment, wait for the certificate and tick _Enforce HTTPS_; after the merge, remove the branch from the environment's rule. The page is not part of the demo, so there is no `demo-up` check.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#205](https://github.com/luiki-dev/szop/issues/205).
 

@@ -35,6 +35,7 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [The app's roles and database password](#the-apps-roles-and-database-password)
   - [CI's roles and variables](#cis-roles-and-variables)
   - [Cost allocation tags](#cost-allocation-tags)
+- [The landing page](#the-landing-page)
 - [Spinning up](#spinning-up)
   - [Service-linked roles](#service-linked-roles)
   - [Pressing the button](#pressing-the-button)
@@ -306,7 +307,7 @@ The domains API exists only in `us-east-1`, hence `--region`.
 
 ## Applying base
 
-`infra/base` holds what outlives every demo: the domain's zone with its Certification Authority Authorization (CAA), Mail Exchanger (MX) and mail records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)), the app's two roles and the password of its database role ([PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds)), and CI's access to AWS: the GitHub OIDC provider and the two roles `szop-ci-plan` and `szop-ci-deploy` ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
+`infra/base` holds what outlives every demo: the domain's zone with its Certification Authority Authorization (CAA), Mail Exchanger (MX), mail and landing-page records, SES's identity for `dzwoniec.com`, the image registry `szop`, the Better Auth secret and the log group `/szop/app` ([ADR 0030](../decisions/0030-domain-and-base-infrastructure-details.md)), the app's two roles and the password of its database role ([PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds)), and CI's access to AWS: the GitHub OIDC provider and the two roles `szop-ci-plan` and `szop-ci-deploy` ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md)). It is applied from your machine after [Buying the domain](#buying-the-domain), and again whenever its code changes: first from the PR's branch, then from `main` after the merge.
 
 ### The first apply
 
@@ -488,6 +489,21 @@ aws ecr describe-images --repository-name szop --image-ids imageTag=0.1.0 --quer
 Once the access portal works (step 5) and a resource that carries the tags exists, which `infra/bootstrap` and `infra/base` provide, make the cost reports group by them. Signed in through the access portal, *Billing and Cost Management → Cost allocation tags*: under *User-defined cost allocation tags*, select `group` and `project`, then *Activate*. These are the two tags every Szop resource carries, so Cost Explorer can group the spending by module ([ADR 0008](../decisions/0008-hosting.md), decision 26). A tag shows in the list only after a resource carrying it exists, which can take up to 24 hours, and its cost data starts from the moment of activation, never earlier: do it before the first demo, not after. This needs step 3's *Activate IAM Access* first ([OP-094](https://github.com/luiki-dev/szop/issues/209)).
 
 **Check:** *Cost allocation tags* opens for your Identity Center user and lists `group` and `project` as *Active*.
+
+## The landing page
+
+`dzwoniec.com` serves the landing page from GitHub Pages ([ADR 0044](../decisions/0044-landing-page-details.md)). Its DNS records are in `infra/base`; the rest is set up in GitHub. Once, in this order, so that the certificate is issued while the rest is built:
+
+1. **Verify the domain for your account.** GitHub → your account's *Settings → Pages → Add a domain*, `dzwoniec.com`. GitHub shows a TXT record named `_github-pages-challenge-luiki-dev.dzwoniec.com`. Its value is the constant `github_pages_challenge` in `infra/base/locals.tf`; put it there before the next step, and press *Verify* after the apply.
+2. **Apply `infra/base`** from the branch, as in [Applying base](#applying-base). `terraform plan` should show five additions (`pages_a`, `pages_aaaa`, `pages_www`, `pages_challenge`, `caa_app`) and one change in place (`caa`). Apply again from `main` after the merge.
+3. **Set Pages up.** The repository's *Settings → Pages*: source **GitHub Actions**, custom domain `dzwoniec.com`. Under *Settings → Environments → `github-pages`*, allow the branch that deploys first (`feat/landing-page` for PH-34) beside `main`. Run `pages.yml` by a push to that branch, or re-run its last run.
+4. **Wait for the certificate**, which can take up to about an hour: the DNS check beside the domain turns green, and *Enforce HTTPS* becomes available. Tick it.
+5. **Check** `https://dzwoniec.com` (200, and `curl -vI https://dzwoniec.com` names Let's Encrypt as the issuer), `https://www.dzwoniec.com` (ends on the apex) and `http://dzwoniec.com` (ends on HTTPS).
+6. **After the merge, remove the branch** from the `github-pages` environment's rules, so that only `main` deploys, and check that `pages.yml` ran on `main`.
+
+If *Enforce HTTPS* stays unavailable for over an hour, check that the apply went through and that `dig CAA dzwoniec.com +short` lists `letsencrypt.org`, then remove the custom domain in the repository's Pages settings and add it again, which starts the issuing afresh.
+
+The page's dot is grey while no demo runs and green while one does: it asks `https://szop.dzwoniec.com/api/health` every 30 seconds while the tab is visible. To see it green, press `demo-up` ([Pressing the button](#pressing-the-button)) and open the page.
 
 ## Spinning up
 
