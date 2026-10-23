@@ -164,7 +164,7 @@ Leave every other rule off.
 | After creating | **Generate a private key** (a `.pem` file); copy the **Client ID** | Stored in the `release` environment as `RELEASE_APP_PRIVATE_KEY` (the file's whole content) and `RELEASE_APP_CLIENT_ID`. Delete the downloaded file afterwards. |
 | Install App | On `luiki-dev/szop` only (*Only select repositories*) | Its token can reach nothing else. |
 
-Then add the App to the [version tags ruleset](#ruleset-for-version-tags)'s bypass list. **Rotating the key:** generate a new one in the App's settings, replace the secret, then delete the old key there.
+Then add the App to the [version tags ruleset](#ruleset-for-version-tags)'s bypass list, and **check that it was saved** (the command is under [Checking the settings](#checking-the-settings)). The first release failed because the bypass list was empty, though the owner had added the App: the first run of `release-please.yml` on `main` was refused with `Cannot create ref due to creations being restricted` and tagged nothing ([ADR 0043](../decisions/0043-cloud-session-setup.md)). **Rotating the key:** generate a new one in the App's settings, replace the secret, then delete the old key there.
 
 ## Security
 
@@ -237,6 +237,10 @@ gh variable list --repo luiki-dev/szop
 gh variable list --repo luiki-dev/szop --env release
 gh secret list --repo luiki-dev/szop --env release
 
+# The bypass list of the version tags ruleset: it must name the release App
+gh api repos/luiki-dev/szop/rulesets --jq '.[] | select(.name=="version-tags") | .id' \
+  | xargs -I{} gh api repos/luiki-dev/szop/rulesets/{} --jq '.bypass_actors'
+
 # Labels, milestones and the project
 gh label list --repo luiki-dev/szop
 gh api "repos/luiki-dev/szop/milestones?state=all"
@@ -250,6 +254,6 @@ Expected:
 - `sha_pinning_required` is `true`.
 - `default_workflow_permissions` is `read` and `can_approve_pull_request_reviews` is `false`.
 - `approval_policy` is `all_external_contributors`.
-- The environment `demo-teardown` exists with `protection_rules` empty (no reviewer) and `deployment_branch_policy` set to `custom_branch_policies: true`; its one branch policy has the name `main`. The environment `demo` has one `required_reviewers` rule naming the owner, with `prevent_self_review` `false`, and `deployment_branch_policy` `null` (no restriction). The environment `release` has `protection_rules` with no reviewer and one branch policy named `main`. `gh variable list` shows `AWS_PLAN_ROLE_ARN`, `AWS_DEPLOY_ROLE_ARN` and `AWS_RELEASE_ROLE_ARN`, and no other variable; for `release` it shows `RELEASE_APP_CLIENT_ID`, and `gh secret list` shows `RELEASE_APP_PRIVATE_KEY`.
+- The environment `demo-teardown` exists with `protection_rules` empty (no reviewer) and `deployment_branch_policy` set to `custom_branch_policies: true`; its one branch policy has the name `main`. The environment `demo` has one `required_reviewers` rule naming the owner, with `prevent_self_review` `false`, and `deployment_branch_policy` `null` (no restriction). The `version-tags` ruleset's `bypass_actors` holds one entry, `actor_type` `Integration` with `bypass_mode` `always`: the release App. An empty list (`[]`) means the App was not saved, and the first release would fail. The environment `release` has `protection_rules` with no reviewer and one branch policy named `main`. `gh variable list` shows `AWS_PLAN_ROLE_ARN`, `AWS_DEPLOY_ROLE_ARN` and `AWS_RELEASE_ROLE_ARN`, and no other variable; for `release` it shows `RELEASE_APP_CLIENT_ID`, and `gh secret list` shows `RELEASE_APP_PRIVATE_KEY`.
 - CodeQL's `state` is `configured`, with `actions` among its `languages` once the workflows are on `main` (until then, only the JavaScript and TypeScript entries; [OP-067](https://github.com/luiki-dev/szop/issues/27)).
 - Seven labels; six milestones, with `Definition` and `Stage 1: Local foundations` closed; the project is public.
