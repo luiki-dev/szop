@@ -3,9 +3,42 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>dzwoniec.com</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src https://szop.dzwoniec.com; base-uri 'none'; form-action 'none'"
+    />
+    <title>Greenfinch (dzwoniec)</title>
+    <meta
+      name="description"
+      content="Greenfinch (dzwoniec), a small passerine bird in the finch family. A bad impersonator of a wheezing kettle."
+    />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <p>This page is on its way.</p>
+    <main>
+      <figure>
+        <img
+          src="dzwoniec.png"
+          width="600"
+          height="600"
+          alt="A greenfinch perched on a lichen-covered twig, drawn in coloured pencil on paper."
+        />
+        <figcaption>
+          <p>
+            <strong>Greenfinch</strong> (dzwoniec) - a small passerine bird in
+            the finch family Fringillidae.
+          </p>
+          <p>
+            A bad impersonator of wheezing kettle. Bully at garden feeders.
+            Spitter.
+          </p>
+        </figcaption>
+      </figure>
+    </main>
+    <footer>
+      <a id="szop-link" href="https://szop.dzwoniec.com">Szop</a>
+      <span id="demo-dot" class="dot"></span>
+      <span id="demo-text" class="sr-only"></span>
+    </footer>
   </body>
 </html>

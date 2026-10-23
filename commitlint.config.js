@@ -45,6 +45,8 @@ export default {
         "sync",
         "limits",
         "connectivity",
+        // The landing page on dzwoniec.com (PH-34).
+        "landing",
         // Docs
         "adr",
         "spec",

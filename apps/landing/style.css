@@ -1,0 +1,135 @@
+/* The page is a drawing on paper, so the page is paper: --paper is the colour
+   of the picture's edges (sampled from dzwoniec.png), and the picture fades
+   into it. There is no dark scheme: the paper is the design. */
+@font-face {
+  font-family: "Gabarito Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url("fonts/gabarito-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root {
+  color-scheme: light;
+  --paper: #fbf8f2;
+  --ink: #3a382f;
+  --muted: #67634f;
+  --up: #3f7357;
+  --down: #857f70;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Gabarito Variable", system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+main {
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+figure {
+  margin: 0;
+  width: min(100%, 600px);
+}
+
+img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Fades the picture's paper into the page's. */
+  mask-image: radial-gradient(ellipse closest-side, #000 90%, transparent);
+}
+
+figcaption {
+  max-width: 34rem;
+  margin: 0.5rem auto 0;
+  padding: 0 0.5rem;
+  text-align: center;
+}
+
+figcaption p {
+  margin: 0 0 0.5rem;
+}
+
+figcaption p:last-child {
+  color: var(--muted);
+}
+
+footer {
+  padding: 1.25rem 1rem 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+a {
+  color: var(--ink);
+  text-underline-offset: 0.2em;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--up);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* The status dot: about the size of a capital "O". Drawn only once the script
+   has set data-state. Up is a filled dot, down a ring, so the two differ by
+   more than colour. */
+.dot {
+  display: none;
+  width: 0.75em;
+  height: 0.75em;
+  margin-left: 0.4em;
+  border-radius: 50%;
+  vertical-align: baseline;
+}
+
+.dot[data-state] {
+  display: inline-block;
+}
+
+.dot[data-state="up"] {
+  background: var(--up);
+}
+
+.dot[data-state="down"] {
+  border: 0.14em solid var(--down);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The bird is drawn onto the paper. */
+  img {
+    animation: draw-in 900ms ease-out both;
+  }
+
+  @keyframes draw-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+}
