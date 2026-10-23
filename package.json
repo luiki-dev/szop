@@ -14,7 +14,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit && pnpm -r typecheck",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p apps/landing && pnpm -r typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "pnpm test --coverage",

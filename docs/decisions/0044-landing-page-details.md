@@ -1,0 +1,41 @@
+# ADR 0044 — Landing page details
+
+- **Status:** ✅ Accepted
+- **Date:** 2026-10-23
+- **Refines:** [ADR 0030](0030-domain-and-base-infrastructure-details.md), decisions 6 (the CAA record also allows Let's Encrypt at the apex, and the `szop` name gets a record of its own, see decision 3) and 13 (what the domain serves while no demo runs: a page on GitHub Pages, and no redirect from `szop.dzwoniec.com`, see decisions 1 and 2)
+
+## Context
+
+[ADR 0030](0030-domain-and-base-infrastructure-details.md), decision 13, settled [OP-092](https://github.com/luiki-dev/szop/issues/202) in direction: a scheduled phase, [PH-34](../roadmap.md#ph-34-landing-page-and-demo-status), where `dzwoniec.com` always serves a static page that shows whether the demo is up, and `szop.dzwoniec.com` redirects to the page while the demo is down. The phase's brainstorm settled how.
+
+The owner wanted a simple page and no new territory: a drawing of a greenfinch (_dzwoniec_), a short text and a footer link to Szop with a dot for the demo's state. That ruled out the AWS options for the page (S3 with CloudFront), and, once the redirect turned out to need one of them, the redirect itself. The [spec](../superpowers/specs/2026-10-23-PH-34-landing-page-and-demo-status-design.md) holds the design in full; this ADR records the decisions and the alternatives.
+
+## Decisions
+
+| # | Topic | Options considered | Decision and reasoning |
+|---|---|---|---|
+| 1 | Where the page is hosted | S3 with CloudFront; GitHub Pages deployed from a branch; GitHub Pages deployed by a workflow | **GitHub Pages, deployed by a workflow** (`pages.yml`) _(the owner's choice: simple)_. No AWS resources beyond DNS records and no cost. The branch source publishes only a repository's root or `/docs`: the root holds the application and `docs/` the documentation, which would be published too. An orphan branch holding only the page would skip pull requests, CI and the page's tests. The workflow keeps the page in `apps/landing/`, reviewed and checked like the rest. |
+| 2 | The redirect from `szop.dzwoniec.com` | A second Pages repository; CloudFront with a function; Route 53 failover with a health check; none | **None** _(the owner's choice)_. GitHub Pages serves one custom domain per site and Route 53 cannot redirect, so a redirect needs a second repository, or CloudFront plus a way to hand the `szop` record back to a fallback when `demo-down` removes the demo's. Each is a concept of its own, and the owner chose to leave `szop.dzwoniec.com` as it is: it resolves only while the demo runs, and the page tells whether it does. `infra/demo`, `demo-down` and the deploy role do not change. This drops the redirect that [ADR 0030](0030-domain-and-base-infrastructure-details.md), decision 13, planned. |
+| 3 | The certificate authority for the page | An ACM certificate for the apex | **Let's Encrypt, which GitHub Pages uses, so the apex's CAA record allows `amazon.com` and `letsencrypt.org`; a CAA record on `szop.dzwoniec.com` allows `amazon.com` only.** ACM public certificates work only inside AWS services and cannot be exported, and Pages accepts no certificate of one's own. Without the record Let's Encrypt refuses to issue and Pages cannot switch HTTPS on. A CAA record on a name takes precedence over its parent's, so the app's name stays with Amazon, as [ADR 0030](0030-domain-and-base-infrastructure-details.md), decision 6, decided; the record is in `infra/base` and does not clash with the demo's `A` record on the same name. `www.dzwoniec.com` is a CNAME to Pages, so a CAA lookup for it follows GitHub's side first: a certificate problem for `www` starts there. |
+| 4 | The page's technology | A framework or a bundler | **Plain HTML, CSS and JavaScript in `apps/landing/`, with no build,** not a pnpm workspace package. One page; a build would be its only moving part. Not being a package keeps the lockfile and the Dockerfile as they are. ESLint, Prettier, `tsc` (`checkJs`) and Vitest cover the folder through their root configuration. |
+| 5 | The status check | CORS headers on `/api/health`, so the page reads the status; a `no-cors` request | **A `no-cors` `fetch` of `https://szop.dzwoniec.com/api/health`; the application does not change** _(the owner's choice)_. Any answer resolves the request (as an opaque response) and no answer rejects it: no DNS record while the demo is down, no connection, or the timeout of 5 seconds. So the page tells "an answer" from "none", but not the status code: a `503` from the load balancer while tasks start counts as up. CORS would show the code but needs a change to the application, a test and a threat-model entry; it can follow later. |
+| 6 | How often | On load only; also while the tab is open | **On load, then every 30 seconds while the tab is visible, and when it becomes visible** _(the owner's choice)_. `demo-up` takes minutes, so an open page corrects itself. No check runs while another is in flight. |
+| 7 | The "Szop" link while the demo is down | Plain text; a link | **Always a link** _(the owner's choice)_. One state less. The dot already says the demo is down. |
+| 8 | The domain's verification | None | **A TXT record, `_github-pages-challenge-luiki-dev.dzwoniec.com`,** with the value GitHub issues, as a constant in `infra/base/locals.tf` (public in DNS). Another account's Pages site cannot claim a domain verified for the owner's. |
+| 9 | Tests | A Playwright test with the health request intercepted | **Unit tests of `checkDemo`; no end-to-end test** _(the owner's choice)_. The function holds the logic and has a fake `fetch`; the wiring is a few lines; the page is checked by hand on the real domain. |
+| 10 | The page's look _(the owner's choice, on screenshots)_ | The application's `fur` background and sage accent, with a dark scheme | **The page is paper.** The picture is a coloured-pencil drawing on paper, so the background is the colour of its edges (`#fbf8f2`, sampled from the file), a soft mask fades the picture into it, and there is no dark scheme. The typeface stays the design system's Gabarito, self-hosted (34 KB, with its licence). The picture is drawn onto the paper on load, unless the system asks for reduced motion. The dot is the size of a capital "O": a filled green dot for up, a grey ring for down, so the two differ by more than colour, with a hidden text and a `title` for the rest. |
+
+## Consequences
+
+- `infra/base` gains five records (`pages_a`, `pages_aaaa`, `pages_www`, `pages_challenge`, `caa_app`) and its apex CAA gains Let's Encrypt. The owner applies it from the branch before the page is set up, and again from `main` after the merge.
+- `szop.dzwoniec.com` shows a browser error whenever the demo is down; only the page explains it. A future phase can add the redirect with CloudFront, or a second Pages repository, if it is wanted.
+- The page is served from the `github-pages` environment, which GitHub creates restricted to the default branch. The first deployment came from the phase's branch, through a temporary trigger of `pages.yml` and a temporary rule in the environment; both are removed when the PR is merged.
+- The Content Security Policy is a `<meta>` tag, since Pages sets no headers: `default-src 'self'; connect-src https://szop.dzwoniec.com; base-uri 'none'; form-action 'none'`. It cannot set `frame-ancestors`, so the page can be framed.
+- The commit scope `landing` is added to `commitlint.config.js`.
+- Costs: nothing; Pages is free for a public repository, and Route 53 charges nothing for the records beyond the zone.
+
+## Settled while building
+
+- **`ci.yml` needed no change.** Its `changes` job already counts every file that is not Markdown as code, and everything under `.github/workflows/` as workflows, so the page's files run the lint, format, type and test jobs and `pages.yml` runs the workflow checks.
+- **A manual run of `pages.yml` needs the workflow on the default branch.** The first deployment therefore came from a push to the phase's branch, through the temporary trigger.
+- **Action pins:** `actions/upload-pages-artifact` v5.0.0 (2026-04-08) and `actions/deploy-pages` v5.0.1 (2026-09-01), each the commit of its tag.

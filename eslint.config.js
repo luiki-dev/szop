@@ -55,6 +55,13 @@ export default defineConfig(
       ],
     },
   },
+  // The landing page's scripts run in the browser. no-undef knows no browser
+  // globals here, and tsc's checkJs (lib: dom) already reports a name that is
+  // not defined.
+  {
+    files: ["apps/landing/**/*.js"],
+    rules: { "no-undef": "off" },
+  },
   // Last: turns off the rules that would fight Prettier.
   prettier,
 );

@@ -21,16 +21,69 @@ resource "aws_route53_zone" "main" {
   }
 }
 
-# Only Amazon's certificate authority may issue certificates for the domain
-# and its subdomains; every other authority must refuse, even if an attacker
-# passes its validation. A page served through another authority (for
-# example GitHub Pages, with Let's Encrypt) adds that authority here.
+# Only Amazon's certificate authority and Let's Encrypt may issue
+# certificates for the domain and its subdomains; every other authority must
+# refuse, even if an attacker passes its validation. Amazon's issues the
+# app's certificates. Let's Encrypt is here because GitHub Pages obtains the
+# landing page's certificate from it and accepts no other (PH-34 spec,
+# decision 3). The szop name has a record of its own below.
 resource "aws_route53_record" "caa" {
   zone_id = aws_route53_zone.main.zone_id
   name    = local.domain
   type    = "CAA"
   ttl     = 3600
+  records = ["0 issue \"amazon.com\"", "0 issue \"letsencrypt.org\""]
+}
+
+# A CAA record on a name takes precedence over its parent's, so the app's name
+# stays with Amazon alone, as ADR 0030, decision 6 decided, although the apex
+# now allows Let's Encrypt too. infra/demo's A record on the same name does
+# not conflict with it: they are different record types.
+resource "aws_route53_record" "caa_app" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = local.app_hostname
+  type    = "CAA"
+  ttl     = 3600
   records = ["0 issue \"amazon.com\""]
+}
+
+# The landing page on dzwoniec.com is served by GitHub Pages (PH-34). These
+# are the addresses GitHub documents for an apex domain: four IPv4 and four
+# IPv6.
+resource "aws_route53_record" "pages_a" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = local.domain
+  type    = "A"
+  ttl     = 3600
+  records = ["185.199.108.153", "185.199.109.153", "185.199.110.153", "185.199.111.153"]
+}
+
+resource "aws_route53_record" "pages_aaaa" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = local.domain
+  type    = "AAAA"
+  ttl     = 3600
+  records = ["2606:50c0:8000::153", "2606:50c0:8001::153", "2606:50c0:8002::153", "2606:50c0:8003::153"]
+}
+
+# GitHub Pages redirects www to the apex when this name points at the account's
+# Pages host.
+resource "aws_route53_record" "pages_www" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "www.${local.domain}"
+  type    = "CNAME"
+  ttl     = 3600
+  records = ["luiki-dev.github.io"]
+}
+
+# Proves to GitHub that this account controls the domain, so another account's
+# Pages site cannot claim it.
+resource "aws_route53_record" "pages_challenge" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "_github-pages-challenge-luiki-dev.${local.domain}"
+  type    = "TXT"
+  ttl     = 3600
+  records = [local.github_pages_challenge]
 }
 
 # Null MX (RFC 7505): the domain receives no mail, so senders fail at once

@@ -1,11 +1,19 @@
 import { defineConfig } from "vitest/config";
 
-// One project per package, plus the push hook's tests (ADR 0007, decision 8).
+// One project per package, plus the landing page's and the push hook's tests
+// (ADR 0007, decision 8).
 export default defineConfig({
   test: {
     projects: [
       "apps/api/vitest.config.ts",
       "apps/web/vitest.config.ts",
+      {
+        test: {
+          name: "landing",
+          environment: "node",
+          include: ["apps/landing/**/*.test.js"],
+        },
+      },
       {
         test: {
           name: "hooks",
