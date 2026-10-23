@@ -194,7 +194,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-12d Safe redeploys](#ph-12d-safe-redeploys) | ✅ Done | [Spec](superpowers/specs/2026-10-21-PH-12d-safe-redeploys-design.md) | [Plan](superpowers/plans/2026-10-21-PH-12d-safe-redeploys.md) | [#251](https://github.com/luiki-dev/szop/pull/251) | [#244](https://github.com/luiki-dev/szop/issues/244) |
 | [PH-37 Two tasks](#ph-37-two-tasks) | ✅ Done | [Spec](superpowers/specs/2026-10-21-PH-37-two-tasks-design.md) | [Plan](superpowers/plans/2026-10-21-PH-37-two-tasks.md) | [#254](https://github.com/luiki-dev/szop/pull/254) | [#233](https://github.com/luiki-dev/szop/issues/233) |
 | [PH-35 Security scanners](#ph-35-security-scanners) | ✅ Done | [Spec](superpowers/specs/2026-10-22-PH-35-security-scanners-design.md) | [Plan](superpowers/plans/2026-10-22-PH-35-security-scanners.md) | [#260](https://github.com/luiki-dev/szop/pull/260) | [#213](https://github.com/luiki-dev/szop/issues/213) |
-| [PH-13 Releases](#ph-13-releases) | ⬜ Not started | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
+| [PH-13 Releases](#ph-13-releases) | 🚧 In progress | — | — | — | [#42](https://github.com/luiki-dev/szop/issues/42) |
 | [PH-34 Landing page and demo status](#ph-34-landing-page-and-demo-status) | ⬜ Not started | — | — | — | [#205](https://github.com/luiki-dev/szop/issues/205) |
 | [PH-38 Autoscaling](#ph-38-autoscaling) | ⬜ Not started | — | — | — | [#234](https://github.com/luiki-dev/szop/issues/234) |
 
