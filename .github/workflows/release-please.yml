@@ -132,13 +132,21 @@ jobs:
           role-session-name: gh-${{ github.run_id }}
           aws-region: eu-central-1
 
-      # Only "not found" means the image is missing; any other error stops the
-      # job rather than pushing on a guess.
+      # Only "not found" means an image is missing; any other error stops the
+      # job rather than pushing on a guess. A re-run after the version tag was
+      # written has nothing left to do: the tag is immutable, and put-image
+      # would fail on it.
       - name: Look for the commit's image
         id: lookup
         env:
           COMMIT: ${{ needs.release-please.outputs.sha }}
+          VERSION: ${{ needs.release-please.outputs.version }}
         run: |
+          if aws ecr describe-images --repository-name szop --image-ids "imageTag=$VERSION" > /dev/null 2>&1; then
+            echo "szop:$VERSION is in the registry already; nothing to push or tag."
+            echo "present=tagged" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if found=$(aws ecr describe-images --repository-name szop --image-ids "imageTag=$COMMIT" 2>&1); then
             echo "szop:$COMMIT is in the registry; adding the version tag to it."
             echo "present=true" >> "$GITHUB_OUTPUT"

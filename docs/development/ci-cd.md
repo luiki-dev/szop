@@ -268,7 +268,7 @@ The App, its permissions and the ruleset's bypass are in [GitHub settings](githu
 ### A release failed
 
 - **`release-please` failed** (a wrong client ID or key, the App not installed, a permission missing): nothing was tagged. Fix the setting and re-run the job; on a release PR's merge, release-please finds the merged PR still labelled `autorelease: pending` and tags it.
-- **`build` or `publish` failed** after the tag and the Release exist (a wrong role ARN, a network error): fix the cause and use *Re-run failed jobs*; `release-please`'s outputs are kept. `publish` is safe to repeat: a commit image pushed by the failed run is found and only tagged, and ECR's immutable tags refuse a second push of the version. The artifact is kept one day; after that, re-run the `build` job itself, which also re-runs `publish`, the job that depends on it. *Re-run all jobs* would not help: `release-please` would find the release already published and skip both.
+- **`build` or `publish` failed** after the tag and the Release exist (a wrong role ARN, a network error): fix the cause and use *Re-run failed jobs*; `release-please`'s outputs are kept. `publish` is safe to repeat: if the version tag is already there it does nothing but the summary, and a commit image pushed by the failed run is found and only tagged. The artifact is kept one day; after that, re-run the `build` job itself, which also re-runs `publish`, the job that depends on it. *Re-run all jobs* would not help: `release-please` would find the release already published and skip both.
 
 ## Rules for every workflow
 
