@@ -452,6 +452,32 @@ It must print `required_reviewers`. The first `demo` environment of PH-12b was s
 
 After the merge, apply base again from `main`, as for every base PR ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 9); the plan must show no changes.
 
+**The release role** ([PH-13](../roadmap.md#ph-13-releases), [ADR 0042](../decisions/0042-releases-details.md)): its apply adds `szop-ci-release` and its inline policy `image`, changes the plan role's inline denies (OP-102) and the registry's lifecycle policy (version tags `*.*.*`), and changes nothing else. Create the `release` environment first (no reviewer, deployment branches limited to `main`, [GitHub settings](../development/github-settings.md#environments)), then apply from the PR's branch and check:
+
+```bash
+aws iam get-role --role-name szop-ci-release --query Role.AssumeRolePolicyDocument
+#   one statement, GitHubRelease: "token.actions.githubusercontent.com:sub" exactly
+#   "repo:luiki-dev@290870182/szop@1380292421:environment:release",
+#   and "token.actions.githubusercontent.com:ref" exactly "refs/heads/main"
+aws iam list-role-policies --role-name szop-ci-release
+#   one inline policy, "image"
+aws ecr get-lifecycle-policy --repository-name szop --query lifecyclePolicyText --output text
+#   rule 1's tagPatternList is ["*.*.*"]
+```
+
+Then store its ARN as the third repository variable, from `infra/base`:
+
+```bash
+gh variable set AWS_RELEASE_ROLE_ARN --repo luiki-dev/szop --body "$(terraform output -raw ci_release_role_arn)"
+```
+
+After the first release, the image carries its version:
+
+```bash
+aws ecr describe-images --repository-name szop --image-ids imageTag=0.1.0 --query 'imageDetails[0].imageTags'
+#   ["<commit hash>", "0.1.0"], in any order
+```
+
 ⚠️ **Don't:**
 
 - add `repo:luiki-dev@290870182/szop@1380292421:environment:demo` to the deploy role's trust by hand, or apply it before the `demo` environment exists with its required reviewer: GitHub creates a missing environment unprotected ([ADR 0032](../decisions/0032-ci-access-and-teardown-details.md), decision 10);

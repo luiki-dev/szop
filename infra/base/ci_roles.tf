@@ -84,6 +84,11 @@ data "aws_iam_policy_document" "ci_plan_denies" {
   }
 
   # Log lines can hold anything the app printed (ADR 0012, decision 17).
+  # GetQueryResults reads a Logs Insights query someone else started,
+  # GetLogRecord a single record, ListAnomalies an anomaly's sample lines
+  # (OP-102). These are every action ReadOnlyAccess grants (its logs:Get*
+  # included) that returns log contents, checked against v190 and the service
+  # authorization reference on 2026-10-23 (ADR 0042).
   statement {
     sid    = "DenyLogContents"
     effect = "Deny"
@@ -92,6 +97,9 @@ data "aws_iam_policy_document" "ci_plan_denies" {
       "logs:FilterLogEvents",
       "logs:StartQuery",
       "logs:StartLiveTail",
+      "logs:GetQueryResults",
+      "logs:GetLogRecord",
+      "logs:ListAnomalies",
     ]
     resources = ["*"]
   }
@@ -1393,4 +1401,93 @@ resource "aws_iam_policy" "ci_deploy_image" {
 resource "aws_iam_role_policy_attachment" "ci_deploy_image" {
   role       = aws_iam_role.ci_deploy.name
   policy_arn = aws_iam_policy.ci_deploy_image.arn
+}
+
+# The release role: what release-please.yml's publish job assumes after a
+# release PR is merged, to give the release commit's image its version tag
+# (ADR 0010, decisions 16 and 17; ADR 0042). It can push and tag images in the
+# registry szop, and nothing else.
+data "aws_iam_policy_document" "ci_release_trust" {
+  statement {
+    sid     = "GitHubRelease"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github.arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    # The immutable subject for a job that names the release environment
+    # (ADR 0032, decision 13).
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:luiki-dev@290870182/szop@1380292421:environment:release"]
+    }
+
+    # main only, in AWS too: the environment's branch rule is a GitHub setting
+    # that this policy cannot see (ADR 0032, decision 14).
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:ref"
+      values   = ["refs/heads/main"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ci_release" {
+  name               = "szop-ci-release"
+  assume_role_policy = data.aws_iam_policy_document.ci_release_trust.json
+
+  # The shortest session AWS allows for a role is one hour.
+  max_session_duration = 3600
+}
+
+# No layer downloads and no deletes: a release image is either pushed whole or,
+# when the registry has the commit's image already, tagged through its
+# manifest. Tags are immutable, so an existing tag can never be moved.
+data "aws_iam_policy_document" "ci_release_image" {
+  # A registry login token is account-wide, so it supports no resource.
+  statement {
+    sid       = "LogInToRegistry"
+    actions   = ["ecr:GetAuthorizationToken"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["eu-central-1"]
+    }
+  }
+
+  # describe-repositories gives the registry's address for the login;
+  # describe-images checks whether the commit's image is there; batch-get-image
+  # reads its manifest and put-image adds the version tag to it. The upload
+  # actions are docker push's, when the image is not there yet.
+  statement {
+    sid = "PushAndTagImages"
+    actions = [
+      "ecr:DescribeRepositories",
+      "ecr:DescribeImages",
+      "ecr:BatchGetImage",
+      "ecr:PutImage",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:InitiateLayerUpload",
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload",
+    ]
+    resources = [aws_ecr_repository.app.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "ci_release_image" {
+  name   = "image"
+  role   = aws_iam_role.ci_release.id
+  policy = data.aws_iam_policy_document.ci_release_image.json
 }

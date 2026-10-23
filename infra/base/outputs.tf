@@ -47,3 +47,8 @@ output "ci_deploy_role_arn" {
   description = "The role demo-up.yml and demo-down.yml assume; stored as the GitHub variable AWS_DEPLOY_ROLE_ARN."
   value       = aws_iam_role.ci_deploy.arn
 }
+
+output "ci_release_role_arn" {
+  description = "The role release-please.yml's publish job assumes; stored as the GitHub variable AWS_RELEASE_ROLE_ARN."
+  value       = aws_iam_role.ci_release.arn
+}

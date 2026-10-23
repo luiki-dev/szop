@@ -78,6 +78,7 @@ flowchart LR
         polDb["Managed policy<br/><b>szop-ci-deploy-demo-database</b><br/><i>base</i>"]
         polService["Managed policy<br/><b>szop-ci-deploy-demo-service</b><br/><i>base</i>"]
         polImage["Managed policy<br/><b>szop-ci-deploy-image</b><br/><i>base</i>"]
+        ciRelease["Role<br/><b>szop-ci-release</b><br/>inline image<br/><i>base</i>"]
         execRole["Role<br/><b>szop-app-task-execution</b><br/>inline task-execution<br/><i>base</i>"]
         taskRole["Role<br/><b>szop-app-task</b><br/>inline ecs-exec<br/><i>base</i>"]
     end
@@ -96,7 +97,7 @@ flowchart LR
     end
 
     subgraph ecr["ECR"]
-        repo["Repository<br/><b>szop</b><br/>immutable tags, scan on push,<br/>lifecycle policy<br/><i>base</i>"]
+        repo["Repository<br/><b>szop</b><br/>immutable tags, scan on push,<br/>lifecycle policy: version tags kept<br/><i>base</i>"]
     end
 
     subgraph logs["CloudWatch Logs"]
@@ -110,6 +111,7 @@ flowchart LR
 
     ciPlan -->|trusts| oidc
     ciDeploy -->|trusts| oidc
+    ciRelease -->|trusts| oidc
     polNetwork -->|attached to| ciDeploy
     polLb -->|attached to| ciDeploy
     polDns -->|attached to| ciDeploy
@@ -120,6 +122,7 @@ flowchart LR
     polService -->|grants passing| execRole
     polService -->|grants passing| taskRole
     polImage -->|grants pushing to| repo
+    ciRelease -->|can push and tag in| repo
     execRole -->|can pull from| repo
     execRole -->|can write to| logGroup
     execRole -->|can read| dbPass
@@ -131,7 +134,7 @@ flowchart LR
     dkim -->|tokens from| identity
 
     classDef base fill:#bfdbfe,stroke:#1d4ed8,color:#1f2937
-    class oidc,ciPlan,ciDeploy,polNetwork,polLb,polDns,polDb,polService,polImage,execRole,taskRole base
+    class oidc,ciPlan,ciDeploy,ciRelease,polNetwork,polLb,polDns,polDb,polService,polImage,execRole,taskRole base
     class zone,caa,mx,spf,dmarc,dkim,identity,repo,logGroup,authSecret,dbPass base
 ```
 
@@ -148,6 +151,7 @@ The managed policies attached to `szop-ci-deploy` reach demo's resources by thei
 | Managed policy `szop-ci-deploy-demo-database` | `aws_iam_policy.ci_deploy_demo_database`, `aws_iam_role_policy_attachment.ci_deploy_demo_database` (the arrow) |
 | Managed policy `szop-ci-deploy-demo-service` | `aws_iam_policy.ci_deploy_demo_service`, `aws_iam_role_policy_attachment.ci_deploy_demo_service` (the arrow) |
 | Managed policy `szop-ci-deploy-image` | `aws_iam_policy.ci_deploy_image`, `aws_iam_role_policy_attachment.ci_deploy_image` (the arrow) |
+| Role `szop-ci-release` | `aws_iam_role.ci_release`, `aws_iam_role_policy.ci_release_image` |
 | Role `szop-app-task-execution` | `aws_iam_role.app_task_execution`, `aws_iam_role_policy.app_task_execution` |
 | Role `szop-app-task` | `aws_iam_role.app_task`, `aws_iam_role_policy.app_task` |
 | Hosted zone `dzwoniec.com` | `aws_route53_zone.main` |

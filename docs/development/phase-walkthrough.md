@@ -48,7 +48,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
  main ──●───────────────────────────────────●───M13──────────────M12────────────M14───────▶
         │                                          \             /  \           /
       v0.3.0                                        \           /    ●─────────┘
-        \                                            \         /     release-please--branches--main
+        \                                            \         /     release-please--branches--main--components--szop
          \                                            \       /      (PR #14, szop-release[bot])
           ●───●───●───●───●───●───●───────●────────────M─────┘                  │
           1   2   3   4   5   6   7       8            9                      v0.4.0
@@ -70,7 +70,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
 | 9 | `feat/templates` | `Merge branch 'main' into feat/templates` | *Update branch*: brings Dependabot's change in, because the PR must be up to date with `main` |
 | M13 | `main` | `build(deps): bump the npm group (#13)` | The owner merged Dependabot's PR |
 | M12 | `main` | `feat(templates): add templates (#12)` | The owner merged the phase: the **PR title** is the merge commit's message |
-| — | `release-please--branches--main` | `chore(main): release 0.4.0` | release-please's commit: version bump and `CHANGELOG.md` |
+| — | `release-please--branches--main--components--szop` | `chore(main): release 0.4.0` | release-please's commit: version bump and `CHANGELOG.md` |
 | M14 | `main` | `chore(main): release 0.4.0 (#14)` | The owner merged the release PR: **this is the release** |
 
 ## Step by step
@@ -258,14 +258,15 @@ git fetch --prune
 ```
  main ──…──M12──────────────────────▶  (more PRs may be merged here;
              \                          the release PR updates itself each time)
-              ●  release-please--branches--main
+              ●  release-please--branches--main--components--szop
                  chore(main): release 0.4.0
-                 ├─ package.json versions   0.3.0 → 0.4.0
+                 ├─ package.json version    0.3.0 → 0.4.0
                  ├─ .release-please-manifest.json
-                 └─ CHANGELOG.md            "## 0.4.0 … Features: add templates …"
+                 └─ CHANGELOG.md            "## 0.4.0 … feat(templates): add templates by @luiki-dev in #12"
 ```
 
 - The PR is authored by `szop-release[bot]` (the GitHub App), so CI and the required checks run on it like on any PR.
+- **The notes list PRs, not commits** ([ADR 0042](../decisions/0042-releases-details.md), decision 1): PR #12 is one line, under its title. Its task commits and the review fix, commit 8, are not listed; they still count towards the version. A PR labelled `skip-changelog` would not be listed at all.
 - **An open release PR is only a proposal.** Nothing forces a release now: the owner merges it when the milestone is worth marking, typically after a phase. Until then it collects whatever else is merged.
 
 ### Step 11 — The owner merges the release PR
@@ -274,11 +275,11 @@ git fetch --prune
 
 ```
  main ──…──M12───────────M14 ──▶ tag v0.4.0 on M14   (immutable: the v* tag ruleset)
-             \           /   ──▶ GitHub Release "v0.4.0" with the changelog entry
-              ●─────────┘    ──▶ follow-up job (environment "release", main only):
+             \           /   ──▶ GitHub Release "v0.4.0" with the same notes
+              ●─────────┘    ──▶ build, then publish (environment "release", main only):
                                    ECR has szop:<hash of M14>?
                                      yes → add the tag 0.4.0 to it
-                                     no  → build and push with both tags
+                                     no  → push the image built, with both tags
 ```
 
 - **A version marks the code; it deploys nothing.** Nothing is running at this point, and that is fine.
@@ -306,7 +307,7 @@ The highest bump wins: a `feat` and three `fix`es since `v0.3.0` make `0.4.0`. A
 | Phase branch | GitHub, deleted after the merge | `type/short-description`: `feat/templates` |
 | Branch outside a phase | GitHub | `docs/fix-typo`, `chore/bump-vitest` |
 | Dependabot branch | GitHub | `dependabot/npm_and_yarn/…` |
-| Release branch | GitHub, kept up to date by release-please | `release-please--branches--main` (to be confirmed, see [open points](#open-points-for-the-releases-phase)) |
+| Release branch | GitHub, kept up to date by release-please, deleted at the merge and created again for the next release | `release-please--branches--main--components--szop` ([ADR 0042](../decisions/0042-releases-details.md), decision 7) |
 | Commit message | Every commit | `type(scope): imperative description` |
 | PR title → merge commit | `main` | `feat(templates): add templates (#12)` |
 | Update-branch merge | The PR branch | `Merge branch 'main' into feat/templates` |
@@ -352,8 +353,8 @@ Until a piece exists, its step is simply skipped, and the matching [definition-o
 
 ## Open points for the releases phase
 
-Details this walkthrough runs into that the ADRs leave open. They belong to [PH-13](../roadmap.md#ph-13-releases) and are tracked as open points, the sub-issues of [PH-13's issue](https://github.com/luiki-dev/szop/issues/42):
+The three details this walkthrough ran into were settled by [PH-13](../roadmap.md#ph-13-releases), after a trial of release-please with merge commits, and are recorded in [ADR 0042](../decisions/0042-releases-details.md):
 
-- **Review fixes and duplicate entries in the changelog** ([OP-025](https://github.com/luiki-dev/szop/issues/89)). A review fix such as commit 8 is a `fix(…)` commit, and release-please reads every commit that reaches `main`, including those a merge commit brings in, so `CHANGELOG.md` will probably list it as a bug fix of code that was never released. The task commits and the merge commit's PR title may also appear as separate features.
-- **Image version tag format** ([OP-026](https://github.com/luiki-dev/szop/issues/90)): agreed direction `szop:0.4.0`, without the `v` of the git tag.
-- **release-please's branch name** ([OP-027](https://github.com/luiki-dev/szop/issues/91)): `release-please--branches--main` by default, to check against the ruleset and branch naming.
+- **Review fixes and duplicate entries in the changelog** ([OP-025](https://github.com/luiki-dev/szop/issues/89)): the release notes come from GitHub, one line per merged PR, so a phase appears once, under its PR title, and a review fix such as commit 8 does not appear at all (ADR 0042, decision 1).
+- **Image version tag format** ([OP-026](https://github.com/luiki-dev/szop/issues/90)): `szop:0.4.0`, without the `v` of the git tag (decision 6).
+- **release-please's branch name** ([OP-027](https://github.com/luiki-dev/szop/issues/91)): `release-please--branches--main--components--szop`, accepted as the one exception to the branch naming rule (decision 7).

@@ -17,10 +17,11 @@ resource "aws_ecr_repository" "app" {
 # so rule 1 shields released images by matching them with a count that is
 # never reached. Rule 2 must stay last: ECR requires the tagStatus "any" rule
 # to have the highest rulePriority. A release image carries its commit hash
-# and its v* version on the same digest, so rule 1 matches it. Commit hashes
-# are hexadecimal and never start with "v". Rule 2 still counts the shielded
-# images: it ranks every image by push time, releases included, so an image
-# without a v* tag is kept only while it is among the 10 newest overall.
+# and its version X.Y.Z on the same digest, so rule 1 matches it. Commit
+# hashes are hexadecimal with no dots, so the pattern *.*.* matches versions
+# only (ADR 0042). Rule 2 still counts the shielded images: it ranks every
+# image by push time, releases included, so an image without a version tag is
+# kept only while it is among the 10 newest overall.
 resource "aws_ecr_lifecycle_policy" "app" {
   repository = aws_ecr_repository.app.name
 
@@ -28,10 +29,10 @@ resource "aws_ecr_lifecycle_policy" "app" {
     rules = [
       {
         rulePriority = 1
-        description  = "Keep released images: v* tags are never expired."
+        description  = "Keep released images: version tags are never expired."
         selection = {
           tagStatus      = "tagged"
-          tagPatternList = ["v*"]
+          tagPatternList = ["*.*.*"]
           countType      = "imageCountMoreThan"
           countNumber    = 9999
         }
@@ -39,7 +40,7 @@ resource "aws_ecr_lifecycle_policy" "app" {
       },
       {
         rulePriority = 2
-        description  = "Keep the 10 newest images of any kind; older ones expire unless a v* tag shields them."
+        description  = "Keep the 10 newest images of any kind; older ones expire unless a version tag shields them."
         selection = {
           tagStatus   = "any"
           countType   = "imageCountMoreThan"

@@ -32,7 +32,7 @@ One **roadmap phase** is one branch and one PR. A change outside a phase (a foun
 
 ## 1. Start a branch
 
-Branch names are `type/short-description`, using the commit types below.
+Branch names are `type/short-description`, using the commit types below. The one exception is release-please's own branch, `release-please--branches--main--components--szop` ([8. Release](#8-release)).
 
 ```bash
 git switch main
@@ -159,11 +159,22 @@ Szop uses **Semantic Versioning (SemVer)**, `MAJOR.MINOR.PATCH`, with one versio
 - **`0.x` until the MVP is complete.** A `feat` raises MINOR, a `fix` raises PATCH, and a breaking change also raises only MINOR.
 - **`1.0.0` marks the finished MVP.**
 
-Releases are cut by **release-please**, set up in [PH-13](../roadmap.md#ph-13-releases). It reads the commits on `main` and keeps an open **release PR** titled like `chore(main): release 0.3.0`, holding the next version and the new `CHANGELOG.md` entry. The PR updates itself as more changes are merged.
+Releases are cut by **[release-please](tools/release-please.md)**, set up in [PH-13](../roadmap.md#ph-13-releases) ([ADR 0042](../decisions/0042-releases-details.md)). It reads the commits on `main` to work out the next version and keeps an open **release PR** titled like `chore(main): release 0.3.0`, from the branch `release-please--branches--main--components--szop`. The PR raises the version in `package.json` and adds the release's notes to `CHANGELOG.md`, and updates itself as more changes are merged. It is authored by `szop-release[bot]` and checked by CI like any PR.
 
-**Merging the release PR is the release.** It creates the `v0.3.0` tag and a GitHub Release, and CI builds the image tagged with that version. Merge it when a milestone is worth marking, typically after a phase. The first release, `v0.1.0`, comes with [PH-13](../roadmap.md#ph-13-releases), at the end of the walking skeleton.
+**The release notes list PRs, not commits:** one line per merged PR, with its title, author and link, as GitHub generates them. So a PR's title is what readers of the notes see. Two kinds of PR are left out:
 
-A version marks a state of the code; it deploys nothing. The demo environment can be created from any image, versioned or not ([ADR 0008](../decisions/0008-hosting.md), decision 13).
+- Dependabot's, always.
+- **PRs labelled `skip-changelog`.** Add the label to a PR whose change readers of the notes do not need, such as Claude Code's settings or the process docs. It only hides the PR from the notes; the version is still worked out from its commits. Add it any time before the release PR is merged: the notes are made again on every push to `main`.
+
+**Merging the release PR is the release.** It creates the `v0.3.0` tag and a GitHub Release with the same notes, and pushes the release commit's image as `szop:0.3.0` (without the `v`). Merge it when a milestone is worth marking, typically after a phase. The first release, `v0.1.0`, comes with [PH-13](../roadmap.md#ph-13-releases), at the end of the walking skeleton.
+
+**`1.0.0`** is set when the MVP is done, with a commit whose footer is `Release-As: 1.0.0`, merged through a PR like any other; an empty commit is enough:
+
+```bash
+git commit --allow-empty -m "chore: release 1.0.0" -m "Release-As: 1.0.0"
+```
+
+A version marks a state of the code; it deploys nothing. The demo environment can be created from any image, versioned or not ([ADR 0008](../decisions/0008-hosting.md), decision 13); to show a release, press `demo-up` with its tag as the `ref`.
 
 ## What is enforced, and by what
 

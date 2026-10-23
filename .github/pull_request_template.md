@@ -1,6 +1,6 @@
 ## What and why
 
-<!-- What this PR changes and why. The title follows Conventional Commits: it becomes the merge commit's message. -->
+<!-- What this PR changes and why. The title follows Conventional Commits: it becomes the merge commit's message and the PR's line in the release notes. Label the PR skip-changelog if readers of the release notes do not need it (Claude Code's settings, process docs). -->
 
 ## Links
 

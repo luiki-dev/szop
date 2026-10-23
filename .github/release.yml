@@ -1,0 +1,11 @@
+# What GitHub's release notes leave out. release-please asks GitHub for the
+# notes (changelog-type: github), one line per merged PR (ADR 0042).
+changelog:
+  exclude:
+    # Set by hand on a PR whose change readers of the notes do not need.
+    labels:
+      - skip-changelog
+    # Dependabot's weekly updates, by its bot login: a plain dependabot does
+    # not match (checked with the generate-notes API, ADR 0042).
+    authors:
+      - dependabot[bot]
