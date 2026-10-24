@@ -350,7 +350,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-14b App shell
 
 - **Goal:** every page sits in Szop's app shell, with the raccoon logo, the navigation (a drawer on phones, a sidebar on larger screens) and the API's status in the menu. `/` is a Start page and `/design` sits under its own heading in the menu. The user picks the color scheme (system, light or dark) in the menu.
-- **Delivers:** the app shell of [ADR 0013](decisions/0013-visual-design.md), decision 17, and the [visual design](architecture/visual-design.md#5-layout-and-navigation); the favicon and the header logo, polished from the draft `raccoon.svg`; the manual theme toggle, brought into the MVP by [ADR 0048](decisions/0048-design-system-phase-details.md); the health journey replaced ([OP-087](https://github.com/luiki-dev/szop/issues/160)).
+- **Delivers:** the app shell of [ADR 0013](decisions/0013-visual-design.md), decision 17, and the [visual design](architecture/visual-design.md#5-layout-and-navigation); the favicon and the header logo, polished from the draft `raccoon.svg`; the manual theme toggle ([APR-1](requirements/functional-requirements.md#apr-1)), brought into the MVP by [ADR 0048](decisions/0048-design-system-phase-details.md); the health journey replaced ([OP-087](https://github.com/luiki-dev/szop/issues/160)).
 - **Split from:** PH-14 App shell and design system, now retired (see [PH-14a](#ph-14a-design-system)).
 - **Depends on:** —
 - **Owner steps:** none.

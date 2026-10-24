@@ -69,6 +69,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **nvm** | Node Version Manager | A tool that installs and switches Node.js versions per user. Szop's `.nvmrc` tells it which one to use. |
 | **OAuth / OIDC** | Open Authorization / OpenID Connect | Standards for logging in through another provider ("Sign in with Google"). Relevant for the social-login future extension. Also how CI logs in to AWS without stored keys: GitHub signs a token saying which repository the job belongs to and which environment, branch or PR event it runs for, and AWS exchanges it for short-lived credentials (see ADR 0010 and ADR 0012). |
 | **OFL** | SIL Open Font License | A free license for fonts: they may be used, bundled and shipped with software, but not sold on their own. Gabarito is under it (see ADR 0022). |
+| **OKLCH** | Oklab Lightness, Chroma, Hue | A way of writing colors as lightness, colorfulness and hue, in a color space built so that equal steps look equally different to the eye. Tailwind CSS v4 writes its palette in it; Szop's contrast test lets the browser convert it to sRGB (see ADR 0048). |
 | **OpenSSF** | Open Source Security Foundation | A Linux Foundation project for open-source security. Its **Scorecard** rates a repository's security practices. Not used yet (see ADR 0010). |
 | **ORM** | Object-Relational Mapper | A library that maps database tables to objects or types in code and builds queries. Drizzle is ours. |
 | **OSS** | Open-Source Software | Software whose source anyone may read, change and share. In "Redis OSS", AWS's name for the open-source Redis engine on ElastiCache, next to Valkey, its open-source fork. |
@@ -93,6 +94,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **SMTP** | Simple Mail Transfer Protocol | The protocol for sending email. |
 | **SPA** | Single-Page Application | A web app where the browser loads one page once and JavaScript renders every screen after that, without full page reloads. Szop's frontend is one. |
 | **SPF** | Sender Policy Framework | A DNS record listing which servers may send mail for a domain. |
+| **sRGB** | standard Red Green Blue | The common color space of screens and the web, with each color as red, green and blue from 0 to 255. WCAG's contrast formula is defined on it (see ADR 0048). |
 | **SSE** | Server-Side Encryption | Data encrypted by the service that stores it. SSE-S3, used for Szop's state bucket, encrypts with keys S3 manages itself. |
 | **SSE-S3** | Server-Side Encryption with Amazon S3 managed keys | S3's default encryption: every object is encrypted with keys S3 creates, holds and rotates itself, at no cost and with no IAM to manage. Szop's state bucket uses it; the alternative is a customer-managed key in KMS (see ADR 0029 and ADR 0041). |
 | **SSM** | (AWS) Systems Manager | A family of AWS operations tools. Its **Parameter Store** holds Szop's app secrets; its Session Manager plugin powers ECS Exec. |
