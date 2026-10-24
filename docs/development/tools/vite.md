@@ -11,7 +11,7 @@ Vite is the build tool and development server of the web app. In development it 
 
 **`apps/web/vite.config.ts`** is the config Vite reads, line by line:
 
-- `plugins: [react(), precompress(), firstScreenBudget(200 * 1024)]`: `@vitejs/plugin-react` teaches Vite to compile JSX, the HTML-like syntax in `.tsx` files, and adds React's fast refresh, which swaps a changed component into the running page without losing its state. The other two are Szop's own, defined in the same file and explained below.
+- `plugins: [tailwindcss(), react(), precompress(), firstScreenBudget(200 * 1024)]`: `@tailwindcss/vite` compiles Tailwind CSS: it scans the source for the classes in use and writes only those into the stylesheet `index.css` builds ([Tailwind CSS](tailwind-css.md)). `@vitejs/plugin-react` teaches Vite to compile JSX, the HTML-like syntax in `.tsx` files, and adds React's fast refresh, which swaps a changed component into the running page without losing its state. The other two are Szop's own, defined in the same file and explained below.
 - **`precompress()`** writes a Brotli (`.br`, quality 11) and a gzip (`.gz`, level 9) copy next to every text file of the build (`.html`, `.js`, `.css`, `.svg`, `.json`, `.txt`, `.webmanifest`); images and fonts are compressed already. It runs in the `closeBundle` hook, after Vite has written every file, those copied from `public/` included, and finds the output folder in `configResolved`. The API sends whichever copy the browser accepts, so the files are compressed once, with the strongest settings, instead of on every request ([ADR 0023](../../decisions/0023-production-build-and-serving-details.md), decision 3).
 - **`firstScreenBudget(200 * 1024)`** enforces the performance budget of [NFR-3](../../requirements/functional-requirements.md#nfr-3). In the `writeBundle` hook it starts from the entry chunk, follows the chunks it imports statically (lazy chunks, in `dynamicImports`, load later and do not count), compresses each with Brotli in memory and adds up the sizes. It always prints `first-screen JavaScript: … KB Brotli of 200.0 KB (… chunks)`, and above the limit it throws, so the build fails with `[plugin szop:first-screen-budget] Error: … over budget (NFR-3)` ([ADR 0023](../../decisions/0023-production-build-and-serving-details.md), decision 4).
 - **Why the two are inline:** each is about 20 lines using only `node:zlib`, so a plugin package would add a dependency for little. Being plugins, a plain `vite build` cannot skip them, as it could a separate script. Both have `apply: "build"`, so the development server never runs them. Vitest does not load this file, so they have no unit tests; CI's `build` job runs them on every code PR.
@@ -42,6 +42,7 @@ pnpm --filter @szop/web dev  # Vite only
 - Getting started: <https://vite.dev/guide/>
 - `server.proxy`: <https://vite.dev/config/server-options#server-proxy>
 - The React plugin: <https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react>
+- The Tailwind CSS plugin: <https://tailwindcss.com/docs/installation/using-vite>
 - Features (hot module replacement, JSX): <https://vite.dev/guide/features>
 - Building for production: <https://vite.dev/guide/build>
 - The plugin API and its hooks: <https://vite.dev/guide/api-plugin>

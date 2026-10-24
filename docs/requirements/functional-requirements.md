@@ -31,6 +31,7 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
   - [Live updates (SYN)](#live-updates-syn)
   - [Limits (LIM)](#limits-lim)
   - [Connectivity (NET)](#connectivity-net)
+  - [Appearance (APR)](#appearance-apr)
 - [3. Non-functional requirements](#3-non-functional-requirements)
 - [4. Use cases](#4-use-cases)
 - [5. Release slicing and future extensions](#5-release-slicing-and-future-extensions)
@@ -319,6 +320,12 @@ IPv6 addresses are grouped by their /64 block. When a limit is hit, the app asks
 
 🎯 [MVP] When the connection is lost, the app clearly shows an offline state and blocks changes rather than silently losing them. This applies to guests and registered users alike.
 
+### Appearance (APR)
+
+#### APR-1
+
+🎯 [MVP] The user chooses the color scheme: system (the default), light or dark. The choice is kept on the device. ([ADR 0048](../decisions/0048-design-system-phase-details.md), decision 5.)
+
 ## 3. Non-functional requirements
 
 The qualities every part of Szop must have. The reasoning and the alternatives are in [ADR 0013](../decisions/0013-visual-design.md); how they are met is described in the [visual design](../architecture/visual-design.md) and [architecture](../architecture/architecture.md) documents.
@@ -397,7 +404,7 @@ The user deletes their account. All their data is removed, and lists they shared
 
 ### MVP
 
-🎯 [ACC](#accounts-and-guest-mode-acc), [LST](#shopping-lists-lst), [ITM](#list-items-itm), [ORD](#list-display-and-ordering-ord), [CAT](#categories-cat), [PRD](#catalog-prd), [UNT](#units-unt), [TPL](#templates-tpl), [LIM](#limits-lim), [NET](#connectivity-net): a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration, meeting the [NFR](#3-non-functional-requirements) qualities.
+🎯 [ACC](#accounts-and-guest-mode-acc), [LST](#shopping-lists-lst), [ITM](#list-items-itm), [ORD](#list-display-and-ordering-ord), [CAT](#categories-cat), [PRD](#catalog-prd), [UNT](#units-unt), [TPL](#templates-tpl), [LIM](#limits-lim), [NET](#connectivity-net), [APR](#appearance-apr): a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration, meeting the [NFR](#3-non-functional-requirements) qualities.
 
 ### Later (planned core functionality)
 
@@ -407,7 +414,7 @@ The user deletes their account. All their data is removed, and lists they shared
 
 💡 Ideas that may become requirements later:
 
-- Themes, including a manual choice between light and dark mode (dark mode itself follows the system setting)
+- Themes beyond light and dark (the choice between those two is [APR-1](#apr-1))
 - Android application
 - Advanced functionality for subscribers only
 - AI-driven list creation for recipes, events, projects and other multi-product shopping

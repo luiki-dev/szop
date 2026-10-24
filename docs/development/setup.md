@@ -72,7 +72,7 @@ Run it once per Node version. In the repository, pnpm switches to the version pi
 1. Install VS Code on Windows (not in Ubuntu): <https://code.visualstudio.com/>.
 2. Install its "WSL" extension.
 3. In the Ubuntu terminal, inside the repository (after step 6), run `code .`. VS Code opens the folder from WSL.
-4. Accept the prompt to install the recommended extensions. They are ESLint, Prettier, Vitest, Container Tools and Playwright Test, which runs the end-to-end journeys from the editor ([Playwright](tools/playwright.md#editor)).
+4. Accept the prompt to install the recommended extensions. They are ESLint, Prettier, Vitest, Container Tools, Playwright Test, which runs the end-to-end journeys from the editor ([Playwright](tools/playwright.md#editor)), and Tailwind CSS IntelliSense, which completes the style classes ([Tailwind CSS](tools/tailwind-css.md)).
 
 More in [VS Code](tools/vscode.md).
 

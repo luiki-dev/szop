@@ -47,37 +47,38 @@ The CSP ([ADR 0012](../decisions/0012-security-baseline.md), decision 8) allows 
 
 ## 3. Design tokens
 
-Tokens are CSS custom properties in two tiers. **The palette** is Tailwind's built-in colors plus two of Szop's own, `fur` and `sage`; **semantic roles** point into it, and components use only the roles (`bg-primary`, `text-muted-foreground`), never a raw color. A new brand color, dark mode or a future theme then changes tokens only. The roles are shadcn/ui's, plus `warning` and the `haul-*` roles of the haul; a phase adds a role when it needs one and records it here.
+Tokens are CSS custom properties in two tiers, all in `apps/web/src/index.css` ([Tailwind CSS](../development/tools/tailwind-css.md) explains the file). The public page **`/design`** shows every role, the palette, the type, the buttons, the icons and the shapes in the current color scheme, for checking them in the browser ([ADR 0048](../decisions/0048-design-system-phase-details.md)). **The palette** is Tailwind's built-in colors plus two of Szop's own, `fur` and `sage`; **semantic roles** point into it, and components use only the roles (`bg-primary`, `text-muted-foreground`), never a raw color. A new brand color, dark mode or a future theme then changes tokens only. The roles are shadcn/ui's, plus `warning` and the `haul-*` roles of the haul; a phase adds a role when it needs one and records it here.
 
 ### Color
 
 The accent is **sage**; neutrals come from Tailwind's **`gray`**, and the light page is **`fur`**. The two custom colors, defined next to Tailwind's palette:
 
 - **`fur`**: `#CBD0D6`.
-- **`sage`**, only the steps used: `sage-100 #E3EEE7`, `sage-300 #86C29C`, `sage-500 #5F9273` (the logo's tile), `sage-700 #3F7357`, `sage-950 #10261A`. A phase that needs another step adds it here and checks its contrast.
+- **`sage`**, only the steps used: `sage-100 #E3EEE7`, `sage-300 #86C29C`, `sage-500 #5F9273` (the logo's tile), `sage-700 #3F7357`, `sage-800 #2F5A43` (sage text on the page, [ADR 0048](../decisions/0048-design-system-phase-details.md)), `sage-950 #10261A`. A phase that needs another step adds it here and checks its contrast.
 
 | Role | Used for | Light | Dark |
 |---|---|---|---|
 | `background` / `foreground` | The page and its text | `fur` / `gray-800` | `gray-900` / `gray-200` |
-| `card` | Category cards, inputs on the page, the sidebar | `white` | `gray-800` |
+| `card` / `card-foreground` | Category cards, inputs on the page, the sidebar, and their text | `white` / `gray-800` | `gray-800` / `gray-200` |
 | `muted-foreground` | Secondary text: notes, counts, prices | `gray-600` | `gray-400` |
 | `border` | Dividers between rows | `gray-200` | `gray-700` |
 | `input` | Borders of checkboxes and inputs | `gray-500` | `gray-400` |
 | `primary` / `primary-foreground` | The main button, the active menu entry's text | `sage-700` / `white` | `sage-300` / `sage-950` |
-| `accent` | The active menu entry's background | `sage-100` | `sage-950` |
+| `accent` / `accent-foreground` | The active menu entry's background and text | `sage-100` / `sage-700` | `sage-950` / `sage-300` |
+| `link` | Sage text on the page itself: links, ghost buttons | `sage-800` | `sage-300` |
 | `ring` | The focus ring | `sage-700` | `sage-300` |
 | `haul` / `haul-foreground` | The haul tray and drawer, and their text | `gray-800` / `white` | `gray-950` / `white` |
 | `haul-muted` | Secondary text in the haul: prices, the caption | `fur` | `gray-400` |
 | `haul-chip` | Chips, the ↶ buttons, the progress bar's track, the handle | `gray-700` | `gray-800` |
 | `haul-accent` | The progress fill, the focus ring inside the haul | `sage-300` | `sage-300` |
-| `destructive` | Deleting | `red-600` | `red-400` |
-| `warning` | The offline banner ([NET-1](../requirements/functional-requirements.md#net-1)) | `amber-100` with `amber-900` text | `amber-950` with `amber-200` text |
+| `destructive` / `destructive-foreground` | Deleting, and the text on it | `red-600` / `white` | `red-400` / `gray-950` |
+| `warning` / `warning-foreground` | The offline banner ([NET-1](../requirements/functional-requirements.md#net-1)) and its text | `amber-100` / `amber-900` | `amber-950` / `amber-200` |
 
-**Contrast:** every text pair meets 4.5:1 and every UI part (checkbox borders, the focus ring, the progress fill) 3:1 against its background, in both schemes ([NFR-2](../requirements/functional-requirements.md#nfr-2)). The narrowest are `primary` on `accent` (4.6:1) and the focus ring on the fur page (3.6:1); every pair is listed in the [redesign spec](../superpowers/specs/2026-10-07-ring-tail-redesign-design.md#contrast). `gray-400` borders on white are only about 2.5:1, which is why `input` is `gray-500` in light mode. axe checks every page in light and dark.
+**Contrast:** every text pair meets 4.5:1 and every UI part (checkbox borders, the focus ring, the progress fill) 3:1 against its background, in both schemes ([NFR-2](../requirements/functional-requirements.md#nfr-2)). The narrowest are `primary` on `accent` (4.6:1) and the focus ring on the fur page (3.6:1); every pair is listed in the [redesign spec](../superpowers/specs/2026-10-07-ring-tail-redesign-design.md#contrast). `gray-400` borders on white are only about 2.5:1, which is why `input` is `gray-500` in light mode, and `primary` on the fur page is only 3.6:1, which is why sage text on the page uses `link`. axe checks every page in light and dark, and an E2E test checks every pair of the roles, UI parts included, in both schemes ([testing guide](../development/testing.md#the-token-contrast-test)); a new pair joins its table.
 
 ### Dark mode
 
-Dark mode **follows the system setting** (`prefers-color-scheme`) through Tailwind's `dark:` variant, with no JavaScript. There is no manual toggle; it is a 💡 [future extension](../requirements/functional-requirements.md#future-extensions-ideas-not-committed). Adding it later means switching `dark:` to a class on `<html>`, a small theme script loaded before the page paints (a separate file, since the CSP forbids inline scripts), a menu and two tests; components do not change. **The haul stays the darkest surface in both schemes**: `gray-800` on the fur page in light mode, `gray-950` on the `gray-900` page in dark mode, so the screen keeps its shape.
+Dark mode **follows the system setting** (`prefers-color-scheme`) through Tailwind's `dark:` variant, with no JavaScript. **A manual choice (system, light or dark) comes with the app shell in PH-14b** ([APR-1](../requirements/functional-requirements.md#apr-1), [ADR 0048](../decisions/0048-design-system-phase-details.md)): it switches `dark:` to a class on `<html>`, set by a small theme script loaded before the page paints (a separate file, since the CSP forbids inline scripts), with a control in the menu; components do not change. **The haul stays the darkest surface in both schemes**: `gray-800` on the fur page in light mode, `gray-950` on the `gray-900` page in dark mode, so the screen keeps its shape.
 
 ### Typography
 
@@ -91,8 +92,8 @@ Dark mode **follows the system setting** (`prefers-color-scheme`) through Tailwi
 |---|---|
 | Spacing | Tailwind's 4 px grid |
 | Tap targets | At least 48 px for anything tappable; list rows 56 px |
-| `--radius` | 12 px for buttons and inputs; checkboxes, chips and pills fully round |
-| `--radius-surface` | 18 px for category cards; 24 px for the top corners of the haul and its drawer |
+| `--radius-control` (`rounded-control`) | 12 px for buttons and inputs; checkboxes, chips and pills fully round |
+| `--radius-surface` (`rounded-surface`) | 18 px for category cards; 24 px for the top corners of the haul and its drawer |
 | Elevation | Flat; one shadow level, only for floating elements (dialogs, menus, toasts) |
 | Motion | 150–200 ms for checking items off and opening dialogs; none when the system asks for reduced motion (`motion-safe:`) |
 

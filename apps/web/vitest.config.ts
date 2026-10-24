@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineProject } from "vitest/config";
 
@@ -5,6 +6,10 @@ import { defineProject } from "vitest/config";
 // in Node (ADR 0007, decision 9).
 export default defineProject({
   plugins: [react()],
+  // The same "@/" alias as vite.config.ts, which Vitest does not load.
+  resolve: {
+    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+  },
   test: {
     name: "web",
     environment: "jsdom",
