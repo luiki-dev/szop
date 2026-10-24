@@ -37,7 +37,7 @@ How Szop's work is tracked on GitHub: the roadmap's phases, the open points and 
 | Candidate | Its open point's issue, also labelled `candidate`, no parent, no milestone | — |
 | ADR made outside a phase | Issue `ADR NNNN <title>`, label `adr` | The ADR in [`docs/decisions/`](../decisions/) |
 | Requirements, use cases | — (linked from a phase's "Delivers") | [`functional-requirements.md`](../requirements/functional-requirements.md) |
-| Status | The project's Status field | The stage tables (⬜ 🚧 ✅ ✖️) and the README's diagram |
+| Status | The project's Status field | The stage tables (⬜ 🚧 ✅ ✖️) |
 
 ## Milestones
 
@@ -173,7 +173,7 @@ The project's `CLAUDE.md` repeats the events Claude handles most often, as steps
 | An owner step is done | Its issue closed; the workflow sets ✅ Done | Owner, or Claude when the owner says so |
 | A phase's owner steps change | Step issues added, or closed as not planned with the reason; the phase's list updated | Claude |
 | An item cannot move | Status → ⏳ Blocked, with a blocked-by link when the blocker is an issue | Owner or Claude |
-| Before a PR, and at the start of a phase | The stage tables, the phase entries' copies in the issues and the README's diagram brought in line | Claude |
+| Before a PR, and at the start of a phase | The stage tables, the phase entries' copies in the issues brought in line | Claude |
 
 ## Keeping GitHub and the docs in step
 
@@ -182,13 +182,13 @@ Each fact has one source; the other place only copies it, and changes when the t
 | Fact | Source | Copied in | When the copy changes |
 |---|---|---|---|
 | A phase's plan (goal, delivers, depends on, expected path, and the wording of its owner steps) | `roadmap.md`'s phase entry | the phase issue's body | when the PR that changes the entry opens; the PR lists the bodies it updated |
-| Phase status | the project's Status field | the stage tables' Status column and the README's diagram | work starts, the PR opens, the merge (in the PR, before it), in one commit |
+| Phase status | the project's Status field | the stage tables' Status column | work starts, the PR opens, the merge (in the PR, before it), in one commit |
 | Spec, plan and PR links of a phase | the stage tables | the project's Spec and Plan fields | when each is committed or opened |
 | Open points, open and closed: text, parts, history, status, phase | issues labelled `open-point` | nowhere | — |
 | What comes next | the board's 📌 Todo | nowhere | — |
 | Whether an owner step is done | the `owner` issue | nowhere | — |
 | Also (the open points of other phases a phase does a part of) | the phase issue's body | nowhere | when the part is added, done or moved |
-| New phases, splits, reorders | a brainstorm, then `roadmap.md` (and an ADR when significant) | new issues, the diagram | in the same PR |
+| New phases, splits, reorders | a brainstorm, then `roadmap.md` (and an ADR when significant) | new issues | in the same PR |
 
 The rules that follow from it:
 

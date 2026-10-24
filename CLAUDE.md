@@ -34,7 +34,7 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 
 ## Project tracking
 
-Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](docs/decisions/0027-open-points-on-github.md) and `docs/development/project-tracking.md`. **GitHub** (the issues and the fields of the [Szop project](https://github.com/users/luiki-dev/projects/3)) holds the status and the open points; **`roadmap.md`** holds each phase's plan and mirrors the status in its stage tables, and the README's diagram mirrors it too. Every step below says which side it changes.
+Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](docs/decisions/0027-open-points-on-github.md) and `docs/development/project-tracking.md`. **GitHub** (the issues and the fields of the [Szop project](https://github.com/users/luiki-dev/projects/3)) holds the status and the open points; **`roadmap.md`** holds each phase's plan and mirrors the status in its stage tables. Every step below says which side it changes.
 
 During a phase:
 
@@ -42,7 +42,7 @@ During a phase:
   - On GitHub: the phase issue's Status → 🚧 In progress; Finished (the merge date) set on the previous phase's issue and on every `adr` issue closed since.
   - On GitHub: read the phase's open-point issues (its sub-issues and the issues its **Also** section lists).
 - **In the phase branch's first commit:**
-  - In the repo: the phase's row in the `roadmap.md` stage table → 🚧, and the README's diagram with it.
+  - In the repo: the phase's row in the `roadmap.md` stage table → 🚧.
   - On GitHub: the phase issue's Started field → that commit's date.
 - **When the spec or plan is committed:**
   - In the repo: its link in the phase's row of the `roadmap.md` stage table.
@@ -52,7 +52,7 @@ During a phase:
   - In the repo: the phase entry's **Owner steps** in `roadmap.md` updated.
 - **Before opening the PR:**
   - On GitHub: every open-point issue of the phase closed (with a "settled by" comment) or re-assigned; the phase issue's body updated if its `roadmap.md` entry changed.
-  - In the repo: the stage table row and the README's diagram in line with GitHub, with the PR link.
+  - In the repo: the stage table row in line with GitHub, with the PR link.
   - In the PR description: `Closes #<phase issue>` and `Closes #<open-point issue>` for each one it settles, and a list of every issue change the PR made.
 - **At the end of a phase:** propose the next phase. The owner moves its issue and its open-point issues to 📌 Todo on GitHub.
 - **Never set ✅ Done on GitHub by hand:** merging the PR closes the issues, and the project's workflow sets it.
@@ -75,7 +75,7 @@ Open points (all on GitHub; no document lists them):
 - `docs/architecture/aws-resources.md` — diagrams of every AWS resource the Terraform configurations in `infra/` create, grouped by service and marked by stack, with the references between them. Keep it updated when a resource, or a reference between resources, is added, changed or removed in `infra/`.
 - `docs/architecture/visual-design.md` — the living design system: the look, design tokens, typography, brand, and the layout and interaction principles every screen follows, with the approved mockups in `docs/architecture/visual-design/`. Keep it updated when the design system changes.
 - `docs/glossary.md` — acronyms and terms used in the docs.
-- `docs/roadmap.md` — the phases in order, grouped into stages, each with its goal, what it delivers, the owner's steps and its status. Keep a phase's row updated when its work starts, when its PR opens and before it is merged, and the roadmap diagram in `README.md` with it, in the same commit ([ADR 0017](docs/decisions/0017-readme-roadmap-diagram.md)). It is the source of each phase's plan; the phase issue's body is a copy, updated when the PR that changes the entry opens.
+- `docs/roadmap.md` — the phases in order, grouped into stages, each with its goal, what it delivers, the owner's steps and its status. Keep a phase's row updated when its work starts, when its PR opens and before it is merged. It is the source of each phase's plan; the phase issue's body is a copy, updated when the PR that changes the entry opens.
 - `docs/development/project-tracking.md` — how the phases, open points and decision work are tracked as GitHub issues on the Szop project: labels, milestones, fields, statuses, how items move. GitHub is the source of status, open points and what comes next, and `roadmap.md` is the source of each phase's plan ([ADR 0027](docs/decisions/0027-open-points-on-github.md)).
 - `docs/development/git-workflow.md` — the day-to-day git workflow: branches, commits, PRs, review, merging and releases.
 - `docs/development/ci-cd.md` — how CI checks every PR: the workflows and jobs, `ci-ok` and the required checks, change detection, reading a failed run, Dependabot and the rules for every workflow. Keep it updated when a workflow changes.

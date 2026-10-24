@@ -6,44 +6,7 @@ It is built for the phone in your hand in the store as much as for planning at a
 
 ## Roadmap
 
-Szop is built in phases, grouped into stages. The road below shows how far along it is; the [roadmap](docs/roadmap.md) has each phase's name, goal and details.
-
-```text
-  START
-  ║
-  ║ Stage 1 · Local foundations
-  ║  PH-01   PH-02
-  ╚════●═══════●═══════════════════════════════════════════════════════════════════╗
-                                                                                   ║
-                                      Stage 2 · Walking skeleton, running locally  ║
-                             PH-08   PH-07   PH-06b  PH-06a  PH-05   PH-04   PH-03 ║
-  ╔════════════════════════════●═══════●═══════●═══════●═══════●═══════●═══════●═══╝
-  ║
-  ║ Stage 3 · Walking skeleton, deployed and released
-  ║  PH-09   PH-10   PH-11   PH-12a  PH-12b  PH-36   PH-12c  PH-12d  PH-37   PH-35
-  ╚════●═══════●═══════●═══════●═══════●═══════●═══════●═══════●═══════●═══════●═══╗
-                                                                                   ║
-                                                                                   ║
-                                                                     PH-34   PH-13 ║
-  ╭────────────────────────────────────────────────────────────────────●═══════●═══╝
-  │
-  │ Stage 4 · MVP
-  │  PH-14   PH-15   PH-16   PH-17   PH-18   PH-19   PH-39   PH-20   PH-21   PH-22
-  ╰────○───────○───────○───────○───────○───────○───────○───────○───────○───────○───╮
-                                                                                   │
-                                                                                   │
-             PH-31   PH-30   PH-29   PH-28   PH-27   PH-26   PH-25   PH-24   PH-23 │
-  ╭────────────○───────○───────○───────○───────○───────○───────○───────○───────○───╯
-  │
-  │ Stage 5 · Later
-  │  PH-32   PH-33   PH-38
-  ╰────○───────○───────○─── DONE
-
-
-  ● done   ◐ in progress   ○ not started   ✕ dropped   ═ road travelled
-```
-
-The [project board](https://github.com/users/luiki-dev/projects/3) shows the same phases as GitHub issues, with their open points and what comes next.
+Szop is built in phases, grouped into stages. The [roadmap](docs/roadmap.md) has each phase's name, goal and details, and the [project board](https://github.com/users/luiki-dev/projects/3) shows how far along each one is, as GitHub issues with their open points and what comes next.
 
 ## Features
 
