@@ -1,5 +1,6 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { brotliCompressSync, constants, gzipSync } from "node:zlib";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -88,6 +89,10 @@ export default defineConfig({
     precompress(),
     firstScreenBudget(200 * 1024),
   ],
+  resolve: {
+    // "@/" is src/, as shadcn/ui's generated code expects (components.json).
+    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+  },
   build: {
     // Small assets become files, never data: URIs, which the CSP's
     // default-src 'self' blocks (ADR 0025, decision 4).

@@ -89,17 +89,17 @@
 - Consumes: the role utilities of Task 1.
 - Produces: `cn(...inputs: ClassValue[]): string` from `@/lib/utils`; `Button` and `buttonVariants` from `@/components/ui/button`, with `variant: "default" | "outline" | "ghost" | "destructive"` and `size: "default" | "icon"`, every size at least `min-h-12`.
 
-- [ ] **Step 1: Add the `@/` alias** (`@/*` → `./src/*`) to `apps/web/tsconfig.json` (`paths`), `vite.config.ts` and `vitest.config.ts` (`resolve.alias`, with `fileURLToPath(new URL("./src", import.meta.url))`).
-- [ ] **Step 2: Run** `pnpm --filter @szop/web exec shadcn@4.22.1 init -b base` (through `pnpm dlx` if `exec` cannot fetch it), answering for Vite and CSS variables; then `shadcn@4.22.1 add button`. Read every file it wrote or changed. Keep `components.json`, `lib/utils.ts`, `components/ui/button.tsx` and the dependencies Button needs; **revert its edits to `index.css`** except what Button relies on (keep Task 1's tokens as the source). If it added `tw-animate-css` or another stylesheet import and nothing uses it, remove it.
-- [ ] **Step 3: Write the failing test** `button.test.tsx`:
+- [x] **Step 1: Add the `@/` alias** (`@/*` → `./src/*`) to `apps/web/tsconfig.json` (`paths`), `vite.config.ts` and `vitest.config.ts` (`resolve.alias`, with `fileURLToPath(new URL("./src", import.meta.url))`).
+- [x] **Step 2: Run** `pnpm --filter @szop/web exec shadcn@4.22.1 init -b base` (through `pnpm dlx` if `exec` cannot fetch it), answering for Vite and CSS variables; then `shadcn@4.22.1 add button`. Read every file it wrote or changed. Keep `components.json`, `lib/utils.ts`, `components/ui/button.tsx` and the dependencies Button needs; **revert its edits to `index.css`** except what Button relies on (keep Task 1's tokens as the source). If it added `tw-animate-css` or another stylesheet import and nothing uses it, remove it.
+- [x] **Step 3: Write the failing test** `button.test.tsx`:
   - `it("styles each variant with its roles")`: renders the four variants and expects their classes to contain `bg-primary text-primary-foreground`, `bg-card border-input`, `text-link`, `bg-destructive text-destructive-foreground`.
   - `it("is at least 48 px tall in every size")`: every `size` has `min-h-12` (or `size-12` for `icon`) in `buttonVariants({ size })`.
-- [ ] **Step 4: Run** `pnpm test -- button`. Expected: FAIL on the class assertions.
-- [ ] **Step 5: Restyle `buttonVariants`** to the roles of the test, `rounded-control`, `font-semibold`, `text-base`, focus `focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background`, and `data-[focused]:` with the same ring classes for `/design`'s sample (Review Focus 5). Fix the generated code for ESLint and the repo's import style.
-- [ ] **Step 6: Wrap the app** in `app.tsx` with `<CSPProvider disableStyleElements>` from `@base-ui/react/csp-provider`, outermost, with a comment citing ADR 0013, decision 9. Add Base UI's scrollbar CSS to `index.css`, verbatim: `.base-ui-disable-scrollbar { scrollbar-width: none; } .base-ui-disable-scrollbar::-webkit-scrollbar { display: none; }`.
-- [ ] **Step 7: Run** `pnpm check` and `pnpm test:e2e`. Expected: all pass, the CSP guard reports nothing.
-- [ ] **Step 8: Docs.** `shadcn-ui.md`: what shadcn/ui and Base UI are, why (ADR 0013, decisions 7 and 9), `components.json` explained, how to add a component and what to check afterwards (no injected styles, roles only, 48 px), `cn()`, `CSPProvider`.
-- [ ] **Step 9: Commit** `feat(web): add shadcn/ui on Base UI with its Button`.
+- [x] **Step 4: Run** `pnpm test -- button`. Expected: FAIL on the class assertions.
+- [x] **Step 5: Restyle `buttonVariants`** to the roles of the test, `rounded-control`, `font-semibold`, `text-base`, focus `focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background`, and `data-[focused]:` with the same ring classes for `/design`'s sample (Review Focus 5). Fix the generated code for ESLint and the repo's import style.
+- [x] **Step 6: Wrap the app** in `app.tsx` with `<CSPProvider disableStyleElements>` from `@base-ui/react/csp-provider`, outermost, with a comment citing ADR 0013, decision 9. Add Base UI's scrollbar CSS to `index.css`, verbatim: `.base-ui-disable-scrollbar { scrollbar-width: none; } .base-ui-disable-scrollbar::-webkit-scrollbar { display: none; }`.
+- [x] **Step 7: Run** `pnpm check` and `pnpm test:e2e`. Expected: all pass, the CSP guard reports nothing.
+- [x] **Step 8: Docs.** `shadcn-ui.md`: what shadcn/ui and Base UI are, why (ADR 0013, decisions 7 and 9), `components.json` explained, how to add a component and what to check afterwards (no injected styles, roles only, 48 px), `cn()`, `CSPProvider`.
+- [x] **Step 9: Commit** `feat(web): add shadcn/ui on Base UI with its Button`.
 
 ### Task 3: The health page restyled
 

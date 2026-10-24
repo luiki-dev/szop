@@ -116,3 +116,13 @@
     @apply bg-background font-sans text-foreground antialiased;
   }
 }
+
+/* What Base UI would inject as a <style> element, which the CSP blocks:
+   scroll areas and selects hide the native scrollbar with this class
+   (CSPProvider's disableStyleElements, in app.tsx). */
+.base-ui-disable-scrollbar {
+  scrollbar-width: none;
+}
+.base-ui-disable-scrollbar::-webkit-scrollbar {
+  display: none;
+}
