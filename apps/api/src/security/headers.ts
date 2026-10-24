@@ -6,7 +6,8 @@ import fp from "fastify-plugin";
 // written out in full, with helmet's defaults off: they would allow inline
 // styles and data: fonts (ADR 0025, decision 4). HSTS covers subdomains, for
 // a year, without preload (ADR 0025, decision 5). Helmet's other headers keep
-// their defaults.
+// their defaults, Cross-Origin-Resource-Policy: same-origin among them, which
+// /api/health alone relaxes to same-site (ADR 0046).
 async function securityHeaders(app: FastifyInstance): Promise<void> {
   await app.register(helmet, {
     contentSecurityPolicy: {

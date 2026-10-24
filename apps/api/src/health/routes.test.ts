@@ -77,6 +77,59 @@ describe("GET /api/health", () => {
   });
 });
 
+// The landing page on dzwoniec.com asks /api/health from the browser with a
+// no-cors request (ADR 0044, decision 5). The browser hands the page the
+// answer only if the response's Cross-Origin-Resource-Policy allows it, and
+// helmet's default, same-origin, makes the request fail as if nothing had
+// answered (ADR 0046).
+describe("GET /api/health from a sibling site", () => {
+  const database = useTestDatabase();
+  let app: FastifyInstance;
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it("allows the site's other subdomains to receive the answer", async () => {
+    app = buildApp({ config, db: database.db });
+
+    const response = await app.inject({ method: "GET", url: "/api/health" });
+
+    expect(response.headers["cross-origin-resource-policy"]).toBe("same-site");
+  });
+
+  it("allows it when the database is down too, which still counts as an answer", async () => {
+    const unreachable = createDatabase(
+      testDatabaseSettings("szop_test_missing"),
+    );
+    app = buildApp({ config, db: unreachable });
+
+    try {
+      const response = await app.inject({ method: "GET", url: "/api/health" });
+
+      expect(response.statusCode).toBe(503);
+      expect(response.headers["cross-origin-resource-policy"]).toBe(
+        "same-site",
+      );
+    } finally {
+      await unreachable.$client.end();
+    }
+  });
+
+  it.each(["/api/live", "/api/nothing-here"])(
+    "keeps every other response same-origin: %s",
+    async (url) => {
+      app = buildApp({ config, db: database.db });
+
+      const response = await app.inject({ method: "GET", url });
+
+      expect(response.headers["cross-origin-resource-policy"]).toBe(
+        "same-origin",
+      );
+    },
+  );
+});
+
 describe("GET /api/live", () => {
   const database = useTestDatabase();
   let app: FastifyInstance;
