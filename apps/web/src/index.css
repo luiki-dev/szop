@@ -1,0 +1,128 @@
+/* Szop's one stylesheet: Tailwind CSS v4, configured here rather than in a
+   tailwind.config.js (ADR 0013, decision 8). The tokens are those of
+   docs/architecture/visual-design.md, section 3, in two tiers (ADR 0013,
+   decision 10; ADR 0022, decision 9). */
+@import "tailwindcss";
+
+/* The palette: Tailwind's built-in colors plus Szop's own fur and sage, and
+   the shapes and font, which do not change with the color scheme. */
+@theme {
+  --color-fur: #cbd0d6;
+  --color-sage-100: #e3eee7;
+  --color-sage-300: #86c29c;
+  --color-sage-500: #5f9273;
+  --color-sage-700: #3f7357;
+  /* Sage text on the page itself: sage-700 on fur is only 3.6:1 (ADR 0048). */
+  --color-sage-800: #2f5a43;
+  --color-sage-950: #10261a;
+
+  --font-sans:
+    "Gabarito Variable", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Buttons and inputs; category cards and other surfaces. */
+  --radius-control: 12px;
+  --radius-surface: 18px;
+}
+
+/* The semantic roles, which components use instead of palette colors: light
+   first, then dark, which follows the system setting (ADR 0013, decision
+   12). A new role is added to visual-design.md's table too. */
+:root {
+  color-scheme: light dark;
+
+  --background: var(--color-fur);
+  --foreground: var(--color-gray-800);
+  --card: var(--color-white);
+  --card-foreground: var(--color-gray-800);
+  --muted-foreground: var(--color-gray-600);
+  --border: var(--color-gray-200);
+  --input: var(--color-gray-500);
+  --primary: var(--color-sage-700);
+  --primary-foreground: var(--color-white);
+  --accent: var(--color-sage-100);
+  --accent-foreground: var(--color-sage-700);
+  --ring: var(--color-sage-700);
+  --link: var(--color-sage-800);
+  --destructive: var(--color-red-600);
+  --destructive-foreground: var(--color-white);
+  --warning: var(--color-amber-100);
+  --warning-foreground: var(--color-amber-900);
+  --haul: var(--color-gray-800);
+  --haul-foreground: var(--color-white);
+  --haul-muted: var(--color-fur);
+  --haul-chip: var(--color-gray-700);
+  --haul-accent: var(--color-sage-300);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--color-gray-900);
+    --foreground: var(--color-gray-200);
+    --card: var(--color-gray-800);
+    --card-foreground: var(--color-gray-200);
+    --muted-foreground: var(--color-gray-400);
+    --border: var(--color-gray-700);
+    --input: var(--color-gray-400);
+    --primary: var(--color-sage-300);
+    --primary-foreground: var(--color-sage-950);
+    --accent: var(--color-sage-950);
+    --accent-foreground: var(--color-sage-300);
+    --ring: var(--color-sage-300);
+    --link: var(--color-sage-300);
+    --destructive: var(--color-red-400);
+    --destructive-foreground: var(--color-gray-950);
+    --warning: var(--color-amber-950);
+    --warning-foreground: var(--color-amber-200);
+    /* The haul stays the darkest surface (ADR 0022, decision 8). */
+    --haul: var(--color-gray-950);
+    --haul-foreground: var(--color-white);
+    --haul-muted: var(--color-gray-400);
+    --haul-chip: var(--color-gray-800);
+    --haul-accent: var(--color-sage-300);
+  }
+}
+
+/* The roles as Tailwind colors: bg-primary, text-muted-foreground and so on.
+   inline, so a utility reads the role's variable, which changes with the
+   color scheme. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-haul: var(--haul);
+  --color-haul-foreground: var(--haul-foreground);
+  --color-haul-muted: var(--haul-muted);
+  --color-haul-chip: var(--haul-chip);
+  --color-haul-accent: var(--haul-accent);
+}
+
+@layer base {
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+}
+
+/* What Base UI would inject as a <style> element, which the CSP blocks:
+   scroll areas and selects hide the native scrollbar with this class
+   (CSPProvider's disableStyleElements, in app.tsx). */
+.base-ui-disable-scrollbar {
+  scrollbar-width: none;
+}
+.base-ui-disable-scrollbar::-webkit-scrollbar {
+  display: none;
+}

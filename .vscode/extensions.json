@@ -4,6 +4,7 @@
     "esbenp.prettier-vscode",
     "vitest.explorer",
     "ms-playwright.playwright",
-    "ms-azuretools.vscode-containers"
+    "ms-azuretools.vscode-containers",
+    "bradlc.vscode-tailwindcss"
   ]
 }

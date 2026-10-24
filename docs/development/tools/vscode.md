@@ -17,8 +17,9 @@ Visual Studio Code (VS Code) is the editor Szop is developed in. The repository 
 - `vitest.explorer`: Vitest, which lists the tests in the editor's Testing view and runs or debugs one from the arrow next to it, with a failure shown on the line that failed.
 - `ms-playwright.playwright`: Playwright Test, which lists the end-to-end tests in the Testing view and runs one from the arrow beside it; ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 21); see [Playwright](playwright.md#editor).
 - `ms-azuretools.vscode-containers`: Container Tools, for working with Docker containers and images from the editor (Docker arrives with the database in PH-04 and the container image in PH-08).
+- `bradlc.vscode-tailwindcss`: Tailwind CSS IntelliSense, which completes class names as you type them in `className`, shows the CSS behind a class on hover, and flags a class that does not exist. It reads `apps/web/src/index.css`, so it knows Szop's own colors and roles ([ADR 0013](../../decisions/0013-visual-design.md), decision 19); see [Tailwind CSS](tailwind-css.md).
 
-The WSL extension is installed on the Windows side and is not in the list: it is needed before the repository can be opened at all. Tailwind CSS IntelliSense arrives with the styling in PH-14.
+The WSL extension is installed on the Windows side and is not in the list: it is needed before the repository can be opened at all.
 
 **`.vscode/settings.json`** holds the workspace settings, which apply to this repository only:
 
