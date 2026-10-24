@@ -82,6 +82,14 @@ describe("HealthPage", () => {
     expect(await screen.findByText("Can't reach the API")).toBeInTheDocument();
   });
 
+  it("links to the design system", () => {
+    renderApp();
+
+    expect(
+      screen.getByRole("link", { name: "See the design system →" }),
+    ).toHaveAttribute("href", "/design");
+  });
+
   it("recovers when the API comes back", async () => {
     server.use(http.get("/api/health", () => HttpResponse.error()));
     const { queryClient } = renderApp();

@@ -109,12 +109,12 @@
 **Interfaces:**
 - Consumes: the roles; the `/design` route path `"/design"` (the route itself lands in Task 4; the link may point at it before it exists).
 
-- [ ] **Step 1: Write the failing test** in `health-page.test.tsx`: `it("links to the design system")` expects `screen.getByRole("link", { name: "See the design system →" })` to have `href` `/design`.
-- [ ] **Step 2: Run** `pnpm test -- health-page`. Expected: the new test FAILS, the others pass.
-- [ ] **Step 3: Restyle `HealthPage`** after the approved mockup (`docs/superpowers/specs/2026-10-24-PH-14a-design-system/health-phone.png`): `main` with `mx-auto max-w-[720px] px-4 py-6`; `h1` "szop", `text-2xl font-extrabold`; "Shopping lists. Coming soon." in `text-muted-foreground`; a `bg-card rounded-surface p-4` card headed "API status" holding the existing `role="status"` block, the status texts unchanged, each "API"/"Database" line led by an `aria-hidden` dot (`bg-primary` when up, `bg-destructive` when down or unreachable); the schema version `tabular-nums text-sm text-muted-foreground`; then a React Router `Link` "See the design system →" to `/design`, `text-link font-semibold underline`.
-- [ ] **Step 4: Add** `<meta name="description" content="Szop is a shopping list app for groceries and everyday shopping." />` to `index.html`.
-- [ ] **Step 5: Run** `pnpm check` and `pnpm test:e2e`. Expected: all pass (`health.spec.ts` unchanged).
-- [ ] **Step 6: Commit** `feat(web): restyle the health page with the design tokens`.
+- [x] **Step 1: Write the failing test** in `health-page.test.tsx`: `it("links to the design system")` expects `screen.getByRole("link", { name: "See the design system →" })` to have `href` `/design`.
+- [x] **Step 2: Run** `pnpm test -- health-page`. Expected: the new test FAILS, the others pass.
+- [x] **Step 3: Restyle `HealthPage`** after the approved mockup (`docs/superpowers/specs/2026-10-24-PH-14a-design-system/health-phone.png`): `main` with `mx-auto max-w-[720px] px-4 py-6`; `h1` "szop", `text-2xl font-extrabold`; "Shopping lists. Coming soon." in `text-muted-foreground`; a `bg-card rounded-surface p-4` card headed "API status" holding the existing `role="status"` block, the status texts unchanged, each "API"/"Database" line led by an `aria-hidden` dot (`bg-primary` when up, `bg-destructive` when down or unreachable); the schema version `tabular-nums text-sm text-muted-foreground`; then a React Router `Link` "See the design system →" to `/design`, `text-link font-semibold underline`.
+- [x] **Step 4: Add** `<meta name="description" content="Szop is a shopping list app for groceries and everyday shopping." />` to `index.html`.
+- [x] **Step 5: Run** `pnpm check` and `pnpm test:e2e`. Expected: all pass (`health.spec.ts` unchanged).
+- [x] **Step 6: Commit** `feat(web): restyle the health page with the design tokens`.
 
 ### Task 4: The `/design` page
 
