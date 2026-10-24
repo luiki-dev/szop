@@ -82,7 +82,7 @@ describe("GET /api/health", () => {
 // answer only if the response's Cross-Origin-Resource-Policy allows it, and
 // helmet's default, same-origin, makes the request fail as if nothing had
 // answered (ADR 0046).
-describe("GET /api/health from a sibling site", () => {
+describe("GET /api/health from pages of the same site", () => {
   const database = useTestDatabase();
   let app: FastifyInstance;
 
@@ -90,7 +90,7 @@ describe("GET /api/health from a sibling site", () => {
     await app.close();
   });
 
-  it("allows the site's other subdomains to receive the answer", async () => {
+  it("lets pages of the same site receive the answer", async () => {
     app = buildApp({ config, db: database.db });
 
     const response = await app.inject({ method: "GET", url: "/api/health" });
