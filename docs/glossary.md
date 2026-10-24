@@ -22,6 +22,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **CIDR** | Classless Inter-Domain Routing | A way to write a range of IP addresses as an address and a prefix length, such as `10.0.0.0/16` (every address starting with `10.0.`). `TRUSTED_PROXIES` takes them (see ADR 0025). |
 | **CLI** | Command-line interface | A program used by typing commands in a terminal, such as `git`, `gh`, `terraform` or the AWS CLI. |
 | **CLS** | Cumulative Layout Shift | A Core Web Vital: how much visible content jumps around while a page loads. "Good" is at most 0.1 ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
+| **CORP** | Cross-Origin Resource Policy | A response header with which a server says which origins' pages may receive its responses (`same-origin`, `same-site`, `cross-origin`). Helmet sends `same-origin`; `/api/health` sends `same-site`, so the landing page can tell that the demo answers (see ADR 0046). |
 | **CORS** | Cross-Origin Resource Sharing | Browser rules deciding when a page from one domain may call an API on another domain. Not needed when frontend and API share one origin. |
 | **CRLF / LF** | Carriage Return + Line Feed / Line Feed | The two conventions for ending a line of text: Windows uses CRLF, Linux and macOS use LF. Szop's repository uses LF only. |
 | **CRUD** | Create, Read, Update, Delete | The four basic operations on data. |
