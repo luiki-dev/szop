@@ -23,6 +23,13 @@ export function healthRoutes(
   app.get("/live", () => ({ status: "ok" }));
 
   app.get("/health", async (request, reply) => {
+    // Helmet sends same-origin on every response, which makes the browser
+    // fail a no-cors request from the landing page on dzwoniec.com as if
+    // nothing had answered. same-site lets the page receive the (opaque)
+    // answer, and only pages of this site, never another site's; every other
+    // route keeps same-origin (ADR 0046). The 503 below counts as an answer.
+    void reply.header("Cross-Origin-Resource-Policy", "same-site");
+
     try {
       const schemaVersion = await currentSchemaVersion(db, journal);
       return {
