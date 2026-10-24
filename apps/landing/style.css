@@ -14,6 +14,8 @@
   --paper: #fbf8f2;
   --ink: #3a382f;
   --muted: #67634f;
+  /* The lightest text that still meets 4.5:1 on the paper (4.54:1). */
+  --faint: #777261;
   --up: #3f7357;
   --down: #857f70;
 }
@@ -73,6 +75,13 @@ footer {
   padding: 1.25rem 1rem 1.5rem;
   text-align: center;
   font-weight: 600;
+}
+
+.copyright {
+  margin: 0.75rem 0 0;
+  color: var(--faint);
+  font-size: 0.875rem;
+  font-weight: 400;
 }
 
 a {
