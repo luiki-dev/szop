@@ -10,7 +10,10 @@ Prettier rewrites code into one consistent layout (quotes, line breaks, indentat
 
 ## Configuration
 
-**`.prettierrc.json`** holds `{}`: no options, so the defaults apply (double quotes, 80 columns, trailing commas).
+**`.prettierrc.json`** sets no formatting option, so the defaults apply (double quotes, 80 columns, trailing commas). It holds two other lines:
+
+- `"plugins": ["prettier-plugin-tailwindcss"]`: the Tailwind CSS plugin sorts the classes in every `className` into Tailwind's own order (layout first, then spacing, then colors, and so on), so two people writing the same classes get the same line and a diff shows only real changes ([ADR 0013](../../decisions/0013-visual-design.md), decision 19). It also sorts the classes after `@apply` in CSS.
+- `"tailwindStylesheet": "./apps/web/src/index.css"`: Tailwind v4 is configured in CSS, so the plugin reads that file to learn Szop's own utilities (`bg-primary`, `rounded-surface`) and where they belong in the order. See [Tailwind CSS](tailwind-css.md).
 
 **`.prettierignore`** lists what Prettier must not touch:
 
@@ -21,8 +24,6 @@ Prettier rewrites code into one consistent layout (quotes, line breaks, indentat
 Prettier also skips everything `.gitignore` lists (such as `node_modules/`), so those need no line here.
 
 **`eslint-config-prettier`**, last in `eslint.config.js`, turns off the ESLint rules that would fight Prettier over layout, so the two tools never undo each other's work.
-
-The Tailwind CSS class-sorting plugin arrives with the styling in PH-14.
 
 ## Everyday use
 
@@ -39,3 +40,4 @@ pnpm format:check                # only report files that are not formatted, cha
 - Configuration file: <https://prettier.io/docs/configuration>
 - Ignoring files: <https://prettier.io/docs/ignore>
 - Integrating with linters: <https://prettier.io/docs/integrating-with-linters>
+- The Tailwind CSS plugin: <https://github.com/tailwindlabs/prettier-plugin-tailwindcss>

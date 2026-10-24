@@ -1,6 +1,7 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { brotliCompressSync, constants, gzipSync } from "node:zlib";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 
@@ -81,7 +82,12 @@ function firstScreenBudget(limitBytes: number): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), precompress(), firstScreenBudget(200 * 1024)],
+  plugins: [
+    tailwindcss(),
+    react(),
+    precompress(),
+    firstScreenBudget(200 * 1024),
+  ],
   build: {
     // Small assets become files, never data: URIs, which the CSP's
     // default-src 'self' blocks (ADR 0025, decision 4).
