@@ -146,7 +146,7 @@
 - Consumes: the `--<role>` custom properties (Task 1), the `/design` page (Task 4).
 - Produces: in `contrast.ts`, `type Rgb = [number, number, number]`; `contrastRatio(a: Rgb, b: Rgb): number` (WCAG 2.2 relative luminance); `readRoleColors(page: Page, roles: readonly string[]): Promise<Record<string, Rgb>>`, which in the browser reads `getComputedStyle(document.documentElement).getPropertyValue("--<role>")`, paints it on a 1×1 canvas and reads the pixel back as sRGB (the browser converts OKLCH).
 
-- [ ] **Step 1: Write `design.spec.ts`:**
+- [x] **Step 1: Write `design.spec.ts`:**
   - `test("the design system page is reachable from the start and accessible")`: `goto("/")`, click "See the design system →", expect heading "Design system", expect `document.fonts.check('16px "Gabarito Variable"', "Żółć")` to be `true` after `document.fonts.ready`, `expectAccessible(page)`.
   - `test("every color pair meets its contrast in light and dark")`: sanity `expect(contrastRatio([255,255,255],[0,0,0])).toBeCloseTo(21)`; then for `colorScheme` of `light` and `dark`, `page.emulateMedia`, `goto("/design")`, `readRoleColors`, and for each pair of the table below expect `contrastRatio` ≥ its minimum, with a message naming the pair and scheme.
 
@@ -165,9 +165,9 @@
   | `ring` | `background`, `card` | 3 |
   | `haul-accent` | `haul`, `haul-chip` | 3 |
 
-- [ ] **Step 2: Run** `pnpm test:e2e`. Expected: PASS on all three projects. If a pair fails, change the role to the next palette step that passes, and note it for Task 6's visual-design.md update (never lower a minimum).
-- [ ] **Step 3: Docs.** `testing.md`: the contrast test (what it reads, why through a canvas, where the pairs live, what to do when one fails) in the E2E section, with the Contents in sync.
-- [ ] **Step 4: Commit** `test(e2e): add the design system journey and the token contrast test`.
+- [x] **Step 2: Run** `pnpm test:e2e`. Expected: PASS on all three projects. If a pair fails, change the role to the next palette step that passes, and note it for Task 6's visual-design.md update (never lower a minimum).
+- [x] **Step 3: Docs.** `testing.md`: the contrast test (what it reads, why through a canvas, where the pairs live, what to do when one fails) in the E2E section, with the Contents in sync.
+- [x] **Step 4: Commit** `test(e2e): add the design system journey and the token contrast test`.
 
 ### Task 6: Decisions and living docs
 

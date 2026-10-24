@@ -19,6 +19,7 @@ The guide grows as the layers arrive: property tests and mutation testing in [PH
 - [Writing an E2E journey](#writing-an-e2e-journey)
   - [The CSP guard](#the-csp-guard)
   - [The accessibility check](#the-accessibility-check)
+  - [The token contrast test](#the-token-contrast-test)
   - [Reading a failed run](#reading-a-failed-run)
 - [Rules](#rules)
 - [Coverage](#coverage)
@@ -345,6 +346,14 @@ Error: axe found accessibility violations
 `color-contrast` is axe's rule ID: <https://dequeuniversity.com/rules/axe/> explains each one, what it checks and how to fix it. The two scans appear as the steps `axe (light)` and `axe (dark)` in the HTML report and in the trace; the terminal's `list` output does not print steps.
 
 axe finds only part of the accessibility problems, so a passing check is a floor and not a verdict ([Stack overview](../architecture/stack-overview.md#19-end-to-end-tests-with-playwright-and-axe)). **No axe rule is turned off for all pages.** If a rule has to be skipped on one page, the call says so, `expectAccessible(page, { disableRules: ["…"] })`, with a comment giving the reason.
+
+### The token contrast test
+
+axe checks the contrast of the text it finds on a page, but not the UI parts (the focus ring, input borders, the haul's progress fill), which need 3:1, nor a pair no page shows yet. So `design.spec.ts` checks the design tokens themselves ([ADR 0048](../decisions/0048-design-system-phase-details.md)): on `/design`, in light and then in dark mode, it reads every role's custom property (`--primary`, `--link` …) and computes the WCAG contrast of each pair in its `pairs` table against the pair's minimum, 4.5:1 for text and 3:1 for UI parts ([NFR-2](../requirements/functional-requirements.md#nfr-2)).
+
+- **Why through a canvas:** Tailwind's palette is written in OKLCH, a color space the WCAG formula does not take. `readRoleColors` in `support/contrast.ts` paints each color on a one-pixel canvas in the browser and reads the pixel back as sRGB, so the browser does the conversion and no color library is needed. `contrastRatio` is the WCAG formula.
+- **A new role or pair** goes into the `pairs` table in the same change that adds it to `index.css` and to the [visual design's](../architecture/visual-design.md#color) table.
+- **A failure** names the pair and the scheme, for example `link on background (light)`, with the ratio it got. Change the role to the next palette step that passes and record it in the visual design; never lower a minimum. Every failing pair is reported at once (`expect.soft`).
 
 ### Reading a failed run
 
