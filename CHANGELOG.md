@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 (2026-10-24)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+* fix(api): let the landing page receive the health answer by @luiki-dev in https://github.com/luiki-dev/szop/pull/274
+* feat(landing): add a copyright line under the Szop link by @luiki-dev in https://github.com/luiki-dev/szop/pull/279
+
+
+**Full Changelog**: https://github.com/luiki-dev/szop/compare/v0.2.0...v0.3.0
+
 ## 0.2.0 (2026-10-23)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
