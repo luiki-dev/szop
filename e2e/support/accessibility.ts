@@ -18,6 +18,14 @@ export async function expectAccessible(
   for (const colorScheme of ["light", "dark"] as const) {
     await test.step(`axe (${colorScheme})`, async () => {
       await page.emulateMedia({ colorScheme });
+      // Switching the scheme starts color transitions (Button's
+      // transition-colors); scanning mid-way reads colors that are neither
+      // scheme's, so wait for every running animation to finish first.
+      await page.evaluate(() =>
+        Promise.all(
+          document.getAnimations().map((animation) => animation.finished),
+        ),
+      );
       const results = await new AxeBuilder({ page })
         .withTags(tags)
         .disableRules(options.disableRules ?? [])
