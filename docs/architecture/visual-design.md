@@ -78,7 +78,7 @@ The accent is **sage**; neutrals come from Tailwind's **`gray`**, and the light 
 
 ### Dark mode
 
-Dark mode **follows the system setting** (`prefers-color-scheme`) through Tailwind's `dark:` variant, with no JavaScript. **A manual choice (system, light or dark) comes with the app shell in PH-14b** ([APR-1](../requirements/functional-requirements.md#apr-1), [ADR 0048](../decisions/0048-design-system-phase-details.md)): it switches `dark:` to a class on `<html>`, set by a small theme script loaded before the page paints (a separate file, since the CSP forbids inline scripts), with a control in the menu; components do not change. **The haul stays the darkest surface in both schemes**: `gray-800` on the fur page in light mode, `gray-950` on the `gray-900` page in dark mode, so the screen keeps its shape.
+**The user chooses the color scheme**: System (the default), Light or Dark, with three labelled options at the bottom of the menu ([APR-1](../requirements/functional-requirements.md#apr-1), [ADR 0049](../decisions/0049-app-shell-phase-details.md), decision 6). Dark mode is **the class `dark` on `<html>`**, which Tailwind's `dark:` variant and the dark roles (`:root.dark` in `index.css`) follow, so components use the roles and never ask which scheme is on. The choice is kept in `localStorage` under `szop-color-scheme` (System removes it; blocked storage means System). **`apps/web/public/color-scheme.js`**, a few lines loaded first in `<head>` as a file (the CSP forbids inline scripts), sets the class before the page paints; **`src/shell/color-scheme.ts`** holds the same rules for the app, and while the choice is System it follows the system setting as it changes. **The haul stays the darkest surface in both schemes**: `gray-800` on the fur page in light mode, `gray-950` on the `gray-900` page in dark mode, so the screen keeps its shape.
 
 ### Typography
 
@@ -101,7 +101,7 @@ Dark mode **follows the system setting** (`prefers-color-scheme`) through Tailwi
 
 - **Icons:** Lucide's line icons, imported one by one as React components, so only the icons used reach the bundle.
 - **The brand mark** is the owner's **flat raccoon head** on a sage rounded square (`sage-500`): *szop* is Polish for raccoon. A dark mask with the eyes in its upper part, white brows and muzzle, a black nose, ears with white rims and white cheek ruffs, in five flat tones. The master is the owner's artwork in [`brand-source/`](visual-design/brand-source/README.md), which the app never uses directly; the app's files are made from it: `apps/web/src/brand/logo.svg` (the menu's logo) and the icons in `apps/web/public/` (`favicon.svg`, `favicon.ico` with 16 and 32 px, `apple-touch-icon.png` at 180 px, square, since iOS rounds the corners itself).
-- **The wordmark** is "szop" in lowercase Gabarito Bold, `sage-700` (`sage-300` in dark mode), next to the mark. On the list screen the mark alone sits at the right of the header.
+- **The wordmark** is "szop" in lowercase Gabarito Bold, in the `link` role (`sage-800`, `sage-300` in dark mode), next to the mark: `sage-700` is under 4.5:1 on `fur` ([ADR 0048](../decisions/0048-design-system-phase-details.md), decision 8). On the list screen the mark alone sits at the right of the header.
 
 ![The raccoon at 128, 32 and 16 px, in a browser tab, and next to the wordmark on light and dark headers](visual-design/brand.png)
 
@@ -109,6 +109,7 @@ Dark mode **follows the system setting** (`prefers-color-scheme`) through Tailwi
 
 - **Mobile first.** Styles are written for the phone; wider screens add to them, using Tailwind's default breakpoints.
 - **The lists are the home screen.** Everything else (templates, archive, catalog, categories, units, settings) is in one menu: **a drawer opened from ☰ on phones, a permanent sidebar from `lg` (1024 px)**, with the setup screens grouped under their own heading.
+- **The shell as built** ([ADR 0049](../decisions/0049-app-shell-phase-details.md)): every page is a child of one layout route, `AppShell` in `apps/web/src/shell/`. On a phone, a header bar holds ☰ and the page's title, cut with "…" when too long; ☰ opens the menu as a modal drawer from the left (focus trapped, Esc or a tap on the dimmed page closes it, focus returns to ☰, following a link closes it). From `lg`, the menu is a sidebar and the title tops the content column. Only one of the two is rendered. The menu is one component (`shell/menu.tsx`): the logo and wordmark (a link to Start), **only the pages that exist** (today Start, and Design system under "Developer"; each phase adds its own), and at the bottom the API's status and the color scheme control. Each route names its title in its `handle`, which the shell shows as the `h1` and in the tab ("Start · Szop").
 - **Inside a list**, the menu gives way to a back arrow, and the add bar and the haul sit at the bottom ([below](#the-list-and-the-haul)).
 - **Desktop content is at most about 720 px wide**, so rows don't stretch across a wide screen.
 - **On phones, a screen's main action** ("New list", the add bar) **is pinned at the bottom**, within thumb reach. Sticky bars never cover the focused element.

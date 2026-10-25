@@ -13,6 +13,7 @@ axe (the library is called axe-core; `@axe-core/playwright` plugs it into Playwr
   - [`start-server.ts`](#start-serverts)
   - [`support/test.ts`](#supporttestts)
   - [`support/accessibility.ts`](#supportaccessibilityts)
+  - [`support/menu.ts`](#supportmenuts)
   - [The ESLint rule](#the-eslint-rule)
 - [Editor](#editor)
 - [Browsers](#browsers)
@@ -88,11 +89,15 @@ The event is standard and fires in Chromium and Firefox alike. Firefox writes it
 
 ### `support/accessibility.ts`
 
-Exports `expectAccessible(page)`. For `light`, then `dark`, each as a `test.step` (named `axe (light)` and `axe (dark)`), it calls `page.emulateMedia({ colorScheme })`, waits for every running animation to finish (switching the scheme starts color transitions, such as Button's `transition-colors`, and a scan mid-way reads colors of neither scheme; it failed that way on CI's slower runners), and scans with `new AxeBuilder({ page }).withTags([...]).analyze()`, using the four WCAG tags. It then returns the page to light, the projects' default, and makes one assertion over both schemes' violations, each listed as scheme, rule ID, number of elements and their selectors, so one failure shows every problem.
+Exports `expectAccessible(page)`. For `light`, then `dark`, each as a `test.step` (named `axe (light)` and `axe (dark)`), it calls `page.emulateMedia({ colorScheme })`, waits one frame (the app switches its `dark` class in a `matchMedia` listener, which the browser calls before the next frame, [ADR 0049](../../decisions/0049-app-shell-phase-details.md)) and then for every running animation to finish, ignoring one cancelled on the way (switching the scheme starts color transitions, such as Button's `transition-colors`, and a scan mid-way reads colors of neither scheme; it failed that way on CI's slower runners), and scans with `new AxeBuilder({ page }).withTags([...]).analyze()`, using the four WCAG tags. It then returns the page to light, the projects' default, and makes one assertion over both schemes' violations, each listed as scheme, rule ID, number of elements and their selectors, so one failure shows every problem.
 
 The helper is called by the journey, on every page it reaches, and not run automatically after every navigation, because an automatic scan cannot tell when a single-page application has finished drawing a screen and would scan half-loaded pages. It is one run with two color schemes, not six projects (three browsers, each in both schemes), which would double every run for what is almost always a contrast problem ([ADR 0026](../../decisions/0026-first-e2e-journey-details.md), decision 3).
 
 No rule is turned off for all pages. The helper takes `{ disableRules: [...] }` for the rare case where one rule must be skipped on one page; that call carries a comment saying why.
+
+### `support/menu.ts`
+
+Exports `openMenu(page, isMobile)`, which returns the app shell's menu (its `navigation` named "Menu"). On the phone project, where `isMobile` is true, the menu is a drawer behind ☰, so it taps "Open menu" first; on the desktop projects the menu is the sidebar, always there ([ADR 0049](../../decisions/0049-app-shell-phase-details.md)). Journeys reach pages through it, so each project takes its own path to the same links.
 
 ### The ESLint rule
 

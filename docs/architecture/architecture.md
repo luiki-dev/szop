@@ -70,7 +70,7 @@ packages/shared   Zod schemas, types, domain rules
 e2e/              Playwright end-to-end tests (ADR 0007)
   start-server.ts   resets the E2E database, then starts the API on the built SPA
   support/          the CSP guard (test.ts) and the axe helper (accessibility.ts)
-  tests/            the journeys, one file per use case (uc-NN-….spec.ts), plus the walking skeleton's health.spec.ts and the CSP guard's own test
+  tests/            the journeys, one file per use case (uc-NN-….spec.ts), plus the app shell's shell.spec.ts, the design system's design.spec.ts and the CSP guard's own test
 infra/            Terraform root modules (ADR 0008): bootstrap (the state bucket and the budget, ADR 0029), base (permanent resources) and demo (one session)
 ```
 
@@ -200,9 +200,10 @@ Feature folders mirroring the backend: `lists`, `items`, `catalog`, `categories`
 Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../decisions/0022-ring-tail-redesign.md); the design system itself is described in [visual-design.md](visual-design.md).
 
 - **Components:** shadcn/ui's components, built on Base UI, are copied into `apps/web/src/components/ui/` as phases need them and are ours to change. Feature folders compose them; they don't restyle them page by page.
-- **Styling:** Tailwind CSS v4 through `@tailwindcss/vite`, compiled at build time into one stylesheet. The design tokens are CSS custom properties in two tiers (Tailwind's palette, and semantic roles such as `--primary` that components use), all in `apps/web`. Dark mode follows the system setting through Tailwind's `dark:` variant.
+- **Styling:** Tailwind CSS v4 through `@tailwindcss/vite`, compiled at build time into one stylesheet. The design tokens are CSS custom properties in two tiers (Tailwind's palette, and semantic roles such as `--primary` that components use), all in `apps/web`. Dark mode is the class `dark` on `<html>`, which Tailwind's `dark:` variant follows: the user's choice, or the system setting while the choice is System ([APR-1](../requirements/functional-requirements.md#apr-1)).
 - **Under the CSP:** nothing injects `<style>` elements at run time ([Web security](#web-security)). Base UI runs with `disableStyleElements`, toasts use Base UI's Toast, and every E2E journey fails on a CSP violation.
 - **As built in [PH-14a](../roadmap.md#ph-14a-design-system)** ([ADR 0048](../decisions/0048-design-system-phase-details.md)): `src/index.css` holds the tokens; `src/lib/utils.ts` exports `cn()`; `src/components/ui/button.tsx` is the first component; `src/app.tsx` wraps the app in Base UI's `CSPProvider`; `src/design/` is the `/design` page, with `roles.ts`, the role list it shows; the `@/` import alias means `src/`.
+- **As built in [PH-14b](../roadmap.md#ph-14b-app-shell)** ([ADR 0049](../decisions/0049-app-shell-phase-details.md)): `src/routes.tsx` nests every page under one layout route without a path, `AppShell` in `src/shell/app-shell.tsx`, which renders the page through React Router's `<Outlet />`; each route names its page's title in its `handle` (`RouteHandle`), which the shell shows as the `h1` and in the tab. The shell renders, by `useMediaQuery` on Tailwind's `lg`, either the phone's header bar with ☰ and the menu in a drawer (shadcn/ui's Sheet on Base UI's Dialog), or the sidebar; `src/shell/menu.tsx` is the one menu, with the logo (`src/brand/logo.svg`), the links, the API's status (`api-status.tsx` with `use-health.ts`, moved from the old `src/health/`) and the color scheme control. `src/start/` is the Start page at `/`. The color scheme lives in two places with the same rules: `public/color-scheme.js`, loaded first in `index.html`, sets the class before the first paint, and `src/shell/color-scheme.ts` reads, stores (`localStorage`, `szop-color-scheme`) and applies the choice, and follows the system setting from `main.tsx` on.
 - **Zod runs in its jitless mode in the browser:** zod would otherwise test for `eval` with `new Function("")` when `@szop/shared` builds its schemas, which the CSP blocks and reports. `apps/web/src/zod-config.ts` sets `z.config({ jitless: true })` and `main.tsx` imports it first; an entry point that loads `@szop/shared` imports it before anything else ([ADR 0026](../decisions/0026-first-e2e-journey-details.md)).
 - **Assets:** the Gabarito font (`@fontsource-variable/gabarito`) and Lucide's icons are bundled by Vite, so everything is served from the app's own origin.
 - **Budget:** the JavaScript needed for the first screen stays within 200 KB compressed, checked in CI ([NFR-3](../requirements/functional-requirements.md#nfr-3)).
@@ -223,7 +224,7 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../deci
 | `/shared` *(Later)* | Shared with me |
 | `/s/:token` *(Later)* | Opening a share link |
 
-Only `/` exists so far, and it shows the health page; the table above is the target. Any other path shows React Router's default error screen until a not-found route is added ([ADR 0021](../decisions/0021-spa-skeleton-details.md), consequences).
+Only `/` (the Start page) and `/design` exist so far; the table above is the target. Any other path shows React Router's default error screen until a not-found route is added ([ADR 0021](../decisions/0021-spa-skeleton-details.md), consequences).
 
 ### Startup
 

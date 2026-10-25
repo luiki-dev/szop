@@ -29,7 +29,7 @@ The logo and the favicon come from the owner's own artwork, which replaces the d
 ## Changes to the roadmap
 
 - **The logo is the owner's artwork, not the polished draft.** The roadmap entry said "polished from the draft `raccoon.svg`"; three rounds of polished drafts did not look enough like a raccoon, and the owner drew the mark ([decision 1](#decisions)). The entry's **Delivers** is updated, and the phase issue's body with it, when the PR opens.
-- **A splash or loading screen with the large raccoon** is a 💡 idea for later: a new open point (OP-105, a candidate with no phase) records it, pointing at the artwork kept in the repo (`brand-source/`).
+- **A splash or loading screen with the large raccoon** is a 💡 idea for later: a new open point ([OP-105](https://github.com/luiki-dev/szop/issues/283), a candidate with no phase) records it, pointing at the artwork kept in the repo (`brand-source/`).
 
 ## Decisions
 
@@ -174,7 +174,7 @@ About six tasks, each one commit:
 
 ## Out of scope
 
-- A splash or loading screen with the large raccoon (OP-105).
+- A splash or loading screen with the large raccoon ([OP-105](https://github.com/luiki-dev/szop/issues/283)).
 - A hand-made 16 px icon; a web app manifest and installability ([OP-061](https://github.com/luiki-dev/szop/issues/188)).
 - Menu entries for pages that do not exist yet; the list screen's header with ← back (the list phases).
 - A not-found page.
