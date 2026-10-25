@@ -214,7 +214,7 @@ Likely at every deploy that starts two tasks at once, and at every scale-out tha
 
 ### S9 The seed data
 
-**Today.** 📝 Designed for [PH-15](../roadmap.md#ph-15-seed-catalog-read-only): the catalog, categories and units every visitor starts with, held in memory, read-only ([architecture.md](../architecture/architecture.md)).
+**Today.** 📝 Designed for [PH-15](../roadmap.md#ph-15a-seed-catalog-read-only): the catalog, categories and units every visitor starts with, held in memory, read-only ([architecture.md](../architecture/architecture.md)).
 
 **With several tasks.** Works unchanged: every task loads the same data from the same image.
 

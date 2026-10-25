@@ -32,7 +32,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - [Stage 4: MVP](#stage-4-mvp)
   - [PH-14a Design system](#ph-14a-design-system)
   - [PH-14b App shell](#ph-14b-app-shell)
-  - [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only)
+  - [PH-15a Seed catalog, read-only](#ph-15a-seed-catalog-read-only)
+  - [PH-15b Mutation testing](#ph-15b-mutation-testing)
   - [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists)
   - [PH-17 List items](#ph-17-list-items)
   - [PH-18 Registration and login](#ph-18-registration-and-login)
@@ -318,7 +319,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 |---|---|---|---|---|---|
 | [PH-14a Design system](#ph-14a-design-system) | ✅ Done | [Spec](superpowers/specs/2026-10-24-PH-14a-design-system-design.md) | [Plan](superpowers/plans/2026-10-24-PH-14a-design-system.md) | [#282](https://github.com/luiki-dev/szop/pull/282) | [#280](https://github.com/luiki-dev/szop/issues/280) |
 | [PH-14b App shell](#ph-14b-app-shell) | ✅ Done | [Spec](superpowers/specs/2026-10-25-PH-14b-app-shell-design.md) | [Plan](superpowers/plans/2026-10-25-PH-14b-app-shell.md) | [#285](https://github.com/luiki-dev/szop/pull/285) | [#281](https://github.com/luiki-dev/szop/issues/281) |
-| [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only) | ⬜ Not started | — | — | — | [#44](https://github.com/luiki-dev/szop/issues/44) |
+| [PH-15a Seed catalog, read-only](#ph-15a-seed-catalog-read-only) | 🚧 In progress | — | — | — | [#287](https://github.com/luiki-dev/szop/issues/287) |
+| [PH-15b Mutation testing](#ph-15b-mutation-testing) | ⬜ Not started | — | — | — | [#288](https://github.com/luiki-dev/szop/issues/288) |
 | [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists) | ⬜ Not started | — | — | — | [#45](https://github.com/luiki-dev/szop/issues/45) |
 | [PH-17 List items](#ph-17-list-items) | ⬜ Not started | — | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
@@ -357,14 +359,25 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#281](https://github.com/luiki-dev/szop/issues/281).
 
-### PH-15 Seed catalog, read-only
+### PH-15a Seed catalog, read-only
 
 - **Goal:** a visitor without a session browses the default catalog by category and searches it by name, with the categories in their depth-first order.
-- **Delivers:** [ACC-1](requirements/functional-requirements.md#acc-1) (part: the seed data before the first change), [PRD-2](requirements/functional-requirements.md#prd-2), [ORD-2](requirements/functional-requirements.md#ord-2) and [ORD-3](requirements/functional-requirements.md#ord-3) (part: the category order rule in `packages/shared`); the seed data; fast-check property tests, StrykerJS and `mutation.yml` ([ADR 0007](decisions/0007-testing-strategy.md)).
+- **Delivers:** [ACC-1](requirements/functional-requirements.md#acc-1) (part: the seed data before the first change), [PRD-2](requirements/functional-requirements.md#prd-2), [ORD-2](requirements/functional-requirements.md#ord-2) and [ORD-3](requirements/functional-requirements.md#ord-3) (part: the category order rule in `packages/shared`); the seed data in YAML, read by the API; `GET /api/catalog` with the JSON error shape and responses serialized through the shared schemas; the `/catalog` page; fast-check property tests ([ADR 0007](decisions/0007-testing-strategy.md)).
+- **Split from:** PH-15 Seed catalog, read-only, now retired: with mutation testing it held about ten tasks and two new concepts, the first data route with its page and mutation testing ([ADR 0014](decisions/0014-roadmap.md), decision 6). Mutation testing became a phase of its own.
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** the sub-issues of [#44](https://github.com/luiki-dev/szop/issues/44).
+- **Open points:** the sub-issues of [#287](https://github.com/luiki-dev/szop/issues/287).
+
+### PH-15b Mutation testing
+
+- **Goal:** mutation testing shows how well the tests catch changes to the shared domain rules and the seed data's validation, locally and in a workflow run on demand ([ADR 0010](decisions/0010-ci-cd.md), decision 5).
+- **Delivers:** StrykerJS, `mutation.yml` and the tool page ([ADR 0007](decisions/0007-testing-strategy.md)).
+- **Split from:** PH-15 Seed catalog, read-only, now retired (see [PH-15a](#ph-15a-seed-catalog-read-only)).
+- **Depends on:** [PH-15a](#ph-15a-seed-catalog-read-only), which brings the first domain logic to mutate.
+- **Owner steps:** none.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#288](https://github.com/luiki-dev/szop/issues/288).
 
 ### PH-16 Guest workspace and lists
 

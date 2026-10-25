@@ -2,7 +2,7 @@
 
 How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tools behind the tests have their own pages: [Vitest](tools/vitest.md), [Testing Library](tools/testing-library.md), [Mock Service Worker (MSW)](tools/msw.md), [Playwright](tools/playwright.md) and [Docker](tools/docker.md).
 
-The guide grows as the layers arrive: property tests and mutation testing in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
+The guide grows as the layers arrive: property tests in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) and mutation testing in [PH-15b](../roadmap.md#ph-15b-mutation-testing).
 
 ## Contents
 
@@ -38,7 +38,7 @@ The guide grows as the layers arrive: property tests and mutation testing in [PH
 | The landing page | `apps/landing/check-demo.test.js` | `checkDemo`, the function behind the footer's dot, says up when the demo answers (whatever the answer), and down when the request fails or outlives its timeout, with a fake `fetch`. The page itself has no browser test: it is checked by hand on `dzwoniec.com` ([PH-34 spec](../superpowers/specs/2026-10-23-PH-34-landing-page-and-demo-status-design.md), decision 9) | `landing` |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
 
-Layer still to come: **property tests and mutation testing** for the domain rules, in [PH-15](../roadmap.md#ph-15-seed-catalog-read-only).
+Layer still to come: **property tests** for the domain rules, in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only), and **mutation testing**, in [PH-15b](../roadmap.md#ph-15b-mutation-testing).
 
 ## Running the tests
 
