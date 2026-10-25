@@ -100,7 +100,7 @@ Dark mode **follows the system setting** (`prefers-color-scheme`) through Tailwi
 ## 4. Icons and brand
 
 - **Icons:** Lucide's line icons, imported one by one as React components, so only the icons used reach the bundle.
-- **The brand mark** is a **flat raccoon** on a sage rounded square (`sage-500`): *szop* is Polish for raccoon. It is drawn around a solid eye mask with white brows, a white muzzle, rounded ears and cheek ruffs, which keep it recognizable at 16 px. The approved draft is [`raccoon.svg`](visual-design/raccoon.svg); the first UI phase polishes it into the favicon and the header logo.
+- **The brand mark** is the owner's **flat raccoon head** on a sage rounded square (`sage-500`): *szop* is Polish for raccoon. A dark mask with the eyes in its upper part, white brows and muzzle, a black nose, ears with white rims and white cheek ruffs, in five flat tones. The master is the owner's artwork in [`brand-source/`](visual-design/brand-source/README.md), which the app never uses directly; the app's files are made from it: `apps/web/src/brand/logo.svg` (the menu's logo) and the icons in `apps/web/public/` (`favicon.svg`, `favicon.ico` with 16 and 32 px, `apple-touch-icon.png` at 180 px, square, since iOS rounds the corners itself).
 - **The wordmark** is "szop" in lowercase Gabarito Bold, `sage-700` (`sage-300` in dark mode), next to the mark. On the list screen the mark alone sits at the right of the header.
 
 ![The raccoon at 128, 32 and 16 px, in a browser tab, and next to the wordmark on light and dark headers](visual-design/brand.png)
