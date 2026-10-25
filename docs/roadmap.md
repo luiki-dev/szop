@@ -319,7 +319,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 |---|---|---|---|---|---|
 | [PH-14a Design system](#ph-14a-design-system) | ✅ Done | [Spec](superpowers/specs/2026-10-24-PH-14a-design-system-design.md) | [Plan](superpowers/plans/2026-10-24-PH-14a-design-system.md) | [#282](https://github.com/luiki-dev/szop/pull/282) | [#280](https://github.com/luiki-dev/szop/issues/280) |
 | [PH-14b App shell](#ph-14b-app-shell) | ✅ Done | [Spec](superpowers/specs/2026-10-25-PH-14b-app-shell-design.md) | [Plan](superpowers/plans/2026-10-25-PH-14b-app-shell.md) | [#285](https://github.com/luiki-dev/szop/pull/285) | [#281](https://github.com/luiki-dev/szop/issues/281) |
-| [PH-15a Seed catalog, read-only](#ph-15a-seed-catalog-read-only) | 🚧 In progress | — | — | — | [#287](https://github.com/luiki-dev/szop/issues/287) |
+| [PH-15a Seed catalog, read-only](#ph-15a-seed-catalog-read-only) | 🚧 In progress | [Spec](superpowers/specs/2026-10-25-PH-15a-seed-catalog-design.md) | — | — | [#287](https://github.com/luiki-dev/szop/issues/287) |
 | [PH-15b Mutation testing](#ph-15b-mutation-testing) | ⬜ Not started | — | — | — | [#288](https://github.com/luiki-dev/szop/issues/288) |
 | [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists) | ⬜ Not started | — | — | — | [#45](https://github.com/luiki-dev/szop/issues/45) |
 | [PH-17 List items](#ph-17-list-items) | ⬜ Not started | — | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
