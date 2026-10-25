@@ -20,10 +20,14 @@ export async function expectAccessible(
       await page.emulateMedia({ colorScheme });
       // Switching the scheme starts color transitions (Button's
       // transition-colors); scanning mid-way reads colors that are neither
-      // scheme's, so wait for every running animation to finish first.
+      // scheme's, so wait for every running animation to finish first. A
+      // transition cancelled on the way (a new one replacing it) rejects its
+      // finished promise; it is no longer running either.
       await page.evaluate(() =>
         Promise.all(
-          document.getAnimations().map((animation) => animation.finished),
+          document
+            .getAnimations()
+            .map((animation) => animation.finished.catch(() => undefined)),
         ),
       );
       const results = await new AxeBuilder({ page })

@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import { cn } from "@/lib/utils.ts";
 import { useHealth } from "./use-health.ts";
 
@@ -9,7 +8,7 @@ function Line({ up, children }: { up: boolean; children: string }) {
       <span
         aria-hidden="true"
         className={cn(
-          "size-2.5 rounded-full",
+          "size-2 rounded-full",
           up ? "bg-primary" : "bg-destructive",
         )}
       />
@@ -30,7 +29,7 @@ function Status({ query }: { query: ReturnType<typeof useHealth> }) {
       <>
         <Line up>API: ok</Line>
         <Line up>Database: up</Line>
-        <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+        <p className="text-xs text-muted-foreground tabular-nums">
           Schema version: {query.data.database.schemaVersion}
         </p>
       </>
@@ -44,26 +43,15 @@ function Status({ query }: { query: ReturnType<typeof useHealth> }) {
   );
 }
 
-// The walking skeleton's page, in the design tokens, until the app shell's
-// Start page replaces it in PH-14b.
-export function HealthPage() {
+// The API's status at the bottom of the menu, in the walking skeleton's
+// words (ADR 0049). It asks when the menu is mounted: on a phone each time
+// the drawer opens, on a desktop once per page load.
+export function ApiStatus() {
   const query = useHealth();
 
   return (
-    <main className="mx-auto max-w-[720px] px-4 py-6">
-      <h1 className="text-2xl font-extrabold">szop</h1>
-      <p className="mt-1 text-muted-foreground">Shopping lists. Coming soon.</p>
-      <section className="mt-4 rounded-surface bg-card p-4 text-card-foreground">
-        <h2 className="mb-2 font-semibold">API status</h2>
-        <div role="status" className="flex flex-col gap-1">
-          <Status query={query} />
-        </div>
-      </section>
-      <p className="mt-4">
-        <Link to="/design" className="font-semibold text-link underline">
-          See the design system →
-        </Link>
-      </p>
-    </main>
+    <div role="status" className="flex flex-col gap-1 text-sm">
+      <Status query={query} />
+    </div>
   );
 }
