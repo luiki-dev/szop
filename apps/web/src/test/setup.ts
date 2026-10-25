@@ -1,7 +1,14 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
-import { afterAll, afterEach, beforeAll } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
+import { stubMatchMedia } from "./match-media.ts";
 import { server } from "./server.ts";
+
+// Every test starts on a phone in the light scheme; a test that needs
+// another answer stubs it again.
+beforeEach(() => {
+  stubMatchMedia();
+});
 
 // A request nobody wrote a handler for must fail the test, not reach a real
 // network. MSW 3's "error" strategy rejects the request but does not fail the

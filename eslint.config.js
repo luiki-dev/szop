@@ -55,12 +55,19 @@ export default defineConfig(
       ],
     },
   },
-  // The landing page's scripts run in the browser. no-undef knows no browser
-  // globals here, and tsc's checkJs (lib: dom) already reports a name that is
-  // not defined.
+  // The landing page's scripts and the web app's script in public/ run in
+  // the browser. no-undef knows no browser globals here, and tsc's checkJs
+  // (lib: dom) already reports a name that is not defined.
   {
-    files: ["apps/landing/**/*.js"],
+    files: ["apps/landing/**/*.js", "apps/web/public/**/*.js"],
     rules: { "no-undef": "off" },
+  },
+  // The web app's public/ scripts are copied as they are, so no tsconfig.json
+  // can sit next to them; tsc checks them through tsconfig.public.json, and
+  // ESLint lints them without type information.
+  {
+    files: ["apps/web/public/**/*.js"],
+    extends: [tseslint.configs.disableTypeChecked],
   },
   // Last: turns off the rules that would fight Prettier.
   prettier,

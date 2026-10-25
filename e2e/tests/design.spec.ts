@@ -4,15 +4,18 @@ import {
   readRoleColors,
   type Rgb,
 } from "../support/contrast.ts";
+import { openMenu } from "../support/menu.ts";
 import { expect, test } from "../support/test.ts";
 
-// The design system page of PH-14a: reachable from the start, accessible in
+// The design system page of PH-14a: reachable from the menu, accessible in
 // both schemes, and loaded without a CSP violation (the guard in test.ts).
-test("the design system page is reachable from the start and accessible", async ({
+test("the design system page is reachable from the menu and accessible", async ({
   page,
+  isMobile,
 }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "See the design system →" }).click();
+  const menu = await openMenu(page, isMobile);
+  await menu.getByRole("link", { name: "Design system" }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Design system" }),
   ).toBeVisible();

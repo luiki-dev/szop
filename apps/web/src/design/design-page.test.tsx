@@ -6,7 +6,8 @@ import { describe, expect, it } from "vitest";
 import { routes } from "../routes.tsx";
 import { colorRoles } from "./roles.ts";
 
-// The real route table, as in health-page.test.tsx. /design makes no request.
+// The real route table, inside the shell, on a phone (setup.ts), so the menu
+// and its API status are not rendered and /design makes no request.
 function renderDesign() {
   const router = createMemoryRouter(routes, { initialEntries: ["/design"] });
   render(
@@ -40,13 +41,12 @@ describe("DesignPage", () => {
     }
   });
 
-  it("links back to the start", () => {
+  it("leaves the way back to the menu", () => {
     renderDesign();
 
-    expect(screen.getByRole("link", { name: "← Back" })).toHaveAttribute(
-      "href",
-      "/",
-    );
+    expect(
+      screen.queryByRole("link", { name: "← Back" }),
+    ).not.toBeInTheDocument();
   });
 
   it("does not take focus on load", () => {

@@ -30,9 +30,9 @@ The guide grows as the layers arrive: property tests and mutation testing in [PH
 |---|---|---|---|
 | API tests | `apps/api/src/**/*.test.ts`, for example `health/routes.test.ts` | A request through the real app gets the right status, headers and body: they go through `buildApp` and `inject()` | `api` |
 | Database tests | `apps/api/src/**/*.test.ts` that call `useTestDatabase()`, for example `test/database.test.ts` | Queries, migrations and cleanup work against the real PostgreSQL | `api` |
-| Component tests | `apps/web/src/**/*.test.tsx`, for example `health/health-page.test.tsx` | A page works as a user sees it: the real route table, hook, API client and schema run in a simulated browser ([jsdom](tools/vitest.md#jsdom)) with only the network faked by MSW | `web` |
+| Component tests | `apps/web/src/**/*.test.tsx`, for example `shell/shell.test.tsx` | A page works as a user sees it: the real route table, hook, API client and schema run in a simulated browser ([jsdom](tools/vitest.md#jsdom)) with only the network faked by MSW | `web` |
 | Unit tests | next to the code, for example `apps/api/src/config.test.ts` | One function does its job for each kind of input, with no server involved | `api` |
-| End-to-end (E2E) journeys | `e2e/tests/*.spec.ts`, for example `health.spec.ts` | A real browser drives the production build through the SPA, the API and PostgreSQL, on three projects (desktop Chromium, desktop Firefox and an emulated phone), checks every page with axe and fails on any Content Security Policy (CSP) violation | ➖ N/A: Playwright |
+| End-to-end (E2E) journeys | `e2e/tests/*.spec.ts`, for example `shell.spec.ts` | A real browser drives the production build through the SPA, the API and PostgreSQL, on three projects (desktop Chromium, desktop Firefox and an emulated phone), checks every page with axe and fails on any Content Security Policy (CSP) violation | ➖ N/A: Playwright |
 | The image check | `scripts/check-image.sh` | The container image builds, starts next to PostgreSQL, migrates, runs as the `node` user and serves the SPA at `/` ([ADR 0028](../decisions/0028-container-image-details.md)) | ➖ N/A: a bash script |
 | The scale check | `scripts/check-scale.sh` | Two instances of the image start together behind nginx (the `scale` profile): one migrates while the other waits for the lock, and requests reach both. It catches what two instances inside one test process hide, since those share module-level state ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 14) | ➖ N/A: a bash script |
 | The landing page | `apps/landing/check-demo.test.js` | `checkDemo`, the function behind the footer's dot, says up when the demo answers (whatever the answer), and down when the request fails or outlives its timeout, with a fake `fetch`. The page itself has no browser test: it is checked by hand on `dzwoniec.com` ([PH-34 spec](../superpowers/specs/2026-10-23-PH-34-landing-page-and-demo-status-design.md), decision 9) | `landing` |
@@ -63,14 +63,14 @@ The E2E journeys are not part of `pnpm test`: they need a browser and a built ap
 ```bash
 pnpm test:e2e                                    # builds the web app, then runs every journey on the three projects
 pnpm test:e2e --project=desktop-firefox          # one project: desktop-chromium, desktop-firefox or pixel
-pnpm test:e2e tests/health.spec.ts               # one file
+pnpm test:e2e tests/shell.spec.ts                # one file
 pnpm test:e2e --ui                               # Playwright's UI mode: pick tests, watch them run, step through a trace
 pnpm test:e2e:report                             # open the HTML report of the last run
 ```
 
 - `pnpm test:e2e` is `pnpm build && pnpm --filter @szop/e2e exec playwright test`, so it always tests the code as it is now, and extra arguments reach Playwright. It resets the database `szop_e2e` and starts the API on port 3100 by itself ([Playwright](tools/playwright.md#start-serverts)); a `pnpm start` or `pnpm dev` running at the same time is not touched, and two E2E runs at once would fight over port 3100.
 - `pnpm test:e2e:report` does not build or run any tests: it serves the report folder on a local port and prints the address (`Serving HTML report at http://localhost:9323`), opening the browser when it can. Under Windows Subsystem for Linux (WSL), open the printed address in Windows' browser. It keeps running until you press Ctrl+C. With no argument it shows `e2e/playwright-report/`, the last local run; with a folder, such as a report downloaded from CI, it shows that one: `pnpm test:e2e:report ~/Downloads/playwright-report`. The script runs in the `e2e/` folder, so a relative path is resolved from there: give an absolute or `~` path. A folder without a report ends with `No report found at …`.
-- A passing run ends with a line such as `6 passed (8.0s)`. A test is shown once per project, as `[desktop-chromium] › tests/health.spec.ts › …`.
+- A passing run ends with a line such as `6 passed (8.0s)`. A test is shown once per project, as `[desktop-chromium] › tests/shell.spec.ts › …`.
 - **In the editor,** the Playwright Test extension runs the same config, but it does not build first: it tests the last build. Run `pnpm build` after every change to `apps/web` or `packages/shared`, or the run tests the old code (and stops with "run `pnpm build` first" when there is no build at all). Changes to the API need no rebuild, since the API runs from source.
 - If the run stops before any test with "is already used", something still answers on port 3100. The usual holder is an E2E server left behind by a run that was killed hard, a closed terminal for example (Playwright starts its server in a separate process group, so the signal never reaches it). Killing `start-server.ts` does nothing, since it ignores `SIGINT` and `SIGTERM` by design. Find the listener with `ss -ltnp 'sport = :3100'` and stop that process, normally `node src/server.ts`, the API: `start-server.ts` then exits by itself. A `pnpm start` is a holder only if its `PORT` was set to 3100 (it listens on 3000 by default). If it hangs at the very start with no output on WSL, see [the setup guide](setup.md#the-end-to-end-journeys).
 
@@ -210,18 +210,16 @@ A database test runs against a real PostgreSQL, so a query, a migration or a cle
 
 ## Writing a component test
 
-A component test renders a page in a simulated browser and checks what the user would see. Only the network is faked: the real route table, data hook, API client and schema run. The first one, `apps/web/src/health/health-page.test.tsx`, is the pattern. Its setup helper and its database-down case:
+A component test renders a page, or one component, in a simulated browser and checks what the user would see. Only the network is faked: the real route table, data hook, API client and schema run. `apps/web/src/shell/shell.test.tsx` (the pages in the app shell) and `shell/api-status.test.tsx` (the API's status in the menu) are the pattern. The shell's setup helper, and the status's database-down case:
 
 ```tsx
-function renderApp() {
-  const queryClient = new QueryClient();
-  const router = createMemoryRouter(routes, { initialEntries: ["/"] });
+function renderApp(path = "/") {
+  const router = createMemoryRouter(routes, { initialEntries: [path] });
   render(
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={new QueryClient()}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
-  return { queryClient };
 }
 
 it("says the database is down when the API reports it", async () => {
@@ -235,7 +233,7 @@ it("says the database is down when the API reports it", async () => {
     ),
   );
 
-  renderApp();
+  renderStatus(); // <ApiStatus /> in its own QueryClientProvider
 
   expect(await screen.findByText("API: reachable")).toBeInTheDocument();
   expect(screen.getByText("Database: down")).toBeInTheDocument();
@@ -245,6 +243,7 @@ it("says the database is down when the API reports it", async () => {
 Line by line:
 
 - **The real route table.** `createMemoryRouter(routes)` builds a router from the same `routes` array the app uses, with the address held in memory, so a test runs the real route definitions and not a copy that could drift from them.
+- **A phone or a desktop, chosen by the test.** jsdom has no `matchMedia`, so `src/test/setup.ts` stubs it before each test with `stubMatchMedia()` from `src/test/match-media.ts`: no query matches, which is a phone in the light scheme. A test that needs a desktop, or the dark scheme, stubs it again (`stubMatchMedia({ [desktopQuery]: true })`), and the stub's `set(query, matches)` changes an answer later and fires the change listeners, as resizing the window or switching the system's scheme would. The shell renders only the drawer or only the sidebar, so a test sees one menu.
 - **A fresh `QueryClient` per test.** TanStack Query caches answers in its `QueryClient`; a new one for each test means a cached answer cannot leak into the next.
 - **`server.use` sets the state.** The default handler, in `src/test/server.ts`, answers the healthy body. A test that needs another state adds a handler for that test; the setup file drops it afterwards ([MSW](tools/msw.md)). Nothing else is faked: the client, the hook and the schema parse the answer as in production.
 - **A handler with a valid body is typed with the shared schema.** The body is written `satisfies Health`, the type from `packages/shared`, so a fake that drifts from the real response fails the type check.
@@ -271,22 +270,33 @@ A unit test lives next to the code it tests and has the same name with `.test.ts
 
 ## Writing an E2E journey
 
-An E2E journey drives a real browser through the whole stack, the way a person would: it opens the production build, which talks to the real API and PostgreSQL. It proves what the lower layers cannot: that the pieces work together, in Chromium, in Firefox and on a phone. It is the most expensive kind of test, so it checks a use case from start to finish and leaves the edge cases to the lower layers ([ADR 0007](../decisions/0007-testing-strategy.md), decision 16). The first one, `e2e/tests/health.spec.ts`, is the pattern:
+An E2E journey drives a real browser through the whole stack, the way a person would: it opens the production build, which talks to the real API and PostgreSQL. It proves what the lower layers cannot: that the pieces work together, in Chromium, in Firefox and on a phone. It is the most expensive kind of test, so it checks a use case from start to finish and leaves the edge cases to the lower layers ([ADR 0007](../decisions/0007-testing-strategy.md), decision 16). The shell's journey, `e2e/tests/shell.spec.ts`, is the pattern:
 
 ```ts
 import { expectAccessible } from "../support/accessibility.ts";
+import { openMenu } from "../support/menu.ts";
 import { expect, test } from "../support/test.ts";
 
-test("the health page shows the API and the database up", async ({ page }) => {
+test("the shell shows the menu, the API's status and the pages", async ({
+  page,
+  isMobile,
+}) => {
   await page.goto("/");
-  const status = page.getByRole("status");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Start" }),
+  ).toBeVisible();
+
+  const menu = await openMenu(page, isMobile);
+  const status = menu.getByRole("status");
   await expect(status).toContainText("API: ok");
   await expect(status).toContainText("Database: up");
   await expectAccessible(page);
+  // … then it follows "Design system" through the menu.
 });
 ```
 
-- **One file per use case,** named `uc-NN-short-name.spec.ts` (`uc-03-shop-in-store.spec.ts`), written in the phase that completes the use case ([ADR 0007](../decisions/0007-testing-strategy.md), decisions 4 and 17). `health.spec.ts` is the exception: no use case is complete yet, so the walking skeleton's journey is named after its page, and it goes when the page does ([OP-087](https://github.com/luiki-dev/szop/issues/160)).
+- **One file per use case,** named `uc-NN-short-name.spec.ts` (`uc-03-shop-in-store.spec.ts`), written in the phase that completes the use case ([ADR 0007](../decisions/0007-testing-strategy.md), decisions 4 and 17). `shell.spec.ts` is the exception: no use case is complete yet, so the journey that proves the SPA, the API and PostgreSQL talk to each other is named after the app shell, whose menu shows the API's status. It replaced the walking skeleton's `health.spec.ts` when the shell replaced the health page ([OP-087](https://github.com/luiki-dev/szop/issues/160)).
+- **Reach a page through the menu with `openMenu(page, isMobile)`** from `support/menu.ts`: on the phone project (`isMobile`) it taps ☰ first, since the menu is a drawer there; on the desktop projects the sidebar is always there. It returns the menu's `navigation` locator.
 - **Import `test` and `expect` from `../support/test.ts`,** never from `@playwright/test`. The file's `test` is Playwright's with the [CSP guard](#the-csp-guard) added, so every journey is guarded without asking. A journey that imports from `@playwright/test` would run unguarded and still pass, so ESLint refuses it, with a message naming `support/test.ts`.
 - **Call `expectAccessible(page)` once the page has settled, on every page the journey visits.** "Settled" means the journey has waited for what the page shows, as the `toContainText` lines above do; scanning earlier would scan a half-drawn screen ([The accessibility check](#the-accessibility-check)).
 - **Each test isolates itself.** Playwright gives every test a fresh browser context, a new guest with no cookies and no storage, so tests run in parallel and the database is reset only once per run, when the server starts ([ADR 0007](../decisions/0007-testing-strategy.md), decision 15). A test that needs a user registers one with a unique email, and never depends on data another test left behind.

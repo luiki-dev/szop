@@ -4,6 +4,10 @@
    decision 10; ADR 0022, decision 9). */
 @import "tailwindcss";
 
+/* dark: follows the class "dark" on <html>, set from the user's choice by
+   public/color-scheme.js and src/shell/color-scheme.ts (APR-1; ADR 0049). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* The palette: Tailwind's built-in colors plus Szop's own fur and sage, and
    the shapes and font, which do not change with the color scheme. */
 @theme {
@@ -26,10 +30,11 @@
 }
 
 /* The semantic roles, which components use instead of palette colors: light
-   first, then dark, which follows the system setting (ADR 0013, decision
-   12). A new role is added to visual-design.md's table too. */
+   first, then dark, under the "dark" class: the user's choice, or the system
+   setting while the choice is System (APR-1; ADR 0049). A new role is added
+   to visual-design.md's table too. */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   --background: var(--color-fur);
   --foreground: var(--color-gray-800);
@@ -55,32 +60,31 @@
   --haul-accent: var(--color-sage-300);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: var(--color-gray-900);
-    --foreground: var(--color-gray-200);
-    --card: var(--color-gray-800);
-    --card-foreground: var(--color-gray-200);
-    --muted-foreground: var(--color-gray-400);
-    --border: var(--color-gray-700);
-    --input: var(--color-gray-400);
-    --primary: var(--color-sage-300);
-    --primary-foreground: var(--color-sage-950);
-    --accent: var(--color-sage-950);
-    --accent-foreground: var(--color-sage-300);
-    --ring: var(--color-sage-300);
-    --link: var(--color-sage-300);
-    --destructive: var(--color-red-400);
-    --destructive-foreground: var(--color-gray-950);
-    --warning: var(--color-amber-950);
-    --warning-foreground: var(--color-amber-200);
-    /* The haul stays the darkest surface (ADR 0022, decision 8). */
-    --haul: var(--color-gray-950);
-    --haul-foreground: var(--color-white);
-    --haul-muted: var(--color-gray-400);
-    --haul-chip: var(--color-gray-800);
-    --haul-accent: var(--color-sage-300);
-  }
+:root.dark {
+  color-scheme: dark;
+  --background: var(--color-gray-900);
+  --foreground: var(--color-gray-200);
+  --card: var(--color-gray-800);
+  --card-foreground: var(--color-gray-200);
+  --muted-foreground: var(--color-gray-400);
+  --border: var(--color-gray-700);
+  --input: var(--color-gray-400);
+  --primary: var(--color-sage-300);
+  --primary-foreground: var(--color-sage-950);
+  --accent: var(--color-sage-950);
+  --accent-foreground: var(--color-sage-300);
+  --ring: var(--color-sage-300);
+  --link: var(--color-sage-300);
+  --destructive: var(--color-red-400);
+  --destructive-foreground: var(--color-gray-950);
+  --warning: var(--color-amber-950);
+  --warning-foreground: var(--color-amber-200);
+  /* The haul stays the darkest surface (ADR 0022, decision 8). */
+  --haul: var(--color-gray-950);
+  --haul-foreground: var(--color-white);
+  --haul-muted: var(--color-gray-400);
+  --haul-chip: var(--color-gray-800);
+  --haul-accent: var(--color-sage-300);
 }
 
 /* The roles as Tailwind colors: bg-primary, text-muted-foreground and so on.

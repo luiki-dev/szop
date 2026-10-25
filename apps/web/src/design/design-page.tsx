@@ -44,14 +44,11 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 // Szop's tokens and first components, in the current color scheme, for
-// checking the styles in the browser (ADR 0048).
+// checking the styles in the browser (ADR 0048). The shell gives it its
+// title.
 export function DesignPage() {
   return (
-    <main className="mx-auto max-w-[720px] px-4 py-6">
-      <Link to="/" className="font-semibold text-link underline">
-        ← Back
-      </Link>
-      <h1 className="mt-4 text-2xl font-extrabold">Design system</h1>
+    <>
       <p className="mt-1 text-sm text-muted-foreground">
         Szop's tokens and components, in the current color scheme.
       </p>
@@ -145,6 +142,6 @@ export function DesignPage() {
           Haul · 24 px top corners
         </div>
       </Section>
-    </main>
+    </>
   );
 }
