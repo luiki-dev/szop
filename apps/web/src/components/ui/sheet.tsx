@@ -31,7 +31,7 @@ function SheetContent({
       <SheetPrimitive.Popup
         data-slot="sheet-content"
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-border bg-card text-card-foreground shadow-lg outline-none data-ending-style:-translate-x-full data-starting-style:-translate-x-full motion-safe:transition motion-safe:duration-200 motion-safe:ease-out",
+          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-border bg-card text-card-foreground shadow-lg outline-none data-ending-style:-translate-x-full data-starting-style:-translate-x-full motion-safe:transition-[translate] motion-safe:duration-200 motion-safe:ease-out",
           className,
         )}
         {...props}
