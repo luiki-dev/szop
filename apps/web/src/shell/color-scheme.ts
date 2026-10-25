@@ -10,19 +10,24 @@ export type ColorScheme = "system" | "light" | "dark";
 export const storageKey = "szop-color-scheme";
 export const darkQuery = "(prefers-color-scheme: dark)";
 
-// A storage that throws (private mode, blocked site data) or holds anything
-// else means System.
+// The choice of this visit, for when the storage throws (private mode,
+// blocked site data): the menu and the system listener read it, so the
+// choice holds until the page is closed. Undefined while the storage works.
+let sessionChoice: ColorScheme | undefined;
+
+// A stored value other than light or dark means System. A storage that
+// throws means this visit's choice, or System.
 export function readColorScheme(): ColorScheme {
   try {
     const stored = localStorage.getItem(storageKey);
     return stored === "light" || stored === "dark" ? stored : "system";
   } catch {
-    return "system";
+    return sessionChoice ?? "system";
   }
 }
 
 // System is the default, so choosing it forgets the choice. A storage that
-// throws keeps nothing; the page still switches for this visit.
+// throws keeps it for this visit only.
 export function storeColorScheme(choice: ColorScheme): void {
   try {
     if (choice === "system") {
@@ -30,8 +35,9 @@ export function storeColorScheme(choice: ColorScheme): void {
     } else {
       localStorage.setItem(storageKey, choice);
     }
+    sessionChoice = undefined;
   } catch {
-    // Nothing to keep it in.
+    sessionChoice = choice;
   }
 }
 

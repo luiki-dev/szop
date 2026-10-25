@@ -12,9 +12,10 @@ import {
 const html = document.documentElement;
 
 afterEach(() => {
-  localStorage.clear();
-  html.classList.remove("dark");
   vi.restoreAllMocks();
+  // With the storage working again, this also forgets a session's choice.
+  storeColorScheme("system");
+  html.classList.remove("dark");
 });
 
 describe("readColorScheme", () => {
@@ -108,6 +109,24 @@ describe("followSystemColorScheme", () => {
     media.set(darkQuery, true);
 
     expect(html).not.toHaveClass("dark");
+    stop();
+  });
+
+  it("keeps the session's choice when the storage throws and the system changes", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    const media = stubMatchMedia({ [darkQuery]: true });
+    const stop = followSystemColorScheme();
+    storeColorScheme("dark");
+    applyColorScheme("dark");
+
+    media.set(darkQuery, false);
+
+    expect(html).toHaveClass("dark");
     stop();
   });
 

@@ -2,14 +2,15 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "../test/match-media.ts";
 import { ColorSchemeControl } from "./color-scheme-control.tsx";
-import { darkQuery, storageKey } from "./color-scheme.ts";
+import { darkQuery, storageKey, storeColorScheme } from "./color-scheme.ts";
 
 const html = document.documentElement;
 
 afterEach(() => {
-  localStorage.clear();
-  html.classList.remove("dark");
   vi.restoreAllMocks();
+  // With the storage working again, this also forgets a session's choice.
+  storeColorScheme("system");
+  html.classList.remove("dark");
 });
 
 describe("ColorSchemeControl", () => {
@@ -65,5 +66,21 @@ describe("ColorSchemeControl", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Dark" }));
 
     expect(html).toHaveClass("dark");
+  });
+
+  it("shows the session's choice again when the storage throws and the menu reopens", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    const { unmount } = render(<ColorSchemeControl />);
+    fireEvent.click(screen.getByRole("radio", { name: "Dark" }));
+    unmount();
+
+    render(<ColorSchemeControl />);
+
+    expect(screen.getByRole("radio", { name: "Dark" })).toBeChecked();
   });
 });
