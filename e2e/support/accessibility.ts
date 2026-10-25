@@ -20,12 +20,20 @@ export async function expectAccessible(
       await page.emulateMedia({ colorScheme });
       // Switching the scheme starts color transitions (Button's
       // transition-colors); scanning mid-way reads colors that are neither
-      // scheme's, so wait for every running animation to finish first.
-      await page.evaluate(() =>
-        Promise.all(
-          document.getAnimations().map((animation) => animation.finished),
-        ),
-      );
+      // scheme's, so wait for every running animation to finish first. A
+      // transition cancelled on the way (a new one replacing it) rejects its
+      // finished promise; it is no longer running either. The app switches
+      // the scheme in a matchMedia listener (ADR 0049), which the browser
+      // calls before the next frame, so the transitions start only then:
+      // wait for that frame before collecting them.
+      await page.evaluate(async () => {
+        await new Promise(requestAnimationFrame);
+        await Promise.all(
+          document
+            .getAnimations()
+            .map((animation) => animation.finished.catch(() => undefined)),
+        );
+      });
       const results = await new AxeBuilder({ page })
         .withTags(tags)
         .disableRules(options.disableRules ?? [])

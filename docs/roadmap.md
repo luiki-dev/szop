@@ -317,7 +317,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | Phase | Status | Spec | Plan | PR | Issue |
 |---|---|---|---|---|---|
 | [PH-14a Design system](#ph-14a-design-system) | ✅ Done | [Spec](superpowers/specs/2026-10-24-PH-14a-design-system-design.md) | [Plan](superpowers/plans/2026-10-24-PH-14a-design-system.md) | [#282](https://github.com/luiki-dev/szop/pull/282) | [#280](https://github.com/luiki-dev/szop/issues/280) |
-| [PH-14b App shell](#ph-14b-app-shell) | ⬜ Not started | — | — | — | [#281](https://github.com/luiki-dev/szop/issues/281) |
+| [PH-14b App shell](#ph-14b-app-shell) | ✅ Done | [Spec](superpowers/specs/2026-10-25-PH-14b-app-shell-design.md) | [Plan](superpowers/plans/2026-10-25-PH-14b-app-shell.md) | [#285](https://github.com/luiki-dev/szop/pull/285) | [#281](https://github.com/luiki-dev/szop/issues/281) |
 | [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only) | ⬜ Not started | — | — | — | [#44](https://github.com/luiki-dev/szop/issues/44) |
 | [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists) | ⬜ Not started | — | — | — | [#45](https://github.com/luiki-dev/szop/issues/45) |
 | [PH-17 List items](#ph-17-list-items) | ⬜ Not started | — | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
@@ -350,7 +350,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-14b App shell
 
 - **Goal:** every page sits in Szop's app shell, with the raccoon logo, the navigation (a drawer on phones, a sidebar on larger screens) and the API's status in the menu. `/` is a Start page and `/design` sits under its own heading in the menu. The user picks the color scheme (system, light or dark) in the menu.
-- **Delivers:** the app shell of [ADR 0013](decisions/0013-visual-design.md), decision 17, and the [visual design](architecture/visual-design.md#5-layout-and-navigation); the favicon and the header logo, polished from the draft `raccoon.svg`; the manual theme toggle ([APR-1](requirements/functional-requirements.md#apr-1)), brought into the MVP by [ADR 0048](decisions/0048-design-system-phase-details.md); the health journey replaced ([OP-087](https://github.com/luiki-dev/szop/issues/160)).
+- **Delivers:** the app shell of [ADR 0013](decisions/0013-visual-design.md), decision 17, and the [visual design](architecture/visual-design.md#5-layout-and-navigation); the favicon and the menu's logo, traced from the owner's raccoon artwork ([ADR 0049](decisions/0049-app-shell-phase-details.md)); the manual theme toggle ([APR-1](requirements/functional-requirements.md#apr-1)), brought into the MVP by [ADR 0048](decisions/0048-design-system-phase-details.md); the health journey replaced ([OP-087](https://github.com/luiki-dev/szop/issues/160)).
 - **Split from:** PH-14 App shell and design system, now retired (see [PH-14a](#ph-14a-design-system)).
 - **Depends on:** —
 - **Owner steps:** none.

@@ -92,6 +92,7 @@ Each package in the workspace has its own `package.json` scripts. The root scrip
 | `@szop/web` | `dev` | Serve the web app for development | `vite`: the dev server on port 5173 ([Vite](tools/vite.md)) | `pnpm dev` |
 | `@szop/web` | `build` | Build the web app | `vite build` | `pnpm build` |
 | every package | `typecheck` | Check the package's types | `tsc --noEmit` | `pnpm typecheck` |
+| `@szop/web` | `typecheck` | Check the web app's types, and its plain scripts in `public/` | `tsc --noEmit && tsc --noEmit -p tsconfig.public.json`: the second checks `public/*.js` with `checkJs`, since no `tsconfig.json` can sit in `public/`, whose files are served as they are | `pnpm typecheck` |
 
 ## Adding a script
 
