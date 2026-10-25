@@ -129,6 +129,25 @@ describe("AppShell", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("keeps the page mounted when the screen crosses lg", async () => {
+    const media = stubMatchMedia();
+    renderApp("/design");
+    const button = screen.getByRole("button", { name: "Primary" });
+    button.focus();
+
+    media.set(desktopQuery, true);
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: "Open menu" }),
+      ).not.toBeInTheDocument();
+    });
+
+    // The same element, still focused: the page was not rebuilt, so a page
+    // with typed input or other state keeps it when a tablet rotates.
+    expect(screen.getByRole("button", { name: "Primary" })).toBe(button);
+    expect(button).toHaveFocus();
+  });
+
   it("cuts a long title and keeps ☰ whole", () => {
     renderApp();
 

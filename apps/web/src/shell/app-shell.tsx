@@ -29,10 +29,10 @@ function usePageTitle(): string | undefined {
     .at(-1)?.title;
 }
 
-// The phone's layout: a header bar with ☰ and the page's title, and the menu
-// in a drawer. Its open state lives here, so it goes when the screen grows
-// past lg and the drawer never reopens by itself when it shrinks again.
-function PhoneShell({ title }: { title: string | undefined }) {
+// The phone's header bar: ☰ and the page's title, with the menu in a
+// drawer. Its open state lives here, so it goes when the screen grows past
+// lg and the drawer never reopens by itself when it shrinks again.
+function PhoneHeader({ title }: { title: string | undefined }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -52,9 +52,6 @@ function PhoneShell({ title }: { title: string | undefined }) {
         </SheetTrigger>
         <h1 className="min-w-0 truncate text-xl font-extrabold">{title}</h1>
       </header>
-      <main className="mx-auto max-w-[720px] px-4 pb-6">
-        <Outlet />
-      </main>
       <SheetContent closeLabel="Close menu" className="w-[280px] max-w-[85vw]">
         <SheetTitle className="sr-only">Menu</SheetTitle>
         <nav aria-label="Menu" className="h-full overflow-y-auto">
@@ -72,7 +69,9 @@ function PhoneShell({ title }: { title: string | undefined }) {
 // The app shell around every page (ADR 0013, decision 17; ADR 0049): on a
 // phone a header bar with ☰ and a drawer, from lg a permanent sidebar. Only
 // one of the two is rendered, so the menu is never in the page twice. The
-// shell owns the page's h1 and the tab's title.
+// shell owns the page's h1 and the tab's title. The page's <main> keeps its
+// place in the tree whichever chrome surrounds it, so crossing lg (a tablet
+// rotating) does not rebuild the page and lose what it holds.
 export function AppShell() {
   const desktop = useMediaQuery(desktopQuery);
   const title = usePageTitle();
@@ -81,19 +80,25 @@ export function AppShell() {
     document.title = title ? `${title} · Szop` : "Szop";
   }, [title]);
 
-  if (!desktop) {
-    return <PhoneShell title={title} />;
-  }
-
   return (
-    <div className="flex min-h-dvh">
-      <aside className="sticky top-0 h-dvh w-64 shrink-0 overflow-y-auto bg-card text-card-foreground">
-        <nav aria-label="Menu" className="h-full">
-          <Menu />
-        </nav>
-      </aside>
-      <main className="mx-auto w-full max-w-[720px] px-6 py-6">
-        <h1 className="text-2xl font-extrabold">{title}</h1>
+    <div className={desktop ? "flex min-h-dvh" : undefined}>
+      {desktop ? (
+        <aside className="sticky top-0 h-dvh w-64 shrink-0 overflow-y-auto bg-card text-card-foreground">
+          <nav aria-label="Menu" className="h-full">
+            <Menu />
+          </nav>
+        </aside>
+      ) : (
+        <PhoneHeader title={title} />
+      )}
+      <main
+        className={
+          desktop
+            ? "mx-auto w-full max-w-[720px] px-6 py-6"
+            : "mx-auto max-w-[720px] px-4 pb-6 md:px-6"
+        }
+      >
+        {desktop && <h1 className="text-2xl font-extrabold">{title}</h1>}
         <Outlet />
       </main>
     </div>

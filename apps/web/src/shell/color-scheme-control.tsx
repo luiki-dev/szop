@@ -40,6 +40,8 @@ export function ColorSchemeControl() {
         }}
         className="grid grid-cols-3 gap-1 rounded-control border border-border p-1"
       >
+        {/* rounded-[8px]: the group's 12 px control radius less its 4 px
+            padding, so the inner and outer corners run parallel. */}
         {options.map(({ value, label, icon: Icon }) => (
           <Radio.Root
             key={value}

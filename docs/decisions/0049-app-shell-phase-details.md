@@ -34,6 +34,7 @@
 - **The logo is 12.7 KB**: SVGO with whole-pixel precision on the 1254 px canvas shrank the 68 KB trace with no visible change. `favicon.ico` holds 16 and 32 px; `apple-touch-icon.png` is square, since iOS rounds the corners itself and would fill transparent ones with black.
 - **shadcn's Sheet** was kept to its root, trigger, content and title, on Szop's roles. ☰ is the Sheet's trigger, since Base UI returns focus only to its own trigger.
 - **The control uses Base UI's Radio Group directly**: Toggle Group has the `group` role with pressed buttons, not radios, and shadcn's Radio Group draws dots.
-- **The drawer's state lives in the phone's layout**, so it goes when the screen grows past `lg`, and the drawer never reopens by itself.
+- **The drawer's state lives in the phone's header**, so it goes when the screen grows past `lg`, and the drawer never reopens by itself. **The page's `<main>` keeps its place in the tree** whichever chrome surrounds it, so crossing `lg` (a tablet rotating) does not rebuild the page and lose what it holds; the final review found the first version did.
+- **A blocked storage keeps the choice for the visit**, in memory, so the control and the system listener do not fall back to System (found by the final review).
 - **The drawer slides; it does not fade its colors.** Its `transition` covered every property, so switching the scheme with the drawer open started color transitions that axe scanned half-way. The axe helper now also waits one frame for the `matchMedia` listener, and ignores cancelled animations.
 - **`public/color-scheme.js` is type-checked through `apps/web/tsconfig.public.json`**: a `tsconfig.json` in `public/` would be served with the app.
