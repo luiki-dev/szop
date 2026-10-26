@@ -213,7 +213,7 @@
 **Interfaces:**
 - Consumes: the style the owner approved after Task 3; `check-done.py`, `check-index.py`, `check-links.py`.
 
-- [ ] **Step 1: Write the criteria of ACC-1 to ACC-8.** Main sources:
+- [x] **Step 1: Write the criteria of ACC-1 to ACC-8.** Main sources:
   - ADR 0002, 0003 and 0012, decisions 9 to 12 and 14;
   - architecture.md's "Anonymous guests" and "Web security";
   - open points [OP-038](https://github.com/luiki-dev/szop/issues/97), [OP-039](https://github.com/luiki-dev/szop/issues/98), [OP-044](https://github.com/luiki-dev/szop/issues/76), [OP-048](https://github.com/luiki-dev/szop/issues/101), [OP-055](https://github.com/luiki-dev/szop/issues/109), and the ACC part of [OP-041](https://github.com/luiki-dev/szop/issues/100) (category matching, currency) and [OP-047](https://github.com/luiki-dev/szop/issues/111);
@@ -221,16 +221,16 @@
 
   Directions are `❔ Draft · [OP-…]`. Questions left open get no criterion.
 
-- [ ] **Step 2: Write the criteria of LIM-1 to LIM-4**: one per quota row and rate-limit row, the IPv6 grouping, the silent per-email limits, the messages, and the all-or-nothing direction for bulk actions ([OP-047](https://github.com/luiki-dev/szop/issues/111)). Sources: ADR 0003, ADR 0012, decisions 13 and 14, ADR 0036, decision 8, architecture.md's "Abuse protection" and "Errors".
+- [x] **Step 2: Write the criteria of LIM-1 to LIM-4**: one per quota row and rate-limit row, the IPv6 grouping, the silent per-email limits, the messages, and the all-or-nothing direction for bulk actions ([OP-047](https://github.com/luiki-dev/szop/issues/111)). Sources: ADR 0003, ADR 0012, decisions 13 and 14, ADR 0036, decision 8, architecture.md's "Abuse protection" and "Errors".
 
-- [ ] **Step 3: Write the criteria of NET-1** from ADR 0013, visual-design.md ("Offline") and [OP-040](https://github.com/luiki-dev/szop/issues/99) (timeouts, "not saved", refetch, an explicit checked value).
+- [x] **Step 3: Write the criteria of NET-1** from ADR 0013, visual-design.md ("Offline") and [OP-040](https://github.com/luiki-dev/szop/issues/99) (timeouts, "not saved", refetch, an explicit checked value).
 
-- [ ] **Step 4: Update the requirement statements** where a criterion now holds the detail or the statement is out of date. Fill the three areas' index tables.
+- [x] **Step 4: Update the requirement statements** where a criterion now holds the detail or the statement is out of date. Fill the three areas' index tables.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
   Run: `python3 scratchpad/check-done.py && python3 scratchpad/check-index.py && python3 scratchpad/check-links.py && pnpm check`. Expected: all pass.
 
-- [ ] **Step 6: Commit**: `docs(requirements): add the criteria of ACC, LIM and NET`, with the ticked boxes and a list of the sweep's findings (contradictions, behaviors that fit no requirement) kept for the PR. Push.
+- [x] **Step 6: Commit**: `docs(requirements): add the criteria of ACC, LIM and NET`, with the ticked boxes and a list of the sweep's findings (contradictions, behaviors that fit no requirement) kept for the PR. Push.
 
 ---
 

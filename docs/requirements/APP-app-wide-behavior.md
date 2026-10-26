@@ -24,7 +24,7 @@ Every page sits in one app shell, with one menu that leads to every destination.
 
 ## APP-2
 
-🎯 [MVP] · 🚧 In progress (2 of 2) · ❔ Criteria not finalized
+🎯 [MVP] · ✅ Done (2 of 2) · ✅ Criteria finalized ([PH-40](../roadmap.md#ph-40-acceptance-criteria))
 
 Every page names itself, in the page and in the browser's tab.
 

@@ -4,7 +4,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 
 ## NFR-1
 
-🎯 [MVP] · 🚧 In progress (1 of 1) · ❔ Criteria not finalized
+🎯 [MVP] · ✅ Done (1 of 1) · ✅ Criteria finalized ([PH-40](../roadmap.md#ph-40-acceptance-criteria))
 
 **Browsers:** Szop supports the current versions of Chrome, Edge and Firefox on the desktop, and Chrome on Android. Safari and iOS are not supported: Szop may work there, but it is not tested.
 

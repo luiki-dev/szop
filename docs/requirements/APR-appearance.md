@@ -4,7 +4,7 @@ How the app looks: the color scheme. Part of the [functional requirements](funct
 
 ## APR-1
 
-🎯 [MVP] · 🚧 In progress (5 of 5) · ❔ Criteria not finalized
+🎯 [MVP] · ✅ Done (5 of 5) · ✅ Criteria finalized ([PH-40](../roadmap.md#ph-40-acceptance-criteria))
 
 The user chooses the color scheme: system (the default), light or dark. The choice is kept on the device ([ADR 0048](../decisions/0048-design-system-phase-details.md), decision 5; [ADR 0049](../decisions/0049-app-shell-phase-details.md), decision 6).
 

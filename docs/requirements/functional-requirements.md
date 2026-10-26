@@ -100,14 +100,14 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | — | — | — |
-| [ACC-2](ACC-accounts-and-guest-mode.md#acc-2) | 🎯 MVP | — | — | — |
-| [ACC-3](ACC-accounts-and-guest-mode.md#acc-3) | 🎯 MVP | — | — | — |
-| [ACC-4](ACC-accounts-and-guest-mode.md#acc-4) | 🎯 MVP | — | — | — |
-| [ACC-5](ACC-accounts-and-guest-mode.md#acc-5) | 🎯 MVP | — | — | — |
-| [ACC-6](ACC-accounts-and-guest-mode.md#acc-6) | 🎯 MVP | — | — | — |
-| [ACC-7](ACC-accounts-and-guest-mode.md#acc-7) | 🎯 MVP | — | — | — |
-| [ACC-8](ACC-accounts-and-guest-mode.md#acc-8) | 🎯 MVP | — | — | — |
+| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | ❔ Draft | 0 of 9 | ❔ Not finalized |
+| [ACC-2](ACC-accounts-and-guest-mode.md#acc-2) | 🎯 MVP | ❔ Draft | 0 of 8 | ❔ Not finalized |
+| [ACC-3](ACC-accounts-and-guest-mode.md#acc-3) | 🎯 MVP | ❔ Draft | 0 of 9 | ❔ Not finalized |
+| [ACC-4](ACC-accounts-and-guest-mode.md#acc-4) | 🎯 MVP | ❔ Draft | 0 of 5 | ❔ Not finalized |
+| [ACC-5](ACC-accounts-and-guest-mode.md#acc-5) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [ACC-6](ACC-accounts-and-guest-mode.md#acc-6) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [ACC-7](ACC-accounts-and-guest-mode.md#acc-7) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [ACC-8](ACC-accounts-and-guest-mode.md#acc-8) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
 
 ### Shopping lists (LST)
 
@@ -194,29 +194,29 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [LIM-1](LIM-limits.md#lim-1) | 🎯 MVP | — | — | — |
-| [LIM-2](LIM-limits.md#lim-2) | 🎯 MVP | — | — | — |
-| [LIM-3](LIM-limits.md#lim-3) | 🎯 MVP | — | — | — |
-| [LIM-4](LIM-limits.md#lim-4) | 🎯 MVP | — | — | — |
+| [LIM-1](LIM-limits.md#lim-1) | 🎯 MVP | ❔ Draft | 0 of 8 | ❔ Not finalized |
+| [LIM-2](LIM-limits.md#lim-2) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [LIM-3](LIM-limits.md#lim-3) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [LIM-4](LIM-limits.md#lim-4) | 🎯 MVP | ❔ Draft | 0 of 10 | ❔ Not finalized |
 
 ### Connectivity (NET)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [NET-1](NET-connectivity.md#net-1) | 🎯 MVP | — | — | — |
+| [NET-1](NET-connectivity.md#net-1) | 🎯 MVP | ❔ Draft | 0 of 6 | ❔ Not finalized |
 
 ### Appearance (APR)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [APR-1](APR-appearance.md#apr-1) | 🎯 MVP | 🚧 In progress | 5 of 5 | ❔ Not finalized |
+| [APR-1](APR-appearance.md#apr-1) | 🎯 MVP | ✅ Done | 5 of 5 | ✅ Finalized |
 
 ### App-wide behavior (APP)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 4 of 9 | ❔ Not finalized |
-| [APP-2](APP-app-wide-behavior.md#app-2) | 🎯 MVP | 🚧 In progress | 2 of 2 | ❔ Not finalized |
+| [APP-2](APP-app-wide-behavior.md#app-2) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
 | [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
 | [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
 | [APP-5](APP-app-wide-behavior.md#app-5) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
@@ -227,7 +227,7 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [NFR-1](NFR-non-functional-requirements.md#nfr-1) | 🎯 MVP | 🚧 In progress | 1 of 1 | ❔ Not finalized |
+| [NFR-1](NFR-non-functional-requirements.md#nfr-1) | 🎯 MVP | ✅ Done | 1 of 1 | ✅ Finalized |
 | [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP | 🚧 In progress | 3 of 7 | ❔ Not finalized |
 | [NFR-3](NFR-non-functional-requirements.md#nfr-3) | 🎯 MVP | 🚧 In progress | 3 of 3 | ❔ Not finalized |
 | [NFR-4](NFR-non-functional-requirements.md#nfr-4) | 🎯 MVP | 🚧 In progress | 6 of 11 | ❔ Not finalized |
