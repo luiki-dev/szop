@@ -8,7 +8,7 @@ import { useTestDatabase } from "../test/database.ts";
 // only the body rule is under test (ADR 0025, decision 3).
 const sameOrigin = { "sec-fetch-site": "same-origin" };
 
-describe("JSON-only bodies", () => {
+describe("NFR-4.2: JSON-only bodies", () => {
   const database = useTestDatabase();
   let app: FastifyInstance;
 

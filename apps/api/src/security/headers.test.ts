@@ -9,7 +9,7 @@ import { useWebRoot } from "../test/web-root.ts";
 const csp =
   "default-src 'self';object-src 'none';base-uri 'none';form-action 'self';frame-ancestors 'none'";
 
-describe("security headers", () => {
+describe("NFR-4.3: security headers", () => {
   const database = useTestDatabase();
   const webRoot = useWebRoot();
   let app: FastifyInstance;

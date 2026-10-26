@@ -162,13 +162,13 @@
 - Consumes: Task 2's files and headings.
 - Produces: `check-done.py` (prints every ✅ criterion without a matching test name or comment, and exits non-zero if there is one; lists `· checked at the demo` criteria separately) and `check-index.py` (prints every mismatch between a requirement's line, its criteria table and its index row; exits non-zero on any). Both are run by Tasks 4 to 8.
 
-- [ ] **Step 1: Write `check-done.py` and `check-index.py`.**
+- [x] **Step 1: Write `check-done.py` and `check-index.py`.**
   - `check-done.py` reads every criteria table row, and for each ✅ row not marked `checked at the demo`, greps `git ls-files` outside `docs/` for `\b<ID>[:,]`.
   - `check-index.py` recomputes each requirement's status, count and list state from its rows, using the rules in Global Constraints, and compares them with the requirement's line and its index row.
 
   Run both now. Expected: both exit 0 (no criteria yet).
 
-- [ ] **Step 2: Complete the index's "How requirements are written"**:
+- [x] **Step 2: Complete the index's "How requirements are written"**:
   - the release tags;
   - what a criterion is;
   - the ID format;
@@ -177,26 +177,26 @@
   - the test rule, linking `testing.md#rules`;
   - how phases change criteria, linking ADR 0051.
 
-- [ ] **Step 3: Write APP and NFR-4.**
+- [x] **Step 3: Write APP and NFR-4.**
   - **APP:** requirements cut along the spec's [The new areas](../specs/2026-10-26-PH-40-acceptance-criteria-design.md#the-new-areas) list, each `🎯 [MVP]`, with a statement and criteria.
   - **NFR-4 (security):** its statement and criteria from ADR 0012, decisions 7 to 9 and 12, ADR 0025, and `threat-model.md`. Also the access rule ("a reference to another workspace's record answers 404 like a missing record", from closed OP-034 and ADR 0012, decision 3), drafted ❔ for PH-16.
   - **Cross-cutting criteria:** general rules ([decision 13](../specs/2026-10-26-PH-40-acceptance-criteria-design.md#decisions)).
 
-- [ ] **Step 4: Write the criteria of APR-1 and NFR-1 to NFR-3** from ADR 0013, 0023, 0026, 0048 and 0049, and visual-design.md.
+- [x] **Step 4: Write the criteria of APR-1 and NFR-1 to NFR-3** from ADR 0013, 0023, 0026, 0048 and 0049, and visual-design.md.
 
-- [ ] **Step 5: Find the tests of every delivered criterion and rename them.** For each criterion delivered by PH-06a, PH-06b, PH-07, PH-14a or PH-14b, find the tests that prove it, put its ID at the start of their titles, and keep the rest of each title. Then mark the criterion `✅ [PH-NN](…)`.
+- [x] **Step 5: Find the tests of every delivered criterion and rename them.** For each criterion delivered by PH-06a, PH-06b, PH-07, PH-14a or PH-14b, find the tests that prove it, put its ID at the start of their titles, and keep the rest of each title. Then mark the criterion `✅ [PH-NN](…)`.
   - The budget comment in `vite.config.ts` and the projects in `playwright.config.ts` get the ID in a comment.
   - A criterion checked only at the demo (the Core Web Vitals) is `✅ … · checked at the demo`.
   - A criterion delivered with no test is `🚧 [PH-NN](…) · no test yet` and goes on the gap list.
 
-- [ ] **Step 6: Fill the APP, APR and NFR tables of the index**: `| Requirement | Release | Status | Criteria done | Criteria list |`.
+- [x] **Step 6: Fill the APP, APR and NFR tables of the index**: `| Requirement | Release | Status | Criteria done | Criteria list |`.
 
-- [ ] **Step 7: Verify**
+- [x] **Step 7: Verify**
   Run: `pnpm check && pnpm test:e2e`. Expected: PASS, same counts of tests as before.
   Run: `python3 scratchpad/check-done.py && python3 scratchpad/check-index.py && python3 scratchpad/check-links.py`. Expected: all exit 0.
   Read `git diff -U0 -- '*.test.ts' '*.test.tsx' '*.spec.ts'`. Expected: only titles change, each keeps its words after the ID.
 
-- [ ] **Step 8: Commit**: `docs(requirements): add the criteria of what is built, with APP and NFR-4`, with the ticked boxes. Push, stop, and give the owner the review of decisions 12, 14 and 15:
+- [x] **Step 8: Commit**: `docs(requirements): add the criteria of what is built, with APP and NFR-4`, with the ticked boxes. Push, stop, and give the owner the review of decisions 12, 14 and 15:
   - the criteria written, so their style and granularity can be corrected before Tasks 4 to 7;
   - the gap list, for the decision on missing tests (in this phase, a phase of their own, or open points);
   - the requirements the owner may finalize now.

@@ -30,7 +30,7 @@ function openMenu() {
 }
 
 describe("AppShell", () => {
-  it("shows Start at / with its title and the menu in a sidebar on a desktop", () => {
+  it("APP-1.2, APP-1.3, APP-2.1: shows Start at / with its title and the menu in a sidebar on a desktop", () => {
     stubMatchMedia({ [desktopQuery]: true });
     renderApp();
 
@@ -56,7 +56,7 @@ describe("AppShell", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("follows a link to the design system", () => {
+  it("APP-1.3, APP-2.1: follows a link to the design system", () => {
     stubMatchMedia({ [desktopQuery]: true });
     renderApp();
 
@@ -72,7 +72,7 @@ describe("AppShell", () => {
     );
   });
 
-  it("opens the menu from ☰ on a phone and closes it with Esc", async () => {
+  it("APP-1.1, NFR-2.5: opens the menu from ☰ on a phone and closes it with Esc", async () => {
     renderApp();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
 
@@ -92,7 +92,7 @@ describe("AppShell", () => {
   });
 
   it.each(["Szop, Start", "Start", "Design system"])(
-    "closes the drawer after following %s",
+    "APP-1.1: closes the drawer after following %s",
     async (name) => {
       renderApp("/design");
 
@@ -104,7 +104,7 @@ describe("AppShell", () => {
     },
   );
 
-  it("swaps the drawer for the sidebar when the screen grows past lg", async () => {
+  it("APP-1.2: swaps the drawer for the sidebar when the screen grows past lg", async () => {
     const media = stubMatchMedia();
     renderApp();
     openMenu();
@@ -129,7 +129,7 @@ describe("AppShell", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("keeps the page mounted when the screen crosses lg", async () => {
+  it("APP-1.2: keeps the page mounted when the screen crosses lg", async () => {
     const media = stubMatchMedia();
     renderApp("/design");
     const button = screen.getByRole("button", { name: "Primary" });
@@ -148,7 +148,7 @@ describe("AppShell", () => {
     expect(button).toHaveFocus();
   });
 
-  it("cuts a long title and keeps ☰ whole", () => {
+  it("APP-2.2: cuts a long title and keeps ☰ whole", () => {
     renderApp();
 
     const title = screen.getByRole("heading", { level: 1 });

@@ -9,7 +9,7 @@ import { captureLog } from "../test/log.ts";
 // the address it saw (ADR 0012, decision 13; ADR 0025, decision 7).
 const forged = { "x-forwarded-for": "6.6.6.6, 203.0.113.7" };
 
-describe("the client address", () => {
+describe("NFR-4.7: the client address", () => {
   const database = useTestDatabase();
   let app: FastifyInstance;
 

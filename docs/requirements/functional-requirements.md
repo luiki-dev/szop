@@ -1,26 +1,33 @@
 # Szop — Functional Requirements
 
-Living source of truth for what Szop does, and the qualities it must have while doing it ([section 3](NFR-non-functional-requirements.md): browsers, accessibility, performance). Technical and visual design are out of scope here and are documented separately.
+Living source of truth for what Szop does, and the qualities it must have while doing it ([non-functional requirements](NFR-non-functional-requirements.md): browsers, accessibility, performance, security). Technical and visual design are out of scope here and are documented separately.
 
-Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server), [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits), [ADR 0013](../decisions/0013-visual-design.md) (the non-functional requirements) and [ADR 0022](../decisions/0022-ring-tail-redesign.md) (checked items go to the haul). Acronyms are explained in the [glossary](../glossary.md).
+Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server), [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits), [ADR 0013](../decisions/0013-visual-design.md) (the non-functional requirements) and [ADR 0022](../decisions/0022-ring-tail-redesign.md) (checked items go to the haul) and [ADR 0051](../decisions/0051-acceptance-criteria.md) (acceptance criteria and their status). Acronyms are explained in the [glossary](../glossary.md).
 
 ## Contents
 
 - [How requirements are written](#how-requirements-are-written)
+  - [Release tags](#release-tags)
+  - [Files and links](#files-and-links)
+  - [Acceptance criteria](#acceptance-criteria)
+  - [Statuses](#statuses)
+  - [Tests that cover a criterion](#tests-that-cover-a-criterion)
+  - [How phases change criteria](#how-phases-change-criteria)
 - [Requirements by area](#requirements-by-area)
-  - [Accounts and guest mode (ACC)](ACC-accounts-and-guest-mode.md)
-  - [Shopping lists (LST)](LST-shopping-lists.md)
-  - [List items (ITM)](ITM-list-items.md)
-  - [List display and ordering (ORD)](ORD-list-display-and-ordering.md)
-  - [Categories (CAT)](CAT-categories.md)
-  - [Catalog (PRD)](PRD-catalog.md)
-  - [Units (UNT)](UNT-units.md)
-  - [Templates (TPL)](TPL-templates.md)
-  - [Sharing (SHR)](SHR-sharing.md)
-  - [Live updates (SYN)](SYN-live-updates.md)
-  - [Limits (LIM)](LIM-limits.md)
-  - [Connectivity (NET)](NET-connectivity.md)
-  - [Appearance (APR)](APR-appearance.md)
+  - [Accounts and guest mode (ACC)](#accounts-and-guest-mode-acc)
+  - [Shopping lists (LST)](#shopping-lists-lst)
+  - [List items (ITM)](#list-items-itm)
+  - [List display and ordering (ORD)](#list-display-and-ordering-ord)
+  - [Categories (CAT)](#categories-cat)
+  - [Catalog (PRD)](#catalog-prd)
+  - [Units (UNT)](#units-unt)
+  - [Templates (TPL)](#templates-tpl)
+  - [Sharing (SHR)](#sharing-shr)
+  - [Live updates (SYN)](#live-updates-syn)
+  - [Limits (LIM)](#limits-lim)
+  - [Connectivity (NET)](#connectivity-net)
+  - [Appearance (APR)](#appearance-apr)
+  - [App-wide behavior (APP)](#app-wide-behavior-app)
   - [Non-functional requirements (NFR)](#non-functional-requirements-nfr)
 - [General assumptions, actors, domain concepts](#general-assumptions-actors-domain-concepts)
   - [Assumptions](#assumptions)
@@ -34,138 +41,196 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
 
 ## How requirements are written
 
-Requirements are tagged:
+### Release tags
 
 - **🎯 [MVP]** — part of the first release.
 - **🔜 [Later]** — planned core functionality, built after the MVP.
 - **✖️ [Dropped]** — no longer a requirement; the ID is kept and never reused.
 
-Each area has its own file, and every requirement and use case has its own heading in it, so its ID can be linked directly, for example [`ACC-accounts-and-guest-mode.md#acc-1`](ACC-accounts-and-guest-mode.md#acc-1) or [`UC-use-cases.md#uc-3-shop-in-a-store`](UC-use-cases.md#uc-3-shop-in-a-store). Other documents refer to requirements, use cases and areas by these links rather than by plain IDs. The use cases are in [their own file](UC-use-cases.md).
+### Files and links
+
+Each area has its own file, `<AREA-CODE>-<full-area-name>.md`, and every requirement and use case has its own heading in it, so its ID can be linked directly, for example [`ACC-accounts-and-guest-mode.md#acc-1`](ACC-accounts-and-guest-mode.md#acc-1) or [`UC-use-cases.md#uc-3-shop-in-a-store`](UC-use-cases.md#uc-3-shop-in-a-store). Other documents refer to requirements, use cases and areas by these links rather than by plain IDs. The use cases are in [their own file](UC-use-cases.md); they are scenarios and have no criteria.
+
+### Acceptance criteria
+
+Every requirement lists its **acceptance criteria**: short, checkable statements of what must be true for the requirement to be met ([ADR 0051](../decisions/0051-acceptance-criteria.md)).
+
+- **What a criterion is:** something a user, or someone sending requests to the API, can observe; one statement, in plain present-tense English. How it is built belongs to the [architecture](../architecture/architecture.md).
+- **ID:** the requirement's ID, a dot and a number, such as `APR-1.2`. Criteria are rows of the requirement's table, not headings, so links go to the requirement. A number is never reused: a criterion that moves to another requirement gets a new ID there.
+- **A criterion that applies to every screen** is a general rule. It is ✅ when everything that exists meets it and a test checks it; later phases keep it true. What one screen must do is a criterion of that screen's requirement.
+
+### Statuses
+
+A criterion's status:
+
+| Status | Meaning |
+|---|---|
+| ❔ Draft | Written from a decision, or from an open point's direction (then linked); no phase has finalized it. |
+| ⬜ Not started | Finalized by a phase's brainstorm, which is named; not built yet. |
+| 🚧 In progress | The named phase is building it; or it is built, but no test covers it yet ("no test yet"). |
+| ✅ Done | Delivered by the named phase and covered by a test, or checked by a person at the demo check ("checked at the demo"). |
+| ➡️ Moved | Moved to another requirement, under the ID named. |
+| ✖️ Dropped | No longer wanted, for the reason given. |
+
+A requirement's **list of criteria** is either:
+
+- **❔ Criteria not finalized**: no brainstorm has reviewed the requirement as a whole with the owner, so criteria may still be missing; or
+- **✅ Criteria finalized**: a brainstorm, named, reviewed every criterion and judged the list complete. Later phases may still add, move or drop criteria.
+
+A requirement's own status follows from both, leaving out moved and dropped criteria:
+
+- **✅ Done** when its list is finalized and every criterion is ✅;
+- **🚧 In progress** when at least one criterion is 🚧 or ✅, including when all are ✅ but the list is not finalized;
+- **⬜ Not started** when its list is finalized and no criterion has started;
+- **❔ Draft** when its list is not finalized and no criterion has started.
+
+The line under each requirement's heading shows its release tag, its status, how many criteria are done, and its list's state. The tables in [Requirements by area](#requirements-by-area) show the same, for every requirement.
+
+### Tests that cover a criterion
+
+A criterion is ✅ only when a phase delivered it and a test covers it. The test's name starts with the criterion's ID and a colon, such as `it('APR-1.2: …')`, and `grep -rn 'APR-1.2[:,]'` finds every test of a criterion ([testing.md](../development/testing.md#rules)).
+
+### How phases change criteria
+
+A phase's brainstorm reviews the criteria of every requirement the phase delivers with the owner, and finalizes them: drafts become ⬜ or 🚧, criteria are added, moved or dropped, and the list of a requirement reviewed as a whole becomes ✅ Criteria finalized. The phase's PR marks what it delivered ✅ and updates the requirement's line and this index ([ADR 0051](../decisions/0051-acceptance-criteria.md)).
 
 ## Requirements by area
 
 ### Accounts and guest mode (ACC)
 
-| Requirement | Release |
-|---|---|
-| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP |
-| [ACC-2](ACC-accounts-and-guest-mode.md#acc-2) | 🎯 MVP |
-| [ACC-3](ACC-accounts-and-guest-mode.md#acc-3) | 🎯 MVP |
-| [ACC-4](ACC-accounts-and-guest-mode.md#acc-4) | 🎯 MVP |
-| [ACC-5](ACC-accounts-and-guest-mode.md#acc-5) | 🎯 MVP |
-| [ACC-6](ACC-accounts-and-guest-mode.md#acc-6) | 🎯 MVP |
-| [ACC-7](ACC-accounts-and-guest-mode.md#acc-7) | 🎯 MVP |
-| [ACC-8](ACC-accounts-and-guest-mode.md#acc-8) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | — | — | — |
+| [ACC-2](ACC-accounts-and-guest-mode.md#acc-2) | 🎯 MVP | — | — | — |
+| [ACC-3](ACC-accounts-and-guest-mode.md#acc-3) | 🎯 MVP | — | — | — |
+| [ACC-4](ACC-accounts-and-guest-mode.md#acc-4) | 🎯 MVP | — | — | — |
+| [ACC-5](ACC-accounts-and-guest-mode.md#acc-5) | 🎯 MVP | — | — | — |
+| [ACC-6](ACC-accounts-and-guest-mode.md#acc-6) | 🎯 MVP | — | — | — |
+| [ACC-7](ACC-accounts-and-guest-mode.md#acc-7) | 🎯 MVP | — | — | — |
+| [ACC-8](ACC-accounts-and-guest-mode.md#acc-8) | 🎯 MVP | — | — | — |
 
 ### Shopping lists (LST)
 
-| Requirement | Release |
-|---|---|
-| [LST-1](LST-shopping-lists.md#lst-1) | 🎯 MVP |
-| [LST-2](LST-shopping-lists.md#lst-2) | 🎯 MVP |
-| [LST-3](LST-shopping-lists.md#lst-3) | 🎯 MVP |
-| [LST-4](LST-shopping-lists.md#lst-4) | 🎯 MVP |
-| [LST-5](LST-shopping-lists.md#lst-5) | 🎯 MVP |
-| [LST-6](LST-shopping-lists.md#lst-6) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [LST-1](LST-shopping-lists.md#lst-1) | 🎯 MVP | — | — | — |
+| [LST-2](LST-shopping-lists.md#lst-2) | 🎯 MVP | — | — | — |
+| [LST-3](LST-shopping-lists.md#lst-3) | 🎯 MVP | — | — | — |
+| [LST-4](LST-shopping-lists.md#lst-4) | 🎯 MVP | — | — | — |
+| [LST-5](LST-shopping-lists.md#lst-5) | 🎯 MVP | — | — | — |
+| [LST-6](LST-shopping-lists.md#lst-6) | 🎯 MVP | — | — | — |
 
 ### List items (ITM)
 
-| Requirement | Release |
-|---|---|
-| [ITM-1](ITM-list-items.md#itm-1) | 🎯 MVP |
-| [ITM-2](ITM-list-items.md#itm-2) | 🎯 MVP |
-| [ITM-3](ITM-list-items.md#itm-3) | 🎯 MVP |
-| [ITM-4](ITM-list-items.md#itm-4) | 🎯 MVP |
-| [ITM-5](ITM-list-items.md#itm-5) | 🎯 MVP |
-| [ITM-6](ITM-list-items.md#itm-6) | 🎯 MVP |
-| [ITM-7](ITM-list-items.md#itm-7) | 🎯 MVP |
-| [ITM-8](ITM-list-items.md#itm-8) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [ITM-1](ITM-list-items.md#itm-1) | 🎯 MVP | — | — | — |
+| [ITM-2](ITM-list-items.md#itm-2) | 🎯 MVP | — | — | — |
+| [ITM-3](ITM-list-items.md#itm-3) | 🎯 MVP | — | — | — |
+| [ITM-4](ITM-list-items.md#itm-4) | 🎯 MVP | — | — | — |
+| [ITM-5](ITM-list-items.md#itm-5) | 🎯 MVP | — | — | — |
+| [ITM-6](ITM-list-items.md#itm-6) | 🎯 MVP | — | — | — |
+| [ITM-7](ITM-list-items.md#itm-7) | 🎯 MVP | — | — | — |
+| [ITM-8](ITM-list-items.md#itm-8) | 🎯 MVP | — | — | — |
 
 ### List display and ordering (ORD)
 
-| Requirement | Release |
-|---|---|
-| [ORD-1](ORD-list-display-and-ordering.md#ord-1) | 🎯 MVP |
-| [ORD-2](ORD-list-display-and-ordering.md#ord-2) | 🎯 MVP |
-| [ORD-3](ORD-list-display-and-ordering.md#ord-3) | 🎯 MVP |
-| [ORD-4](ORD-list-display-and-ordering.md#ord-4) | ✖️ Dropped |
-| [ORD-5](ORD-list-display-and-ordering.md#ord-5) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [ORD-1](ORD-list-display-and-ordering.md#ord-1) | 🎯 MVP | — | — | — |
+| [ORD-2](ORD-list-display-and-ordering.md#ord-2) | 🎯 MVP | — | — | — |
+| [ORD-3](ORD-list-display-and-ordering.md#ord-3) | 🎯 MVP | — | — | — |
+| [ORD-4](ORD-list-display-and-ordering.md#ord-4) | ✖️ Dropped | — | — | — |
+| [ORD-5](ORD-list-display-and-ordering.md#ord-5) | 🎯 MVP | — | — | — |
 
 ### Categories (CAT)
 
-| Requirement | Release |
-|---|---|
-| [CAT-1](CAT-categories.md#cat-1) | 🎯 MVP |
-| [CAT-2](CAT-categories.md#cat-2) | 🎯 MVP |
-| [CAT-3](CAT-categories.md#cat-3) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [CAT-1](CAT-categories.md#cat-1) | 🎯 MVP | — | — | — |
+| [CAT-2](CAT-categories.md#cat-2) | 🎯 MVP | — | — | — |
+| [CAT-3](CAT-categories.md#cat-3) | 🎯 MVP | — | — | — |
 
 ### Catalog (PRD)
 
-| Requirement | Release |
-|---|---|
-| [PRD-1](PRD-catalog.md#prd-1) | 🎯 MVP |
-| [PRD-2](PRD-catalog.md#prd-2) | 🎯 MVP |
-| [PRD-3](PRD-catalog.md#prd-3) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [PRD-1](PRD-catalog.md#prd-1) | 🎯 MVP | — | — | — |
+| [PRD-2](PRD-catalog.md#prd-2) | 🎯 MVP | — | — | — |
+| [PRD-3](PRD-catalog.md#prd-3) | 🎯 MVP | — | — | — |
 
 ### Units (UNT)
 
-| Requirement | Release |
-|---|---|
-| [UNT-1](UNT-units.md#unt-1) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [UNT-1](UNT-units.md#unt-1) | 🎯 MVP | — | — | — |
 
 ### Templates (TPL)
 
-| Requirement | Release |
-|---|---|
-| [TPL-1](TPL-templates.md#tpl-1) | 🎯 MVP |
-| [TPL-2](TPL-templates.md#tpl-2) | 🎯 MVP |
-| [TPL-3](TPL-templates.md#tpl-3) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [TPL-1](TPL-templates.md#tpl-1) | 🎯 MVP | — | — | — |
+| [TPL-2](TPL-templates.md#tpl-2) | 🎯 MVP | — | — | — |
+| [TPL-3](TPL-templates.md#tpl-3) | 🎯 MVP | — | — | — |
 
 ### Sharing (SHR)
 
-| Requirement | Release |
-|---|---|
-| [SHR-1](SHR-sharing.md#shr-1) | 🔜 Later |
-| [SHR-2](SHR-sharing.md#shr-2) | 🔜 Later |
-| [SHR-3](SHR-sharing.md#shr-3) | 🔜 Later |
-| [SHR-4](SHR-sharing.md#shr-4) | 🔜 Later |
-| [SHR-5](SHR-sharing.md#shr-5) | 🔜 Later |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [SHR-1](SHR-sharing.md#shr-1) | 🔜 Later | — | — | — |
+| [SHR-2](SHR-sharing.md#shr-2) | 🔜 Later | — | — | — |
+| [SHR-3](SHR-sharing.md#shr-3) | 🔜 Later | — | — | — |
+| [SHR-4](SHR-sharing.md#shr-4) | 🔜 Later | — | — | — |
+| [SHR-5](SHR-sharing.md#shr-5) | 🔜 Later | — | — | — |
 
 ### Live updates (SYN)
 
-| Requirement | Release |
-|---|---|
-| [SYN-1](SYN-live-updates.md#syn-1) | 🔜 Later |
-| [SYN-2](SYN-live-updates.md#syn-2) | 🔜 Later |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [SYN-1](SYN-live-updates.md#syn-1) | 🔜 Later | — | — | — |
+| [SYN-2](SYN-live-updates.md#syn-2) | 🔜 Later | — | — | — |
 
 ### Limits (LIM)
 
-| Requirement | Release |
-|---|---|
-| [LIM-1](LIM-limits.md#lim-1) | 🎯 MVP |
-| [LIM-2](LIM-limits.md#lim-2) | 🎯 MVP |
-| [LIM-3](LIM-limits.md#lim-3) | 🎯 MVP |
-| [LIM-4](LIM-limits.md#lim-4) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [LIM-1](LIM-limits.md#lim-1) | 🎯 MVP | — | — | — |
+| [LIM-2](LIM-limits.md#lim-2) | 🎯 MVP | — | — | — |
+| [LIM-3](LIM-limits.md#lim-3) | 🎯 MVP | — | — | — |
+| [LIM-4](LIM-limits.md#lim-4) | 🎯 MVP | — | — | — |
 
 ### Connectivity (NET)
 
-| Requirement | Release |
-|---|---|
-| [NET-1](NET-connectivity.md#net-1) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [NET-1](NET-connectivity.md#net-1) | 🎯 MVP | — | — | — |
 
 ### Appearance (APR)
 
-| Requirement | Release |
-|---|---|
-| [APR-1](APR-appearance.md#apr-1) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [APR-1](APR-appearance.md#apr-1) | 🎯 MVP | 🚧 In progress | 5 of 5 | ❔ Not finalized |
+
+### App-wide behavior (APP)
+
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 4 of 9 | ❔ Not finalized |
+| [APP-2](APP-app-wide-behavior.md#app-2) | 🎯 MVP | 🚧 In progress | 2 of 2 | ❔ Not finalized |
+| [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [APP-5](APP-app-wide-behavior.md#app-5) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
+| [APP-6](APP-app-wide-behavior.md#app-6) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [APP-7](APP-app-wide-behavior.md#app-7) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
 
 ### Non-functional requirements (NFR)
 
-| Requirement | Release |
-|---|---|
-| [NFR-1](NFR-non-functional-requirements.md#nfr-1) | 🎯 MVP |
-| [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP |
-| [NFR-3](NFR-non-functional-requirements.md#nfr-3) | 🎯 MVP |
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [NFR-1](NFR-non-functional-requirements.md#nfr-1) | 🎯 MVP | 🚧 In progress | 1 of 1 | ❔ Not finalized |
+| [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP | 🚧 In progress | 3 of 7 | ❔ Not finalized |
+| [NFR-3](NFR-non-functional-requirements.md#nfr-3) | 🎯 MVP | 🚧 In progress | 3 of 3 | ❔ Not finalized |
+| [NFR-4](NFR-non-functional-requirements.md#nfr-4) | 🎯 MVP | 🚧 In progress | 6 of 11 | ❔ Not finalized |
 
 ## General assumptions, actors, domain concepts
 
@@ -203,7 +268,7 @@ Each area has its own file, and every requirement and use case has its own headi
 
 ### MVP
 
-🎯 [ACC](ACC-accounts-and-guest-mode.md), [LST](LST-shopping-lists.md), [ITM](ITM-list-items.md), [ORD](ORD-list-display-and-ordering.md), [CAT](CAT-categories.md), [PRD](PRD-catalog.md), [UNT](UNT-units.md), [TPL](TPL-templates.md), [LIM](LIM-limits.md), [NET](NET-connectivity.md), [APR](APR-appearance.md): a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration, meeting the [NFR](NFR-non-functional-requirements.md) qualities.
+🎯 [ACC](ACC-accounts-and-guest-mode.md), [LST](LST-shopping-lists.md), [ITM](ITM-list-items.md), [ORD](ORD-list-display-and-ordering.md), [CAT](CAT-categories.md), [PRD](PRD-catalog.md), [UNT](UNT-units.md), [TPL](TPL-templates.md), [LIM](LIM-limits.md), [NET](NET-connectivity.md), [APR](APR-appearance.md), [APP](APP-app-wide-behavior.md): a complete single-user experience (guest mode, accounts, lists, catalog, categories, templates) without collaboration, meeting the [NFR](NFR-non-functional-requirements.md) qualities.
 
 ### Later (planned core functionality)
 

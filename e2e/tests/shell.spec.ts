@@ -6,7 +6,7 @@ import { expect, test } from "../support/test.ts";
 // The shell around every page (PH-14b). The menu's status replaces the
 // walking skeleton's health page as the one proof that the SPA, the API and
 // PostgreSQL talk to each other (OP-087).
-test("the shell shows the menu, the API's status and the pages", async ({
+test("APP-1.4: the shell shows the menu, the API's status and the pages", async ({
   page,
   isMobile,
 }) => {
@@ -31,7 +31,7 @@ test("the shell shows the menu, the API's status and the pages", async ({
 // The user's color scheme (APR-1): kept on the device, and applied by
 // public/color-scheme.js before the app's bundle runs, so the page never
 // flashes in the wrong scheme.
-test("the color scheme survives a reload and is set before the app runs", async ({
+test("APR-1.4: the color scheme survives a reload and is set before the app runs", async ({
   page,
   isMobile,
 }) => {

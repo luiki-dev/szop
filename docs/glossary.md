@@ -133,7 +133,9 @@ Used in the [functional requirements](requirements/functional-requirements.md), 
 | **[SYN](requirements/SYN-live-updates.md)** | Live updates (synchronization) |
 | **[NET](requirements/NET-connectivity.md)** | Connectivity (network) |
 | **[LIM](requirements/LIM-limits.md)** | Limits (quotas and rate limits) |
-| **[NFR](requirements/NFR-non-functional-requirements.md)** | Non-functional requirements (browsers, accessibility, performance) |
+| **[APR](requirements/APR-appearance.md)** | Appearance (the color scheme) |
+| **[APP](requirements/APP-app-wide-behavior.md)** | App-wide behavior (the menu, page titles, messages, loading and empty states, forms) |
+| **[NFR](requirements/NFR-non-functional-requirements.md)** | Non-functional requirements (browsers, accessibility, performance, security) |
 | **[UC](requirements/UC-use-cases.md)** | Use case |
 | **FR** | Functional requirement (general name for any of the IDs above, apart from NFR) |
 
