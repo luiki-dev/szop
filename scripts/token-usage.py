@@ -6,7 +6,7 @@ Ported from the frozen analysis in docs/audits/2026-10-26-token-usage/
 docs/superpowers/specs/2026-10-26-working-with-claude-design.md. Standard library only.
 
     python3 scripts/token-usage.py [--phase PH-NN | --branch NAME]
-        [--since YYYY-MM-DD] [--until YYYY-MM-DD] [--by-phase]
+        [--since DATE] [--until DATE] [--by-phase]
         [--projects DIR] [--usage-log FILE]
 
 Cost units are Opus input-token equivalents (input 1, cache write 1.25, cache read 0.1,
@@ -46,6 +46,9 @@ def model_weight(model):
         if k in (model or ''):
             return v
     return 0.0
+
+
+USAGE_KEYS = ('input_tokens', 'cache_creation_input_tokens', 'cache_read_input_tokens', 'output_tokens')
 
 
 def call_cost(u, model):
@@ -89,9 +92,13 @@ def load_calls(root):
                 if model == '<synthetic>':
                     continue
                 for field, value in (('timestamp', d.get('timestamp')),
+                                     ('message.model', model),
                                      ('message.usage', msg.get('usage'))):
                     if not value:
                         fail(f'{path}:{n}: missing {field}', 2)
+                for k in USAGE_KEYS:
+                    if k not in msg['usage']:
+                        fail(f'{path}:{n}: missing message.usage.{k}', 2)
                 key = d.get('requestId') or msg.get('id')
                 if key in seen:
                     continue
@@ -285,18 +292,20 @@ def main():
     sel = ap.add_mutually_exclusive_group()
     sel.add_argument('--phase', metavar='PH-NN', type=str.upper)
     sel.add_argument('--branch', metavar='NAME')
-    ap.add_argument('--since', metavar='YYYY-MM-DD')
-    ap.add_argument('--until', metavar='YYYY-MM-DD')
+    # A date, or a UTC timestamp (2026-10-26T21:43:37) to cut within a day; compared as prefixes.
+    ap.add_argument('--since', metavar='DATE')
+    ap.add_argument('--until', metavar='DATE')
     ap.add_argument('--by-phase', action='store_true')
     ap.add_argument('--projects', default='~/.claude/projects/-home-lemekk-workspace-szop/')
     ap.add_argument('--usage-log', default='~/.claude/usage-log.csv')
     args = ap.parse_args()
     args.projects = os.path.expanduser(args.projects)
     args.usage_log = os.path.expanduser(args.usage_log)
+    since, until = (v.rstrip('Z') if v else v for v in (args.since, args.until))
 
     rows = [r for r in load_calls(args.projects)
-            if (not args.since or r['ts'][:10] >= args.since)
-            and (not args.until or r['ts'][:10] <= args.until)]
+            if (not since or r['ts'][:len(since)] >= since)
+            and (not until or r['ts'][:len(until)] <= until)]
     if not rows:
         fail('no calls found in the period', 1)
     sessions = by_session(rows)
