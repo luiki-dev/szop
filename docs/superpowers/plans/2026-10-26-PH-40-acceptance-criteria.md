@@ -301,7 +301,7 @@
 - Modify: `docs/roadmap.md`, the index, phase issue bodies on GitHub where their entry changes
 - Scratch: `rewrite-issue-links.py`
 
-- [ ] **Step 1: List the findings that touch later phases**, from Tasks 3 to 7, for the owner:
+- [x] **Step 1: List the findings that touch later phases**, from Tasks 3 to 7, for the owner:
   - a phase whose criteria pass its size;
   - a requirement or criterion no phase delivers (such as APP's not-found page, or NFR-4's session cookie if PH-18's entry does not name it);
   - a phase whose order no longer fits;
@@ -309,13 +309,13 @@
 
   Stop, and ask the owner which restructuring to do here.
 
-- [ ] **Step 2: Apply the small changes and what the owner approved.**
+- [x] **Step 2: Apply the small changes and what the owner approved.**
   - "How it works" says a "(part: …)" note may name criteria.
   - "Delivers" lines gain APP and NFR-4 links where a phase delivers them, and criterion IDs in "(part: …)" notes where that makes the part clearer.
   - New phases get issues as `project-tracking.md`'s "How items move" says.
   - The phase issue bodies of every changed entry are updated.
 
-- [ ] **Step 3: Write the open points** for every finding that needs a decision, with the next free `OP-` ID, labelled `open-point`, as a sub-issue of the phase that settles it.
+- [x] **Step 3: Write the open points** for every finding that needs a decision, with the next free `OP-` ID, labelled `open-point`, as a sub-issue of the phase that settles it.
 
 - [ ] **Step 4: Rewrite the links in issue bodies.**
   - Write `rewrite-issue-links.py`. It lists every issue in `luiki-dev/szop` (`gh issue list --state all --limit 400 --json number,body`) whose body contains `docs/requirements/functional-requirements.md#`, and applies `rewrite-links.py`'s mapping to those URLs only.

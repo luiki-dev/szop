@@ -1,6 +1,6 @@
 # ADR 0022 — "Ring tail" visual redesign
 
-- **Status:** ✅ Accepted — decision 9 extended by [ADR 0048](0048-design-system-phase-details.md) (the `sage-800` step and the `link` and `destructive-foreground` roles); decision 12 refined by [ADR 0049](0049-app-shell-phase-details.md) (the owner's raccoon artwork on the sage tile)
+- **Status:** ✅ Accepted — decision 9 extended by [ADR 0048](0048-design-system-phase-details.md) (the `sage-800` step and the `link` and `destructive-foreground` roles); decision 12 refined by [ADR 0049](0049-app-shell-phase-details.md) (the owner's raccoon artwork on the sage tile); the consequence "PH-17 builds the haul" revisited by [ADR 0051](0051-acceptance-criteria.md), decision 16 (PH-17 split into PH-17a List items and PH-17b The haul)
 - **Date:** 2026-10-07
 - **Supersedes:** [ADR 0013](0013-visual-design.md), decisions 6 (the look; see decision 1), 11 (teal; see decision 2) and 13 (Figtree; see decision 10); [ADR 0001](0001-functional-requirements-scope.md), decision 9 (checked items in a separate part, and the toggle hiding them; see decisions 1, 4 and 6)
 - **Extends:** [ADR 0013](0013-visual-design.md), decisions 10 (the `fur` and `sage` colors and the `haul-*` roles; see decision 9), 14 (`--radius-surface`; see decision 11) and 18 (the list-and-haul pattern and the add bar's label; see decisions 3 to 8 and 13)
