@@ -221,12 +221,12 @@ git commit -m "docs(plan): tick the status line task"
 - Consumes: the audit's anchors (Task 2).
 - Produces: `docs/decisions/0052-working-with-claude.md`, decisions numbered as the spec's 1 to 14, which Tasks 5 to 7 cite by number.
 
-- [ ] **Step 1: Check the number**
+- [x] **Step 1: Check the number**
 
 Run: `git fetch origin main && git ls-tree --name-only origin/main docs/decisions/ | grep -E '005[0-9]'`
 Expected: no `0052-`. If it is taken, take the next free number and use it everywhere this plan says 0052, including the branch's other files.
 
-- [ ] **Step 2: Write the ADR**
+- [x] **Step 2: Write the ADR**
 
 Layout as [ADR 0051](../../decisions/0051-acceptance-criteria.md): title `ADR 0052 — Working with Claude within the weekly limit`; **Status** ✅ Accepted; **Date** 2026-10-26; **Extends:** [ADR 0004](../../decisions/0004-implementation-process.md), decision 8 (a phase on the full path runs as one session per stage). Then:
 
@@ -234,16 +234,16 @@ Layout as [ADR 0051](../../decisions/0051-acceptance-criteria.md): title `ADR 00
 - **Decisions:** the spec's 14 decisions, in its order, in the ADR's table (`# | Topic | Options considered | Decision and reasoning`), each with who chose it as the spec marks it. Decision 1 links [OP-109](https://github.com/luiki-dev/szop/issues/296); decision 13 cites [ADR 0014](../../decisions/0014-roadmap.md), decision 6 as restated, not changed; decision 9 links the audit's `#baseline`.
 - **Consequences:** what changes for the owner and for Claude (sessions per stage, the status line, the report in phase PRs, the CLAUDE.md rule and default subagent model), the risks from the spec's [Risks](../specs/2026-10-26-working-with-claude-design.md#risks), and the evaluation open point (its link is added in Task 7).
 
-- [ ] **Step 3: Add the notes to ADR 0004**
+- [x] **Step 3: Add the notes to ADR 0004**
 
 Its status line: append `; decision 8 extended by [ADR 0052](0052-working-with-claude.md) (one session per stage of a phase)`. Decision 8's cell: append `<br>➕ **Extended by [ADR 0052](0052-working-with-claude.md), decision 2:** a phase on the full path runs as one session per stage, each starting from the committed spec or plan.`
 
-- [ ] **Step 4: Check the links**
+- [x] **Step 4: Check the links**
 
 Run: `grep -o '](\([^)#]*\)' docs/decisions/0052-working-with-claude.md | sort -u` and open every relative target from `docs/decisions/`.
 Expected: each file exists, and each anchor matches a heading in its file.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/decisions/0052-working-with-claude.md docs/decisions/0004-implementation-process.md docs/superpowers/plans/2026-10-26-working-with-claude.md
