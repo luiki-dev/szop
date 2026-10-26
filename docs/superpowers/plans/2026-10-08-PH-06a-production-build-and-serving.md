@@ -852,7 +852,7 @@ Expected: no findings from the tools that are installed. If neither is installed
 
 In `docs/development/ci-cd.md` (read it first):
 
-- *The jobs*: a `build` row or paragraph in the existing format: runs `pnpm build` (the web app's production build with its precompressed copies); fails when the first screen's JavaScript exceeds 200 KB Brotli ([NFR-3](../../requirements/functional-requirements.md#nfr-3), [ADR 0023](../../decisions/0023-production-build-and-serving-details.md)); skipped when only Markdown changed; no database.
+- *The jobs*: a `build` row or paragraph in the existing format: runs `pnpm build` (the web app's production build with its precompressed copies); fails when the first screen's JavaScript exceeds 200 KB Brotli ([NFR-3](../../requirements/NFR-non-functional-requirements.md#nfr-3), [ADR 0023](../../decisions/0023-production-build-and-serving-details.md)); skipped when only Markdown changed; no database.
 - *ci-ok and the required checks*: `build` is among the jobs `ci-ok` waits for; the required check is still only `ci-ok`, so no GitHub setting changes.
 - *Reading a failed run*: a failed `build` with `over budget (NFR-3)`: the log line names the size; run `pnpm build` locally, find what grew (a new dependency, an import that should be lazy), and either shrink it or, with a reason, change the budget through an ADR ([ADR 0013](../../decisions/0013-visual-design.md), decision 4: "adjusted with a reason when real measurements exist").
 - Keep `## Contents` in sync if headings change.

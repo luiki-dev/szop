@@ -338,7 +338,7 @@ The guard has a test of its own, `csp-guard.spec.ts`, which adds a `<style>` ele
 
 ### The accessibility check
 
-`expectAccessible(page)` scans the page with axe against the Web Content Accessibility Guidelines (WCAG) 2.2 AA rule sets ([NFR-2](../requirements/functional-requirements.md#nfr-2)), first in light mode and then in dark, and fails with every violation of both ([Playwright](tools/playwright.md#supportaccessibilityts)). Each violation is listed as the color scheme, the rule ID, how many elements break it and their selectors. Here the heading was given a pale gray through `element.style`, which the CSP allows and axe still sees:
+`expectAccessible(page)` scans the page with axe against the Web Content Accessibility Guidelines (WCAG) 2.2 AA rule sets ([NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2)), first in light mode and then in dark, and fails with every violation of both ([Playwright](tools/playwright.md#supportaccessibilityts)). Each violation is listed as the color scheme, the rule ID, how many elements break it and their selectors. Here the heading was given a pale gray through `element.style`, which the CSP allows and axe still sees:
 
 ```
 Error: axe found accessibility violations
@@ -359,7 +359,7 @@ axe finds only part of the accessibility problems, so a passing check is a floor
 
 ### The token contrast test
 
-axe checks the contrast of the text it finds on a page, but not the UI parts (the focus ring, input borders, the haul's progress fill), which need 3:1, nor a pair no page shows yet. So `design.spec.ts` checks the design tokens themselves ([ADR 0048](../decisions/0048-design-system-phase-details.md)): on `/design`, in light and then in dark mode, it reads every role's custom property (`--primary`, `--link` …) and computes the WCAG contrast of each pair in its `pairs` table against the pair's minimum, 4.5:1 for text and 3:1 for UI parts ([NFR-2](../requirements/functional-requirements.md#nfr-2)).
+axe checks the contrast of the text it finds on a page, but not the UI parts (the focus ring, input borders, the haul's progress fill), which need 3:1, nor a pair no page shows yet. So `design.spec.ts` checks the design tokens themselves ([ADR 0048](../decisions/0048-design-system-phase-details.md)): on `/design`, in light and then in dark mode, it reads every role's custom property (`--primary`, `--link` …) and computes the WCAG contrast of each pair in its `pairs` table against the pair's minimum, 4.5:1 for text and 3:1 for UI parts ([NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2)).
 
 - **Why through a canvas:** Tailwind's palette is written in OKLCH, a color space the WCAG formula does not take. `readRoleColors` in `support/contrast.ts` paints each color on a one-pixel canvas in the browser and reads the pixel back as sRGB, so the browser does the conversion and no color library is needed. `contrastRatio` is the WCAG formula.
 - **A new role or pair** goes into the `pairs` table in the same change that adds it to `index.css` and to the [visual design's](../architecture/visual-design.md#color) table.

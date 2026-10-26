@@ -44,7 +44,7 @@ The phase is done when:
 ## Out of scope
 
 - **Journeys for use cases.** No use case is complete yet; each phase that completes one adds its journey ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 4).
-- **Reading emails in tests**, decided by the phase that delivers [ACC-2](../../requirements/functional-requirements.md#acc-2) (ADR 0007, decision 15).
+- **Reading emails in tests**, decided by the phase that delivers [ACC-2](../../requirements/ACC-accounts-and-guest-mode.md#acc-2) (ADR 0007, decision 15).
 - **Running the suite against the container image**, one of the two options of [OP-032](../../archive/open-points.md#op-032), left to PH-08.
 - **Dark styles.** The health page has none yet, so both color schemes see the same page; the design system arrives in [PH-14](../../roadmap.md#ph-14-app-shell-and-design-system).
 - **A WebKit project, visual regression and Lighthouse CI**, left out by ADR 0007, decisions 5, 6 and 23, and ADR 0013, decisions 1 and 23.

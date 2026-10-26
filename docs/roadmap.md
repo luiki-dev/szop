@@ -144,7 +144,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-06a Production build and serving
 
 - **Goal:** `pnpm build` and `pnpm start` serve the SPA from the API on one port, compressed and cached, and CI fails a build whose first screen needs more than 200 KB of JavaScript.
-- **Delivers:** the API run in production by Node's type stripping, with `packages/shared` from source; the SPA served by `@fastify/static`, precompressed and with the cache headers of [ADR 0013](decisions/0013-visual-design.md), decision 5, and a fallback for client-side routes; the bundle-size gate of [NFR-3](requirements/functional-requirements.md#nfr-3), run by a `build` job in CI ([ADR 0023](decisions/0023-production-build-and-serving-details.md)).
+- **Delivers:** the API run in production by Node's type stripping, with `packages/shared` from source; the SPA served by `@fastify/static`, precompressed and with the cache headers of [ADR 0013](decisions/0013-visual-design.md), decision 5, and a fallback for client-side routes; the bundle-size gate of [NFR-3](requirements/NFR-non-functional-requirements.md#nfr-3), run by a `build` job in CI ([ADR 0023](decisions/0023-production-build-and-serving-details.md)).
 - **Split from:** PH-06 Production build and web baseline, now retired: it held two new concepts, the production build and the web security baseline ([ADR 0014](decisions/0014-roadmap.md), decision 6).
 - **Depends on:** —
 - **Owner steps:** none.
@@ -164,7 +164,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-07 First E2E journey
 
 - **Goal:** a Playwright journey drives the production build on a phone and on desktop Chromium and Firefox, scans every page with axe in light and dark mode, and fails on any CSP violation. CI keeps the report and traces of a failed run.
-- **Delivers:** `e2e/` with Playwright and axe ([ADR 0007](decisions/0007-testing-strategy.md); [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11); the CSP violation guard; the `e2e` job in CI ([ADR 0010](decisions/0010-ci-cd.md), decisions 7 and 9); the groundwork for [NFR-1](requirements/functional-requirements.md#nfr-1) and [NFR-2](requirements/functional-requirements.md#nfr-2) ([ADR 0026](decisions/0026-first-e2e-journey-details.md)).
+- **Delivers:** `e2e/` with Playwright and axe ([ADR 0007](decisions/0007-testing-strategy.md); [ADR 0013](decisions/0013-visual-design.md), decisions 2, 3, 9 and 11); the CSP violation guard; the `e2e` job in CI ([ADR 0010](decisions/0010-ci-cd.md), decisions 7 and 9); the groundwork for [NFR-1](requirements/NFR-non-functional-requirements.md#nfr-1) and [NFR-2](requirements/NFR-non-functional-requirements.md#nfr-2) ([ADR 0026](decisions/0026-first-e2e-journey-details.md)).
 - **Depends on:** —
 - **Owner steps:** install Playwright's browsers and the system libraries they need in WSL, once, following `setup.md`.
 - **Expected path:** full.
@@ -312,7 +312,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ## Stage 4: MVP
 
-**Exit:** every 🎯 requirement is delivered and meets [NFR-1](requirements/functional-requirements.md#nfr-1) to [NFR-3](requirements/functional-requirements.md#nfr-3), every MVP use case has a passing E2E journey, and `1.0.0` is released: a `Release-As: 1.0.0` footer reaches `main` and the owner merges the release PR ([ADR 0009](decisions/0009-git-workflow.md)).
+**Exit:** every 🎯 requirement is delivered and meets [NFR-1](requirements/NFR-non-functional-requirements.md#nfr-1) to [NFR-3](requirements/NFR-non-functional-requirements.md#nfr-3), every MVP use case has a passing E2E journey, and `1.0.0` is released: a `Release-As: 1.0.0` footer reaches `main` and the owner merges the release PR ([ADR 0009](decisions/0009-git-workflow.md)).
 
 | Phase | Status | Spec | Plan | PR | Issue |
 |---|---|---|---|---|---|
@@ -351,7 +351,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-14b App shell
 
 - **Goal:** every page sits in Szop's app shell, with the raccoon logo, the navigation (a drawer on phones, a sidebar on larger screens) and the API's status in the menu. `/` is a Start page and `/design` sits under its own heading in the menu. The user picks the color scheme (system, light or dark) in the menu.
-- **Delivers:** the app shell of [ADR 0013](decisions/0013-visual-design.md), decision 17, and the [visual design](architecture/visual-design.md#5-layout-and-navigation); the favicon and the menu's logo, traced from the owner's raccoon artwork ([ADR 0049](decisions/0049-app-shell-phase-details.md)); the manual theme toggle ([APR-1](requirements/functional-requirements.md#apr-1)), brought into the MVP by [ADR 0048](decisions/0048-design-system-phase-details.md); the health journey replaced ([OP-087](https://github.com/luiki-dev/szop/issues/160)).
+- **Delivers:** the app shell of [ADR 0013](decisions/0013-visual-design.md), decision 17, and the [visual design](architecture/visual-design.md#5-layout-and-navigation); the favicon and the menu's logo, traced from the owner's raccoon artwork ([ADR 0049](decisions/0049-app-shell-phase-details.md)); the manual theme toggle ([APR-1](requirements/APR-appearance.md#apr-1)), brought into the MVP by [ADR 0048](decisions/0048-design-system-phase-details.md); the health journey replaced ([OP-087](https://github.com/luiki-dev/szop/issues/160)).
 - **Split from:** PH-14 App shell and design system, now retired (see [PH-14a](#ph-14a-design-system)).
 - **Depends on:** —
 - **Owner steps:** none.
@@ -370,7 +370,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-15 Seed catalog, read-only
 
 - **Goal:** a visitor without a session browses the default catalog by category and searches it by name, with the categories in their depth-first order.
-- **Delivers:** [ACC-1](requirements/functional-requirements.md#acc-1) (part: the seed data before the first change), [PRD-2](requirements/functional-requirements.md#prd-2), [ORD-2](requirements/functional-requirements.md#ord-2) and [ORD-3](requirements/functional-requirements.md#ord-3) (part: the category order rule in `packages/shared`); the seed data; fast-check property tests, StrykerJS and `mutation.yml` ([ADR 0007](decisions/0007-testing-strategy.md)).
+- **Delivers:** [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: the seed data before the first change), [PRD-2](requirements/PRD-catalog.md#prd-2), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2) and [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3) (part: the category order rule in `packages/shared`); the seed data; fast-check property tests, StrykerJS and `mutation.yml` ([ADR 0007](decisions/0007-testing-strategy.md)).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -379,7 +379,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-16 Guest workspace and lists
 
 - **Goal:** a guest creates their first list, which creates their anonymous workspace from the seed data. They rename and delete lists and see their active lists, and nobody can reach another workspace's data.
-- **Delivers:** [ACC-1](requirements/functional-requirements.md#acc-1), [LST-1](requirements/functional-requirements.md#lst-1), [LST-2](requirements/functional-requirements.md#lst-2) (part: active lists); Better Auth with its anonymous plugin; the access layer and the composite workspace keys ([ADR 0012](decisions/0012-security-baseline.md), decisions 3–6); the data model conventions every later migration follows.
+- **Delivers:** [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1), [LST-1](requirements/LST-shopping-lists.md#lst-1), [LST-2](requirements/LST-shopping-lists.md#lst-2) (part: active lists); Better Auth with its anonymous plugin; the access layer and the composite workspace keys ([ADR 0012](decisions/0012-security-baseline.md), decisions 3–6); the data model conventions every later migration follows.
 - **Depends on:** the spike on Better Auth's anonymous plugin, before the brainstorm ([OP-038](https://github.com/luiki-dev/szop/issues/97)).
 - **Owner steps:** none.
 - **Expected path:** full; a candidate for a split into anonymous sessions and the access layer.
@@ -388,7 +388,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-17 List items
 
 - **Goal:** a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added; checked items drop into the haul, which shows how many are done and puts an item back on a tap.
-- **Delivers:** [ITM-1](requirements/functional-requirements.md#itm-1), [ITM-6](requirements/functional-requirements.md#itm-6), [ITM-7](requirements/functional-requirements.md#itm-7), [ORD-1](requirements/functional-requirements.md#ord-1), [ORD-2](requirements/functional-requirements.md#ord-2), [ORD-3](requirements/functional-requirements.md#ord-3), [ORD-5](requirements/functional-requirements.md#ord-5); the haul with its chips and drawer ([ADR 0022](decisions/0022-ring-tail-redesign.md)); optimistic updates; forms with React Hook Form.
+- **Delivers:** [ITM-1](requirements/ITM-list-items.md#itm-1), [ITM-6](requirements/ITM-list-items.md#itm-6), [ITM-7](requirements/ITM-list-items.md#itm-7), [ORD-1](requirements/ORD-list-display-and-ordering.md#ord-1), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2), [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5); the haul with its chips and drawer ([ADR 0022](decisions/0022-ring-tail-redesign.md)); optimistic updates; forms with React Hook Form.
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -397,7 +397,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-18 Registration and login
 
 - **Goal:** a guest registers with email and password, verifies the address and keeps their workspace as the account's. They log in and out, on any device.
-- **Delivers:** [ACC-2](requirements/functional-requirements.md#acc-2), [ACC-3](requirements/functional-requirements.md#acc-3) (part: logging in and out); the SES email sender, and a way for development and E2E tests to read the emails; completes [UC-8](requirements/functional-requirements.md#uc-8-guest-becomes-a-user).
+- **Delivers:** [ACC-2](requirements/ACC-accounts-and-guest-mode.md#acc-2), [ACC-3](requirements/ACC-accounts-and-guest-mode.md#acc-3) (part: logging in and out); the SES email sender, and a way for development and E2E tests to read the emails; completes [UC-8](requirements/UC-use-cases.md#uc-8-guest-becomes-a-user).
 - **Depends on:** —
 - **Owner steps:** verify the email addresses the demo will send to, while SES is in its sandbox.
 - **Expected path:** full; a candidate for a split into the authentication flows and sending email.
@@ -406,7 +406,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-19 Guest data on login
 
 - **Goal:** logging into an existing account from a browser that holds guest data offers to import the guest's lists or to discard them. Imported items find the account's categories by name.
-- **Delivers:** [ACC-4](requirements/functional-requirements.md#acc-4) (part: lists; [PH-28](#ph-28-templates) adds templates); completes [UC-9](requirements/functional-requirements.md#uc-9-log-in-on-a-device-with-guest-data).
+- **Delivers:** [ACC-4](requirements/ACC-accounts-and-guest-mode.md#acc-4) (part: lists; [PH-28](#ph-28-templates) adds templates); completes [UC-9](requirements/UC-use-cases.md#uc-9-log-in-on-a-device-with-guest-data).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -424,7 +424,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-20 Quotas and rate limits
 
 - **Goal:** a workspace cannot outgrow its quotas, and a script cannot flood the API, guest creation, registration or login. A user who hits a limit is told which one and what to do about it.
-- **Delivers:** [LIM-1](requirements/functional-requirements.md#lim-1) (part: lists and items), [LIM-3](requirements/functional-requirements.md#lim-3), [LIM-4](requirements/functional-requirements.md#lim-4) (part: everything except password reset); `@fastify/rate-limit`; both limiters counting in Redis, so a limit holds across tasks, with a test across two instances ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 8). Later phases add their own quotas and limits.
+- **Delivers:** [LIM-1](requirements/LIM-limits.md#lim-1) (part: lists and items), [LIM-3](requirements/LIM-limits.md#lim-3), [LIM-4](requirements/LIM-limits.md#lim-4) (part: everything except password reset); `@fastify/rate-limit`; both limiters counting in Redis, so a limit holds across tasks, with a test across two instances ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 8). Later phases add their own quotas and limits.
 - **Depends on:** PH-39.
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -433,7 +433,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-21 Shop in a store
 
 - **Goal:** in the store, a user checks items off into the haul and sees in it the spent and remaining totals; afterwards, "Put all back" resets the list for next week.
-- **Delivers:** [ITM-8](requirements/functional-requirements.md#itm-8) (the amounts in the haul), [LST-5](requirements/functional-requirements.md#lst-5); completes [UC-3](requirements/functional-requirements.md#uc-3-shop-in-a-store) and [UC-4](requirements/functional-requirements.md#uc-4-reuse-a-weekly-list).
+- **Delivers:** [ITM-8](requirements/ITM-list-items.md#itm-8) (the amounts in the haul), [LST-5](requirements/LST-shopping-lists.md#lst-5); completes [UC-3](requirements/UC-use-cases.md#uc-3-shop-in-a-store) and [UC-4](requirements/UC-use-cases.md#uc-4-reuse-a-weekly-list).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -442,7 +442,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-22 Offline state
 
 - **Goal:** when the connection drops or hangs, the app says so clearly and blocks changes instead of losing them.
-- **Delivers:** [NET-1](requirements/functional-requirements.md#net-1).
+- **Delivers:** [NET-1](requirements/NET-connectivity.md#net-1).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** bounded, likely.
@@ -451,7 +451,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-23 Smart input
 
 - **Goal:** typing into a list's input suggests catalog products, and picking one adds it with its defaults. Enter adds the typed text as a one-off item, with an offer to save it to the catalog, and a duplicate offers to increase the existing item's quantity instead.
-- **Delivers:** [ITM-2](requirements/functional-requirements.md#itm-2), [ITM-3](requirements/functional-requirements.md#itm-3), [ITM-4](requirements/functional-requirements.md#itm-4); completes [UC-1](requirements/functional-requirements.md#uc-1-first-visit-as-a-guest).
+- **Delivers:** [ITM-2](requirements/ITM-list-items.md#itm-2), [ITM-3](requirements/ITM-list-items.md#itm-3), [ITM-4](requirements/ITM-list-items.md#itm-4); completes [UC-1](requirements/UC-use-cases.md#uc-1-first-visit-as-a-guest).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -460,7 +460,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-24 Catalog browser
 
 - **Goal:** from a list, a user browses the catalog's category tree, selects several products and adds them in one go.
-- **Delivers:** [ITM-5](requirements/functional-requirements.md#itm-5); completes [UC-2](requirements/functional-requirements.md#uc-2-plan-a-grocery-trip).
+- **Delivers:** [ITM-5](requirements/ITM-list-items.md#itm-5); completes [UC-2](requirements/UC-use-cases.md#uc-2-plan-a-grocery-trip).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -469,7 +469,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-25 Archive and duplicate
 
 - **Goal:** a user archives a finished list, finds it read-only in the archive, unarchives it, and duplicates any list with every item unchecked.
-- **Delivers:** [LST-2](requirements/functional-requirements.md#lst-2), [LST-3](requirements/functional-requirements.md#lst-3), [LST-4](requirements/functional-requirements.md#lst-4); completes [UC-13](requirements/functional-requirements.md#uc-13-archive-after-a-project).
+- **Delivers:** [LST-2](requirements/LST-shopping-lists.md#lst-2), [LST-3](requirements/LST-shopping-lists.md#lst-3), [LST-4](requirements/LST-shopping-lists.md#lst-4); completes [UC-13](requirements/UC-use-cases.md#uc-13-archive-after-a-project).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** bounded, likely.
@@ -478,7 +478,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-26 Catalog and units
 
 - **Goal:** a user adds, edits and deletes catalog products and units. The smart input suggests the new products, and items already on lists stay as they were.
-- **Delivers:** [PRD-1](requirements/functional-requirements.md#prd-1), [PRD-3](requirements/functional-requirements.md#prd-3), [UNT-1](requirements/functional-requirements.md#unt-1), [LIM-1](requirements/functional-requirements.md#lim-1) (part: products and units); completes [UC-7](requirements/functional-requirements.md#uc-7-customize-the-catalog).
+- **Delivers:** [PRD-1](requirements/PRD-catalog.md#prd-1), [PRD-3](requirements/PRD-catalog.md#prd-3), [UNT-1](requirements/UNT-units.md#unt-1), [LIM-1](requirements/LIM-limits.md#lim-1) (part: products and units); completes [UC-7](requirements/UC-use-cases.md#uc-7-customize-the-catalog).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -487,7 +487,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-27 Categories
 
 - **Goal:** a user shapes their own category tree: creates, renames, moves, reorders and deletes categories, and every list re-sorts to match the store.
-- **Delivers:** [CAT-1](requirements/functional-requirements.md#cat-1), [CAT-2](requirements/functional-requirements.md#cat-2), [CAT-3](requirements/functional-requirements.md#cat-3), [LIM-1](requirements/functional-requirements.md#lim-1) (part: categories and their depth); completes [UC-6](requirements/functional-requirements.md#uc-6-match-the-store-layout).
+- **Delivers:** [CAT-1](requirements/CAT-categories.md#cat-1), [CAT-2](requirements/CAT-categories.md#cat-2), [CAT-3](requirements/CAT-categories.md#cat-3), [LIM-1](requirements/LIM-limits.md#lim-1) (part: categories and their depth); completes [UC-6](requirements/UC-use-cases.md#uc-6-match-the-store-layout).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -496,7 +496,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-28 Templates
 
 - **Goal:** a user keeps reusable templates, built from scratch or saved from a list, and starts new lists from them. A guest's templates are imported along with their lists.
-- **Delivers:** [TPL-1](requirements/functional-requirements.md#tpl-1), [TPL-2](requirements/functional-requirements.md#tpl-2), [TPL-3](requirements/functional-requirements.md#tpl-3), [LST-6](requirements/functional-requirements.md#lst-6), [ACC-4](requirements/functional-requirements.md#acc-4) (part: templates), [LIM-1](requirements/functional-requirements.md#lim-1) (part: templates); completes [UC-5](requirements/functional-requirements.md#uc-5-build-from-a-template).
+- **Delivers:** [TPL-1](requirements/TPL-templates.md#tpl-1), [TPL-2](requirements/TPL-templates.md#tpl-2), [TPL-3](requirements/TPL-templates.md#tpl-3), [LST-6](requirements/LST-shopping-lists.md#lst-6), [ACC-4](requirements/ACC-accounts-and-guest-mode.md#acc-4) (part: templates), [LIM-1](requirements/LIM-limits.md#lim-1) (part: templates); completes [UC-5](requirements/UC-use-cases.md#uc-5-build-from-a-template).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -505,7 +505,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-29 Password reset and change
 
 - **Goal:** a user who forgot their password resets it through an emailed link, and a logged-in user changes it; either change logs out every other session.
-- **Delivers:** [ACC-3](requirements/functional-requirements.md#acc-3), [LIM-4](requirements/functional-requirements.md#lim-4) (part: password reset).
+- **Delivers:** [ACC-3](requirements/ACC-accounts-and-guest-mode.md#acc-3), [LIM-4](requirements/LIM-limits.md#lim-4) (part: password reset).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -514,7 +514,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-30 Settings and account deletion
 
 - **Goal:** a user sets their display name and currency, and deletes their account with all its data after confirming their password.
-- **Delivers:** [ACC-5](requirements/functional-requirements.md#acc-5), [ACC-6](requirements/functional-requirements.md#acc-6); completes [UC-14](requirements/functional-requirements.md#uc-14-delete-an-account) for the MVP ([PH-32](#ph-32-sharing) adds what happens to shared lists).
+- **Delivers:** [ACC-5](requirements/ACC-accounts-and-guest-mode.md#acc-5), [ACC-6](requirements/ACC-accounts-and-guest-mode.md#acc-6); completes [UC-14](requirements/UC-use-cases.md#uc-14-delete-an-account) for the MVP ([PH-32](#ph-32-sharing) adds what happens to shared lists).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -523,7 +523,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-31 Automatic cleanup
 
 - **Goal:** guest workspaces and unverified accounts are deleted on schedule, and a guest who returns after theirs was deleted understands what happened.
-- **Delivers:** [ACC-7](requirements/functional-requirements.md#acc-7), [ACC-8](requirements/functional-requirements.md#acc-8); the scheduled cleanup inside the API, tested with a controllable clock ([ADR 0007](decisions/0007-testing-strategy.md)); each run takes a PostgreSQL try-lock, so one task cleans up per round, with a test of two runs at once ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 9).
+- **Delivers:** [ACC-7](requirements/ACC-accounts-and-guest-mode.md#acc-7), [ACC-8](requirements/ACC-accounts-and-guest-mode.md#acc-8); the scheduled cleanup inside the API, tested with a controllable clock ([ADR 0007](decisions/0007-testing-strategy.md)); each run takes a PostgreSQL try-lock, so one task cleans up per round, with a test of two runs at once ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 9).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -544,7 +544,7 @@ PH-32 and PH-33 are rough: each is split into smaller phases once the MVP is don
 ### PH-32 Sharing
 
 - **Goal:** an owner shares a list with a registered user or through a link, as shopper or editor, manages who has access, and can take it back.
-- **Delivers:** [SHR-1](requirements/functional-requirements.md#shr-1), [SHR-2](requirements/functional-requirements.md#shr-2), [SHR-3](requirements/functional-requirements.md#shr-3), [SHR-4](requirements/functional-requirements.md#shr-4), [SHR-5](requirements/functional-requirements.md#shr-5); completes [UC-12](requirements/functional-requirements.md#uc-12-revoke-access) and [UC-14](requirements/functional-requirements.md#uc-14-delete-an-account); [UC-10](requirements/functional-requirements.md#uc-10-share-with-a-household-member) and [UC-11](requirements/functional-requirements.md#uc-11-hand-off-shopping-to-someone-without-an-account) (part: without live updates).
+- **Delivers:** [SHR-1](requirements/SHR-sharing.md#shr-1), [SHR-2](requirements/SHR-sharing.md#shr-2), [SHR-3](requirements/SHR-sharing.md#shr-3), [SHR-4](requirements/SHR-sharing.md#shr-4), [SHR-5](requirements/SHR-sharing.md#shr-5); completes [UC-12](requirements/UC-use-cases.md#uc-12-revoke-access) and [UC-14](requirements/UC-use-cases.md#uc-14-delete-an-account); [UC-10](requirements/UC-use-cases.md#uc-10-share-with-a-household-member) and [UC-11](requirements/UC-use-cases.md#uc-11-hand-off-shopping-to-someone-without-an-account) (part: without live updates).
 - **Depends on:** —
 - **Owner steps:** none known yet.
 - **Expected path:** split into several phases first.
@@ -553,7 +553,7 @@ PH-32 and PH-33 are rough: each is split into smaller phases once the MVP is don
 ### PH-33 Live updates
 
 - **Goal:** everyone viewing a shared list sees the others' changes within a few seconds, without reloading.
-- **Delivers:** [SYN-1](requirements/functional-requirements.md#syn-1), [SYN-2](requirements/functional-requirements.md#syn-2); completes [UC-10](requirements/functional-requirements.md#uc-10-share-with-a-household-member) and [UC-11](requirements/functional-requirements.md#uc-11-hand-off-shopping-to-someone-without-an-account); the event bus over Redis publish/subscribe, the client's reconnect and refetch, and a test across two instances ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 5 and 7).
+- **Delivers:** [SYN-1](requirements/SYN-live-updates.md#syn-1), [SYN-2](requirements/SYN-live-updates.md#syn-2); completes [UC-10](requirements/UC-use-cases.md#uc-10-share-with-a-household-member) and [UC-11](requirements/UC-use-cases.md#uc-11-hand-off-shopping-to-someone-without-an-account); the event bus over Redis publish/subscribe, the client's reconnect and refetch, and a test across two instances ([ADR 0036](decisions/0036-scalability-and-isolation.md), decisions 5 and 7).
 - **Depends on:** —
 - **Owner steps:** none known yet.
 - **Expected path:** split into several phases first.

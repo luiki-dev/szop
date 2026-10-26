@@ -112,10 +112,10 @@
   The `###` anchors of today stay valid.
 - Produces: `check-links.py`, run by every later task. It exits non-zero and prints `file:line target` for each broken link.
 
-- [ ] **Step 1: Write `check-links.py`** and run it on today's tree. It reads every tracked `.md` file (`git ls-files '*.md'`) and every link `](target)` whose target resolves to `docs/requirements/*.md` (a relative path, or `https://github.com/luiki-dev/szop/blob/main/docs/requirements/…`). It checks that the file exists and that the anchor equals the GitHub slug of one of its headings. Slug: lowercase; drop every character that is not a letter, digit, space or hyphen; spaces become hyphens.
+- [x] **Step 1: Write `check-links.py`** and run it on today's tree. It reads every tracked `.md` file (`git ls-files '*.md'`) and every link `](target)` whose target resolves to `docs/requirements/*.md` (a relative path, or `https://github.com/luiki-dev/szop/blob/main/docs/requirements/…`). It checks that the file exists and that the anchor equals the GitHub slug of one of its headings. Slug: lowercase; drop every character that is not a letter, digit, space or hyphen; spaces become hyphens.
   Expected now: only the link with anchor `#nfr-` fails. Note its file; Step 4 repairs it as a mechanical link fix.
 
-- [ ] **Step 2: Write the new files by moving today's text unchanged.** Each requirement becomes `## <ID>` followed by today's line (`🎯 [MVP] …`). Each area file starts with this header, one sentence per area saying what it covers:
+- [x] **Step 2: Write the new files by moving today's text unchanged.** Each requirement becomes `## <ID>` followed by today's line (`🎯 [MVP] …`). Each area file starts with this header, one sentence per area saying what it covers:
 
   ```markdown
   # Accounts and guest mode (ACC)
@@ -129,7 +129,7 @@
   - The index holds the sections above. "How requirements are written" holds today's legend of release tags; Task 3 extends it. "Requirements by area" holds, per area, a table `| Requirement | Release |` with each requirement linked to its file; Tasks 3 to 7 add the remaining columns.
   - Same-file links that now cross files point at the right file. Index-internal links point at the new anchors.
 
-- [ ] **Step 3: Write `rewrite-links.py`** with the spec's mapping ([Moving the links](../specs/2026-10-26-PH-40-acceptance-criteria-design.md#moving-the-links)), extended for the index's old numbered anchors:
+- [x] **Step 3: Write `rewrite-links.py`** with the spec's mapping ([Moving the links](../specs/2026-10-26-PH-40-acceptance-criteria-design.md#moving-the-links)), extended for the index's old numbered anchors:
   - `1-general-assumptions-actors-domain-concepts` → `functional-requirements.md#general-assumptions-actors-domain-concepts`
   - `2-functional-requirements` → `functional-requirements.md#requirements-by-area`
   - `5-release-slicing-and-future-extensions` → `functional-requirements.md#release-slicing-and-future-extensions`
@@ -138,16 +138,16 @@
 
   It keeps each link's path prefix (`../`, `../../`, the `blob/main/` URL) and changes only the file name and anchor. It prints the count per file and every anchor it does not know, and it changes nothing for an unknown anchor.
 
-- [ ] **Step 4: Run `rewrite-links.py` on the repo**, then `check-links.py`.
+- [x] **Step 4: Run `rewrite-links.py` on the repo**, then `check-links.py`.
   Expected: about 376 links rewritten, no unknown anchor except `#nfr-`, which is repaired by hand to the link its sentence means. `check-links.py` exits 0.
 
-- [ ] **Step 5: Update `CLAUDE.md`'s Documentation entry for `docs/requirements/`** (the index, the area files, the use cases, the criteria and their status) and the link rule's examples (`[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1)`, `[UC-3](../requirements/UC-use-cases.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/SHR-sharing.md)`). Update `README.md`'s line only if it describes the single file.
+- [x] **Step 5: Update `CLAUDE.md`'s Documentation entry for `docs/requirements/`** (the index, the area files, the use cases, the criteria and their status) and the link rule's examples (`[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1)`, `[UC-3](../requirements/UC-use-cases.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/SHR-sharing.md)`). Update `README.md`'s line only if it describes the single file.
 
-- [ ] **Step 6: Verify it is a move**
+- [x] **Step 6: Verify it is a move**
   Run: `git diff --stat` and `git diff --word-diff docs/requirements/`. Expected: the requirement texts are unchanged words; the other files change only inside link targets.
   Run: `pnpm check`. Expected: PASS.
 
-- [ ] **Step 7: Commit**: `docs(requirements): split the requirements into one file per area`, with the ticked boxes. Push.
+- [x] **Step 7: Commit**: `docs(requirements): split the requirements into one file per area`, with the ticked boxes. Push.
 
 ---
 

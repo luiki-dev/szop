@@ -69,7 +69,7 @@ Open points (all on GitHub; no document lists them):
 
 ## Documentation
 
-- `docs/requirements/functional-requirements.md` — the living source of truth for functional requirements (FR IDs, use cases, MVP/Later slicing, future extensions) and the non-functional requirements (NFR IDs: browsers, accessibility, performance). Keep it updated when behavior changes.
+- `docs/requirements/` — the living source of truth for what Szop does: `functional-requirements.md` is the index (how requirements and their acceptance criteria are written, the status of every requirement, the assumptions, actors and domain concepts, MVP/Later slicing and future extensions); one file per area, `<AREA-CODE>-<full-area-name>.md` (such as `ACC-accounts-and-guest-mode.md`, and `NFR-non-functional-requirements.md` for browsers, accessibility, performance and security), holds each requirement with its acceptance criteria and their status; `UC-use-cases.md` holds the use cases. Keep it updated when behavior changes or a phase finalizes, starts or delivers criteria.
 - `docs/architecture/architecture.md` — the living technical architecture (components, layering, data model highlights, frontend state, later features). Keep it updated when the design changes.
 - `docs/architecture/stack-overview.md` — a learning-oriented explanation of the stack and its concepts. Extend it when a new technology or concept enters the project.
 - `docs/architecture/threat-model.md` — what Szop protects, who can act through which path, and what guards each entry point. Keep it updated when an actor or entry point is added.
@@ -108,7 +108,7 @@ Open points (all on GitHub; no document lists them):
   - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell
   - ➖ not applicable: `➖ N/A: reason` in the definition of done and the PR template
   - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
-- **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/functional-requirements.md#acc-1)`, `[UC-3](../requirements/functional-requirements.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/functional-requirements.md#sharing-shr)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
+- **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1)`, `[UC-3](../requirements/UC-use-cases.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/SHR-sharing.md)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
 - Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.
 
 ## Conversation tone
