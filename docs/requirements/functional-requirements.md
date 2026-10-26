@@ -113,35 +113,35 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [LST-1](LST-shopping-lists.md#lst-1) | 🎯 MVP | — | — | — |
-| [LST-2](LST-shopping-lists.md#lst-2) | 🎯 MVP | — | — | — |
-| [LST-3](LST-shopping-lists.md#lst-3) | 🎯 MVP | — | — | — |
-| [LST-4](LST-shopping-lists.md#lst-4) | 🎯 MVP | — | — | — |
-| [LST-5](LST-shopping-lists.md#lst-5) | 🎯 MVP | — | — | — |
-| [LST-6](LST-shopping-lists.md#lst-6) | 🎯 MVP | — | — | — |
+| [LST-1](LST-shopping-lists.md#lst-1) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [LST-2](LST-shopping-lists.md#lst-2) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [LST-3](LST-shopping-lists.md#lst-3) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [LST-4](LST-shopping-lists.md#lst-4) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [LST-5](LST-shopping-lists.md#lst-5) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
+| [LST-6](LST-shopping-lists.md#lst-6) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
 
 ### List items (ITM)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [ITM-1](ITM-list-items.md#itm-1) | 🎯 MVP | — | — | — |
-| [ITM-2](ITM-list-items.md#itm-2) | 🎯 MVP | — | — | — |
-| [ITM-3](ITM-list-items.md#itm-3) | 🎯 MVP | — | — | — |
-| [ITM-4](ITM-list-items.md#itm-4) | 🎯 MVP | — | — | — |
-| [ITM-5](ITM-list-items.md#itm-5) | 🎯 MVP | — | — | — |
-| [ITM-6](ITM-list-items.md#itm-6) | 🎯 MVP | — | — | — |
-| [ITM-7](ITM-list-items.md#itm-7) | 🎯 MVP | — | — | — |
-| [ITM-8](ITM-list-items.md#itm-8) | 🎯 MVP | — | — | — |
+| [ITM-1](ITM-list-items.md#itm-1) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [ITM-2](ITM-list-items.md#itm-2) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [ITM-3](ITM-list-items.md#itm-3) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [ITM-4](ITM-list-items.md#itm-4) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [ITM-5](ITM-list-items.md#itm-5) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [ITM-6](ITM-list-items.md#itm-6) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [ITM-7](ITM-list-items.md#itm-7) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [ITM-8](ITM-list-items.md#itm-8) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
 
 ### List display and ordering (ORD)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [ORD-1](ORD-list-display-and-ordering.md#ord-1) | 🎯 MVP | — | — | — |
-| [ORD-2](ORD-list-display-and-ordering.md#ord-2) | 🎯 MVP | — | — | — |
-| [ORD-3](ORD-list-display-and-ordering.md#ord-3) | 🎯 MVP | — | — | — |
+| [ORD-1](ORD-list-display-and-ordering.md#ord-1) | 🎯 MVP | ❔ Draft | 0 of 11 | ❔ Not finalized |
+| [ORD-2](ORD-list-display-and-ordering.md#ord-2) | 🎯 MVP | ❔ Draft | 0 of 5 | ❔ Not finalized |
+| [ORD-3](ORD-list-display-and-ordering.md#ord-3) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
 | [ORD-4](ORD-list-display-and-ordering.md#ord-4) | ✖️ Dropped | — | — | — |
-| [ORD-5](ORD-list-display-and-ordering.md#ord-5) | 🎯 MVP | — | — | — |
+| [ORD-5](ORD-list-display-and-ordering.md#ord-5) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
 
 ### Categories (CAT)
 

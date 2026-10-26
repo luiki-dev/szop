@@ -239,9 +239,9 @@
 **Files:**
 - Modify: `LST-shopping-lists.md`, `ITM-list-items.md`, `ORD-list-display-and-ordering.md`, the index
 
-- [ ] **Step 1: Write the criteria of LST-1 to LST-6.** Sources: ADR 0001; visual-design.md (the lists home, "Put all back"); [OP-047](https://github.com/luiki-dev/szop/issues/111) (what an archived list allows, bulk actions); [OP-051](https://github.com/luiki-dev/szop/issues/103) (undo).
+- [x] **Step 1: Write the criteria of LST-1 to LST-6.** Sources: ADR 0001; visual-design.md (the lists home, "Put all back"); [OP-047](https://github.com/luiki-dev/szop/issues/111) (what an archived list allows, bulk actions); [OP-051](https://github.com/luiki-dev/szop/issues/103) (undo).
 
-- [ ] **Step 2: Write the criteria of ITM-1 to ITM-8.** Sources:
+- [x] **Step 2: Write the criteria of ITM-1 to ITM-8.** Sources:
   - ADR 0001;
   - ADR 0022 (the drawer's rows, amounts);
   - visual-design.md's "Amounts";
@@ -250,16 +250,16 @@
   - [OP-047](https://github.com/luiki-dev/szop/issues/111) (different units);
   - [OP-040](https://github.com/luiki-dev/szop/issues/99) (checking sends a value).
 
-- [ ] **Step 3: Write the criteria of ORD-1 to ORD-5.**
+- [x] **Step 3: Write the criteria of ORD-1 to ORD-5.**
   - **Sources:** ADR 0022, decisions 3 to 8 and 13; visual-design.md's "The list and the haul" (the chips, "+N more", the drawer and its opening and closing, ↶, folding while typing, the states table, the accessible names); [OP-041](https://github.com/luiki-dev/szop/issues/100) (`position` for "order added"); PH-15a's spec for the category order rule.
   - **ORD-4** keeps its dropped line.
   - **Screen-specific criteria** stay here, not in APP ([decision 13](../specs/2026-10-26-PH-40-acceptance-criteria-design.md#decisions)).
 
-- [ ] **Step 4: Statements and index tables**, as in Task 4.
+- [x] **Step 4: Statements and index tables**, as in Task 4.
 
-- [ ] **Step 5: Verify**: the same commands as Task 4, Step 5.
+- [x] **Step 5: Verify**: the same commands as Task 4, Step 5.
 
-- [ ] **Step 6: Commit**: `docs(requirements): add the criteria of LST, ITM and ORD`, with the ticked boxes. Push.
+- [x] **Step 6: Commit**: `docs(requirements): add the criteria of LST, ITM and ORD`, with the ticked boxes. Push.
 
 ---
 
