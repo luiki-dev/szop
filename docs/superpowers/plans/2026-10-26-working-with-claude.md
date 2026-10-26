@@ -62,11 +62,11 @@
   - Defaults: `--projects ~/.claude/projects/-home-lemekk-workspace-szop/`, `--usage-log ~/.claude/usage-log.csv`. `--since` and `--until` are inclusive UTC dates on a call's `timestamp`.
   - `BASELINE`: a module-level dict, keys `phase_cost`, `median_ctx`, `share_above_200k`, `peak_ctx`, `sessions_per_phase`, `idle_rebuild_share`, `opus_implementer_share`; values `None` until Task 2.
 
-- [ ] **Step 1: Record the frozen analysis's numbers**
+- [x] **Step 1: Record the frozen analysis's numbers**
 
 Run, from `docs/audits/2026-10-26-token-usage/` (the scripts load `usage.py` by relative path), each with `~/.claude/projects/-home-lemekk-workspace-szop/` as argument: `usage.py`, `extra.py`, `phases.py`, `sub.py`. Save the output to `<scratchpad>/frozen.txt` and note: total cost units; median main-session context (`extra.py`); share of main-session cost at or above 200k (the sum of the `<300k`, `<500k` and `>=500k` rows of `usage.py`'s context table); the idle rebuild share (`phases.py`); the Opus share of the `Implement…` agents (`sub.py`: Opus ÷ (Opus + Sonnet)); each phase's share of total (`phases.py`).
 
-- [ ] **Step 2: Implement `scripts/token-usage.py`**
+- [x] **Step 2: Implement `scripts/token-usage.py`**
 
 The definitions are the spec's [Measuring](../specs/2026-10-26-working-with-claude-design.md#measuring) section; port them from the frozen scripts, which they must match exactly:
 
@@ -79,12 +79,12 @@ The definitions are the spec's [Measuring](../specs/2026-10-26-working-with-clau
 - **Output:** one line `Sessions: N main, M subagent transcripts · calls from <first date> to <last date>`, then a table `| Indicator | This selection | Baseline | Target |` with the spec's eight indicators in its order and its targets, then a `Notes:` list: the CSV missing, covering K of N main sessions, or skipped rows; nothing when all is well. Token counts as `131k`, costs as `12.3M` units, shares as `58%`. A baseline still `None` prints `—`.
 - **`--by-phase`:** instead of the report, a table of every phase in the period: phase, cost units, main sessions, peak context, first and last date.
 
-- [ ] **Step 3: Check parity with the frozen analysis**
+- [x] **Step 3: Check parity with the frozen analysis**
 
 Run: `python3 scripts/token-usage.py` (no flags) and `python3 scripts/token-usage.py --by-phase`, right after Step 1 so the transcripts are the same.
 Expected: total cost, median context, share above 200k, idle share and Opus implementer share equal Step 1's numbers to the printed precision; each phase's cost ÷ total equals `phases.py`'s share to 0.1%. A difference is a porting bug: find it before going on. (Transcripts written between the two runs, such as this session's, can move the totals slightly; if so, run both again back to back.)
 
-- [ ] **Step 4: Write the fixtures and their check**
+- [x] **Step 4: Write the fixtures and their check**
 
 In `<scratchpad>/fixtures/`, one projects directory per case, each a minimal `.jsonl` (two or three assistant records with `requestId`, `timestamp`, `gitBranch`, `message.model`, `message.usage`) and, where needed, a `usage-log.csv`. `<scratchpad>/check-fixtures.sh` runs the script on each with `--projects` and `--usage-log` and asserts:
 
@@ -96,12 +96,12 @@ In `<scratchpad>/fixtures/`, one projects directory per case, each a minimal `.j
 | `letter-phase` | `--projects fixtures/letter --phase ph-14a`, branch `feat/ph-14a-design-system` | exit 0, one main session |
 | `duplicate` | `--projects fixtures/duplicate`: the same `requestId` in a session file and in a second (resumed) session file | the call counted once |
 
-- [ ] **Step 5: Run the fixture check**
+- [x] **Step 5: Run the fixture check**
 
 Run: `bash <scratchpad>/check-fixtures.sh`
 Expected: every case passes. (The fixtures are scratch; the spec gives the script no unit tests.)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/token-usage.py docs/superpowers/plans/2026-10-26-working-with-claude.md
