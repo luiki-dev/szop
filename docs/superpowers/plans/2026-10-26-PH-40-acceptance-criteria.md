@@ -24,7 +24,7 @@
 - **Docs style:** niche acronyms spelled out on first use and in `docs/glossary.md`; every status with its icon, no icons in headings; requirements, use cases and areas linked, never plain IDs (headings, code and the criteria tables' ID column stay plain); long docs keep a `## Contents` in sync; ADR notes in three places (`CLAUDE.md`, "Documentation").
 - **Git:** branch `docs/ph-40-acceptance-criteria`. Never commit to `main`, never merge, never trigger `demo-up` or `demo-down`. Commits follow Conventional Commits (scope `requirements`, `adr`, `docs` or `test` as fits; header at most 100 characters) and end with `Co-Authored-By: <the model that wrote the commit> <noreply@anthropic.com>` and `Claude-Session: https://claude.ai/code/session_013pCg35LC2zysPHNamQjpo7`.
 - `pnpm check` and `pnpm test:e2e` pass after every task that touches tests.
-- **After each task:** tick its step boxes (`- [ ]` → `- [x]`) in this plan within the task's own commit, `git push` the phase branch, then stop and summarize the task for the owner; start the next task only when the owner says so (`docs/superpowers/plans/CLAUDE.md`). After Task 3 the summary also carries the review the spec's decisions 12, 14 and 15 ask for.
+- **After each task:** tick its step boxes (`- [ ]` → `- [x]`) in this plan within the task's own commit and `git push` the phase branch. **Stop for the owner only after Task 3** (the review the spec's decisions 12, 14 and 15 ask for) **and at Task 8, Step 1** (the roadmap's restructuring); otherwise go on to the next task. This is the owner's exception, for this phase, to the stop after every task in `docs/superpowers/plans/CLAUDE.md`.
 
 ## Review Focus
 
@@ -88,7 +88,7 @@
   Run: `pnpm check`. Expected: PASS (Prettier formats the Markdown).
   Run: `grep -n "0051" docs/decisions/0004-implementation-process.md docs/decisions/0024-github-project-tracking.md docs/decisions/0027-open-points-on-github.md`. Expected: a status-line note and a cell note in each.
 
-- [ ] **Step 5: Commit**: `docs(adr): add ADR 0051, acceptance criteria and their status`, with the ticked boxes. Push, stop, summarize.
+- [ ] **Step 5: Commit**: `docs(adr): add ADR 0051, acceptance criteria and their status`, with the ticked boxes. Push.
 
 ---
 
@@ -147,7 +147,7 @@
   Run: `git diff --stat` and `git diff --word-diff docs/requirements/`. Expected: the requirement texts are unchanged words; the other files change only inside link targets.
   Run: `pnpm check`. Expected: PASS.
 
-- [ ] **Step 7: Commit**: `docs(requirements): split the requirements into one file per area`, with the ticked boxes. Push, stop, summarize: files created, links rewritten, the `#nfr-` repair.
+- [ ] **Step 7: Commit**: `docs(requirements): split the requirements into one file per area`, with the ticked boxes. Push.
 
 ---
 
@@ -230,7 +230,7 @@
 - [ ] **Step 5: Verify**
   Run: `python3 scratchpad/check-done.py && python3 scratchpad/check-index.py && python3 scratchpad/check-links.py && pnpm check`. Expected: all pass.
 
-- [ ] **Step 6: Commit**: `docs(requirements): add the criteria of ACC, LIM and NET`, with the ticked boxes and a list of the sweep's findings (contradictions, behaviors that fit no requirement) kept for the PR. Push, stop, summarize.
+- [ ] **Step 6: Commit**: `docs(requirements): add the criteria of ACC, LIM and NET`, with the ticked boxes and a list of the sweep's findings (contradictions, behaviors that fit no requirement) kept for the PR. Push.
 
 ---
 
@@ -259,7 +259,7 @@
 
 - [ ] **Step 5: Verify**: the same commands as Task 4, Step 5.
 
-- [ ] **Step 6: Commit**: `docs(requirements): add the criteria of LST, ITM and ORD`. Push, stop, summarize.
+- [ ] **Step 6: Commit**: `docs(requirements): add the criteria of LST, ITM and ORD`, with the ticked boxes. Push.
 
 ---
 
@@ -276,7 +276,7 @@
 
 - [ ] **Step 4: Statements and index tables.** **Step 5: Verify**, as in Task 4.
 
-- [ ] **Step 6: Commit**: `docs(requirements): add the criteria of CAT, PRD, UNT and TPL`. Push, stop, summarize.
+- [ ] **Step 6: Commit**: `docs(requirements): add the criteria of CAT, PRD, UNT and TPL`, with the ticked boxes. Push.
 
 ---
 
@@ -291,7 +291,7 @@
 
 - [ ] **Step 3: Statements and index tables.** **Step 4: Verify**, as in Task 4.
 
-- [ ] **Step 5: Commit**: `docs(requirements): add the criteria of SHR and SYN`. Push, stop, summarize.
+- [ ] **Step 5: Commit**: `docs(requirements): add the criteria of SHR and SYN`, with the ticked boxes. Push.
 
 ---
 
@@ -329,7 +329,7 @@
   Run: `python3 scratchpad/check-links.py && python3 scratchpad/check-done.py && python3 scratchpad/check-index.py && pnpm check && pnpm test:e2e`. Expected: all pass. `check-done.py`'s list of criteria checked at the demo goes into the PR.
   Run: `grep -c "❔ Criteria not finalized" docs/requirements/*.md` and count the criteria per status. These counts go into the PR description.
 
-- [ ] **Step 6: Commit**: `docs(roadmap): apply what the acceptance criteria show`, with the ticked boxes. Set the PH-40 row's Plan link (already set when this plan was committed) and the PR link when the PR opens. Push, stop, summarize.
+- [ ] **Step 6: Commit**: `docs(roadmap): apply what the acceptance criteria show`, with the ticked boxes. Set the PH-40 row's Plan link (already set when this plan was committed) and the PR link when the PR opens. Push.
 
 - [ ] **Step 7: Open the PR** when the owner says so:
   - title `docs(requirements): add acceptance criteria to every requirement`;
