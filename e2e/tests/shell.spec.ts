@@ -65,3 +65,91 @@ test("APR-1.4: the color scheme survives a reload and is set before the app runs
   await page.emulateMedia({ colorScheme: "light" });
   await expect(html).not.toHaveClass(/\bdark\b/);
 });
+
+// Criteria built in PH-14a and PH-14b without a test of their own, covered by
+// PH-40 (ADR 0051, decision 18).
+const phone = { width: 390, height: 844 };
+
+test("APP-1.7: the content is at most 720 px wide on a wide screen", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await page.goto("/");
+  const box = await page.getByRole("main").boundingBox();
+  expect(box?.width).toBeLessThanOrEqual(720);
+});
+
+test("NFR-2.3: every button and every link in the menu is at least 48 px high", async ({
+  page,
+}) => {
+  for (const path of ["/", "/design"]) {
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    const targets = page.locator("main button, nav a, nav button, nav label");
+    for (const target of await targets.all()) {
+      if (!(await target.isVisible())) continue;
+      const box = await target.boundingBox();
+      expect(
+        box?.height,
+        `${path}: ${(await target.textContent()) ?? ""}`,
+      ).toBeGreaterThanOrEqual(48);
+    }
+  }
+});
+
+test("NFR-2.4: everything focused with the keyboard shows a focus ring", async ({
+  page,
+}) => {
+  await page.goto("/design");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  for (let stop = 0; stop < 12; stop++) {
+    await page.keyboard.press("Tab");
+    const ring = await page.evaluate(() => {
+      const element = document.activeElement;
+      if (!element || element === document.body) return null;
+      const style = getComputedStyle(element);
+      return {
+        name: element.textContent.trim() || element.tagName,
+        visible:
+          (style.outlineStyle !== "none" && style.outlineWidth !== "0px") ||
+          style.boxShadow !== "none",
+      };
+    });
+    if (ring) expect(ring.visible, ring.name).toBe(true);
+  }
+});
+
+test("NFR-2.6: focus stays inside the open menu drawer", async ({ page }) => {
+  await page.setViewportSize(phone);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const drawer = page.getByRole("dialog");
+  await expect(drawer).toBeVisible();
+  for (let stop = 0; stop < 15; stop++) {
+    await page.keyboard.press("Tab");
+    expect(
+      await drawer.evaluate((node) => node.contains(document.activeElement)),
+    ).toBe(true);
+  }
+});
+
+test("NFR-2.7: the drawer slides in 200 ms, and not at all with reduced motion", async ({
+  page,
+}) => {
+  await page.setViewportSize(phone);
+  for (const [reducedMotion, duration] of [
+    ["no-preference", "0.2s"],
+    ["reduce", "0s"],
+  ] as const) {
+    await page.emulateMedia({ reducedMotion });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Open menu" }).click();
+    const drawer = page.getByRole("dialog");
+    await expect(drawer).toBeVisible();
+    expect(
+      await drawer.evaluate(
+        (node) => getComputedStyle(node).transitionDuration,
+      ),
+    ).toBe(duration);
+  }
+});

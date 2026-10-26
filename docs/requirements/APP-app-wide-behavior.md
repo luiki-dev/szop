@@ -6,7 +6,7 @@ These are general rules ([ADR 0051](../decisions/0051-acceptance-criteria.md), d
 
 ## APP-1
 
-🎯 [MVP] · 🚧 In progress (4 of 9) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (5 of 9) · ❔ Criteria not finalized
 
 Every page sits in one app shell, with one menu that leads to every destination. The lists are the home screen.
 
@@ -18,7 +18,7 @@ Every page sits in one app shell, with one menu that leads to every destination.
 | APP-1.4 | The bottom of the menu shows whether the API and the database answer: "API: ok" and "Database: up", that the database is down, or that the API cannot be reached, and it recovers when they come back. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
 | APP-1.5 | The active lists are the home screen, at `/`. | ❔ Draft |
 | APP-1.6 | Inside a list, a back arrow takes the menu's place. | ❔ Draft |
-| APP-1.7 | On a wide screen, the content is at most 720 px wide. | 🚧 [PH-14b](../roadmap.md#ph-14b-app-shell) · no test yet |
+| APP-1.7 | On a wide screen, the content is at most 720 px wide. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
 | APP-1.8 | On a phone, a screen's main action (such as "New list" or the add bar) is pinned at the bottom, and a sticky bar never covers the focused element. | ❔ Draft |
 | APP-1.9 | The setup pages (catalog, categories, units, settings) sit under a heading of their own in the menu, apart from the lists, templates and archive. | ❔ Draft |
 

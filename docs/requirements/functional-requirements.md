@@ -67,7 +67,7 @@ A criterion's status:
 |---|---|
 | ❔ Draft | Written from a decision, or from an open point's direction (then linked); no phase has finalized it. |
 | ⬜ Not started | Finalized by a phase's brainstorm, which is named; not built yet. |
-| 🚧 In progress | The named phase is building it; or it is built, but no test covers it yet ("no test yet"). |
+| 🚧 In progress | The named phase is building it; or it is built, but no test covers it yet ("no test yet"), or a person has yet to check it at a demo check ("to check at the next demo"). |
 | ✅ Done | Delivered by the named phase and covered by a test, or checked by a person at the demo check ("checked at the demo"). |
 | ➡️ Moved | Moved to another requirement, under the ID named. |
 | ✖️ Dropped | No longer wanted, for the reason given. |
@@ -215,7 +215,7 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 4 of 9 | ❔ Not finalized |
+| [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 5 of 9 | ❔ Not finalized |
 | [APP-2](APP-app-wide-behavior.md#app-2) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
 | [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
 | [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
@@ -228,7 +228,7 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [NFR-1](NFR-non-functional-requirements.md#nfr-1) | 🎯 MVP | ✅ Done | 1 of 1 | ✅ Finalized |
-| [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP | 🚧 In progress | 3 of 7 | ❔ Not finalized |
+| [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP | 🚧 In progress | 7 of 7 | ❔ Not finalized |
 | [NFR-3](NFR-non-functional-requirements.md#nfr-3) | 🎯 MVP | 🚧 In progress | 3 of 3 | ❔ Not finalized |
 | [NFR-4](NFR-non-functional-requirements.md#nfr-4) | 🎯 MVP | 🚧 In progress | 6 of 11 | ❔ Not finalized |
 

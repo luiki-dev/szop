@@ -14,7 +14,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 
 ## NFR-2
 
-🎯 [MVP] · 🚧 In progress (3 of 7) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (7 of 7) · ❔ Criteria not finalized
 
 **Accessibility:** Szop meets the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA, in light and dark mode.
 
@@ -22,11 +22,11 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 |---|---|---|
 | NFR-2.1 | Every page an end-to-end journey visits passes axe's WCAG 2.2 A and AA rules (`wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa`), in light and in dark mode. | ✅ [PH-07](../roadmap.md#ph-07-first-e2e-journey) |
 | NFR-2.2 | Every pair of color roles the pages render meets its contrast in light and in dark mode: 4.5:1 for text, 3:1 for the parts of controls. | ✅ [PH-14a](../roadmap.md#ph-14a-design-system) |
-| NFR-2.3 | Everything that can be tapped is at least 48 px high. | 🚧 [PH-14a](../roadmap.md#ph-14a-design-system) · no test yet |
-| NFR-2.4 | Everything that can be focused shows a visible focus ring. | 🚧 [PH-14a](../roadmap.md#ph-14a-design-system) · no test yet |
+| NFR-2.3 | Every button, and every link in the menu, is at least 48 px high. | ✅ [PH-14a](../roadmap.md#ph-14a-design-system) |
+| NFR-2.4 | Everything focused with the keyboard shows a visible focus ring. | ✅ [PH-14a](../roadmap.md#ph-14a-design-system) |
 | NFR-2.5 | When a dialog or drawer closes, focus returns to the control that opened it. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
-| NFR-2.6 | While a dialog or drawer is open, focus stays inside it. | 🚧 [PH-14b](../roadmap.md#ph-14b-app-shell) · no test yet |
-| NFR-2.7 | Motion lasts 150 to 200 ms and is off when the system asks for reduced motion. | 🚧 [PH-14b](../roadmap.md#ph-14b-app-shell) · no test yet |
+| NFR-2.6 | While a dialog or drawer is open, focus stays inside it. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
+| NFR-2.7 | Motion lasts 150 to 200 ms and is off when the system asks for reduced motion. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
 
 ## NFR-3
 
@@ -53,7 +53,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 | NFR-4.3 | Every response carries a Content Security Policy that allows only the app's own files and no framing (`frame-ancestors 'none'`), HTTP Strict Transport Security for one year with subdomains, and `Referrer-Policy: no-referrer`. | ✅ [PH-06b](../roadmap.md#ph-06b-web-security-baseline) |
 | NFR-4.4 | No page breaks the Content Security Policy: no injected `<style>` element and no inline script. | ✅ [PH-07](../roadmap.md#ph-07-first-e2e-journey) |
 | NFR-4.5 | Tokens in addresses travel in the query string, and the request log shows every query value as `[redacted]`. | ✅ [PH-06b](../roadmap.md#ph-06b-web-security-baseline) |
-| NFR-4.6 | A request over plain HTTP is redirected to HTTPS. | 🚧 [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) · no test yet |
+| NFR-4.6 | A request over plain HTTP is redirected to HTTPS. | 🚧 [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button) · to check at the next demo |
 | NFR-4.7 | A forged `X-Forwarded-For` header does not change the client address that per-address limits and the log use. | ✅ [PH-06b](../roadmap.md#ph-06b-web-security-baseline) |
 | NFR-4.8 | Once the app has used a token from the address (verification, password reset, a share link), it removes the token from the address bar. | ❔ Draft · [OP-055](https://github.com/luiki-dev/szop/issues/109) |
 | NFR-4.9 | The session cookie is `HttpOnly`, `Secure` and `SameSite=Lax`, has no `Domain` attribute and carries the `__Host-` prefix (or `__Secure-` if the auth library does not allow it); a revoked session stops working at once. | ❔ Draft · [OP-055](https://github.com/luiki-dev/szop/issues/109) |
