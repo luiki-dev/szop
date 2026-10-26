@@ -40,7 +40,7 @@ The MVP's feature phases start with PH-15a ([#287](https://github.com/luiki-dev/
 
 - **PH-40 is added** before [PH-15](../../roadmap.md#ph-15-seed-catalog-read-only) in Stage 4, with its issue [#289](https://github.com/luiki-dev/szop/issues/289) (Order 165). Already done on GitHub and in `roadmap.md`.
 - **PH-15a ([#287](https://github.com/luiki-dev/szop/issues/287)) is ⏳ Blocked by #289** on GitHub. Its split from PH-15 lives on its own branch and reaches `main` with it.
-- **The phases after this one may change** when the criteria show a phase is too big, misses a requirement or needs another order. The last task collects these findings ([order of work](#order-of-work), task 8).
+- **The phases after this one may change** when the criteria show a phase is too big, misses a requirement or needs another order, and a phase for missing tests may be added ([decision 12](#decisions)). The last task collects these findings ([order of work](#order-of-work), task 8).
 
 ## Decisions
 
@@ -57,7 +57,7 @@ The MVP's feature phases start with PH-15a ([#287](https://github.com/luiki-dev/
 | 9 | **Candidate open points do not become criteria** _(Claude's proposal, the owner's choice)_. | Criteria for candidates such as [OP-105](https://github.com/luiki-dev/szop/issues/283) and [OP-106](https://github.com/luiki-dev/szop/issues/284). | A candidate is an idea without a phase. The index of what is left would otherwise list work nobody planned. A candidate gets criteria when it is picked up. |
 | 10 | **The landing page on `dzwoniec.com` and the `/design` page stay outside the requirements** _(the owner's choice)_. | Requirements for both. | Both are tools of the project, not Szop's features: one says whether the demo runs, the other shows the design system. [ADR 0044](../../decisions/0044-landing-page-details.md) and [ADR 0048](../../decisions/0048-design-system-phase-details.md) describe them, and their tests stay as they are. |
 | 11 | **One phase, with the method first, then the split, then the criteria area by area, then the roadmap** _(the owner's choice)_. | Four phases: the method, then three backfills, interleaved with feature phases. | The owner wants the whole picture before further work. The phase brings one new concept, and its plan stays within about 8 tasks ([ADR 0014](../../decisions/0014-roadmap.md), decision 6). |
-| 12 | **The phase adds no tests and changes no behavior. A delivered criterion without a test stays 🚧 and is recorded in an open point for the phase that adds its test** _(Claude's call)_. | Writing the missing tests in this phase. | Writing tests is work of its own and would hide among a few hundred lines of documentation. The finding is visible in the index either way. |
+| 12 | **The phase changes no behavior. Delivered criteria without a test are listed at the owner's review after task 3, and the owner decides by how many there are: a few small tests are added in this phase, in a commit of their own; more go to a phase of their own on the roadmap, or to open points for the phases that next work in their areas. Until a test covers it, such a criterion stays 🚧** _(the owner's choice)_. | One open point under PH-15a, the next phase (Claude's first proposal); no tests in this phase at all. | PH-15a is about the catalog, and a missing test of the shell or of a security header would be foreign work in it, against the size of a phase. How much is missing is known only after task 3. The sweep expects little: the shell, the color scheme and the security baseline have many tests. |
 | 13 | **A cross-cutting criterion is a general rule, ✅ when everything that exists today meets it and a test checks it; later phases keep it true. What one screen must do is a criterion of that screen's requirement** _(Claude's recommendation, the owner's choice)_. | The criterion stays 🚧 until every screen of the MVP exists; a new criterion per screen in APP or NFR. | Most NFR and APP rules are enforced by a mechanism that runs everywhere, such as axe in every E2E journey on every page it visits. The definition of done's first item already makes every phase's tests keep them true. Leaving them 🚧 for many phases would make the index say less. The criterion links the phase that built the mechanism; the empty state of the lists page, for example, belongs to [LST-2](../../requirements/functional-requirements.md#lst-2), not to APP. |
 | 14 | **The owner reviews the criteria once during the phase, after task 3, before tasks 4 to 7 run in one go; the rest is read in the PR, commit by commit** _(Claude's recommendation, the owner's choice)_. | A stop after every area; reading everything only in the PR. | Task 3 writes the first criteria, so their style and granularity are settled there. A correction found only in the PR would mean reworking about 300 rows. |
 
@@ -161,7 +161,7 @@ Not sources: `docs/archive/` (never a source) and the audits (point-in-time; the
 
 **Criteria from PH-15a's spec** (PRD-2, the seed part of ACC-1, the category order rule of ORD-2 and ORD-3) are ❔ drafts like the others _(Claude's call)_. PH-15a's brainstorm took place before criteria existed, so the phase finalizes them when it resumes, with its spec at hand. This phase does not touch PH-15's roadmap entry: PH-15a's branch already splits it, and brings the split to `main` when it merges.
 
-**Delivered criteria (✅).** The phase looks for each delivered criterion's tests, renames their titles to carry its ID, and marks it ✅. A delivered criterion with no test stays 🚧. **One open point** lists every such criterion as a checklist, as a sub-issue of PH-15a ([#287](https://github.com/luiki-dev/szop/issues/287)), the next phase to run; PH-15a's brainstorm keeps it or re-parents parts of it to the phases that next work in those areas _(Claude's call)_ ([decision 12](#decisions)).
+**Delivered criteria (✅).** The phase looks for each delivered criterion's tests, renames their titles to carry its ID, and marks it ✅. A delivered criterion with no test stays 🚧, its Status column saying `🚧 [PH-14b](…) · no test yet`, and goes on the list for the owner's review after task 3, which decides where its test is written ([decision 12](#decisions)).
 
 ### The new areas
 
@@ -240,18 +240,18 @@ A one-off script in the session's scratch directory, not committed, rewrites eve
 
 ## Tests and checks
 
-- **No new tests.** Renamed tests keep their assertions; `pnpm test` and `pnpm test:e2e` pass with the new titles, and CI is green.
+- **No new tests**, except the few the review after task 3 may add ([decision 12](#decisions)). Renamed tests keep their assertions; `pnpm test` and `pnpm test:e2e` pass with the new titles, and CI is green.
 - **The link check** ([moving the links](#moving-the-links)) runs after the split and after each criteria task, and finds no broken link into `docs/requirements/`.
 - **A check of the ✅ rule**, before the PR opens: every ✅ criterion's ID is found in a test name or a check's comment (a scratch script running the `grep` per ID), and the PR lists the result. Criteria checked at the demo are listed separately.
 - **The index matches the files**: a scratch script compares each requirement's line with its row in the index and with its criteria table's statuses.
 
 ## Definition of done for this phase
 
-- Tests pass and CI is green; the renamed tests are the only code change.
+- Tests pass and CI is green; renamed tests, and any tests added under [decision 12](#decisions), are the only code changes.
 - Deployed and checked: ➖ N/A: no behavior changes.
 - UI changes shown: ➖ N/A: nothing users see changes.
 - Living docs, guides and ADR 0051 as in [Documentation](#documentation).
-- Open points: every finding that needs a decision, and every delivered criterion without a test, has an open point under the phase that will settle it.
+- Open points: every finding that needs a decision has an open point under the phase that will settle it, and every delivered criterion without a test is covered, or handled as the review after task 3 decided.
 - The PR is labelled `skip-changelog`: readers of the release notes see no change.
 
 ## Order of work
@@ -260,7 +260,7 @@ Each task is one commit. The owner can review the criteria area by area.
 
 1. **The method:** ADR 0051, and the process documents of [Documentation](#documentation), except what depends on the new files' contents.
 2. **The split:** the index, the area files, `nfr.md` and `use-cases.md`, with today's content moved and nothing reworded; every link in the repo rewritten and checked. A reviewer sees a move.
-3. **What exists:** APP and NFR-4 written; the criteria of APR-1 and NFR-1 to NFR-3; every ✅ in the project, with its tests renamed; the open point for delivered criteria without a test. **The owner reviews this task before work goes on** ([decision 14](#decisions)).
+3. **What exists:** APP and NFR-4 written; the criteria of APR-1 and NFR-1 to NFR-3; every ✅ in the project, with its tests renamed; the list of delivered criteria without a test. **The owner reviews this task before work goes on** ([decision 14](#decisions)), and decides where the missing tests are written ([decision 12](#decisions)). Tests added in this phase come in a commit of their own right after it.
 4. **ACC, LIM and NET.**
 5. **LST, ITM and ORD.**
 6. **CAT, PRD, UNT and TPL.**
@@ -283,7 +283,7 @@ Before the PR opens: the issue bodies' links rewritten, the ✅ check and the in
 
 ## Out of scope
 
-- New tests, and any change to behavior ([decision 12](#decisions)).
+- Any change to behavior, and tests beyond what the review after task 3 decides ([decision 12](#decisions)).
 - A script in the repo or a CI job for coverage or for the index ([decision 4](#decisions)).
 - Criteria for candidates, the landing page and `/design` ([decisions 9 and 10](#decisions)).
 - Finalizing criteria: each phase does that for its own requirements.
