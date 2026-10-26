@@ -296,33 +296,33 @@ git commit -m "docs(claude): add the guide to working with Claude within the wee
 - Consumes: the guide's anchors (Task 5), ADR 0052 (Task 4), the script's CLI (Task 1).
 - Produces: the "Before opening the PR" step Task 7 follows.
 
-- [ ] **Step 1: Set the default subagent model**
+- [x] **Step 1: Set the default subagent model**
 
 In `.claude/settings.json`, add a top-level `"env": { "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet" }` and change nothing else.
 Run: `git diff .claude/settings.json`
 Expected: only the `env` lines added.
 
-- [ ] **Step 2: Check both ends of the precedence**
+- [x] **Step 2: Check both ends of the precedence**
 
 The `env` is read when a session starts: restart the session (or start a new one on this branch) first. Then dispatch two trivial agents (`Reply with the word ok`), one with no `model` and one with `model: opus`, and read the `message.model` of each one's transcript under `~/.claude/projects/-home-lemekk-workspace-szop/<session>/subagents/`.
 Expected: the first `claude-sonnet-…`, the second `claude-opus-…`. If the second is not Opus, stop: the owner decides (the spec's [Subagent models](../specs/2026-10-26-working-with-claude-design.md#subagent-models)). Note both transcripts' file names for the PR.
 
-- [ ] **Step 3: Change CLAUDE.md**
+- [x] **Step 3: Change CLAUDE.md**
 
 - A new section `## Working with Claude`, after "Project tracking", with the spec's five bullets ([Changes to CLAUDE.md](../specs/2026-10-26-working-with-claude-design.md#changes-to-claudemd)): a session per stage; restart or `/compact` above 150–200k of context; before a break longer than an hour, finish the stage; implementers on Sonnet (the default), the whole-branch review on Opus named explicitly; links to the guide and to ADR 0052. Short: the guide holds the reasons.
 - In "Before opening the PR", a new bullet: `In the PR description: a "Token usage" section with the output of scripts/token-usage.py --branch <the phase branch>` (in the list's style).
 - In "Documentation", a line for `docs/development/working-with-claude.md` after `phase-walkthrough.md`'s.
 
-- [ ] **Step 4: Glossary and the guide lists**
+- [x] **Step 4: Glossary and the guide lists**
 
 `docs/glossary.md`: the new niche terms in its Terms table, alphabetically, each with a link to the guide: at least *prompt cache*, *compaction*, *cost unit*, *context (of a call)*, *subagent*, *coordinator* — whichever are not there yet. Add the guide to each doc the grep in **Files** found, next to `phase-walkthrough.md`.
 
-- [ ] **Step 5: Check**
+- [x] **Step 5: Check**
 
 Run: `pnpm exec prettier --check CLAUDE.md docs/glossary.md docs/development/working-with-claude.md docs/decisions/0052-working-with-claude.md docs/audits/2026-10-26-token-usage.md .claude/settings.json` (skip any file Prettier ignores) and `git diff --stat`.
 Expected: no formatting errors; only the files of this task changed.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add CLAUDE.md .claude/settings.json docs/glossary.md docs/superpowers/plans/2026-10-26-working-with-claude.md <the guide lists>
