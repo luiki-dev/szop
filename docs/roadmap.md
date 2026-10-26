@@ -32,6 +32,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - [Stage 4: MVP](#stage-4-mvp)
   - [PH-14a Design system](#ph-14a-design-system)
   - [PH-14b App shell](#ph-14b-app-shell)
+  - [PH-41 Faster, steadier CI](#ph-41-faster-steadier-ci)
   - [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only)
   - [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists)
   - [PH-17 List items](#ph-17-list-items)
@@ -318,6 +319,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 |---|---|---|---|---|---|
 | [PH-14a Design system](#ph-14a-design-system) | ✅ Done | [Spec](superpowers/specs/2026-10-24-PH-14a-design-system-design.md) | [Plan](superpowers/plans/2026-10-24-PH-14a-design-system.md) | [#282](https://github.com/luiki-dev/szop/pull/282) | [#280](https://github.com/luiki-dev/szop/issues/280) |
 | [PH-14b App shell](#ph-14b-app-shell) | ✅ Done | [Spec](superpowers/specs/2026-10-25-PH-14b-app-shell-design.md) | [Plan](superpowers/plans/2026-10-25-PH-14b-app-shell.md) | [#285](https://github.com/luiki-dev/szop/pull/285) | [#281](https://github.com/luiki-dev/szop/issues/281) |
+| [PH-41 Faster, steadier CI](#ph-41-faster-steadier-ci) | 🚧 In progress | — | — | — | [#295](https://github.com/luiki-dev/szop/issues/295) |
 | [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only) | ⬜ Not started | — | — | — | [#44](https://github.com/luiki-dev/szop/issues/44) |
 | [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists) | ⬜ Not started | — | — | — | [#45](https://github.com/luiki-dev/szop/issues/45) |
 | [PH-17 List items](#ph-17-list-items) | ⬜ Not started | — | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
@@ -356,6 +358,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** none.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#281](https://github.com/luiki-dev/szop/issues/281).
+
+### PH-41 Faster, steadier CI
+
+- **Goal:** CI's longest runs no longer depend on a slow Ubuntu mirror, and less of its time goes to setting up every job again, measured against the baseline of the [CI run analysis of 2026-10-26](audits/2026-10-26-ci-run-analysis.md).
+- **Delivers:** the CI run analysis and its page; the improvements of [OP-108](https://github.com/luiki-dev/szop/issues/294) the brainstorm picks; an ADR when a decision is significant.
+- **Depends on:** —
+- **Owner steps:** none.
+- **Expected path:** bounded, likely.
+- **Open points:** the sub-issues of [#295](https://github.com/luiki-dev/szop/issues/295).
 
 ### PH-15 Seed catalog, read-only
 
