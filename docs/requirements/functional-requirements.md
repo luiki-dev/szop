@@ -177,18 +177,18 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [SHR-1](SHR-sharing.md#shr-1) | 🔜 Later | — | — | — |
-| [SHR-2](SHR-sharing.md#shr-2) | 🔜 Later | — | — | — |
-| [SHR-3](SHR-sharing.md#shr-3) | 🔜 Later | — | — | — |
-| [SHR-4](SHR-sharing.md#shr-4) | 🔜 Later | — | — | — |
-| [SHR-5](SHR-sharing.md#shr-5) | 🔜 Later | — | — | — |
+| [SHR-1](SHR-sharing.md#shr-1) | 🔜 Later | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [SHR-2](SHR-sharing.md#shr-2) | 🔜 Later | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [SHR-3](SHR-sharing.md#shr-3) | 🔜 Later | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [SHR-4](SHR-sharing.md#shr-4) | 🔜 Later | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [SHR-5](SHR-sharing.md#shr-5) | 🔜 Later | ❔ Draft | 0 of 4 | ❔ Not finalized |
 
 ### Live updates (SYN)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [SYN-1](SYN-live-updates.md#syn-1) | 🔜 Later | — | — | — |
-| [SYN-2](SYN-live-updates.md#syn-2) | 🔜 Later | — | — | — |
+| [SYN-1](SYN-live-updates.md#syn-1) | 🔜 Later | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [SYN-2](SYN-live-updates.md#syn-2) | 🔜 Later | ❔ Draft | 0 of 2 | ❔ Not finalized |
 
 ### Limits (LIM)
 

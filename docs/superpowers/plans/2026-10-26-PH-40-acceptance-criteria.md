@@ -285,13 +285,13 @@
 **Files:**
 - Modify: `SHR-sharing.md`, `SYN-live-updates.md`, the index
 
-- [ ] **Step 1: Write the criteria of SHR-1 to SHR-5** (🔜 [Later]). Sources: ADR 0001, decisions 2, 3 and 6; ADR 0012, decisions 4 and 12 (invitations reveal nothing); architecture.md's "Sharing"; [OP-049](https://github.com/luiki-dev/szop/issues/113)'s directions (redeeming a link is a guest's first change; a shopper editing gets 403); [OP-041](https://github.com/luiki-dev/szop/issues/100) (matching by full path). Questions OP-049 leaves open get no criterion.
+- [x] **Step 1: Write the criteria of SHR-1 to SHR-5** (🔜 [Later]). Sources: ADR 0001, decisions 2, 3 and 6; ADR 0012, decisions 4 and 12 (invitations reveal nothing); architecture.md's "Sharing"; [OP-049](https://github.com/luiki-dev/szop/issues/113)'s directions (redeeming a link is a guest's first change; a shopper editing gets 403); [OP-041](https://github.com/luiki-dev/szop/issues/100) (matching by full path). Questions OP-049 leaves open get no criterion.
 
-- [ ] **Step 2: Write the criteria of SYN-1 and SYN-2.** Sources: ADR 0001, decision 4; ADR 0036, decisions 5 and 7; architecture.md's "Live updates"; [OP-045](https://github.com/luiki-dev/szop/issues/112)'s directions (refetch after a reconnect, one's own change never overwritten by its echo).
+- [x] **Step 2: Write the criteria of SYN-1 and SYN-2.** Sources: ADR 0001, decision 4; ADR 0036, decisions 5 and 7; architecture.md's "Live updates"; [OP-045](https://github.com/luiki-dev/szop/issues/112)'s directions (refetch after a reconnect, one's own change never overwritten by its echo).
 
-- [ ] **Step 3: Statements and index tables.** **Step 4: Verify**, as in Task 4.
+- [x] **Step 3: Statements and index tables.** **Step 4: Verify**, as in Task 4.
 
-- [ ] **Step 5: Commit**: `docs(requirements): add the criteria of SHR and SYN`, with the ticked boxes. Push.
+- [x] **Step 5: Commit**: `docs(requirements): add the criteria of SHR and SYN`, with the ticked boxes. Push.
 
 ---
 
