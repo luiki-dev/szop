@@ -261,7 +261,7 @@ git commit -m "docs(adr): add ADR 0052 working with Claude within the weekly lim
 - Consumes: ADR 0052's decision numbers (Task 4), the audit's anchors (Task 2), the status line's segment and log (Task 3), the script's CLI (Task 1).
 - Produces: the anchors CLAUDE.md links in Task 6: `#a-phase-in-sessions`, `#reading-the-status-line`, `#choosing-models`, `#measuring`.
 
-- [ ] **Step 1: Write the guide**
+- [x] **Step 1: Write the guide**
 
 A living doc, written to teach (the owner wants to learn the skill, not only apply it): an introduction linking ADR 0052 and the audit, `## Contents`, and the sections of the spec's [The guide](../specs/2026-10-26-working-with-claude-design.md#the-guide), in its order, as `##` headings:
 
@@ -273,12 +273,12 @@ A living doc, written to teach (the owner wants to learn the skill, not only app
 - **Measuring:** the CSV log (columns, once a minute), `scripts/token-usage.py` with its flags and an example of its output, the report in a phase PR, how to read each indicator, the evaluation after 3–4 phases.
 - **The settings involved:** a table of `autoCompactWindow`, `cleanupPeriodDays`, `statusLine` (user settings, `~/.claude/settings.json`) and `CLAUDE_CODE_SUBAGENT_MODEL` (project settings, `env`), each with its value and why.
 
-- [ ] **Step 2: Check the Contents and the links**
+- [x] **Step 2: Check the Contents and the links**
 
 Run: `grep -n '^##' docs/development/working-with-claude.md` and compare with its Contents; check every relative link as in Task 4, Step 4.
 Expected: every `##` and `###` heading in the Contents, every link resolves.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/development/working-with-claude.md docs/superpowers/plans/2026-10-26-working-with-claude.md
