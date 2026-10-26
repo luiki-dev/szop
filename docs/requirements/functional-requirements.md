@@ -147,31 +147,31 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [CAT-1](CAT-categories.md#cat-1) | 🎯 MVP | — | — | — |
-| [CAT-2](CAT-categories.md#cat-2) | 🎯 MVP | — | — | — |
-| [CAT-3](CAT-categories.md#cat-3) | 🎯 MVP | — | — | — |
+| [CAT-1](CAT-categories.md#cat-1) | 🎯 MVP | ❔ Draft | 0 of 6 | ❔ Not finalized |
+| [CAT-2](CAT-categories.md#cat-2) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
+| [CAT-3](CAT-categories.md#cat-3) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
 
 ### Catalog (PRD)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [PRD-1](PRD-catalog.md#prd-1) | 🎯 MVP | — | — | — |
-| [PRD-2](PRD-catalog.md#prd-2) | 🎯 MVP | — | — | — |
-| [PRD-3](PRD-catalog.md#prd-3) | 🎯 MVP | — | — | — |
+| [PRD-1](PRD-catalog.md#prd-1) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [PRD-2](PRD-catalog.md#prd-2) | 🎯 MVP | ❔ Draft | 0 of 9 | ❔ Not finalized |
+| [PRD-3](PRD-catalog.md#prd-3) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
 
 ### Units (UNT)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [UNT-1](UNT-units.md#unt-1) | 🎯 MVP | — | — | — |
+| [UNT-1](UNT-units.md#unt-1) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
 
 ### Templates (TPL)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [TPL-1](TPL-templates.md#tpl-1) | 🎯 MVP | — | — | — |
-| [TPL-2](TPL-templates.md#tpl-2) | 🎯 MVP | — | — | — |
-| [TPL-3](TPL-templates.md#tpl-3) | 🎯 MVP | — | — | — |
+| [TPL-1](TPL-templates.md#tpl-1) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [TPL-2](TPL-templates.md#tpl-2) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
+| [TPL-3](TPL-templates.md#tpl-3) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
 
 ### Sharing (SHR)
 

@@ -268,15 +268,15 @@
 **Files:**
 - Modify: `CAT-categories.md`, `PRD-catalog.md`, `UNT-units.md`, `TPL-templates.md`, the index
 
-- [ ] **Step 1: Write the criteria of CAT-1 to CAT-3.** Sources: ADR 0001; ADR 0012, decision 6 (a deleted category leaves items uncategorized); [OP-041](https://github.com/luiki-dev/szop/issues/100) (moves refuse a descendant, depth with the subtree, `template_items` uncategorized too); LIM-1's depth.
+- [x] **Step 1: Write the criteria of CAT-1 to CAT-3.** Sources: ADR 0001; ADR 0012, decision 6 (a deleted category leaves items uncategorized); [OP-041](https://github.com/luiki-dev/szop/issues/100) (moves refuse a descendant, depth with the subtree, `template_items` uncategorized too); LIM-1's depth.
 
-- [ ] **Step 2: Write the criteria of PRD-1 to PRD-3.** Sources: PH-15a's spec for PRD-2: browsing collapsed and indented by level, "Expand all" and "Collapse all", search by product and category name with the path shown and the match highlighted, a matching category showing its contents, products alphabetical, the loading and error states. Also architecture.md (items are copies).
+- [x] **Step 2: Write the criteria of PRD-1 to PRD-3.** Sources: PH-15a's spec for PRD-2: browsing collapsed and indented by level, "Expand all" and "Collapse all", search by product and category name with the path shown and the match highlighted, a matching category showing its contents, products alphabetical, the loading and error states. Also architecture.md (items are copies).
 
-- [ ] **Step 3: Write the criteria of UNT-1 and TPL-1 to TPL-3.** Sources: ADR 0001; [OP-041](https://github.com/luiki-dev/szop/issues/100) (units: label copied, product's default unit cleared); [OP-047](https://github.com/luiki-dev/szop/issues/111) (templates against quotas).
+- [x] **Step 3: Write the criteria of UNT-1 and TPL-1 to TPL-3.** Sources: ADR 0001; [OP-041](https://github.com/luiki-dev/szop/issues/100) (units: label copied, product's default unit cleared); [OP-047](https://github.com/luiki-dev/szop/issues/111) (templates against quotas).
 
-- [ ] **Step 4: Statements and index tables.** **Step 5: Verify**, as in Task 4.
+- [x] **Step 4: Statements and index tables.** **Step 5: Verify**, as in Task 4.
 
-- [ ] **Step 6: Commit**: `docs(requirements): add the criteria of CAT, PRD, UNT and TPL`, with the ticked boxes. Push.
+- [x] **Step 6: Commit**: `docs(requirements): add the criteria of CAT, PRD, UNT and TPL`, with the ticked boxes. Push.
 
 ---
 

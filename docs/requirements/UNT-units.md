@@ -4,4 +4,13 @@ The units of measure items and products use. Part of the [functional requirement
 
 ## UNT-1
 
-🎯 [MVP] Add, rename and delete units. Items that already use a unit keep its label.
+🎯 [MVP] · ❔ Draft (0 of 4) · ❔ Criteria not finalized
+
+Add, rename and delete units. Items that already use a unit keep its label.
+
+| ID | Criterion | Status |
+|---|---|---|
+| UNT-1.1 | A new workspace starts with the default units, such as pcs, kg, g, l, ml and pack. | ❔ Draft |
+| UNT-1.2 | A user adds, renames and deletes units. | ❔ Draft |
+| UNT-1.3 | Items that use a unit keep its label when the unit is renamed or deleted. | ❔ Draft · [OP-041](https://github.com/luiki-dev/szop/issues/100) |
+| UNT-1.4 | Deleting a unit removes it as the default unit of the products that had it. | ❔ Draft · [OP-041](https://github.com/luiki-dev/szop/issues/100) |
