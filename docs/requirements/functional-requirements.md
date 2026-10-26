@@ -2,7 +2,7 @@
 
 Living source of truth for what Szop does, and the qualities it must have while doing it ([non-functional requirements](NFR-non-functional-requirements.md): browsers, accessibility, performance, security). Technical and visual design are out of scope here and are documented separately.
 
-Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server), [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits), [ADR 0013](../decisions/0013-visual-design.md) (the non-functional requirements) and [ADR 0022](../decisions/0022-ring-tail-redesign.md) (checked items go to the haul) and [ADR 0051](../decisions/0051-acceptance-criteria.md) (acceptance criteria and their status). Acronyms are explained in the [glossary](../glossary.md).
+Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001-functional-requirements-scope.md), [ADR 0002](../decisions/0002-technical-architecture.md) (guest workspaces live on the server), [ADR 0003](../decisions/0003-abuse-protection.md) (lazy guest workspaces, limits), [ADR 0013](../decisions/0013-visual-design.md) (the non-functional requirements), [ADR 0022](../decisions/0022-ring-tail-redesign.md) (checked items go to the haul) and [ADR 0051](../decisions/0051-acceptance-criteria.md) (acceptance criteria and their status). Acronyms are explained in the [glossary](../glossary.md).
 
 ## Contents
 
@@ -228,7 +228,7 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [NFR-1](NFR-non-functional-requirements.md#nfr-1) | 🎯 MVP | ✅ Done | 1 of 1 | ✅ Finalized |
-| [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP | 🚧 In progress | 7 of 7 | ❔ Not finalized |
+| [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP | 🚧 In progress | 7 of 8 | ❔ Not finalized |
 | [NFR-3](NFR-non-functional-requirements.md#nfr-3) | 🎯 MVP | 🚧 In progress | 3 of 3 | ❔ Not finalized |
 | [NFR-4](NFR-non-functional-requirements.md#nfr-4) | 🎯 MVP | 🚧 In progress | 6 of 11 | ❔ Not finalized |
 

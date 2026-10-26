@@ -82,18 +82,30 @@ test("APP-1.7: the content is at most 720 px wide on a wide screen", async ({
 test("NFR-2.3: every button and every link in the menu is at least 48 px high", async ({
   page,
 }) => {
-  for (const path of ["/", "/design"]) {
-    await page.goto(path);
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    const targets = page.locator("main button, nav a, nav button, nav label");
-    for (const target of await targets.all()) {
+  const expectTall = async (selector: string, where: string) => {
+    for (const target of await page.locator(selector).all()) {
       if (!(await target.isVisible())) continue;
       const box = await target.boundingBox();
       expect(
         box?.height,
-        `${path}: ${(await target.textContent()) ?? ""}`,
+        `${where}: ${(await target.textContent()) ?? ""}`,
       ).toBeGreaterThanOrEqual(48);
     }
+  };
+  for (const path of ["/", "/design"]) {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expectTall("main button, nav a, nav button, nav label", path);
+
+    await page.setViewportSize(phone);
+    await expectTall("header button, main button", `${path} on a phone`);
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expectTall(
+      "[role=dialog] a, [role=dialog] button, [role=dialog] label",
+      `${path}, the drawer`,
+    );
   }
 });
 
@@ -152,4 +164,21 @@ test("NFR-2.7: the drawer slides in 200 ms, and not at all with reduced motion",
       ),
     ).toBe(duration);
   }
+});
+
+test("APP-1.1: the drawer opens from the left, and a tap on the dimmed page closes it", async ({
+  page,
+}) => {
+  await page.setViewportSize(phone);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const drawer = page.getByRole("dialog");
+  await expect(drawer).toBeVisible();
+  // It slides in from the left edge, and stops there.
+  await expect.poll(async () => (await drawer.boundingBox())?.x).toBe(0);
+  expect((await drawer.boundingBox())?.width).toBeLessThan(phone.width);
+
+  await page.mouse.click(phone.width - 20, phone.height / 2);
+  await expect(drawer).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
 });

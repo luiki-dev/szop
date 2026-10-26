@@ -14,7 +14,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 
 ## NFR-2
 
-🎯 [MVP] · 🚧 In progress (7 of 7) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (7 of 8) · ❔ Criteria not finalized
 
 **Accessibility:** Szop meets the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA, in light and dark mode.
 
@@ -27,6 +27,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 | NFR-2.5 | When a dialog or drawer closes, focus returns to the control that opened it. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
 | NFR-2.6 | While a dialog or drawer is open, focus stays inside it. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
 | NFR-2.7 | Motion lasts 150 to 200 ms and is off when the system asks for reduced motion. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
+| NFR-2.8 | The focus ring is drawn in the `ring` color, on links as on buttons. | ❔ Draft · [OP-107](https://github.com/luiki-dev/szop/issues/292) |
 
 ## NFR-3
 

@@ -2,6 +2,18 @@
 
 Guest mode, registration, logging in and out, passwords, profile settings, and the deletion of accounts and guest workspaces. Part of the [functional requirements](functional-requirements.md), which explain how requirements and their criteria are written and show the status of every requirement.
 
+
+## Contents
+
+- [ACC-1](#acc-1)
+- [ACC-2](#acc-2)
+- [ACC-3](#acc-3)
+- [ACC-4](#acc-4)
+- [ACC-5](#acc-5)
+- [ACC-6](#acc-6)
+- [ACC-7](#acc-7)
+- [ACC-8](#acc-8)
+
 ## ACC-1
 
 🎯 [MVP] · ❔ Draft (0 of 9) · ❔ Criteria not finalized
