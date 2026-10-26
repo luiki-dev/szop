@@ -163,13 +163,13 @@ git commit -m "docs(audit): add the token usage baseline"
 **Interfaces:**
 - Produces, for Task 1's weekly-limit row and Task 5's guide: `~/.claude/usage-log.csv` in the Global Constraints' columns; the environment variable `USAGE_LOG_FILE` overrides its path (for the checks only, so they never write to the real log).
 
-- [ ] **Step 1: Capture a real input**
+- [x] **Step 1: Capture a real input**
 
 Add, right after `input=$(cat)`, the temporary line `printf '%s' "$input" > <scratchpad>/statusline-input.json` (the absolute scratchpad path). Wait for the status line to refresh (one reply), then remove the line.
 Run: `python3 -c 'import json; d=json.load(open("<scratchpad>/statusline-input.json")); print(json.dumps({k: d.get(k) for k in ("session_id", "model", "context_window", "rate_limits")}, indent=1))'`
 Expected: the `context_window` fields. Record which gives the context in tokens: `current_usage.input_tokens + cache_creation_input_tokens + cache_read_input_tokens` should match `used_percentage × context_window_size ÷ 100` within a percent. If `current_usage` is missing or differs, use the fallback and say so in the task summary.
 
-- [ ] **Step 2: Write `<scratchpad>/check-statusline.sh`**
+- [x] **Step 2: Write `<scratchpad>/check-statusline.sh`**
 
 It builds inputs from the captured one with `python3` (setting the context fields to the token counts below, keeping a 1M window), pipes each to `bash ~/.claude/statusline-command.sh` with `USAGE_LOG_FILE=<scratchpad>/usage-log.csv`, and asserts on `cat -v` of the output:
 
@@ -183,24 +183,24 @@ It builds inputs from the captured one with `python3` (setting the context field
 | after `touch -d '2 minutes ago'` on the log | two rows |
 | `rate_limits` removed, fresh log path | no file created |
 
-- [ ] **Step 3: Run it to see it fail**
+- [x] **Step 3: Run it to see it fail**
 
 Run: `bash <scratchpad>/check-statusline.sh`
 Expected: FAIL on the tokens (the script prints `13%` only) and on the log.
 
-- [ ] **Step 4: Change the status line**
+- [x] **Step 4: Change the status line**
 
 - **Tokens:** from Step 1's field, printed after the percentage as `%dk` (rounded to the nearest thousand). The bar's fill stays the percentage.
 - **Color:** by the tokens: green below 150,000, yellow from 150,000 to 200,000, red above 200,000. The 5-hour and weekly segments keep their percentage colors.
 - **Log:** only when both rate-limit percentages are present; skipped when the file was modified less than 60 seconds ago (`stat -c %Y`); the header written when the file is created; `timestamp` from `date -u +%Y-%m-%dT%H:%M:%SZ`. The whole block runs with errors discarded (`2>/dev/null`, `|| true`) so it can never break the status line.
 - **One `python3` call per field stays.** The header comment describes the new token segment, its colors and the log.
 
-- [ ] **Step 5: Run the checks, including a log that cannot be written**
+- [x] **Step 5: Run the checks, including a log that cannot be written**
 
 Run: `bash <scratchpad>/check-statusline.sh`, then the 131,000 case with `USAGE_LOG_FILE=/nonexistent/dir/log.csv` and with a read-only file.
 Expected: all cases pass; the unwritable cases print the same line as with a writable log, exit 0, empty stderr.
 
-- [ ] **Step 6: See it live and commit the tick**
+- [x] **Step 6: See it live and commit the tick**
 
 The status line of the running session shows `… NN% NNNk` in the right color, and `~/.claude/usage-log.csv` gains a row within a minute or two. Only the plan changes in the repository:
 
