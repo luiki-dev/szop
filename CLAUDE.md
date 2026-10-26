@@ -34,25 +34,26 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 
 ## Project tracking
 
-Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](docs/decisions/0027-open-points-on-github.md) and `docs/development/project-tracking.md`. **GitHub** (the issues and the fields of the [Szop project](https://github.com/users/luiki-dev/projects/3)) holds the status and the open points; **`roadmap.md`** holds each phase's plan and mirrors the status in its stage tables. Every step below says which side it changes.
+Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](docs/decisions/0027-open-points-on-github.md) and `docs/development/project-tracking.md`. **GitHub** (the issues and the fields of the [Szop project](https://github.com/users/luiki-dev/projects/3)) holds the status and the open points; **`roadmap.md`** holds each phase's plan and mirrors the status in its stage tables; **`docs/requirements/`** holds each requirement's acceptance criteria and their status ([ADR 0051](docs/decisions/0051-acceptance-criteria.md)). Every step below says which side it changes.
 
 During a phase:
 
 - **When a phase's brainstorm starts, before the first question:**
   - On GitHub: the phase issue's Status → 🚧 In progress; Finished (the merge date) set on the previous phase's issue and on every `adr` issue closed since.
   - On GitHub: read the phase's open-point issues (its sub-issues and the issues its **Also** section lists).
+- **During the brainstorm:** review with the owner the acceptance criteria of every requirement the phase delivers, and the whole list of any requirement still ❔ Criteria not finalized ([ADR 0051](docs/decisions/0051-acceptance-criteria.md)).
 - **In the phase branch's first commit:**
   - In the repo: the phase's row in the `roadmap.md` stage table → 🚧.
   - On GitHub: the phase issue's Started field → that commit's date.
 - **When the spec or plan is committed:**
-  - In the repo: its link in the phase's row of the `roadmap.md` stage table.
+  - In the repo: its link in the phase's row of the `roadmap.md` stage table; with the spec (or a bounded phase's first commit after its design), the criteria the phase delivers set to 🚧, the requirements it reviewed marked ✅ Criteria finalized, and the index updated.
   - On GitHub: the phase issue's Spec or Plan field.
 - **When the phase's owner steps change:**
   - On GitHub: owner-step issues added, or closed as not planned with the reason.
   - In the repo: the phase entry's **Owner steps** in `roadmap.md` updated.
 - **Before opening the PR:**
   - On GitHub: every open-point issue of the phase closed (with a "settled by" comment) or re-assigned; the phase issue's body updated if its `roadmap.md` entry changed.
-  - In the repo: the stage table row in line with GitHub, with the PR link.
+  - In the repo: the stage table row in line with GitHub, with the PR link; every criterion the PR delivers ✅, with a test whose name starts with its ID; each requirement's line and the index updated.
   - In the PR description: `Closes #<phase issue>` and `Closes #<open-point issue>` for each one it settles, and a list of every issue change the PR made.
 - **At the end of a phase:** propose the next phase. The owner moves its issue and its open-point issues to 📌 Todo on GitHub.
 - **Never set ✅ Done on GitHub by hand:** merging the PR closes the issues, and the project's workflow sets it.
@@ -101,7 +102,8 @@ Open points (all on GitHub; no document lists them):
   - ⏳ deferred or waiting: finding deferred to an open point, `⏳ Blocked` on the project
   - ✖️ rejected or dropped: finding rejected, open point dropped without being done, `✖️ Dropped` on the project
   - ❌ failed or blocking: a failed plan, a blocking finding in the PR comment
-  - ❔ pending: not decided or triaged yet
+  - ❔ pending: not decided or triaged yet, a draft acceptance criterion, a list of criteria not finalized
+  - ➡️ moved: an acceptance criterion moved to another requirement, under a new ID
   - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
   - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell
   - ➖ not applicable: `➖ N/A: reason` in the definition of done and the PR template

@@ -390,6 +390,7 @@ These follow [ADR 0007](../decisions/0007-testing-strategy.md), decision 16, unl
 - **Every journey imports `test` and `expect` from `support/test.ts`,** so the CSP guard runs in it. ESLint enforces it.
 - **No axe rule is turned off for all pages.** A rule skipped for one page is passed to that one `expectAccessible` call, with a comment saying why.
 - **Test-driven development (TDD) for domain rules, services and routes**, and every bug fix starts with a failing test that reproduces it ([ADR 0007](../decisions/0007-testing-strategy.md), decision 3).
+- **A test that covers an acceptance criterion starts its name with the criterion's ID and a colon** (`it('APR-1.2: …')`), or lists several (`'APR-1.2, APR-1.3: …'`); a `describe` can carry it for every test inside. A check that is not a test names the ID in a comment at its assertion. `grep -rn 'APR-1.2[:,]'` finds them. A criterion is ✅ only when such a test exists ([ADR 0051](../decisions/0051-acceptance-criteria.md), decision 4).
 - **Entry points are checked by hand.** `server.ts` only reads the environment, listens and shuts down. Everything it calls is tested, so what is left untested is a few lines of wiring; the manual checks (it starts and `/api/health` answers, a missing or invalid setting stops it with a message naming the variable, a taken port, Ctrl+C shuts it down gracefully, an edit restarts it) are recorded in the phase's pull request ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 10).
 
 ## Coverage

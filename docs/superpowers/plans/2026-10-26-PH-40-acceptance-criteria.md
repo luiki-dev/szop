@@ -61,15 +61,15 @@
 **Interfaces:**
 - Produces: the rules every later task follows, under these exact names. Later tasks link to `docs/decisions/0051-acceptance-criteria.md` and to `testing.md#rules`.
 
-- [ ] **Step 1: Write ADR 0051, "Acceptance criteria and their status"**, in the format of ADR 0048 (Status, Date `2026-10-26`, header notes, Context, a Decisions table with `# | Topic | Options considered | Decision and reasoning`, Consequences). It holds the spec's decisions 1 to 15 with their alternatives and reasons, condensed, keeping the owner's and Claude's attributions. Header:
+- [x] **Step 1: Write ADR 0051, "Acceptance criteria and their status"**, in the format of ADR 0048 (Status, Date `2026-10-26`, header notes, Context, a Decisions table with `# | Topic | Options considered | Decision and reasoning`, Consequences). It holds the spec's decisions 1 to 15 with their alternatives and reasons, condensed, keeping the owner's and Claude's attributions. Header:
   - `Refines:` [ADR 0024](…), decision 1 and [ADR 0027](…), decision 1 (GitHub stays the source of status for phases and open points; requirement status lives in the requirements); [ADR 0004](…), decision 9 (the requirements also answer how far along each requirement is).
   - `Extends:` [ADR 0004](…), decision 7 (the definition of done gains the ✅ rule) and decision 8 (a phase's brainstorm finalizes the criteria of the requirements it delivers).
 
   Before writing each note, read the target decision cell, and name the decision whose words actually say it.
 
-- [ ] **Step 2: Add the notes in the three places** `CLAUDE.md` names: each earlier ADR's status line, and a line at the bottom of each named decision's cell (`<br>✏️ **Refined by [ADR 0051](0051-acceptance-criteria.md), decision N:** …` or `➕ **Extended by …`), oldest first.
+- [x] **Step 2: Add the notes in the three places** `CLAUDE.md` names: each earlier ADR's status line, and a line at the bottom of each named decision's cell (`<br>✏️ **Refined by [ADR 0051](0051-acceptance-criteria.md), decision N:** …` or `➕ **Extended by …`), oldest first.
 
-- [ ] **Step 3: Update the process documents**, with the wording of the spec's [Documentation](../specs/2026-10-26-PH-40-acceptance-criteria-design.md#documentation) and [The process after this phase](../specs/2026-10-26-PH-40-acceptance-criteria-design.md#the-process-after-this-phase):
+- [x] **Step 3: Update the process documents**, with the wording of the spec's [Documentation](../specs/2026-10-26-PH-40-acceptance-criteria-design.md#documentation) and [The process after this phase](../specs/2026-10-26-PH-40-acceptance-criteria-design.md#the-process-after-this-phase):
   - **`definition-of-done.md`:**
     - item 1 gains "every criterion the PR marks ✅ has a test whose name carries its ID, or is marked checked at the demo";
     - item 6 names the criteria's statuses, the requirement's line and the index;
@@ -84,11 +84,11 @@
 
   The file paths in `CLAUDE.md`'s Documentation entry and link-rule examples change in Task 2, together with the files.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
   Run: `pnpm check`. Expected: PASS (Prettier formats the Markdown).
   Run: `grep -n "0051" docs/decisions/0004-implementation-process.md docs/decisions/0024-github-project-tracking.md docs/decisions/0027-open-points-on-github.md`. Expected: a status-line note and a cell note in each.
 
-- [ ] **Step 5: Commit**: `docs(adr): add ADR 0051, acceptance criteria and their status`, with the ticked boxes. Push.
+- [x] **Step 5: Commit**: `docs(adr): add ADR 0051, acceptance criteria and their status`, with the ticked boxes. Push.
 
 ---
 
