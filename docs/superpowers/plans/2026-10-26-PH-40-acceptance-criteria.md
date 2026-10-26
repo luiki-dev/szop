@@ -317,7 +317,7 @@
 
 - [x] **Step 3: Write the open points** for every finding that needs a decision, with the next free `OP-` ID, labelled `open-point`, as a sub-issue of the phase that settles it.
 
-- [ ] **Step 4: Rewrite the links in issue bodies.**
+- [x] **Step 4: Rewrite the links in issue bodies.**
   - Write `rewrite-issue-links.py`. It lists every issue in `luiki-dev/szop` (`gh issue list --state all --limit 400 --json number,body`) whose body contains `docs/requirements/functional-requirements.md#`, and applies `rewrite-links.py`'s mapping to those URLs only.
   - **Dry run:** save each original body to `scratchpad/issue-bodies/<n>.md`, and print a diff per issue.
   - Read the diffs. Expected: only link targets change.
@@ -325,13 +325,13 @@
 
   Run this step when the PR is about to open.
 
-- [ ] **Step 5: Final checks**
+- [x] **Step 5: Final checks**
   Run: `python3 scratchpad/check-links.py && python3 scratchpad/check-done.py && python3 scratchpad/check-index.py && pnpm check && pnpm test:e2e`. Expected: all pass. `check-done.py`'s list of criteria checked at the demo goes into the PR.
   Run: `grep -c "❔ Criteria not finalized" docs/requirements/*.md` and count the criteria per status. These counts go into the PR description.
 
-- [ ] **Step 6: Commit**: `docs(roadmap): apply what the acceptance criteria show`, with the ticked boxes. Set the PH-40 row's Plan link (already set when this plan was committed) and the PR link when the PR opens. Push.
+- [x] **Step 6: Commit**: `docs(roadmap): apply what the acceptance criteria show`, with the ticked boxes. Set the PH-40 row's Plan link (already set when this plan was committed) and the PR link when the PR opens. Push.
 
-- [ ] **Step 7: Open the PR** when the owner says so:
+- [x] **Step 7: Open the PR** when the owner says so:
   - title `docs(requirements): add acceptance criteria to every requirement`;
   - label `skip-changelog`;
   - the template filled, with `Closes #289`, the issue changes, the findings, the counts and the demo-check list;
