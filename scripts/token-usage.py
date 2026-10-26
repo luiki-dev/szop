@@ -220,7 +220,8 @@ def report(rows, sessions, all_phases, args):
     else:
         costs = [sum(r['cost'] for r in v) for v in all_phases.values()]
         phase_cost = statistics.median(costs) if costs else None
-        per_phase = len(sessions) / len(all_phases) if all_phases else None
+        counts = [len({r['session'] for r in v if not r['sub']}) for v in all_phases.values()]
+        per_phase = statistics.median(counts) if counts else None
     above = sum(r['cost'] for r in main if r['ctx'] >= 200e3)
     limit = weekly_limit(args.usage_log, set(sessions))
 
