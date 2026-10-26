@@ -200,7 +200,7 @@ The timestamp is in Coordinated Universal Time (UTC). The 5-hour and weekly perc
 |---|---|
 | `python3 scripts/token-usage.py --phase PH-NN` | one phase: its main sessions and their subagents |
 | `python3 scripts/token-usage.py --branch <name>` | the sessions on one branch, for work outside a phase |
-| `python3 scripts/token-usage.py --since 2026-10-27 --until 2026-11-02` | a period; combines with `--phase` and `--branch` |
+| `python3 scripts/token-usage.py --since 2026-10-27 --until 2026-11-02` | a period, by date or by UTC timestamp (`--until 2026-10-26T21:37:47`); combines with `--phase` and `--branch` |
 | `python3 scripts/token-usage.py --by-phase` | one row per phase: cost, main sessions, peak context, first and last call |
 | `python3 scripts/token-usage.py` | everything in the transcripts |
 
@@ -258,7 +258,7 @@ After 3–4 phases worked with these habits, their reports are compared with the
 - per-phase cost at least 25% below the baseline median;
 - the owner not running out of the weekly limit before its reset.
 
-The findings go into this guide. If the targets need to change, that is recorded in a new ADR or an audit of its own. An open-point issue tracks the evaluation.
+The findings go into this guide. If the targets need to change, that is recorded in a new ADR or an audit of its own. [OP-110](https://github.com/luiki-dev/szop/issues/298) tracks the evaluation.
 
 ## The settings involved
 

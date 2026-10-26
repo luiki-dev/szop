@@ -339,24 +339,24 @@ git commit -m "docs(claude): add the working-with-Claude rules and the default s
 **Interfaces:**
 - Consumes: everything above.
 
-- [ ] **Step 1: The `adr` issue**
+- [x] **Step 1: The `adr` issue**
 
 Create `ADR 0052 Working with Claude within the weekly limit`, label `adr`, its body like the earlier `adr` issues (`gh issue list --label adr --state all --limit 3`, then `gh issue view`): the link to the ADR on `main` and "Landed in" the PR (filled after Step 4). Set its fields as "How items move" says for "An ADR is made outside a phase", Started 2026-10-26.
 
-- [ ] **Step 2: The evaluation open point**
+- [x] **Step 2: The evaluation open point**
 
 Find the next free `OP-` ID ([how](../../development/project-tracking.md#checking-with-gh)). Create `OP-NNN Evaluate the token-saving habits after 3–4 phases`, label `open-point`, no parent, ⬜ Backlog. Its body: what to compare (each phase's report against the baseline), the four targets of decision 14, where the findings go (the guide; a new ADR or audit if the targets change), and links to ADR 0052 and the audit on `main`. Add its link to ADR 0052's Consequences.
 
-- [ ] **Step 3: The report**
+- [x] **Step 3: The report**
 
 Run: `python3 scripts/token-usage.py --phase PH-40` and `python3 scripts/token-usage.py --branch docs/adr-0052-working-with-claude`.
 Expected: two tables; the first is the PR's example, the second this branch's own usage.
 
-- [ ] **Step 4: Review, push and open the PR**
+- [x] **Step 4: Review, push and open the PR**
 
 Run Task 4, Step 1's check again (another branch may have taken 0052 since). Review the branch's diff against the spec's [Definition of done](../specs/2026-10-26-working-with-claude-design.md#definition-of-done). Commit the ADR link and the ticks (`docs(adr): link the evaluation open point`), push, then `gh pr create` with the title `docs(claude): work with Claude within the weekly limit`, label `skip-changelog`, and the PR template filled in. The description holds: `Closes #<adr issue>`; the list of issue changes (the `adr` issue created, the open point created); a "Token usage" section with both tables of Step 3; that the status line was checked with sample input (Task 3) and is outside the repository; the subagent model check with its two transcripts (Task 6, Step 2); that `scripts/token-usage.py` and `.claude/settings.json` count as code for CI's change detection, so the code jobs run. Then fill "Landed in" in the `adr` issue with the PR's link.
 
-- [ ] **Step 5: Check**
+- [x] **Step 5: Check**
 
 Run: `gh pr view --json title,labels,body | head -40` and `gh pr checks`.
 Expected: the title and label as above, `Closes #` present, the checks running or passing.

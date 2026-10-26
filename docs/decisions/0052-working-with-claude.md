@@ -44,4 +44,4 @@ The owner sees coordinating the work well as a skill to learn, not only to apply
   - Sonnet implementers may need more retries, which can eat the saving; the retry rule and the Opus share in the report make this visible.
   - Habits erode in long sessions; the status line's colors are the reminder that does not depend on memory.
   - Setting the default subagent model touches `.claude/settings.json`, which holds the deny rules ([ADR 0012](0012-security-baseline.md), decision 19); only an `env` key is added.
-- The habits are evaluated after 3–4 phases against the targets of decision 14, tracked by an open-point issue. The findings go into the guide; changed targets get a new ADR or an audit of their own.
+- The habits are evaluated after 3–4 phases against the targets of decision 14, tracked by [OP-110](https://github.com/luiki-dev/szop/issues/298). The findings go into the guide; changed targets get a new ADR or an audit of their own.
