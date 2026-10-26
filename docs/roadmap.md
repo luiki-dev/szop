@@ -318,6 +318,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 |---|---|---|---|---|---|
 | [PH-14a Design system](#ph-14a-design-system) | ✅ Done | [Spec](superpowers/specs/2026-10-24-PH-14a-design-system-design.md) | [Plan](superpowers/plans/2026-10-24-PH-14a-design-system.md) | [#282](https://github.com/luiki-dev/szop/pull/282) | [#280](https://github.com/luiki-dev/szop/issues/280) |
 | [PH-14b App shell](#ph-14b-app-shell) | ✅ Done | [Spec](superpowers/specs/2026-10-25-PH-14b-app-shell-design.md) | [Plan](superpowers/plans/2026-10-25-PH-14b-app-shell.md) | [#285](https://github.com/luiki-dev/szop/pull/285) | [#281](https://github.com/luiki-dev/szop/issues/281) |
+| [PH-40 Acceptance criteria](#ph-40-acceptance-criteria) | 🚧 In progress | — | — | — | [#289](https://github.com/luiki-dev/szop/issues/289) |
 | [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only) | ⬜ Not started | — | — | — | [#44](https://github.com/luiki-dev/szop/issues/44) |
 | [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists) | ⬜ Not started | — | — | — | [#45](https://github.com/luiki-dev/szop/issues/45) |
 | [PH-17 List items](#ph-17-list-items) | ⬜ Not started | — | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
@@ -356,6 +357,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** none.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#281](https://github.com/luiki-dev/szop/issues/281).
+
+### PH-40 Acceptance criteria
+
+- **Goal:** every requirement has acceptance criteria with a status, so the requirements show what each one means in detail, what is delivered and what is left. The requirements live in one file per area, with an index that holds the status of every requirement.
+- **Delivers:** ADR 0051 (acceptance criteria and their status); `docs/requirements/` split into an index, one file per area and the use cases, with every link updated; acceptance criteria for every requirement, written from the decisions taken so far, ✅ where delivered and covered by a test whose title carries the criterion's ID; a new area, APP (app-wide behavior), and NFR-4 (security); the process documents updated ([ADR 0004](decisions/0004-implementation-process.md)'s table of sources, the [definition of done](development/definition-of-done.md), the PR template, [testing.md](development/testing.md), [project-tracking.md](development/project-tracking.md), `CLAUDE.md`); the roadmap changes the criteria call for.
+- **Depends on:** —
+- **Owner steps:** none.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#289](https://github.com/luiki-dev/szop/issues/289).
 
 ### PH-15 Seed catalog, read-only
 
