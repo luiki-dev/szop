@@ -14,7 +14,7 @@ afterEach(() => {
 });
 
 describe("ColorSchemeControl", () => {
-  it("offers System, Light and Dark, with System chosen by default", () => {
+  it("APR-1.1, APR-1.2: offers System, Light and Dark, with System chosen by default", () => {
     render(<ColorSchemeControl />);
 
     const group = screen.getByRole("radiogroup", { name: "Color scheme" });
@@ -24,7 +24,7 @@ describe("ColorSchemeControl", () => {
     expect(screen.getByRole("radio", { name: "Dark" })).not.toBeChecked();
   });
 
-  it("starts from the stored choice", () => {
+  it("APR-1.4: starts from the stored choice", () => {
     localStorage.setItem(storageKey, "light");
 
     render(<ColorSchemeControl />);
@@ -32,7 +32,7 @@ describe("ColorSchemeControl", () => {
     expect(screen.getByRole("radio", { name: "Light" })).toBeChecked();
   });
 
-  it("stores and applies Dark when chosen", () => {
+  it("APR-1.4: stores and applies Dark when chosen", () => {
     render(<ColorSchemeControl />);
 
     fireEvent.click(screen.getByRole("radio", { name: "Dark" }));
@@ -42,7 +42,7 @@ describe("ColorSchemeControl", () => {
     expect(html).toHaveClass("dark");
   });
 
-  it("forgets the choice and follows the system when System is chosen", () => {
+  it("APR-1.2: forgets the choice and follows the system when System is chosen", () => {
     stubMatchMedia({ [darkQuery]: false });
     localStorage.setItem(storageKey, "dark");
     html.classList.add("dark");
@@ -54,7 +54,7 @@ describe("ColorSchemeControl", () => {
     expect(html).not.toHaveClass("dark");
   });
 
-  it("still switches the page when the storage throws", () => {
+  it("APR-1.5: still switches the page when the storage throws", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new Error("blocked");
     });
@@ -68,7 +68,7 @@ describe("ColorSchemeControl", () => {
     expect(html).toHaveClass("dark");
   });
 
-  it("shows the session's choice again when the storage throws and the menu reopens", () => {
+  it("APR-1.5: shows the session's choice again when the storage throws and the menu reopens", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new Error("blocked");
     });

@@ -338,7 +338,7 @@ The guard has a test of its own, `csp-guard.spec.ts`, which adds a `<style>` ele
 
 ### The accessibility check
 
-`expectAccessible(page)` scans the page with axe against the Web Content Accessibility Guidelines (WCAG) 2.2 AA rule sets ([NFR-2](../requirements/functional-requirements.md#nfr-2)), first in light mode and then in dark, and fails with every violation of both ([Playwright](tools/playwright.md#supportaccessibilityts)). Each violation is listed as the color scheme, the rule ID, how many elements break it and their selectors. Here the heading was given a pale gray through `element.style`, which the CSP allows and axe still sees:
+`expectAccessible(page)` scans the page with axe against the Web Content Accessibility Guidelines (WCAG) 2.2 AA rule sets ([NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2)), first in light mode and then in dark, and fails with every violation of both ([Playwright](tools/playwright.md#supportaccessibilityts)). Each violation is listed as the color scheme, the rule ID, how many elements break it and their selectors. Here the heading was given a pale gray through `element.style`, which the CSP allows and axe still sees:
 
 ```
 Error: axe found accessibility violations
@@ -359,7 +359,7 @@ axe finds only part of the accessibility problems, so a passing check is a floor
 
 ### The token contrast test
 
-axe checks the contrast of the text it finds on a page, but not the UI parts (the focus ring, input borders, the haul's progress fill), which need 3:1, nor a pair no page shows yet. So `design.spec.ts` checks the design tokens themselves ([ADR 0048](../decisions/0048-design-system-phase-details.md)): on `/design`, in light and then in dark mode, it reads every role's custom property (`--primary`, `--link` …) and computes the WCAG contrast of each pair in its `pairs` table against the pair's minimum, 4.5:1 for text and 3:1 for UI parts ([NFR-2](../requirements/functional-requirements.md#nfr-2)).
+axe checks the contrast of the text it finds on a page, but not the UI parts (the focus ring, input borders, the haul's progress fill), which need 3:1, nor a pair no page shows yet. So `design.spec.ts` checks the design tokens themselves ([ADR 0048](../decisions/0048-design-system-phase-details.md)): on `/design`, in light and then in dark mode, it reads every role's custom property (`--primary`, `--link` …) and computes the WCAG contrast of each pair in its `pairs` table against the pair's minimum, 4.5:1 for text and 3:1 for UI parts ([NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2)).
 
 - **Why through a canvas:** Tailwind's palette is written in OKLCH, a color space the WCAG formula does not take. `readRoleColors` in `support/contrast.ts` paints each color on a one-pixel canvas in the browser and reads the pixel back as sRGB, so the browser does the conversion and no color library is needed. `contrastRatio` is the WCAG formula.
 - **A new role or pair** goes into the `pairs` table in the same change that adds it to `index.css` and to the [visual design's](../architecture/visual-design.md#color) table.
@@ -390,6 +390,7 @@ These follow [ADR 0007](../decisions/0007-testing-strategy.md), decision 16, unl
 - **Every journey imports `test` and `expect` from `support/test.ts`,** so the CSP guard runs in it. ESLint enforces it.
 - **No axe rule is turned off for all pages.** A rule skipped for one page is passed to that one `expectAccessible` call, with a comment saying why.
 - **Test-driven development (TDD) for domain rules, services and routes**, and every bug fix starts with a failing test that reproduces it ([ADR 0007](../decisions/0007-testing-strategy.md), decision 3).
+- **A test that covers an acceptance criterion starts its name with the criterion's ID and a colon** (`it('APR-1.2: …')`), or lists several (`'APR-1.2, APR-1.3: …'`); a `describe` can carry it for every test inside. A check that is not a test names the ID in a comment at its assertion. `grep -rn 'APR-1.2[:,]'` finds them. A criterion is ✅ only when such a test exists ([ADR 0051](../decisions/0051-acceptance-criteria.md), decision 4).
 - **Entry points are checked by hand.** `server.ts` only reads the environment, listens and shuts down. Everything it calls is tested, so what is left untested is a few lines of wiring; the manual checks (it starts and `/api/health` answers, a missing or invalid setting stops it with a message naming the variable, a taken port, Ctrl+C shuts it down gracefully, an edit restarts it) are recorded in the phase's pull request ([ADR 0019](../decisions/0019-api-skeleton-details.md), decision 10).
 
 ## Coverage

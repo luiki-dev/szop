@@ -11,7 +11,7 @@ export interface CspViolation {
 // Every journey imports test and expect from here, never from
 // @playwright/test (ESLint enforces it in tests/), so the CSP guard runs in
 // every test without being asked for (ADR 0013, decision 9; ADR 0026,
-// decision 7).
+// decision 7). NFR-4.4: a journey fails on any CSP violation.
 export const test = base.extend<{ cspViolations: CspViolation[] }>({
   // eslint-disable-next-line no-empty-pattern -- Playwright reads a fixture's dependencies from this pattern, and this one has none.
   cspViolations: async ({}, use) => {

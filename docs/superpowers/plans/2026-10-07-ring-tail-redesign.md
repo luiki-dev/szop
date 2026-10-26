@@ -37,7 +37,7 @@
 
 Things no task's own check catches, most likely first. Each has a check in the task named.
 
-- **A stale mention left behind**: teal, Figtree, "calm and roomy", "the checked part", the hide toggle, or [ORD-4](../../requirements/functional-requirements.md#ord-4) as live, in a living doc. A reader would trust the stale line. Check: the grep in [the final pass](#after-tasks-15-final-pass-and-the-pr).
+- **A stale mention left behind**: teal, Figtree, "calm and roomy", "the checked part", the hide toggle, or [ORD-4](../../requirements/ORD-list-display-and-ordering.md#ord-4) as live, in a living doc. A reader would trust the stale line. Check: the grep in [the final pass](#after-tasks-15-final-pass-and-the-pr).
 - **A broken anchor**: a link to `#the-list-and-the-haul`, `#op-081` or a renamed heading that does not exist. Check: the link check in the final pass.
 - **The dark mode mockup does not read**: the cards and the haul blend into the `gray-900` page (contrast 1.2:1 and 1.1:1). Check: Task 2, step 5, with the fallback the spec names.
 - **Polish characters in Gabarito**: a product name like "Żółty ser" renders in a fallback font. Check: Task 2, step 4.
@@ -80,7 +80,7 @@ Follow the shape of [ADR 0020](../../decisions/0020-database-details.md). Its ex
 - **Refines:** [ADR 0013](../../decisions/0013-visual-design.md), decision 16 (the sage tile and the Gabarito wordmark; see decision 12)
 ```
 
-**`## Context`**, one paragraph: [OP-073](../../archive/open-points.md#op-073) recorded a design exploration of 2026-10-06, "Ring tail" ([screenshot](../../ideas/visual-design/ring-tail.png)), which the owner liked: a fur-gray page with white rounded cards, Gabarito, a ringed raccoon tail as the progress bar, and checked items dropping out of the list as chips into a dark "haul" tray that also held the add bar. It was brainstormed on 2026-10-07, before PH-14 builds the design system, to keep, adjust or drop it, and to settle what the exploration left open: the green of its logo, the add bar inside the haul, a haul with 40 checked items, the remaining amount [ITM-8](../../requirements/functional-requirements.md#itm-8) asks for, and dark mode. The design is in the [spec](../specs/2026-10-07-ring-tail-redesign-design.md); the options were compared as mockups in the visual companion.
+**`## Context`**, one paragraph: [OP-073](../../archive/open-points.md#op-073) recorded a design exploration of 2026-10-06, "Ring tail" ([screenshot](../../ideas/visual-design/ring-tail.png)), which the owner liked: a fur-gray page with white rounded cards, Gabarito, a ringed raccoon tail as the progress bar, and checked items dropping out of the list as chips into a dark "haul" tray that also held the add bar. It was brainstormed on 2026-10-07, before PH-14 builds the design system, to keep, adjust or drop it, and to settle what the exploration left open: the green of its logo, the add bar inside the haul, a haul with 40 checked items, the remaining amount [ITM-8](../../requirements/ITM-list-items.md#itm-8) asks for, and dark mode. The design is in the [spec](../specs/2026-10-07-ring-tail-redesign-design.md); the options were compared as mockups in the visual companion.
 
 **`## Decisions`**: the table header `| # | Topic | Options considered | Decision and reasoning |`. Rows 1 to 10 are the spec's [decisions table](../specs/2026-10-07-ring-tail-redesign-design.md#decisions-taken-in-the-brainstorm), copied verbatim, with one change: at the end of row 1 add "It supersedes ADR 0013, decision 6, and ADR 0001, decision 9." Then these three rows, verbatim:
 
@@ -96,10 +96,10 @@ After the table, the spec's paragraph "Two smaller changes from the exploration�
 
 ```markdown
 - **The design system changes before it is built.** [visual-design.md](../../architecture/visual-design.md) describes the Ring tail look, the `fur` and `sage` colors, the `haul-*` roles, Gabarito, `--radius-surface`, the sage brand and the list-and-haul pattern, with new mockups; PH-14 builds it ([OP-056](../../archive/open-points.md#op-056)).
-- **Checked items leave the list.** [ORD-1](../../requirements/functional-requirements.md#ord-1), [ORD-2](../../requirements/functional-requirements.md#ord-2), [ORD-5](../../requirements/functional-requirements.md#ord-5) and [UC-3](../../requirements/functional-requirements.md#uc-3-shop-in-a-store) describe the haul; [ORD-4](../../requirements/functional-requirements.md#ord-4), the toggle hiding checked items, is ✖️ dropped. [ITM-8](../../requirements/functional-requirements.md#itm-8) and [LST-5](../../requirements/functional-requirements.md#lst-5) keep their wording: the haul shows all three totals, and "Uncheck all" is the drawer's "Put all back".
+- **Checked items leave the list.** [ORD-1](../../requirements/ORD-list-display-and-ordering.md#ord-1), [ORD-2](../../requirements/ORD-list-display-and-ordering.md#ord-2), [ORD-5](../../requirements/ORD-list-display-and-ordering.md#ord-5) and [UC-3](../../requirements/UC-use-cases.md#uc-3-shop-in-a-store) describe the haul; [ORD-4](../../requirements/ORD-list-display-and-ordering.md#ord-4), the toggle hiding checked items, is ✖️ dropped. [ITM-8](../../requirements/ITM-list-items.md#itm-8) and [LST-5](../../requirements/LST-shopping-lists.md#lst-5) keep their wording: the haul shows all three totals, and "Uncheck all" is the drawer's "Put all back".
 - **List items record when they were checked**, which orders the haul; how "checked" is stored is [OP-082](../../archive/open-points.md#op-082) for PH-17.
-- **PH-17 builds the haul**: its chips, putting items back, the drawer and the progress by item count. It grows with them, so its brainstorm considers splitting the drawer off ([OP-083](../../archive/open-points.md#op-083)), and it picks a drawer component that works under the CSP ([OP-081](../../archive/open-points.md#op-081)). **PH-21 adds the money** in the haul's header and "Put all back", and no longer delivers [ORD-4](../../requirements/functional-requirements.md#ord-4).
-- **The font costs 16 KB more**: Gabarito's Latin file is 36 KB against Figtree's 20 KB. Fonts are outside the 200 KB JavaScript budget of [NFR-3](../../requirements/functional-requirements.md#nfr-3), and `font-display: swap` keeps text visible while it loads.
+- **PH-17 builds the haul**: its chips, putting items back, the drawer and the progress by item count. It grows with them, so its brainstorm considers splitting the drawer off ([OP-083](../../archive/open-points.md#op-083)), and it picks a drawer component that works under the CSP ([OP-081](../../archive/open-points.md#op-081)). **PH-21 adds the money** in the haul's header and "Put all back", and no longer delivers [ORD-4](../../requirements/ORD-list-display-and-ordering.md#ord-4).
+- **The font costs 16 KB more**: Gabarito's Latin file is 36 KB against Figtree's 20 KB. Fonts are outside the 200 KB JavaScript budget of [NFR-3](../../requirements/NFR-non-functional-requirements.md#nfr-3), and `font-display: swap` keeps text visible while it loads.
 - **A haul panel on wide screens** (decision 7) is not built; it can come back as a 💡 future extension if shopping at a desktop turns out to matter.
 - [OP-073](../../archive/open-points.md#op-073) is closed.
 ```
@@ -274,7 +274,7 @@ followed by the spec's roles table ([Palette and semantic roles](../specs/2026-1
 Replace the **Contrast** paragraph with:
 
 ```markdown
-**Contrast:** every text pair meets 4.5:1 and every UI part (checkbox borders, the focus ring, the progress fill) 3:1 against its background, in both schemes ([NFR-2](../../requirements/functional-requirements.md#nfr-2)). The narrowest are `primary` on `accent` (4.6:1) and the focus ring on the fur page (3.6:1); every pair is listed in the [redesign spec](../specs/2026-10-07-ring-tail-redesign-design.md#contrast). `gray-400` borders on white are only about 2.5:1, which is why `input` is `gray-500` in light mode. axe checks every page in light and dark.
+**Contrast:** every text pair meets 4.5:1 and every UI part (checkbox borders, the focus ring, the progress fill) 3:1 against its background, in both schemes ([NFR-2](../../requirements/NFR-non-functional-requirements.md#nfr-2)). The narrowest are `primary` on `accent` (4.6:1) and the focus ring on the fur page (3.6:1); every pair is listed in the [redesign spec](../specs/2026-10-07-ring-tail-redesign-design.md#contrast). `gray-400` borders on white are only about 2.5:1, which is why `input` is `gray-500` in light mode. axe checks every page in light and dark.
 ```
 
 Under `### Dark mode`, append to the first paragraph: "**The haul stays the darkest surface in both schemes**: `gray-800` on the fur page in light mode, `gray-950` on the `gray-900` page in dark mode, so the screen keeps its shape." (If Task 2, step 5 changed the dark page, write its value instead of `gray-900`.)
@@ -362,9 +362,9 @@ Then check whether the document lists MVP requirements elsewhere (`grep -n "ORD-
 
 In `docs/architecture/architecture.md`:
 
-- The **List items** bullet under `### Data model highlights` gets this sentence at its end: "They also record when they were checked, which orders the haul with the most recently checked first ([ORD-2](../../requirements/functional-requirements.md#ord-2)); whether "checked" is that timestamp alone or a flag next to it is [OP-082](../../archive/open-points.md#op-082)."
+- The **List items** bullet under `### Data model highlights` gets this sentence at its end: "They also record when they were checked, which orders the haul with the most recently checked first ([ORD-2](../../requirements/ORD-list-display-and-ordering.md#ord-2)); whether "checked" is that timestamp alone or a flag next to it is [OP-082](../../archive/open-points.md#op-082)."
 - The **Assets** bullet: "the Figtree font (`@fontsource-variable/figtree`)" becomes "the Gabarito font (`@fontsource-variable/gabarito`)".
-- The state table's row `| **Device preference** | "hide checked items" toggle ([ORD-4](../../requirements/functional-requirements.md#ord-4)) | \`localStorage\` |` becomes `| **Device preference** | none yet | \`localStorage\` |`.
+- The state table's row `| **Device preference** | "hide checked items" toggle ([ORD-4](../../requirements/ORD-list-display-and-ordering.md#ord-4)) | \`localStorage\` |` becomes `| **Device preference** | none yet | \`localStorage\` |`.
 
 - [x] **Step 3: The stack overview**
 
@@ -403,9 +403,9 @@ In `docs/roadmap.md`:
 
 - PH-14, **Delivers:** "the UI foundation of [ADR 0013](../../decisions/0013-visual-design.md) and the [visual design](../../architecture/visual-design.md): Tailwind CSS, shadcn/ui on Base UI under the CSP, the design tokens, Figtree, Lucide, the favicon and the logo." becomes "the UI foundation of [ADR 0013](../../decisions/0013-visual-design.md) and [ADR 0022](../../decisions/0022-ring-tail-redesign.md), and the [visual design](../../architecture/visual-design.md): Tailwind CSS, shadcn/ui on Base UI under the CSP, the design tokens, Gabarito, Lucide, the favicon and the logo."
 - PH-17, **Goal:** becomes "a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added; checked items drop into the haul, which shows how many are done and puts an item back on a tap." **Delivers:** gets, after the ORD-5 link, "; the haul with its chips and drawer ([ADR 0022](../../decisions/0022-ring-tail-redesign.md))".
-- PH-21, **Goal:** becomes "in the store, a user checks items off into the haul and sees in it the spent and remaining totals; afterwards, "Put all back" resets the list for next week." **Delivers:** "[ITM-8](../../requirements/functional-requirements.md#itm-8), [ORD-4](../../requirements/functional-requirements.md#ord-4), [LST-5](../../requirements/functional-requirements.md#lst-5);" becomes "[ITM-8](../../requirements/functional-requirements.md#itm-8) (the amounts in the haul), [LST-5](../../requirements/functional-requirements.md#lst-5);".
+- PH-21, **Goal:** becomes "in the store, a user checks items off into the haul and sees in it the spent and remaining totals; afterwards, "Put all back" resets the list for next week." **Delivers:** "[ITM-8](../../requirements/ITM-list-items.md#itm-8), [ORD-4](../../requirements/ORD-list-display-and-ordering.md#ord-4), [LST-5](../../requirements/LST-shopping-lists.md#lst-5);" becomes "[ITM-8](../../requirements/ITM-list-items.md#itm-8) (the amounts in the haul), [LST-5](../../requirements/LST-shopping-lists.md#lst-5);".
 
-The README's roadmap diagram shows phase names and statuses only; check it names neither Figtree nor [ORD-4](../../requirements/functional-requirements.md#ord-4) (`grep -n -i "figtree\|ORD-4" README.md`, expect no output) and leave it.
+The README's roadmap diagram shows phase names and statuses only; check it names neither Figtree nor [ORD-4](../../requirements/ORD-list-display-and-ordering.md#ord-4) (`grep -n -i "figtree\|ORD-4" README.md`, expect no output) and leave it.
 
 - [x] **Step 2: OP-056**
 
@@ -433,7 +433,7 @@ At the end of the `### PH-17 List items` group (after its last entry, before `##
 
 #### OP-082
 
-**Decide how "checked" is stored.** The haul orders items by when they were checked, so list items need a `checked_at` timestamp. Either it is the only field (`checked_at IS NOT NULL` means checked), or a `checked` flag stays next to it. One field cannot disagree with itself; a flag keeps the API's `{ "checked": true }` shape and simple queries. "Put all back" ([LST-5](../../requirements/functional-requirements.md#lst-5)) and duplicating a list must clear it either way.
+**Decide how "checked" is stored.** The haul orders items by when they were checked, so list items need a `checked_at` timestamp. Either it is the only field (`checked_at IS NOT NULL` means checked), or a `checked` flag stays next to it. One field cannot disagree with itself; a flag keeps the API's `{ "checked": true }` shape and simple queries. "Put all back" ([LST-5](../../requirements/LST-shopping-lists.md#lst-5)) and duplicating a list must clear it either way.
 
 - **Source:** [ADR 0022](../../decisions/0022-ring-tail-redesign.md), consequences; [redesign spec](../specs/2026-10-07-ring-tail-redesign-design.md#architecture-changes)
 - **Status:** ⬜ Open

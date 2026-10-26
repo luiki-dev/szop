@@ -21,7 +21,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **CI/CD** | Continuous Integration / Continuous Delivery (or Deployment) | **CI:** every change is built and checked automatically, here by GitHub Actions on every PR. **CD:** every change that passes the checks can be released or deployed at the push of a button; continuous *deployment* goes further and deploys every change by itself. |
 | **CIDR** | Classless Inter-Domain Routing | A way to write a range of IP addresses as an address and a prefix length, such as `10.0.0.0/16` (every address starting with `10.0.`). `TRUSTED_PROXIES` takes them (see ADR 0025). |
 | **CLI** | Command-line interface | A program used by typing commands in a terminal, such as `git`, `gh`, `terraform` or the AWS CLI. |
-| **CLS** | Cumulative Layout Shift | A Core Web Vital: how much visible content jumps around while a page loads. "Good" is at most 0.1 ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
+| **CLS** | Cumulative Layout Shift | A Core Web Vital: how much visible content jumps around while a page loads. "Good" is at most 0.1 ([NFR-3](requirements/NFR-non-functional-requirements.md#nfr-3)). |
 | **CORP** | Cross-Origin Resource Policy | A response header with which a server says which origins' pages may receive its responses (`same-origin`, `same-site`, `cross-origin`). Helmet sends `same-origin`; `/api/health` sends `same-site`, so the landing page can tell that the demo answers (see ADR 0046). |
 | **CORS** | Cross-Origin Resource Sharing | Browser rules deciding when a page from one domain may call an API on another domain. Not needed when frontend and API share one origin. |
 | **CRLF / LF** | Carriage Return + Line Feed / Line Feed | The two conventions for ending a line of text: Windows uses CRLF, Linux and macOS use LF. Szop's repository uses LF only. |
@@ -51,11 +51,11 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **ICANN** | Internet Corporation for Assigned Names and Numbers | The body that runs the domain name system's registries and accredits registrars. |
 | **IDOR** | Insecure Direct Object Reference | A hole where a request names a record by its ID and the server does not check that the caller may use it, for example an item pointing at another user's category. Closed in Szop by resolving every ID within the workspace (see ADR 0012). |
 | **IGW** | Internet Gateway | The door between an AWS VPC and the internet. A subnet is public when its route table sends `0.0.0.0/0` (all addresses) through the gateway. Szop's demo has one (see ADR 0034). |
-| **INP** | Interaction to Next Paint | A Core Web Vital: how long the page takes to visibly respond to a tap, click or key press. "Good" is at most 200 ms ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
+| **INP** | Interaction to Next Paint | A Core Web Vital: how long the page takes to visibly respond to a tap, click or key press. "Good" is at most 200 ms ([NFR-3](requirements/NFR-non-functional-requirements.md#nfr-3)). |
 | **JSX** | JavaScript XML | HTML-like syntax inside JavaScript or TypeScript, used to write React components. It has been used in `apps/web` since [PH-05](roadmap.md#ph-05-spa-skeleton). |
 | **JWT** | JSON Web Token | A signed token carrying claims about a user. An alternative to server-side sessions; not used in Szop. |
 | **KMS** | (AWS) Key Management Service | AWS's service for encryption keys. A customer-managed key costs $1 a month; Szop's state bucket uses S3-managed keys instead (SSE-S3), which Trivy's `AWS-0132` flags and Szop accepts (see ADR 0041). |
-| **LCP** | Largest Contentful Paint | A Core Web Vital: when the largest piece of content (usually the main text block or image) appears. "Good" is at most 2.5 s ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
+| **LCP** | Largest Contentful Paint | A Core Web Vital: when the largest piece of content (usually the main text block or image) appears. "Good" is at most 2.5 s ([NFR-3](requirements/NFR-non-functional-requirements.md#nfr-3)). |
 | **LCU** | Load Balancer Capacity Unit | The unit AWS bills a load balancer's traffic in, on top of its hourly price: new connections, active connections, bytes and rule evaluations, whichever is highest. A demo's traffic uses a tiny fraction of one. |
 | **LLM** | Large Language Model | An AI model trained on large amounts of text, such as the Claude models behind Claude Code. graphify sends docs through one to build its graph (see ADR 0031). |
 | **LTS** | Long-Term Support | A release line that receives fixes for an extended period. Even-numbered Node.js releases (22, 24, …) become LTS. |
@@ -65,7 +65,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
 | **MX** | Mail Exchanger | The DNS record naming the servers that receive a domain's mail. Szop's is a null MX, `0 .`, saying it receives none (see ADR 0030). |
 | **NAT** | Network Address Translation | In AWS: a NAT gateway lets resources in a private subnet reach the internet. Costs about $32 a month on AWS; not used (see ADR 0008). In WSL: its default networking mode, where Windows hands the Linux side a private address; the alternative, mirrored mode, broke Playwright's start (see the [setup guide](development/setup.md#the-end-to-end-journeys)). |
-| **NFR** | Non-functional requirement | A quality the system must have rather than something it does: supported browsers, accessibility, performance. Szop's are [NFR-1 to NFR-3](requirements/functional-requirements.md#3-non-functional-requirements). |
+| **NFR** | Non-functional requirement | A quality the system must have rather than something it does: supported browsers, accessibility, performance. Szop's are [NFR-1 to NFR-3](requirements/NFR-non-functional-requirements.md). |
 | **nvm** | Node Version Manager | A tool that installs and switches Node.js versions per user. Szop's `.nvmrc` tells it which one to use. |
 | **OAuth / OIDC** | Open Authorization / OpenID Connect | Standards for logging in through another provider ("Sign in with Google"). Relevant for the social-login future extension. Also how CI logs in to AWS without stored keys: GitHub signs a token saying which repository the job belongs to and which environment, branch or PR event it runs for, and AWS exchanges it for short-lived credentials (see ADR 0010 and ADR 0012). |
 | **OFL** | SIL Open Font License | A free license for fonts: they may be used, bundled and shipped with software, but not sold on their own. Gabarito is under it (see ADR 0022). |
@@ -111,36 +111,39 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **VPS** | Virtual Private Server | A rented virtual machine you manage yourself (Hetzner, DigitalOcean). Considered, not used (see ADR 0008). |
 | **WAF** | Web Application Firewall | A filter in front of an app that blocks malicious or excessive requests. Not used by the demo (see ADR 0008). |
 | **WASM** | WebAssembly | A compact binary format that browsers and Node.js can run at near-native speed. PGlite is PostgreSQL compiled to it; considered for tests, not used (see ADR 0007). |
-| **WCAG** | Web Content Accessibility Guidelines | The W3C's standard for accessible web content, with levels A, AA and AAA. Szop targets WCAG 2.2 AA ([NFR-2](requirements/functional-requirements.md#nfr-2)). |
+| **WCAG** | Web Content Accessibility Guidelines | The W3C's standard for accessible web content, with levels A, AA and AAA. Szop targets WCAG 2.2 AA ([NFR-2](requirements/NFR-non-functional-requirements.md#nfr-2)). |
 | **WSL** | Windows Subsystem for Linux | A Linux environment running inside Windows. Szop is developed in WSL 2 with Ubuntu. |
 | **YAML** | YAML Ain't Markup Language | A text format for configuration, based on indentation. GitHub Actions workflows and `compose.yaml` are written in it. |
 
 ## Requirement ID prefixes
 
-Used in [functional-requirements.md](requirements/functional-requirements.md) and referenced across the docs.
+Used in the [functional requirements](requirements/functional-requirements.md), where each area has its own file, and referenced across the docs.
 
 | Prefix | Area |
 |---|---|
-| **[ACC](requirements/functional-requirements.md#accounts-and-guest-mode-acc)** | Accounts and guest mode |
-| **[LST](requirements/functional-requirements.md#shopping-lists-lst)** | Shopping lists |
-| **[ITM](requirements/functional-requirements.md#list-items-itm)** | List items |
-| **[ORD](requirements/functional-requirements.md#list-display-and-ordering-ord)** | List display and ordering |
-| **[CAT](requirements/functional-requirements.md#categories-cat)** | Categories |
-| **[PRD](requirements/functional-requirements.md#catalog-prd)** | Catalog (products) |
-| **[UNT](requirements/functional-requirements.md#units-unt)** | Units |
-| **[TPL](requirements/functional-requirements.md#templates-tpl)** | Templates |
-| **[SHR](requirements/functional-requirements.md#sharing-shr)** | Sharing |
-| **[SYN](requirements/functional-requirements.md#live-updates-syn)** | Live updates (synchronization) |
-| **[NET](requirements/functional-requirements.md#connectivity-net)** | Connectivity (network) |
-| **[LIM](requirements/functional-requirements.md#limits-lim)** | Limits (quotas and rate limits) |
-| **[NFR](requirements/functional-requirements.md#3-non-functional-requirements)** | Non-functional requirements (browsers, accessibility, performance) |
-| **[UC](requirements/functional-requirements.md#4-use-cases)** | Use case |
+| **[ACC](requirements/ACC-accounts-and-guest-mode.md)** | Accounts and guest mode |
+| **[LST](requirements/LST-shopping-lists.md)** | Shopping lists |
+| **[ITM](requirements/ITM-list-items.md)** | List items |
+| **[ORD](requirements/ORD-list-display-and-ordering.md)** | List display and ordering |
+| **[CAT](requirements/CAT-categories.md)** | Categories |
+| **[PRD](requirements/PRD-catalog.md)** | Catalog (products) |
+| **[UNT](requirements/UNT-units.md)** | Units |
+| **[TPL](requirements/TPL-templates.md)** | Templates |
+| **[SHR](requirements/SHR-sharing.md)** | Sharing |
+| **[SYN](requirements/SYN-live-updates.md)** | Live updates (synchronization) |
+| **[NET](requirements/NET-connectivity.md)** | Connectivity (network) |
+| **[LIM](requirements/LIM-limits.md)** | Limits (quotas and rate limits) |
+| **[APR](requirements/APR-appearance.md)** | Appearance (the color scheme) |
+| **[APP](requirements/APP-app-wide-behavior.md)** | App-wide behavior (the menu, page titles, messages, loading and empty states, forms) |
+| **[NFR](requirements/NFR-non-functional-requirements.md)** | Non-functional requirements (browsers, accessibility, performance, security) |
+| **[UC](requirements/UC-use-cases.md)** | Use case |
 | **FR** | Functional requirement (general name for any of the IDs above, apart from NFR) |
 
 ## Terms
 
 | Term | Meaning |
 |---|---|
+| **Acceptance criterion** | A short, checkable statement of what must be true for a requirement to be met, such as "System is the default and follows the device's setting". Each Szop requirement lists its criteria with an ID (`APR-1.2`) and a status; a test that covers one starts its name with that ID. Written out, never abbreviated (see [ADR 0051](decisions/0051-acceptance-criteria.md)). |
 | **Access Analyzer (IAM)** | An AWS service that checks IAM policy documents against AWS's own rules and reports errors, security warnings, warnings and suggestions, for example a trust policy that could name a branch. Szop runs it on every IAM policy in the plan of a PR that changes `infra/`, and an error or a security warning blocks the PR (see ADR 0032, decision 4, and ADR 0041). |
 | **Access key** | A long-lived AWS credential pair (an ID and a secret) for an IAM user. It works until someone deletes it, so a leaked one is the most common way AWS accounts are compromised; Szop has none, and uses IAM Identity Center's short-lived credentials instead (ADR 0029). |
 | **Accessibility check (axe)** | An automated scan of a page for barriers to people using assistive technology, such as a missing label or low contrast. **axe** (axe-core) is the common rule engine; Szop runs it in the E2E journeys through `@axe-core/playwright`, in light and dark mode (see [Playwright](development/tools/playwright.md)). It finds only part of the problems: keyboard and screen-reader use still need people. |

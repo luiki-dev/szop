@@ -30,6 +30,8 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
+  // NFR-1.1: every journey runs in desktop Chromium, desktop Firefox and an
+  // emulated Android phone.
   projects: [
     { name: "desktop-chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "desktop-firefox", use: { ...devices["Desktop Firefox"] } },
