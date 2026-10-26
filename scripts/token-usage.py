@@ -23,16 +23,17 @@ import statistics
 import sys
 from datetime import datetime
 
-# The audit's numbers (docs/audits/2026-10-26-token-usage.md), frozen so that a later
-# change to this script cannot move the baseline. None until the audit records them.
+# The audit's numbers (docs/audits/2026-10-26-token-usage.md#baseline). They are constants on
+# purpose: a later change to this script must not move the baseline. Shares are fractions,
+# contexts are tokens, phase_cost is in cost units.
 BASELINE = {
-    'phase_cost': None,
-    'median_ctx': None,
-    'share_above_200k': None,
-    'peak_ctx': None,
-    'sessions_per_phase': None,
-    'idle_rebuild_share': None,
-    'opus_implementer_share': None,
+    'phase_cost': 9864966,
+    'median_ctx': 201577,
+    'share_above_200k': 0.6595,
+    'peak_ctx': 396105,
+    'sessions_per_phase': 2.0,
+    'idle_rebuild_share': 0.0485,
+    'opus_implementer_share': 0.4553,
 }
 
 MODEL_W = {'opus': 1.0, 'sonnet': 0.6, 'haiku': 0.2}

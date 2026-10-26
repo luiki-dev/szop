@@ -120,12 +120,12 @@ git commit -m "chore(claude): add the token usage report script"
 - Consumes: Task 1's CLI.
 - Produces: the audit's anchors `#baseline` and `#baseline-phases`, which the script's constants, the ADR and the guide cite; `BASELINE` filled.
 
-- [ ] **Step 1: Compute the baseline**
+- [x] **Step 1: Compute the baseline**
 
 Run: `python3 scripts/token-usage.py --until 2026-10-26` and `python3 scripts/token-usage.py --by-phase --until 2026-10-26`.
 The period ends on 2026-10-26 (inclusive, UTC) so the baseline can be recomputed later from the same transcripts. A **baseline phase** is a phase with sessions in the period; the median phase cost uses only the complete ones: a phase that started before the first transcript (its earlier sessions were deleted) or was not merged by 2026-10-26 is listed but marked and left out of the median.
 
-- [ ] **Step 2: Write the audit**
+- [x] **Step 2: Write the audit**
 
 Layout as `docs/audits/2026-10-19-scalability-and-isolation-analysis.md`: title, a **Date** / **Status** (a point-in-time record) / **Design** (the spec's link) list, an introduction, `## Contents`, then:
 
@@ -136,16 +136,16 @@ Layout as `docs/audits/2026-10-19-scalability-and-isolation-analysis.md`: title,
 - **Baseline phases** (`#baseline-phases`): Step 1's `--by-phase` table, with the left-out phases marked and why, and the median.
 - **The analysis scripts:** what each file in `2026-10-26-token-usage/` computes, how to run them (from their own folder, with the transcript directory as argument), and that they are frozen; `scripts/token-usage.py` is the maintained port.
 
-- [ ] **Step 3: Fill `BASELINE` in `scripts/token-usage.py`**
+- [x] **Step 3: Fill `BASELINE` in `scripts/token-usage.py`**
 
 The values from the audit's Baseline table, with a comment above the dict citing `docs/audits/2026-10-26-token-usage.md#baseline` and saying they are constants on purpose (a change to the script must not move them). `sessions_per_phase` and `peak_ctx` hold the audit's figures as numbers (the median main sessions per complete phase; the median peak context).
 
-- [ ] **Step 4: Check the report against the audit**
+- [x] **Step 4: Check the report against the audit**
 
 Run: `python3 scripts/token-usage.py --until 2026-10-26` and `python3 scripts/token-usage.py --phase PH-40`.
 Expected: the first one's "This selection" column equals its "Baseline" column for every indicator measured over all sessions (median context, share above 200k, idle share, Opus implementer share); the second prints a full table with a baseline in every row but the weekly limit, and a note that the CSV is missing.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/audits/2026-10-26-token-usage.md scripts/token-usage.py docs/superpowers/plans/2026-10-26-working-with-claude.md
