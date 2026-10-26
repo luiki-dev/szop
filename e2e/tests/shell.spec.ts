@@ -137,11 +137,15 @@ test("NFR-2.6: focus stays inside the open menu drawer", async ({ page }) => {
   await page.getByRole("button", { name: "Open menu" }).click();
   const drawer = page.getByRole("dialog");
   await expect(drawer).toBeVisible();
+  // Tabbing past the last element lands on Base UI's focus guard, just
+  // outside the drawer, which sends focus back in on the next animation
+  // frame: wait for focus to settle rather than read it at once.
+  const focusInside = () =>
+    drawer.evaluate((node) => node.contains(document.activeElement));
+  await expect.poll(focusInside).toBe(true);
   for (let stop = 0; stop < 15; stop++) {
     await page.keyboard.press("Tab");
-    expect(
-      await drawer.evaluate((node) => node.contains(document.activeElement)),
-    ).toBe(true);
+    await expect.poll(focusInside).toBe(true);
   }
 });
 
