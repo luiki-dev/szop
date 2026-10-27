@@ -115,7 +115,7 @@ Playwright downloads its own builds of Chromium and Firefox, not the ones instal
 pnpm --filter @szop/e2e exec playwright install --with-deps chromium firefox
 ```
 
-`--with-deps` also installs the system libraries the browsers need, through `apt`, which needs `sudo`: it asks for the password. Without it, a browser can fail to start with a message naming a missing library. Where the libraries are already installed, the browsers launch without it. CI runs the same command on every run and does not cache the browsers ([CI/CD](../ci-cd.md)).
+`--with-deps` also installs the system libraries the browsers need, through `apt`, which needs `sudo`: it asks for the password. Without it, a browser can fail to start with a message naming a missing library. Where the libraries are already installed, the browsers launch without it. CI is such a place: the runner image ships Chrome and Firefox with their libraries, so CI runs the command without `--with-deps` on every run and does not cache the browsers ([CI/CD](../ci-cd.md)).
 
 ## Everyday use
 
