@@ -242,7 +242,7 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../deci
 
 Only `/` (the Start page), `/catalog` and `/design` exist so far; the table above is the target. Any other path shows React Router's default error screen until a not-found route is added ([ADR 0021](../decisions/0021-spa-skeleton-details.md), consequences).
 
-As built in PH-15a, the app shell renders React Router's `ScrollRestoration`: a page opened from the menu or a link starts at the top, and Back and Forward return to where the page was scrolled ([APP-1](../requirements/APP-app-wide-behavior.md#app-1), criterion APP-1.10). The router keeps the positions in `sessionStorage`; in this single-page mode the component renders no script, so the Content Security Policy is untouched.
+As built in PH-15a, the app shell renders React Router's `ScrollRestoration`: a page opened from the menu or a link starts at the top, and Back and Forward return to where the page was scrolled ([APP-1](../requirements/APP-app-wide-behavior.md#app-1), criterion APP-1.10), except the catalog's expansion and search, left to [OP-112](https://github.com/luiki-dev/szop/issues/305). The router keeps the positions in `sessionStorage`; in this single-page mode the component renders no script, so the Content Security Policy is untouched.
 
 ### Startup
 
