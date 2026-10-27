@@ -62,16 +62,18 @@ export function CatalogPage() {
   const input = useRef<HTMLInputElement>(null);
   const trimmed = text.trim();
   const result = useMemo(() => searchTree(nodes, trimmed), [nodes, trimmed]);
-  // The search keeps its own open set, tied to the query it was made under: a
-  // new query starts again from the paths to its matches, and the browsing
-  // set is not touched while searching.
-  const [searchToggled, setSearchToggled] = useState<{
-    query: string;
-    open: ReadonlySet<string>;
-  } | null>(null);
-  const searchOpen =
-    searchToggled?.query === trimmed ? searchToggled.open : result?.open;
+  // The search keeps its own open set, set by hand only until the text
+  // changes (changeText): every change, clearing included, starts again from
+  // the paths to the matches. The browsing set is not touched while searching.
+  const [searchToggled, setSearchToggled] =
+    useState<ReadonlySet<string> | null>(null);
+  const searchOpen = result && (searchToggled ?? result.open);
   const shown = useMemo(() => result?.nodes.map(displayNode), [result]);
+
+  function changeText(value: string) {
+    setText(value);
+    setSearchToggled(null);
+  }
 
   function toggle(id: string) {
     const flip = (previous: ReadonlySet<string>) => {
@@ -80,7 +82,7 @@ export function CatalogPage() {
       return next;
     };
     if (searchOpen) {
-      setSearchToggled({ query: trimmed, open: flip(searchOpen) });
+      setSearchToggled(flip(searchOpen));
     } else {
       setOpen(flip);
     }
@@ -120,12 +122,12 @@ export function CatalogPage() {
               placeholder="Search the catalog"
               value={text}
               onChange={(event) => {
-                setText(event.target.value);
+                changeText(event.target.value);
               }}
               onKeyDown={(event) => {
                 if (event.key === "Escape" && text !== "") {
                   event.preventDefault();
-                  setText("");
+                  changeText("");
                 }
               }}
               className="min-h-12 w-full rounded-surface border border-input bg-card py-2 pr-12 pl-11 text-card-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
@@ -135,7 +137,7 @@ export function CatalogPage() {
                 type="button"
                 aria-label="Clear search"
                 onClick={() => {
-                  setText("");
+                  changeText("");
                   input.current?.focus();
                 }}
                 className="absolute top-1/2 right-0 flex size-12 -translate-y-1/2 items-center justify-center rounded-surface text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring"

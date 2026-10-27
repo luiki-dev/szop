@@ -116,6 +116,25 @@ describe("Catalog search", () => {
     expect(category("Plant-based")).toHaveAttribute("aria-expanded", "true");
   });
 
+  it("opens the matches again when the same query comes back", async () => {
+    const user = await renderCatalog();
+    await user.type(field(), "oat");
+    await user.click(category("Plant-based"));
+    await user.clear(field());
+    await user.type(field(), "oat");
+
+    for (const name of ["Dairy & eggs", "Milk", "Plant-based"]) {
+      expect(category(name)).toHaveAttribute("aria-expanded", "true");
+    }
+
+    await user.click(category("Plant-based"));
+    await user.type(field(), " m");
+    await user.type(field(), "{Backspace}{Backspace}");
+
+    expect(field()).toHaveValue("oat");
+    expect(category("Plant-based")).toHaveAttribute("aria-expanded", "true");
+  });
+
   it("PRD-2.11: restores the expansion from before the search when cleared", async () => {
     const user = await renderCatalog();
     await user.click(category("Bakery"));

@@ -213,10 +213,10 @@
   - `it("PRD-2.11: restores the expansion from before the search when cleared")`: open Bakery; type; collapse a match; click ✕ ("Clear search") → Bakery open, nothing else; again with Esc, focus stays in the field (Review Focus 5).
   - `it("PRD-2.12: says no products match")`: "xyz" → `No products match "xyz"` in a card.
 - [x] **Step 4: Run** `pnpm test -- search`. Expected: FAIL.
-- [ ] **Step 5: Implement** `search.ts`, then in the page: the field (magnifier, `type="search"`, ✕ button "Clear search" while the query is not empty, Esc clears), the query in state, `useMemo` over `searchTree`; a second `Set` for the search's expansion, reset to `result.open` whenever the query changes; the browsing `Set` untouched while searching. `CatalogTree` takes an optional highlight query and renders the name's match in `<mark className="bg-accent text-accent-foreground">`; a matched category opened by hand renders its whole `node`.
-- [ ] **Step 6: Run** the tests of Step 4 and `pnpm test -- catalog`. Expected: PASS.
-- [ ] **Step 7: Run** `pnpm check`, `pnpm build` and `pnpm test:e2e`. Expected: all pass.
-- [ ] **Step 8: Commit** `feat(web): search the catalog by product or category name`.
+- [x] **Step 5: Implement** `search.ts`, then in the page: the field (magnifier, `type="search"`, ✕ button "Clear search" while the query is not empty, Esc clears), the query in state, `useMemo` over `searchTree`; a second `Set` for the search's expansion, reset to `result.open` whenever the query changes; the browsing `Set` untouched while searching. `CatalogTree` takes an optional highlight query and renders the name's match in `<mark className="bg-accent text-accent-foreground">`; a matched category opened by hand renders its whole `node`.
+- [x] **Step 6: Run** the tests of Step 4 and `pnpm test -- catalog`. Expected: PASS.
+- [x] **Step 7: Run** `pnpm check`, `pnpm build` and `pnpm test:e2e`. Expected: all pass.
+- [x] **Step 8: Commit** `feat(web): search the catalog by product or category name`.
 
 ### Task 7: The journey, the documentation and the tracking
 
