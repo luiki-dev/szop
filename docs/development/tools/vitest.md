@@ -1,6 +1,6 @@
 # Vitest
 
-Vitest is the test runner: it finds the test files, runs them and reports which tests passed, and it can measure which lines the tests ran. It is built on Vite (the build tool the web app uses, see [Vite](vite.md)) and runs TypeScript and ES modules (ESM) as they are, with no setup. In Szop it runs every test: the API's, the web app's and the push hook's.
+Vitest is the test runner: it finds the test files, runs them and reports which tests passed, and it can measure which lines the tests ran. It is built on Vite (the build tool the web app uses, see [Vite](vite.md)) and runs TypeScript and ES modules (ESM) as they are, with no setup. In Szop it runs every test: the API's, the web app's, the shared package's and the push hook's.
 
 ## Why Szop uses it
 
@@ -12,7 +12,7 @@ Vitest is the test runner: it finds the test files, runs them and reports which 
 
 **`vitest.config.ts`** at the root is the config Vitest reads:
 
-- `test.projects`: the list of projects. A **project** is a group of tests with its own settings, shown by name in the output. There are three: `apps/api/vitest.config.ts` and `apps/web/vitest.config.ts`, files of their own, and `hooks`, written inline because it needs only three settings.
+- `test.projects`: the list of projects. A **project** is a group of tests with its own settings, shown by name in the output. There are four: `apps/api/vitest.config.ts`, `apps/web/vitest.config.ts` and `packages/shared/vitest.config.ts`, files of their own, and `hooks`, written inline because it needs only three settings.
 - `name`: the project's name, for `--project` and for the output.
 - `environment: "node"`: tests run in plain Node. The `web` project uses `jsdom` instead, a simulated browser (see [jsdom](#jsdom)).
 - `include`: the files that count as this project's tests, by glob (a path pattern).
@@ -35,7 +35,7 @@ jsdom is a simulated browser written in JavaScript that runs inside Node: it pro
 ```bash
 pnpm test                    # run everything once; the same tests CI runs (CI adds `--coverage`)
 pnpm test:watch              # stay running, re-run what a change affects
-pnpm test --project web      # only the web project (api and hooks work the same)
+pnpm test --project web      # only the web project (api, shared and hooks work the same)
 pnpm test health             # only files whose path contains "health"
 pnpm test:coverage           # run everything and measure coverage
 ```

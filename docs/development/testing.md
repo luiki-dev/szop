@@ -1,8 +1,8 @@
 # Testing guide
 
-How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tools behind the tests have their own pages: [Vitest](tools/vitest.md), [Testing Library](tools/testing-library.md), [Mock Service Worker (MSW)](tools/msw.md), [Playwright](tools/playwright.md) and [Docker](tools/docker.md).
+How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tools behind the tests have their own pages: [Vitest](tools/vitest.md), [Testing Library](tools/testing-library.md), [Mock Service Worker (MSW)](tools/msw.md), [Playwright](tools/playwright.md), [fast-check](tools/fast-check.md) and [Docker](tools/docker.md).
 
-The guide grows as the layers arrive: property tests in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) and mutation testing in [PH-15b](../roadmap.md#ph-15b-mutation-testing).
+The guide grows as the layers arrive: mutation testing in [PH-15b](../roadmap.md#ph-15b-mutation-testing).
 
 ## Contents
 
@@ -16,6 +16,7 @@ The guide grows as the layers arrive: property tests in [PH-15a](../roadmap.md#p
 - [Writing a database test](#writing-a-database-test)
 - [Writing a component test](#writing-a-component-test)
 - [Writing a unit test](#writing-a-unit-test)
+- [Writing a property test](#writing-a-property-test)
 - [Writing an E2E journey](#writing-an-e2e-journey)
   - [The CSP guard](#the-csp-guard)
   - [The accessibility check](#the-accessibility-check)
@@ -32,13 +33,14 @@ The guide grows as the layers arrive: property tests in [PH-15a](../roadmap.md#p
 | Database tests | `apps/api/src/**/*.test.ts` that call `useTestDatabase()`, for example `test/database.test.ts` | Queries, migrations and cleanup work against the real PostgreSQL | `api` |
 | Component tests | `apps/web/src/**/*.test.tsx`, for example `shell/shell.test.tsx` | A page works as a user sees it: the real route table, hook, API client and schema run in a simulated browser ([jsdom](tools/vitest.md#jsdom)) with only the network faked by MSW | `web` |
 | Unit tests | next to the code, for example `apps/api/src/config.test.ts` | One function does its job for each kind of input, with no server involved | `api` |
+| Property tests | next to the code, for example `packages/shared/src/catalog.test.ts` | A rule holds for hundreds of generated inputs, such as the category order ([fast-check](tools/fast-check.md)) | `shared` |
 | End-to-end (E2E) journeys | `e2e/tests/*.spec.ts`, for example `shell.spec.ts` | A real browser drives the production build through the SPA, the API and PostgreSQL, on three projects (desktop Chromium, desktop Firefox and an emulated phone), checks every page with axe and fails on any Content Security Policy (CSP) violation | ➖ N/A: Playwright |
 | The image check | `scripts/check-image.sh` | The container image builds, starts next to PostgreSQL, migrates, runs as the `node` user and serves the SPA at `/` ([ADR 0028](../decisions/0028-container-image-details.md)) | ➖ N/A: a bash script |
 | The scale check | `scripts/check-scale.sh` | Two instances of the image start together behind nginx (the `scale` profile): one migrates while the other waits for the lock, and requests reach both. It catches what two instances inside one test process hide, since those share module-level state ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 14) | ➖ N/A: a bash script |
 | The landing page | `apps/landing/check-demo.test.js` | `checkDemo`, the function behind the footer's dot, says up when the demo answers (whatever the answer), and down when the request fails or outlives its timeout, with a fake `fetch`. The page itself has no browser test: it is checked by hand on `dzwoniec.com` ([PH-34 spec](../superpowers/specs/2026-10-23-PH-34-landing-page-and-demo-status-design.md), decision 9) | `landing` |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
 
-Layer still to come: **property tests** for the domain rules, in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only), and **mutation testing**, in [PH-15b](../roadmap.md#ph-15b-mutation-testing).
+Layer still to come: **mutation testing**, in [PH-15b](../roadmap.md#ph-15b-mutation-testing).
 
 ## Running the tests
 
@@ -47,7 +49,7 @@ All commands run from the repository root. PostgreSQL must be running first for 
 ```bash
 pnpm test                       # every project once, the same tests CI runs (CI adds `--coverage`)
 pnpm test:watch                 # stays running and re-runs the tests a change affects, on every save
-pnpm test --project api         # one project only: api, web, landing or hooks
+pnpm test --project api         # one project only: api, web, shared, landing or hooks
 pnpm test --project web         # for example, only the component tests
 pnpm test health                # only the files whose path contains "health"
 pnpm test:coverage              # every project, plus a coverage report
@@ -267,6 +269,14 @@ A unit test lives next to the code it tests and has the same name with `.test.ts
   ```
 
   `%j` puts each value in the test's name as JSON, so a failure tells you which input broke.
+
+## Writing a property test
+
+A property test states a rule that must hold for **every** input of some kind, and [fast-check](tools/fast-check.md) tries hundreds of generated inputs against it. Write one when the rule is about a whole input space and a few examples cannot cover it, such as an order ("a parent comes before its children, whatever the tree"). An edge case with one right answer is still an ordinary unit test; the two usually sit side by side, as in `packages/shared/src/catalog.test.ts`.
+
+- **Where they live:** next to the code, in the `shared` project (`pnpm test --project shared`). The arbitrary that generates the input is defined in the test file.
+- **One property per `it`,** named with the criterion's ID: `it("returns a permutation of its input")` inside a `describe("ORD-2.1, ORD-3.1: …")`.
+- **Reading a failure:** the message shows the shrunk `Counterexample`, the smallest input fast-check found that breaks the rule, and a `seed` and `path`. Pass them as `fc.assert`'s last argument to replay the failure, then remove them. Add the counterexample as an example test too. How to read it, with a real output: [fast-check](tools/fast-check.md#reading-a-counterexample).
 
 ## Writing an E2E journey
 

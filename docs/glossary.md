@@ -320,6 +320,7 @@ Used in the [functional requirements](requirements/functional-requirements.md), 
 | **Session / session cookie** | The server's record of a logged-in (or anonymous) user, and the browser cookie that identifies it on each request. |
 | **shadcn/ui** | A collection of styled React components that a command-line tool copies into the project as source code, built on a headless library and Tailwind CSS. |
 | **Shield Standard** | AWS's free, always-on protection against common network-level floods, covering every load balancer. |
+| **Shrinking** | What a property-based testing library does with a failing input: it tries smaller, simpler inputs that still fail, until it reports the smallest one, the counterexample ([fast-check](development/tools/fast-check.md#reading-a-counterexample)). |
 | **Simple request** | A request a browser sends to another site without asking it first (without a CORS *preflight*): a GET, HEAD or POST whose body has one of the content types an HTML form can send (`application/x-www-form-urlencoded`, `multipart/form-data`, `text/plain`). Szop accepts only JSON bodies, which closes it (see ADR 0025). |
 | **Skeleton placeholder** | Gray shapes in the layout of the content that is still loading, shown instead of a spinner. |
 | **Snapshot test** | A test that saves the output (for example rendered HTML) on its first run and fails when later output differs. Szop avoids them for rendered markup, because updating a snapshot without reading it is too easy. |
@@ -359,7 +360,7 @@ Used in the [functional requirements](requirements/functional-requirements.md), 
 | **Variable font** | One font file containing every weight (and sometimes width), instead of one file per weight. |
 | **Vertical slice** | A piece of work that delivers one capability through every layer at once (database, API, UI, tests, deployment), as opposed to building one layer at a time. |
 | **Visual companion** | A browser tab the superpowers brainstorming workflow opens to show mockups and visual options during a brainstorm. Its files live in `.superpowers/`, which git ignores. |
-| **Vitest project** | One named group of tests inside a Vitest run, with its own configuration. Szop has three: `api`, from `apps/api/vitest.config.ts`, `web`, from `apps/web/vitest.config.ts`, and `hooks`, for the push hook's tests, which is defined inline. |
+| **Vitest project** | One named group of tests inside a Vitest run, with its own configuration. Szop has four: `api`, from `apps/api/vitest.config.ts`, `web`, from `apps/web/vitest.config.ts`, `shared`, from `packages/shared/vitest.config.ts`, and `hooks`, for the push hook's tests, which is defined inline. |
 | **Walking skeleton** | The thinnest possible version of the whole system that runs end to end (here: SPA → API → database, built by CI and deployed) and does almost nothing yet. Built early to test the foundation decisions. |
 | **WebSocket** | A persistent two-way connection between browser and server, letting the server push messages (used for live updates). |
 | **WHOIS** | The public lookup of who registered a domain, through which registrar and until when. Route 53's privacy protection hides the owner's contact details from it. |
