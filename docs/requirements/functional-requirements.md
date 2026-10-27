@@ -215,7 +215,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 7 of 10 | ❔ Not finalized |
+| [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 6 of 10 | ❔ Not finalized |
 | [APP-2](APP-app-wide-behavior.md#app-2) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
 | [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
 | [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | 🚧 In progress | 2 of 3 | ❔ Not finalized |
