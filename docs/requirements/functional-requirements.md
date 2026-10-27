@@ -100,7 +100,7 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | ❔ Draft | 0 of 9 | ❔ Not finalized |
+| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | 🚧 In progress | 0 of 9 | ❔ Not finalized |
 | [ACC-2](ACC-accounts-and-guest-mode.md#acc-2) | 🎯 MVP | ❔ Draft | 0 of 8 | ❔ Not finalized |
 | [ACC-3](ACC-accounts-and-guest-mode.md#acc-3) | 🎯 MVP | ❔ Draft | 0 of 9 | ❔ Not finalized |
 | [ACC-4](ACC-accounts-and-guest-mode.md#acc-4) | 🎯 MVP | ❔ Draft | 0 of 5 | ❔ Not finalized |
@@ -138,8 +138,8 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [ORD-1](ORD-list-display-and-ordering.md#ord-1) | 🎯 MVP | ❔ Draft | 0 of 11 | ❔ Not finalized |
-| [ORD-2](ORD-list-display-and-ordering.md#ord-2) | 🎯 MVP | ❔ Draft | 0 of 5 | ❔ Not finalized |
-| [ORD-3](ORD-list-display-and-ordering.md#ord-3) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
+| [ORD-2](ORD-list-display-and-ordering.md#ord-2) | 🎯 MVP | 🚧 In progress | 0 of 5 | ❔ Not finalized |
+| [ORD-3](ORD-list-display-and-ordering.md#ord-3) | 🎯 MVP | 🚧 In progress | 0 of 1 | ❔ Not finalized |
 | [ORD-4](ORD-list-display-and-ordering.md#ord-4) | ✖️ Dropped | — | — | — |
 | [ORD-5](ORD-list-display-and-ordering.md#ord-5) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
 
@@ -156,7 +156,7 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [PRD-1](PRD-catalog.md#prd-1) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
-| [PRD-2](PRD-catalog.md#prd-2) | 🎯 MVP | ❔ Draft | 0 of 9 | ❔ Not finalized |
+| [PRD-2](PRD-catalog.md#prd-2) | 🎯 MVP | 🚧 In progress | 0 of 12 | ✅ Finalized |
 | [PRD-3](PRD-catalog.md#prd-3) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
 
 ### Units (UNT)
@@ -218,7 +218,7 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 | [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 5 of 9 | ❔ Not finalized |
 | [APP-2](APP-app-wide-behavior.md#app-2) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
 | [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
-| [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | 🚧 In progress | 0 of 3 | ❔ Not finalized |
 | [APP-5](APP-app-wide-behavior.md#app-5) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
 | [APP-6](APP-app-wide-behavior.md#app-6) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
 | [APP-7](APP-app-wide-behavior.md#app-7) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |

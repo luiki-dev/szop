@@ -24,27 +24,27 @@ Checked items leave the list and go to **the haul**, a tray apart from the list 
 
 ## ORD-2
 
-🎯 [MVP] · ❔ Draft (0 of 5) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (0 of 5) · ❔ Criteria not finalized
 
 The list's items are sorted by the global category order, then alphabetically by name. Uncategorized items come last. The haul shows the most recently checked items first.
 
 | ID | Criterion | Status |
 |---|---|---|
-| ORD-2.1 | The unchecked items are grouped in category cards, in the global category order: depth-first, each category before its subcategories, siblings in the order the user gave them. | ❔ Draft |
-| ORD-2.2 | Within a category, items are sorted alphabetically by name. | ❔ Draft |
-| ORD-2.3 | Names sort by Polish alphabetical rules, so "śmietana" comes after "ser" and before "tofu". | ❔ Draft · [OP-041](https://github.com/luiki-dev/szop/issues/100) |
+| ORD-2.1 | The unchecked items are grouped in category cards, in the global category order: depth-first, each category before its subcategories, siblings in the order the user gave them. | 🚧 [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) · the rule in `packages/shared`; the list in [PH-17a](../roadmap.md#ph-17a-list-items) |
+| ORD-2.2 | Within a category, items are sorted alphabetically by name. | 🚧 [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) · the rule in `packages/shared`; the list in [PH-17a](../roadmap.md#ph-17a-list-items) |
+| ORD-2.3 | Names sort by Polish alphabetical rules, so "śmietana" comes after "ser" and before "tofu". | 🚧 [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) · the rule in `packages/shared`; the list in [PH-17a](../roadmap.md#ph-17a-list-items) · [OP-041](https://github.com/luiki-dev/szop/issues/100) |
 | ORD-2.4 | Uncategorized items come last. | ❔ Draft |
 | ORD-2.5 | The haul shows the most recently checked item first. | ❔ Draft |
 
 ## ORD-3
 
-🎯 [MVP] · ❔ Draft (0 of 1) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (0 of 1) · ❔ Criteria not finalized
 
 Items labeled with a parent category come before items labeled with its subcategories.
 
 | ID | Criterion | Status |
 |---|---|---|
-| ORD-3.1 | Items labeled with a parent category come before the items of its subcategories. | ❔ Draft |
+| ORD-3.1 | Items labeled with a parent category come before the items of its subcategories. | 🚧 [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) · the rule in `packages/shared`; the list in [PH-17a](../roadmap.md#ph-17a-list-items) |
 
 ## ORD-4
 

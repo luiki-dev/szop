@@ -59,4 +59,4 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 | NFR-4.8 | Once the app has used a token from the address (verification, password reset, a share link), it removes the token from the address bar. | ❔ Draft · [OP-055](https://github.com/luiki-dev/szop/issues/109) |
 | NFR-4.9 | The session cookie is `HttpOnly`, `Secure` and `SameSite=Lax`, has no `Domain` attribute and carries the `__Host-` prefix (or `__Secure-` if the auth library does not allow it); a revoked session stops working at once. | ❔ Draft · [OP-055](https://github.com/luiki-dev/szop/issues/109) |
 | NFR-4.10 | A request that names a record of another workspace, anywhere in its path, query or body, gets the same 404 as a request for a record that does not exist. | ❔ Draft |
-| NFR-4.11 | An unexpected error answers 500 with a generic message; the details go to the log, never to the browser. | ❔ Draft |
+| NFR-4.11 | An unexpected error answers 500 with a generic message; the details go to the log, never to the browser. | 🚧 [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
