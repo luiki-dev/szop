@@ -32,6 +32,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - [Stage 4: MVP](#stage-4-mvp)
   - [PH-14a Design system](#ph-14a-design-system)
   - [PH-14b App shell](#ph-14b-app-shell)
+  - [PH-41 Faster, steadier CI](#ph-41-faster-steadier-ci)
   - [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only)
   - [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists)
   - [PH-17a List items](#ph-17a-list-items)
@@ -320,6 +321,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-14a Design system](#ph-14a-design-system) | ✅ Done | [Spec](superpowers/specs/2026-10-24-PH-14a-design-system-design.md) | [Plan](superpowers/plans/2026-10-24-PH-14a-design-system.md) | [#282](https://github.com/luiki-dev/szop/pull/282) | [#280](https://github.com/luiki-dev/szop/issues/280) |
 | [PH-14b App shell](#ph-14b-app-shell) | ✅ Done | [Spec](superpowers/specs/2026-10-25-PH-14b-app-shell-design.md) | [Plan](superpowers/plans/2026-10-25-PH-14b-app-shell.md) | [#285](https://github.com/luiki-dev/szop/pull/285) | [#281](https://github.com/luiki-dev/szop/issues/281) |
 | [PH-40 Acceptance criteria](#ph-40-acceptance-criteria) | ✅ Done | [Spec](superpowers/specs/2026-10-26-PH-40-acceptance-criteria-design.md) | [Plan](superpowers/plans/2026-10-26-PH-40-acceptance-criteria.md) | [#293](https://github.com/luiki-dev/szop/pull/293) | [#289](https://github.com/luiki-dev/szop/issues/289) |
+| [PH-41 Faster, steadier CI](#ph-41-faster-steadier-ci) | ✅ Done | ➖ N/A: bounded | ➖ N/A: bounded | [#303](https://github.com/luiki-dev/szop/pull/303) | [#295](https://github.com/luiki-dev/szop/issues/295) |
 | [PH-15 Seed catalog, read-only](#ph-15-seed-catalog-read-only) | ⬜ Not started | — | — | — | [#44](https://github.com/luiki-dev/szop/issues/44) |
 | [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists) | ⬜ Not started | — | — | — | [#45](https://github.com/luiki-dev/szop/issues/45) |
 | [PH-17a List items](#ph-17a-list-items) | ⬜ Not started | — | — | — | [#290](https://github.com/luiki-dev/szop/issues/290) |
@@ -368,6 +370,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** none.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#289](https://github.com/luiki-dev/szop/issues/289).
+
+### PH-41 Faster, steadier CI
+
+- **Goal:** CI's longest runs no longer depend on a slow Ubuntu mirror, a stuck step fails in minutes instead of running out the job's timeout, and pull requests no longer fill the cache that the image build relies on, measured against the baseline of the [CI run analysis of 2026-10-26](audits/2026-10-26-ci-run-analysis.md).
+- **Delivers:** the CI run analysis and its page; [ADR 0053](decisions/0053-faster-steadier-ci.md): the browsers installed without apt, timeouts on the steps that download, and the Docker layer cache written by pushes to `main` only, from [OP-108](https://github.com/luiki-dev/szop/issues/294); the later measurement left to [OP-111](https://github.com/luiki-dev/szop/issues/304).
+- **Depends on:** —
+- **Owner steps:** none.
+- **Expected path:** bounded.
+- **Open points:** the sub-issues of [#295](https://github.com/luiki-dev/szop/issues/295).
 
 ### PH-15 Seed catalog, read-only
 
