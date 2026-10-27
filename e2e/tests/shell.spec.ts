@@ -131,6 +131,43 @@ test("NFR-2.4: everything focused with the keyboard shows a focus ring", async (
   }
 });
 
+test("NFR-2.8: the focus ring is drawn in the ring color, on links as on buttons", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/catalog");
+  await expect(page.getByRole("button", { name: "Expand all" })).toBeVisible();
+
+  // The ring is a box-shadow in the --ring color. A probe element is given
+  // the color and read back, so both sides are serialized by the browser the
+  // same way, whatever color space the palette is written in.
+  const focusedRing = () =>
+    page.evaluate(() => {
+      const probe = document.createElement("span");
+      probe.style.color = "var(--ring)";
+      document.body.append(probe);
+      const ring = getComputedStyle(probe).color;
+      probe.remove();
+      const element = document.activeElement;
+      return {
+        name: element?.getAttribute("aria-label") ?? element?.textContent,
+        ring,
+        boxShadow: element ? getComputedStyle(element).boxShadow : "none",
+      };
+    });
+
+  // Tab to the "Start" link, then to the "Expand all" button.
+  for (const name of ["Start", "Expand all"]) {
+    let focused = await focusedRing();
+    for (let stop = 0; stop < 20 && focused.name?.trim() !== name; stop++) {
+      await page.keyboard.press("Tab");
+      focused = await focusedRing();
+    }
+    expect(focused.name?.trim()).toBe(name);
+    expect(focused.boxShadow, name).toContain(focused.ring);
+  }
+});
+
 test("NFR-2.6: focus stays inside the open menu drawer", async ({ page }) => {
   await page.setViewportSize(phone);
   await page.goto("/");

@@ -1,4 +1,5 @@
 import type { RouteObject } from "react-router";
+import { CatalogPage } from "./catalog/catalog-page.tsx";
 import { DesignPage } from "./design/design-page.tsx";
 import { AppShell } from "./shell/app-shell.tsx";
 import { StartPage } from "./start/start-page.tsx";
@@ -19,6 +20,11 @@ export const routes: RouteObject[] = [
         index: true,
         element: <StartPage />,
         handle: { title: "Start" } satisfies RouteHandle,
+      },
+      {
+        path: "catalog",
+        element: <CatalogPage />,
+        handle: { title: "Catalog" } satisfies RouteHandle,
       },
       {
         path: "design",
