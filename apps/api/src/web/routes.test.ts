@@ -1,5 +1,6 @@
 import { brotliDecompressSync, gunzipSync } from "node:zlib";
 import type { FastifyInstance } from "fastify";
+import { apiErrorSchema } from "@szop/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
 import { testConfig } from "../test/config.ts";
@@ -114,7 +115,7 @@ describe("serving the SPA", () => {
     ["GET", "/assets/missing.js"],
     ["GET", "/favicon.ico"],
     ["POST", "/some/route"],
-  ] as const)("answers %s %s with Fastify's JSON 404", async (method, url) => {
+  ] as const)("answers %s %s with the JSON 404", async (method, url) => {
     const response = await start().inject({
       method,
       url,
@@ -123,10 +124,11 @@ describe("serving the SPA", () => {
 
     expect(response.statusCode).toBe(404);
     expect(response.headers["content-type"]).toMatch(/^application\/json/);
-    expect(response.json()).toEqual({
-      statusCode: 404,
-      error: "Not Found",
-      message: `Route ${method}:${url} not found`,
+    expect(apiErrorSchema.parse(response.json())).toEqual({
+      error: {
+        code: "not_found",
+        message: `Route ${method}:${url} not found`,
+      },
     });
   });
 

@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
+import { sendError } from "../errors.ts";
 
 // GET, HEAD and OPTIONS never change anything (ADR 0012, decision 7).
 const safeMethods = new Set(["GET", "HEAD", "OPTIONS"]);
@@ -32,12 +33,12 @@ function crossSiteCheck(app: FastifyInstance): void {
       done();
       return;
     }
-    // Fastify's error shape until the app has its own (OP-071).
-    void reply.code(403).send({
-      statusCode: 403,
-      error: "Forbidden",
-      message: "Cross-site request refused",
-    });
+    void sendError(
+      reply,
+      403,
+      "forbidden_cross_site",
+      "Cross-site request refused",
+    );
   });
 }
 

@@ -61,7 +61,7 @@ describe("NFR-4.5: the request log", () => {
       db: database.db,
       logStream: log.stream,
     });
-    // A route that fails: Fastify's error line carries the request too.
+    // A route that fails: the error handler logs it.
     app.get("/api/test-fails", () => {
       throw new Error("kaput");
     });
@@ -72,7 +72,8 @@ describe("NFR-4.5: the request log", () => {
     });
 
     expect(response.statusCode).toBe(500);
-    expect(log.lines().some((line) => line.msg === "kaput")).toBe(true);
+    const logged = log.lines().find((line) => line.level === 50);
+    expect(logged).toMatchObject({ err: { message: "kaput" } });
     expect(JSON.stringify(log.lines())).not.toContain("s3cret");
   });
 });

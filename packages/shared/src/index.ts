@@ -1,4 +1,5 @@
 export { healthSchema, type Health } from "./health.ts";
+export { apiErrorSchema, type ApiError } from "./api-error.ts";
 export {
   catalogCategorySchema,
   catalogProductSchema,

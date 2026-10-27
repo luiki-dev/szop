@@ -3,6 +3,7 @@ import Fastify, { LogController, type FastifyInstance } from "fastify";
 import type { Config } from "./config.ts";
 import type { Database } from "./db/database.ts";
 import { readJournal } from "./db/schema-version.ts";
+import { errorHandler } from "./errors.ts";
 import { healthRoutes } from "./health/routes.ts";
 import { instanceId } from "./instance.ts";
 import { crossSite } from "./security/cross-site.ts";
@@ -52,6 +53,10 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
         request.routeOptions.url === "/api/live",
     }),
   });
+
+  // One JSON shape for every error, including the ones the plugins below
+  // raise.
+  app.setErrorHandler(errorHandler);
 
   // The web baseline, before any route, so every response and request goes
   // through it (ADR 0012, decisions 7 and 8).

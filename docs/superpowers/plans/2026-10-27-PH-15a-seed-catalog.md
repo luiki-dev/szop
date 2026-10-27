@@ -120,16 +120,16 @@
 **Interfaces:**
 - Produces: `apiErrorSchema = z.object({ error: z.object({ code: z.string(), message: z.string() }) })`, `type ApiError` (shared); in `errors.ts`: `sendError(reply: FastifyReply, status: number, code: string, message: string): FastifyReply` and `errorHandler` (the function given to `app.setErrorHandler` in `buildApp`). Task 4 adds the 400 branch.
 
-- [ ] **Step 1: Write the failing tests** in `errors.test.ts` (adding throwaway routes after `buildApp`, as `json-only.test.ts` does):
+- [x] **Step 1: Write the failing tests** in `errors.test.ts` (adding throwaway routes after `buildApp`, as `json-only.test.ts` does):
   - `it("NFR-4.11: answers an unexpected error with a generic 500 and logs the details")`: a route throwing `new Error("secret detail")` → 500, `apiErrorSchema` accepts the body, `{ error: { code: "internal_error", message: "Internal server error" } }`, the raw body does not contain "secret detail", and the captured log (`captureLog`, level info) has a line at level 50 whose `err.message` is "secret detail".
   - A route throwing an error with `statusCode: 409` → 409, code `conflict`, its message kept.
   - `GET /api/nope` and `GET /missing.js` → 404 `{ error: { code: "not_found", … } }`.
   - Update the existing expectations: the cross-site 403 → `forbidden_cross_site`; the JSON-only 415 → `unsupported_media_type`; `web/routes.test.ts`' 404 bodies. Every one checked with `apiErrorSchema`.
-- [ ] **Step 2: Run** `pnpm test -- errors cross-site json-only web/routes`. Expected: FAIL.
-- [ ] **Step 3: Implement.** `errorHandler`: a 4xx `statusCode` → that status, the code from `http.STATUS_CODES[status]` in snake case, the error's message; anything else → `request.log.error(error, "request failed")` and the generic 500. `cross-site.ts` and the not-found handler call `sendError`; their "until OP-071" comments go. Register the handler in `buildApp` before the plugins.
-- [ ] **Step 4: Run** the tests of Step 2. Expected: PASS.
-- [ ] **Step 5: Run** `pnpm check`. Expected: PASS.
-- [ ] **Step 6: Commit** `feat(api): answer every error in one JSON shape`.
+- [x] **Step 2: Run** `pnpm test -- errors cross-site json-only web/routes`. Expected: FAIL.
+- [x] **Step 3: Implement.** `errorHandler`: a 4xx `statusCode` → that status, the code from `http.STATUS_CODES[status]` in snake case, the error's message; anything else → `request.log.error(error, "request failed")` and the generic 500. `cross-site.ts` and the not-found handler call `sendError`; their "until OP-071" comments go. Register the handler in `buildApp` before the plugins.
+- [x] **Step 4: Run** the tests of Step 2. Expected: PASS.
+- [x] **Step 5: Run** `pnpm check`. Expected: PASS.
+- [x] **Step 6: Commit** `feat(api): answer every error in one JSON shape`.
 
 ### Task 4: The catalog route and serialization
 

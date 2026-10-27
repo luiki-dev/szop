@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { apiErrorSchema } from "@szop/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
 import { testConfig } from "../test/config.ts";
@@ -8,9 +9,10 @@ const safe = ["GET", "HEAD", "OPTIONS"] as const;
 const unsafe = ["POST", "PUT", "PATCH", "DELETE"] as const;
 
 const refused = {
-  statusCode: 403,
-  error: "Forbidden",
-  message: "Cross-site request refused",
+  error: {
+    code: "forbidden_cross_site",
+    message: "Cross-site request refused",
+  },
 };
 
 describe("NFR-4.1: the cross-site check", () => {
@@ -119,6 +121,6 @@ describe("NFR-4.1: the cross-site check", () => {
       },
     });
     expect(response.statusCode).toBe(403);
-    expect(response.json()).toEqual(refused);
+    expect(apiErrorSchema.parse(response.json())).toEqual(refused);
   });
 });

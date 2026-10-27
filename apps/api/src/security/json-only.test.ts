@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { apiErrorSchema } from "@szop/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
 import { testConfig } from "../test/config.ts";
@@ -42,10 +43,9 @@ describe("NFR-4.2: JSON-only bodies", () => {
     });
 
     expect(response.statusCode).toBe(415);
-    expect(response.json()).toMatchObject({
-      statusCode: 415,
-      error: "Unsupported Media Type",
-    });
+    expect(apiErrorSchema.parse(response.json()).error.code).toBe(
+      "unsupported_media_type",
+    );
   });
 
   it.each(["application/json", "application/json; charset=utf-8"])(
