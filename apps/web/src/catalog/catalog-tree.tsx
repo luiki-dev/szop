@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils.ts";
+import { findMatch } from "./search.ts";
 import { pluralize, type CatalogNode } from "./tree.ts";
 
 // 20 px per level, as classes: the CSP blocks a style attribute, so a
@@ -15,6 +16,22 @@ interface TreeProps {
   onToggle: (id: string) => void;
   // Unit names by ID, for the unit shown at the right of a product.
   unitNames: ReadonlyMap<string, string>;
+  // The search query, whose match in each name is highlighted.
+  highlight?: string;
+}
+
+function Highlighted({ text, query }: { text: string; query?: string }) {
+  const match = query === undefined ? null : findMatch(text, query);
+  if (!match) return text;
+  return (
+    <>
+      {text.slice(0, match[0])}
+      <mark className="bg-accent text-accent-foreground">
+        {text.slice(match[0], match[1])}
+      </mark>
+      {text.slice(match[1])}
+    </>
+  );
 }
 
 function CategoryItem({
@@ -22,6 +39,7 @@ function CategoryItem({
   open,
   onToggle,
   unitNames,
+  highlight,
 }: Omit<TreeProps, "nodes"> & { node: CatalogNode }) {
   const { category, depth } = node;
   const isOpen = open.has(category.id);
@@ -58,7 +76,7 @@ function CategoryItem({
           />
         )}
         <span className="min-w-0 flex-1 py-2 font-semibold wrap-break-word">
-          {category.name}
+          <Highlighted text={category.name} query={highlight} />
         </span>
         <span
           aria-hidden="true"
@@ -87,7 +105,7 @@ function CategoryItem({
                   className="size-1.5 shrink-0 rounded-full bg-muted-foreground"
                 />
                 <span className="min-w-0 flex-1 wrap-break-word">
-                  {product.name}
+                  <Highlighted text={product.name} query={highlight} />
                 </span>
                 {unit !== undefined && (
                   <span className="shrink-0 text-sm text-muted-foreground">
@@ -104,6 +122,7 @@ function CategoryItem({
               open={open}
               onToggle={onToggle}
               unitNames={unitNames}
+              highlight={highlight}
             />
           ))}
         </ul>
@@ -116,7 +135,13 @@ function CategoryItem({
 // pattern, not an ARIA tree: no arrow-key model to learn). Top-level
 // categories are cards; below them a tinted band sets category rows apart
 // from product rows.
-export function CatalogTree({ nodes, open, onToggle, unitNames }: TreeProps) {
+export function CatalogTree({
+  nodes,
+  open,
+  onToggle,
+  unitNames,
+  highlight,
+}: TreeProps) {
   return (
     <ul className="flex flex-col gap-3">
       {nodes.map((node) => (
@@ -126,6 +151,7 @@ export function CatalogTree({ nodes, open, onToggle, unitNames }: TreeProps) {
           open={open}
           onToggle={onToggle}
           unitNames={unitNames}
+          highlight={highlight}
         />
       ))}
     </ul>
