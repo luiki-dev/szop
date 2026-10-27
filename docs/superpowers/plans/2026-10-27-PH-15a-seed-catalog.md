@@ -97,19 +97,19 @@
 - Consumes: `Catalog`, `catalogSchema` from Task 1.
 - Produces (`catalog/seed.ts`): `seedLimits = { categories: 300, depth: 5, products: 2000, units: 50, nameLength: 100 } as const`; `parseSeed(text: string): Catalog` (throws `Error` with a message naming the entry and the rule); `loadSeed(): Catalog` (reads `new URL("./seed.yaml", import.meta.url)`).
 
-- [ ] **Step 1:** `pnpm --filter @szop/api add yaml@^2.9.1`.
-- [ ] **Step 2: Write the failing tests** in `seed.test.ts`, on small YAML strings:
+- [x] **Step 1:** `pnpm --filter @szop/api add yaml@^2.9.1`.
+- [x] **Step 2: Write the failing tests** in `seed.test.ts`, on small YAML strings:
   - A valid file (the spec's example) → `catalogSchema.parse(result)` equals `result`; "Dairy & eggs" has `parentId: null`, `position: 0`; "Milk" has "Dairy & eggs"'s ID as parent; "Plant-based" depth 2; "Oat milk"'s `unitId` is the ID of `l`; a product without `unit` has `unitId: null`; IDs are unique.
   - A unit called `no` and a category called `off` stay the strings "no" and "off".
   - Each broken rule throws, the message matched with `toThrow(/…/)`: a duplicate category name in another case anywhere in the tree (`/Dairy & eggs › Milk.*"milk".*used twice/i` or the builder's equivalent naming the path and the name); a duplicate product name; an unknown unit (names the product and the unit); depth 6; an empty or blank name; a name of 101 characters; an unknown key (`colour:`); a duplicate YAML key; a YAML syntax error (the message holds the line number); `name: 2024`, `name: null` and `name:` (Review Focus 1); a duplicate unit.
   - `describe("the real seed file")` (OP-052): `loadSeed()` does not throw; the category count ≤ 300, depth ≤ 5, products ≤ 2,000, units ≤ 50; 18 to 22 top-level categories; "Oat milk" sits under "Plant-based" › "Milk" › "Dairy & eggs"; and the test logs one line, `seed quota use: categories N/300, products N/2000, units N/50, deepest level N/5`, for the PR.
-- [ ] **Step 3: Run** `pnpm test -- seed`. Expected: FAIL.
-- [ ] **Step 4: Implement `seed.ts`.** `parseDocument(text, { version: "1.2", uniqueKeys: true })`; any `doc.errors` → throw with the first error's message (it carries the line). The file's shape as a strict Zod schema (a recursive category with optional `products` and `subcategories`; names `z.string().trim().min(1).max(100)`), its issues turned into the entry's path by category names, not indices. Then the cross-entry rules (uniqueness, units, depth, counts), then the flattening: categories in pre-order with `position` = index among siblings; IDs `c1…`, `p1…`, `u1…` in file order. A comment at the top names the spec's decisions 1 to 3.
-- [ ] **Step 5: Write `seed.yaml`.** The header comment, then `units` and about 20 top-level categories of a Lidl- or Biedronka-like store in walking order (produce first, household and non-food last), each with 5 or 6 subcategories, a few typical products each, 300 to 500 products in total, English names, a few with accents (at least "Crème fraîche") and with numbers. No prices.
-- [ ] **Step 6: Run** the tests of Step 3. Expected: PASS; note the quota line.
-- [ ] **Step 7: `server.ts`** calls `loadSeed()` right after `loadConfig`, in the same `try`, so a broken seed prints its message and exits 1 before the database is touched; Task 4 passes the result to `buildApp`. Check by hand: break the file, `pnpm --filter @szop/api dev`, see the message and the exit; restore. Note it for the PR.
-- [ ] **Step 8: Run** `pnpm check` and `pnpm check:image` (the seed must be in the image: `apps/api/src` is copied). Expected: PASS.
-- [ ] **Step 9: Commit** `feat(api): add the seed catalog in YAML, checked at startup`.
+- [x] **Step 3: Run** `pnpm test -- seed`. Expected: FAIL.
+- [x] **Step 4: Implement `seed.ts`.** `parseDocument(text, { version: "1.2", uniqueKeys: true })`; any `doc.errors` → throw with the first error's message (it carries the line). The file's shape as a strict Zod schema (a recursive category with optional `products` and `subcategories`; names `z.string().trim().min(1).max(100)`), its issues turned into the entry's path by category names, not indices. Then the cross-entry rules (uniqueness, units, depth, counts), then the flattening: categories in pre-order with `position` = index among siblings; IDs `c1…`, `p1…`, `u1…` in file order. A comment at the top names the spec's decisions 1 to 3.
+- [x] **Step 5: Write `seed.yaml`.** The header comment, then `units` and about 20 top-level categories of a Lidl- or Biedronka-like store in walking order (produce first, household and non-food last), each with 5 or 6 subcategories, a few typical products each, 300 to 500 products in total, English names, a few with accents (at least "Crème fraîche") and with numbers. No prices.
+- [x] **Step 6: Run** the tests of Step 3. Expected: PASS; note the quota line.
+- [x] **Step 7: `server.ts`** calls `loadSeed()` right after `loadConfig`, in the same `try`, so a broken seed prints its message and exits 1 before the database is touched; Task 4 passes the result to `buildApp`. Check by hand: break the file, `pnpm --filter @szop/api dev`, see the message and the exit; restore. Note it for the PR.
+- [x] **Step 8: Run** `pnpm check` and `pnpm check:image` (the seed must be in the image: `apps/api/src` is copied). Expected: PASS.
+- [x] **Step 9: Commit** `feat(api): add the seed catalog in YAML, checked at startup`.
 
 ### Task 3: The error shape
 

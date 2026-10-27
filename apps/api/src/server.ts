@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { buildApp } from "./app.ts";
+import { loadSeed } from "./catalog/seed.ts";
 import { loadConfig, type Config } from "./config.ts";
 import { createDatabase } from "./db/database.ts";
 import { runMigrations } from "./db/migrate.ts";
@@ -11,9 +12,12 @@ import { startShutdownDeadline } from "./shutdown.ts";
 
 // The only file that reads process.env. Checked by hand, not by tests:
 // everything it calls is tested (ADR 0019, decision 10).
+// The seed catalog is checked here too, so a broken seed stops the start
+// before the database is touched (PH-15a spec, decision 3).
 let config: Config;
 try {
   config = loadConfig(process.env);
+  loadSeed();
 } catch (error) {
   console.error((error as Error).message);
   process.exit(1);

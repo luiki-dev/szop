@@ -1,0 +1,700 @@
+# Szop's default catalog: the categories, products and units every
+# workspace starts with (ACC-1). Categories are shown in this file's
+# order, the store's order; products are shown alphabetically.
+# The E2E test relies on "Dairy & eggs" and "Oat milk": rename them
+# together with e2e/tests/catalog.spec.ts.
+units: [pcs, kg, g, l, ml, pack]
+
+categories:
+  - name: Fruit & vegetables
+    subcategories:
+      - name: Fresh fruit
+        products:
+          - { name: Apples, unit: kg }
+          - { name: Bananas, unit: kg }
+          - { name: Pears, unit: kg }
+          - { name: Oranges, unit: kg }
+      - name: Fresh vegetables
+        products:
+          - { name: Tomatoes, unit: kg }
+          - { name: Cucumbers, unit: kg }
+          - { name: Carrots, unit: kg }
+          - { name: Onions, unit: kg }
+      - name: Salad & herbs
+        products:
+          - { name: Lettuce, unit: pcs }
+          - { name: Rocket, unit: pcs }
+          - { name: Spinach, unit: pcs }
+          - { name: Parsley, unit: pcs }
+      - name: Mushrooms
+        products:
+          - { name: Button mushrooms, unit: g }
+          - { name: Chestnut mushrooms, unit: g }
+          - { name: Oyster mushrooms, unit: g }
+          - { name: Shiitake, unit: g }
+      - name: Exotic fruit
+        products:
+          - { name: Avocado, unit: pcs }
+          - { name: Mango, unit: pcs }
+          - { name: Pineapple, unit: pcs }
+          - { name: Pomegranate, unit: pcs }
+      - name: Nuts & dried fruit
+        products:
+          - { name: Almonds, unit: g }
+          - { name: Walnuts, unit: g }
+          - { name: Cashews, unit: g }
+          - { name: Raisins, unit: g }
+  - name: Bakery
+    subcategories:
+      - name: Bread
+        products:
+          - { name: Wholegrain bread, unit: pcs }
+          - { name: Rye bread, unit: pcs }
+          - { name: Sourdough loaf, unit: pcs }
+          - { name: Toast bread, unit: pcs }
+      - name: Rolls
+        products:
+          - { name: Wheat rolls, unit: pcs }
+          - { name: Kaiser rolls, unit: pcs }
+          - { name: Seeded rolls, unit: pcs }
+          - { name: Burger buns, unit: pcs }
+      - name: Sweet pastries
+        products:
+          - { name: Croissants, unit: pcs }
+          - { name: Cinnamon rolls, unit: pcs }
+          - { name: Doughnuts, unit: pcs }
+          - { name: Cheese danish, unit: pcs }
+      - name: Cakes
+        products:
+          - { name: Cheesecake, unit: pcs }
+          - { name: Apple pie, unit: pcs }
+          - { name: Chocolate cake, unit: pcs }
+          - { name: Muffins, unit: pcs }
+      - name: Bake-off
+        products:
+          - { name: Bake-off baguettes, unit: pack }
+          - { name: Bake-off rolls, unit: pack }
+          - { name: Pretzels, unit: pack }
+          - { name: Pizza dough, unit: pack }
+  - name: Dairy & eggs
+    subcategories:
+      - name: Milk
+        products:
+          - { name: Milk, unit: l }
+          - { name: Lactose-free milk, unit: l }
+          - { name: Buttermilk, unit: l }
+          - { name: Condensed milk, unit: l }
+        subcategories:
+          - name: Plant-based
+            products:
+              - { name: Oat milk, unit: l }
+              - { name: Soy milk, unit: l }
+              - { name: Almond milk, unit: l }
+              - { name: Coconut milk, unit: l }
+      - name: Yoghurt & desserts
+        products:
+          - { name: Natural yoghurt, unit: pcs }
+          - { name: Greek yoghurt, unit: pcs }
+          - { name: Fruit yoghurt, unit: pcs }
+          - { name: Skyr, unit: pcs }
+      - name: Cheese
+        products:
+          - { name: Gouda, unit: g }
+          - { name: Edam, unit: g }
+          - { name: Mozzarella, unit: g }
+          - { name: Feta, unit: g }
+      - name: Butter & cream
+        products:
+          - { name: Butter, unit: g }
+          - { name: Crème fraîche, unit: g }
+          - { name: Sour cream, unit: g }
+          - { name: Whipping cream, unit: g }
+      - name: Eggs
+        products:
+          - { name: Eggs, unit: pcs }
+          - { name: Free-range eggs, unit: pcs }
+          - { name: Quail eggs, unit: pcs }
+          - { name: Eggs 10 pack, unit: pcs }
+  - name: Meat & poultry
+    subcategories:
+      - name: Chicken
+        products:
+          - { name: Chicken breast, unit: kg }
+          - { name: Chicken thighs, unit: kg }
+          - { name: Whole chicken, unit: kg }
+          - { name: Chicken wings, unit: kg }
+      - name: Pork
+        products:
+          - { name: Pork loin, unit: kg }
+          - { name: Pork neck, unit: kg }
+          - { name: Pork ribs, unit: kg }
+          - { name: Minced pork, unit: kg }
+      - name: Beef
+        products:
+          - { name: Beef steak, unit: kg }
+          - { name: Minced beef, unit: kg }
+          - { name: Beef rump, unit: kg }
+          - { name: Beef ribs, unit: kg }
+      - name: Turkey & duck
+        products:
+          - { name: Turkey breast, unit: kg }
+          - { name: Duck breast, unit: kg }
+          - { name: Whole duck, unit: kg }
+          - { name: Turkey thighs, unit: kg }
+      - name: Burgers & marinated
+        products:
+          - { name: Beef burgers, unit: pack }
+          - { name: Marinated skewers, unit: pack }
+          - { name: Meatballs, unit: pack }
+          - { name: Chicken nuggets, unit: pack }
+  - name: Cold cuts & sausages
+    subcategories:
+      - name: Ham
+        products:
+          - { name: Cooked ham, unit: g }
+          - { name: Smoked ham, unit: g }
+          - { name: Turkey ham, unit: g }
+          - { name: Prosciutto, unit: g }
+      - name: Sausages
+        products:
+          - { name: Frankfurters, unit: pack }
+          - { name: Kabanos, unit: pack }
+          - { name: Chorizo, unit: pack }
+          - { name: Smoked sausage, unit: pack }
+      - name: Salami
+        products:
+          - { name: Salami, unit: g }
+          - { name: Pepperoni, unit: g }
+          - { name: Mortadella, unit: g }
+          - { name: Pâté, unit: g }
+      - name: Bacon
+        products:
+          - { name: Bacon rashers, unit: g }
+          - { name: Diced bacon, unit: g }
+          - { name: Smoked bacon, unit: g }
+          - { name: Pancetta, unit: g }
+      - name: Spreads
+        products:
+          - { name: Chicken spread, unit: pcs }
+          - { name: Pork spread, unit: pcs }
+          - { name: Vegetable spread, unit: pcs }
+          - { name: Tuna spread, unit: pcs }
+  - name: Fish & seafood
+    subcategories:
+      - name: Fresh fish
+        products:
+          - { name: Salmon fillet, unit: kg }
+          - { name: Cod fillet, unit: kg }
+          - { name: Trout, unit: kg }
+          - { name: Sea bass, unit: kg }
+      - name: Smoked fish
+        products:
+          - { name: Smoked salmon, unit: g }
+          - { name: Smoked mackerel, unit: g }
+          - { name: Smoked trout, unit: g }
+          - { name: Smoked sprats, unit: g }
+      - name: Seafood
+        products:
+          - { name: Prawns, unit: g }
+          - { name: Mussels, unit: g }
+          - { name: Squid rings, unit: g }
+          - { name: Crab sticks, unit: g }
+      - name: Canned fish
+        products:
+          - { name: Tuna in water, unit: pcs }
+          - { name: Tuna in oil, unit: pcs }
+          - { name: Sardines, unit: pcs }
+          - { name: Mackerel in tomato sauce, unit: pcs }
+      - name: Frozen fish
+        products:
+          - { name: Fish fingers, unit: pack }
+          - { name: Breaded cod, unit: pack }
+          - { name: Frozen salmon, unit: pack }
+          - { name: Frozen shrimps, unit: pack }
+  - name: Ready meals & deli
+    subcategories:
+      - name: Salads
+        products:
+          - { name: Pasta salad, unit: pcs }
+          - { name: Coleslaw, unit: pcs }
+          - { name: Potato salad, unit: pcs }
+          - { name: Greek salad, unit: pcs }
+      - name: Soups
+        products:
+          - { name: Tomato soup, unit: pcs }
+          - { name: Chicken soup, unit: pcs }
+          - { name: Pea soup, unit: pcs }
+          - { name: Borscht, unit: pcs }
+      - name: Chilled meals
+        products:
+          - { name: Lasagne, unit: pack }
+          - { name: Pierogi, unit: pack }
+          - { name: Gnocchi, unit: pack }
+          - { name: Fresh pasta, unit: pack }
+      - name: Dips & hummus
+        products:
+          - { name: Hummus, unit: pcs }
+          - { name: Guacamole, unit: pcs }
+          - { name: Tzatziki, unit: pcs }
+          - { name: Salsa dip, unit: pcs }
+      - name: Sandwiches & wraps
+        products:
+          - { name: Ham sandwich, unit: pcs }
+          - { name: Chicken wrap, unit: pcs }
+          - { name: Veggie wrap, unit: pcs }
+          - { name: Egg sandwich, unit: pcs }
+  - name: Frozen food
+    subcategories:
+      - name: Frozen vegetables
+        products:
+          - { name: Frozen peas, unit: pack }
+          - { name: Frozen spinach, unit: pack }
+          - { name: Frozen broccoli, unit: pack }
+          - { name: Stir-fry mix, unit: pack }
+      - name: Frozen fruit
+        products:
+          - { name: Frozen strawberries, unit: pack }
+          - { name: Frozen raspberries, unit: pack }
+          - { name: Frozen blueberries, unit: pack }
+          - { name: Smoothie mix, unit: pack }
+      - name: Frozen pizza & snacks
+        products:
+          - { name: Frozen pizza margherita, unit: pcs }
+          - { name: Frozen pizza salami, unit: pcs }
+          - { name: Garlic bread, unit: pcs }
+          - { name: Spring rolls, unit: pcs }
+      - name: Chips & potatoes
+        products:
+          - { name: French fries, unit: pack }
+          - { name: Potato wedges, unit: pack }
+          - { name: Hash browns, unit: pack }
+          - { name: Croquettes, unit: pack }
+      - name: Ice cream
+        products:
+          - { name: Vanilla ice cream, unit: pcs }
+          - { name: Chocolate ice cream, unit: pcs }
+          - { name: Ice lollies, unit: pcs }
+          - { name: Ice cream tub 1 l, unit: pcs }
+      - name: Frozen bread
+        products:
+          - { name: Frozen croissants, unit: pack }
+          - { name: Frozen buns, unit: pack }
+          - { name: Frozen dumplings, unit: pack }
+  - name: Pasta, rice & grains
+    subcategories:
+      - name: Pasta
+        products:
+          - { name: Spaghetti, unit: pack }
+          - { name: Penne, unit: pack }
+          - { name: Fusilli, unit: pack }
+          - { name: Tagliatelle, unit: pack }
+      - name: Rice
+        products:
+          - { name: Basmati rice, unit: pack }
+          - { name: Jasmine rice, unit: pack }
+          - { name: Long-grain rice, unit: pack }
+          - { name: Risotto rice, unit: pack }
+      - name: Groats & grains
+        products:
+          - { name: Buckwheat, unit: pack }
+          - { name: Couscous, unit: pack }
+          - { name: Bulgur, unit: pack }
+          - { name: Pearl barley, unit: pack }
+      - name: Flour
+        products:
+          - { name: Wheat flour, unit: kg }
+          - { name: Rye flour, unit: kg }
+          - { name: Wholemeal flour, unit: kg }
+          - { name: Spelt flour, unit: kg }
+      - name: Noodles
+        products:
+          - { name: Egg noodles, unit: pack }
+          - { name: Rice noodles, unit: pack }
+          - { name: Instant noodles, unit: pack }
+          - { name: Soba noodles, unit: pack }
+  - name: Canned & jarred
+    subcategories:
+      - name: Canned vegetables
+        products:
+          - { name: Chopped tomatoes, unit: pcs }
+          - { name: Sweetcorn, unit: pcs }
+          - { name: Kidney beans, unit: pcs }
+          - { name: Chickpeas, unit: pcs }
+      - name: Tomato products
+        products:
+          - { name: Tomato passata, unit: pcs }
+          - { name: Tomato paste, unit: pcs }
+          - { name: Ketchup, unit: pcs }
+          - { name: Pasta sauce, unit: pcs }
+      - name: Pickles & jars
+        products:
+          - { name: Pickled cucumbers, unit: pcs }
+          - { name: Sauerkraut, unit: pcs }
+          - { name: Beetroot, unit: pcs }
+          - { name: Olives, unit: pcs }
+      - name: Canned fruit
+        products:
+          - { name: Peaches in syrup, unit: pcs }
+          - { name: Pineapple slices, unit: pcs }
+          - { name: Fruit cocktail, unit: pcs }
+          - { name: Mandarin segments, unit: pcs }
+      - name: Ready sauces
+        products:
+          - { name: Curry sauce, unit: pcs }
+          - { name: Bolognese sauce, unit: pcs }
+          - { name: Pesto, unit: pcs }
+          - { name: Sweet and sour sauce, unit: pcs }
+  - name: Spices, oils & baking
+    subcategories:
+      - name: Spices
+        products:
+          - { name: Salt, unit: pcs }
+          - { name: Black pepper, unit: pcs }
+          - { name: Paprika, unit: pcs }
+          - { name: Cinnamon, unit: pcs }
+      - name: Oils & vinegar
+        products:
+          - { name: Rapeseed oil, unit: ml }
+          - { name: Olive oil, unit: ml }
+          - { name: Sunflower oil, unit: ml }
+          - { name: Balsamic vinegar, unit: ml }
+      - name: Sugar & sweeteners
+        products:
+          - { name: Sugar, unit: kg }
+          - { name: Icing sugar, unit: kg }
+          - { name: Brown sugar, unit: kg }
+          - { name: Honey, unit: kg }
+      - name: Baking
+        products:
+          - { name: Baking powder, unit: pack }
+          - { name: Vanilla sugar, unit: pack }
+          - { name: Yeast, unit: pack }
+          - { name: Cocoa powder, unit: pack }
+      - name: Stock & seasoning
+        products:
+          - { name: Chicken stock cubes, unit: pcs }
+          - { name: Vegetable stock, unit: pcs }
+          - { name: Maggi seasoning, unit: pcs }
+          - { name: Bay leaves, unit: pcs }
+  - name: Breakfast & spreads
+    subcategories:
+      - name: Cereals
+        products:
+          - { name: Cornflakes, unit: pack }
+          - { name: Muesli, unit: pack }
+          - { name: Porridge oats, unit: pack }
+          - { name: Granola, unit: pack }
+      - name: Jams & honey
+        products:
+          - { name: Strawberry jam, unit: pcs }
+          - { name: Plum jam, unit: pcs }
+          - { name: Raspberry jam, unit: pcs }
+          - { name: Marmalade, unit: pcs }
+      - name: Chocolate spreads
+        products:
+          - { name: Hazelnut spread, unit: pcs }
+          - { name: Peanut butter, unit: pcs }
+          - { name: Almond butter, unit: pcs }
+          - { name: Tahini, unit: pcs }
+      - name: Crispbread & rusks
+        products:
+          - { name: Crispbread, unit: pack }
+          - { name: Rice cakes, unit: pack }
+          - { name: Rusks, unit: pack }
+          - { name: Wafers, unit: pack }
+      - name: Pancakes & waffles
+        products:
+          - { name: Pancake mix, unit: pack }
+          - { name: Waffles, unit: pack }
+          - { name: Maple pancakes, unit: pack }
+          - { name: Crêpes, unit: pack }
+  - name: Sweets & snacks
+    subcategories:
+      - name: Chocolate
+        products:
+          - { name: Milk chocolate, unit: pcs }
+          - { name: Dark chocolate 70%, unit: pcs }
+          - { name: White chocolate, unit: pcs }
+          - { name: Chocolate with nuts, unit: pcs }
+      - name: Biscuits & cookies
+        products:
+          - { name: Butter biscuits, unit: pack }
+          - { name: Oat cookies, unit: pack }
+          - { name: Chocolate cookies, unit: pack }
+          - { name: Gingerbread, unit: pack }
+      - name: Sweets
+        products:
+          - { name: Gummy bears, unit: pack }
+          - { name: Hard candy, unit: pack }
+          - { name: Toffees, unit: pack }
+          - { name: Liquorice, unit: pack }
+      - name: Crisps & snacks
+        products:
+          - { name: Salted crisps, unit: pack }
+          - { name: Paprika crisps, unit: pack }
+          - { name: Tortilla chips, unit: pack }
+          - { name: Popcorn, unit: pack }
+      - name: Nuts to snack
+        products:
+          - { name: Salted peanuts, unit: pack }
+          - { name: Mixed nuts, unit: pack }
+          - { name: Roasted cashews, unit: pack }
+          - { name: Sunflower seeds, unit: pack }
+  - name: Drinks
+    subcategories:
+      - name: Water
+        products:
+          - { name: Still water, unit: l }
+          - { name: Sparkling water, unit: l }
+          - { name: Flavoured water, unit: l }
+          - { name: Mineral water 1.5 l, unit: l }
+      - name: Soft drinks
+        products:
+          - { name: Cola, unit: l }
+          - { name: Lemonade, unit: l }
+          - { name: Orange soda, unit: l }
+          - { name: Iced tea, unit: l }
+      - name: Juices
+        products:
+          - { name: Orange juice, unit: l }
+          - { name: Apple juice, unit: l }
+          - { name: Multivitamin juice, unit: l }
+          - { name: Tomato juice, unit: l }
+      - name: Plant drinks
+        products:
+          - { name: Soy drink, unit: l }
+          - { name: Almond drink, unit: l }
+          - { name: Rice drink, unit: l }
+          - { name: Coconut drink, unit: l }
+      - name: Syrups & concentrates
+        products:
+          - { name: Raspberry syrup, unit: ml }
+          - { name: Lemon concentrate, unit: ml }
+          - { name: Elderflower cordial, unit: ml }
+  - name: Coffee & tea
+    subcategories:
+      - name: Ground coffee
+        products:
+          - { name: Ground coffee, unit: g }
+          - { name: Strong ground coffee, unit: g }
+          - { name: Decaf ground coffee, unit: g }
+      - name: Coffee beans
+        products:
+          - { name: Coffee beans, unit: kg }
+          - { name: Espresso beans, unit: kg }
+          - { name: Arabica beans, unit: kg }
+      - name: Instant coffee
+        products:
+          - { name: Instant coffee, unit: pcs }
+          - { name: Cappuccino sachets, unit: pcs }
+          - { name: Latte sachets, unit: pcs }
+          - { name: 3in1 coffee, unit: pcs }
+      - name: Tea
+        products:
+          - { name: Black tea, unit: pack }
+          - { name: Green tea, unit: pack }
+          - { name: Fruit tea, unit: pack }
+          - { name: Peppermint tea, unit: pack }
+      - name: Cocoa & hot drinks
+        products:
+          - { name: Drinking chocolate, unit: pcs }
+          - { name: Cocoa drink, unit: pcs }
+          - { name: Chai latte, unit: pcs }
+  - name: Beer, wine & spirits
+    subcategories:
+      - name: Beer
+        products:
+          - { name: Lager, unit: pcs }
+          - { name: Wheat beer, unit: pcs }
+          - { name: IPA, unit: pcs }
+          - { name: Non-alcoholic beer, unit: pcs }
+      - name: Red wine
+        products:
+          - { name: Merlot, unit: pcs }
+          - { name: Cabernet Sauvignon, unit: pcs }
+          - { name: Malbec, unit: pcs }
+          - { name: Tempranillo, unit: pcs }
+      - name: White wine
+        products:
+          - { name: Chardonnay, unit: pcs }
+          - { name: Riesling, unit: pcs }
+          - { name: Pinot Grigio, unit: pcs }
+          - { name: Sauvignon Blanc, unit: pcs }
+      - name: Sparkling wine
+        products:
+          - { name: Prosecco, unit: pcs }
+          - { name: Cava, unit: pcs }
+          - { name: Sparkling rosé, unit: pcs }
+          - { name: Champagne, unit: pcs }
+      - name: Spirits
+        products:
+          - { name: Vodka, unit: pcs }
+          - { name: Whisky, unit: pcs }
+          - { name: Gin, unit: pcs }
+          - { name: Rum, unit: pcs }
+  - name: Baby & kids
+    subcategories:
+      - name: Baby food
+        products:
+          - { name: Fruit puree pouch, unit: pcs }
+          - { name: Vegetable puree jar, unit: pcs }
+          - { name: Baby cereal, unit: pcs }
+          - { name: Baby biscuits, unit: pcs }
+      - name: Nappies & wipes
+        products:
+          - { name: Nappies size 3, unit: pack }
+          - { name: Nappies size 4, unit: pack }
+          - { name: Baby wipes, unit: pack }
+          - { name: Training pants, unit: pack }
+      - name: Baby care
+        products:
+          - { name: Baby shampoo, unit: pcs }
+          - { name: Baby lotion, unit: pcs }
+          - { name: Nappy cream, unit: pcs }
+          - { name: Baby powder, unit: pcs }
+      - name: Kids snacks
+        products:
+          - { name: Fruit snacks, unit: pack }
+          - { name: Kids yoghurt pouches, unit: pack }
+          - { name: Rice crackers for kids, unit: pack }
+          - { name: Mini cheese, unit: pack }
+      - name: Toys & stationery
+        products:
+          - { name: Colouring book, unit: pcs }
+          - { name: Crayons, unit: pcs }
+          - { name: Stickers, unit: pcs }
+          - { name: Playdough, unit: pcs }
+  - name: Health & beauty
+    subcategories:
+      - name: Hair care
+        products:
+          - { name: Shampoo, unit: pcs }
+          - { name: Conditioner, unit: pcs }
+          - { name: Hair mask, unit: pcs }
+          - { name: Hair spray, unit: pcs }
+      - name: Body care
+        products:
+          - { name: Shower gel, unit: pcs }
+          - { name: Body lotion, unit: pcs }
+          - { name: Deodorant, unit: pcs }
+          - { name: Hand cream, unit: pcs }
+      - name: Dental care
+        products:
+          - { name: Toothpaste, unit: pcs }
+          - { name: Toothbrush, unit: pcs }
+          - { name: Mouthwash, unit: pcs }
+          - { name: Dental floss, unit: pcs }
+      - name: Face care
+        products:
+          - { name: Face cream, unit: pcs }
+          - { name: Micellar water, unit: pcs }
+          - { name: Face wash, unit: pcs }
+          - { name: Lip balm, unit: pcs }
+      - name: Pharmacy
+        products:
+          - { name: Paracetamol, unit: pack }
+          - { name: Ibuprofen, unit: pack }
+          - { name: Plasters, unit: pack }
+          - { name: Vitamin C, unit: pack }
+      - name: Hygiene
+        products:
+          - { name: Toilet paper, unit: pack }
+          - { name: Tampons, unit: pack }
+          - { name: Sanitary pads, unit: pack }
+          - { name: Cotton pads, unit: pack }
+  - name: Cleaning & laundry
+    subcategories:
+      - name: Laundry
+        products:
+          - { name: Washing powder, unit: pcs }
+          - { name: Washing capsules, unit: pcs }
+          - { name: Fabric softener, unit: pcs }
+          - { name: Stain remover, unit: pcs }
+      - name: Dishwashing
+        products:
+          - { name: Dish soap, unit: pcs }
+          - { name: Dishwasher tablets, unit: pcs }
+          - { name: Dishwasher salt, unit: pcs }
+          - { name: Rinse aid, unit: pcs }
+      - name: Surface cleaners
+        products:
+          - { name: All-purpose cleaner, unit: pcs }
+          - { name: Glass cleaner, unit: pcs }
+          - { name: Bathroom cleaner, unit: pcs }
+          - { name: Limescale remover, unit: pcs }
+      - name: Bin bags & wipes
+        products:
+          - { name: Bin bags 35 l, unit: pack }
+          - { name: Bin bags 60 l, unit: pack }
+          - { name: Kitchen roll, unit: pack }
+          - { name: Cleaning wipes, unit: pack }
+      - name: Air fresheners
+        products:
+          - { name: Air freshener spray, unit: pcs }
+          - { name: Toilet blocks, unit: pcs }
+          - { name: Scented candle, unit: pcs }
+          - { name: Odour absorber, unit: pcs }
+  - name: Home & kitchen
+    subcategories:
+      - name: Kitchenware
+        products:
+          - { name: Frying pan, unit: pcs }
+          - { name: Saucepan, unit: pcs }
+          - { name: Chopping board, unit: pcs }
+          - { name: Kitchen knife, unit: pcs }
+      - name: Tableware
+        products:
+          - { name: Plates, unit: pcs }
+          - { name: Mugs, unit: pcs }
+          - { name: Glasses, unit: pcs }
+          - { name: Cutlery set, unit: pcs }
+      - name: Food storage
+        products:
+          - { name: Lunch box, unit: pcs }
+          - { name: Cling film, unit: pcs }
+          - { name: Aluminium foil, unit: pcs }
+          - { name: Baking paper, unit: pcs }
+      - name: Light & batteries
+        products:
+          - { name: AA batteries, unit: pack }
+          - { name: AAA batteries, unit: pack }
+          - { name: LED bulbs, unit: pack }
+          - { name: Candles, unit: pack }
+      - name: Textiles
+        products:
+          - { name: Tea towels, unit: pcs }
+          - { name: Bath towel, unit: pcs }
+          - { name: Bed sheets, unit: pcs }
+          - { name: Pillow, unit: pcs }
+  - name: Pets & garden
+    subcategories:
+      - name: Dog food
+        products:
+          - { name: Dry dog food, unit: pcs }
+          - { name: Wet dog food, unit: pcs }
+          - { name: Dog treats, unit: pcs }
+          - { name: Dog chews, unit: pcs }
+      - name: Cat food
+        products:
+          - { name: Dry cat food, unit: pcs }
+          - { name: Wet cat food, unit: pcs }
+          - { name: Cat treats, unit: pcs }
+          - { name: Cat litter, unit: pcs }
+      - name: Plants & flowers
+        products:
+          - { name: Cut flowers, unit: pcs }
+          - { name: Potted plant, unit: pcs }
+          - { name: Herb pot, unit: pcs }
+          - { name: Plant fertiliser, unit: pcs }
+      - name: Garden
+        products:
+          - { name: Potting soil, unit: pcs }
+          - { name: Garden gloves, unit: pcs }
+          - { name: Plant pots, unit: pcs }
+          - { name: Seeds, unit: pcs }
+      - name: Bird & small pets
+        products:
+          - { name: Bird seed, unit: pcs }
+          - { name: Rabbit food, unit: pcs }
+          - { name: Hamster bedding, unit: pcs }
+          - { name: Fish food, unit: pcs }
