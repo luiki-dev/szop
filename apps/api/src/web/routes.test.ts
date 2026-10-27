@@ -3,6 +3,7 @@ import type { FastifyInstance } from "fastify";
 import { apiErrorSchema } from "@szop/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
+import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
 import { useWebRoot, webRootFiles } from "../test/web-root.ts";
@@ -19,7 +20,11 @@ describe("serving the SPA", () => {
   });
 
   function start(root = webRoot.path): FastifyInstance {
-    app = buildApp({ config: testConfig({ webRoot: root }), db: database.db });
+    app = buildApp({
+      catalog: testCatalog,
+      config: testConfig({ webRoot: root }),
+      db: database.db,
+    });
     return app;
   }
 

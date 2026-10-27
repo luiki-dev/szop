@@ -1,3 +1,4 @@
+import type { Catalog } from "@szop/shared";
 import { sql } from "drizzle-orm";
 import { buildApp } from "./app.ts";
 import { loadSeed } from "./catalog/seed.ts";
@@ -15,9 +16,10 @@ import { startShutdownDeadline } from "./shutdown.ts";
 // The seed catalog is checked here too, so a broken seed stops the start
 // before the database is touched (PH-15a spec, decision 3).
 let config: Config;
+let catalog: Catalog;
 try {
   config = loadConfig(process.env);
-  loadSeed();
+  catalog = loadSeed();
 } catch (error) {
   console.error((error as Error).message);
   process.exit(1);
@@ -25,7 +27,7 @@ try {
 
 // server.ts creates the pool, so server.ts closes it (ADR 0020, decision 12).
 const db = createDatabase(config.database);
-const app = buildApp({ config, db });
+const app = buildApp({ config, db, catalog });
 // Not logged whole: pg-pool attaches the whole client to the error.
 db.$client.on("error", (error: Error & { code?: string }) => {
   app.log.warn(

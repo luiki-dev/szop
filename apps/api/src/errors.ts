@@ -1,6 +1,7 @@
 import { STATUS_CODES } from "node:http";
 import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
 import type { ApiError } from "@szop/shared";
+import { hasZodFastifySchemaValidationErrors } from "fastify-type-provider-zod";
 
 // Answers with the API's one error body: { error: { code, message } }.
 export function sendError(
@@ -28,6 +29,9 @@ export function errorHandler(
   request: FastifyRequest,
   reply: FastifyReply,
 ): FastifyReply {
+  if (hasZodFastifySchemaValidationErrors(error)) {
+    return sendError(reply, 400, "invalid_input", error.message);
+  }
   const status = error.statusCode;
   if (status !== undefined && status >= 400 && status < 500) {
     return sendError(reply, status, codeFor(status), error.message);

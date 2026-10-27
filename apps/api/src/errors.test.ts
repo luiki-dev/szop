@@ -1,7 +1,9 @@
 import { apiErrorSchema } from "@szop/shared";
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
+import { z } from "zod";
 import { buildApp } from "./app.ts";
+import { testCatalog } from "./test/catalog.ts";
 import { testConfig } from "./test/config.ts";
 import { useTestDatabase } from "./test/database.ts";
 import { captureLog } from "./test/log.ts";
@@ -17,6 +19,7 @@ describe("the error shape", () => {
   function start(): ReturnType<typeof captureLog> {
     const log = captureLog();
     app = buildApp({
+      catalog: testCatalog,
       config: testConfig({ logLevel: "info" }),
       db: database.db,
       logStream: log.stream,
@@ -27,6 +30,11 @@ describe("the error shape", () => {
     app.get("/api/test-conflict", () => {
       throw Object.assign(new Error("Name taken"), { statusCode: 409 });
     });
+    app.get(
+      "/api/test-query",
+      { schema: { querystring: z.object({ n: z.coerce.number().int() }) } },
+      () => ({ ok: true }),
+    );
     return log;
   }
 
@@ -56,6 +64,20 @@ describe("the error shape", () => {
     expect(apiErrorSchema.parse(response.json())).toEqual({
       error: { code: "conflict", message: "Name taken" },
     });
+  });
+
+  it("answers a query that fails its schema with 400 invalid_input", async () => {
+    start();
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/test-query?n=x",
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(apiErrorSchema.parse(response.json()).error.code).toBe(
+      "invalid_input",
+    );
   });
 
   it.each(["/api/nope", "/missing.js"])(

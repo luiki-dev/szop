@@ -141,18 +141,18 @@
 - Consumes: `catalogSchema`, `healthSchema`, `Catalog`; `loadSeed` (Task 2); `errorHandler` (Task 3).
 - Produces: `AppDeps.catalog: Catalog`; `catalogRoutes(app, { catalog }: CatalogRoutesOptions)` registered under `/api`; `testCatalog: Catalog` in `src/test/catalog.ts` (two categories, two products, one unit, valid against `catalogSchema`).
 
-- [ ] **Step 1: Check the provider.** `pnpm --filter @szop/api add fastify-type-provider-zod@^7.0.0`, then `pnpm why @fastify/swagger openapi-types --filter @szop/api --prod`. Its peers list `@fastify/swagger` and `openapi-types`. If they stay out of the production dependencies (optional peers, or types only), go on. If `@fastify/swagger` lands in the image's dependencies, stop and ask the owner: accept it, or take the spec's fallback (an explicit `catalogSchema.parse` in the route), recorded in ADR 0050.
-- [ ] **Step 2: Write the failing tests** in `catalog/routes.test.ts`:
+- [x] **Step 1: Check the provider.** `pnpm --filter @szop/api add fastify-type-provider-zod@^7.0.0`, then `pnpm why @fastify/swagger openapi-types --filter @szop/api --prod`. Its peers list `@fastify/swagger` and `openapi-types`. If they stay out of the production dependencies (optional peers, or types only), go on. If `@fastify/swagger` lands in the image's dependencies, stop and ask the owner: accept it, or take the spec's fallback (an explicit `catalogSchema.parse` in the route), recorded in ADR 0050.
+- [x] **Step 2: Write the failing tests** in `catalog/routes.test.ts`:
   - `it("PRD-2.1, ACC-1.2: answers GET /api/catalog with the catalog")`: `buildApp({ …, catalog: testCatalog })` → 200, JSON, `catalogSchema.parse(body)` equals `body` and equals `testCatalog`.
   - `it("ACC-1.3: sets no cookie")`: no `set-cookie` header.
   - `it("ACC-1.2: is read-only")`: `POST`, `PUT`, `DELETE /api/catalog` (same-origin) → 404 `not_found`.
   - A catalog built wrong on purpose (a name of 101 characters) → 500 `internal_error`, the body does not contain the long name.
   - In `errors.test.ts`: a throwaway route with `schema: { querystring: z.object({ n: z.coerce.number().int() }) }`, `?n=x` → 400 `invalid_input`.
-- [ ] **Step 3: Run** `pnpm test -- catalog/routes errors`. Expected: FAIL.
-- [ ] **Step 4: Implement.** In `buildApp`: `setValidatorCompiler` and `setSerializerCompiler` from the provider, before any route; `catalog` in `AppDeps` with a comment; `app.register(catalogRoutes, { prefix: "/api", catalog })` after health. `catalogRoutes` uses `app.withTypeProvider<ZodTypeProvider>()` and `schema: { response: { 200: catalogSchema } }`. `healthRoutes` declares `response: { 200: healthSchema, 503: healthSchema }` (this plan's call for the spec's open question: both bodies through the serializer, the same pattern for every status; the ADR records it). `errorHandler` gains the 400 branch for `hasZodFastifySchemaValidationErrors(error)` (or the provider's equivalent), and a response serialization error falls into the 500. `server.ts` passes the catalog from Task 2. Every test's `buildApp` call gets `catalog: testCatalog`.
-- [ ] **Step 5: Run** `pnpm test -- --project api`. Expected: PASS, the health tests unchanged.
-- [ ] **Step 6: Run** `pnpm check`, then `pnpm image:up` and `curl -s localhost:3000/api/catalog | head -c 300` (expected: the catalog), `image:down`.
-- [ ] **Step 7: Commit** `feat(api): serve the seed catalog from GET /api/catalog`.
+- [x] **Step 3: Run** `pnpm test -- catalog/routes errors`. Expected: FAIL.
+- [x] **Step 4: Implement.** In `buildApp`: `setValidatorCompiler` and `setSerializerCompiler` from the provider, before any route; `catalog` in `AppDeps` with a comment; `app.register(catalogRoutes, { prefix: "/api", catalog })` after health. `catalogRoutes` uses `app.withTypeProvider<ZodTypeProvider>()` and `schema: { response: { 200: catalogSchema } }`. `healthRoutes` declares `response: { 200: healthSchema, 503: healthSchema }` (this plan's call for the spec's open question: both bodies through the serializer, the same pattern for every status; the ADR records it). `errorHandler` gains the 400 branch for `hasZodFastifySchemaValidationErrors(error)` (or the provider's equivalent), and a response serialization error falls into the 500. `server.ts` passes the catalog from Task 2. Every test's `buildApp` call gets `catalog: testCatalog`.
+- [x] **Step 5: Run** `pnpm test -- --project api`. Expected: PASS, the health tests unchanged.
+- [x] **Step 6: Run** `pnpm check`, then `pnpm image:up` and `curl -s localhost:3000/api/catalog | head -c 300` (expected: the catalog), `image:down`.
+- [x] **Step 7: Commit** `feat(api): serve the seed catalog from GET /api/catalog`.
 
 ### Task 5: The catalog page
 

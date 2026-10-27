@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { apiErrorSchema } from "@szop/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
+import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
 
@@ -26,7 +27,7 @@ describe("NFR-4.1: the cross-site check", () => {
   // No route changes data yet, so the test adds one, answering every method
   // (Fastify answers HEAD for every GET route).
   function start(config = testConfig()): FastifyInstance {
-    app = buildApp({ config, db: database.db });
+    app = buildApp({ catalog: testCatalog, config, db: database.db });
     app.route({
       method: ["GET", "OPTIONS", ...unsafe],
       url: "/api/test-unsafe",
