@@ -189,11 +189,14 @@ jobs:
       # creates szop_e2e itself.
       - run: cp apps/api/.env.example apps/api/.env
       - run: docker compose up -d --wait
-      # Every run, not cached: restoring a cache takes about as long as the
-      # download, and the system libraries come from apt anyway (ADR 0026,
-      # decision 5).
+      # Every run, not cached: the download takes about 11 seconds. The
+      # runner image already has the browsers' system libraries, so apt never
+      # runs: a slow Ubuntu mirror once ran this step into the job's timeout.
+      # Its own timeout, so a stuck download fails in minutes and can be rerun
+      # (ADR 0053, refining ADR 0026, decision 5).
       - name: Install Playwright's browsers
-        run: pnpm --filter @szop/e2e exec playwright install --with-deps chromium firefox
+        timeout-minutes: 5
+        run: pnpm --filter @szop/e2e exec playwright install chromium firefox
       # Builds the app, then runs every journey on the three projects.
       - run: pnpm test:e2e
       # The HTML report, with the trace and screenshot of every failed test,
@@ -226,9 +229,11 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       # Builds without pushing (ADR 0010, decisions 7 and 10) and loads the
       # image into the runner's Docker as szop:local. The layers of every
-      # stage are cached in GitHub's cache (ADR 0010, decision 9). The app's
-      # dependencies are installed only inside the build, never on the runner
-      # (ADR 0012, decision 18).
+      # stage are cached in GitHub's cache (ADR 0010, decision 9), written by
+      # pushes to main only: a pull request reads main's layers and writes
+      # none, so pull requests no longer fill the repository's 10 GB of cache
+      # and evict them (ADR 0053). The app's dependencies are installed only
+      # inside the build, never on the runner (ADR 0012, decision 18).
       - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -237,7 +242,7 @@ jobs:
           tags: szop:local
           build-args: GIT_COMMIT=${{ steps.commit.outputs.sha }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: ${{ github.event_name == 'push' && 'type=gha,mode=max' || '' }}
       # Starts the image next to PostgreSQL from compose.yaml and checks it
       # (ADR 0028); on failure it prints the app's logs. It checks that
       # /api/health reports the commit the image was built with.

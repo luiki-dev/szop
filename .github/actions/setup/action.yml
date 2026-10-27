@@ -16,5 +16,8 @@ runs:
         cache: pnpm
 
     # Fails instead of updating a lockfile that does not match package.json.
-    - run: pnpm install --frozen-lockfile
+    # A composite action's steps take no timeout-minutes, so timeout stops an
+    # install stuck on a slow runner after 3 minutes instead of the job's 10
+    # (ADR 0053).
+    - run: timeout 3m pnpm install --frozen-lockfile
       shell: bash
