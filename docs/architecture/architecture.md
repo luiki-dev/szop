@@ -242,6 +242,8 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../deci
 
 Only `/` (the Start page), `/catalog` and `/design` exist so far; the table above is the target. Any other path shows React Router's default error screen until a not-found route is added ([ADR 0021](../decisions/0021-spa-skeleton-details.md), consequences).
 
+As built in PH-15a, the app shell renders React Router's `ScrollRestoration`: a page opened from the menu or a link starts at the top, and Back and Forward return to where the page was scrolled ([APP-1](../requirements/APP-app-wide-behavior.md#app-1), criterion APP-1.10). The router keeps the positions in `sessionStorage`; in this single-page mode the component renders no script, so the Content Security Policy is untouched.
+
 ### Startup
 
 The app asks Better Auth (through its React client) for the current session. If there is none, the app works without one: it shows the (empty) lists and the read-only seed catalog and categories. On the visitor's first change, the API client creates an anonymous session and then sends the change, so a first-time visitor still lands directly in a working app — the workspace just appears when they first need it.

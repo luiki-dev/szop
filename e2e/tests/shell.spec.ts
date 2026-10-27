@@ -223,3 +223,38 @@ test("APP-1.1: the drawer opens from the left, and a tap on the dimmed page clos
   await expect(drawer).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
 });
+
+test("APP-1.10: a page opened from the menu starts at the top; Back returns to where it was scrolled", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const scrollY = () => page.evaluate(() => window.scrollY);
+  const scrollToBottom = async () => {
+    await page.evaluate(() => {
+      window.scrollTo(0, document.documentElement.scrollHeight);
+    });
+    await expect.poll(scrollY).toBeGreaterThan(0);
+    return scrollY();
+  };
+  const heading = (name: string) =>
+    page.getByRole("heading", { level: 1, name });
+
+  // Starts at the top. The catalog, with every category open, is much taller
+  // than the screen. (Coming from /design, it is still loading when the
+  // browser clamps the scroll, which would hide the bug.)
+  await page.goto("/catalog");
+  await page.getByRole("button", { name: "Expand all" }).click();
+  await scrollToBottom();
+  await page.getByRole("link", { name: "Design system" }).click();
+  await expect(heading("Design system")).toBeVisible();
+  await expect.poll(scrollY).toBe(0);
+
+  // Back returns. The design page is the one whose height does not depend on
+  // data or on what was opened, so its position can be restored.
+  const scrolled = await scrollToBottom();
+  await page.getByRole("link", { name: "Catalog" }).click();
+  await expect(heading("Catalog")).toBeVisible();
+  await page.goBack();
+  await expect(heading("Design system")).toBeVisible();
+  await expect.poll(scrollY).toBe(scrolled);
+});
