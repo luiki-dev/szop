@@ -33,6 +33,7 @@ The guide grows as the layers arrive: mutation testing in [PH-15b](../roadmap.md
 | Database tests | `apps/api/src/**/*.test.ts` that call `useTestDatabase()`, for example `test/database.test.ts` | Queries, migrations and cleanup work against the real PostgreSQL | `api` |
 | Component tests | `apps/web/src/**/*.test.tsx`, for example `shell/shell.test.tsx` | A page works as a user sees it: the real route table, hook, API client and schema run in a simulated browser ([jsdom](tools/vitest.md#jsdom)) with only the network faked by MSW | `web` |
 | Unit tests | next to the code, for example `apps/api/src/config.test.ts` | One function does its job for each kind of input, with no server involved | `api` |
+| Seed data tests | `apps/api/src/catalog/seed.test.ts` | The real `seed.yaml` passes every check the API makes at startup (limits, unique names, declared units), and `parseSeed` refuses each kind of broken file with a message naming the entry. They run in `pnpm test`, so a bad edit of the file fails CI before a deploy ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 3) | `api` |
 | Property tests | next to the code, for example `packages/shared/src/catalog.test.ts` | A rule holds for hundreds of generated inputs, such as the category order ([fast-check](tools/fast-check.md)) | `shared` |
 | End-to-end (E2E) journeys | `e2e/tests/*.spec.ts`, for example `shell.spec.ts` | A real browser drives the production build through the SPA, the API and PostgreSQL, on three projects (desktop Chromium, desktop Firefox and an emulated phone), checks every page with axe and fails on any Content Security Policy (CSP) violation | ➖ N/A: Playwright |
 | The image check | `scripts/check-image.sh` | The container image builds, starts next to PostgreSQL, migrates, runs as the `node` user and serves the SPA at `/` ([ADR 0028](../decisions/0028-container-image-details.md)) | ➖ N/A: a bash script |
@@ -275,7 +276,7 @@ A unit test lives next to the code it tests and has the same name with `.test.ts
 A property test states a rule that must hold for **every** input of some kind, and [fast-check](tools/fast-check.md) tries hundreds of generated inputs against it. Write one when the rule is about a whole input space and a few examples cannot cover it, such as an order ("a parent comes before its children, whatever the tree"). An edge case with one right answer is still an ordinary unit test; the two usually sit side by side, as in `packages/shared/src/catalog.test.ts`.
 
 - **Where they live:** next to the code, in the `shared` project (`pnpm test --project shared`). The arbitrary that generates the input is defined in the test file.
-- **One property per `it`,** named with the criterion's ID: `it("returns a permutation of its input")` inside a `describe("ORD-2.1, ORD-3.1: …")`.
+- **One property per `it`.** The criterion's ID is on the `describe` around them, not on each `it`: `it("returns a permutation of its input")` inside a `describe("ORD-2.1, ORD-3.1: …")`.
 - **Reading a failure:** the message shows the shrunk `Counterexample`, the smallest input fast-check found that breaks the rule, and a `seed` and `path`. Pass them as `fc.assert`'s last argument to replay the failure, then remove them. Add the counterexample as an example test too. How to read it, with a real output: [fast-check](tools/fast-check.md#reading-a-counterexample).
 
 ## Writing an E2E journey
@@ -312,6 +313,8 @@ test("the shell shows the menu, the API's status and the pages", async ({
 - **Each test isolates itself.** Playwright gives every test a fresh browser context, a new guest with no cookies and no storage, so tests run in parallel and the database is reset only once per run, when the server starts ([ADR 0007](../decisions/0007-testing-strategy.md), decision 15). A test that needs a user registers one with a unique email, and never depends on data another test left behind.
 - **Find elements as a user does,** by role and text, as with Testing Library (`page.getByRole("status")`, `page.getByText(…)`), never by test ID or CSS class. Playwright's `expect(locator)` waits and retries until the condition holds or a timeout passes, so no journey sleeps or polls by hand.
 - **Edge cases stay in lower layers.** A journey follows the main path of its use case; an ordering rule, a permission check or a validation message is proven by a unit, API or component test.
+
+The catalog's journey, `e2e/tests/catalog.spec.ts`, is a second pattern: it reads the real `seed.yaml`, so it names "Dairy & eggs" and "Oat milk" (the seed's header comment says to rename them together), opens a category, searches, clears the search and runs axe with a category open. It shows a check that depends on the viewport: on a phone the buttons "Expand all" and "Collapse all" show only an icon, so the test looks at the visibility of the label, not at the button's text (`toHaveText` reads hidden text too).
 
 ### The CSP guard
 

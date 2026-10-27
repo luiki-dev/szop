@@ -41,7 +41,7 @@ During a phase:
 - **When a phase's brainstorm starts, before the first question:**
   - On GitHub: the phase issue's Status → 🚧 In progress; Finished (the merge date) set on the previous phase's issue and on every `adr` issue closed since.
   - On GitHub: read the phase's open-point issues (its sub-issues and the issues its **Also** section lists).
-- **During the brainstorm:** review with the owner the acceptance criteria of every requirement the phase delivers, and the whole list of any requirement still ❔ Criteria not finalized ([ADR 0051](docs/decisions/0051-acceptance-criteria.md)).
+- **During the brainstorm:** review with the owner the acceptance criteria the phase delivers of every requirement, and the whole list of a requirement whose last part the phase delivers and that is still ❔ Criteria not finalized; an earlier phase does not finalize a list ([ADR 0051](docs/decisions/0051-acceptance-criteria.md), decision 15, refined by [ADR 0050](docs/decisions/0050-seed-catalog-phase-details.md), decision 14).
 - **In the phase branch's first commit:**
   - In the repo: the phase's row in the `roadmap.md` stage table → 🚧.
   - On GitHub: the phase issue's Started field → that commit's date.

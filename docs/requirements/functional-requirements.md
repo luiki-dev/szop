@@ -75,7 +75,7 @@ A criterion's status:
 A requirement's **list of criteria** is either:
 
 - **❔ Criteria not finalized**: no brainstorm has reviewed the requirement as a whole with the owner, so criteria may still be missing; or
-- **✅ Criteria finalized**: a brainstorm, named, reviewed every criterion and judged the list complete. Later phases may still add, move or drop criteria.
+- **✅ Criteria finalized**: a brainstorm, named, reviewed every criterion and judged the list complete. It is the brainstorm of the phase that delivers the requirement's last part ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 14); an earlier phase reviews only the criteria it delivers. Later phases may still add, move or drop criteria.
 
 A requirement's own status follows from both, leaving out moved and dropped criteria:
 
@@ -92,7 +92,7 @@ A criterion is ✅ only when a phase delivered it and a test covers it. The test
 
 ### How phases change criteria
 
-A phase's brainstorm reviews the criteria of every requirement the phase delivers with the owner, and finalizes them: drafts become ⬜ or 🚧, criteria are added, moved or dropped, and the list of a requirement reviewed as a whole becomes ✅ Criteria finalized. The phase's PR marks what it delivered ✅ and updates the requirement's line and this index ([ADR 0051](../decisions/0051-acceptance-criteria.md)).
+A phase's brainstorm reviews with the owner the criteria it delivers of every requirement, and the whole list of a requirement whose last part it delivers: drafts become ⬜ or 🚧, criteria are added, moved or dropped, and a list reviewed as a whole becomes ✅ Criteria finalized. A requirement that later phases also deliver stays ❔ Criteria not finalized until the phase of its last part ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 14, refining [ADR 0051](../decisions/0051-acceptance-criteria.md), decision 15). The phase's PR marks what it delivered ✅ and updates the requirement's line and this index ([ADR 0051](../decisions/0051-acceptance-criteria.md)).
 
 ## Requirements by area
 
@@ -100,7 +100,7 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | 🚧 In progress | 0 of 9 | ❔ Not finalized |
+| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | 🚧 In progress | 1 of 9 | ❔ Not finalized |
 | [ACC-2](ACC-accounts-and-guest-mode.md#acc-2) | 🎯 MVP | ❔ Draft | 0 of 8 | ❔ Not finalized |
 | [ACC-3](ACC-accounts-and-guest-mode.md#acc-3) | 🎯 MVP | ❔ Draft | 0 of 9 | ❔ Not finalized |
 | [ACC-4](ACC-accounts-and-guest-mode.md#acc-4) | 🎯 MVP | ❔ Draft | 0 of 5 | ❔ Not finalized |
@@ -156,7 +156,7 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [PRD-1](PRD-catalog.md#prd-1) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
-| [PRD-2](PRD-catalog.md#prd-2) | 🎯 MVP | 🚧 In progress | 0 of 12 | ✅ Finalized |
+| [PRD-2](PRD-catalog.md#prd-2) | 🎯 MVP | ✅ Done | 12 of 12 | ✅ Finalized |
 | [PRD-3](PRD-catalog.md#prd-3) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
 
 ### Units (UNT)
@@ -215,10 +215,10 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 5 of 9 | ❔ Not finalized |
+| [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 6 of 9 | ❔ Not finalized |
 | [APP-2](APP-app-wide-behavior.md#app-2) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
 | [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
-| [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | 🚧 In progress | 0 of 3 | ❔ Not finalized |
+| [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | 🚧 In progress | 2 of 3 | ❔ Not finalized |
 | [APP-5](APP-app-wide-behavior.md#app-5) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
 | [APP-6](APP-app-wide-behavior.md#app-6) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
 | [APP-7](APP-app-wide-behavior.md#app-7) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
@@ -228,9 +228,9 @@ A phase's brainstorm reviews the criteria of every requirement the phase deliver
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [NFR-1](NFR-non-functional-requirements.md#nfr-1) | 🎯 MVP | ✅ Done | 1 of 1 | ✅ Finalized |
-| [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP | 🚧 In progress | 7 of 8 | ❔ Not finalized |
+| [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP | 🚧 In progress | 8 of 8 | ❔ Not finalized |
 | [NFR-3](NFR-non-functional-requirements.md#nfr-3) | 🎯 MVP | 🚧 In progress | 3 of 3 | ❔ Not finalized |
-| [NFR-4](NFR-non-functional-requirements.md#nfr-4) | 🎯 MVP | 🚧 In progress | 6 of 11 | ❔ Not finalized |
+| [NFR-4](NFR-non-functional-requirements.md#nfr-4) | 🎯 MVP | 🚧 In progress | 7 of 11 | ❔ Not finalized |
 
 ## General assumptions, actors, domain concepts
 

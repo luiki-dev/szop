@@ -12,7 +12,7 @@ Vitest is the test runner: it finds the test files, runs them and reports which 
 
 **`vitest.config.ts`** at the root is the config Vitest reads:
 
-- `test.projects`: the list of projects. A **project** is a group of tests with its own settings, shown by name in the output. There are four: `apps/api/vitest.config.ts`, `apps/web/vitest.config.ts` and `packages/shared/vitest.config.ts`, files of their own, and `hooks`, written inline because it needs only three settings.
+- `test.projects`: the list of projects. A **project** is a group of tests with its own settings, shown by name in the output. There are five: `apps/api/vitest.config.ts`, `apps/web/vitest.config.ts` and `packages/shared/vitest.config.ts`, files of their own, and `landing` and `hooks`, written inline because each needs only three settings.
 - `name`: the project's name, for `--project` and for the output.
 - `environment: "node"`: tests run in plain Node. The `web` project uses `jsdom` instead, a simulated browser (see [jsdom](#jsdom)).
 - `include`: the files that count as this project's tests, by glob (a path pattern).

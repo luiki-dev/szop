@@ -98,6 +98,8 @@ Dependencies (database client, email sender, clock) are passed in explicitly whe
 
 **Web security.** `security/` holds the web baseline's four concerns, one file each, with its test beside it: `headers.ts` (the security headers, through `@fastify/helmet`), `cross-site.ts` (the check that unsafe requests come from the app), `json-only.ts` (bodies kept to JSON) and `log.ts` (the request log's serializer, which hides query values). `buildApp` registers the first three before any route, each wrapped with `fastify-plugin` so that it reaches every route, the SPA's files and the not-found handler included; `AppDeps` also takes an optional `logStream`, which tests pass to read the log back ([ADR 0025](../decisions/0025-web-security-baseline-details.md), decisions 8 and 9).
 
+**As built in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only)** ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md)): `src/catalog/` holds the first feature module, without a service or a repository, since it only reads a file: `seed.ts` parses and checks the seed (`parseSeed`, `loadSeed`), `routes.ts` serves `GET /api/catalog`. `src/errors.ts` holds the error handler and the not-found handler ([Errors](#errors)). `buildApp` sets the validator and serializer compilers of `fastify-type-provider-zod` once, so every route that declares a schema is validated and serialized through the shared Zod schemas; a route returns its body and Fastify refuses to send one that does not match, as a 500.
+
 ### Request lifecycle
 
 1. The request reaches Fastify.
@@ -134,6 +136,8 @@ The same Zod route schemas generate an OpenAPI description of the API (via `@fas
 ### Seed data
 
 A versioned data file in `apps/api` holds the default catalog, category tree and units. Creating a workspace copies it into that workspace's tables in one transaction.
+
+**As built in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only)** ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decisions 1 to 4): the file is `apps/api/src/catalog/seed.yaml` (under `src/`, which the Dockerfile already copies into the image). It is YAML nested the way the store is: categories hold their products and subcategories, in the store's order, and products carry a unit by name; there are no IDs and no `position` fields. The API reads it at startup with the `yaml` package (YAML 1.2) and checks it with a Zod schema and the seed limits (`seedLimits`: at most 300 categories, 5 levels, 2,000 products and 50 units, unique names, every unit declared). A broken file stops the API before it touches the database, with a message naming the entry. `GET /api/catalog` serves the result flattened, the shape the tables will have: `categories` (`id`, `parentId`, `position`, `name`), `products` (`id`, `name`, `categoryId`, `unitId`) and `units` (`id`, `name`), with IDs assigned from the file's order. There are no tables until [PH-16](../roadmap.md#ph-16-guest-workspace-and-lists), and the endpoint stays after it for visitors without a workspace ([ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1)). The page orders the tree with `orderCategories` from `packages/shared`, a pure function that treats a category whose parent does not exist as top-level and drops categories reachable only through a cycle.
 
 ### Anonymous guests
 
@@ -176,7 +180,18 @@ The application's baseline, production grade even on the demo ([ADR 0012](../dec
 
 ### Errors
 
-One JSON error shape: `{ "error": { "code": "...", "message": "..." } }`.
+One JSON error shape: `{ "error": { "code": "...", "message": "..." } }`. Since [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) every error ends in one place ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 7): `setErrorHandler` for what a route, a hook or Fastify raises, and a not-found handler for paths under `/api/` (`src/errors.ts`); the cross-site check and the JSON-only check answer in the same shape. The shared `apiErrorSchema` describes the body.
+
+| Code | Status | When |
+|---|---|---|
+| `invalid_input` | 400 | Zod validation of the path, query or body fails |
+| `forbidden_cross_site` | 403 | An unsafe request that does not come from the app |
+| `not_found` | 404 | No route, or no access |
+| `unsupported_media_type` | 415 | A body that is not JSON |
+| the status text in snake case | other 4xx | Any other client error Fastify raises |
+| `internal_error` | 500 | Anything unexpected: logged at level 50 with the error, answered with "Internal server error" and never the error's own text ([NFR-4](../requirements/NFR-non-functional-requirements.md#nfr-4).11); also a response that fails its schema |
+
+The target for the whole API:
 
 | Situation | Status |
 |---|---|
@@ -204,6 +219,7 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../deci
 - **Under the CSP:** nothing injects `<style>` elements at run time ([Web security](#web-security)). Base UI runs with `disableStyleElements`, toasts use Base UI's Toast, and every E2E journey fails on a CSP violation.
 - **As built in [PH-14a](../roadmap.md#ph-14a-design-system)** ([ADR 0048](../decisions/0048-design-system-phase-details.md)): `src/index.css` holds the tokens; `src/lib/utils.ts` exports `cn()`; `src/components/ui/button.tsx` is the first component; `src/app.tsx` wraps the app in Base UI's `CSPProvider`; `src/design/` is the `/design` page, with `roles.ts`, the role list it shows; the `@/` import alias means `src/`.
 - **As built in [PH-14b](../roadmap.md#ph-14b-app-shell)** ([ADR 0049](../decisions/0049-app-shell-phase-details.md)): `src/routes.tsx` nests every page under one layout route without a path, `AppShell` in `src/shell/app-shell.tsx`, which renders the page through React Router's `<Outlet />`; each route names its page's title in its `handle` (`RouteHandle`), which the shell shows as the `h1` and in the tab. The shell renders, by `useMediaQuery` on Tailwind's `lg`, either the phone's header bar with ☰ and the menu in a drawer (shadcn/ui's Sheet on Base UI's Dialog), or the sidebar; `src/shell/menu.tsx` is the one menu, with the logo (`src/brand/logo.svg`), the links, the API's status (`api-status.tsx` with `use-health.ts`, moved from the old `src/health/`) and the color scheme control. `src/start/` is the Start page at `/`. The color scheme lives in two places with the same rules: `public/color-scheme.js`, loaded first in `index.html`, sets the class before the first paint, and `src/shell/color-scheme.ts` reads, stores (`localStorage`, `szop-color-scheme`) and applies the choice, and follows the system setting from `main.tsx` on.
+- **As built in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only)** ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md)): `src/catalog/` holds the Catalog page at `/catalog`: `use-catalog.ts` (TanStack Query over `getCatalog()` in `src/api/client.ts`, which checks the body against the shared schema; `retry: false`, `staleTime: Infinity`), `tree.ts` (builds the tree with `orderCategories` and `compareNames`, products before subcategories), `search.ts` (the search, a pure function), `catalog-tree.tsx` (the collapsible rows) and `catalog-page.tsx` (the search field, the counts, "Expand all" and "Collapse all", the skeleton and the error card with "Try again"). The whole catalog arrives in one request and the page filters it in the browser. The set of open categories is state of the page; search keeps its own set, so clearing it brings the browsing set back untouched. The menu has a "Catalog" link under the "Setup" heading.
 - **Zod runs in its jitless mode in the browser:** zod would otherwise test for `eval` with `new Function("")` when `@szop/shared` builds its schemas, which the CSP blocks and reports. `apps/web/src/zod-config.ts` sets `z.config({ jitless: true })` and `main.tsx` imports it first; an entry point that loads `@szop/shared` imports it before anything else ([ADR 0026](../decisions/0026-first-e2e-journey-details.md)).
 - **Assets:** the Gabarito font (`@fontsource-variable/gabarito`) and Lucide's icons are bundled by Vite, so everything is served from the app's own origin.
 - **Budget:** the JavaScript needed for the first screen stays within 200 KB compressed, checked in CI ([NFR-3](../requirements/NFR-non-functional-requirements.md#nfr-3)).
@@ -224,7 +240,7 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../deci
 | `/shared` *(Later)* | Shared with me |
 | `/s/:token` *(Later)* | Opening a share link |
 
-Only `/` (the Start page) and `/design` exist so far; the table above is the target. Any other path shows React Router's default error screen until a not-found route is added ([ADR 0021](../decisions/0021-spa-skeleton-details.md), consequences).
+Only `/` (the Start page), `/catalog` and `/design` exist so far; the table above is the target. Any other path shows React Router's default error screen until a not-found route is added ([ADR 0021](../decisions/0021-spa-skeleton-details.md), consequences).
 
 ### Startup
 
