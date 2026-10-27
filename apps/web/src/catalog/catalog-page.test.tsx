@@ -252,7 +252,9 @@ describe("CatalogPage", () => {
     await waitFor(() => {
       expect(empty).toHaveAttribute("aria-expanded", "true");
     });
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText("3 categories · 10 products")).toBeInTheDocument();
   });
 });

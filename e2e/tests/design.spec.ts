@@ -48,6 +48,7 @@ const pairs: [foreground: string, background: string, minimum: number][] = [
   ["muted-foreground", "muted", 4.5],
   ["primary-foreground", "primary", 4.5],
   ["primary", "accent", 4.5],
+  ["accent-foreground", "accent", 4.5],
   ["primary", "card", 4.5],
   ["link", "background", 4.5],
   ["link", "card", 4.5],
