@@ -63,7 +63,7 @@ const pairs: [foreground: string, background: string, minimum: number][] = [
   ["haul-accent", "haul-chip", 3],
 ];
 
-test("every color pair meets its contrast in light and dark", async ({
+test("NFR-2.2: every color pair meets its contrast in light and dark", async ({
   page,
 }) => {
   expect(contrastRatio([255, 255, 255], [0, 0, 0])).toBeCloseTo(21);

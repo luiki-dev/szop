@@ -23,8 +23,8 @@ axe (the library is called axe-core; `@axe-core/playwright` plugs it into Playwr
 ## Why Szop uses it
 
 - **Playwright, not Cypress:** [ADR 0007](../../decisions/0007-testing-strategy.md), decision 11. Playwright runs Chromium, Firefox and WebKit, emulates phones, runs tests in parallel for free and has a trace viewer for debugging failures; Cypress is Chromium-first and puts parallel runs behind a paid service. Playwright is a library first, so the Content Security Policy (CSP) guard below is ordinary code.
-- **Three projects:** [ADR 0007](../../decisions/0007-testing-strategy.md), decision 5, extended by [ADR 0013](../../decisions/0013-visual-design.md), decision 2. A **project** is one browser setup that every test runs under: `desktop-chromium`, `desktop-firefox` (Firefox is the only supported browser with an engine of its own) and `pixel`, an emulated Pixel 7 phone on Chromium, because the in-store scenario ([UC-3](../../requirements/functional-requirements.md#uc-3-shop-in-a-store)) happens on a phone. A WebKit project can join if Safari-specific bugs appear.
-- **axe's rule sets:** [ADR 0013](../../decisions/0013-visual-design.md), decision 3. Szop targets WCAG 2.2 level AA ([NFR-2](../../requirements/functional-requirements.md#nfr-2)), so axe runs with the `wcag2a`, `wcag2aa`, `wcag21aa` and `wcag22aa` rule sets, in light and in dark mode.
+- **Three projects:** [ADR 0007](../../decisions/0007-testing-strategy.md), decision 5, extended by [ADR 0013](../../decisions/0013-visual-design.md), decision 2. A **project** is one browser setup that every test runs under: `desktop-chromium`, `desktop-firefox` (Firefox is the only supported browser with an engine of its own) and `pixel`, an emulated Pixel 7 phone on Chromium, because the in-store scenario ([UC-3](../../requirements/UC-use-cases.md#uc-3-shop-in-a-store)) happens on a phone. A WebKit project can join if Safari-specific bugs appear.
+- **axe's rule sets:** [ADR 0013](../../decisions/0013-visual-design.md), decision 3. Szop targets WCAG 2.2 level AA ([NFR-2](../../requirements/NFR-non-functional-requirements.md#nfr-2)), so axe runs with the `wcag2a`, `wcag2aa`, `wcag21aa` and `wcag22aa` rule sets, in light and in dark mode.
 - **The details of this phase:** [ADR 0026](../../decisions/0026-first-e2e-journey-details.md): the port, the helper that scans both color schemes, the retry policy, the browsers not cached in CI, the start script and the CSP guard.
 
 ## Configuration
@@ -115,7 +115,7 @@ Playwright downloads its own builds of Chromium and Firefox, not the ones instal
 pnpm --filter @szop/e2e exec playwright install --with-deps chromium firefox
 ```
 
-`--with-deps` also installs the system libraries the browsers need, through `apt`, which needs `sudo`: it asks for the password. Without it, a browser can fail to start with a message naming a missing library. Where the libraries are already installed, the browsers launch without it. CI runs the same command on every run and does not cache the browsers ([CI/CD](../ci-cd.md)).
+`--with-deps` also installs the system libraries the browsers need, through `apt`, which needs `sudo`: it asks for the password. Without it, a browser can fail to start with a message naming a missing library. Where the libraries are already installed, the browsers launch without it. CI is such a place: the runner image ships Chrome and Firefox with their libraries, so CI runs the command without `--with-deps` on every run and does not cache the browsers ([CI/CD](../ci-cd.md)).
 
 ## Everyday use
 

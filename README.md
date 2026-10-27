@@ -67,6 +67,7 @@ Start PostgreSQL first, with `pnpm db:up` (Docker Desktop must be running). Then
 - [Project tracking](docs/development/project-tracking.md) — how the phases, open points and decisions are tracked as GitHub issues and on the [project board](https://github.com/users/luiki-dev/projects/3)
 - [Git workflow](docs/development/git-workflow.md) — how changes reach `main` and how releases are cut
 - [Definition of done](docs/development/definition-of-done.md) — what every PR must meet before it is merged
+- [Working with Claude](docs/development/working-with-claude.md) — keeping Claude Code within its weekly limit, and measuring each phase's token usage
 - [GitHub settings](docs/development/github-settings.md) — the repository settings behind the workflow
 - [Setup guide](docs/development/setup.md) — from a clean Windows machine to passing checks
 - [Demo environment runbook](docs/operations/demo-environment.md) — setting up the AWS account and running Szop's infrastructure, step by step

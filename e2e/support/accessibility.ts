@@ -2,7 +2,7 @@ import { AxeBuilder } from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 import { expect, test } from "./test.ts";
 
-// WCAG 2.2 AA (NFR-2; ADR 0013, decision 3).
+// NFR-2.1: WCAG 2.2 AA, in light and dark (ADR 0013, decision 3).
 const tags = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 
 // Scans the page as it is now with axe, in light and then in dark, and fails

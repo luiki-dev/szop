@@ -187,7 +187,7 @@ Likely at every deploy that starts two tasks at once, and at every scale-out tha
 
 ### S7 The cleanup job
 
-**Today.** 📝 Designed for [PH-31](../roadmap.md#ph-31-automatic-cleanup): a scheduled task inside the API process deletes expired anonymous users and unverified registrations ([ACC-7](../requirements/functional-requirements.md#acc-7), [ACC-8](../requirements/functional-requirements.md#acc-8); [architecture.md](../architecture/architecture.md)).
+**Today.** 📝 Designed for [PH-31](../roadmap.md#ph-31-automatic-cleanup): a scheduled task inside the API process deletes expired anonymous users and unverified registrations ([ACC-7](../requirements/ACC-accounts-and-guest-mode.md#acc-7), [ACC-8](../requirements/ACC-accounts-and-guest-mode.md#acc-8); [architecture.md](../architecture/architecture.md)).
 
 **With several tasks.** Every task runs it on its own timer. The deletes are by age, so a second run finds less to do; running twice is waste, and two runs at once can contend for the same rows and fail one of them. Harmless, but untidy, and N times the work.
 

@@ -6,7 +6,7 @@ import { useTestDatabase } from "../test/database.ts";
 import { captureLog } from "../test/log.ts";
 import { redactUrl } from "./log.ts";
 
-describe("redactUrl", () => {
+describe("NFR-4.5: redactUrl", () => {
   it.each([
     ["/api/health", "/api/health"],
     ["/reset-password?token=abc", "/reset-password?token=[redacted]"],
@@ -26,7 +26,7 @@ describe("redactUrl", () => {
   });
 });
 
-describe("the request log", () => {
+describe("NFR-4.5: the request log", () => {
   const database = useTestDatabase();
   let app: FastifyInstance;
 

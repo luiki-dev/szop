@@ -7,7 +7,7 @@
 
 ## Context
 
-[PH-14b](../roadmap.md#ph-14b-app-shell) puts every page in the app shell of [ADR 0013](0013-visual-design.md), decision 17: a drawer on phones, a sidebar from `lg`. It also brings the logo and the favicon, and the manual theme toggle that [ADR 0048](0048-design-system-phase-details.md), decision 5, brought into the MVP ([APR-1](../requirements/functional-requirements.md#apr-1)). The draft `raccoon.svg` was to be polished into the logo; three rounds of polished drafts did not look enough like a raccoon, and the owner drew the mark. The [spec](../superpowers/specs/2026-10-25-PH-14b-app-shell-design.md) holds the design in full; this ADR records the decisions and the alternatives.
+[PH-14b](../roadmap.md#ph-14b-app-shell) puts every page in the app shell of [ADR 0013](0013-visual-design.md), decision 17: a drawer on phones, a sidebar from `lg`. It also brings the logo and the favicon, and the manual theme toggle that [ADR 0048](0048-design-system-phase-details.md), decision 5, brought into the MVP ([APR-1](../requirements/APR-appearance.md#apr-1)). The draft `raccoon.svg` was to be polished into the logo; three rounds of polished drafts did not look enough like a raccoon, and the owner drew the mark. The [spec](../superpowers/specs/2026-10-25-PH-14b-app-shell-design.md) holds the design in full; this ADR records the decisions and the alternatives.
 
 ## Decisions
 
@@ -27,7 +27,7 @@
 - Every page is a child of one layout route, `AppShell`; a new page names its title in its route's `handle`, and a phase that adds a destination adds it to `shell/menu.tsx`.
 - The shell renders either the phone's layout or the desktop's, decided by `matchMedia` on Tailwind's `lg`, so the menu is never in the page twice; unit tests choose the layout with a `matchMedia` stub.
 - Dark mode is a class: components keep using the roles, and the dark roles live under `:root.dark` in `index.css`. Two pieces of code hold the same rules, `public/color-scheme.js` (before the first paint) and `shell/color-scheme.ts` (after), and change together.
-- The first-screen JavaScript grew from 124 KB to 146 KB Brotli (Base UI's dialog and radio group, the shell), under the 200 KB budget of [NFR-3](../requirements/functional-requirements.md#nfr-3). Vite now warns that the one chunk is over 500 KB before compression; splitting it is left until a phase needs it.
+- The first-screen JavaScript grew from 124 KB to 146 KB Brotli (Base UI's dialog and radio group, the shell), under the 200 KB budget of [NFR-3](../requirements/NFR-non-functional-requirements.md#nfr-3). Vite now warns that the one chunk is over 500 KB before compression; splitting it is left until a phase needs it.
 
 ## Settled while building
 

@@ -21,13 +21,14 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **CI/CD** | Continuous Integration / Continuous Delivery (or Deployment) | **CI:** every change is built and checked automatically, here by GitHub Actions on every PR. **CD:** every change that passes the checks can be released or deployed at the push of a button; continuous *deployment* goes further and deploys every change by itself. |
 | **CIDR** | Classless Inter-Domain Routing | A way to write a range of IP addresses as an address and a prefix length, such as `10.0.0.0/16` (every address starting with `10.0.`). `TRUSTED_PROXIES` takes them (see ADR 0025). |
 | **CLI** | Command-line interface | A program used by typing commands in a terminal, such as `git`, `gh`, `terraform` or the AWS CLI. |
-| **CLS** | Cumulative Layout Shift | A Core Web Vital: how much visible content jumps around while a page loads. "Good" is at most 0.1 ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
+| **CLS** | Cumulative Layout Shift | A Core Web Vital: how much visible content jumps around while a page loads. "Good" is at most 0.1 ([NFR-3](requirements/NFR-non-functional-requirements.md#nfr-3)). |
 | **CORP** | Cross-Origin Resource Policy | A response header with which a server says which origins' pages may receive its responses (`same-origin`, `same-site`, `cross-origin`). Helmet sends `same-origin`; `/api/health` sends `same-site`, so the landing page can tell that the demo answers (see ADR 0046). |
 | **CORS** | Cross-Origin Resource Sharing | Browser rules deciding when a page from one domain may call an API on another domain. Not needed when frontend and API share one origin. |
 | **CRLF / LF** | Carriage Return + Line Feed / Line Feed | The two conventions for ending a line of text: Windows uses CRLF, Linux and macOS use LF. Szop's repository uses LF only. |
 | **CRUD** | Create, Read, Update, Delete | The four basic operations on data. |
 | **CSP** | Content Security Policy | An HTTP header telling the browser which sources a page may load scripts, styles and other content from, which limits the damage of an injected script. Szop allows only its own files and no inline scripts (see ADR 0012). |
 | **CSRF** | Cross-Site Request Forgery | An attack where another site makes the victim's browser send a request, with the victim's cookies, that changes data. Countered by `SameSite` cookies and by refusing unsafe requests whose `Sec-Fetch-Site` or `Origin` header shows they came from another site (see ADR 0012). |
+| **CSV** | Comma-Separated Values | A plain-text table with one row per line and its fields separated by commas. The status line logs the rate-limit percentages to one, `~/.claude/usage-log.csv` (see the [guide to working with Claude](development/working-with-claude.md#the-usage-log)). |
 | **CVE** | Common Vulnerabilities and Exposures | The public catalog of known security flaws in software, each with an ID such as `CVE-2026-12345`, the affected versions and, once one exists, the fixed version. Image scanners such as Trivy list the CVEs in an image's packages; since PH-35 CI scans Szop's image on every PR that rebuilds it (see ADR 0041). |
 | **DKIM** | DomainKeys Identified Mail | A signature on outgoing email, checked against a key published in DNS, proving the mail really comes from the domain. |
 | **DMARC** | Domain-based Message Authentication, Reporting and Conformance | A DNS record telling receiving mail servers what to do with mail that fails the SPF and DKIM checks, which stops others sending mail in the domain's name. |
@@ -51,11 +52,11 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **ICANN** | Internet Corporation for Assigned Names and Numbers | The body that runs the domain name system's registries and accredits registrars. |
 | **IDOR** | Insecure Direct Object Reference | A hole where a request names a record by its ID and the server does not check that the caller may use it, for example an item pointing at another user's category. Closed in Szop by resolving every ID within the workspace (see ADR 0012). |
 | **IGW** | Internet Gateway | The door between an AWS VPC and the internet. A subnet is public when its route table sends `0.0.0.0/0` (all addresses) through the gateway. Szop's demo has one (see ADR 0034). |
-| **INP** | Interaction to Next Paint | A Core Web Vital: how long the page takes to visibly respond to a tap, click or key press. "Good" is at most 200 ms ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
+| **INP** | Interaction to Next Paint | A Core Web Vital: how long the page takes to visibly respond to a tap, click or key press. "Good" is at most 200 ms ([NFR-3](requirements/NFR-non-functional-requirements.md#nfr-3)). |
 | **JSX** | JavaScript XML | HTML-like syntax inside JavaScript or TypeScript, used to write React components. It has been used in `apps/web` since [PH-05](roadmap.md#ph-05-spa-skeleton). |
 | **JWT** | JSON Web Token | A signed token carrying claims about a user. An alternative to server-side sessions; not used in Szop. |
 | **KMS** | (AWS) Key Management Service | AWS's service for encryption keys. A customer-managed key costs $1 a month; Szop's state bucket uses S3-managed keys instead (SSE-S3), which Trivy's `AWS-0132` flags and Szop accepts (see ADR 0041). |
-| **LCP** | Largest Contentful Paint | A Core Web Vital: when the largest piece of content (usually the main text block or image) appears. "Good" is at most 2.5 s ([NFR-3](requirements/functional-requirements.md#nfr-3)). |
+| **LCP** | Largest Contentful Paint | A Core Web Vital: when the largest piece of content (usually the main text block or image) appears. "Good" is at most 2.5 s ([NFR-3](requirements/NFR-non-functional-requirements.md#nfr-3)). |
 | **LCU** | Load Balancer Capacity Unit | The unit AWS bills a load balancer's traffic in, on top of its hourly price: new connections, active connections, bytes and rule evaluations, whichever is highest. A demo's traffic uses a tiny fraction of one. |
 | **LLM** | Large Language Model | An AI model trained on large amounts of text, such as the Claude models behind Claude Code. graphify sends docs through one to build its graph (see ADR 0031). |
 | **LTS** | Long-Term Support | A release line that receives fixes for an extended period. Even-numbered Node.js releases (22, 24, …) become LTS. |
@@ -65,7 +66,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |
 | **MX** | Mail Exchanger | The DNS record naming the servers that receive a domain's mail. Szop's is a null MX, `0 .`, saying it receives none (see ADR 0030). |
 | **NAT** | Network Address Translation | In AWS: a NAT gateway lets resources in a private subnet reach the internet. Costs about $32 a month on AWS; not used (see ADR 0008). In WSL: its default networking mode, where Windows hands the Linux side a private address; the alternative, mirrored mode, broke Playwright's start (see the [setup guide](development/setup.md#the-end-to-end-journeys)). |
-| **NFR** | Non-functional requirement | A quality the system must have rather than something it does: supported browsers, accessibility, performance. Szop's are [NFR-1 to NFR-3](requirements/functional-requirements.md#3-non-functional-requirements). |
+| **NFR** | Non-functional requirement | A quality the system must have rather than something it does: supported browsers, accessibility, performance. Szop's are [NFR-1 to NFR-3](requirements/NFR-non-functional-requirements.md). |
 | **nvm** | Node Version Manager | A tool that installs and switches Node.js versions per user. Szop's `.nvmrc` tells it which one to use. |
 | **OAuth / OIDC** | Open Authorization / OpenID Connect | Standards for logging in through another provider ("Sign in with Google"). Relevant for the social-login future extension. Also how CI logs in to AWS without stored keys: GitHub signs a token saying which repository the job belongs to and which environment, branch or PR event it runs for, and AWS exchanges it for short-lived credentials (see ADR 0010 and ADR 0012). |
 | **OFL** | SIL Open Font License | A free license for fonts: they may be used, bundled and shipped with software, but not sold on their own. Gabarito is under it (see ADR 0022). |
@@ -105,42 +106,46 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **SVG** | Scalable Vector Graphics | An image format describing shapes rather than pixels, so it stays sharp at any size. Lucide's icons and Szop's raccoon are SVG. |
 | **TDD** | Test-Driven Development | Writing a failing test first, then the code that makes it pass, then tidying up ("red, green, refactor"). Szop uses it for domain rules, services and API routes (see ADR 0007). |
 | **TLS** | Transport Layer Security | The encryption behind HTTPS. |
+| **UTC** | Coordinated Universal Time | The time standard with no time zone or daylight saving, which logs use so their timestamps compare across machines. The usage log's timestamps are in it (see the [guide to working with Claude](development/working-with-claude.md#the-usage-log)). |
 | **UUID** | Universally Unique Identifier | A 128-bit random identifier, such as `3f2c…`, practically never repeated. Szop's request IDs fall back to one where the load balancer sent no trace ID (ADR 0036). |
 | **vCPU** | Virtual CPU | A share of a processor as cloud providers sell it. Szop's demo task gets a quarter of one. |
 | **VPC** | Virtual Private Cloud | A private network inside AWS, divided into subnets. |
 | **VPS** | Virtual Private Server | A rented virtual machine you manage yourself (Hetzner, DigitalOcean). Considered, not used (see ADR 0008). |
 | **WAF** | Web Application Firewall | A filter in front of an app that blocks malicious or excessive requests. Not used by the demo (see ADR 0008). |
 | **WASM** | WebAssembly | A compact binary format that browsers and Node.js can run at near-native speed. PGlite is PostgreSQL compiled to it; considered for tests, not used (see ADR 0007). |
-| **WCAG** | Web Content Accessibility Guidelines | The W3C's standard for accessible web content, with levels A, AA and AAA. Szop targets WCAG 2.2 AA ([NFR-2](requirements/functional-requirements.md#nfr-2)). |
+| **WCAG** | Web Content Accessibility Guidelines | The W3C's standard for accessible web content, with levels A, AA and AAA. Szop targets WCAG 2.2 AA ([NFR-2](requirements/NFR-non-functional-requirements.md#nfr-2)). |
 | **WSL** | Windows Subsystem for Linux | A Linux environment running inside Windows. Szop is developed in WSL 2 with Ubuntu. |
 | **YAML** | YAML Ain't Markup Language | A text format for configuration, based on indentation. GitHub Actions workflows and `compose.yaml` are written in it. |
 
 ## Requirement ID prefixes
 
-Used in [functional-requirements.md](requirements/functional-requirements.md) and referenced across the docs.
+Used in the [functional requirements](requirements/functional-requirements.md), where each area has its own file, and referenced across the docs.
 
 | Prefix | Area |
 |---|---|
-| **[ACC](requirements/functional-requirements.md#accounts-and-guest-mode-acc)** | Accounts and guest mode |
-| **[LST](requirements/functional-requirements.md#shopping-lists-lst)** | Shopping lists |
-| **[ITM](requirements/functional-requirements.md#list-items-itm)** | List items |
-| **[ORD](requirements/functional-requirements.md#list-display-and-ordering-ord)** | List display and ordering |
-| **[CAT](requirements/functional-requirements.md#categories-cat)** | Categories |
-| **[PRD](requirements/functional-requirements.md#catalog-prd)** | Catalog (products) |
-| **[UNT](requirements/functional-requirements.md#units-unt)** | Units |
-| **[TPL](requirements/functional-requirements.md#templates-tpl)** | Templates |
-| **[SHR](requirements/functional-requirements.md#sharing-shr)** | Sharing |
-| **[SYN](requirements/functional-requirements.md#live-updates-syn)** | Live updates (synchronization) |
-| **[NET](requirements/functional-requirements.md#connectivity-net)** | Connectivity (network) |
-| **[LIM](requirements/functional-requirements.md#limits-lim)** | Limits (quotas and rate limits) |
-| **[NFR](requirements/functional-requirements.md#3-non-functional-requirements)** | Non-functional requirements (browsers, accessibility, performance) |
-| **[UC](requirements/functional-requirements.md#4-use-cases)** | Use case |
+| **[ACC](requirements/ACC-accounts-and-guest-mode.md)** | Accounts and guest mode |
+| **[LST](requirements/LST-shopping-lists.md)** | Shopping lists |
+| **[ITM](requirements/ITM-list-items.md)** | List items |
+| **[ORD](requirements/ORD-list-display-and-ordering.md)** | List display and ordering |
+| **[CAT](requirements/CAT-categories.md)** | Categories |
+| **[PRD](requirements/PRD-catalog.md)** | Catalog (products) |
+| **[UNT](requirements/UNT-units.md)** | Units |
+| **[TPL](requirements/TPL-templates.md)** | Templates |
+| **[SHR](requirements/SHR-sharing.md)** | Sharing |
+| **[SYN](requirements/SYN-live-updates.md)** | Live updates (synchronization) |
+| **[NET](requirements/NET-connectivity.md)** | Connectivity (network) |
+| **[LIM](requirements/LIM-limits.md)** | Limits (quotas and rate limits) |
+| **[APR](requirements/APR-appearance.md)** | Appearance (the color scheme) |
+| **[APP](requirements/APP-app-wide-behavior.md)** | App-wide behavior (the menu, page titles, messages, loading and empty states, forms) |
+| **[NFR](requirements/NFR-non-functional-requirements.md)** | Non-functional requirements (browsers, accessibility, performance, security) |
+| **[UC](requirements/UC-use-cases.md)** | Use case |
 | **FR** | Functional requirement (general name for any of the IDs above, apart from NFR) |
 
 ## Terms
 
 | Term | Meaning |
 |---|---|
+| **Acceptance criterion** | A short, checkable statement of what must be true for a requirement to be met, such as "System is the default and follows the device's setting". Each Szop requirement lists its criteria with an ID (`APR-1.2`) and a status; a test that covers one starts its name with that ID. Written out, never abbreviated (see [ADR 0051](decisions/0051-acceptance-criteria.md)). |
 | **Access Analyzer (IAM)** | An AWS service that checks IAM policy documents against AWS's own rules and reports errors, security warnings, warnings and suggestions, for example a trust policy that could name a branch. Szop runs it on every IAM policy in the plan of a PR that changes `infra/`, and an error or a security warning blocks the PR (see ADR 0032, decision 4, and ADR 0041). |
 | **Access key** | A long-lived AWS credential pair (an ID and a secret) for an IAM user. It works until someone deletes it, so a leaked one is the most common way AWS accounts are compromised; Szop has none, and uses IAM Identity Center's short-lived credentials instead (ADR 0029). |
 | **Accessibility check (axe)** | An automated scan of a page for barriers to people using assistive technology, such as a missing label or low contrast. **axe** (axe-core) is the common rule engine; Szop runs it in the E2E journeys through `@axe-core/playwright`, in light and dark mode (see [Playwright](development/tools/playwright.md)). It finds only part of the problems: keyboard and screen-reader use still need people. |
@@ -167,16 +172,20 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Cloud session** | A Claude Code session that runs in a container in the cloud instead of on the owner's machine. The container is thrown away after a period of inactivity, so its tools are installed by a setup script (see ADR 0043 and the setup guide). |
 | **CodeQL** | GitHub's code analysis engine: it finds security vulnerabilities and coding errors in the code and in the workflows. Free for public repositories; Szop uses its default setup (see ADR 0010). |
 | **Commitlint** | A tool that checks commit messages against a convention, here Conventional Commits, run by a `commit-msg` git hook. |
+| **Compaction** | Replacing a Claude Code conversation with a summary written by the model, so the next call starts from a small context again: on demand with `/compact`, or by itself at a threshold (auto-compact, 300k here). The summary is lossy (see the [guide to working with Claude](development/working-with-claude.md#compaction)). |
 | **Composite action** | A reusable group of GitHub Actions steps kept in the repository (`.github/actions/<name>/action.yml`) and called from workflows like any action. Szop's `setup` action installs pnpm, Node and the dependencies for every CI job. |
 | **Composite foreign key** | A foreign key made of several columns. In Szop, references between workspace-owned tables include `workspace_id`, such as `(workspace_id, category_id) → categories (workspace_id, id)`, so the database refuses a reference into another workspace (see ADR 0012). |
 | **Connection pool** | A set of open database connections that the app lends to queries and takes back, so each query does not pay for opening a new connection. node-postgres's `Pool` is one; Szop's API creates it in `createDatabase`. |
 | **Container / Docker** | A container packages a program with everything it needs and runs it isolated from the rest of the machine. Docker is the most common tool for building and running containers. Szop runs PostgreSQL in one during development, and packs the app itself into a container image, which AWS runs (see ADR 0028). |
 | **Content hash (fingerprint)** | A short hash of a file's content that the build puts in the file's name (`index-3f9a1c.js`). A changed file gets a new name, so the old one can be cached forever. Vite fingerprints everything under `assets/`. |
+| **Context (of a call)** | Everything the model reads for one API call: the system prompt, CLAUDE.md, the skills' text and the whole conversation so far, counted in tokens. The audit and the usage script count it as input plus cache write plus cache read tokens (see the [guide to working with Claude](development/working-with-claude.md#context-and-the-prompt-cache)). |
 | **Conventional Commits** | A convention for commit messages, `type(scope): description` (`feat(api): add list sharing`), that tells both people and tools what kind of change a commit is. Szop uses it (see ADR 0009). |
 | **Cookie prefix** | A cookie name starting with `__Host-` or `__Secure-`, which the browser accepts only with matching attributes. `__Host-` requires `Secure`, the path `/` and no `Domain`, so no other subdomain can set or overwrite the cookie. |
 | **Cooldown (Dependabot)** | A waiting period before Dependabot proposes a new version of a dependency, so malicious releases are usually found and removed before they are offered. Szop uses 7 days (see ADR 0010). |
+| **Coordinator** | The main Claude Code session the owner talks to: it brainstorms, writes the spec and the plan, dispatches the subagents and reviews their work. It spends most of the weekly limit (see the [guide to working with Claude](development/working-with-claude.md#why-this-matters)). |
 | **Core Web Vitals** | Google's three metrics of how a page feels to use: LCP (loading), INP (responsiveness) and CLS (visual stability), each with a "good" threshold. |
 | **Cost allocation tag** | A tag that AWS's billing can group costs by, once the owner activates it. Szop activates `project` and `group`, which every resource carries, so Cost Explorer can show what each module costs; the data starts from activation (see the [runbook](operations/demo-environment.md#3-region-and-billing-preferences)). |
+| **Cost unit** | The price of one Opus input token, the unit the token usage audit and script measure cost in: input 1, cache write 1.25, cache read 0.1, output 5, with Sonnet at 0.6× and Haiku at 0.2× of Opus. It approximates how the subscription meters usage (see the [guide to working with Claude](development/working-with-claude.md#cost-units)). |
 | **CSP guard** | The part of Szop's E2E tests (`e2e/support/test.ts`) that listens for the browser's `securitypolicyviolation` events on every page and fails the test if there was any (see [Testing guide](development/testing.md#the-csp-guard)). |
 | **CSS-in-JS** | Writing styles in JavaScript that a library turns into `<style>` elements at run time (Emotion, styled-components). Ruled out for Szop by its Content Security Policy. |
 | **Customer-managed key (KMS)** | An encryption key you create in KMS and control yourself: who may use it, when it rotates, when it is deleted. It costs about $1 a month and needs IAM permissions for everything that uses it. The alternative is a key the service manages for you, such as SSE-S3 or RDS's AWS managed key. Szop uses none (see ADR 0041, decision 9). |
@@ -278,6 +287,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **Precompression** | Writing compressed copies of files (Brotli `.br`, gzip `.gz`) at build time, so the server never compresses per request and the strongest settings are affordable. Szop's Vite build does it ([ADR 0023](decisions/0023-production-build-and-serving-details.md)). |
 | **Precondition (Terraform)** | A check in a resource's `lifecycle` block that Terraform runs before it creates or changes the resource, failing with the author's message. Skipped when the resource is destroyed. The demo's HTTPS listener uses one to refuse an apply without `deployed_commit` (see ADR 0034). |
 | **Profile (Compose)** | A label on a Docker Compose service that starts it only when asked for with `--profile <name>`. Szop's `app` service, the container image, has the profile `app`, so `docker compose up` alone still starts PostgreSQL only. |
+| **Prompt cache** | The API's store of the beginning of a context already sent in an earlier call, read back at a tenth of the price of new input; writing to it costs a quarter more. On a subscription an entry lives one hour, so the first call after a longer break writes the whole context again (see the [guide to working with Claude](development/working-with-claude.md#context-and-the-prompt-cache)). |
 | **Property-based testing** | Testing a rule against hundreds of generated inputs instead of a few hand-picked examples, checking a property that must always hold ("a parent category always comes before its children"). Szop uses fast-check. |
 | **Proxy (dev server)** | The Vite dev server forwarding requests for `/api/*` to the API, so the browser sees a single origin during development. |
 | **Push protection** | A GitHub secret scanning feature that rejects a push containing a recognized secret, such as an access key, before it reaches the repository. |
@@ -321,6 +331,7 @@ Used in [functional-requirements.md](requirements/functional-requirements.md) an
 | **State lock (Terraform)** | A guard that stops two runs from writing the same state at once. With `use_lockfile`, Terraform creates a `.tflock` file next to the state for the length of a run. Not to be confused with the provider lock file, `.terraform.lock.hcl`. |
 | **Storybook** | A separate local web app for building and reviewing components on their own, in all their states. Not used by Szop for now. |
 | **Sub-issue** | An issue placed under a parent issue on GitHub; the parent shows its sub-issues and how many are closed. In Szop, each open point is a sub-issue of the phase that settles it (see ADR 0024). |
+| **Subagent** | A Claude Code agent the coordinator dispatches for one task, such as implementing a plan task or reviewing a branch. It starts with a fresh context, may run on another model, and hands back a report. Szop's subagents default to Sonnet (see the [guide to working with Claude](development/working-with-claude.md#choosing-models)). |
 | **Subnet (public, private)** | A slice of a VPC's addresses. A public subnet has a route to the internet; a private one does not. |
 | **Subnet group (RDS)** | The list of subnets an RDS instance may be placed in, in at least two availability zones. Szop's holds the two private subnets. |
 | **Supply-chain attack** | Attacking software through something it depends on, such as a hijacked npm package or GitHub action, instead of attacking it directly. |

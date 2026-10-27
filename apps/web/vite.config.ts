@@ -44,7 +44,7 @@ function precompress(): Plugin {
   };
 }
 
-// NFR-3: the JavaScript the first screen needs is at most 200 KB compressed
+// NFR-3.1: the JavaScript the first screen needs is at most 200 KB compressed
 // (ADR 0013, decision 4). It is the entry chunk and every chunk it imports
 // statically; chunks loaded later through import() do not count. Measured
 // in Brotli, what browsers download (ADR 0023, decision 4).

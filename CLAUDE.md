@@ -34,26 +34,28 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 
 ## Project tracking
 
-Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](docs/decisions/0027-open-points-on-github.md) and `docs/development/project-tracking.md`. **GitHub** (the issues and the fields of the [Szop project](https://github.com/users/luiki-dev/projects/3)) holds the status and the open points; **`roadmap.md`** holds each phase's plan and mirrors the status in its stage tables. Every step below says which side it changes.
+Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](docs/decisions/0027-open-points-on-github.md) and `docs/development/project-tracking.md`. **GitHub** (the issues and the fields of the [Szop project](https://github.com/users/luiki-dev/projects/3)) holds the status and the open points; **`roadmap.md`** holds each phase's plan and mirrors the status in its stage tables; **`docs/requirements/`** holds each requirement's acceptance criteria and their status ([ADR 0051](docs/decisions/0051-acceptance-criteria.md)). Every step below says which side it changes.
 
 During a phase:
 
 - **When a phase's brainstorm starts, before the first question:**
   - On GitHub: the phase issue's Status → 🚧 In progress; Finished (the merge date) set on the previous phase's issue and on every `adr` issue closed since.
   - On GitHub: read the phase's open-point issues (its sub-issues and the issues its **Also** section lists).
+- **During the brainstorm:** review with the owner the acceptance criteria of every requirement the phase delivers, and the whole list of any requirement still ❔ Criteria not finalized ([ADR 0051](docs/decisions/0051-acceptance-criteria.md)).
 - **In the phase branch's first commit:**
   - In the repo: the phase's row in the `roadmap.md` stage table → 🚧.
   - On GitHub: the phase issue's Started field → that commit's date.
 - **When the spec or plan is committed:**
-  - In the repo: its link in the phase's row of the `roadmap.md` stage table.
+  - In the repo: its link in the phase's row of the `roadmap.md` stage table; with the spec (or a bounded phase's first commit after its design), the criteria the phase delivers set to 🚧, the requirements it reviewed marked ✅ Criteria finalized, and the index updated.
   - On GitHub: the phase issue's Spec or Plan field.
 - **When the phase's owner steps change:**
   - On GitHub: owner-step issues added, or closed as not planned with the reason.
   - In the repo: the phase entry's **Owner steps** in `roadmap.md` updated.
 - **Before opening the PR:**
   - On GitHub: every open-point issue of the phase closed (with a "settled by" comment) or re-assigned; the phase issue's body updated if its `roadmap.md` entry changed.
-  - In the repo: the stage table row in line with GitHub, with the PR link.
+  - In the repo: the stage table row in line with GitHub, with the PR link; every criterion the PR delivers ✅, with a test whose name starts with its ID; each requirement's line and the index updated.
   - In the PR description: `Closes #<phase issue>` and `Closes #<open-point issue>` for each one it settles, and a list of every issue change the PR made.
+  - In the PR description: a "Token usage" section with the output of `scripts/token-usage.py --branch <the phase branch>`.
 - **At the end of a phase:** propose the next phase. The owner moves its issue and its open-point issues to 📌 Todo on GitHub.
 - **Never set ✅ Done on GitHub by hand:** merging the PR closes the issues, and the project's workflow sets it.
 
@@ -66,9 +68,18 @@ Open points (all on GitHub; no document lists them):
 - **An open point is dropped:** closed as not planned, with the reason as a comment.
 - **Anything else** (a phase split, a candidate picked up, an item blocked, an ADR made outside a phase): look up its row in [How items move](docs/development/project-tracking.md#how-items-move).
 
+## Working with Claude
+
+Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `docs/development/working-with-claude.md`, which holds the reasons. In short:
+
+- **A session per stage:** brainstorm and spec, plan, execution, finishing; each starts a new session from the committed document or commits of the last ([A phase in sessions](docs/development/working-with-claude.md#a-phase-in-sessions)).
+- **Restart or `/compact` above 150–200k of context**, never in the middle of an uncommitted edit ([Reading the status line](docs/development/working-with-claude.md#reading-the-status-line)).
+- **Before a break longer than an hour, finish the stage:** the prompt cache lives one hour, and the first call after it writes the whole context again ([Breaks and the cache](docs/development/working-with-claude.md#breaks-and-the-cache)).
+- **Implementers on Sonnet, the default; the whole-branch review on Opus, named explicitly** (`model: opus`) ([Choosing models](docs/development/working-with-claude.md#choosing-models)).
+
 ## Documentation
 
-- `docs/requirements/functional-requirements.md` — the living source of truth for functional requirements (FR IDs, use cases, MVP/Later slicing, future extensions) and the non-functional requirements (NFR IDs: browsers, accessibility, performance). Keep it updated when behavior changes.
+- `docs/requirements/` — the living source of truth for what Szop does: `functional-requirements.md` is the index (how requirements and their acceptance criteria are written, the status of every requirement, the assumptions, actors and domain concepts, MVP/Later slicing and future extensions); one file per area, `<AREA-CODE>-<full-area-name>.md` (such as `ACC-accounts-and-guest-mode.md`, and `NFR-non-functional-requirements.md` for browsers, accessibility, performance and security), holds each requirement with its acceptance criteria and their status; `UC-use-cases.md` holds the use cases. Keep it updated when behavior changes or a phase finalizes, starts or delivers criteria.
 - `docs/architecture/architecture.md` — the living technical architecture (components, layering, data model highlights, frontend state, later features). Keep it updated when the design changes.
 - `docs/architecture/stack-overview.md` — a learning-oriented explanation of the stack and its concepts. Extend it when a new technology or concept enters the project.
 - `docs/architecture/threat-model.md` — what Szop protects, who can act through which path, and what guards each entry point. Keep it updated when an actor or entry point is added.
@@ -83,6 +94,7 @@ Open points (all on GitHub; no document lists them):
 - `docs/development/testing.md` — how Szop is tested: the layers, running the suites, writing each kind of test, and the rules. Read it before writing or changing tests, and keep it updated when a test layer or tool changes.
 - `docs/development/definition-of-done.md` — the one definition of done: every item, what it means, which PRs need it, and when the demo check must be repeated. The PR template mirrors it.
 - `docs/development/phase-walkthrough.md` — one example phase end to end: commits, PRs, CI, demo, release-please and version tags, in order.
+- `docs/development/working-with-claude.md` — working with Claude Code within the weekly limit: how usage builds up, a phase in sessions, the status line, choosing models, and measuring a phase with `scripts/token-usage.py`. Keep it updated when a habit, a threshold or the script changes.
 - `docs/development/github-settings.md` — every GitHub setting the workflow relies on, where it lives in GitHub, and why. Keep it updated when a setting changes.
 - `docs/development/scripts.md` — every script in the `package.json` files: what it runs, when to run it, and which CI job or git hook runs it. Keep it updated when a script is added, changed or removed.
 - `docs/development/setup.md` — the setup guide, from a clean Windows machine to passing checks, and the setup script of a Claude Code session in the cloud. Keep it updated when a tool or a step changes.
@@ -101,10 +113,11 @@ Open points (all on GitHub; no document lists them):
   - ⏳ deferred or waiting: finding deferred to an open point, `⏳ Blocked` on the project
   - ✖️ rejected or dropped: finding rejected, open point dropped without being done, `✖️ Dropped` on the project
   - ❌ failed or blocking: a failed plan, a blocking finding in the PR comment
-  - ❔ pending: not decided or triaged yet
+  - ❔ pending: not decided or triaged yet, a draft acceptance criterion, a list of criteria not finalized
+  - ➡️ moved: an acceptance criterion moved to another requirement, under a new ID
   - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
   - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell
   - ➖ not applicable: `➖ N/A: reason` in the definition of done and the PR template
   - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
-- **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/functional-requirements.md#acc-1)`, `[UC-3](../requirements/functional-requirements.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/functional-requirements.md#sharing-shr)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
+- **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1)`, `[UC-3](../requirements/UC-use-cases.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/SHR-sharing.md)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
 - Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.
