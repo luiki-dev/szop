@@ -189,11 +189,23 @@ jobs:
       # creates szop_e2e itself.
       - run: cp apps/api/.env.example apps/api/.env
       - run: docker compose up -d --wait
-      # Every run, not cached: restoring a cache takes about as long as the
-      # download, and the system libraries come from apt anyway (ADR 0026,
+      # The browsers are cached, keyed by Playwright's version, which
+      # e2e/package.json pins exactly. The runner image already has their
+      # system libraries, so apt never runs: a slow Ubuntu mirror once ran
+      # this step into the job's timeout (ADR 0053, refining ADR 0026,
       # decision 5).
+      - name: Resolve Playwright's version
+        id: playwright
+        run: echo "version=$(jq -r '.devDependencies["@playwright/test"]' e2e/package.json)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      # Downloads nothing when the cache was restored. Its own timeout, so a
+      # stuck download fails in minutes and can be rerun.
       - name: Install Playwright's browsers
-        run: pnpm --filter @szop/e2e exec playwright install --with-deps chromium firefox
+        timeout-minutes: 5
+        run: pnpm --filter @szop/e2e exec playwright install chromium firefox
       # Builds the app, then runs every journey on the three projects.
       - run: pnpm test:e2e
       # The HTML report, with the trace and screenshot of every failed test,
