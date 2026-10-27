@@ -1,6 +1,6 @@
 # Szop — Visual Design
 
-Living description of what Szop looks like and how its screens are built: the look, the components and styling, the design tokens, the brand, and the layout and interaction principles every phase follows. The decisions behind it, with the alternatives considered, are in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../decisions/0022-ring-tail-redesign.md), which replaced its look, color and font; the non-functional requirements it serves are [NFR-1](../requirements/functional-requirements.md#nfr-1) (browsers), [NFR-2](../requirements/functional-requirements.md#nfr-2) (accessibility) and [NFR-3](../requirements/functional-requirements.md#nfr-3) (performance). Acronyms are explained in the [glossary](../glossary.md).
+Living description of what Szop looks like and how its screens are built: the look, the components and styling, the design tokens, the brand, and the layout and interaction principles every phase follows. The decisions behind it, with the alternatives considered, are in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../decisions/0022-ring-tail-redesign.md), which replaced its look, color and font; the non-functional requirements it serves are [NFR-1](../requirements/NFR-non-functional-requirements.md#nfr-1) (browsers), [NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2) (accessibility) and [NFR-3](../requirements/NFR-non-functional-requirements.md#nfr-3) (performance). Acronyms are explained in the [glossary](../glossary.md).
 
 This page describes the design system, not the screens: each phase designs the screens it builds ([ADR 0004](../decisions/0004-implementation-process.md), decision 4) and updates this page when it changes the system. **The pictures here are mockups drawn during the brainstorm**: the decisions (tokens, font, layout) are binding, the pixel details are illustrations.
 
@@ -72,13 +72,13 @@ The accent is **sage**; neutrals come from Tailwind's **`gray`**, and the light 
 | `haul-chip` | Chips, the ↶ buttons, the progress bar's track, the handle | `gray-700` | `gray-800` |
 | `haul-accent` | The progress fill, the focus ring inside the haul | `sage-300` | `sage-300` |
 | `destructive` / `destructive-foreground` | Deleting, and the text on it | `red-600` / `white` | `red-400` / `gray-950` |
-| `warning` / `warning-foreground` | The offline banner ([NET-1](../requirements/functional-requirements.md#net-1)) and its text | `amber-100` / `amber-900` | `amber-950` / `amber-200` |
+| `warning` / `warning-foreground` | The offline banner ([NET-1](../requirements/NET-connectivity.md#net-1)) and its text | `amber-100` / `amber-900` | `amber-950` / `amber-200` |
 
-**Contrast:** every text pair meets 4.5:1 and every UI part (checkbox borders, the focus ring, the progress fill) 3:1 against its background, in both schemes ([NFR-2](../requirements/functional-requirements.md#nfr-2)). The narrowest are `primary` on `accent` (4.6:1) and the focus ring on the fur page (3.6:1); every pair is listed in the [redesign spec](../superpowers/specs/2026-10-07-ring-tail-redesign-design.md#contrast). `gray-400` borders on white are only about 2.5:1, which is why `input` is `gray-500` in light mode, and `primary` on the fur page is only 3.6:1, which is why sage text on the page uses `link`. axe checks every page in light and dark, and an E2E test checks every pair of the roles, UI parts included, in both schemes ([testing guide](../development/testing.md#the-token-contrast-test)); a new pair joins its table.
+**Contrast:** every text pair meets 4.5:1 and every UI part (checkbox borders, the focus ring, the progress fill) 3:1 against its background, in both schemes ([NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2)). The narrowest are `primary` on `accent` (4.6:1) and the focus ring on the fur page (3.6:1); every pair is listed in the [redesign spec](../superpowers/specs/2026-10-07-ring-tail-redesign-design.md#contrast). `gray-400` borders on white are only about 2.5:1, which is why `input` is `gray-500` in light mode, and `primary` on the fur page is only 3.6:1, which is why sage text on the page uses `link`. axe checks every page in light and dark, and an E2E test checks every pair of the roles, UI parts included, in both schemes ([testing guide](../development/testing.md#the-token-contrast-test)); a new pair joins its table.
 
 ### Dark mode
 
-**The user chooses the color scheme**: System (the default), Light or Dark, with three labelled options at the bottom of the menu ([APR-1](../requirements/functional-requirements.md#apr-1), [ADR 0049](../decisions/0049-app-shell-phase-details.md), decision 6). Dark mode is **the class `dark` on `<html>`**, which Tailwind's `dark:` variant and the dark roles (`:root.dark` in `index.css`) follow, so components use the roles and never ask which scheme is on. The choice is kept in `localStorage` under `szop-color-scheme` (System removes it; when the storage is blocked, the choice holds for the visit only). **`apps/web/public/color-scheme.js`**, a few lines loaded first in `<head>` as a file (the CSP forbids inline scripts), sets the class before the page paints; **`src/shell/color-scheme.ts`** holds the same rules for the app, and while the choice is System it follows the system setting as it changes. **The haul stays the darkest surface in both schemes**: `gray-800` on the fur page in light mode, `gray-950` on the `gray-900` page in dark mode, so the screen keeps its shape.
+**The user chooses the color scheme**: System (the default), Light or Dark, with three labelled options at the bottom of the menu ([APR-1](../requirements/APR-appearance.md#apr-1), [ADR 0049](../decisions/0049-app-shell-phase-details.md), decision 6). Dark mode is **the class `dark` on `<html>`**, which Tailwind's `dark:` variant and the dark roles (`:root.dark` in `index.css`) follow, so components use the roles and never ask which scheme is on. The choice is kept in `localStorage` under `szop-color-scheme` (System removes it; when the storage is blocked, the choice holds for the visit only). **`apps/web/public/color-scheme.js`**, a few lines loaded first in `<head>` as a file (the CSP forbids inline scripts), sets the class before the page paints; **`src/shell/color-scheme.ts`** holds the same rules for the app, and while the choice is System it follows the system setting as it changes. **The haul stays the darkest surface in both schemes**: `gray-800` on the fur page in light mode, `gray-950` on the `gray-900` page in dark mode, so the screen keeps its shape.
 
 ### Typography
 
@@ -125,7 +125,7 @@ The main screen's pattern, decided in [ADR 0022](../decisions/0022-ring-tail-red
 From top to bottom, on a phone:
 
 1. **Header**: ← back, the list's name (Gabarito 800, cut with "…" when too long), the raccoon tile. List actions (rename, sort setting and so on) are placed by the phases that add them.
-2. **Category cards with the unchecked items only**, ordered as [ORD-2](../requirements/functional-requirements.md#ord-2) and [ORD-3](../requirements/functional-requirements.md#ord-3) say. The card's header shows the category and "N left". A card disappears when all its items are checked.
+2. **Category cards with the unchecked items only**, ordered as [ORD-2](../requirements/ORD-list-display-and-ordering.md#ord-2) and [ORD-3](../requirements/ORD-list-display-and-ordering.md#ord-3) say. The card's header shows the category and "N left". A card disappears when all its items are checked.
 3. **The add bar**, pinned above the haul, on the page: a white field "+ Add item" and a sage "Add" button. While the field has focus, the haul folds to one line ("The haul · €28.47"), so the keyboard leaves room for the list.
 4. **The collapsed haul**, a dark tray with rounded top corners and a fixed height:
    - a handle;
@@ -137,11 +137,11 @@ From top to bottom, on a phone:
    - the list behind it is dimmed; the drawer traps focus while open and returns it when closed;
    - **the header stays pinned**: handle, amount, bar and caption, as in the collapsed haul;
    - then "Newest first · ↶ puts an item back", and **rows**: name, quantity and unit, line total and a **↶ button**. Only the button puts an item back; the row itself does nothing;
-   - at the end, a **"Put all back"** button: [LST-5](../requirements/functional-requirements.md#lst-5)'s "Uncheck all".
+   - at the end, a **"Put all back"** button: [LST-5](../requirements/LST-shopping-lists.md#lst-5)'s "Uncheck all".
 
 **Checking an item**: its row leaves its card and its chip appears first in the haul, in 150 to 200 ms, without motion when the system asks for reduced motion. Putting an item back reverses it: the item returns to its place in its card.
 
-**Amounts.** The haul shows all three totals of [ITM-8](../requirements/functional-requirements.md#itm-8):
+**Amounts.** The haul shows all three totals of [ITM-8](../requirements/ITM-list-items.md#itm-8):
 
 - **"€28.47"**: the checked items;
 - **"of €36.54"**: all items;
@@ -175,11 +175,11 @@ Items without a price are left out of all three. When no item has a price, the m
 ### Feedback
 
 - **Changes are optimistic**: checking, adding and editing show at once, with no spinner; a failure rolls the change back and says so ([architecture](architecture.md#optimistic-updates)).
-- **Messages are toasts** (Base UI Toast) that say what happened and what to do. Never a generic "Something went wrong"; limits explain themselves ([LIM-3](../requirements/functional-requirements.md#lim-3), [LIM-4](../requirements/functional-requirements.md#lim-4)).
+- **Messages are toasts** (Base UI Toast) that say what happened and what to do. Never a generic "Something went wrong"; limits explain themselves ([LIM-3](../requirements/LIM-limits.md#lim-3), [LIM-4](../requirements/LIM-limits.md#lim-4)).
 - **Undo rather than "Are you sure?"** for reversible actions; a confirmation dialog only for what cannot be undone, such as deleting an account. Which actions get undo is decided by their phases ([OP-051](https://github.com/luiki-dev/szop/issues/103)).
 - **Loading:** skeleton placeholders shaped like the content on a page's first load, never a full-screen spinner.
 - **Empty states:** every empty page says what it is for and offers the next action ("No lists yet" with "New list"). An illustration is optional.
-- **Offline ([NET-1](../requirements/functional-requirements.md#net-1)):** an amber `warning` banner stays at the top while offline; controls that change data are disabled with a visible reason.
+- **Offline ([NET-1](../requirements/NET-connectivity.md#net-1)):** an amber `warning` banner stays at the top while offline; controls that change data are disabled with a visible reason.
 
 ### Forms and focus
 

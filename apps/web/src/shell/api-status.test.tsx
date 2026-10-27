@@ -19,7 +19,7 @@ function renderStatus() {
   return { queryClient };
 }
 
-describe("ApiStatus", () => {
+describe("APP-1.4: ApiStatus", () => {
   it("shows the schema version once the API and the database answer", async () => {
     renderStatus();
 

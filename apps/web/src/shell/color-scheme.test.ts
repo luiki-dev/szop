@@ -25,7 +25,7 @@ describe("readColorScheme", () => {
     expect(readColorScheme()).toBe(choice);
   });
 
-  it("is system when nothing is stored", () => {
+  it("APR-1.2: is system when nothing is stored", () => {
     expect(readColorScheme()).toBe("system");
   });
 
@@ -35,7 +35,7 @@ describe("readColorScheme", () => {
     expect(readColorScheme()).toBe("system");
   });
 
-  it("is system when the storage throws", () => {
+  it("APR-1.5: is system when the storage throws", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new Error("blocked");
     });
@@ -89,7 +89,7 @@ describe("applyColorScheme", () => {
 });
 
 describe("followSystemColorScheme", () => {
-  it("follows the system while the choice is system, with nothing rendered", () => {
+  it("APR-1.2: follows the system while the choice is system, with nothing rendered", () => {
     const media = stubMatchMedia();
     const stop = followSystemColorScheme();
 
@@ -101,7 +101,7 @@ describe("followSystemColorScheme", () => {
     stop();
   });
 
-  it("keeps a stored light choice when the system turns dark", () => {
+  it("APR-1.3: keeps a stored light choice when the system turns dark", () => {
     localStorage.setItem(storageKey, "light");
     const media = stubMatchMedia();
     const stop = followSystemColorScheme();

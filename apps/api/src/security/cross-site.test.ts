@@ -13,7 +13,7 @@ const refused = {
   message: "Cross-site request refused",
 };
 
-describe("the cross-site check", () => {
+describe("NFR-4.1: the cross-site check", () => {
   const database = useTestDatabase();
   let app: FastifyInstance;
 

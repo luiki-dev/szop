@@ -352,7 +352,7 @@ What Szop looks like is described in [visual-design.md](visual-design.md) and de
 
 ## 15. How fast is fast enough
 
-"Fast" becomes testable once it is a number. Szop's numbers are [NFR-3](../requirements/functional-requirements.md#nfr-3); this section explains them.
+"Fast" becomes testable once it is a number. Szop's numbers are [NFR-3](../requirements/NFR-non-functional-requirements.md#nfr-3); this section explains them.
 
 - **Core Web Vitals** are Google's three measures of how a page *feels*: **LCP** (Largest Contentful Paint, when the main content appears), **INP** (Interaction to Next Paint, how fast a tap gets a visible response) and **CLS** (Cumulative Layout Shift, how much content jumps around while loading). Each has a "good" threshold.
 - **Lighthouse**, built into Chrome's DevTools, loads a page while simulating a mid-range phone on a slow 4G connection and reports these numbers. Its results vary a little from run to run, so Szop runs it by hand during the demo check rather than as a CI gate.

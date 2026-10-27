@@ -7,7 +7,7 @@
 - Roadmap phase:
 - Spec:
 - Plan:
-- Requirement IDs:
+- Requirements and criteria:
 - ADRs:
 - Issues changed (open points closed, re-assigned or added; phase bodies updated):
 - Issues closed (`Closes #N`, one per line):
@@ -22,7 +22,7 @@
 
 <!-- What each item means, which PRs need which items, and when the demo check must be repeated: docs/development/definition-of-done.md. Mark an item that does not apply as "➖ N/A: <reason>" after its text, and leave its box unchecked. In brackets: who makes the item true; the owner verifies all of them. -->
 
-- [ ] Tests pass, at the right layers (Claude)
+- [ ] Tests pass, at the right layers; every criterion marked ✅ has a test named with its ID, or is checked at the demo (Claude)
 - [ ] Surviving mutants reviewed, when domain rules changed (Claude → owner)
 - [ ] CI is green (CI)
 - [ ] Deployed and checked on the demo, covering the final head, with a Lighthouse run when the UI changed (owner):
@@ -30,20 +30,21 @@
     - `demo-up` run: …
     - Deployed commit (the PR's final head): …
     - `/api/health` answers `ok` with that commit: …
+    - `http://` redirects to `https://` ([NFR-4.6](https://github.com/luiki-dev/szop/blob/main/docs/requirements/NFR-non-functional-requirements.md#nfr-4)): …
     - Console (no CSP errors, no other messages): …
     - Lighthouse, mobile profile, on `/`:
       - Performance: …
       - Accessibility: …
       - Best Practices: …
       - SEO: …
-    - Core Web Vitals ([NFR-3](https://github.com/luiki-dev/szop/blob/main/docs/requirements/functional-requirements.md#nfr-3): LCP ≤ 2.5 s, CLS ≤ 0.1; TBT stands in for INP in the lab):
+    - Core Web Vitals ([NFR-3](https://github.com/luiki-dev/szop/blob/main/docs/requirements/NFR-non-functional-requirements.md#nfr-3): LCP ≤ 2.5 s, CLS ≤ 0.1; TBT stands in for INP in the lab):
       - LCP … s
       - CLS …
       - TBT … ms
     - `demo-down` run: …
   - This PR's checks: <!-- one line per behavior to check in a browser, from the spec's demo check, each ending in ": …" for the result -->
 - [ ] `infra/base` changes applied from this branch (owner; applied again from `main` once the PR is merged or closed)
-- [ ] Living docs updated: architecture, stack overview, glossary, threat model, visual design, functional requirements, roadmap status and the issues (Claude)
+- [ ] Living docs updated: architecture, stack overview, glossary, threat model, visual design, functional requirements (criteria statuses, each requirement's line and the index), roadmap status and the issues (Claude)
 - [ ] Guides updated (Claude)
 - [ ] Significant decisions have ADRs (Claude → owner)
 - [ ] Open points closed, re-assigned or added on GitHub, and listed above (Claude)

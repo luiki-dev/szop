@@ -106,7 +106,7 @@ Components keep using only semantic roles. Changed values and new roles (🆕):
 
 ### Contrast
 
-Computed with the WCAG formula for every pair the roles produce ([NFR-2](../../requirements/functional-requirements.md#nfr-2): text 4.5:1, UI parts 3:1):
+Computed with the WCAG formula for every pair the roles produce ([NFR-2](../../requirements/NFR-non-functional-requirements.md#nfr-2): text 4.5:1, UI parts 3:1):
 
 | Pair | Light | Dark |
 |---|---|---|
@@ -145,7 +145,7 @@ The narrowest are `primary` on `accent` (4.6) and the focus ring on the fur page
 A layout pattern of the design system, not one phase's screen: the list phases build it and design their screens on top of it. From top to bottom, on a phone:
 
 1. **Header**: ← back, the list's name (Gabarito 800, cut with "…" when too long), the raccoon tile. List actions (rename, sort setting and so on) are placed by the phases that add them.
-2. **Category cards with the unchecked items only**, ordered as [ORD-2](../../requirements/functional-requirements.md#ord-2) and [ORD-3](../../requirements/functional-requirements.md#ord-3) say. The card's header shows the category and "N left". A card disappears when all its items are checked.
+2. **Category cards with the unchecked items only**, ordered as [ORD-2](../../requirements/ORD-list-display-and-ordering.md#ord-2) and [ORD-3](../../requirements/ORD-list-display-and-ordering.md#ord-3) say. The card's header shows the category and "N left". A card disappears when all its items are checked.
 3. **The add bar**, pinned above the haul, on the page: a white field "+ Add item" and a sage "Add" button. While the field has focus, the haul folds to one line ("The haul · €28.47"), so the keyboard leaves room for the list.
 4. **The collapsed haul**, a dark tray with rounded top corners and a fixed height:
    - a handle;
@@ -157,13 +157,13 @@ A layout pattern of the design system, not one phase's screen: the list phases b
    - the list behind it is dimmed; the drawer traps focus while open and returns it when closed;
    - **the header stays pinned**: handle, amount, bar and caption, as in the collapsed haul;
    - then "Newest first · ↶ puts an item back", and **rows**: name, quantity and unit, line total and a **↶ button**. Only the button puts an item back; the row itself does nothing;
-   - at the end, a **"Put all back"** button: [LST-5](../../requirements/functional-requirements.md#lst-5)'s "Uncheck all".
+   - at the end, a **"Put all back"** button: [LST-5](../../requirements/LST-shopping-lists.md#lst-5)'s "Uncheck all".
 
 **Checking an item**: its row leaves its card and its chip appears first in the haul, in 150 to 200 ms, without motion when the system asks for reduced motion. Putting an item back reverses it: the item returns to its place in its card.
 
 ### Amounts
 
-The haul shows all three totals of [ITM-8](../../requirements/functional-requirements.md#itm-8):
+The haul shows all three totals of [ITM-8](../../requirements/ITM-list-items.md#itm-8):
 
 - **"€28.47"**: the checked items;
 - **"of €36.54"**: all items;
@@ -200,13 +200,13 @@ In [functional-requirements.md](../../requirements/functional-requirements.md). 
 
 | ID | Today | Becomes |
 |---|---|---|
-| [ORD-1](../../requirements/functional-requirements.md#ord-1) | The list shows unchecked items first, then checked items. | Checked items leave the list and go to the haul, a tray apart from it; putting one back returns it to the list. |
-| [ORD-2](../../requirements/functional-requirements.md#ord-2) | Within each of the two parts, sorted by category order, then name. | The list's items are sorted by category order, then name; the haul's are ordered most recently checked first. |
-| [ORD-4](../../requirements/functional-requirements.md#ord-4) | A toggle hides checked items. | ✖️ Dropped: the list never shows checked items, so there is nothing to hide. The ID is kept and never reused. |
-| [ORD-5](../../requirements/functional-requirements.md#ord-5) | "…the unchecked/checked split ([ORD-1](../../requirements/functional-requirements.md#ord-1)) still applies." | "…checked items still go to the haul ([ORD-1](../../requirements/functional-requirements.md#ord-1))." |
-| [UC-3](../../requirements/functional-requirements.md#uc-3-shop-in-a-store) | Checked items move to the checked part; the user hides them; the totals show spent and remaining. | Checked items drop into the haul, so the list shows only what is left; the haul shows what is in the basket, how far along they are and what is left to spend. |
+| [ORD-1](../../requirements/ORD-list-display-and-ordering.md#ord-1) | The list shows unchecked items first, then checked items. | Checked items leave the list and go to the haul, a tray apart from it; putting one back returns it to the list. |
+| [ORD-2](../../requirements/ORD-list-display-and-ordering.md#ord-2) | Within each of the two parts, sorted by category order, then name. | The list's items are sorted by category order, then name; the haul's are ordered most recently checked first. |
+| [ORD-4](../../requirements/ORD-list-display-and-ordering.md#ord-4) | A toggle hides checked items. | ✖️ Dropped: the list never shows checked items, so there is nothing to hide. The ID is kept and never reused. |
+| [ORD-5](../../requirements/ORD-list-display-and-ordering.md#ord-5) | "…the unchecked/checked split ([ORD-1](../../requirements/ORD-list-display-and-ordering.md#ord-1)) still applies." | "…checked items still go to the haul ([ORD-1](../../requirements/ORD-list-display-and-ordering.md#ord-1))." |
+| [UC-3](../../requirements/UC-use-cases.md#uc-3-shop-in-a-store) | Checked items move to the checked part; the user hides them; the totals show spent and remaining. | Checked items drop into the haul, so the list shows only what is left; the haul shows what is in the basket, how far along they are and what is left to spend. |
 
-[ITM-8](../../requirements/functional-requirements.md#itm-8) and [LST-5](../../requirements/functional-requirements.md#lst-5) keep their wording: the haul shows all three totals, and "Uncheck all" is the drawer's "Put all back".
+[ITM-8](../../requirements/ITM-list-items.md#itm-8) and [LST-5](../../requirements/LST-shopping-lists.md#lst-5) keep their wording: the haul shows all three totals, and "Uncheck all" is the drawer's "Put all back".
 
 ## Architecture changes
 
@@ -240,7 +240,7 @@ In [architecture.md](../../architecture/architecture.md) and [stack-overview.md]
 
   The exploration's [screenshot](../../ideas/visual-design/ring-tail.png) stays, as the record of where the idea came from.
 - **Requirements, architecture and the stack overview**: as in the two sections above.
-- **[roadmap.md](../../roadmap.md)**: PH-14 delivers Gabarito instead of Figtree. PH-17's goal speaks of the haul instead of "unchecked items first": it builds the haul, its chips, putting items back, the drawer and the progress by item count. PH-21 adds the money in the haul's header ([ITM-8](../../requirements/functional-requirements.md#itm-8)) and "Put all back" ([LST-5](../../requirements/functional-requirements.md#lst-5)), and no longer delivers [ORD-4](../../requirements/functional-requirements.md#ord-4). The README's diagram names no requirements and does not change.
+- **[roadmap.md](../../roadmap.md)**: PH-14 delivers Gabarito instead of Figtree. PH-17's goal speaks of the haul instead of "unchecked items first": it builds the haul, its chips, putting items back, the drawer and the progress by item count. PH-21 adds the money in the haul's header ([ITM-8](../../requirements/ITM-list-items.md#itm-8)) and "Put all back" ([LST-5](../../requirements/LST-shopping-lists.md#lst-5)), and no longer delivers [ORD-4](../../requirements/ORD-list-display-and-ordering.md#ord-4). The README's diagram names no requirements and does not change.
 - **[open-points.md](../../archive/open-points.md)**:
   - [OP-073](../../archive/open-points.md#op-073) ✅ closed, pointing at ADR 0022;
   - PH-14's design system point (Figtree, the teal tokens) names Gabarito and the new tokens;

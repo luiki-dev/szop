@@ -173,6 +173,7 @@ The project's `CLAUDE.md` repeats the events Claude handles most often, as steps
 | An owner step is done | Its issue closed; the workflow sets ✅ Done | Owner, or Claude when the owner says so |
 | A phase's owner steps change | Step issues added, or closed as not planned with the reason; the phase's list updated | Claude |
 | An item cannot move | Status → ⏳ Blocked, with a blocked-by link when the blocker is an issue | Owner or Claude |
+| An acceptance criterion is finalized, added, moved, dropped or delivered | Nothing on GitHub: the criterion's status, its requirement's line and the index's table in `docs/requirements/`, in the phase's branch: finalized at the brainstorm, ✅ in the PR ([ADR 0051](../decisions/0051-acceptance-criteria.md)) | Claude |
 | Before a PR, and at the start of a phase | The stage tables, the phase entries' copies in the issues brought in line | Claude |
 
 ## Keeping GitHub and the docs in step
@@ -189,6 +190,7 @@ Each fact has one source; the other place only copies it, and changes when the t
 | Whether an owner step is done | the `owner` issue | nowhere | — |
 | Also (the open points of other phases a phase does a part of) | the phase issue's body | nowhere | when the part is added, done or moved |
 | New phases, splits, reorders | a brainstorm, then `roadmap.md` (and an ADR when significant) | new issues | in the same PR |
+| A requirement's acceptance criteria and their status | the requirement's file in `docs/requirements/` | the index's status table | in the PR that changes a criterion ([ADR 0051](../decisions/0051-acceptance-criteria.md)) |
 
 The rules that follow from it:
 

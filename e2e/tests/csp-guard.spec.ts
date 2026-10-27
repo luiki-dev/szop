@@ -3,7 +3,7 @@ import { expect, test } from "../support/test.ts";
 // The guard catches what it is there for: a <style> element added at run
 // time, which the CSP blocks (ADR 0013, decision 9). If the guard stops
 // listening, or the built app loses its CSP, this test fails.
-test("the CSP guard catches an injected style element", async ({
+test("NFR-4.4: the CSP guard catches an injected style element", async ({
   page,
   cspViolations,
 }) => {

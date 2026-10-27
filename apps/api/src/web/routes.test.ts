@@ -22,7 +22,7 @@ describe("serving the SPA", () => {
     return app;
   }
 
-  it("sends index.html as Brotli to a browser, never cached", async () => {
+  it("NFR-3.2: sends index.html as Brotli to a browser, never cached", async () => {
     const response = await start().inject({
       method: "GET",
       url: "/",
@@ -39,7 +39,7 @@ describe("serving the SPA", () => {
     );
   });
 
-  it("sends a fingerprinted asset as gzip, cached for a year", async () => {
+  it("NFR-3.2: sends a fingerprinted asset as gzip, cached for a year", async () => {
     const response = await start().inject({
       method: "GET",
       url: "/assets/index-abc123.js",
