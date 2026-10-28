@@ -278,7 +278,7 @@ git commit -m "docs(adr): note ADR 0054 in the decisions it refines"
 
 The open phase issues today are 22 (`gh issue list --label phase --state open`); closed ones are left as they are.
 
-- [ ] **Step 1: Write `<scratchpad>/rewrite-phase-issues.py [--apply]`**
+- [x] **Step 1: Write `<scratchpad>/rewrite-phase-issues.py [--apply]`**
 
 For each open issue labelled `phase`:
 - Read its body (`gh issue view N --json body`). Take the first line, `Roadmap entry: [...](…#anchor)`, and the `### Also` section to the end of the body, verbatim.
@@ -287,7 +287,7 @@ For each open issue labelled `phase`:
 - Write the new body to `phase-bodies/<N>.md`. On a difference, write `phase-bodies/<N>.diff` instead and do not edit that issue, even with `--apply`.
 - Without `--apply`, print one line per issue: `#N ok` or `#N DIFF <fields>`. With `--apply`, run `gh issue edit N --body-file phase-bodies/<N>.md` for each `ok` issue.
 
-- [ ] **Step 2: Dry run**
+- [x] **Step 2: Dry run**
 
 Run: `python3 -I <scratchpad>/rewrite-phase-issues.py`
 Expected: 22 lines. [#234](https://github.com/luiki-dev/szop/issues/234), [#235](https://github.com/luiki-dev/szop/issues/235) and [#47](https://github.com/luiki-dev/szop/issues/47) (owner steps) come out `ok` unless their steps differ from the roadmap. Read every `.diff`; a difference from a normalization the script missed is a script fix, rerun.
