@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../app.ts";
 import { createDatabase } from "../db/database.ts";
 import { instanceId } from "../instance.ts";
+import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { testDatabaseSettings, useTestDatabase } from "../test/database.ts";
 import { captureLog, type LogLine } from "../test/log.ts";
@@ -20,7 +21,7 @@ describe("GET /api/health", () => {
   });
 
   it("answers 200 with the commit and the schema version when the database is up", async () => {
-    app = buildApp({ config, db: database.db });
+    app = buildApp({ catalog: testCatalog, config, db: database.db });
 
     const response = await app.inject({ method: "GET", url: "/api/health" });
 
@@ -40,7 +41,7 @@ describe("GET /api/health", () => {
   });
 
   it("names this process with 8 hexadecimal characters, the same on every answer", async () => {
-    app = buildApp({ config, db: database.db });
+    app = buildApp({ catalog: testCatalog, config, db: database.db });
 
     const first = await app.inject({ method: "GET", url: "/api/health" });
     const second = await app.inject({ method: "GET", url: "/api/health" });
@@ -56,7 +57,7 @@ describe("GET /api/health", () => {
     const unreachable = createDatabase(
       testDatabaseSettings("szop_test_missing"),
     );
-    app = buildApp({ config, db: unreachable });
+    app = buildApp({ catalog: testCatalog, config, db: unreachable });
 
     try {
       const response = await app.inject({ method: "GET", url: "/api/health" });
@@ -91,7 +92,7 @@ describe("GET /api/health from pages of the same site", () => {
   });
 
   it("lets pages of the same site receive the answer", async () => {
-    app = buildApp({ config, db: database.db });
+    app = buildApp({ catalog: testCatalog, config, db: database.db });
 
     const response = await app.inject({ method: "GET", url: "/api/health" });
 
@@ -102,7 +103,7 @@ describe("GET /api/health from pages of the same site", () => {
     const unreachable = createDatabase(
       testDatabaseSettings("szop_test_missing"),
     );
-    app = buildApp({ config, db: unreachable });
+    app = buildApp({ catalog: testCatalog, config, db: unreachable });
 
     try {
       const response = await app.inject({ method: "GET", url: "/api/health" });
@@ -119,7 +120,7 @@ describe("GET /api/health from pages of the same site", () => {
   it.each(["/api/live", "/api/nothing-here"])(
     "keeps every other response same-origin: %s",
     async (url) => {
-      app = buildApp({ config, db: database.db });
+      app = buildApp({ catalog: testCatalog, config, db: database.db });
 
       const response = await app.inject({ method: "GET", url });
 
@@ -139,7 +140,7 @@ describe("GET /api/live", () => {
   });
 
   it("answers 200 while the database is up", async () => {
-    app = buildApp({ config, db: database.db });
+    app = buildApp({ catalog: testCatalog, config, db: database.db });
 
     const response = await app.inject({ method: "GET", url: "/api/live" });
 
@@ -152,7 +153,7 @@ describe("GET /api/live", () => {
     const unreachable = createDatabase(
       testDatabaseSettings("szop_test_missing"),
     );
-    app = buildApp({ config, db: unreachable });
+    app = buildApp({ catalog: testCatalog, config, db: unreachable });
 
     try {
       const live = await app.inject({ method: "GET", url: "/api/live" });
@@ -169,7 +170,7 @@ describe("GET /api/live", () => {
   // The load balancer reuses a connection for up to 60 seconds; a shorter
   // timeout would let the API close it just as a request arrives (a 502).
   it("keeps idle connections longer than the load balancer's 60 seconds", () => {
-    app = buildApp({ config, db: database.db });
+    app = buildApp({ catalog: testCatalog, config, db: database.db });
 
     expect(app.server.keepAliveTimeout).toBeGreaterThan(60_000);
   });
@@ -193,6 +194,7 @@ describe("the log", () => {
     async (url) => {
       const log = captureLog();
       app = buildApp({
+        catalog: testCatalog,
         config: testConfig({ logLevel: "info" }),
         db: database.db,
         logStream: log.stream,
@@ -211,6 +213,7 @@ describe("the log", () => {
     );
     const log = captureLog();
     app = buildApp({
+      catalog: testCatalog,
       config: testConfig({ logLevel: "info" }),
       db: unreachable,
       logStream: log.stream,
@@ -234,7 +237,11 @@ describe("the log", () => {
   it("builds without a deprecation warning", () => {
     const emitWarning = vi.spyOn(process, "emitWarning");
     try {
-      app = buildApp({ config: testConfig(), db: database.db });
+      app = buildApp({
+        catalog: testCatalog,
+        config: testConfig(),
+        db: database.db,
+      });
 
       expect(emitWarning).not.toHaveBeenCalled();
     } finally {
@@ -247,6 +254,7 @@ describe("the log", () => {
     async (url) => {
       const log = captureLog();
       app = buildApp({
+        catalog: testCatalog,
         config: testConfig({ logLevel: "info" }),
         db: database.db,
         logStream: log.stream,

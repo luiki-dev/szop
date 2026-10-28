@@ -35,6 +35,7 @@ export const colorRoles: readonly ColorRole[] = [
       className: "text-accent-foreground",
     },
   },
+  { name: "muted", className: "bg-muted" },
   { name: "muted-foreground", className: "bg-muted-foreground" },
   { name: "border", className: "bg-border" },
   { name: "input", className: "bg-input" },

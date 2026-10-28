@@ -14,7 +14,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 
 ## NFR-2
 
-🎯 [MVP] · 🚧 In progress (7 of 8) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (8 of 8) · ❔ Criteria not finalized
 
 **Accessibility:** Szop meets the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA, in light and dark mode.
 
@@ -27,7 +27,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 | NFR-2.5 | When a dialog or drawer closes, focus returns to the control that opened it. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
 | NFR-2.6 | While a dialog or drawer is open, focus stays inside it. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
 | NFR-2.7 | Motion lasts 150 to 200 ms and is off when the system asks for reduced motion. | ✅ [PH-14b](../roadmap.md#ph-14b-app-shell) |
-| NFR-2.8 | The focus ring is drawn in the `ring` color, on links as on buttons. | ❔ Draft · [OP-107](https://github.com/luiki-dev/szop/issues/292) |
+| NFR-2.8 | The focus ring is drawn in the `ring` color, on links as on buttons. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) · wording confirmed by the owner ([OP-107](https://github.com/luiki-dev/szop/issues/292)) |
 
 ## NFR-3
 
@@ -43,7 +43,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 
 ## NFR-4
 
-🎯 [MVP] · 🚧 In progress (6 of 11) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (7 of 11) · ❔ Criteria not finalized
 
 **Security:** other sites cannot act in a user's name or frame the app, nothing travels over plain HTTP, tokens do not leak through addresses or logs, users reach only their own data, and errors reveal nothing about the server ([ADR 0012](../decisions/0012-security-baseline.md), [ADR 0025](../decisions/0025-web-security-baseline-details.md), the [threat model](../architecture/threat-model.md)). The account rules (passwords, sessions, never revealing whether an account exists) are in [ACC](ACC-accounts-and-guest-mode.md).
 
@@ -59,4 +59,4 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 | NFR-4.8 | Once the app has used a token from the address (verification, password reset, a share link), it removes the token from the address bar. | ❔ Draft · [OP-055](https://github.com/luiki-dev/szop/issues/109) |
 | NFR-4.9 | The session cookie is `HttpOnly`, `Secure` and `SameSite=Lax`, has no `Domain` attribute and carries the `__Host-` prefix (or `__Secure-` if the auth library does not allow it); a revoked session stops working at once. | ❔ Draft · [OP-055](https://github.com/luiki-dev/szop/issues/109) |
 | NFR-4.10 | A request that names a record of another workspace, anywhere in its path, query or body, gets the same 404 as a request for a record that does not exist. | ❔ Draft |
-| NFR-4.11 | An unexpected error answers 500 with a generic message; the details go to the log, never to the browser. | ❔ Draft |
+| NFR-4.11 | An unexpected error answers 500 with a generic message; the details go to the log, never to the browser. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |

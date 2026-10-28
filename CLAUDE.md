@@ -41,7 +41,7 @@ During a phase:
 - **When a phase's brainstorm starts, before the first question:**
   - On GitHub: the phase issue's Status → 🚧 In progress; Finished (the merge date) set on the previous phase's issue and on every `adr` issue closed since.
   - On GitHub: read the phase's open-point issues (its sub-issues and the issues its **Also** section lists).
-- **During the brainstorm:** review with the owner the acceptance criteria of every requirement the phase delivers, and the whole list of any requirement still ❔ Criteria not finalized ([ADR 0051](docs/decisions/0051-acceptance-criteria.md)).
+- **During the brainstorm:** review with the owner the acceptance criteria the phase delivers of every requirement, and the whole list of a requirement whose last part the phase delivers and that is still ❔ Criteria not finalized; an earlier phase does not finalize a list ([ADR 0051](docs/decisions/0051-acceptance-criteria.md), decision 15, refined by [ADR 0050](docs/decisions/0050-seed-catalog-phase-details.md), decision 14).
 - **In the phase branch's first commit:**
   - In the repo: the phase's row in the `roadmap.md` stage table → 🚧.
   - On GitHub: the phase issue's Started field → that commit's date.
@@ -124,8 +124,3 @@ Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `
   - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
 - **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1)`, `[UC-3](../requirements/UC-use-cases.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/SHR-sharing.md)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
 - Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.
-
-## Conversation tone
-
-- **Add a short joke to about every other reply in the conversation**: a dad joke, a quip or a bit of sarcasm. The owner asked for it and noticed it fading over long sessions.
-- **Keep it to a line, and keep it out of the way:** never in place of content, never in a decision, a question to the owner or bad news, and never in the docs, commits or PRs.

@@ -1,8 +1,15 @@
 import { randomUUID } from "node:crypto";
+import type { Catalog } from "@szop/shared";
 import Fastify, { LogController, type FastifyInstance } from "fastify";
+import {
+  serializerCompiler,
+  validatorCompiler,
+} from "fastify-type-provider-zod";
+import { catalogRoutes } from "./catalog/routes.ts";
 import type { Config } from "./config.ts";
 import type { Database } from "./db/database.ts";
 import { readJournal } from "./db/schema-version.ts";
+import { errorHandler } from "./errors.ts";
 import { healthRoutes } from "./health/routes.ts";
 import { instanceId } from "./instance.ts";
 import { crossSite } from "./security/cross-site.ts";
@@ -21,12 +28,19 @@ export interface LogStream {
 export interface AppDeps {
   config: Config;
   db: Database;
+  // The seed catalog, read and checked at startup by loadSeed.
+  catalog: Catalog;
   // Stdout when left out. Tests pass a stream they read back (ADR 0025,
   // decision 9).
   logStream?: LogStream;
 }
 
-export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
+export function buildApp({
+  config,
+  db,
+  catalog,
+  logStream,
+}: AppDeps): FastifyInstance {
   const app = Fastify({
     // By address, never a hop count or true (ADR 0025, decision 7).
     trustProxy: config.trustedProxies,
@@ -53,6 +67,14 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
     }),
   });
 
+  // Zod schemas on routes validate requests and serialize responses.
+  app.setValidatorCompiler(validatorCompiler);
+  app.setSerializerCompiler(serializerCompiler);
+
+  // One JSON shape for every error, including the ones the plugins below
+  // raise.
+  app.setErrorHandler(errorHandler);
+
   // The web baseline, before any route, so every response and request goes
   // through it (ADR 0012, decisions 7 and 8).
   app.register(headers);
@@ -68,6 +90,8 @@ export function buildApp({ config, db, logStream }: AppDeps): FastifyInstance {
     commit: config.commit,
     instance: instanceId,
   });
+
+  app.register(catalogRoutes, { prefix: "/api", catalog });
 
   // The built SPA, and index.html for the app's own paths. Registered last:
   // its not-found handler answers every path no route above claims.

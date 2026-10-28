@@ -17,6 +17,7 @@ This page describes the design system, not the screens: each phase designs the s
 - [4. Icons and brand](#4-icons-and-brand)
 - [5. Layout and navigation](#5-layout-and-navigation)
   - [The list and the haul](#the-list-and-the-haul)
+  - [The tree](#the-tree)
 - [6. Interaction patterns](#6-interaction-patterns)
   - [Feedback](#feedback)
   - [Forms and focus](#forms-and-focus)
@@ -60,6 +61,7 @@ The accent is **sage**; neutrals come from Tailwind's **`gray`**, and the light 
 |---|---|---|---|
 | `background` / `foreground` | The page and its text | `fur` / `gray-800` | `gray-900` / `gray-200` |
 | `card` / `card-foreground` | Category cards, inputs on the page, the sidebar, and their text | `white` / `gray-800` | `gray-800` / `gray-200` |
+| `muted` | The tinted band of category rows below the top level ([The tree](#the-tree)) | `gray-50` | `gray-800` and `gray-700` mixed half and half (`color-mix(in oklab, …)`) |
 | `muted-foreground` | Secondary text: notes, counts, prices | `gray-600` | `gray-400` |
 | `border` | Dividers between rows | `gray-200` | `gray-700` |
 | `input` | Borders of checkboxes and inputs | `gray-500` | `gray-400` |
@@ -170,6 +172,16 @@ Items without a price are left out of all three. When no item has a price, the m
 - The progress bar is a `progressbar` with its value and maximum, labelled by the caption.
 - The handle is decoration: it shows the haul can be pulled up, but the header is the control, so it needs no 3:1 contrast.
 
+### The tree
+
+Decided in [ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 9 and following, for the Catalog page of [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only). It is the pattern for every screen that shows categories with things inside them: the catalog browser ([PH-24](../roadmap.md#ph-24-catalog-browser)) and the categories screen ([PH-27](../roadmap.md#ph-27-categories)) start from it. The [mockups](../superpowers/specs/2026-10-25-PH-15a-seed-catalog/) are the reference; the built page differs in two details (a matching category stays collapsed, and products sort alphabetically).
+
+- **A category** is one button with `aria-expanded`, in a nested `<ul>`: the disclosure pattern, not an ARIA tree. Each top-level category is a `card`. A row is 56 px high at the top level and 52 px below it, with a chevron in `link` (right when closed, down when open), the name in semibold and a count pill in `accent` / `accent-foreground`. Rows below the top level sit on the `muted` band. The accessible name holds the count: "Dairy & eggs, 31 products".
+- **A product** is a 48 px row with a small bullet in `muted-foreground`, the name in regular weight and the unit on the right in `muted-foreground`, or nothing when it has none.
+- **Indent** is 20 px per level, set by classes chosen by depth, never by a `style` attribute (the CSP). Within a category, products come before subcategories. Long names wrap. Counts use `tabular-nums`.
+- **Expand all** and **Collapse all** are icon buttons on a phone, with the names as `aria-label` and a tooltip, and show their label from `lg`. All categories start collapsed.
+- **Search** narrows the tree: the matches on their opened paths, the matched text in a `<mark>` in the pill's `accent` pair. See [Forms and focus](#forms-and-focus) for the field.
+
 ## 6. Interaction patterns
 
 ### Feedback
@@ -183,8 +195,8 @@ Items without a price are left out of all three. When no item has a price, the m
 
 ### Forms and focus
 
-- **Labels are always visible**, never placeholder-only. The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../decisions/0022-ring-tail-redesign.md), decision 13). Errors appear under their field, in words, checked when leaving the field and on submit.
-- **A visible focus ring** (`ring`) on everything focusable. Dialogs and drawers trap focus and return it when closed (Base UI does this).
+- **Labels are always visible**, never placeholder-only. The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../decisions/0022-ring-tail-redesign.md), decision 13). **The catalog's search field is the second exception**: a placeholder and the accessible name "Search the catalog", a magnifier icon and a clear button ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 10). Errors appear under their field, in words, checked when leaving the field and on submit.
+- **A visible focus ring** (`ring`) on everything focusable. Dialogs and drawers trap focus and return it when closed (Base UI does this). **The ring is drawn in the `ring` color on links as on buttons**, so the menu's links draw it too ([NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2).8).
 
 ### Writing
 

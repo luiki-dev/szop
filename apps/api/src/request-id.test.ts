@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "./app.ts";
+import { testCatalog } from "./test/catalog.ts";
 import { testConfig } from "./test/config.ts";
 import { useTestDatabase } from "./test/database.ts";
 import { captureLog, type LogLine } from "./test/log.ts";
@@ -26,6 +27,7 @@ describe("request IDs", () => {
   it("gives each request a random UUID", async () => {
     const log = captureLog();
     app = buildApp({
+      catalog: testCatalog,
       config: testConfig({ logLevel: "info" }),
       db: database.db,
       logStream: log.stream,
@@ -44,6 +46,7 @@ describe("request IDs", () => {
   it("ignores an ID the client sends", async () => {
     const log = captureLog();
     app = buildApp({
+      catalog: testCatalog,
       config: testConfig({ logLevel: "info" }),
       db: database.db,
       logStream: log.stream,

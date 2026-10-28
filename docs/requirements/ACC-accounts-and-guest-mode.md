@@ -16,15 +16,15 @@ Guest mode, registration, logging in and out, passwords, profile settings, and t
 
 ## ACC-1
 
-🎯 [MVP] · ❔ Draft (0 of 9) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (1 of 9) · ❔ Criteria not finalized
 
 A guest can use the app without registering. Until their first change, they see the default (seed) catalog, categories and units, read-only. Their first change (for example creating a list) creates an anonymous workspace from the seed data, tied to their browser.
 
 | ID | Criterion | Status |
 |---|---|---|
 | ACC-1.1 | A visitor can use the app at once, with no sign-up step. | ❔ Draft |
-| ACC-1.2 | Before their first change, a visitor sees the default catalog, categories and units, read-only, and no lists or templates. | ❔ Draft |
-| ACC-1.3 | A visit that changes nothing stores nothing: a request that only reads sets no session cookie and creates no workspace. | ❔ Draft |
+| ACC-1.2 | Before their first change, a visitor sees the default catalog, categories and units, read-only, and no lists or templates. | 🚧 [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) · the catalog; the rest in [PH-16](../roadmap.md#ph-16-guest-workspace-and-lists) |
+| ACC-1.3 | A visit that changes nothing stores nothing: a request that only reads sets no session cookie and creates no workspace. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) · `GET /api/catalog`; later read routes keep it true |
 | ACC-1.4 | A visitor's first change, such as creating a list, creates their workspace from the default data and then applies the change, with nothing more asked of them. | ❔ Draft |
 | ACC-1.5 | The first change succeeds when it refers to default data, such as adding the default product "Milk" with its default category. | ❔ Draft · [OP-048](https://github.com/luiki-dev/szop/issues/101) |
 | ACC-1.6 | Two tabs that make their first change at the same moment end up in one workspace. | ❔ Draft · [OP-048](https://github.com/luiki-dev/szop/issues/101) |

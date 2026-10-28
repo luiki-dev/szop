@@ -4,6 +4,9 @@ import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import { stubMatchMedia } from "./match-media.ts";
 import { server } from "./server.ts";
 
+// jsdom does not implement scrolling and prints "Not implemented" for it.
+window.scrollTo = () => undefined;
+
 // Every test starts on a phone in the light scheme; a test that needs
 // another answer stubs it again.
 beforeEach(() => {

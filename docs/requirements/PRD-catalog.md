@@ -17,21 +17,24 @@ Create, edit and delete catalog products (name, default category, default unit, 
 
 ## PRD-2
 
-🎯 [MVP] · ❔ Draft (0 of 9) · ❔ Criteria not finalized
+🎯 [MVP] · ✅ Done (12 of 12) · ✅ Criteria finalized ([PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only))
 
-Browse the catalog by category, and search it by name.
+Browse the catalog by category, and search it by product or category name.
 
 | ID | Criterion | Status |
 |---|---|---|
-| PRD-2.1 | "Catalog" in the menu opens the catalog, for every visitor, with or without a workspace. | ❔ Draft |
-| PRD-2.2 | The catalog shows the category tree in its order, each level indented; every category can be expanded and collapsed, and all start collapsed. | ❔ Draft |
-| PRD-2.3 | A category's row stands apart from the products' rows and shows how many products it holds. | ❔ Draft |
-| PRD-2.4 | "Expand all" and "Collapse all" open and close every category; they are icon buttons on a phone, with a label from 1024 px. | ❔ Draft |
-| PRD-2.5 | Within a category, products are sorted alphabetically, and come before its subcategories. | ❔ Draft |
-| PRD-2.6 | Search matches product names and category names: each match is shown with the path to it, opened, and the matched text highlighted. | ❔ Draft |
-| PRD-2.7 | A category that matches the search shows its whole contents. | ❔ Draft |
-| PRD-2.8 | While the catalog loads, cards shaped like its collapsed tree show; when it cannot be loaded, a card says so and offers "Try again". | ❔ Draft |
-| PRD-2.9 | A long product name wraps. | ❔ Draft |
+| PRD-2.1 | "Catalog" in the menu opens the catalog, for every visitor, with or without a workspace. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.2 | The catalog shows the category tree in its order, each level indented; every category can be expanded and collapsed, and all start collapsed. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.3 | A category's row stands apart from the products' rows and shows how many products it holds. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.4 | "Expand all" and "Collapse all" open and close every category; they are icon buttons on a phone, with a label from 1024 px. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.5 | Within a category, products are sorted alphabetically, and come before its subcategories. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.6 | Search matches product names and category names: each match is shown with the path to it, opened, and the matched text highlighted. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.7 | A category that matches the search is shown on its path, collapsed, unless something inside it matches too; then only those matches show. Opened by hand during a search, it shows its whole contents. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.8 | While the catalog loads, cards shaped like its collapsed tree show; when it cannot be loaded, a card says so and offers "Try again". | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.9 | A long product name wraps. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.10 | Search ignores case and accents, so "creme" finds "Crème fraîche". | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.11 | Clearing the search, with ✕ or Esc, restores what was expanded before it. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
+| PRD-2.12 | When nothing matches, a card says "No products match" with the query. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
 
 ## PRD-3
 

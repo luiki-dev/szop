@@ -49,6 +49,10 @@ describe("AppShell", () => {
     expect(
       within(menu).getByRole("link", { name: "Design system" }),
     ).toHaveAttribute("href", "/design");
+    expect(within(menu).getByRole("link", { name: "Catalog" })).toHaveAttribute(
+      "href",
+      "/catalog",
+    );
     expect(within(menu).getByText("Developer")).toBeInTheDocument();
     expect(screen.getByText("Welcome to Szop")).toBeInTheDocument();
     expect(
