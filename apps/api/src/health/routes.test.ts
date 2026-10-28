@@ -40,6 +40,19 @@ describe("GET /api/health", () => {
     expect(healthSchema.parse(body)).toEqual(body);
   });
 
+  it("does not send a body that breaks the response schema", async () => {
+    // A commit that is not a string: only the route's schema notices.
+    app = buildApp({
+      catalog: testCatalog,
+      config: testConfig({ commit: 123 as unknown as string }),
+      db: database.db,
+    });
+
+    const response = await app.inject({ method: "GET", url: "/api/health" });
+
+    expect(response.statusCode).toBe(500);
+  });
+
   it("names this process with 8 hexadecimal characters, the same on every answer", async () => {
     app = buildApp({ catalog: testCatalog, config, db: database.db });
 

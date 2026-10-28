@@ -1,3 +1,5 @@
+import { rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { brotliDecompressSync, gunzipSync } from "node:zlib";
 import type { FastifyInstance } from "fastify";
 import { apiErrorSchema } from "@szop/shared";
@@ -94,6 +96,31 @@ describe("serving the SPA", () => {
     expect(response.statusCode).toBe(200);
     expect(response.headers["content-type"]).toMatch(/^text\/html/);
     expect(response.body).toBe("");
+  });
+
+  it("treats a dot in a folder name as a page, not a file", async () => {
+    const response = await start().inject({
+      method: "GET",
+      url: "/v1.2/route",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBe(webRootFiles["index.html"]);
+  });
+
+  it("serves only the files found at startup", async () => {
+    start();
+    const late = join(webRoot.path, "late.txt");
+    try {
+      await app.ready();
+      await writeFile(late, "added after startup");
+
+      const response = await app.inject({ method: "GET", url: "/late.txt" });
+
+      expect(response.statusCode).toBe(404);
+    } finally {
+      await rm(late, { force: true });
+    }
   });
 
   it("ignores the query string when it decides", async () => {

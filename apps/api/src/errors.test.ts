@@ -32,6 +32,11 @@ describe("the error shape", () => {
         statusCode: 503,
       });
     });
+    for (const statusCode of [400, 499, 399]) {
+      app.get(`/api/test-status-${String(statusCode)}`, () => {
+        throw Object.assign(new Error("Plain"), { statusCode });
+      });
+    }
     app.get("/api/test-conflict", () => {
       throw Object.assign(new Error("Name taken"), { statusCode: 409 });
     });
@@ -85,6 +90,44 @@ describe("the error shape", () => {
     expect(response.statusCode).toBe(409);
     expect(apiErrorSchema.parse(response.json())).toEqual({
       error: { code: "conflict", message: "Name taken" },
+    });
+  });
+
+  it("keeps a 400 and a 499, and answers a status below 400 as a 500", async () => {
+    const log = start();
+
+    const bad = await app.inject({
+      method: "GET",
+      url: "/api/test-status-400",
+    });
+    const unknown = await app.inject({
+      method: "GET",
+      url: "/api/test-status-499",
+    });
+    const low = await app.inject({
+      method: "GET",
+      url: "/api/test-status-399",
+    });
+
+    expect(bad.statusCode).toBe(400);
+    expect(bad.json()).toEqual({
+      error: { code: "bad_request", message: "Plain" },
+    });
+    expect(unknown.statusCode).toBe(499);
+    expect(unknown.json()).toEqual({
+      error: { code: "error", message: "Plain" },
+    });
+    expect(low.statusCode).toBe(500);
+    expect(log.lines().filter((line) => line.level === 50)).toHaveLength(1);
+  });
+
+  it('logs an unexpected error as "request failed"', async () => {
+    const log = start();
+
+    await app.inject({ method: "GET", url: "/api/test-boom" });
+
+    expect(log.lines().find((line) => line.level === 50)).toMatchObject({
+      msg: "request failed",
     });
   });
 

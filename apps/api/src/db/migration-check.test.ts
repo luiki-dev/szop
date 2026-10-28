@@ -98,6 +98,9 @@ describe("describeMismatch", () => {
 
     const text = describeMismatch(mismatch);
 
+    expect(text).toContain(
+      "The database's migrations do not match this code's:",
+    );
     expect(text).toContain("unknown");
     expect(text).toContain("1891307052475");
     expect(text).toContain("skipped");
