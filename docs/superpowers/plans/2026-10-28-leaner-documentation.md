@@ -90,7 +90,7 @@ git commit -m "docs(claude): gather the repo-wide rules for plans and add the sp
 **Interfaces:**
 - Produces: the item labels, used by Task 4 when a guide names an item: `Tests`, `Mutants`, `CI green`, `Demo check`, `infra/base applied`, `Living docs`, `Guides`, `ADRs`, `Open points`, `Conventional Commits`, `Screenshots` (items 1 to 11, in order).
 
-- [ ] **Step 1: Rewrite the PR template**
+- [x] **Step 1: Rewrite the PR template**
 
 Following spec, [The PR template](../specs/2026-10-28-leaner-documentation-design.md#the-pr-template): four sections, **What and why**, **Links**, **Definition of done**, **Token usage**. "How it was tested" and the demo block's fixed fields go. Exact shape of the two middle sections:
 
@@ -121,7 +121,7 @@ Following spec, [The PR template](../specs/2026-10-28-leaner-documentation-desig
 
 The "What and why" comment keeps the Conventional Commits and `skip-changelog` guidance and asks for bullets plus a link to the phase ADR or the ADR the PR adds. The "Token usage" comment says it is for phase PRs, and a PR outside a phase leaves the section out. The definition-of-done link in the comment is a relative or repo URL that works from a PR page; keep whatever form the current template uses.
 
-- [ ] **Step 2: Update `docs/development/definition-of-done.md`**
+- [x] **Step 2: Update `docs/development/definition-of-done.md`**
 
 Following spec, [The definition of done](../specs/2026-10-28-leaner-documentation-design.md#the-definition-of-done):
 - Each item's **Item** cell gets its label from Task 2's Interfaces, for example `**CI is green** (`CI green`)`.
@@ -132,16 +132,16 @@ Following spec, [The definition of done](../specs/2026-10-28-leaner-documentatio
 - "When the demo check must be repeated": relies on the `demo-up` run, which the owner checks, instead of the PR naming the deployed commit; "The PR's link is updated to the new run" goes.
 - The header's history line adds ADR 0054.
 
-- [ ] **Step 3: Check the template on a PR outside a phase**
+- [x] **Step 3: Check the template on a PR outside a phase**
 
 Write this branch's PR description into `<scratchpad>/pr-body.md` from the new template: "What and why" links ADR 0054; "Acceptance criteria: none"; `Closes #308`; every item that does not apply marked `➖ N/A`; no "Token usage". Expected: every section can be filled without a field left over. Keep the file; it is the draft for the PR.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `grep -n -E "How it was tested|Lighthouse|Deployed commit|Issues changed" .github/pull_request_template.md; grep -n -E "names the commit|lists the changes|never a bare|a copy of the roadmap" docs/development/definition-of-done.md`
 Expected: no matches.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .github/pull_request_template.md docs/development/definition-of-done.md docs/superpowers/plans/2026-10-28-leaner-documentation.md
