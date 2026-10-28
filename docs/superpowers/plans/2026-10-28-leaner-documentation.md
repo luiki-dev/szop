@@ -292,16 +292,16 @@ For each open issue labelled `phase`:
 Run: `python3 -I <scratchpad>/rewrite-phase-issues.py`
 Expected: 22 lines. [#234](https://github.com/luiki-dev/szop/issues/234), [#235](https://github.com/luiki-dev/szop/issues/235) and [#47](https://github.com/luiki-dev/szop/issues/47) (owner steps) come out `ok` unless their steps differ from the roadmap. Read every `.diff`; a difference from a normalization the script missed is a script fix, rerun.
 
-- [ ] **Step 3: Show the owner one rewritten body, then stop**
+- [x] **Step 3: Show the owner one rewritten body, then stop**
 
 Show the owner `phase-bodies/45.md` (PH-16) next to its current body, and every remaining `.diff`. Wait for the owner's go-ahead; a `.diff` issue is rewritten only as the owner says (the roadmap or the body corrected first).
 
-- [ ] **Step 4: Apply and check**
+- [x] **Step 4: Apply and check**
 
 Run: `python3 -I <scratchpad>/rewrite-phase-issues.py --apply`, then `gh issue list --label phase --state open --limit 100 --json number,body -q '.[] | select(.body | test("### Goal")) | .number'`
 Expected: no output (no open phase body still holds a Goal section, except any the owner kept back).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 Tick this task's boxes in the plan.
 

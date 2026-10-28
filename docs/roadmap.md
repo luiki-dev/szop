@@ -402,7 +402,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 - **Goal:** a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added. Checked items leave the list for a plain section of checked items, which the haul replaces in [PH-17b](#ph-17b-the-haul).
 - **Delivers:** [ITM-1](requirements/ITM-list-items.md#itm-1), [ITM-6](requirements/ITM-list-items.md#itm-6), [ITM-7](requirements/ITM-list-items.md#itm-7), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2) (part: the list's order, ORD-2.1 to ORD-2.4), [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5) (part: ORD-5.1, ORD-5.2 and ORD-5.4), [APP-1](requirements/APP-app-wide-behavior.md#app-1) (part: APP-1.6, the back arrow inside a list), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.1 and APP-3.2, messages and undoing a removal), [APP-6](requirements/APP-app-wide-behavior.md#app-6), [APP-7](requirements/APP-app-wide-behavior.md#app-7), [LIM-2](requirements/LIM-limits.md#lim-2) (part: item names and notes); optimistic updates; forms with React Hook Form.
-- **Split from:** PH-17 List items, now retired: with the haul it held about 40 acceptance criteria and two new concepts, the list's items with their forms and optimistic updates, and the haul with its drawer ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0051](decisions/0051-acceptance-criteria.md), decision 16). The haul became a phase of its own.
+- **Split from:** PH-17 List items, now retired: with the haul it held about 40 acceptance criteria and two new concepts, the list's items with their forms and optimistic updates, and the haul with its drawer ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0051](decisions/0051-acceptance-criteria.md), decision 16). The haul became PH-17b.
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -449,7 +449,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 - **Goal:** a workspace cannot outgrow its quotas, and a script cannot flood the API, guest creation, registration or login. A user who hits a limit is told which one and what to do about it.
 - **Delivers:** [LIM-1](requirements/LIM-limits.md#lim-1) (part: lists and items), [LIM-3](requirements/LIM-limits.md#lim-3), [LIM-4](requirements/LIM-limits.md#lim-4) (part: everything except password reset); `@fastify/rate-limit`; both limiters counting in Redis, so a limit holds across tasks, with a test across two instances ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 8). Later phases add their own quotas and limits.
-- **Depends on:** PH-39.
+- **Depends on:** PH-39: Redis.
 - **Owner steps:** none.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#49](https://github.com/luiki-dev/szop/issues/49).
