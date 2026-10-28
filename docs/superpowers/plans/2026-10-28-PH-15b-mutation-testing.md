@@ -184,18 +184,18 @@ git commit -m "test: add StrykerJS and pnpm test:mutation"
 - Consumes: Task 2's script and report path.
 - Produces: the rules Task 5 applies.
 
-- [ ] **Step 1: `testing.md`**: drop "Layer still to come" (line 44) and the intro's "grows as the layers arrive" (line 5); add mutation testing to [The layers today](../../development/testing.md#the-layers-today), running it to [Running the tests](../../development/testing.md#running-the-tests), and a `## Mutation testing` section with the rules of the spec's [Reviewing survivors in later phases](../specs/2026-10-28-PH-15b-mutation-testing-design.md#reviewing-survivors-in-later-phases): when a file opts out (no logic a test should check: wiring, configuration, plain rendering), how a survivor is accepted (one mutator, one line, a reason, never `all`), that a new wiring file starts with its opt-out, and that each survivor is killed or accepted in the code, never in the PR. Link [ADR 0055](../../decisions/0055-mutation-testing-phase-details.md). Update `## Contents`.
+- [x] **Step 1: `testing.md`**: drop "Layer still to come" (line 44) and the intro's "grows as the layers arrive" (line 5); add mutation testing to [The layers today](../../development/testing.md#the-layers-today), running it to [Running the tests](../../development/testing.md#running-the-tests), and a `## Mutation testing` section with the rules of the spec's [Reviewing survivors in later phases](../specs/2026-10-28-PH-15b-mutation-testing-design.md#reviewing-survivors-in-later-phases): when a file opts out (no logic a test should check: wiring, configuration, plain rendering), how a survivor is accepted (one mutator, one line, a reason, never `all`), that a new wiring file starts with its opt-out, and that each survivor is killed or accepted in the code, never in the PR. Link [ADR 0055](../../decisions/0055-mutation-testing-phase-details.md). Update `## Contents`.
 
-- [ ] **Step 2: `definition-of-done.md`, item 2**: "When the phase changes domain rules in `packages/shared`" → "When the phase adds or changes logic that is mutated"; "accepted with a reason in the PR" → "accepted with a reason in the code (`// Stryker disable next-line <Mutator>: <reason>`); the PR states the score and what was done"; the source column gets `ADR 0055, decision 3`. The PR template's `Mutants` box stays as is.
+- [x] **Step 2: `definition-of-done.md`, item 2**: "When the phase changes domain rules in `packages/shared`" → "When the phase adds or changes logic that is mutated"; "accepted with a reason in the PR" → "accepted with a reason in the code (`// Stryker disable next-line <Mutator>: <reason>`); the PR states the score and what was done"; the source column gets `ADR 0055, decision 3`. The PR template's `Mutants` box stays as is.
 
-- [ ] **Step 3: `glossary.md`**: mutant, mutation score, equivalent mutant, survivor, in its order and format.
+- [x] **Step 3: `glossary.md`**: mutant, mutation score, equivalent mutant, survivor, in its order and format.
 
-- [ ] **Step 4: Check the links**
+- [x] **Step 4: Check the links**
 
 Run: `pnpm check` (Markdown is not formatted; read the changed anchors by hand: every link resolves to a heading).
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/

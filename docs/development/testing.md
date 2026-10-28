@@ -1,8 +1,6 @@
 # Testing guide
 
-How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tools behind the tests have their own pages: [Vitest](tools/vitest.md), [Testing Library](tools/testing-library.md), [Mock Service Worker (MSW)](tools/msw.md), [Playwright](tools/playwright.md), [fast-check](tools/fast-check.md) and [Docker](tools/docker.md).
-
-The guide grows as the layers arrive: mutation testing in [PH-15b](../roadmap.md#ph-15b-mutation-testing).
+How Szop is tested **now**: the layers, how to run them, how to write each kind of test, and the rules. This guide is the *how*; [ADR 0007](../decisions/0007-testing-strategy.md) is the *why*, with the options that were considered. The tools behind the tests have their own pages: [Vitest](tools/vitest.md), [Testing Library](tools/testing-library.md), [Mock Service Worker (MSW)](tools/msw.md), [Playwright](tools/playwright.md), [fast-check](tools/fast-check.md), [StrykerJS](tools/stryker.md) and [Docker](tools/docker.md).
 
 ## Contents
 
@@ -22,6 +20,7 @@ The guide grows as the layers arrive: mutation testing in [PH-15b](../roadmap.md
   - [The accessibility check](#the-accessibility-check)
   - [The token contrast test](#the-token-contrast-test)
   - [Reading a failed run](#reading-a-failed-run)
+- [Mutation testing](#mutation-testing)
 - [Rules](#rules)
 - [Coverage](#coverage)
 
@@ -40,8 +39,7 @@ The guide grows as the layers arrive: mutation testing in [PH-15b](../roadmap.md
 | The scale check | `scripts/check-scale.sh` | Two instances of the image start together behind nginx (the `scale` profile): one migrates while the other waits for the lock, and requests reach both. It catches what two instances inside one test process hide, since those share module-level state ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 14) | ➖ N/A: a bash script |
 | The landing page | `apps/landing/check-demo.test.js` | `checkDemo`, the function behind the footer's dot, says up when the demo answers (whatever the answer), and down when the request fails or outlives its timeout, with a fake `fetch`. The page itself has no browser test: it is checked by hand on `dzwoniec.com` ([PH-34 spec](../superpowers/specs/2026-10-23-PH-34-landing-page-and-demo-status-design.md), decision 9) | `landing` |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
-
-Layer still to come: **mutation testing**, in [PH-15b](../roadmap.md#ph-15b-mutation-testing).
+| Mutation testing | `stryker.config.mjs`, run by `pnpm test:mutation`; not part of `pnpm test` or CI | Whether the tests check anything: StrykerJS changes the application code one small way at a time and counts the changes no test notices ([StrykerJS](tools/stryker.md), [ADR 0055](../decisions/0055-mutation-testing-phase-details.md)) | ➖ N/A: runs the projects above |
 
 ## Running the tests
 
@@ -60,6 +58,13 @@ pnpm test:coverage              # every project, plus a coverage report
 - A filter is a piece of a file path, not a test name: `pnpm test config` runs `config.test.ts`. If it matches nothing, Vitest says `No test files found`.
 - `pnpm test:coverage` is defined as `pnpm test --coverage`, so it always runs the same tests as `pnpm test`, with measuring switched on. It prints a table in the terminal and writes `coverage/index.html`, a report you open in a browser. See [Coverage](#coverage).
 - In VS Code, the Vitest extension lists every test in the Testing view and runs one from the green arrow next to it. See [VS Code](tools/vscode.md).
+
+```bash
+pnpm test:mutation                               # StrykerJS over the application code; needs PostgreSQL
+pnpm test:mutation --mutate apps/api/src/config.ts   # one file or several, comma-separated
+```
+
+`pnpm test:mutation` is not part of `pnpm test` and no CI job or hook runs it. It takes minutes, not seconds, and writes a report to `reports/mutation/mutation.html` ([how to read it](tools/stryker.md#reading-the-report)).
 
 The E2E journeys are not part of `pnpm test`: they need a browser and a built app, and run by their own command. They need PostgreSQL and `apps/api/.env` like the API tests, and Playwright's browsers installed once ([setup guide](setup.md)).
 
@@ -389,6 +394,19 @@ A failed test leaves three pieces of evidence, kept for each attempt:
 **From CI,** the `e2e` job uploads the HTML report as the `playwright-report` artifact when it fails; see [CI/CD](ci-cd.md#reading-a-failed-e2e-run) for downloading it. A trace can also be dropped on <https://trace.playwright.dev>, which opens it in the browser without uploading it anywhere.
 
 **Flaky and failed.** In CI each failed test is retried once ([ADR 0026](../decisions/0026-first-e2e-journey-details.md), decision 4). A test that fails twice is **failed**. A test that fails and then passes on its retry is **flaky**, and with `failOnFlakyTests` the run fails anyway, because a flaky test is a bug ([Rules](#rules)); the report labels it *Flaky* and holds the trace of the failed attempt. Locally there is no retry: a failure is a failure.
+
+## Mutation testing
+
+Mutation testing judges the tests, not the code: a **mutant** is a small change StrykerJS makes to the code, and a test that fails on it *kills* it. A **survivor** is a mutant every test passed on, so no test checks the behavior it changed. Run `pnpm test:mutation` when a phase adds or changes logic that is mutated ([definition of done](definition-of-done.md), item 2), and deal with every survivor in the code, never only in the PR ([ADR 0055](../decisions/0055-mutation-testing-phase-details.md), decisions 1, 3 and 4).
+
+- **What is mutated:** every source file under `apps/api/src`, `apps/web/src` and `packages/shared/src`, except the tests, `apps/*/src/test/` and the shadcn/ui components.
+- **A file opts out** when it holds no logic a test should check (wiring, configuration, plain rendering). Its first line is `// Stryker disable all: <reason>`. An opt-out is never for speed or to hide a weak test.
+- **A new wiring file starts with its opt-out,** written with the file, so the report never fills with noise from files nobody means to test.
+- **A survivor is dealt with in one of three ways:**
+  - *Kill it:* write or tighten a test until the mutant fails it. This is the default.
+  - *Accept it:* when the mutant is equivalent (no test could tell it apart from the code), put `// Stryker disable next-line <Mutator>: <reason>` above the line. Name one mutator, cover one line and give the reason. Never `all`: a comment that hides only one mutator cannot hide a new, real survivor on the same line later.
+  - *Record it as an open point:* when the fix is larger than a small test change.
+- **The PR states the score and what was done;** the reasons live in the code, so the next run shows only new survivors.
 
 ## Rules
 
