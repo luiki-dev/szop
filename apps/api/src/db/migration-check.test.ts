@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { sql } from "drizzle-orm";
 import pg from "pg";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { testDatabaseSettings } from "../test/database.ts";
+import { testDatabaseName, testDatabaseSettings } from "../test/database.ts";
 import { createDatabase, type Database } from "./database.ts";
 import {
   checkMigrations,
@@ -164,7 +164,7 @@ describe("against a database", () => {
   beforeEach(async () => {
     const worker = process.env.VITEST_POOL_ID;
     if (!worker) throw new Error("these tests run only under Vitest");
-    name = `szop_test_migrations_${worker}`;
+    name = testDatabaseName(`migrations_${worker}`);
     await runAdmin(`DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
     await runAdmin(`CREATE DATABASE ${name}`);
     db = createDatabase(testDatabaseSettings(name));
