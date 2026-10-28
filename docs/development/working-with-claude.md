@@ -96,11 +96,11 @@ A new session needs only a short prompt naming the stage and its document. CLAUD
 |---|---|---|
 | Brainstorm and spec | `Brainstorm PH-NN` | the phase's entry in `docs/roadmap.md`, its issue and open-point issues, the requirements it delivers |
 | Plan | `Plan PH-NN from docs/superpowers/specs/<spec>.md` | the spec, the files it names |
-| Execution | `Execute the plan docs/superpowers/plans/<plan>.md` | the plan, its Global Constraints, the spec |
+| Execution | `Execute the plan docs/superpowers/plans/<plan>.md` | the plan, `docs/superpowers/plans/CLAUDE.md` (the repo-wide rules; the plan does not repeat them), the spec |
 | Execution, continued | `Execute the plan docs/superpowers/plans/<plan>.md; tasks 1–3 are committed` | the plan, the progress ledger in `.superpowers/sdd/<plan>/progress.md`, `git log` |
 | Finishing | `Finish PH-NN: tracking and the PR` | the plan's last task, CLAUDE.md's "Before opening the PR", the branch's diff |
 
-The ledger of a plan's workspace keeps each finished task, the rulings made along the way and the review findings deferred, so a new execution session picks up where the last one stopped without re-reading the whole conversation.
+The ledger of a plan's workspace keeps each finished task, the rulings made along the way and the review findings deferred, so a new execution session picks up where the last one stopped without re-reading the whole conversation. The session that dispatches an implementer tells it to read `docs/superpowers/plans/CLAUDE.md` before its task. Each finding of the whole-branch review that is not fixed becomes an open-point issue, created in the review's session before the PR opens; the ledger is where it waits until then.
 
 ### Restart or compact
 

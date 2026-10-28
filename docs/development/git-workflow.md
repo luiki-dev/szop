@@ -99,7 +99,7 @@ gh pr create --title "feat(lists): add shopping lists"
 `gh` opens an editor with the PR template for the description.
 
 - **The PR title follows Conventional Commits**: it becomes the merge commit's message on `main`.
-- **The description follows the PR template** (`.github/pull_request_template.md`): what and why, links to the roadmap phase, spec, plan, requirement IDs and ADRs, how it was tested, and the definition-of-done checklist.
+- **The description follows the PR template** (`.github/pull_request_template.md`): what and why (bullets, with a link to the phase ADR or the ADR the PR adds), the acceptance criteria and the `Closes #N` lines, the definition-of-done labels, and, for a phase PR, token usage.
 - **The description closes the PR's issues** with `Closes #N`, one per line: a phase's issue, each open point it settles and, for an ADR made outside a phase, its `adr` issue. The merge closes them, and the project marks them ✅ Done ([project tracking](project-tracking.md)).
 - A phase's spec and plan are already on the branch, so the PR shows the design next to the code.
 

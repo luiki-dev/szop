@@ -59,7 +59,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
 
 | # | Branch | Commit message | Why it is there |
 |---|---|---|---|
-| 1 | `feat/templates` | `docs(spec): add templates design` | The approved spec, `docs/superpowers/specs/2026-10-05-PH-28-templates-design.md` |
+| 1 | `feat/templates` | `docs(spec): add templates design` | The approved spec, `docs/superpowers/specs/2026-10-05-PH-28-templates-design.md`, with the phase's ADR, created in the same commit at ✅ Accepted |
 | 2 | `feat/templates` | `docs(plan): add templates implementation plan` | The approved plan, `docs/superpowers/plans/2026-10-05-PH-28-templates.md` |
 | 3 | `feat/templates` | `feat(shared): add template schema` | Plan task 1: the schema and its tests (TDD) |
 | 4 | `feat/templates` | `feat(api): add templates endpoints` | Plan task 2: the routes, services and their tests (TDD) |
@@ -84,7 +84,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
          \
           ●───●            git switch main && git pull
           1   2            git switch -c feat/templates
-          feat/templates   commit 1: spec   (after the owner approves the design)
+          feat/templates   commit 1: spec + ADR (after the owner approves the design)
                            commit 2: plan   (after the owner approves the plan)
 ```
 
@@ -147,7 +147,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
 ```
 
 - Claude reviews its own diff first, then opens the PR with the **template** filled in.
-- The description closes the phase's issue and each open point it settles with `Closes #N`, and lists the issue changes it made: open points closed, re-assigned or added on GitHub, and phase bodies updated from the roadmap.
+- The description has four sections: what and why (bullets, with a link to the phase ADR), the acceptance criteria and the `Closes #N` lines (the phase's issue and each open point it settles), the definition-of-done labels, and token usage. It does not list the issue changes or the tests.
 - The **PR title** matters most: it becomes the merge commit's message on `main`, and release-please reads it.
 - CI tests `refs/pull/12/merge`: what `main` would look like after the merge. A newer push cancels the older run.
 - Until a check's phase lands, `ci.yml` simply has no such job; the jobs today are listed in [CI/CD](ci-cd.md).

@@ -213,21 +213,21 @@ git commit -m "docs(claude): link the roadmap from phase issues and create the p
 **Interfaces:**
 - Consumes: the item labels (Task 2); `plans/CLAUDE.md` (Task 1).
 
-- [ ] **Step 1: Update the three guides**
+- [x] **Step 1: Update the three guides**
 
 Following spec, [Other guides](../specs/2026-10-28-leaner-documentation-design.md#other-guides), only where they restate a changed rule:
 - `phase-walkthrough.md`: the phase ADR is committed with the spec (Step 1 and the commit table at line 62); the PR's sections are the template's four (Step 4).
 - `git-workflow.md`, line 102: the description's sections are what and why (with the ADR link), the criteria and `Closes #N`, the definition-of-done labels, and token usage for phase PRs.
 - `working-with-claude.md`: the execution row at line 99 reads the plan and `plans/CLAUDE.md`, the plan no longer carries the repo rules in its Global Constraints; the dispatching session tells each implementer to read `plans/CLAUDE.md` before its task; the whole-branch review's findings that are not fixed become open-point issues in the review's session (line 103 says the ledger holds the deferred findings; keep the ledger, add where they end up).
 
-- [ ] **Step 2: Sweep for old phrases and changed anchors**
+- [x] **Step 2: Sweep for old phrases and changed anchors**
 
 Run: `grep -rn -E "How it was tested|issue changes|body (is )?a copy|Plans repeat|Rulings|names the commit it deployed|N/A: <reason>|N/A with a reason" --include=*.md . | grep -v -E "^\./docs/(decisions|superpowers/(specs|plans)/20|audits|archive)/"`
 Expected: no match that states an old rule. Fix any in a file the spec does not list only if it restates the rule; mention it in the task summary.
 
 Then, for each heading Tasks 2–4 renamed, run `grep -rn "<old-anchor>" --include=*.md .` and update every link outside frozen records.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/development/ docs/superpowers/plans/2026-10-28-leaner-documentation.md
