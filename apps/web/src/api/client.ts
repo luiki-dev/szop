@@ -23,6 +23,7 @@ export async function getHealth(): Promise<Health> {
 // different deploys) is an error too, not a crash further on.
 export async function getCatalog(): Promise<Catalog> {
   const response = await fetch("/api/catalog");
+  // Stryker disable next-line ArrowFunction: `null` and `undefined` are both an unreadable body, handled the same
   const body: unknown = await response.json().catch(() => null);
   if (response.status !== 200) {
     const error = apiErrorSchema.safeParse(body);

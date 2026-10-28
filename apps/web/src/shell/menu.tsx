@@ -23,6 +23,7 @@ function MenuLink({
       onClick={onNavigate}
       className={({ isActive }) =>
         cn(
+          // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
           "flex min-h-12 items-center gap-3 rounded-control px-3 font-semibold outline-none hover:bg-accent/60 focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           isActive && "bg-accent text-accent-foreground",
         )

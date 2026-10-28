@@ -1,3 +1,4 @@
+// Stryker disable all: wiring: mounts the app, no logic a test should check
 import "./zod-config.ts";
 // Gabarito, every subset: the browser downloads Latin Extended only when a
 // character needs it (visual-design.md, Typography).

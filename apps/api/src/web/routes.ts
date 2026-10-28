@@ -36,6 +36,7 @@ export async function webRoutes(
   });
 
   app.setNotFoundHandler((request, reply) => {
+    // Stryker disable next-line StringLiteral: `split("?", 1)` always returns one element, so the default is unreachable
     const [path = ""] = request.url.split("?", 1);
     const lastSegment = path.slice(path.lastIndexOf("/") + 1);
     const isApi = path === "/api" || path.startsWith("/api/");
@@ -45,6 +46,7 @@ export async function webRoutes(
       !lastSegment.includes(".");
     if (isPage) {
       // React Router renders the path; setHeaders above marks it no-cache.
+      // Stryker disable next-line StringLiteral: an empty file name resolves to the root's index.html, the same file
       return reply.sendFile("index.html");
     }
     // An API call or a missing file never gets the app's HTML.

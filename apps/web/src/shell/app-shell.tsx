@@ -81,6 +81,7 @@ export function AppShell() {
   }, [title]);
 
   return (
+    // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
     <div className={desktop ? "flex min-h-dvh" : undefined}>
       {desktop ? (
         <aside className="sticky top-0 h-dvh w-64 shrink-0 overflow-y-auto bg-card text-card-foreground">
@@ -94,8 +95,10 @@ export function AppShell() {
       <main
         className={
           desktop
-            ? "mx-auto w-full max-w-[720px] px-6 py-6"
-            : "mx-auto max-w-[720px] px-4 pb-6 md:px-6"
+            ? // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
+              "mx-auto w-full max-w-[720px] px-6 py-6"
+            : // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
+              "mx-auto max-w-[720px] px-4 pb-6 md:px-6"
         }
       >
         {desktop && <h1 className="text-2xl font-extrabold">{title}</h1>}

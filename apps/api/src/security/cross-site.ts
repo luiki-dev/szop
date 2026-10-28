@@ -14,10 +14,13 @@ function comesFromTheApp(request: FastifyRequest): boolean {
   const site = request.headers["sec-fetch-site"];
   if (site !== undefined) return site === "same-origin";
   const origin = request.headers.origin;
+  // Stryker disable next-line ConditionalExpression: `new URL(undefined)` throws and the catch returns false too
   if (origin === undefined) return false;
   try {
+    // Stryker disable BlockStatement: an empty catch returns undefined, falsy like the false it returns; restored below
     return new URL(origin).host === request.headers.host;
   } catch {
+    // Stryker restore BlockStatement
     // Not a URL, such as the opaque origin "null".
     return false;
   }
@@ -43,4 +46,5 @@ function crossSiteCheck(app: FastifyInstance): void {
 }
 
 // fastify-plugin turns off encapsulation, so the check reaches every route.
+// Stryker disable next-line ObjectLiteral,StringLiteral: the plugin name only labels the plugin in Fastify's errors and logs
 export const crossSite = fp(crossSiteCheck, { name: "szop-cross-site" });

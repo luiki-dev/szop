@@ -1,3 +1,4 @@
+// Stryker disable all: entry point, checked by hand (testing.md, Rules): it only wires the setup of the app role, which setup-role.ts tests
 import { createDatabase } from "./db/database.ts";
 import { loadSetupConfig, setupAppRole } from "./db/setup-role.ts";
 

@@ -8,6 +8,7 @@ function Line({ up, children }: { up: boolean; children: string }) {
       <span
         aria-hidden="true"
         className={cn(
+          // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
           "size-2 rounded-full",
           up ? "bg-primary" : "bg-destructive",
         )}

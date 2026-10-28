@@ -15,6 +15,7 @@ export function findMatch(
   query: string,
 ): [start: number, end: number] | null {
   const needle = foldForSearch(query.trim());
+  // Stryker disable next-line ConditionalExpression,StringLiteral: an empty needle ends at index -1, which the check at the end turns into null
   if (needle === "") return null;
 
   let folded = "";
@@ -32,9 +33,11 @@ export function findMatch(
   }
 
   const at = folded.indexOf(needle);
+  // Stryker disable next-line ConditionalExpression: `starts[-1]` is undefined, which the check at the end turns into null
   if (at === -1) return null;
   const start = starts[at];
   const end = ends[at + needle.length - 1];
+  // Stryker disable next-line ConditionalExpression,LogicalOperator: only narrows the index types: a match found above has both ends
   return start === undefined || end === undefined ? null : [start, end];
 }
 

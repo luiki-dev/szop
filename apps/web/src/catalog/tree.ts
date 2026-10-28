@@ -22,6 +22,7 @@ export interface CatalogNode {
 export function buildCatalogTree(catalog: Catalog): CatalogNode[] {
   const productsOf = new Map<string, CatalogProduct[]>();
   for (const product of catalog.products) {
+    // Stryker disable next-line ConditionalExpression: a product stored under the key null is never looked up: no category has a null ID
     if (product.categoryId === null) continue;
     const group = productsOf.get(product.categoryId);
     if (group) group.push(product);
@@ -31,6 +32,7 @@ export function buildCatalogTree(catalog: Catalog): CatalogNode[] {
   // orderCategories is depth-first, so a category's parent is the last
   // category seen one level up.
   const roots: CatalogNode[] = [];
+  // Stryker disable next-line ArrayDeclaration: each entry is set before it is read: a parent is always seen first
   const parents: CatalogNode[] = [];
   const all: { node: CatalogNode; parent: CatalogNode | undefined }[] = [];
   for (const { depth, ...category } of orderCategories(catalog.categories)) {
@@ -43,6 +45,7 @@ export function buildCatalogTree(catalog: Catalog): CatalogNode[] {
       children: [],
       productCount: 0,
     };
+    // Stryker disable next-line ConditionalExpression: `parents[-1]` is undefined, the same as the root's parent
     const parent = depth === 0 ? undefined : parents[depth - 1];
     if (parent) parent.children.push(node);
     else roots.push(node);

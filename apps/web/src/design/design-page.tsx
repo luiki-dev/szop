@@ -1,3 +1,4 @@
+// Stryker disable all: the colour-role page: class names and labels; design-page.test.tsx checks every entry shows
 import {
   Check,
   Menu,

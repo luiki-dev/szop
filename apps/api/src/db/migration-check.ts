@@ -45,6 +45,7 @@ export function compareMigrations(
   return {
     unknown: recorded.filter(({ createdAt }) => !localTimes.has(createdAt)),
     skipped: local.filter(
+      // Stryker disable next-line EqualityOperator: a local migration at `newest` time is recorded, so the first clause is already false
       ({ createdAt }) => !recordedByTime.has(createdAt) && createdAt < newest,
     ),
     edited: local.filter(({ createdAt, hash }) => {
