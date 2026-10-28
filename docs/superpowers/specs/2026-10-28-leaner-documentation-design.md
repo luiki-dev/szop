@@ -67,7 +67,7 @@ The template keeps one shape for every PR. A PR outside a phase writes "none" fo
 `docs/superpowers/plans/CLAUDE.md`:
 
 - **Becomes the one home of the repo-wide rules** a plan's implementers follow: branch and git rules, commit messages and trailers, the docs writing style, "after each task", never merge, never trigger the demo workflows, the deny rules ([decision 11](../../decisions/0054-leaner-documentation.md#decisions)).
-- **Replaces "Plans repeat these rules"** with: the session that dispatches an implementer pastes this file into the implementer's prompt.
+- **Replaces "Plans repeat these rules"** with: the session that dispatches an implementer tells it, in its prompt, to read this file before the task.
 - **Says what a plan holds:** "Order of work" at the top, each task linking its section; Global Constraints with only this phase's constraints; links to the spec for the criteria and the docs to update.
 
 ### Specs
@@ -80,7 +80,7 @@ Where they restate a changed rule, and only there:
 
 - `docs/development/phase-walkthrough.md`: the ADR is written with the spec; the PR's sections.
 - `docs/development/git-workflow.md`: the PR description and its sections.
-- `docs/development/working-with-claude.md`: the dispatching session pastes `plans/CLAUDE.md` into the implementer's prompt; the review findings become issues in the review's session.
+- `docs/development/working-with-claude.md`: the dispatching session tells each implementer to read `plans/CLAUDE.md` before its task; the review findings become issues in the review's session.
 - `docs/architecture/`: no change.
 
 ### CLAUDE.md
@@ -89,7 +89,7 @@ Where they restate a changed rule, and only there:
 - **Documentation, `docs/decisions/`:** the note rule becomes two places: the new ADR's header and the decision's cell; the earlier ADR's status line only when the whole ADR is superseded or deprecated ([decision 13](../../decisions/0054-leaner-documentation.md#decisions)).
 - **Documentation, `docs/roadmap.md`:** "the phase issue's body is a copy" becomes "the phase issue's body links it".
 - **The implementation process line** gains: a phase's ADR is created with its spec.
-- **Project tracking, "When the spec or plan is committed":** the phase ADR is created in the spec's commit. The stage table and the project's fields get no ADR link: the spec links the ADR. _Claude's call._
+- **Project tracking, "When the spec or plan is committed":** the phase ADR is created in the spec's commit. The stage table and the project's fields stay as they are (Spec, Plan, PR, issue), with no ADR link added _(the owner's choice)_.
 - **Settled while building:** a decision taken during execution is added to the ADR's "Settled while building" in the commit of the task that took it. ADR numbers are checked against `main` and the open branches when the ADR is created and again before the PR, as today.
 
 ### Earlier ADRs
@@ -127,7 +127,7 @@ At the end, the same sample the audit measured is rewritten under the new rules 
 ## Risks
 
 - **No deployed commit in the PR.** The PR no longer names the commit the demo deployed, so a reviewer cannot check from the PR that the demo covered the final head; the owner, who runs the demo, is the check. The `demo-up` run's logs still name the commit.
-- **Subagents without the repo rules.** If the dispatching session forgets to paste `plans/CLAUDE.md`, implementers miss the commit trailers or the docs style. The whole-branch review and commitlint catch most of it.
+- **Subagents without the repo rules.** If the dispatching session forgets the instruction, or the implementer skips reading `plans/CLAUDE.md`, implementers miss the commit trailers or the docs style. The whole-branch review and commitlint catch most of it.
 - **The spec reads less on its own.** The plan writer opens the spec and the ADR. The spec links the ADR's decisions by number.
 - **A rewritten phase issue loses text the roadmap does not have.** The builder compares each body with its roadmap entry before rewriting and stops on a difference.
 
