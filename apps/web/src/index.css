@@ -40,6 +40,7 @@
   --foreground: var(--color-gray-800);
   --card: var(--color-white);
   --card-foreground: var(--color-gray-800);
+  --muted: var(--color-gray-50);
   --muted-foreground: var(--color-gray-600);
   --border: var(--color-gray-200);
   --input: var(--color-gray-500);
@@ -66,6 +67,13 @@
   --foreground: var(--color-gray-200);
   --card: var(--color-gray-800);
   --card-foreground: var(--color-gray-200);
+  /* Halfway between the card (gray-800) and the border (gray-700): a band
+     that shows against the card without getting close to the haul. */
+  --muted: color-mix(
+    in oklab,
+    var(--color-gray-800) 50%,
+    var(--color-gray-700)
+  );
   --muted-foreground: var(--color-gray-400);
   --border: var(--color-gray-700);
   --input: var(--color-gray-400);
@@ -95,6 +103,7 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-input: var(--input);

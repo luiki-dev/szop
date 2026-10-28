@@ -1,6 +1,6 @@
 import { Menu as MenuIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Outlet, useMatches } from "react-router";
+import { Outlet, ScrollRestoration, useMatches } from "react-router";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Sheet,
@@ -101,6 +101,8 @@ export function AppShell() {
         {desktop && <h1 className="text-2xl font-extrabold">{title}</h1>}
         <Outlet />
       </main>
+      {/* A new page starts at the top; Back and Forward restore the scroll. */}
+      <ScrollRestoration />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
+import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
 import { captureLog } from "../test/log.ts";
@@ -37,6 +38,7 @@ describe("NFR-4.5: the request log", () => {
   it("logs a page's URL with its token hidden", async () => {
     const log = captureLog();
     app = buildApp({
+      catalog: testCatalog,
       config: testConfig({ logLevel: "info" }),
       db: database.db,
       logStream: log.stream,
@@ -57,11 +59,12 @@ describe("NFR-4.5: the request log", () => {
   it("keeps the token out of the error line", async () => {
     const log = captureLog();
     app = buildApp({
+      catalog: testCatalog,
       config: testConfig({ logLevel: "info" }),
       db: database.db,
       logStream: log.stream,
     });
-    // A route that fails: Fastify's error line carries the request too.
+    // A route that fails: the error handler logs it.
     app.get("/api/test-fails", () => {
       throw new Error("kaput");
     });
@@ -72,7 +75,8 @@ describe("NFR-4.5: the request log", () => {
     });
 
     expect(response.statusCode).toBe(500);
-    expect(log.lines().some((line) => line.msg === "kaput")).toBe(true);
+    const logged = log.lines().find((line) => line.level === 50);
+    expect(logged).toMatchObject({ err: { message: "kaput" } });
     expect(JSON.stringify(log.lines())).not.toContain("s3cret");
   });
 });

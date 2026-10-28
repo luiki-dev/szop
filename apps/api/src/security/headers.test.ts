@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
+import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
 import { useWebRoot } from "../test/web-root.ts";
@@ -28,6 +29,7 @@ describe("NFR-4.3: security headers", () => {
     ["a refused cross-site request", "POST", "/api/health", 403, crossSite],
   ] as const)("are on %s", async (_, method, url, status, headers) => {
     app = buildApp({
+      catalog: testCatalog,
       config: testConfig({ webRoot: webRoot.path }),
       db: database.db,
     });

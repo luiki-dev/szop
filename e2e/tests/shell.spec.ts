@@ -131,6 +131,43 @@ test("NFR-2.4: everything focused with the keyboard shows a focus ring", async (
   }
 });
 
+test("NFR-2.8: the focus ring is drawn in the ring color, on links as on buttons", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/catalog");
+  await expect(page.getByRole("button", { name: "Expand all" })).toBeVisible();
+
+  // The ring is a box-shadow in the --ring color. A probe element is given
+  // the color and read back, so both sides are serialized by the browser the
+  // same way, whatever color space the palette is written in.
+  const focusedRing = () =>
+    page.evaluate(() => {
+      const probe = document.createElement("span");
+      probe.style.color = "var(--ring)";
+      document.body.append(probe);
+      const ring = getComputedStyle(probe).color;
+      probe.remove();
+      const element = document.activeElement;
+      return {
+        name: element?.getAttribute("aria-label") ?? element?.textContent,
+        ring,
+        boxShadow: element ? getComputedStyle(element).boxShadow : "none",
+      };
+    });
+
+  // Tab to the "Start" link, then to the "Expand all" button.
+  for (const name of ["Start", "Expand all"]) {
+    let focused = await focusedRing();
+    for (let stop = 0; stop < 20 && focused.name?.trim() !== name; stop++) {
+      await page.keyboard.press("Tab");
+      focused = await focusedRing();
+    }
+    expect(focused.name?.trim()).toBe(name);
+    expect(focused.boxShadow, name).toContain(focused.ring);
+  }
+});
+
 test("NFR-2.6: focus stays inside the open menu drawer", async ({ page }) => {
   await page.setViewportSize(phone);
   await page.goto("/");
@@ -185,4 +222,41 @@ test("APP-1.1: the drawer opens from the left, and a tap on the dimmed page clos
   await page.mouse.click(phone.width - 20, phone.height / 2);
   await expect(drawer).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
+});
+
+test("APP-1.10: a page opened from the menu starts at the top; Back returns to where it was scrolled", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const scrollY = () => page.evaluate(() => window.scrollY);
+  const scrollToBottom = async () => {
+    await page.evaluate(() => {
+      window.scrollTo(0, document.documentElement.scrollHeight);
+    });
+    await expect.poll(scrollY).toBeGreaterThan(0);
+    return scrollY();
+  };
+  const heading = (name: string) =>
+    page.getByRole("heading", { level: 1, name });
+
+  // Starts at the top. The catalog, with every category open, is much taller
+  // than the screen. (Coming from /design, it is still loading when the
+  // browser clamps the scroll, which would hide the bug.)
+  await page.goto("/catalog");
+  await page.getByRole("button", { name: "Expand all" }).click();
+  await scrollToBottom();
+  await page.getByRole("link", { name: "Design system" }).click();
+  await expect(heading("Design system")).toBeVisible();
+  await expect.poll(scrollY).toBe(0);
+
+  // Back returns. Browsers also restore the position natively on Back, so
+  // this half guards the behavior, not the component. The design page is the
+  // one whose height does not depend on data or on what was opened, so its
+  // position can be restored.
+  const scrolled = await scrollToBottom();
+  await page.getByRole("link", { name: "Catalog" }).click();
+  await expect(heading("Catalog")).toBeVisible();
+  await page.goBack();
+  await expect(heading("Design system")).toBeVisible();
+  await expect.poll(scrollY).toBe(scrolled);
 });

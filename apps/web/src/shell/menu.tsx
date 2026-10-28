@@ -1,4 +1,4 @@
-import { House, Palette, type LucideIcon } from "lucide-react";
+import { House, ListTree, Palette, type LucideIcon } from "lucide-react";
 import { Link, NavLink } from "react-router";
 import logo from "@/brand/logo.svg";
 import { cn } from "@/lib/utils.ts";
@@ -23,7 +23,7 @@ function MenuLink({
       onClick={onNavigate}
       className={({ isActive }) =>
         cn(
-          "flex min-h-12 items-center gap-3 rounded-control px-3 font-semibold hover:bg-accent/60",
+          "flex min-h-12 items-center gap-3 rounded-control px-3 font-semibold outline-none hover:bg-accent/60 focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           isActive && "bg-accent text-accent-foreground",
         )
       }
@@ -44,7 +44,7 @@ export function Menu({ onNavigate }: { onNavigate?: () => void }) {
         to="/"
         onClick={onNavigate}
         aria-label="Szop, Start"
-        className="flex min-h-12 items-center gap-2 self-start rounded-control px-1"
+        className="flex min-h-12 items-center gap-2 self-start rounded-control px-1 outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <img src={logo} alt="" width={40} height={40} />
         <span className="text-2xl font-bold text-link">szop</span>
@@ -54,6 +54,21 @@ export function Menu({ onNavigate }: { onNavigate?: () => void }) {
           <MenuLink to="/" icon={House} label="Start" onNavigate={onNavigate} />
         </li>
       </ul>
+      <div>
+        <p className="px-3 pb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+          Setup
+        </p>
+        <ul className="flex flex-col gap-1">
+          <li>
+            <MenuLink
+              to="/catalog"
+              icon={ListTree}
+              label="Catalog"
+              onNavigate={onNavigate}
+            />
+          </li>
+        </ul>
+      </div>
       <div>
         <p className="px-3 pb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
           Developer

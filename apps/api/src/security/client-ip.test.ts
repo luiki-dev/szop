@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
+import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
 import { captureLog } from "../test/log.ts";
@@ -27,6 +28,7 @@ describe("NFR-4.7: the client address", () => {
   ): Promise<unknown> {
     const log = captureLog();
     app = buildApp({
+      catalog: testCatalog,
       config: testConfig({ logLevel: "info", trustedProxies }),
       db: database.db,
       logStream: log.stream,

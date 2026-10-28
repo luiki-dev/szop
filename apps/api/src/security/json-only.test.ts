@@ -1,6 +1,8 @@
 import type { FastifyInstance } from "fastify";
+import { apiErrorSchema } from "@szop/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
+import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
 
@@ -18,7 +20,11 @@ describe("NFR-4.2: JSON-only bodies", () => {
 
   // No route takes a body yet, so the test adds one.
   function start(): FastifyInstance {
-    app = buildApp({ config: testConfig(), db: database.db });
+    app = buildApp({
+      catalog: testCatalog,
+      config: testConfig(),
+      db: database.db,
+    });
     app.route({
       method: ["POST", "DELETE"],
       url: "/api/test-body",
@@ -42,10 +48,9 @@ describe("NFR-4.2: JSON-only bodies", () => {
     });
 
     expect(response.statusCode).toBe(415);
-    expect(response.json()).toMatchObject({
-      statusCode: 415,
-      error: "Unsupported Media Type",
-    });
+    expect(apiErrorSchema.parse(response.json()).error.code).toBe(
+      "unsupported_media_type",
+    );
   });
 
   it.each(["application/json", "application/json; charset=utf-8"])(

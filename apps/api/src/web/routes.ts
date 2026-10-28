@@ -1,6 +1,7 @@
 import { join, sep } from "node:path";
 import fastifyStatic from "@fastify/static";
 import type { FastifyInstance } from "fastify";
+import { sendError } from "../errors.ts";
 
 export interface WebRoutesOptions {
   root: string;
@@ -46,12 +47,12 @@ export async function webRoutes(
       // React Router renders the path; setHeaders above marks it no-cache.
       return reply.sendFile("index.html");
     }
-    // The body of Fastify's own 404, which this handler replaces: an API
-    // call or a missing file never gets the app's HTML.
-    return reply.code(404).send({
-      statusCode: 404,
-      error: "Not Found",
-      message: `Route ${request.method}:${request.url} not found`,
-    });
+    // An API call or a missing file never gets the app's HTML.
+    return sendError(
+      reply,
+      404,
+      "not_found",
+      `Route ${request.method}:${request.url} not found`,
+    );
   });
 }
