@@ -49,7 +49,7 @@ The template keeps one shape for every PR. A PR outside a phase writes "none" fo
 - **Item 4 (deployed and checked)** keeps the demo check itself: the fixed checks (the `demo-up` run, the deployed commit is the final head, `/api/health`, the HTTPS redirect, the console, Lighthouse on a phone profile with the [NFR-3](../../requirements/NFR-non-functional-requirements.md#nfr-3) thresholds, `demo-down`) and the spec's demo check list. They move from the PR template to this page as a list the owner follows. The PR records only the ticked item.
 - **Item 6 (living docs)** drops "the phase issue's body, a copy of the roadmap entry", and says a criterion marked "to check at the next demo" turns ✅ once it is listed under the PR's ticked demo item.
 - **"When the demo check must be repeated"** stays; where it relies on the PR naming the deployed commit, it relies on the `demo-up` run instead, which the owner checks.
-- **Item 9 (open points)** drops "the PR description lists the changes" and adds that every review finding not fixed is an open-point issue ([decision 2](../../decisions/0054-leaner-documentation.md#decisions)).
+- **Item 9 (open points)** drops "the PR description lists the changes" and adds that the whole-branch review's unfixed findings are listed to the owner, and the ones the owner chooses are open-point issues ([decision 2](../../decisions/0054-leaner-documentation.md#decisions)).
 - **"Items that don't apply"** says `➖ N/A` replaces the checkbox, without a reason, and gives one example.
 - The header's history line adds ADR 0054.
 
@@ -58,7 +58,7 @@ The template keeps one shape for every PR. A PR outside a phase writes "none" fo
 `docs/development/project-tracking.md`:
 
 - **Phase issue body:** a link to the roadmap entry and the **Also** section; the copy and the rule that `roadmap.md` is mirrored into it go ([decision 5](../../decisions/0054-leaner-documentation.md#decisions)). The rows of "How items move" that update a phase body when its entry changes go, except for **Also**.
-- **Open-point issues:** **Source** names the phase, and for a deferred review finding, the review ([decision 2](../../decisions/0054-leaner-documentation.md#decisions)).
+- **Open-point issues:** **Source** names the phase, and for a review finding, the review ([decision 2](../../decisions/0054-leaner-documentation.md#decisions)).
 - **The PR:** the rule that the PR lists the issue changes goes; `Closes #N` stays ([decision 6](../../decisions/0054-leaner-documentation.md#decisions)).
 - **The criteria's statuses** are unchanged ([decision 12](../../decisions/0054-leaner-documentation.md#decisions)).
 
@@ -80,12 +80,12 @@ Where they restate a changed rule, and only there:
 
 - `docs/development/phase-walkthrough.md`: the ADR is written with the spec; the PR's sections.
 - `docs/development/git-workflow.md`: the PR description and its sections.
-- `docs/development/working-with-claude.md`: the dispatching session tells each implementer to read `plans/CLAUDE.md` before its task; the review findings become issues in the review's session.
+- `docs/development/working-with-claude.md`: the dispatching session tells each implementer to read `plans/CLAUDE.md` before its task; the owner chooses which unfixed review findings become issues, created in the review's session.
 - `docs/architecture/`: no change.
 
 ### CLAUDE.md
 
-- **Project tracking, "Before opening the PR":** the phase body is updated only for **Also**; "a list of every issue change the PR made" goes; every review finding not fixed is an open-point issue before the PR opens.
+- **Project tracking, "Before opening the PR":** the phase body is updated only for **Also**; "a list of every issue change the PR made" goes; the owner chooses which unfixed review findings become open-point issues before the PR opens, and the rest are noted as declined in the phase ADR.
 - **Documentation, `docs/decisions/`:** the note rule becomes two places: the new ADR's header and the decision's cell; the earlier ADR's status line only when the whole ADR is superseded or deprecated ([decision 13](../../decisions/0054-leaner-documentation.md#decisions)).
 - **Documentation, `docs/roadmap.md`:** "the phase issue's body is a copy" becomes "the phase issue's body links it".
 - **The implementation process line** gains: a phase's ADR is created with its spec.

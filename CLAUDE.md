@@ -52,12 +52,12 @@ During a phase:
 - **When the phase's owner steps change:**
   - On GitHub: owner-step issues added, or closed as not planned with the reason.
   - In the repo: the phase entry's **Owner steps** in `roadmap.md` updated.
+- **During execution:** a decision taken while building goes into the phase ADR's "Settled while building", in the commit of the task that took it. ADR numbers are checked against `main` and the open branches when the ADR is created and again before the PR.
 - **Before opening the PR:**
-  - On GitHub: every open-point issue of the phase closed (with a "settled by" comment) or re-assigned; every review finding that was not fixed is an open-point issue by now; the phase issue's body updated only when its **Also** changed.
+  - On GitHub: every open-point issue of the phase closed (with a "settled by" comment) or re-assigned; every whole-branch-review finding not fixed was listed to the owner, and each one the owner chose is an open-point issue by now (the rest are noted as declined in the phase ADR's "Settled while building"); the phase issue's body updated only when its **Also** changed.
   - In the repo: the stage table row in line with GitHub, with the PR link; every criterion the PR delivers ✅, with a test whose name starts with its ID; each requirement's line and the index updated.
   - In the PR description: `Closes #<phase issue>` and `Closes #<open-point issue>` for each one it settles.
   - In the PR description: a "Token usage" section with the output of `scripts/token-usage.py --branch <the phase branch>`.
-- **During execution:** a decision taken while building goes into the phase ADR's "Settled while building", in the commit of the task that took it. ADR numbers are checked against `main` and the open branches when the ADR is created and again before the PR.
 - **At the end of a phase:** propose the next phase. The owner moves its issue and its open-point issues to 📌 Todo on GitHub.
 - **Never set ✅ Done on GitHub by hand:** merging the PR closes the issues, and the project's workflow sets it.
 
@@ -120,7 +120,7 @@ Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `
   - ➡️ moved: an acceptance criterion moved to another requirement, under a new ID
   - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
   - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell
-  - ➖ not applicable: `➖ N/A: reason` in the definition of done and the PR template
+  - ➖ not applicable: `➖ N/A: reason` in the roadmap's stage tables, a bare `➖ N/A` in the definition of done and the PR template
   - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
 - **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1)`, `[UC-3](../requirements/UC-use-cases.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/SHR-sharing.md)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
 - Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.

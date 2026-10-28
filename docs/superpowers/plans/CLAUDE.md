@@ -15,7 +15,7 @@ Rules for any session that executes a plan in this folder, whichever method the 
 - **Git:** never commit to `main`; a phase is one branch named `type/ph-NN-short-description`; never merge a PR; never trigger `demo-up` or `demo-down`; don't work around the deny rules in `.claude/settings.json` or the push hook ([ADR 0009](../../decisions/0009-git-workflow.md); [ADR 0012](../../decisions/0012-security-baseline.md), decision 19; [ADR 0015](../../decisions/0015-git-push-guard-hook.md)).
 - **Commits:** Conventional Commits with a scope from `commitlint.config.js`, a header of at most 100 characters, ending with `Co-Authored-By: <the model that wrote the commit> <noreply@anthropic.com>` and the executing session's `Claude-Session:` line.
 - **Docs style:** the "Writing style for docs and explanations" section of the root [`CLAUDE.md`](../../../CLAUDE.md); no jokes in docs, commits or PRs.
-- **Review findings:** every finding of the whole-branch review that is not fixed becomes an open-point issue, created in that review's session before the PR opens ([ADR 0054](../../decisions/0054-leaner-documentation.md), decision 2).
+- **Review findings:** after the whole-branch review, the session that ran it lists the findings it did not fix to the owner; the owner chooses which become open-point issues, created in that session before the PR opens, and the rest are dropped and noted as declined in the phase ADR's "Settled while building" ([ADR 0054](../../decisions/0054-leaner-documentation.md), decision 2).
 - **Settled while building:** a decision taken during a task goes into the phase ADR's "Settled while building", in that task's commit.
 
 ## What a plan holds

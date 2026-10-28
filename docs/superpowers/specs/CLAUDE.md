@@ -16,7 +16,7 @@ In this order:
 4. **Acceptance criteria:** linked IDs, each marked whole or in part.
 5. **Tests.**
 6. **Documentation:** the living docs the phase changes.
-7. **Demo check:** the behaviors to check at the demo.
+7. **Demo check:** the behaviors to check at the demo, and the IDs (linked) of the criteria checked there, from which the PR's "Checked at the demo:" line is filled.
 8. **Risks.**
 9. **Out of scope.**
 10. **Left to the builder.**

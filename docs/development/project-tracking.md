@@ -72,7 +72,7 @@ Title: `ADR 0008 Hosting: an on-demand demo environment on AWS`. The body links 
 
 ### Owner-step issues
 
-Every owner step of a phase that is not done is an issue of its own, so the owner sees on the board what waits on them. Title: `PH-10 owner step 1: Choose the name and buy the domain`, the step, capitalised, cut to 100 characters in all; a phase's steps are numbered from 1 in the order of its **Owner steps**. Label `owner`, no milestone, a sub-issue of its phase. The body says which phase's step it is, with a link to the roadmap entry, and gives the step's text. The phase entry's **Owner steps** in the roadmap list the steps; the phase issue's body does not. The owner closes a step when it is done (or Claude does, when the owner says so), and the workflow sets ✅ Done. A done phase has no step issues: its steps stay a ticked checklist.
+Every owner step of a phase that is not done is an issue of its own, so the owner sees on the board what waits on them. Title: `PH-10 owner step 1: Choose the name and buy the domain`, the step, capitalised, cut to 100 characters in all; a phase's steps are numbered from 1 in the order of its **Owner steps**. Label `owner`, no milestone, a sub-issue of its phase. The body says which phase's step it is, with a link to the roadmap entry, and gives the step's text. The phase entry's **Owner steps** in the roadmap list the steps; the phase issue's body does not. The owner closes a step when it is done (or Claude does, when the owner says so), and the workflow sets ✅ Done. A done phase has no step issues: its steps stay a ticked checklist in the phase entry's **Owner steps** in `roadmap.md`.
 
 ### Links inside issue bodies
 
