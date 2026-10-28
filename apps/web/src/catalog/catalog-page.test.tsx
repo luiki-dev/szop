@@ -121,6 +121,21 @@ describe("CatalogPage", () => {
     expect(category("Dairy & eggs")).toHaveAttribute("aria-expanded", "true");
   });
 
+  it("PRD-2.11: announces the number of matches in a status region", async () => {
+    serveCatalog();
+    renderApp();
+    await screen.findByRole("button", { name: /^Dairy/ });
+    expect(screen.getByRole("status")).toHaveTextContent("3 categories");
+
+    fireEvent.change(
+      screen.getByRole("searchbox", { name: "Search the catalog" }),
+      { target: { value: "oat milk" } },
+    );
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent("1 product");
+    });
+  });
+
   it("PRD-2.4: expands and collapses everything", async () => {
     serveCatalog();
     renderApp();

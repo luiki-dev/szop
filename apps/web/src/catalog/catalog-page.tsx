@@ -147,7 +147,7 @@ export function CatalogPage() {
             )}
           </div>
           <div className="flex items-center justify-between gap-2">
-            <p className="tabular-nums">
+            <p role="status" className="tabular-nums">
               {result
                 ? pluralize(result.productCount, "product", "products")
                 : `${pluralize(nodes.length, "category", "categories")} · ${pluralize(catalog.products.length, "product", "products")}`}

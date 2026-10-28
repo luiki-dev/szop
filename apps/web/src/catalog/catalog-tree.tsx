@@ -48,7 +48,9 @@ function CategoryItem({
   const count = pluralize(node.productCount, "product", "products");
 
   return (
-    <li className={cn(depth === 0 && "rounded-surface bg-card")}>
+    <li
+      className={cn(depth === 0 && "overflow-hidden rounded-surface bg-card")}
+    >
       <button
         type="button"
         aria-expanded={isOpen}
