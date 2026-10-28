@@ -3,7 +3,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { sql } from "drizzle-orm";
 import pg from "pg";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { readMigrationFiles } from "drizzle-orm/migrator";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { testDatabaseName, testDatabaseSettings } from "../test/database.ts";
 import { createDatabase, type Database } from "./database.ts";
 import {
@@ -19,6 +20,16 @@ import {
 } from "./migration-check.ts";
 import { migrationsFolder, runMigrations } from "./migrate.ts";
 import { readJournal } from "./schema-version.ts";
+
+// The real reader unless a test sets a folder's content for one call.
+vi.mock("drizzle-orm/migrator", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("drizzle-orm/migrator")>();
+  return {
+    ...original,
+    readMigrationFiles: vi.fn(original.readMigrationFiles),
+  };
+});
 
 const L = (name: string, createdAt: number, hash: string): LocalMigration => ({
   name,
@@ -110,6 +121,20 @@ describe("describeMismatch", () => {
     expect(text).toContain(remedy);
   });
 
+  it("puts each line on its own line", () => {
+    const text = describeMismatch({
+      unknown: [],
+      skipped: [],
+      edited: [L("0000_init", 100, "h0")],
+    });
+
+    expect(text.split("\n")).toEqual([
+      "The database's migrations do not match this code's:",
+      "  edited: 0000_init, changed since it was applied",
+      remedy,
+    ]);
+  });
+
   it("leaves out a case with nothing in it", () => {
     const text = describeMismatch({
       unknown: [R(1891307052475, "x")],
@@ -133,6 +158,41 @@ describe("readLocalMigrations", () => {
 
     expect(readLocalMigrations(readJournal())).toEqual([
       { name: "0000_init", createdAt: 1791307052475, hash },
+    ]);
+  });
+});
+
+describe("MigrationMismatchError", () => {
+  it("is named after itself", () => {
+    const error = new MigrationMismatchError({
+      unknown: [],
+      skipped: [],
+      edited: [],
+    });
+
+    expect(error.name).toBe("MigrationMismatchError");
+  });
+});
+
+describe("readLocalMigrations naming", () => {
+  it("takes the tag whose timestamp matches, not the first", () => {
+    const journal = {
+      entries: [
+        { when: 1, tag: "0000_other" },
+        { when: 1791307052475, tag: "0000_init" },
+      ],
+    };
+
+    expect(readLocalMigrations(journal).map(({ name }) => name)).toEqual([
+      "0000_init",
+    ]);
+  });
+
+  it("falls back to the timestamp when the journal has no such entry", () => {
+    const journal = { entries: [{ when: 1, tag: "0000_other" }] };
+
+    expect(readLocalMigrations(journal).map(({ name }) => name)).toEqual([
+      "1791307052475",
     ]);
   });
 });
@@ -205,5 +265,49 @@ describe("against a database", () => {
     await expect(check).rejects.toMatchObject({
       mismatch: { unknown: [{ createdAt: 1891307052475 }] },
     });
+  });
+});
+
+describe("checkMigrations with a stubbed database", () => {
+  // The first query asks whether Drizzle's table exists, the second reads it.
+  function stubDb(rows: { hash: string; created_at: string }[]): Database {
+    const answers = [{ rows: [{ exists: true }] }, { rows }];
+    return {
+      execute: () => Promise.resolve(answers.shift()),
+    } as unknown as Database;
+  }
+  const file = (folderMillis: number, hash: string) => ({
+    sql: [],
+    bps: true,
+    folderMillis,
+    hash,
+  });
+  const journal = { entries: [] };
+
+  it("reads nothing recorded when the existence query returns no row", async () => {
+    const db = {
+      execute: () => Promise.resolve({ rows: [] }),
+    } as unknown as Database;
+
+    expect(await readRecordedMigrations(db)).toEqual([]);
+  });
+
+  it("rejects when only an edited migration is found", async () => {
+    vi.mocked(readMigrationFiles).mockReturnValueOnce([file(100, "h0")]);
+
+    await expect(
+      checkMigrations(stubDb([{ hash: "hX", created_at: "100" }]), journal),
+    ).rejects.toBeInstanceOf(MigrationMismatchError);
+  });
+
+  it("rejects when only a skipped migration is found", async () => {
+    vi.mocked(readMigrationFiles).mockReturnValueOnce([
+      file(100, "h0"),
+      file(200, "h1"),
+    ]);
+
+    await expect(
+      checkMigrations(stubDb([{ hash: "h1", created_at: "200" }]), journal),
+    ).rejects.toBeInstanceOf(MigrationMismatchError);
   });
 });
