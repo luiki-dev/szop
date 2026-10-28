@@ -38,11 +38,14 @@ The audit's main finding decides every habit below: **cost tracks how long a ses
 
 Every API call sends the model the whole conversation so far: the system prompt, CLAUDE.md, the skills' text, every message and every tool result. That is the call's **context**, counted in tokens. The **context of a call** in the audit and the script is its input tokens plus its cache write tokens plus its cache read tokens: everything the model read for that call.
 
-Re-sending the whole conversation on every call would be expensive, so the API keeps a **prompt cache**: the beginning of the context that was seen in an earlier call is stored for a while and read back at a tenth of the price of new input. Writing to the cache costs a quarter more than plain input. A call therefore pays:
+The API keeps no session between calls: Claude Code builds the whole request again each time and sends all of it, so a context of 200k is 200k tokens sent with every call. What costs is not sending the text but processing it: before the model writes its first word, it computes an internal state for every token of the input. Processing the whole conversation again on every call would be expensive, so the API keeps a **prompt cache**: the processed state of the beginning of the context, stored for a while after a call. When the next call comes, the API:
 
-- a cache read for everything up to the end of the previous call;
-- a cache write for what is new since then (the last tool result, the last message);
-- output for what the model writes, including its thinking.
+1. compares the beginning of its context with what is stored; the two must match exactly, byte for byte;
+2. reads the processed state of the matching part back from the cache, at a tenth of the price of new input: a **cache read**, for everything up to the end of the previous call;
+3. processes what is new since then (the last tool result, the last message) and stores it for the next call, at a quarter more than plain input: a **cache write**;
+4. writes the answer, including its thinking: **output**.
+
+Two things follow. The cache matches a beginning, it does not compute a difference: when something early in the context changes, nothing after that point matches any more, and all of it is written again. And a cache read is cheap, not free: every call pays a tenth for the whole matching part again, which is why a long session costs more than its length ([the next section](#why-a-long-session-costs-more-than-its-length)).
 
 On a subscription the cache entry lives one hour. A call that comes later than that finds nothing, and writes the whole context to the cache again ([Breaks and the cache](#breaks-and-the-cache)).
 
