@@ -22,6 +22,20 @@ export function testDatabaseSettings(name: string): DatabaseSettings {
   return { ...loadConfig(parseEnv(content)).database, name };
 }
 
+// The name of a test database: `szop_test_<suffix>`, with the suffix a worker
+// number or "template". Stryker runs several processes at once, each running
+// the whole suite, so each gets its own names (`szop_test_s<n>_<suffix>`) and
+// none drops another's databases. The names go into DROP DATABASE unquoted,
+// hence the digits check.
+export function testDatabaseName(suffix: string): string {
+  const stryker = process.env.STRYKER_MUTATOR_WORKER;
+  if (stryker === undefined) return `szop_test_${suffix}`;
+  if (!/^\d+$/.test(stryker)) {
+    throw new Error(`STRYKER_MUTATOR_WORKER must be digits, got "${stryker}"`);
+  }
+  return `szop_test_s${stryker}_${suffix}`;
+}
+
 // Empties every table of the app's schema in one round trip, reading the
 // list each time so it never goes stale. Drizzle's own table lives in the
 // drizzle schema and is left alone (ADR 0020; ADR 0007, decision 13).
@@ -47,7 +61,7 @@ export function useTestDatabase(): { readonly db: Database } {
     // The copy global-setup.ts made for this worker, numbered from 1.
     const worker = process.env.VITEST_POOL_ID;
     if (!worker) throw new Error("useTestDatabase runs only under Vitest");
-    db = createDatabase(testDatabaseSettings(`szop_test_${worker}`));
+    db = createDatabase(testDatabaseSettings(testDatabaseName(worker)));
   });
   // Before, not after: a test starts clean even if the previous one crashed.
   beforeEach(async () => {

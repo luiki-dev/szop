@@ -6,6 +6,7 @@ import { vi } from "vitest";
 // missing from the table does not match: a phone in the light scheme.
 export function stubMatchMedia(matches: Record<string, boolean> = {}): {
   set(query: string, matches: boolean): void;
+  listenerCount(query: string): number;
 } {
   const answers = new Map(Object.entries(matches));
   const listeners = new Map<
@@ -21,16 +22,18 @@ export function stubMatchMedia(matches: Record<string, boolean> = {}): {
       get matches() {
         return answers.get(query) ?? false;
       },
-      addEventListener(_type: "change", listener: () => void) {
-        queryListeners.add(listener);
+      // Only "change" is wired, so a listener for another event never fires.
+      addEventListener(type: string, listener: () => void) {
+        if (type === "change") queryListeners.add(listener);
       },
-      removeEventListener(_type: "change", listener: () => void) {
-        queryListeners.delete(listener);
+      removeEventListener(type: string, listener: () => void) {
+        if (type === "change") queryListeners.delete(listener);
       },
     } as unknown as MediaQueryList;
   });
 
   return {
+    listenerCount: (query) => listeners.get(query)?.size ?? 0,
     set(query, value) {
       answers.set(query, value);
       for (const listener of listeners.get(query) ?? []) {

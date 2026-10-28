@@ -47,6 +47,7 @@ export function CatalogPage() {
   const query = useCatalog();
   const catalog = query.data;
   const nodes = useMemo(
+    // Stryker disable next-line ArrayDeclaration: the tree is read only once the catalog has loaded
     () => (catalog ? buildCatalogTree(catalog) : []),
     [catalog],
   );
@@ -138,6 +139,7 @@ export function CatalogPage() {
                 aria-label="Clear search"
                 onClick={() => {
                   changeText("");
+                  // Stryker disable next-line OptionalChaining: the ref is set while the clear button, which is rendered with the input, exists
                   input.current?.focus();
                 }}
                 className="absolute top-1/2 right-0 flex size-12 -translate-y-1/2 items-center justify-center rounded-surface text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring"

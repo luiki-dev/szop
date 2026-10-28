@@ -60,6 +60,7 @@ function CategoryItem({
           onToggle(category.id);
         }}
         className={cn(
+          // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
           "flex w-full items-center gap-2 pr-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-inset",
           depth === 0 ? "min-h-14 rounded-surface" : "min-h-13 bg-muted",
           depth > 0 && "border-t border-border",
@@ -90,14 +91,13 @@ function CategoryItem({
       {isOpen && hasRows && (
         <ul id={panelId}>
           {node.products.map((product) => {
-            const unit =
-              product.unitId === null
-                ? undefined
-                : unitNames.get(product.unitId);
+            // Stryker disable next-line StringLiteral: no unit has an empty ID, so any other fallback finds no unit either
+            const unit = unitNames.get(product.unitId ?? "");
             return (
               <li
                 key={product.id}
                 className={cn(
+                  // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
                   "flex min-h-12 items-center gap-3 border-t border-border py-2 pr-4",
                   indentOf(depth + 1),
                 )}

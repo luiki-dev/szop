@@ -25,3 +25,7 @@ e2e/test-results/
 # Local configuration (copied from .env.example) and test coverage reports
 .env
 coverage/
+
+# Stryker's report (pnpm test:mutation) and its sandbox copies
+reports/
+.stryker-tmp/

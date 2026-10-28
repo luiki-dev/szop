@@ -1,3 +1,4 @@
+// Stryker disable all: wiring: builds the providers and the router, no logic a test should check
 import { CSPProvider } from "@base-ui/react/csp-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter } from "react-router";

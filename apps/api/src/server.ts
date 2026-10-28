@@ -1,3 +1,4 @@
+// Stryker disable all: entry point, checked by hand (testing.md, Rules): it only reads the environment, listens and shuts down
 import type { Catalog } from "@szop/shared";
 import { sql } from "drizzle-orm";
 import { buildApp } from "./app.ts";

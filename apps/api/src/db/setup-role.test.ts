@@ -65,6 +65,18 @@ describe("loadSetupConfig", () => {
     );
   });
 
+  it("lists every problem on a line of its own", () => {
+    expect(
+      errorFor({
+        ...valid,
+        APP_DATABASE_USER: undefined,
+        APP_DATABASE_PASSWORD: undefined,
+      }),
+    ).toBe(
+      "Invalid configuration:\n  APP_DATABASE_USER: missing\n  APP_DATABASE_PASSWORD: missing",
+    );
+  });
+
   it.each(["Szop-App", "a; DROP ROLE x", "1app", "", "a".repeat(64)])(
     "rejects APP_DATABASE_USER=%j",
     (name) => {
@@ -88,6 +100,7 @@ describe("loadSetupConfig", () => {
       const message = errorFor({ ...valid, APP_DATABASE_PASSWORD: password });
 
       expect(message).toMatch(/APP_DATABASE_PASSWORD: (?!missing)/);
+      expect(message).toContain("must be printable ASCII characters");
       expect(message).not.toContain(password);
     },
   );

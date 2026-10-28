@@ -171,6 +171,96 @@ describe("parseSeed", () => {
   });
 });
 
+describe("parseSeed messages and ids", () => {
+  const messageFor = (text: string): string => {
+    try {
+      parseSeed(text);
+    } catch (error) {
+      return (error as Error).message;
+    }
+    throw new Error("expected parseSeed to throw");
+  };
+
+  it.each([
+    [
+      "a file that is not a map",
+      "42",
+      "seed: Invalid input: expected object, received number",
+    ],
+    [
+      "a blank name",
+      'units: []\ncategories:\n  - name: "   "\n',
+      "categories › #1 › name: Too small: expected string to have >=1 characters",
+    ],
+    [
+      "an entry that is null",
+      "units: [pcs]\ncategories: [null]\n",
+      "categories › #1: Invalid input: expected object, received null",
+    ],
+    [
+      "a bad name in a subcategory",
+      "units: []\ncategories:\n  - name: A\n    subcategories:\n      - name: 7\n",
+      "categories › A › #1 › name: Invalid input: expected string, received number",
+    ],
+    [
+      "an unknown key, the entry shown trimmed",
+      'units: []\ncategories:\n  - name: "  Dairy "\n    colour: red\n',
+      'categories › Dairy: Unrecognized key: "colour" ("colour")',
+    ],
+    [
+      "two unknown keys",
+      "units: []\ncategories:\n  - name: A\n    colour: red\n    shade: x\n",
+      'categories › A: Unrecognized keys: "colour", "shade" ("colour", "shade")',
+    ],
+    [
+      "a missing key",
+      "units: []\n",
+      "categories: Invalid input: expected array, received undefined",
+    ],
+  ])("names the entry and the rule for %s", (_label, text, message) => {
+    expect(messageFor(text)).toBe(message);
+  });
+
+  it("starts the path of a limit error at the list or the categories", () => {
+    expect(messageFor("units: [a, a]\ncategories: []\n")).toBe(
+      'units: the name "a" is used twice',
+    );
+    expect(
+      messageFor("units: []\ncategories: [{ name: A }, { name: a }]\n"),
+    ).toBe('categories › a: the name "a" is used twice');
+    expect(
+      messageFor(
+        `units: [${Array.from({ length: seedLimits.units + 1 }, (_, i) => `u${String(i)}`).join(", ")}]\ncategories: []`,
+      ),
+    ).toBe("units: more than 50 units");
+  });
+
+  it("accepts exactly the limit of units", () => {
+    const units = Array.from(
+      { length: seedLimits.units },
+      (_, i) => `u${String(i)}`,
+    );
+    expect(
+      parseSeed(`units: [${units.join(", ")}]\ncategories: []`).units,
+    ).toHaveLength(seedLimits.units);
+  });
+
+  it("numbers units, categories and products from 1", () => {
+    const catalog = parseSeed(valid);
+    expect(catalog.units.map((u) => u.id).slice(0, 2)).toEqual(["u1", "u2"]);
+    expect(catalog.categories.map((c) => c.id).slice(0, 2)).toEqual([
+      "c1",
+      "c2",
+    ]);
+    expect(catalog.products.map((p) => p.id).slice(0, 2)).toEqual(["p1", "p2"]);
+  });
+
+  it("compares names in lower case, so names that differ only in upper case are different", () => {
+    // "ß" and "SS" are the same in upper case and different in lower case.
+    expect(() => parseSeed("units: [ß, SS]\ncategories: []\n")).not.toThrow();
+  });
+});
+
 describe("the real seed file", () => {
   const catalog = loadSeed();
 

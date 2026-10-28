@@ -42,6 +42,7 @@ function entryPath(raw: unknown, path: PropertyKey[]): string {
   const parts: string[] = [];
   let node: unknown = raw;
   for (const key of path) {
+    // Stryker disable next-line OptionalChaining: the path comes from a validation issue, so every step of it exists in the raw document
     node = (node as Record<PropertyKey, unknown> | undefined)?.[key];
     if (typeof key === "number") {
       const entryName = (node as { name?: unknown } | undefined)?.name;
@@ -59,23 +60,32 @@ function entryPath(raw: unknown, path: PropertyKey[]): string {
 
 // Throws an Error naming the entry and the rule that the seed breaks.
 export function parseSeed(text: string): Catalog {
+  // Stryker disable next-line ObjectLiteral: the options only state the YAML library's defaults (version 1.2, unique keys)
   const doc = parseDocument(text, { version: "1.2", uniqueKeys: true });
   // The message of a YAML error carries its line and column.
-  if (doc.errors.length > 0)
-    throw new Error(doc.errors[0]?.message ?? "invalid YAML");
+  if (doc.errors.length > 0) {
+    const yamlError = doc.errors[0];
+    // Stryker disable next-line OptionalChaining: `errors[0]` exists, the length is checked above, so `yamlError` is defined
+    // Stryker disable next-line StringLiteral: `errors[0]` exists, the length is checked above, so the fallback is unreachable
+    throw new Error(yamlError?.message ?? "invalid YAML");
+  }
 
   const raw: unknown = doc.toJS();
   const parsed = seedSchema.safeParse(raw);
   if (!parsed.success) {
     const [issue] = parsed.error.issues;
+    // Stryker disable next-line OptionalChaining: a failed parse has at least one issue, so `issue` is defined
+    // Stryker disable next-line ArrayDeclaration: a failed parse has at least one issue, so the fallback is unreachable
     const where = entryPath(raw, issue?.path ?? []);
     const extra =
+      // Stryker disable next-line OptionalChaining: a failed parse has at least one issue, so `issue` is defined
       issue?.code === "unrecognized_keys"
         ? ` (${issue.keys.map((k) => `"${k}"`).join(", ")})`
         : "";
-    throw new Error(
-      `${where || "seed"}: ${issue?.message ?? "invalid seed"}${extra}`,
-    );
+    // Stryker disable next-line OptionalChaining: a failed parse has at least one issue, so `issue` is defined
+    // Stryker disable next-line StringLiteral: a failed parse has at least one issue, so the fallback is unreachable
+    const message = issue?.message ?? "invalid seed";
+    throw new Error(`${where || "seed"}: ${message}${extra}`);
   }
   const seed = parsed.data;
 

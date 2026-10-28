@@ -1,3 +1,4 @@
+// Stryker disable all: the colour-role table: class names and labels, no logic
 // The color roles of index.css that /design shows, one swatch each, with the
 // text role that goes on it where there is one. The class names are written
 // out in full, so Tailwind finds them in the source. A new role is added

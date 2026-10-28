@@ -15,7 +15,6 @@ export function findMatch(
   query: string,
 ): [start: number, end: number] | null {
   const needle = foldForSearch(query.trim());
-  if (needle === "") return null;
 
   let folded = "";
   const starts: number[] = [];
@@ -32,7 +31,8 @@ export function findMatch(
   }
 
   const at = folded.indexOf(needle);
-  if (at === -1) return null;
+  // An empty needle or no match has no start or end, which the check below
+  // turns into null.
   const start = starts[at];
   const end = ends[at + needle.length - 1];
   return start === undefined || end === undefined ? null : [start, end];

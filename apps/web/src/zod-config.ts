@@ -1,3 +1,4 @@
+// Stryker disable all: one configuration line, which the E2E CSP guard checks
 import { z } from "zod";
 
 // Turns off zod's compiled fast path in the browser. Without it, zod probes

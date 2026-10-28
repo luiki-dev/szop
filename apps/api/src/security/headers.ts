@@ -20,15 +20,19 @@ async function securityHeaders(app: FastifyInstance): Promise<void> {
         frameAncestors: ["'none'"],
       },
     },
+    // Stryker disable next-line ObjectLiteral: helmet's default Strict-Transport-Security is the same header; the options only state it
     strictTransportSecurity: {
       maxAge: 31536000,
       includeSubDomains: true,
       preload: false,
     },
+    // Stryker disable next-line ObjectLiteral: helmet's default Referrer-Policy is the same header; the option only states it
     referrerPolicy: { policy: "no-referrer" },
   });
 }
 
 // fastify-plugin turns off encapsulation, so the headers reach every route,
 // the SPA's files and the not-found handler included.
+// Stryker disable next-line ObjectLiteral: the plugin name only labels the plugin in Fastify's errors and logs
+// Stryker disable next-line StringLiteral: the plugin name only labels the plugin in Fastify's errors and logs
 export const headers = fp(securityHeaders, { name: "szop-security-headers" });

@@ -7,7 +7,9 @@ const port = z.coerce.number().int().min(1).max(65535);
 // An IPv4 or IPv6 address, optionally with a CIDR prefix length. A /0 prefix
 // is every address, "trust everything", so it is refused.
 function isAddressOrRange(entry: string): boolean {
-  const [address = "", prefix, ...rest] = entry.split("/");
+  const parts = entry.split("/");
+  // Stryker disable next-line StringLiteral: `split` always returns one element, so the default is unreachable
+  const [address = "", prefix, ...rest] = parts;
   const version = isIP(address);
   if (version === 0 || rest.length > 0) return false;
   if (prefix === undefined) return true;

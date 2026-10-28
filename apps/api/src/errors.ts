@@ -16,9 +16,11 @@ export function sendError(
 
 // "Unsupported Media Type" -> "unsupported_media_type".
 function codeFor(status: number): string {
+  // Stryker disable next-line Regex: no status name has two adjacent non-alphanumeric characters, so `+` changes nothing
+  const separators = /[^a-z0-9]+/g;
   return (STATUS_CODES[status] ?? "error")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_");
+    .replace(separators, "_");
 }
 
 // Every error a route, hook or Fastify itself raises ends here. A client
@@ -32,8 +34,9 @@ export function errorHandler(
   if (hasZodFastifySchemaValidationErrors(error)) {
     return sendError(reply, 400, "invalid_input", error.message);
   }
-  const status = error.statusCode;
-  if (status !== undefined && status >= 400 && status < 500) {
+  // No status counts as a server error.
+  const status = error.statusCode ?? 500;
+  if (status >= 400 && status < 500) {
     return sendError(reply, status, codeFor(status), error.message);
   }
   request.log.error(error, "request failed");

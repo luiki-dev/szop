@@ -9,7 +9,8 @@ export default defineConfig(
   // Docs hold no code; .superpowers/ holds the brainstorm companion's
   // untracked files; coverage/ holds Vitest's generated report; dist/ holds
   // the web app's build; e2e/playwright-report/ and e2e/test-results/ hold
-  // Playwright's output.
+  // Playwright's output; reports/ and .stryker-tmp/ hold Stryker's report and
+  // sandbox copies.
   globalIgnores([
     "docs/",
     ".superpowers/",
@@ -17,6 +18,8 @@ export default defineConfig(
     "**/dist/",
     "e2e/playwright-report/",
     "e2e/test-results/",
+    "reports/",
+    ".stryker-tmp/",
   ]),
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,

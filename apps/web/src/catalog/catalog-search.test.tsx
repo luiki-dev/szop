@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse, type JsonBodyType } from "msw";
 import { createMemoryRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { describe, expect, it } from "vitest";
@@ -9,15 +9,18 @@ import { routes } from "../routes.tsx";
 import { smallCatalog } from "../test/catalog.ts";
 import { server } from "../test/server.ts";
 
-async function renderCatalog() {
-  server.use(http.get("/api/catalog", () => HttpResponse.json(smallCatalog)));
+async function renderCatalog(
+  body: JsonBodyType = smallCatalog,
+  first = "Bakery",
+) {
+  server.use(http.get("/api/catalog", () => HttpResponse.json(body)));
   const router = createMemoryRouter(routes, { initialEntries: ["/catalog"] });
   render(
     <QueryClientProvider client={new QueryClient()}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
-  await screen.findByRole("button", { name: /^Bakery/ });
+  await screen.findByRole("button", { name: new RegExp(`^${first}`) });
   return userEvent.setup();
 }
 
@@ -166,6 +169,69 @@ describe("Catalog search", () => {
 
     expect(screen.getByText('No products match "xyz"')).toBeInTheDocument();
     expect(screen.getByText("0 products")).toBeInTheDocument();
+  });
+
+  it("PRD-2.12: names the query without the spaces around it", async () => {
+    const user = await renderCatalog();
+
+    await user.type(field(), "  xyz  ");
+
+    expect(screen.getByText('No products match "xyz"')).toBeInTheDocument();
+  });
+
+  it("PRD-2.7: shows only the matches in a matching category whose products and subcategories both match", async () => {
+    const user = await renderCatalog(
+      {
+        ...smallCatalog,
+        categories: [
+          { id: "c1", parentId: null, position: 0, name: "Milk" },
+          { id: "c2", parentId: "c1", position: 0, name: "Milk powder" },
+        ],
+        products: [
+          { id: "p1", name: "Milk drink", categoryId: "c1", unitId: null },
+          { id: "p2", name: "Eggs", categoryId: "c1", unitId: null },
+        ],
+      },
+      "Milk",
+    );
+
+    await user.type(field(), "milk");
+
+    expect(row("Milk drink")).toBeInTheDocument();
+    expect(screen.queryByText("Eggs")).not.toBeInTheDocument();
+    expect(category("Milk powder")).toBeInTheDocument();
+  });
+
+  it("clears the search with Esc, and leaves Esc alone when the field is empty", async () => {
+    const user = await renderCatalog();
+
+    expect(fireEvent.keyDown(field(), { key: "Escape" })).toBe(true);
+    await user.type(field(), "oat");
+    expect(fireEvent.keyDown(field(), { key: "Escape" })).toBe(false);
+
+    expect(field()).toHaveValue("");
+  });
+
+  it("puts the focus back in the field after Clear search", async () => {
+    const user = await renderCatalog();
+    await user.type(field(), "oat");
+    await user.click(screen.getByRole("button", { name: "Clear search" }));
+
+    expect(field()).toHaveValue("");
+    expect(field()).toHaveFocus();
+  });
+
+  it("uses the singular for one category and one product", async () => {
+    await renderCatalog(
+      {
+        ...smallCatalog,
+        categories: [{ id: "c1", parentId: null, position: 0, name: "Only" }],
+        products: [{ id: "p1", name: "One", categoryId: "c1", unitId: null }],
+      },
+      "Only",
+    );
+
+    expect(screen.getByText("1 category · 1 product")).toBeInTheDocument();
   });
 
   it("shows the normal tree for a query of only spaces", async () => {

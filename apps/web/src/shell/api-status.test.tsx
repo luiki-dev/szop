@@ -19,6 +19,9 @@ function renderStatus() {
   return { queryClient };
 }
 
+// The decoration before a line's words: green when up, red when down.
+const dot = (words: string) => screen.getByText(words).firstElementChild;
+
 describe("APP-1.4: ApiStatus", () => {
   it("shows the schema version once the API and the database answer", async () => {
     renderStatus();
@@ -26,6 +29,8 @@ describe("APP-1.4: ApiStatus", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Checking the API…");
     expect(await screen.findByText("API: ok")).toBeInTheDocument();
     expect(screen.getByText("Database: up")).toBeInTheDocument();
+    expect(dot("API: ok")).toHaveClass("bg-primary");
+    expect(dot("Database: up")).toHaveClass("bg-primary");
     expect(
       screen.getByText(`Schema version: ${healthyBody.database.schemaVersion}`),
     ).toBeInTheDocument();
@@ -48,6 +53,8 @@ describe("APP-1.4: ApiStatus", () => {
 
     expect(await screen.findByText("API: reachable")).toBeInTheDocument();
     expect(screen.getByText("Database: down")).toBeInTheDocument();
+    expect(dot("API: reachable")).toHaveClass("bg-primary");
+    expect(dot("Database: down")).toHaveClass("bg-destructive");
   });
 
   it("says it cannot reach the API when the request fails", async () => {
@@ -56,6 +63,7 @@ describe("APP-1.4: ApiStatus", () => {
     renderStatus();
 
     expect(await screen.findByText("Can't reach the API")).toBeInTheDocument();
+    expect(dot("Can't reach the API")).toHaveClass("bg-destructive");
   });
 
   it.each([
