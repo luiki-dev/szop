@@ -98,7 +98,7 @@ Dependencies (database client, email sender, clock) are passed in explicitly whe
 
 **Web security.** `security/` holds the web baseline's four concerns, one file each, with its test beside it: `headers.ts` (the security headers, through `@fastify/helmet`), `cross-site.ts` (the check that unsafe requests come from the app), `json-only.ts` (bodies kept to JSON) and `log.ts` (the request log's serializer, which hides query values). `buildApp` registers the first three before any route, each wrapped with `fastify-plugin` so that it reaches every route, the SPA's files and the not-found handler included; `AppDeps` also takes an optional `logStream`, which tests pass to read the log back ([ADR 0025](../decisions/0025-web-security-baseline-details.md), decisions 8 and 9).
 
-**As built in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only)** ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md)): `src/catalog/` holds the first feature module, without a service or a repository, since it only reads a file: `seed.ts` parses and checks the seed (`parseSeed`, `loadSeed`), `routes.ts` serves `GET /api/catalog`. `src/errors.ts` holds the error handler and the not-found handler ([Errors](#errors)). `buildApp` sets the validator and serializer compilers of `fastify-type-provider-zod` once, so every route that declares a schema is validated and serialized through the shared Zod schemas; a route returns its body and Fastify refuses to send one that does not match, as a 500.
+**As built in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only)** ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md)): `src/catalog/` holds the first feature module, without a service or a repository, since it only reads a file: `seed.ts` parses and checks the seed (`parseSeed`, `loadSeed`), `routes.ts` serves `GET /api/catalog`. `src/errors.ts` holds the error handler (`setErrorHandler`) and `sendError`, which the not-found handler in `src/web/routes.ts` calls too ([Errors](#errors)). `buildApp` sets the validator and serializer compilers of `fastify-type-provider-zod` once, so every route that declares a schema is validated and serialized through the shared Zod schemas; a route returns its body and Fastify refuses to send one that does not match, as a 500.
 
 ### Request lifecycle
 
@@ -180,7 +180,7 @@ The application's baseline, production grade even on the demo ([ADR 0012](../dec
 
 ### Errors
 
-One JSON error shape: `{ "error": { "code": "...", "message": "..." } }`. Since [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) every error ends in one place ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 7): `setErrorHandler` for what a route, a hook or Fastify raises, and a not-found handler for paths under `/api/` (`src/errors.ts`); the cross-site check and the JSON-only check answer in the same shape. The shared `apiErrorSchema` describes the body.
+One JSON error shape: `{ "error": { "code": "...", "message": "..." } }`. Since [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) every error ends in one place ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 7): `setErrorHandler` for what a route, a hook or Fastify raises, and a not-found handler for paths under `/api/` (`setNotFoundHandler` in `src/web/routes.ts`, answering through `sendError` from `src/errors.ts`); the cross-site check and the JSON-only check answer in the same shape. The shared `apiErrorSchema` describes the body.
 
 | Code | Status | When |
 |---|---|---|

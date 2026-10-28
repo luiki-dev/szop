@@ -250,8 +250,9 @@ test("APP-1.10: a page opened from the menu starts at the top; Back returns to w
   await expect.poll(scrollY).toBe(0);
 
   // Back returns. Browsers also restore the position natively on Back, so
-  // this half guards the behavior, not the component. The design page is the one whose height does not depend on
-  // data or on what was opened, so its position can be restored.
+  // this half guards the behavior, not the component. The design page is the
+  // one whose height does not depend on data or on what was opened, so its
+  // position can be restored.
   const scrolled = await scrollToBottom();
   await page.getByRole("link", { name: "Catalog" }).click();
   await expect(heading("Catalog")).toBeVisible();

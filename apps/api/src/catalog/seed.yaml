@@ -1,8 +1,9 @@
 # Szop's default catalog: the categories, products and units every
 # workspace starts with (ACC-1). Categories are shown in this file's
 # order, the store's order; products are shown alphabetically.
-# The E2E test relies on "Dairy & eggs" and "Oat milk": rename them
-# together with e2e/tests/catalog.spec.ts.
+# The E2E test relies on "Dairy & eggs", its subcategory "Milk",
+# "Buttermilk" and "Oat milk": rename them together with
+# e2e/tests/catalog.spec.ts.
 units: [pcs, kg, g, l, ml, pack]
 
 categories:

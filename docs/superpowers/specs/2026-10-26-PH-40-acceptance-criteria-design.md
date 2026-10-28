@@ -34,11 +34,11 @@ The requirements document is split: an index with the status of every requiremen
 
 ## Why now
 
-The MVP's feature phases start with PH-15a ([#287](https://github.com/luiki-dev/szop/issues/287)), split from [PH-15](../../roadmap.md#ph-15-seed-catalog-read-only) on its own branch. The owner wants the full picture of every requirement before further work, because the criteria may change the shape of later phases ([the roadmap task](#order-of-work)). PH-15a waits on its branch, blocked by this phase ([#287](https://github.com/luiki-dev/szop/issues/287)), and finalizes its own criteria when it resumes.
+The MVP's feature phases start with PH-15a ([#287](https://github.com/luiki-dev/szop/issues/287)), split from [PH-15](../../roadmap.md#ph-15a-seed-catalog-read-only) on its own branch. The owner wants the full picture of every requirement before further work, because the criteria may change the shape of later phases ([the roadmap task](#order-of-work)). PH-15a waits on its branch, blocked by this phase ([#287](https://github.com/luiki-dev/szop/issues/287)), and finalizes its own criteria when it resumes.
 
 ## Changes to the roadmap
 
-- **PH-40 is added** before [PH-15](../../roadmap.md#ph-15-seed-catalog-read-only) in Stage 4, with its issue [#289](https://github.com/luiki-dev/szop/issues/289) (Order 165). Already done on GitHub and in `roadmap.md`.
+- **PH-40 is added** before [PH-15](../../roadmap.md#ph-15a-seed-catalog-read-only) in Stage 4, with its issue [#289](https://github.com/luiki-dev/szop/issues/289) (Order 165). Already done on GitHub and in `roadmap.md`.
 - **PH-15a ([#287](https://github.com/luiki-dev/szop/issues/287)) is ⏳ Blocked by #289** on GitHub. Its split from PH-15 lives on its own branch and reaches `main` with it.
 - **The phases after this one may change** when the criteria show a phase is too big, misses a requirement or needs another order, and a phase for missing tests may be added ([decision 12](#decisions)). The last task collects these findings ([order of work](#order-of-work), task 8).
 

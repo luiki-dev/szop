@@ -10,7 +10,7 @@ describe("compareNames", () => {
     ]);
   });
 
-  it("ignores case", () => {
+  it("keeps case variants next to each other", () => {
     // The collator's default sensitivity ("variant") puts "milk" and "Milk"
     // next to each other, before "Mint", without calling them equal; that is
     // enough for an order and keeps the sort deterministic.

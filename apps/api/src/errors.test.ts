@@ -27,6 +27,11 @@ describe("the error shape", () => {
     app.get("/api/test-boom", () => {
       throw new Error("secret detail");
     });
+    app.get("/api/test-unavailable", () => {
+      throw Object.assign(new Error("secret outage detail"), {
+        statusCode: 503,
+      });
+    });
     app.get("/api/test-conflict", () => {
       throw Object.assign(new Error("Name taken"), { statusCode: 409 });
     });
@@ -50,6 +55,23 @@ describe("the error shape", () => {
     expect(response.body).not.toContain("secret detail");
     const logged = log.lines().find((line) => line.level === 50);
     expect(logged).toMatchObject({ err: { message: "secret detail" } });
+  });
+
+  it("NFR-4.11: answers an error with a 5xx status other than 500 as the same generic 500", async () => {
+    const log = start();
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/test-unavailable",
+    });
+
+    expect(response.statusCode).toBe(500);
+    expect(apiErrorSchema.parse(response.json())).toEqual({
+      error: { code: "internal_error", message: "Internal server error" },
+    });
+    expect(response.body).not.toContain("secret outage detail");
+    const logged = log.lines().find((line) => line.level === 50);
+    expect(logged).toMatchObject({ err: { message: "secret outage detail" } });
   });
 
   it("keeps the status and message of a client error, with a code from the status", async () => {

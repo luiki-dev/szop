@@ -314,7 +314,7 @@ test("the shell shows the menu, the API's status and the pages", async ({
 - **Find elements as a user does,** by role and text, as with Testing Library (`page.getByRole("status")`, `page.getByText(…)`), never by test ID or CSS class. Playwright's `expect(locator)` waits and retries until the condition holds or a timeout passes, so no journey sleeps or polls by hand.
 - **Edge cases stay in lower layers.** A journey follows the main path of its use case; an ordering rule, a permission check or a validation message is proven by a unit, API or component test.
 
-The catalog's journey, `e2e/tests/catalog.spec.ts`, is a second pattern: it reads the real `seed.yaml`, so it names "Dairy & eggs" and "Oat milk" (the seed's header comment says to rename them together), opens a category, searches, clears the search and runs axe with a category open. It shows a check that depends on the viewport: on a phone the buttons "Expand all" and "Collapse all" show only an icon, so the test looks at the visibility of the label, not at the button's text (`toHaveText` reads hidden text too).
+The catalog's journey, `e2e/tests/catalog.spec.ts`, is a second pattern: it reads the real `seed.yaml`, so it names "Dairy & eggs", its subcategory "Milk", "Buttermilk" and "Oat milk" (the seed's header comment says to rename them together), opens a category, searches, clears the search and runs axe with a category open. It shows a check that depends on the viewport: on a phone the buttons "Expand all" and "Collapse all" show only an icon, so the test looks at the visibility of the label, not at the button's text (`toHaveText` reads hidden text too).
 
 ### The CSP guard
 

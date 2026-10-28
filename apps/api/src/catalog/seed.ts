@@ -154,7 +154,12 @@ export function parseSeed(text: string): Catalog {
 }
 
 export function loadSeed(): Catalog {
-  return parseSeed(
-    readFileSync(new URL("./seed.yaml", import.meta.url), "utf8"),
-  );
+  try {
+    return parseSeed(
+      readFileSync(new URL("./seed.yaml", import.meta.url), "utf8"),
+    );
+  } catch (error) {
+    // server.ts prints this message for any startup failure, so name the file.
+    throw new Error(`seed.yaml: ${(error as Error).message}`, { cause: error });
+  }
 }
