@@ -250,18 +250,18 @@ The work is too large for one implementer: Task 5 is dispatched in groups (API t
 **Interfaces:**
 - Consumes: Task 4's list with the owner's decisions; Task 3's rules.
 
-- [ ] **Step 1: Kill.** For each "kill": write or tighten the named test, run `pnpm test:mutation --mutate <file>` and see the mutant killed. A test for an acceptance criterion keeps its ID prefix.
+- [x] **Step 1: Kill.** For each "kill": write or tighten the named test, run `pnpm test:mutation --mutate <file>` and see the mutant killed. A test for an acceptance criterion keeps its ID prefix.
 
-- [ ] **Step 2: Accept and opt out.** Add each `// Stryker disable next-line <Mutator>: <reason>` above its line and each `// Stryker disable all: <reason>` as its file's first line, with the reasons the owner approved.
+- [x] **Step 2: Accept and opt out.** Add each `// Stryker disable next-line <Mutator>: <reason>` above its line and each `// Stryker disable all: <reason>` as its file's first line, with the reasons the owner approved.
 
-- [ ] **Step 3: Open points.** For each "open point": a new `open-point` issue with the next free `OP-` ID ([how to find it](../../development/project-tracking.md#checking-with-gh)), a sub-issue of the phase that will settle it (none for a candidate), with the file, line and mutant in its body.
+- [x] **Step 3: Open points.** For each "open point": a new `open-point` issue with the next free `OP-` ID ([how to find it](../../development/project-tracking.md#checking-with-gh)), a sub-issue of the phase that will settle it (none for a candidate), with the file, line and mutant in its body.
 
 - [ ] **Step 4: The last run**
 
 Run: `time pnpm test:mutation`
 Expected: no survivor or "no coverage" mutant without a decision (a survivor recorded as an open point is still listed; check each against the issues). Record the score and the time for the PR description.
 
-- [ ] **Step 5: Run the checks**
+- [x] **Step 5: Run the checks**
 
 Run: `pnpm check`
 Expected: PASS.

@@ -405,6 +405,7 @@ Mutation testing judges the tests, not the code: a **mutant** is a small change 
 - **A survivor is dealt with in one of three ways:**
   - *Kill it:* write or tighten a test until the mutant fails it. This is the default.
   - *Accept it:* when the mutant is equivalent (no test could tell it apart from the code), put `// Stryker disable next-line <Mutator>: <reason>` above the line. Name one mutator, cover one line and give the reason. Never `all`: a comment that hides only one mutator cannot hide a new, real survivor on the same line later.
+  - *Tailwind class names:* jsdom applies no CSS, so a mutant of a class-name string is equivalent for every test. It is accepted line by line with `// Stryker disable next-line StringLiteral: <reason>` (the same rule, one mutator on one line), never for a whole file: strings that carry behaviour (the document title, a message, a label) stay mutated and tested ([ADR 0055](../decisions/0055-mutation-testing-phase-details.md), "Settled while building").
   - *Record it as an open point:* when the fix is larger than a small test change.
 - **The PR states the score and what was done;** the reasons live in the code, so the next run shows only new survivors.
 

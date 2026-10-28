@@ -43,7 +43,7 @@ Stryker runs several processes at once, and each runs the API's test setup. `tes
 
 ## Reading the report
 
-The terminal table lists each file with its score and the counts: **killed**, **timeout** (the mutant made the code loop; counted as killed), **survived**, **no cov** (no test reaches it) and **errors**. Open `reports/mutation/mutation.html` in a browser: it shows each file's source with every mutant on its line, the change it made, and the tests that ran against it. A survivor is either a missing check (write the test) or an **equivalent mutant**, a change that cannot alter the behavior (accept it with a comment).
+The terminal table lists each file with its score and the counts: **killed**, **timeout** (the mutant made the code loop; counted as killed), **survived**, **no cov** (no test reaches it) and **errors**. Open `reports/mutation/mutation.html` in a browser: it shows each file's source with every mutant on its line, the change it made, and the tests that ran against it. A survivor is either a missing check (write the test) or an **equivalent mutant**, a change that cannot alter the behavior (accept it with a comment). A `next-line` comment works on the syntax node that follows it, so it must sit directly above a statement or a property; inside a method chain, or before a `catch`, it is not picked up, and the code is arranged so it can be (a constant, or a `disable` and `restore` pair).
 
 ## A long run
 
