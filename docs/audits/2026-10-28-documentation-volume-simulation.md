@@ -24,7 +24,7 @@ The [first audit](2026-10-28-documentation-volume.md) found what a phase writes 
 
 ## Edits no longer made
 
-- **The phase issue's body sync:** 4 for PH-15a (3 during its PR), from the issue's edit history.
+- **The phase issue's body sync:** 4 for PH-15a (3 during the phase), from the issue's edit history.
 - **The third place of an ADR note:** 3, the status lines of ADR 0014, 0022 and 0051 that ADR 0050 changed.
 - **Repo-wide rules in the plan's Global Constraints:** 5 bullets and about 180 words, now in `plans/CLAUDE.md`.
 
