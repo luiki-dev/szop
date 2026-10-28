@@ -168,7 +168,7 @@ Roadmap entry: [PH-NN Name](https://github.com/luiki-dev/szop/blob/main/docs/roa
 <the Also section, or —>
 ```
 
-- [ ] **Step 1: Update `docs/development/project-tracking.md`**
+- [x] **Step 1: Update `docs/development/project-tracking.md`**
 
 Following spec, [Project tracking](../specs/2026-10-28-leaner-documentation-design.md#project-tracking):
 - **Phase issue body** (line 63 and the table at line 33): the body above; the copy and the rule that it is updated when the PR opens go. Owner steps stay sub-issues; "Depends on" stays a "Blocked by" link. Say that the bodies were rewritten once by ADR 0054.
@@ -178,7 +178,7 @@ Following spec, [Project tracking](../specs/2026-10-28-leaner-documentation-desi
 - **Open-point issues** (line 67): **Source** names the phase, and for a deferred review finding, the review.
 - The criteria's statuses: no change.
 
-- [ ] **Step 2: Update `CLAUDE.md`**
+- [x] **Step 2: Update `CLAUDE.md`**
 
 Following spec, [CLAUDE.md](../specs/2026-10-28-leaner-documentation-design.md#claudemd), each bullet in the section it names:
 - **Project purpose,** the ADR 0004 line: a phase's ADR is created with its spec, with a link to `docs/superpowers/specs/CLAUDE.md`.
@@ -189,12 +189,12 @@ Following spec, [CLAUDE.md](../specs/2026-10-28-leaner-documentation-design.md#c
 - **Documentation, `docs/decisions/`:** notes go in two places, the new ADR's header and the decision's cell; the earlier ADR's status line only when the whole ADR is superseded or deprecated.
 - **Documentation:** add `docs/superpowers/specs/CLAUDE.md` and `docs/superpowers/plans/CLAUDE.md` where the list fits, one line each.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `grep -n -E "a copy|lists the issue changes|every issue change|three places|status line, and" CLAUDE.md docs/development/project-tracking.md`
 Expected: no match that states the old rule (a match that describes history, such as "was a copy until ADR 0054", is fine). `## Contents` of `project-tracking.md` matches its headings.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add docs/development/project-tracking.md CLAUDE.md docs/superpowers/plans/2026-10-28-leaner-documentation.md
