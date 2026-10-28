@@ -121,7 +121,7 @@ describe("CatalogPage", () => {
     expect(category("Dairy & eggs")).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("PRD-2.11: announces the number of matches in a status region", async () => {
+  it("announces the number of matches in a status region", async () => {
     serveCatalog();
     renderApp();
     await screen.findByRole("button", { name: /^Dairy/ });

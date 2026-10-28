@@ -16,7 +16,7 @@ fast-check is a library for **property-based testing**: instead of a few hand-pi
 
 ## Reading a counterexample
 
-When a property fails, fast-check **shrinks** the input: it tries smaller and simpler inputs that still fail, until none does, so the failure is small enough to read. For `orderCategories` with its position tie-break removed on purpose (siblings sorted by name only), the output was:
+When a property fails, fast-check **shrinks** the input: it tries smaller and simpler inputs that still fail, until none does, so the failure is small enough to read. For `orderCategories` with its position tie-break removed on purpose (siblings sorted by name only), the output looked like this (the counterexample is rebuilt by hand, so its `seed` and `path` do not replay it):
 
 ```text
 Error: Property failed after 1 tests
@@ -25,9 +25,9 @@ Counterexample: [[{"id":"c0","parentId":null,"position":0,"name":"name 0"},{"id"
 Shrunk 23 time(s)
 ```
 
-- **`Counterexample`** is the input, one entry per argument of the property. Here `c5` has `position` 4 and so must come after `c4`, `c1` and `c3`, but sorting by name put it earlier (the order "name 4", "name 5", "name 6", "name 7" is `c4`, `c5`, `c3`, `c1`). The counterexample is illustrative: it is rebuilt in full from the original run, which was cut short with "…", so the `seed` and `path` below will not replay exactly this array.
+- **`Counterexample`** is the input, one entry per argument of the property. Here `c5` has `position` 4 and so must come after `c4`, `c1` and `c3`, but sorting by name put it earlier (the order "name 4", "name 5", "name 6", "name 7" is `c4`, `c5`, `c3`, `c1`).
 - **`Shrunk 23 time(s)`** says it started from a larger input and reduced it 23 times.
-- **`seed` and `path`** replay exactly this failure. Pass them to the failing `fc.assert`, run the test, fix the code, and remove them again:
+- **`seed` and `path`** replay a failure exactly, from a real run's output. Pass them to the failing `fc.assert`, run the test, fix the code, and remove them again:
 
 ```ts
 fc.assert(fc.property(forest, (xs) => { … }), {
