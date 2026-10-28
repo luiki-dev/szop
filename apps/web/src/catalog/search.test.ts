@@ -21,6 +21,19 @@ describe("findMatch", () => {
     expect(findMatch("Oat milk", "milk")).toEqual([4, 8]);
   });
 
+  it("ignores spaces around the query", () => {
+    expect(findMatch("Oat milk", "  milk ")).toEqual([4, 8]);
+  });
+
+  it("finds a match that starts at index 1", () => {
+    expect(findMatch("Oat milk", "at")).toEqual([1, 3]);
+  });
+
+  it("returns null for a blank query", () => {
+    expect(findMatch("Oat milk", "")).toBeNull();
+    expect(findMatch("Oat milk", "   ")).toBeNull();
+  });
+
   it("returns null when nothing matches", () => {
     expect(findMatch("Oat milk", "cheese")).toBeNull();
   });

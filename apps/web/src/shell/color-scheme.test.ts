@@ -140,3 +140,29 @@ describe("followSystemColorScheme", () => {
     expect(html).not.toHaveClass("dark");
   });
 });
+
+describe("the constants", () => {
+  it("keep the choice under szop-color-scheme, which public/color-scheme.js also reads", () => {
+    storeColorScheme("dark");
+
+    expect(localStorage.getItem("szop-color-scheme")).toBe("dark");
+  });
+
+  it("ask the system for prefers-color-scheme: dark", () => {
+    stubMatchMedia({ "(prefers-color-scheme: dark)": true });
+
+    applyColorScheme("system");
+
+    expect(html).toHaveClass("dark");
+  });
+
+  it("stops listening to the system once stopped", () => {
+    const media = stubMatchMedia();
+    const stop = followSystemColorScheme();
+    expect(media.listenerCount(darkQuery)).toBe(1);
+
+    stop();
+
+    expect(media.listenerCount(darkQuery)).toBe(0);
+  });
+});

@@ -6,9 +6,10 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { createMemoryRouter } from "react-router";
+import { createMemoryRouter, type RouteObject } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { describe, expect, it } from "vitest";
+import { AppShell } from "./app-shell.tsx";
 import { routes } from "../routes.tsx";
 import { stubMatchMedia } from "../test/match-media.ts";
 import { desktopQuery } from "./use-media-query.ts";
@@ -159,6 +160,59 @@ describe("AppShell", () => {
     expect(title).toHaveClass("min-w-0", "truncate");
     expect(screen.getByRole("button", { name: "Open menu" })).toHaveClass(
       "shrink-0",
+    );
+  });
+});
+
+describe("AppShell title", () => {
+  // The shell around one child route whose handle the test sets; the shell
+  // itself may carry a title, as a parent route.
+  function renderWith(handle: unknown, shellHandle?: unknown) {
+    // The tab's title outlives a test; a shell that fails to set it must show.
+    document.title = "";
+    const table: RouteObject[] = [
+      {
+        element: <AppShell />,
+        ...(shellHandle === undefined ? {} : { handle: shellHandle }),
+        children: [{ index: true, element: <p>Page</p>, handle }],
+      },
+    ];
+    render(<RouterProvider router={createMemoryRouter(table)} />);
+  }
+
+  it("APP-2.1: is just Szop when no route names a title", () => {
+    renderWith(undefined);
+
+    expect(document.title).toBe("Szop");
+  });
+
+  it.each([
+    ["no handle", undefined],
+    ["a null handle", null],
+    ["a handle without a title", {}],
+    ["a handle with a title that is not text", { title: 3 }],
+    ["a handle that is not an object", "Start"],
+  ])(
+    "APP-2.1: takes the title of the deepest route that names one, past %s",
+    (_name, handle) => {
+      renderWith(handle, { title: "Parent" });
+
+      expect(document.title).toBe("Parent · Szop");
+    },
+  );
+});
+
+describe("Menu", () => {
+  it("APP-1.3: marks only the current page's link as active", () => {
+    stubMatchMedia({ [desktopQuery]: true });
+    renderApp("/design");
+
+    const menu = screen.getByRole("navigation", { name: "Menu" });
+    expect(
+      within(menu).getByRole("link", { name: "Design system" }),
+    ).toHaveClass("bg-accent");
+    expect(within(menu).getByRole("link", { name: "Start" })).not.toHaveClass(
+      "bg-accent",
     );
   });
 });
