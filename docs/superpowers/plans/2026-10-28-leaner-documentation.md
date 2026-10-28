@@ -50,7 +50,7 @@
 **Interfaces:**
 - Produces: `plans/CLAUDE.md` as the one home of the repo-wide rules, which every later task's implementer reads; `specs/CLAUDE.md`, linked from Tasks 3 and 4.
 
-- [ ] **Step 1: Rewrite `docs/superpowers/plans/CLAUDE.md`**
+- [x] **Step 1: Rewrite `docs/superpowers/plans/CLAUDE.md`**
 
 Following spec, [Plans and their rules](../specs/2026-10-28-leaner-documentation-design.md#plans-and-their-rules). Keep the three current rules (after each task, tick the boxes, never merge). Add the repo-wide rules, each in a line with a link to its home instead of restating the home's detail:
 - **Git:** never commit to `main`; a phase is one branch `type/ph-NN-short-description`; never merge; never trigger `demo-up` or `demo-down`; don't work around the deny rules in `.claude/settings.json` or the push hook ([ADR 0009](../../decisions/0009-git-workflow.md), [ADR 0012](../../decisions/0012-security-baseline.md), decision 19; [ADR 0015](../../decisions/0015-git-push-guard-hook.md)).
@@ -63,16 +63,16 @@ Replace "Plans repeat these rules" with: the session that dispatches an implemen
 
 Add a section **What a plan holds**: "Order of work" at the top, each task linking its section; Global Constraints with only this phase's constraints; the criteria and the docs to update linked from the spec, not listed again; a line telling implementers to read this file.
 
-- [ ] **Step 2: Create `docs/superpowers/specs/CLAUDE.md`**
+- [x] **Step 2: Create `docs/superpowers/specs/CLAUDE.md`**
 
 Following spec, [Specs](../specs/2026-10-28-leaner-documentation-design.md#specs). An introduction (rules for the session that writes a spec in this folder), then a spec's sections in order: Goal (one sentence and a link to the roadmap entry), a link to the phase ADR's decisions, the design, Acceptance criteria (linked IDs, each whole or in part), Tests, Documentation, Demo check, Risks, Out of scope, Left to the builder. State what a spec does not hold: a Decisions table, "Changes to the roadmap", "Definition of done for this phase", "Order of work" (decision 10). And that the phase ADR is created in the same commit as the spec, at ✅ Accepted (decisions 3 and 4).
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `grep -n "Plans repeat" docs/superpowers/plans/CLAUDE.md; grep -c "" docs/superpowers/specs/CLAUDE.md`
 Expected: no match for the first; the second file exists. Read both files once against the spec's two sections: every bullet there has a line here.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add docs/superpowers/plans/CLAUDE.md docs/superpowers/specs/CLAUDE.md docs/superpowers/plans/2026-10-28-leaner-documentation.md
