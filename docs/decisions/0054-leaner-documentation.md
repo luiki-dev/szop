@@ -39,3 +39,7 @@ The owner went through the duplicates and candidates one by one. Their answers d
 - **The first phase to follow these rules** is the next one to start its brainstorm. PH-15a, whose PR is open, stays as written.
 
 ## Settled while building
+
+- **The simulation on PH-15a:** [the audit](../audits/2026-10-28-documentation-volume-simulation.md) rewrote PH-15a's spec, plan, ADR, phase issue body and PR description under these rules: about 20% fewer tokens in total (an estimate, characters divided by four), 49% fewer in the PR description and 29% in the spec.
+- **The phase issues were rewritten against `origin/main`'s roadmap**, not the branch's, since the branch was behind `main` (PH-15b was missing). The script compared text, not issue numbers, because the roadmap names many dependencies without them; owner-step references were accepted when each named an `owner` issue. For [#49](https://github.com/luiki-dev/szop/issues/49) and [#290](https://github.com/luiki-dev/szop/issues/290) the body won, as the owner decided, and the roadmap entries were corrected in this branch.
+- **The simulation's sample is PH-15a's final PR head** (`9e7c4dd`), since the branch was deleted at the merge.

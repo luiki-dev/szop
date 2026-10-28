@@ -324,11 +324,11 @@ git commit -m "docs(plan): record the phase issues rewritten to the roadmap link
 
 Following spec, [The simulation](../specs/2026-10-28-leaner-documentation-design.md#the-simulation).
 
-- [ ] **Step 1: Copy the sample into `before/`**
+- [x] **Step 1: Copy the sample into `before/`**
 
 From `origin/feat/ph-15a-seed-catalog` (fetch it first): `docs/superpowers/specs/2026-10-25-PH-15a-seed-catalog-design.md`, `docs/superpowers/plans/2026-10-27-PH-15a-seed-catalog.md`, `docs/decisions/0050-seed-catalog-phase-details.md`. From GitHub: issue #287's body and PR #306's description. Five files, as they are today; note the branch head's commit for the record.
 
-- [ ] **Step 2: Rewrite each into `after/` under the new rules**
+- [x] **Step 2: Rewrite each into `after/` under the new rules**
 
 - **Spec:** the sections of `specs/CLAUDE.md`; its decisions move to the ADR (a decision in both is kept once, in the ADR); Goal one sentence with the roadmap link; criteria as linked IDs.
 - **ADR 0050:** unchanged in its decisions, plus any decision that was only in the spec, and "Changes to the roadmap".
@@ -338,24 +338,24 @@ From `origin/feat/ph-15a-seed-catalog` (fetch it first): `docs/superpowers/specs
 
 Nothing is shortened beyond the rules: decisions move, they are not condensed.
 
-- [ ] **Step 3: Count**
+- [x] **Step 3: Count**
 
 `<scratchpad>/count.py before/ after/` prints, per artifact and in total, words (`len(text.split())`) and tokens, before and after, and the change in percent. Tokens: the Claude API's token counting endpoint (`POST /v1/messages/count_tokens`, model `claude-opus-5-5`) when `ANTHROPIC_API_KEY` is set; otherwise characters ÷ 4, rounded. The method goes in the record.
 
 Also count, per phase, the edits it no longer makes, from PH-15a: the phase issue body syncs (the number of times #287's body was edited after creation, from its timeline, or 1 per PR that changed the entry when the timeline does not show it); the third place of each ADR note (the earlier ADRs whose status line ADR 0050 changed); the plan's lines of repo-wide rules in its Global Constraints.
 
-- [ ] **Step 4: Write the audit**
+- [x] **Step 4: Write the audit**
 
 `docs/audits/2026-10-28-documentation-volume-simulation.md`: date, status (a point-in-time record), what was simulated and how (the sample with the PH-15a head commit, the rewrite rules, the counting method), one table `| Artifact | Words before | Words after | Tokens before | Tokens after | Change |` with a total row, the edits no longer made as a short list, and what the numbers do not show (the decisions are moved, not removed; one phase only). No Contents needed if it stays under about 100 lines. Link the first audit; the first audit is not edited.
 
 In ADR 0054, under "Settled while building", add one bullet linking the new audit with its headline result (the total change in tokens).
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run: `git status --short`
 Expected: only the audit, ADR 0054 and this plan changed; nothing from the scratchpad. The table's totals equal the sums of its rows.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add docs/audits/2026-10-28-documentation-volume-simulation.md docs/decisions/0054-leaner-documentation.md docs/superpowers/plans/2026-10-28-leaner-documentation.md
