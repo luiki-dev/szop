@@ -4,9 +4,9 @@ import type { TestProject } from "vitest/node";
 import type { DatabaseSettings } from "../config.ts";
 import { createDatabase } from "../db/database.ts";
 import { runMigrations } from "../db/migrate.ts";
-import { testDatabaseSettings } from "./database.ts";
+import { testDatabaseName, testDatabaseSettings } from "./database.ts";
 
-const template = "szop_test_template";
+const template = testDatabaseName("template");
 
 // Once per run, before any test: a freshly migrated template, then one copy
 // per Vitest worker (ADR 0007, decision 12; ADR 0020, decision 7). Nothing
@@ -17,16 +17,15 @@ export default async function setup(project: TestProject): Promise<void> {
   // the number of CPUs.
   const maxWorkers = project.config.maxWorkers as number | undefined;
   const workers = maxWorkers ?? availableParallelism();
-  const copies = Array.from(
-    { length: workers },
-    (_, i) => `szop_test_${String(i + 1)}`,
+  const copies = Array.from({ length: workers }, (_, i) =>
+    testDatabaseName(String(i + 1)),
   );
   // The maintenance database, never the development one.
   const admin = testDatabaseSettings("postgres");
 
   await checkReachable(admin);
-  // The names are fixed or numbered, never input, so they are safe to put
-  // into the statements. FORCE closes connections a crashed run left.
+  // The names are fixed or numbered, and testDatabaseName checks
+  // Stryker's process number, so they are safe to put into the statements. FORCE closes connections a crashed run left.
   await runEach(
     admin,
     [...copies, template].map(

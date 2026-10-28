@@ -1,7 +1,11 @@
 import { sql } from "drizzle-orm";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { readJournal } from "../db/schema-version.ts";
-import { truncateAllTables, useTestDatabase } from "./database.ts";
+import {
+  testDatabaseName,
+  truncateAllTables,
+  useTestDatabase,
+} from "./database.ts";
 
 describe("truncateAllTables", () => {
   const database = useTestDatabase();
@@ -24,5 +28,28 @@ describe("truncateAllTables", () => {
     } finally {
       await db.execute(sql`DROP TABLE probe`);
     }
+  });
+});
+
+describe("testDatabaseName", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("keeps the plain names outside Stryker", () => {
+    vi.stubEnv("STRYKER_MUTATOR_WORKER", undefined);
+    expect(testDatabaseName("1")).toBe("szop_test_1");
+    expect(testDatabaseName("template")).toBe("szop_test_template");
+  });
+
+  it("prefixes the names with Stryker's process number", () => {
+    vi.stubEnv("STRYKER_MUTATOR_WORKER", "2");
+    expect(testDatabaseName("1")).toBe("szop_test_s2_1");
+    expect(testDatabaseName("template")).toBe("szop_test_s2_template");
+  });
+
+  it("refuses a process number that is not digits", () => {
+    vi.stubEnv("STRYKER_MUTATOR_WORKER", "1; DROP DATABASE szop");
+    expect(() => testDatabaseName("1")).toThrow(/STRYKER_MUTATOR_WORKER/);
   });
 });

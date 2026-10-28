@@ -67,7 +67,7 @@
 **Interfaces:**
 - Produces: `testDatabaseName(suffix: string): string` exported from `apps/api/src/test/database.ts`. `suffix` is a worker number (`"1"`) or `"template"`. Without `STRYKER_MUTATOR_WORKER`: `szop_test_<suffix>`. With it set to `2`: `szop_test_s2_<suffix>`. It reads `process.env` on each call.
 
-- [ ] **Step 1: Write the failing tests** in `database.test.ts`, a `describe("testDatabaseName")` using `vi.stubEnv` and `vi.unstubAllEnvs` in `afterEach`:
+- [x] **Step 1: Write the failing tests** in `database.test.ts`, a `describe("testDatabaseName")` using `vi.stubEnv` and `vi.unstubAllEnvs` in `afterEach`:
 
 ```ts
 it("keeps the plain names outside Stryker", () => {
@@ -88,19 +88,19 @@ it("refuses a process number that is not digits", () => {
 });
 ```
 
-- [ ] **Step 2: Run them to see them fail**
+- [x] **Step 2: Run them to see them fail**
 
 Run: `pnpm db:up && pnpm test --project api apps/api/src/test/database.test.ts`
 Expected: FAIL, `testDatabaseName` is not exported.
 
-- [ ] **Step 3: Implement `testDatabaseName` in `database.ts`** and use it in `useTestDatabase` (`testDatabaseName(worker)`) and in `global-setup.ts` for `template` and the copies. Check the value with `/^\d+$/`; the comment in global-setup ("never input, so they are safe") gets a word that the process number is checked.
+- [x] **Step 3: Implement `testDatabaseName` in `database.ts`** and use it in `useTestDatabase` (`testDatabaseName(worker)`) and in `global-setup.ts` for `template` and the copies. Check the value with `/^\d+$/`; the comment in global-setup ("never input, so they are safe") gets a word that the process number is checked.
 
-- [ ] **Step 4: Run the tests and the whole suite**
+- [x] **Step 4: Run the tests and the whole suite**
 
 Run: `pnpm test`
 Expected: PASS. Then `docker compose exec postgres psql -U szop -d postgres -Atc "SELECT datname FROM pg_database WHERE datname LIKE 'szop_test%' ORDER BY 1"` lists `szop_test_1` … and `szop_test_template` only.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/api/src/test/ docs/superpowers/plans/2026-10-28-PH-15b-mutation-testing.md
