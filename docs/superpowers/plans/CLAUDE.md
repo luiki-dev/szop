@@ -1,8 +1,26 @@
 # Executing a plan
 
-Rules for any session that executes a plan in this folder, whichever method the owner chose at the plan's handoff (subagent-driven or native). The owner reviews each task as it lands, often remotely, where only pushed changes are visible.
+Rules for any session that executes a plan in this folder, whichever method the owner chose at the plan's handoff (subagent-driven or native), and the one home of the repo-wide rules a plan's implementers follow ([ADR 0054](../../decisions/0054-leaner-documentation.md), decision 11). The owner reviews each task as it lands, often remotely, where only pushed changes are visible.
+
+**Dispatching an implementer:** the session that dispatches one tells it, in its prompt, to read this file before its task. An implementer sees only its task's text, not the plan, so it would not come across this file on its own.
+
+## After each task
 
 - **After each task:** commit it, `git push` the phase branch, then stop and summarize the task for the owner. Start the next task only when the owner says so.
 - **Tick the task's step boxes** (`- [ ]` → `- [x]`) in the plan, in the task's own commit, so the pushed plan shows progress.
 - **Never merge.** The PR opens after the last task, or when the owner asks.
-- **Plans repeat these rules** in their Global Constraints, so a subagent that only sees its task still follows them.
+
+## Repo-wide rules
+
+- **Git:** never commit to `main`; a phase is one branch named `type/ph-NN-short-description`; never merge a PR; never trigger `demo-up` or `demo-down`; don't work around the deny rules in `.claude/settings.json` or the push hook ([ADR 0009](../../decisions/0009-git-workflow.md); [ADR 0012](../../decisions/0012-security-baseline.md), decision 19; [ADR 0015](../../decisions/0015-git-push-guard-hook.md)).
+- **Commits:** Conventional Commits with a scope from `commitlint.config.js`, a header of at most 100 characters, ending with `Co-Authored-By: <the model that wrote the commit> <noreply@anthropic.com>` and the executing session's `Claude-Session:` line.
+- **Docs style:** the "Writing style for docs and explanations" section of the root [`CLAUDE.md`](../../../CLAUDE.md); no jokes in docs, commits or PRs.
+- **Review findings:** after the whole-branch review, the session that ran it lists the findings it did not fix to the owner; the owner chooses which become open-point issues, created in that session before the PR opens, and the rest are dropped and noted as declined in the phase ADR's "Settled while building" ([ADR 0054](../../decisions/0054-leaner-documentation.md), decision 2).
+- **Settled while building:** a decision taken during a task goes into the phase ADR's "Settled while building", in that task's commit.
+
+## What a plan holds
+
+- **"Order of work"** at the top: the tasks in order, each linking its section.
+- **Global Constraints** with only this phase's constraints; the repo-wide rules above are not repeated.
+- **The criteria and the docs to update** are linked from the spec, not listed again.
+- **A line telling implementers to read this file** before their task.

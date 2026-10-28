@@ -96,11 +96,11 @@ A new session needs only a short prompt naming the stage and its document. CLAUD
 |---|---|---|
 | Brainstorm and spec | `Brainstorm PH-NN` | the phase's entry in `docs/roadmap.md`, its issue and open-point issues, the requirements it delivers |
 | Plan | `Plan PH-NN from docs/superpowers/specs/<spec>.md` | the spec, the files it names |
-| Execution | `Execute the plan docs/superpowers/plans/<plan>.md` | the plan, its Global Constraints, the spec |
+| Execution | `Execute the plan docs/superpowers/plans/<plan>.md` | the plan, `docs/superpowers/plans/CLAUDE.md` (the repo-wide rules; the plan does not repeat them), the spec |
 | Execution, continued | `Execute the plan docs/superpowers/plans/<plan>.md; tasks 1–3 are committed` | the plan, the progress ledger in `.superpowers/sdd/<plan>/progress.md`, `git log` |
 | Finishing | `Finish PH-NN: tracking and the PR` | the plan's last task, CLAUDE.md's "Before opening the PR", the branch's diff |
 
-The ledger of a plan's workspace keeps each finished task, the rulings made along the way and the review findings deferred, so a new execution session picks up where the last one stopped without re-reading the whole conversation.
+The ledger of a plan's workspace keeps each finished task, the rulings made along the way and the review findings deferred, so a new execution session picks up where the last one stopped without re-reading the whole conversation. The session that dispatches an implementer tells it to read `docs/superpowers/plans/CLAUDE.md` before its task. After the whole-branch review, the session that ran it lists the findings it did not fix to the owner; the owner chooses which become open-point issues, created in that session before the PR opens, and the rest are noted as declined in the phase ADR's "Settled while building". The ledger is where the findings wait until then.
 
 ### Restart or compact
 
@@ -250,7 +250,7 @@ The first rows are leading indicators: they show whether the habits were followe
 
 ### The report in a phase PR
 
-Before opening a phase's PR, Claude runs `python3 scripts/token-usage.py --branch <the phase branch>` and puts its output in the PR description under a "Token usage" heading ([ADR 0052](../decisions/0052-working-with-claude.md), decision 10). CI cannot do it: the transcripts live only on the machine that ran the sessions. Non-phase PRs may include it, but don't have to. The section also notes any implementer retried on Opus, and any part of the phase worked in the cloud or on another machine.
+Before opening a phase's PR, Claude runs `python3 scripts/token-usage.py --branch <the phase branch>` and puts its output in the PR description under a "Token usage" heading ([ADR 0052](../decisions/0052-working-with-claude.md), decision 10). CI cannot do it: the transcripts live only on the machine that ran the sessions. A PR outside a phase leaves the section out, as the PR template says. The section also notes any implementer retried on Opus, and any part of the phase worked in the cloud or on another machine.
 
 ### The evaluation
 

@@ -74,7 +74,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Size of a phase** ([ADR 0014](decisions/0014-roadmap.md), decision 6): it ends with something working, brings at most one big concept new to the project, and its plan has about 3 to 8 tasks. A phase that grows past about 10 tasks or a second new concept is split before it is planned or executed, and the owner can ask for a split at any time.
 - **Changing the roadmap** is expected as phases teach us things. A split phase becomes `PH-16a`, `PH-16b` and so on, and its old ID is retired; a new phase gets the next free number. A change needs an ADR only when it reflects a significant decision ([ADR 0004](decisions/0004-implementation-process.md), decision 6). A new feature goes through the [functional requirements](requirements/functional-requirements.md) first (decision 10).
 - **Not on the roadmap:** work outside phases (dependency updates, documentation fixes, ADR-only PRs), and spikes, which run before the phase that needs them and are listed under its "depends on".
-- **On GitHub:** each phase, open point, owner step and ADR made outside a phase is an issue on the [Szop project](https://github.com/users/luiki-dev/projects/3). This page is the source of each phase's plan, and the phase issue's body is a copy, updated when the PR that changes the entry opens; the status lives on GitHub, and the stage tables mirror it ([ADR 0027](decisions/0027-open-points-on-github.md), decisions 3 and 4).
+- **On GitHub:** each phase, open point, owner step and ADR made outside a phase is an issue on the [Szop project](https://github.com/users/luiki-dev/projects/3). This page is the source of each phase's plan, and the phase issue's body links it; the status lives on GitHub, and the stage tables mirror it ([ADR 0027](decisions/0027-open-points-on-github.md), decisions 3 and 4).
 
 ## Stage 1: Local foundations
 
@@ -415,7 +415,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 - **Goal:** a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added. Checked items leave the list for a plain section of checked items, which the haul replaces in [PH-17b](#ph-17b-the-haul).
 - **Delivers:** [ITM-1](requirements/ITM-list-items.md#itm-1), [ITM-6](requirements/ITM-list-items.md#itm-6), [ITM-7](requirements/ITM-list-items.md#itm-7), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2) (part: the list's order, ORD-2.1 to ORD-2.4), [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5) (part: ORD-5.1, ORD-5.2 and ORD-5.4), [APP-1](requirements/APP-app-wide-behavior.md#app-1) (part: APP-1.6, the back arrow inside a list), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.1 and APP-3.2, messages and undoing a removal), [APP-6](requirements/APP-app-wide-behavior.md#app-6), [APP-7](requirements/APP-app-wide-behavior.md#app-7), [LIM-2](requirements/LIM-limits.md#lim-2) (part: item names and notes); optimistic updates; forms with React Hook Form.
-- **Split from:** PH-17 List items, now retired: with the haul it held about 40 acceptance criteria and two new concepts, the list's items with their forms and optimistic updates, and the haul with its drawer ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0051](decisions/0051-acceptance-criteria.md), decision 16). The haul became a phase of its own.
+- **Split from:** PH-17 List items, now retired: with the haul it held about 40 acceptance criteria and two new concepts, the list's items with their forms and optimistic updates, and the haul with its drawer ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0051](decisions/0051-acceptance-criteria.md), decision 16). The haul became PH-17b.
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -462,7 +462,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 - **Goal:** a workspace cannot outgrow its quotas, and a script cannot flood the API, guest creation, registration or login. A user who hits a limit is told which one and what to do about it.
 - **Delivers:** [LIM-1](requirements/LIM-limits.md#lim-1) (part: lists and items), [LIM-3](requirements/LIM-limits.md#lim-3), [LIM-4](requirements/LIM-limits.md#lim-4) (part: everything except password reset); `@fastify/rate-limit`; both limiters counting in Redis, so a limit holds across tasks, with a test across two instances ([ADR 0036](decisions/0036-scalability-and-isolation.md), decision 8). Later phases add their own quotas and limits.
-- **Depends on:** PH-39.
+- **Depends on:** PH-39: Redis.
 - **Owner steps:** none.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#49](https://github.com/luiki-dev/szop/issues/49).
