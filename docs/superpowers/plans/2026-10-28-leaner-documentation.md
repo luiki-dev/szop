@@ -243,7 +243,7 @@ git commit -m "docs: align the walkthrough, git workflow and Claude guide with A
 - Modify: `docs/decisions/0011-design-sanity-check-follow-ups.md` (decisions 3 and 4)
 - Modify: `docs/decisions/0027-open-points-on-github.md` (decision 3)
 
-- [ ] **Step 1: Add the notes**
+- [x] **Step 1: Add the notes**
 
 At the bottom of each cell, after any existing note (oldest first), in the form CLAUDE.md gives: `<br>✏️ **Refined by [ADR 0054](0054-leaner-documentation.md), decisions …:** <one clause>`. Which decisions, from spec, [Earlier ADRs](../specs/2026-10-28-leaner-documentation-design.md#earlier-adrs):
 - ADR 0004, decision 9: decisions 3, 10, 11 and 13 (decisions live in the phase ADR, created with the spec; the spec and plan hold less; notes in two places).
@@ -253,12 +253,12 @@ At the bottom of each cell, after any existing note (oldest first), in the form 
 
 Status lines stay as they are (decision 13).
 
-- [ ] **Step 2: Verify**
+- [x] **Step 2: Verify**
 
 Run: `git diff --stat docs/decisions/ && git diff docs/decisions/ | grep -c "^+.*ADR 0054"`
 Expected: three files changed, 4 added notes, no status line in the diff.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/decisions/0004-implementation-process.md docs/decisions/0011-design-sanity-check-follow-ups.md docs/decisions/0027-open-points-on-github.md docs/superpowers/plans/2026-10-28-leaner-documentation.md
