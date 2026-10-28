@@ -6,6 +6,7 @@ const { loadSeed } = await import("./seed.ts");
 
 describe("loadSeed", () => {
   it("names seed.yaml in the error of a bad seed, and keeps the cause", () => {
+    expect.assertions(2);
     expect(() => loadSeed()).toThrow(/^seed\.yaml: units: /);
     try {
       loadSeed();

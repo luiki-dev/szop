@@ -20,10 +20,10 @@ export interface CatalogNode {
 // each with its own products sorted by name. A product with no category is
 // not in the tree.
 export function buildCatalogTree(catalog: Catalog): CatalogNode[] {
-  const productsOf = new Map<string, CatalogProduct[]>();
+  // A product with no category lands under the key null, which no category
+  // looks up.
+  const productsOf = new Map<string | null, CatalogProduct[]>();
   for (const product of catalog.products) {
-    // Stryker disable next-line ConditionalExpression: a product stored under the key null is never looked up: no category has a null ID
-    if (product.categoryId === null) continue;
     const group = productsOf.get(product.categoryId);
     if (group) group.push(product);
     else productsOf.set(product.categoryId, [product]);
@@ -45,8 +45,8 @@ export function buildCatalogTree(catalog: Catalog): CatalogNode[] {
       children: [],
       productCount: 0,
     };
-    // Stryker disable next-line ConditionalExpression: `parents[-1]` is undefined, the same as the root's parent
-    const parent = depth === 0 ? undefined : parents[depth - 1];
+    // A root (depth 0) reads parents[-1], which is undefined.
+    const parent = parents[depth - 1];
     if (parent) parent.children.push(node);
     else roots.push(node);
     parents[depth] = node;

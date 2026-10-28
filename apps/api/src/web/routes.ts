@@ -36,8 +36,9 @@ export async function webRoutes(
   });
 
   app.setNotFoundHandler((request, reply) => {
+    const parts = request.url.split("?", 1);
     // Stryker disable next-line StringLiteral: `split("?", 1)` always returns one element, so the default is unreachable
-    const [path = ""] = request.url.split("?", 1);
+    const [path = ""] = parts;
     const lastSegment = path.slice(path.lastIndexOf("/") + 1);
     const isApi = path === "/api" || path.startsWith("/api/");
     const isPage =

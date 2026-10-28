@@ -91,11 +91,8 @@ function CategoryItem({
       {isOpen && hasRows && (
         <ul id={panelId}>
           {node.products.map((product) => {
-            const unit =
-              // Stryker disable next-line ConditionalExpression: `unitNames.get(null)` is undefined too, so the null check is redundant
-              product.unitId === null
-                ? undefined
-                : unitNames.get(product.unitId);
+            // Stryker disable next-line StringLiteral: no unit has an empty ID, so any other fallback finds no unit either
+            const unit = unitNames.get(product.unitId ?? "");
             return (
               <li
                 key={product.id}

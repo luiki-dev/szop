@@ -155,6 +155,7 @@ async function currentDatabase(client: pg.PoolClient): Promise<string> {
   const { rows } = await client.query<{ name: string }>(
     "SELECT current_database() AS name",
   );
-  // Stryker disable next-line OptionalChaining, StringLiteral: `current_database()` always returns one row, so the `?? ""` fallback is unreachable
+  // Stryker disable next-line OptionalChaining: `current_database()` always returns one row, so `rows[0]` is defined
+  // Stryker disable next-line StringLiteral: `current_database()` always returns one row, so the `?? ""` fallback is unreachable
   return rows[0]?.name ?? "";
 }

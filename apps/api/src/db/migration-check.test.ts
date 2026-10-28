@@ -284,6 +284,8 @@ describe("checkMigrations with a stubbed database", () => {
   });
   const journal = { entries: [] };
 
+  // stubDb answers by query order and always finds the table, so an empty
+  // existence result needs its own stub.
   it("reads nothing recorded when the existence query returns no row", async () => {
     const db = {
       execute: () => Promise.resolve({ rows: [] }),

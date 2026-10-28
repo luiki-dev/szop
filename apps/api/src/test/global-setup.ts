@@ -25,7 +25,8 @@ export default async function setup(project: TestProject): Promise<void> {
 
   await checkReachable(admin);
   // The names are fixed or numbered, and testDatabaseName checks
-  // Stryker's process number, so they are safe to put into the statements. FORCE closes connections a crashed run left.
+  // Stryker's process number, so they are safe to put into the statements.
+  // FORCE closes connections a crashed run left.
   await runEach(
     admin,
     [...copies, template].map(

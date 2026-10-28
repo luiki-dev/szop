@@ -10,5 +10,6 @@ function jsonOnlyBodies(app: FastifyInstance): void {
 }
 
 // fastify-plugin turns off encapsulation, so every route loses the parser.
-// Stryker disable next-line ObjectLiteral,StringLiteral: the plugin name only labels the plugin in Fastify's errors and logs
+// Stryker disable next-line ObjectLiteral: the plugin name only labels the plugin in Fastify's errors and logs
+// Stryker disable next-line StringLiteral: the plugin name only labels the plugin in Fastify's errors and logs
 export const jsonOnly = fp(jsonOnlyBodies, { name: "szop-json-only" });

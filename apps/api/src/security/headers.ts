@@ -33,5 +33,6 @@ async function securityHeaders(app: FastifyInstance): Promise<void> {
 
 // fastify-plugin turns off encapsulation, so the headers reach every route,
 // the SPA's files and the not-found handler included.
-// Stryker disable next-line ObjectLiteral,StringLiteral: the plugin name only labels the plugin in Fastify's errors and logs
+// Stryker disable next-line ObjectLiteral: the plugin name only labels the plugin in Fastify's errors and logs
+// Stryker disable next-line StringLiteral: the plugin name only labels the plugin in Fastify's errors and logs
 export const headers = fp(securityHeaders, { name: "szop-security-headers" });

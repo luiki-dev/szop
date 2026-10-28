@@ -34,9 +34,9 @@ export function errorHandler(
   if (hasZodFastifySchemaValidationErrors(error)) {
     return sendError(reply, 400, "invalid_input", error.message);
   }
-  const status = error.statusCode;
-  // Stryker disable next-line ConditionalExpression: `undefined >= 400` is false, so the first check is redundant
-  if (status !== undefined && status >= 400 && status < 500) {
+  // No status counts as a server error.
+  const status = error.statusCode ?? 500;
+  if (status >= 400 && status < 500) {
     return sendError(reply, status, codeFor(status), error.message);
   }
   request.log.error(error, "request failed");
