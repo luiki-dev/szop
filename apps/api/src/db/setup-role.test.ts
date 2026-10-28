@@ -100,6 +100,7 @@ describe("loadSetupConfig", () => {
       const message = errorFor({ ...valid, APP_DATABASE_PASSWORD: password });
 
       expect(message).toMatch(/APP_DATABASE_PASSWORD: (?!missing)/);
+      expect(message).toContain("must be printable ASCII characters");
       expect(message).not.toContain(password);
     },
   );

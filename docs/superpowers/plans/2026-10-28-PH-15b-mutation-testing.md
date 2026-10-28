@@ -256,7 +256,7 @@ The work is too large for one implementer: Task 5 is dispatched in groups (API t
 
 - [x] **Step 3: Open points.** For each "open point": a new `open-point` issue with the next free `OP-` ID ([how to find it](../../development/project-tracking.md#checking-with-gh)), a sub-issue of the phase that will settle it (none for a candidate), with the file, line and mutant in its body.
 
-- [ ] **Step 4: The last run**
+- [x] **Step 4: The last run**
 
 Run: `time pnpm test:mutation`
 Expected: no survivor or "no coverage" mutant without a decision (a survivor recorded as an open point is still listed; check each against the issues). Record the score and the time for the PR description.
@@ -266,7 +266,7 @@ Expected: no survivor or "no coverage" mutant without a decision (a survivor rec
 Run: `pnpm check`
 Expected: PASS.
 
-- [ ] **Step 6: Commit**, one commit per group if they are large (tests by package, then the comments):
+- [x] **Step 6: Commit**, one commit per group if they are large (tests by package, then the comments):
 
 ```bash
 git add apps/ packages/ docs/superpowers/plans/2026-10-28-PH-15b-mutation-testing.md
