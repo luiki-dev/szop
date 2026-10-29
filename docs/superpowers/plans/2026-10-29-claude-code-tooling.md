@@ -311,28 +311,28 @@ git commit -m "feat(claude): move the ADR rules into the /new-adr skill"
 - Modify: `docs/decisions/0031-graphify-not-adopted.md` (decisions 1, 2 and 3)
 - Modify: `docs/decisions/0052-working-with-claude.md` (lines 36, 38: links only, if they point to `CLAUDE.md`'s tracking steps)
 
-- [ ] **Step 1: The graphify page**
+- [x] **Step 1: The graphify page**
 
 `tools/graphify.md`: what it is; why, code only (ADR 0056, decisions 3 to 7, and ADR 0031); the configuration explained (`.graphifyignore`, `graphify-out/` ignored, the four husky hooks and their guard line, the wrapper and its wiring, the `CLAUDE.md` rule); what was left out (merge driver, `/graphify` skill, `.claude/CLAUDE.md`) and that `graphify claude install` is never run again in the repository; the owner's steps (spec, [graphify: what the owner does](../specs/2026-10-29-claude-code-tooling-design.md#graphify-what-the-owner-does)); upgrading: `graphify hook uninstall`, `graphify hook install`, the guard line put back, commit, and the by-hand guard check of Task 4, Step 6.
 
-- [ ] **Step 2: The other docs**
+- [x] **Step 2: The other docs**
 
 Following spec, [Documentation](../specs/2026-10-29-claude-code-tooling-design.md#documentation):
 - `setup.md`: graphify as an optional step (`uv tool install graphifyy`, `graphify update .`, link to the page) where the tool steps are; section 12 adds the post-commit, post-checkout, post-merge and post-rewrite hooks, which update the graph when graphify is installed and do nothing otherwise. The cloud setup script is unchanged.
 - `working-with-claude.md`: line 70, what a new session loads, mentions that the tracking and ADR rules load only with their skills; line 101's "CLAUDE.md's "Before opening the PR"" becomes "`/phase-tracking`'s "Before opening the PR"". Update `## Contents` if a heading changes.
 - ADR 0031, at the bottom of decisions 1, 2 and 3's cells, after any existing note: `<br>🔍 **Revisited by [ADR 0056](0056-claude-code-tooling.md), decision N:** <one clause>` (decisions 1 and 2: decision 3, graphify adopted for code only; decision 3: decision 8, the revisit done, OP-095 closed). The status line stays.
 
-- [ ] **Step 3: Sweep for links to the moved rules**
+- [x] **Step 3: Sweep for links to the moved rules**
 
 Run: `grep -rn -E "CLAUDE\.md's \"(Project tracking|Before opening the PR|During a phase)\"|CLAUDE\.md#project-tracking|its \"Project tracking\" section" --include=*.md . | grep -v -E "^\./docs/(decisions/00([0-4]|5[0-5])|superpowers/(specs|plans)/20|audits|archive)/"`
 Expected: no match outside frozen records. In ADR 0052 (accepted), only a link may change, as a mechanical change; if a sentence would have to change, leave it and say so in the task summary.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `pnpm check && git status --short`
 Expected: passes; only the files above and this plan changed. `## Contents` of `setup.md` and `working-with-claude.md` match their headings.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/development/ docs/decisions/0031-graphify-not-adopted.md docs/decisions/0052-working-with-claude.md docs/superpowers/plans/2026-10-29-claude-code-tooling.md

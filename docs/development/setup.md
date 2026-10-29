@@ -13,6 +13,7 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
 - [7. Docker Desktop and the database](#7-docker-desktop-and-the-database)
 - [8. Terraform, tflint and the AWS CLI](#8-terraform-tflint-and-the-aws-cli)
 - [9. actionlint, zizmor and uv](#9-actionlint-zizmor-and-uv)
+  - [Optional: graphify](#optional-graphify)
 - [10. Check that everything works](#10-check-that-everything-works)
   - [The end-to-end journeys](#the-end-to-end-journeys)
 - [11. Run the API and the page](#11-run-the-api-and-the-page)
@@ -193,6 +194,15 @@ cd ~/workspace/szop && pnpm check:workflows
 - `pnpm check:workflows` prints `==> actionlint` and `==> zizmor` and ends with `No findings to report. Good job!`. A missing tool stops it with `FAIL: <tool> not found` and a pointer to this section. What it runs is in [Scripts](scripts.md).
 - The pre-commit hook needs these tools too: a commit that stages a workflow, a local action or `dependabot.yml` fails with `command not found` until they are installed.
 
+### Optional: graphify
+
+graphify builds a map of the code that Claude Code sessions query ([graphify](tools/graphify.md); [ADR 0056](../decisions/0056-claude-code-tooling.md), decision 3). Nothing else needs it, and the checks and the cloud sessions work without it. With uv from above:
+
+```bash
+uv tool install graphifyy
+graphify update .                                 # the first, code-only build
+```
+
 ## 10. Check that everything works
 
 ```bash
@@ -299,6 +309,8 @@ Open `http://localhost:8080`: the same page as `pnpm start`, served from inside 
 ## 12. What the git hooks do
 
 On every commit, a pre-commit hook formats and lints the staged files (a staged workflow under `.github/` goes through actionlint and zizmor, installed in section 9), and a commit-msg hook checks that the message follows Conventional Commits. See [husky and lint-staged](tools/husky-and-lint-staged.md) and [commitlint](tools/commitlint.md).
+
+The post-commit, post-checkout, post-merge and post-rewrite hooks update graphify's code map after the git operation they are named for. They do nothing when graphify is not installed ([graphify](tools/graphify.md)).
 
 ## 13. Claude Code sessions in the cloud
 
