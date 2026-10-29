@@ -10,8 +10,8 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **ACM** | AWS Certificate Manager | Issues free TLS certificates for domains you control, for use on AWS load balancers. |
 | **ADR** | Architecture Decision Record | A short document recording one significant decision: its context, the options considered, the choice and its consequences. Ours live in `docs/decisions/`. |
 | **ALB** | Application Load Balancer | AWS's HTTP(S) load balancer: it decrypts HTTPS and forwards requests to healthy targets. Fronts Szop's demo. |
-| **AST** | Abstract Syntax Tree | The tree a parser builds from source code. graphify reads code through it, which needs no AI model (see ADR 0056). |
 | **ARN** | Amazon Resource Name | The unique identifier of an AWS resource, such as `arn:aws:ssm:eu-central-1:…:parameter/…`. |
+| **AST** | Abstract Syntax Tree | The tree a parser builds from source code. graphify reads code through it, which needs no AI model (see ADR 0056). |
 | **AWS** | Amazon Web Services | Amazon's cloud platform, the largest hyperscaler. Szop's demo environment runs on it (see ADR 0008). |
 | **AZ** | Availability Zone | One of several separate data centers within an AWS region, with independent power and networking. |
 | **CA** | Certificate Authority | An organisation whose signature on a TLS certificate vouches that the certificate belongs to the name it carries. A client trusts a list of CAs, a CA bundle; with `DATABASE_TLS=verify-full` the API trusts only Amazon's RDS bundle (see ADR 0033). |

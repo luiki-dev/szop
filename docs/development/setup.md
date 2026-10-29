@@ -351,7 +351,7 @@ A cloud environment reaches the internet through an egress proxy, and only the h
 
 ### All hosts, to paste
 
-Every host of the three groups above, one per line, for *Network access*. Hosts the environment allows already do no harm there. Of these, `docs.github.com`, `developer.hashicorp.com`, `aquasecurity.github.io`, `aws.amazon.com` and the documentation of the MVP phases were refused on 2026-10-23; the rest answered.
+Every host of the three groups above, one per line, for *Network access*. Hosts the environment allows already do no harm there. Of these, `docs.github.com`, `developer.hashicorp.com`, `aquasecurity.github.io`, `aws.amazon.com` and the documentation of the MVP phases were refused on 2026-10-23; the rest answered. `mcp.context7.com` was added later and was not tested on that date.
 
 ```text
 nodejs.org

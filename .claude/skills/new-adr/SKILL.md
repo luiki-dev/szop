@@ -16,6 +16,8 @@ git fetch
 for b in $(git for-each-ref --format='%(refname:short)' refs/remotes/origin/); do git ls-tree --name-only "$b" docs/decisions/; done | grep -oE '[0-9]{4}-[^/]*\.md$' | cut -c1-4 | sort -u | tail -1 | awk '{printf "%04d\n", $1+1}'
 ```
 
+Once the branch's own ADR is pushed, the command counts it, so it prints that number plus one; if the highest number is your own ADR, there is no clash.
+
 ## The file
 
 `docs/decisions/NNNN-short-title.md`, in the shape of the recent ADRs; take [ADR 0056](../../../docs/decisions/0056-claude-code-tooling.md) as the model:

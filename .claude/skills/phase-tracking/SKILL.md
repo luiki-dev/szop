@@ -106,7 +106,7 @@ A decision taken while building goes into the phase ADR's "Settled while buildin
 
 Propose the next phase. The owner moves its issue and its open-point issues to 📌 Todo on GitHub.
 
-### Never set ✅ Done by hand
+### Never set Done by hand
 
 Merging the PR closes the issues, and the project's workflow sets ✅ Done on GitHub.
 

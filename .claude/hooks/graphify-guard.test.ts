@@ -120,6 +120,11 @@ const passed: [name: string, kind: string, stdin: () => string][] = [
     () => input("Bash", { command: "grep -rn x apps" }),
   ],
   [
+    "Bash naming an ignored and a non-ignored path",
+    "search",
+    () => input("Bash", { command: "grep x docs apps" }),
+  ],
+  [
     "Bash with no existing path",
     "search",
     () => input("Bash", { command: "pnpm test" }),

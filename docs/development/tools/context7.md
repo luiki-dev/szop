@@ -30,7 +30,7 @@ Claude Code asks once per machine before it uses a project MCP server from `.mcp
 
 ## What is sent
 
-Library names and questions only, never code or secrets. The host `mcp.context7.com` must be reachable; in a cloud session it is on the network allowlist in [the setup guide](../setup.md).
+Library names and questions only, never code or secrets. The host `mcp.context7.com` must be reachable; in a cloud session the owner adds it to the cloud environment's *Network access* setting (it is in [the paste list of the setup guide](../setup.md#all-hosts-to-paste)).
 
 ## Rate limit
 
