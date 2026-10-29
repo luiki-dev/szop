@@ -29,3 +29,6 @@ coverage/
 # Stryker's report (pnpm test:mutation) and its sandbox copies
 reports/
 .stryker-tmp/
+
+# graphify's code map, built on each machine (ADR 0056)
+graphify-out/

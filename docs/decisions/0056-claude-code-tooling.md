@@ -42,3 +42,7 @@ While the design was being worked out, Claude ran graphify 0.9.92's install comm
 - **This ADR's [issue](https://github.com/luiki-dev/szop/issues/311) is closed by the PR that merges it**, with [OP-095](https://github.com/luiki-dev/szop/issues/211).
 
 ## Settled while building
+
+- **graphify 0.9.97 was used,** not the 0.9.92 the spec names. The hooks it wrote matched the spec's description.
+- **Every `graphify hook install` rerun re-adds the merge driver** (the `.gitattributes` line and `merge.graphify.*` in local git config). Both are removed again after each run. This adds to the Consequences line on upgrades (uninstall, install, commit).
+- **The post-commit hook leaves `graphify-out/graph.json` untouched when no code-graph topology changed** ("No code-graph topology changes detected; outputs left untouched"). A commit moves the file's modification time only when it changes code structure, so the hook's log (`~/.cache/graphify-rebuild.log`) is the check that the hook ran.

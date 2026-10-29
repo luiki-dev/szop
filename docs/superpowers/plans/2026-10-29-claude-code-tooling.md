@@ -84,21 +84,21 @@ git commit -m "chore(claude): add the context7 MCP server"
 - Create: `.graphifyignore`
 - Modify: `.gitignore`
 
-- [ ] **Step 1: Ignore files**
+- [x] **Step 1: Ignore files**
 
 `.graphifyignore` with the owner's contents, byte for byte, from spec, [graphify: CLAUDE.md and ignore files](../specs/2026-10-29-claude-code-tooling-design.md#graphify-claudemd-and-ignore-files). `.gitignore` gains, in its style (a comment line, then the pattern): `# graphify's code map, built on each machine (ADR 0056)` and `graphify-out/`.
 
-- [ ] **Step 2: Install the hooks**
+- [x] **Step 2: Install the hooks**
 
 Run: `graphify hook install` in the repository root. Then `git status --short`, `git diff`, `cat .gitattributes 2>/dev/null` and `git config --local --get-regexp '^merge\.graphify'`, to see everything it wrote.
 
-- [ ] **Step 3: Trim to the spec**
+- [x] **Step 3: Trim to the spec**
 
 Following spec, [graphify: git hooks](../specs/2026-10-29-claude-code-tooling-design.md#graphify-git-hooks):
 - In each of the four `.husky/post-*` files, add `command -v graphify >/dev/null 2>&1 || exit 0` as the line after the shebang; change nothing else (the `_PINNED=` line stays).
 - Remove the merge driver: delete the `.gitattributes` line graphify added (delete the file if graphify created it), then `git config --local --unset-all merge.graphify.name` and `git config --local --unset-all merge.graphify.driver`.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run each and compare:
 - `graphify update .` → builds `graphify-out/graph.json`; `git status --short` does not list `graphify-out/`.
@@ -108,7 +108,7 @@ Run each and compare:
 - `env PATH=/usr/bin:/bin sh .husky/post-commit; echo $?` → no output, `0` (graphify missing).
 - `git config --local --get-regexp '^merge\.graphify'` → no output; `git grep -n graphify -- .gitattributes` → no match.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .husky/post-commit .husky/post-checkout .husky/post-merge .husky/post-rewrite .graphifyignore .gitignore docs/superpowers/plans/2026-10-29-claude-code-tooling.md
