@@ -280,20 +280,20 @@ git commit -m "feat(claude): move the project tracking steps into the /phase-tra
 **Interfaces:**
 - Consumes: the `item-add` command from Task 5's skill, for adding the `adr` issue to the project (link the skill's section rather than repeat it, or repeat the one command).
 
-- [ ] **Step 1: Write `SKILL.md`**
+- [x] **Step 1: Write `SKILL.md`**
 
 Following spec, [The /new-adr skill](../specs/2026-10-29-claude-code-tooling-design.md#the-new-adr-skill). Frontmatter: `name: new-adr`, a `description` naming the moments (a new ADR; a note on an earlier ADR's decision; checking an ADR's number before a PR). Body: the number (`git fetch`, then for each `origin/*` branch `git ls-tree --name-only <branch> docs/decisions/`, the highest `NNNN` plus one), the file's shape (take ADR 0056 as the model), every rule of today's `docs/decisions/` entry, the `adr` issue outside a phase (`gh issue create --label adr --title "ADR NNNN <title>"`, body as in [ADR issues](../../development/project-tracking.md#adr-issues), added to the project), and inside a phase the link to `docs/superpowers/specs/CLAUDE.md`.
 
-- [ ] **Step 2: Shrink the `docs/decisions/` entry**
+- [x] **Step 2: Shrink the `docs/decisions/` entry**
 
 It keeps what the folder is (ADR-style records, numbered `NNNN-short-title.md`, a new ADR for every significant decision) and becomes "for a new ADR, or a note on an earlier one, run `/new-adr`". The rules move to the skill.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 - Every rule of the old entry is in the skill: `git show HEAD:CLAUDE.md | grep -n "docs/decisions/\` —"`, read side by side.
 - The numbering command, run now, prints `0057` or higher (0056 exists on this branch); if an open branch holds a higher one, it prints that plus one.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .claude/skills/new-adr/ CLAUDE.md docs/superpowers/plans/2026-10-29-claude-code-tooling.md
