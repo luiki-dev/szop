@@ -237,11 +237,11 @@ git commit -m "feat(claude): skip graphify's guard for paths .graphifyignore lea
 - Modify: `CLAUDE.md` ("Project tracking")
 - Modify: `docs/development/project-tracking.md` (line 156, and a pointer to the skill)
 
-- [ ] **Step 1: Look up the IDs**
+- [x] **Step 1: Look up the IDs**
 
 Run: `gh project view 3 --owner luiki-dev --format json --jq .id` and `gh project field-list 3 --owner luiki-dev --format json`. Keep the project ID, the field IDs of Status, Started, Finished, Spec and Plan, and the option ID of each of the six statuses.
 
-- [ ] **Step 2: Write `SKILL.md`**
+- [x] **Step 2: Write `SKILL.md`**
 
 Following spec, [The /phase-tracking skill](../specs/2026-10-29-claude-code-tooling-design.md#the-phase-tracking-skill). Frontmatter: `name: phase-tracking` and a `description` naming every moment (a phase's brainstorm starts; the phase branch's first commit; a spec or plan commit; owner steps change; a decision while building; before a phase PR opens; the end of a phase; any open-point change). Body: one section per moment, holding every bullet of today's `CLAUDE.md` "Project tracking" ("During a phase" and "Open points"), each with its commands:
 - A project item's ID: `gh project item-add 3 --owner luiki-dev --url https://github.com/luiki-dev/szop/issues/<N> --format json --jq .id` (returns the existing item's ID).
@@ -251,18 +251,18 @@ Following spec, [The /phase-tracking skill](../specs/2026-10-29-claude-code-tool
 
 Link [project tracking](../../development/project-tracking.md) for the reasons and "How items move"; do not repeat them.
 
-- [ ] **Step 3: Shrink `CLAUDE.md` and point the guide to the skill**
+- [x] **Step 3: Shrink `CLAUDE.md` and point the guide to the skill**
 
 - `CLAUDE.md`, "Project tracking": the first paragraph stays as it is, its last sentence ("Every step below…") reworded to fit; then "Run `/phase-tracking`" with the moments of the description as a list, then the same for open-point changes. Everything else of the section goes.
 - `project-tracking.md`, line 156: "the `/phase-tracking` skill (`.claude/skills/phase-tracking/`) holds the steps and their `gh` commands; a change to this table changes the skill in the same commit." Under "Checking with gh", one line saying the field and option IDs are in the skill.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 - Every bullet of the old section is in the skill: `git show HEAD:CLAUDE.md | sed -n '/^## Project tracking/,/^## Working with Claude/p'`, then read it side by side with `SKILL.md`; list in the task summary any bullet reworded, none dropped.
 - The IDs work: `gh project item-add 3 --owner luiki-dev --url https://github.com/luiki-dev/szop/issues/311 --format json --jq .id` prints an ID; the IDs in the skill match `field-list`'s output.
 - The skill loads: `claude -p "List your skills whose name contains phase-tracking"` (or a new session's skill list) names it.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .claude/skills/phase-tracking/ CLAUDE.md docs/development/project-tracking.md docs/superpowers/plans/2026-10-29-claude-code-tooling.md

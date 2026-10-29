@@ -34,41 +34,20 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 
 ## Project tracking
 
-Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](docs/decisions/0027-open-points-on-github.md) and `docs/development/project-tracking.md`. **GitHub** (the issues and the fields of the [Szop project](https://github.com/users/luiki-dev/projects/3)) holds the status and the open points; **`roadmap.md`** holds each phase's plan and mirrors the status in its stage tables; **`docs/requirements/`** holds each requirement's acceptance criteria and their status ([ADR 0051](docs/decisions/0051-acceptance-criteria.md)). Every step below says which side it changes.
+Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](docs/decisions/0027-open-points-on-github.md) and `docs/development/project-tracking.md`. **GitHub** (the issues and the fields of the [Szop project](https://github.com/users/luiki-dev/projects/3)) holds the status and the open points; **`roadmap.md`** holds each phase's plan and mirrors the status in its stage tables; **`docs/requirements/`** holds each requirement's acceptance criteria and their status ([ADR 0051](docs/decisions/0051-acceptance-criteria.md)). The steps and their `gh` commands are in the `/phase-tracking` skill.
 
-During a phase:
+Run `/phase-tracking`:
 
-- **When a phase's brainstorm starts, before the first question:**
-  - On GitHub: the phase issue's Status → 🚧 In progress; Finished (the merge date) set on the previous phase's issue and on every `adr` issue closed since.
-  - On GitHub: read the phase's open-point issues (its sub-issues and the issues its **Also** section lists).
-- **During the brainstorm:** review with the owner the acceptance criteria the phase delivers of every requirement, and the whole list of a requirement whose last part the phase delivers and that is still ❔ Criteria not finalized; an earlier phase does not finalize a list ([ADR 0051](docs/decisions/0051-acceptance-criteria.md), decision 15, refined by [ADR 0050](docs/decisions/0050-seed-catalog-phase-details.md), decision 14).
-- **In the phase branch's first commit:**
-  - In the repo: the phase's row in the `roadmap.md` stage table → 🚧.
-  - On GitHub: the phase issue's Started field → that commit's date.
-- **When the spec or plan is committed:**
-  - In the repo: the phase's ADR is created in the spec's commit, at ✅ Accepted ([ADR 0054](docs/decisions/0054-leaner-documentation.md), decisions 3 and 4).
-  - In the repo: its link in the phase's row of the `roadmap.md` stage table; with the spec (or a bounded phase's first commit after its design), the criteria the phase delivers set to 🚧, the requirements it reviewed marked ✅ Criteria finalized, and the index updated.
-  - On GitHub: the phase issue's Spec or Plan field.
-- **When the phase's owner steps change:**
-  - On GitHub: owner-step issues added, or closed as not planned with the reason.
-  - In the repo: the phase entry's **Owner steps** in `roadmap.md` updated.
-- **During execution:** a decision taken while building goes into the phase ADR's "Settled while building", in the commit of the task that took it. ADR numbers are checked against `main` and the open branches when the ADR is created and again before the PR.
-- **Before opening the PR:**
-  - On GitHub: every open-point issue of the phase closed (with a "settled by" comment) or re-assigned; every whole-branch-review finding not fixed was listed to the owner, and each one the owner chose is an open-point issue by now (the rest are noted as declined in the phase ADR's "Settled while building"); the phase issue's body updated only when its **Also** changed.
-  - In the repo: the stage table row in line with GitHub, with the PR link; every criterion the PR delivers ✅, with a test whose name starts with its ID; each requirement's line and the index updated.
-  - In the PR description: `Closes #<phase issue>` and `Closes #<open-point issue>` for each one it settles.
-  - In the PR description: a "Token usage" section with the output of `scripts/token-usage.py --branch <the phase branch>`.
-- **At the end of a phase:** propose the next phase. The owner moves its issue and its open-point issues to 📌 Todo on GitHub.
-- **Never set ✅ Done on GitHub by hand:** merging the PR closes the issues, and the project's workflow sets it.
+- when a phase's brainstorm starts, before the first question, and during the brainstorm (the acceptance criteria review);
+- in the phase branch's first commit;
+- when the spec or plan is committed;
+- when the phase's owner steps change;
+- when a decision is taken while building;
+- before opening the phase's PR;
+- at the end of a phase;
+- never to set ✅ Done on GitHub by hand: merging the PR does it.
 
-Open points (all on GitHub; no document lists them):
-
-- **Something is left to a later phase or topic:** a new open-point issue with the next free `OP-` ID ([how to find it](docs/development/project-tracking.md#checking-with-gh)), labelled `open-point`, a sub-issue of the phase that will settle it (a candidate has none), and mentioned as a link where it came up.
-- **Part of an open point is done:** the part ticked in the issue with its PR; the issue re-parented to the phase doing the next part, its Status set to ⬜ Backlog, or 📌 Todo if that phase is already picked.
-- **An open point moves to another phase:** re-parented, with a History line in its body.
-- **An open point gains or loses a part in another phase:** that phase issue's **Also** section updated.
-- **An open point is dropped:** closed as not planned, with the reason as a comment.
-- **Anything else** (a phase split, a candidate picked up, an item blocked, an ADR made outside a phase): look up its row in [How items move](docs/development/project-tracking.md#how-items-move).
+Run it too for any open-point change: something left to a later phase or topic, part of an open point done, an open point moved, gaining or losing a part, or dropped, and for anything else that moves an item (a phase split, a candidate picked up, an item blocked, an ADR made outside a phase).
 
 ## Working with Claude
 
