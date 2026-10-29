@@ -153,7 +153,7 @@ Five workflows are on and three are off, as read through the API. Their settings
 
 ## How items move
 
-The project's `CLAUDE.md` repeats the events Claude handles most often, as steps in its "Project tracking" section; a change to this table changes that section in the same commit.
+The `/phase-tracking` skill (`.claude/skills/phase-tracking/`) holds the steps and their `gh` commands; a change to this table changes the skill in the same commit.
 
 | Event | On GitHub | Who |
 |---|---|---|
@@ -229,3 +229,5 @@ gh issue list --repo luiki-dev/szop --label open-point --state all --limit 500 -
 ```
 
 `gh` lists issues by creation, and the back-filled closed ones are the newest, so the top row is not the highest ID.
+
+The project, field and option IDs that `gh project item-edit` needs are in the `/phase-tracking` skill.

@@ -11,6 +11,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **ADR** | Architecture Decision Record | A short document recording one significant decision: its context, the options considered, the choice and its consequences. Ours live in `docs/decisions/`. |
 | **ALB** | Application Load Balancer | AWS's HTTP(S) load balancer: it decrypts HTTPS and forwards requests to healthy targets. Fronts Szop's demo. |
 | **ARN** | Amazon Resource Name | The unique identifier of an AWS resource, such as `arn:aws:ssm:eu-central-1:…:parameter/…`. |
+| **AST** | Abstract Syntax Tree | The tree a parser builds from source code. graphify reads code through it, which needs no AI model (see ADR 0056). |
 | **AWS** | Amazon Web Services | Amazon's cloud platform, the largest hyperscaler. Szop's demo environment runs on it (see ADR 0008). |
 | **AZ** | Availability Zone | One of several separate data centers within an AWS region, with independent power and networking. |
 | **CA** | Certificate Authority | An organisation whose signature on a TLS certificate vouches that the certificate belongs to the name it carries. A client trusts a list of CAs, a CA bundle; with `DATABASE_TLS=verify-full` the API trusts only Amazon's RDS bundle (see ADR 0033). |
@@ -60,7 +61,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **LCU** | Load Balancer Capacity Unit | The unit AWS bills a load balancer's traffic in, on top of its hourly price: new connections, active connections, bytes and rule evaluations, whichever is highest. A demo's traffic uses a tiny fraction of one. |
 | **LLM** | Large Language Model | An AI model trained on large amounts of text, such as the Claude models behind Claude Code. graphify sends docs through one to build its graph (see ADR 0031). |
 | **LTS** | Long-Term Support | A release line that receives fixes for an extended period. Even-numbered Node.js releases (22, 24, …) become LTS. |
-| **MCP** | Model Context Protocol | An open protocol that lets an AI assistant call tools and read data served by another program, such as graphify's query server (see ADR 0031). |
+| **MCP** | Model Context Protocol | An open protocol that lets an AI assistant call tools and read data served by another program, such as context7 (see ADR 0056). |
 | **MFA** | Multi-Factor Authentication | Logging in with a second proof besides the password, such as a code from an authenticator app. |
 | **MSW** | Mock Service Worker | A library that intercepts the app's HTTP requests at the network level and answers them with fake responses. Szop's component tests use it, so the real API client runs unchanged. |
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |

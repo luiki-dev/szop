@@ -26,6 +26,26 @@
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-git-push.ts"
           }
         ]
+      },
+      {
+        "matcher": "Bash|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/graphify-guard.ts search",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/graphify-guard.ts read",
+            "timeout": 10
+          }
+        ]
       }
     ]
   },

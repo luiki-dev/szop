@@ -1,0 +1,8 @@
+# keep docs out of the graph
+docs/
+*.md
+*.mdx
+*.pdf
+*.txt
+# add generated/vendored code if any, e.g.
+# src/generated/

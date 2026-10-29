@@ -67,7 +67,7 @@ The same work done at 400k of context costs about three times what it costs at 8
 
 **Compaction** replaces the conversation with a summary written by the model, so the next call starts from a small context again. `/compact` does it on demand, and can take an instruction about what the summary should keep (`/compact Task 3 is committed; the failing test in list.spec.ts is next`). Auto-compact does it by itself when the context reaches a threshold, set to 300k here ([The settings involved](#the-settings-involved)).
 
-A summary is lossy: details of the working state can go, and the session goes on with what the summary kept. A compacted session restarts at about 57–68k of context, a new session at about 48k: the system prompt, CLAUDE.md and the skills' descriptions. A new session that reads a committed spec or plan starts with less and carries a better hand-off than a summary, which is why a stage boundary is a restart, not a compaction.
+A summary is lossy: details of the working state can go, and the session goes on with what the summary kept. A compacted session restarts at about 57–68k of context, a new session at about 48k: the system prompt, CLAUDE.md and the skills' descriptions (the tracking and ADR rules load only with their skills, `/phase-tracking` and `/new-adr`, not in every session). A new session that reads a committed spec or plan starts with less and carries a better hand-off than a summary, which is why a stage boundary is a restart, not a compaction.
 
 ### Cost units
 
@@ -98,7 +98,7 @@ A new session needs only a short prompt naming the stage and its document. CLAUD
 | Plan | `Plan PH-NN from docs/superpowers/specs/<spec>.md` | the spec, the files it names |
 | Execution | `Execute the plan docs/superpowers/plans/<plan>.md` | the plan, `docs/superpowers/plans/CLAUDE.md` (the repo-wide rules; the plan does not repeat them), the spec |
 | Execution, continued | `Execute the plan docs/superpowers/plans/<plan>.md; tasks 1–3 are committed` | the plan, the progress ledger in `.superpowers/sdd/<plan>/progress.md`, `git log` |
-| Finishing | `Finish PH-NN: tracking and the PR` | the plan's last task, CLAUDE.md's "Before opening the PR", the branch's diff |
+| Finishing | `Finish PH-NN: tracking and the PR` | the plan's last task, `/phase-tracking`'s "Before opening the PR", the branch's diff |
 
 The ledger of a plan's workspace keeps each finished task, the rulings made along the way and the review findings deferred, so a new execution session picks up where the last one stopped without re-reading the whole conversation. The session that dispatches an implementer tells it to read `docs/superpowers/plans/CLAUDE.md` before its task. After the whole-branch review, the session that ran it lists the findings it did not fix to the owner; the owner chooses which become open-point issues, created in that session before the PR opens, and the rest are noted as declined in the phase ADR's "Settled while building". The ledger is where the findings wait until then.
 

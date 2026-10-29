@@ -13,6 +13,7 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
 - [7. Docker Desktop and the database](#7-docker-desktop-and-the-database)
 - [8. Terraform, tflint and the AWS CLI](#8-terraform-tflint-and-the-aws-cli)
 - [9. actionlint, zizmor and uv](#9-actionlint-zizmor-and-uv)
+  - [Optional: graphify](#optional-graphify)
 - [10. Check that everything works](#10-check-that-everything-works)
   - [The end-to-end journeys](#the-end-to-end-journeys)
 - [11. Run the API and the page](#11-run-the-api-and-the-page)
@@ -193,6 +194,15 @@ cd ~/workspace/szop && pnpm check:workflows
 - `pnpm check:workflows` prints `==> actionlint` and `==> zizmor` and ends with `No findings to report. Good job!`. A missing tool stops it with `FAIL: <tool> not found` and a pointer to this section. What it runs is in [Scripts](scripts.md).
 - The pre-commit hook needs these tools too: a commit that stages a workflow, a local action or `dependabot.yml` fails with `command not found` until they are installed.
 
+### Optional: graphify
+
+graphify builds a map of the code that Claude Code sessions query ([graphify](tools/graphify.md); [ADR 0056](../decisions/0056-claude-code-tooling.md), decision 3). Nothing else needs it, and the checks and the cloud sessions work without it. With uv from above:
+
+```bash
+uv tool install graphifyy
+graphify update .                                 # the first, code-only build
+```
+
 ## 10. Check that everything works
 
 ```bash
@@ -300,6 +310,8 @@ Open `http://localhost:8080`: the same page as `pnpm start`, served from inside 
 
 On every commit, a pre-commit hook formats and lints the staged files (a staged workflow under `.github/` goes through actionlint and zizmor, installed in section 9), and a commit-msg hook checks that the message follows Conventional Commits. See [husky and lint-staged](tools/husky-and-lint-staged.md) and [commitlint](tools/commitlint.md).
 
+The post-commit, post-checkout, post-merge and post-rewrite hooks update graphify's code map after the git operation they are named for. They do nothing when graphify is not installed ([graphify](tools/graphify.md)).
+
 ## 13. Claude Code sessions in the cloud
 
 Everything above sets up your own machine. A Claude Code session in the cloud runs in a fresh Linux container instead, created from an image, with the repository cloned into it, and thrown away after a period of inactivity ([ADR 0043](../decisions/0043-cloud-session-setup.md)). Nothing installed in one session is there in the next, so the tools the checks need are installed by a **setup script** that the environment runs when each session starts. The image has Node 22, pnpm, Docker's client, `psql` and Python; it lacks Node 24 (which `engines` requires), Terraform, tflint, Trivy, the AWS CLI, zizmor and actionlint.
@@ -331,6 +343,7 @@ A cloud environment reaches the internet through an egress proxy, and only the h
 | `developer.hashicorp.com` | Terraform's language and CLI |
 | `aquasecurity.github.io` | Trivy's rules and the syntax of its exceptions |
 | `aws.amazon.com` | prices, when a decision weighs cost |
+| `mcp.context7.com` | the context7 MCP server ([ADR 0056](../decisions/0056-claude-code-tooling.md)): current documentation of a library, on request |
 
 **For the MVP phases** ([Stage 4](../roadmap.md#stage-4-mvp)), the documentation of what the app is built with: `react.dev`, `reactrouter.com`, `tanstack.com`, `vite.dev`, `vitest.dev`, `fastify.dev`, `orm.drizzle.team`, `zod.dev`, `tailwindcss.com`, `playwright.dev`, `better-auth.com`, `typescriptlang.org`, `pnpm.io`, `www.postgresql.org` and `developer.mozilla.org`.
 
@@ -338,7 +351,7 @@ A cloud environment reaches the internet through an egress proxy, and only the h
 
 ### All hosts, to paste
 
-Every host of the three groups above, one per line, for *Network access*. Hosts the environment allows already do no harm there. Of these, `docs.github.com`, `developer.hashicorp.com`, `aquasecurity.github.io`, `aws.amazon.com` and the documentation of the MVP phases were refused on 2026-10-23; the rest answered.
+Every host of the three groups above, one per line, for *Network access*. Hosts the environment allows already do no harm there. Of these, `docs.github.com`, `developer.hashicorp.com`, `aquasecurity.github.io`, `aws.amazon.com` and the documentation of the MVP phases were refused on 2026-10-23; the rest answered. `mcp.context7.com` was added later and was not tested on that date.
 
 ```text
 nodejs.org
@@ -365,6 +378,7 @@ docs.github.com
 developer.hashicorp.com
 aquasecurity.github.io
 aws.amazon.com
+mcp.context7.com
 react.dev
 reactrouter.com
 tanstack.com
