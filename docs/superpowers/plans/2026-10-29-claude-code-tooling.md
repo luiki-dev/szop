@@ -127,22 +127,22 @@ Then check that the commit itself ran the hook: `graphify-out/graph.json`'s modi
 **Interfaces:**
 - Produces: the exact command graphify wires for its guard (expected `graphify hook-guard search` for `Bash|Grep` and `graphify hook-guard read` for `Read|Glob`, `timeout: 10`), which Task 4 calls from the wrapper. Write the observed entries into the task summary.
 
-- [ ] **Step 1: Run the install**
+- [x] **Step 1: Run the install**
 
 Run: `graphify claude install --project`, then `git status --short`, `git diff` and `ls .claude/skills .claude/CLAUDE.md 2>/dev/null`, to see everything it wrote. Note the two `PreToolUse` entries it added to `.claude/settings.json` (matcher, command, timeout).
 
-- [ ] **Step 2: Keep only the section, edited**
+- [x] **Step 2: Keep only the section, edited**
 
 Following spec, [graphify: CLAUDE.md and ignore files](../specs/2026-10-29-claude-code-tooling-design.md#graphify-claudemd-and-ignore-files):
 - In `CLAUDE.md`'s `## graphify` section, the "After modifying code, run `graphify update .`…" line becomes, exactly: "Before a graph query, if you changed code since the last commit, run `graphify update .` first (AST-only, no API cost)." The line about a committed `graph.json` goes. Keep graphify's markers (if any) around the section.
 - Remove the rest: `git checkout .claude/settings.json`, delete `.claude/skills/graphify/` and `.claude/CLAUDE.md`, remove any merge-driver line or git config it wrote again (as in Task 2, Step 3).
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `git status --short && git diff --stat`
 Expected: only `CLAUDE.md` (and this plan) changed. `grep -n "graphify" .claude/settings.json` → no match. `grep -n -i "graph.json" CLAUDE.md` → no line about committing it.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add CLAUDE.md docs/superpowers/plans/2026-10-29-claude-code-tooling.md
