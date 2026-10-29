@@ -331,6 +331,7 @@ A cloud environment reaches the internet through an egress proxy, and only the h
 | `developer.hashicorp.com` | Terraform's language and CLI |
 | `aquasecurity.github.io` | Trivy's rules and the syntax of its exceptions |
 | `aws.amazon.com` | prices, when a decision weighs cost |
+| `mcp.context7.com` | the context7 MCP server ([ADR 0056](../decisions/0056-claude-code-tooling.md)): current documentation of a library, on request |
 
 **For the MVP phases** ([Stage 4](../roadmap.md#stage-4-mvp)), the documentation of what the app is built with: `react.dev`, `reactrouter.com`, `tanstack.com`, `vite.dev`, `vitest.dev`, `fastify.dev`, `orm.drizzle.team`, `zod.dev`, `tailwindcss.com`, `playwright.dev`, `better-auth.com`, `typescriptlang.org`, `pnpm.io`, `www.postgresql.org` and `developer.mozilla.org`.
 
@@ -365,6 +366,7 @@ docs.github.com
 developer.hashicorp.com
 aquasecurity.github.io
 aws.amazon.com
+mcp.context7.com
 react.dev
 reactrouter.com
 tanstack.com

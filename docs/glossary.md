@@ -60,7 +60,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **LCU** | Load Balancer Capacity Unit | The unit AWS bills a load balancer's traffic in, on top of its hourly price: new connections, active connections, bytes and rule evaluations, whichever is highest. A demo's traffic uses a tiny fraction of one. |
 | **LLM** | Large Language Model | An AI model trained on large amounts of text, such as the Claude models behind Claude Code. graphify sends docs through one to build its graph (see ADR 0031). |
 | **LTS** | Long-Term Support | A release line that receives fixes for an extended period. Even-numbered Node.js releases (22, 24, …) become LTS. |
-| **MCP** | Model Context Protocol | An open protocol that lets an AI assistant call tools and read data served by another program, such as graphify's query server (see ADR 0031). |
+| **MCP** | Model Context Protocol | An open protocol that lets an AI assistant call tools and read data served by another program, such as context7 (see ADR 0056). |
 | **MFA** | Multi-Factor Authentication | Logging in with a second proof besides the password, such as a code from an authenticator app. |
 | **MSW** | Mock Service Worker | A library that intercepts the app's HTTP requests at the network level and answers them with fake responses. Szop's component tests use it, so the real API client runs unchanged. |
 | **MVP** | Minimum Viable Product | The smallest release that is useful on its own. In the requirements, `[MVP]` marks what the first release contains. |

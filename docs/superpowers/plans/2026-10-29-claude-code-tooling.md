@@ -49,26 +49,26 @@
 - Modify: `docs/glossary.md` (the MCP row, line 63)
 - Modify: `docs/development/setup.md` (section 13, "Worth allowing as well" and "All hosts, to paste")
 
-- [ ] **Step 1: Check the URL against context7's README**
+- [x] **Step 1: Check the URL against context7's README**
 
 Fetch `https://github.com/upstash/context7` (README, "Claude Code" install section). Expected: the remote HTTP server is `https://mcp.context7.com/mcp` and works without an API key. If it differs, use the README's URL and note it in ADR 0056's "Settled while building".
 
-- [ ] **Step 2: Write `.mcp.json`**
+- [x] **Step 2: Write `.mcp.json`**
 
 The JSON of spec, [context7](../specs/2026-10-29-claude-code-tooling-design.md#context7), byte for byte (with the URL from Step 1).
 
-- [ ] **Step 3: Docs**
+- [x] **Step 3: Docs**
 
 - `tools/context7.md`, in the shape of the other tool pages (for example `tools/stryker.md`): what it is, why (ADR 0056, decision 2: the new majors), `.mcp.json` explained, the one-time approval per machine, what is sent (library names and questions only), the lower rate limit without a key.
 - Glossary, MCP row: the example becomes context7 (ADR 0056) instead of graphify's query server (ADR 0031).
 - `setup.md`, section 13: `mcp.context7.com` under "Worth allowing as well" (why: the context7 MCP server, ADR 0056) and in "All hosts, to paste".
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `node -e 'JSON.parse(require("fs").readFileSync(".mcp.json","utf8"))' && pnpm format:check && claude mcp list`
 Expected: no error; `context7` listed (connected, or awaiting approval).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .mcp.json docs/development/tools/context7.md docs/glossary.md docs/development/setup.md docs/superpowers/plans/2026-10-29-claude-code-tooling.md
