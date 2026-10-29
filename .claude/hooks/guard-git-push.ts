@@ -29,7 +29,7 @@ const GIT_OPTIONS_WITH_VALUE = new Set([
 
 // Splits a shell command into segments (at ; & | and newlines) of words,
 // honouring quotes. Subshells and expansions are not interpreted.
-function parseSegments(command: string): string[][] {
+export function parseSegments(command: string): string[][] {
   const segments: string[][] = [];
   let words: string[] = [];
   let word: string | null = null;

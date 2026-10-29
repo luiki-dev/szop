@@ -165,7 +165,7 @@ git commit -m "docs(claude): add graphify's section with the update-before-query
 
 The behaviour is spec, [graphify: the guard wrapper](../specs/2026-10-29-claude-code-tooling-design.md#graphify-the-guard-wrapper); this task pins how it is tested and the edges.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `graphify-guard.test.ts`, in the style of `guard-git-push.test.ts`, running the hook with `spawnSync(process.execPath, [script, kind], { input, cwd: repo, env: { ...env, CLAUDE_PROJECT_DIR: repo, PATH } , encoding: "utf8" })`.
 
@@ -191,12 +191,12 @@ Setup (`beforeAll`), in a `mkdtempSync` folder: `git init`; `.graphifyignore` wi
 | graphify missing | read | `Read` of apps/x.ts, the git-only `PATH` | `""` |
 | Invalid JSON | read | stdin `"not json"` | `""` |
 
-- [ ] **Step 2: Run them to see them fail**
+- [x] **Step 2: Run them to see them fail**
 
 Run: `pnpm vitest run --project hooks .claude/hooks/graphify-guard.test.ts`
 Expected: FAIL (the script does not exist).
 
-- [ ] **Step 3: Write `.claude/hooks/graphify-guard.ts`**
+- [x] **Step 3: Write `.claude/hooks/graphify-guard.ts`**
 
 A header comment like the push guard's (what it does, ADR 0056 decisions 5 and 6, input and exit codes, "fails open: it never blocks", only `node:` imports). Main, under `import.meta.main`, wrapped in one `try`/`catch` that exits 0 silently:
 - Paths per tool as the spec lists; Bash: the words of `parseSegments(command).flat()` that `existsSync(resolve(cwd, word))`.
@@ -206,22 +206,22 @@ A header comment like the push guard's (what it does, ADR 0056 decisions 5 and 6
 
 In `guard-git-push.ts`, only `function parseSegments` → `export function parseSegments`.
 
-- [ ] **Step 4: Run the tests**
+- [x] **Step 4: Run the tests**
 
 Run: `pnpm vitest run --project hooks`
 Expected: PASS, the push guard's tests included.
 
-- [ ] **Step 5: Wire it in `.claude/settings.json`**
+- [x] **Step 5: Wire it in `.claude/settings.json`**
 
 Two `PreToolUse` entries after the push guard's: matcher `Bash|Grep`, command `node "$CLAUDE_PROJECT_DIR"/.claude/hooks/graphify-guard.ts search`; matcher `Read|Glob`, command `… read`; both `"timeout": 10` (or what Task 3 observed).
 
-- [ ] **Step 6: Check by hand**
+- [x] **Step 6: Check by hand**
 
 Run (graph built in Task 2):
 `echo '{"tool_name":"Read","tool_input":{"file_path":"'$PWD'/apps/api/src/app.ts"},"cwd":"'$PWD'"}' | CLAUDE_PROJECT_DIR=$PWD node .claude/hooks/graphify-guard.ts read`
 Expected: graphify's nudge for `app.ts` (its symbols). The same with `docs/roadmap.md` → no output. Then `pnpm check` → passes.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add .claude/hooks/graphify-guard.ts .claude/hooks/graphify-guard.test.ts .claude/hooks/guard-git-push.ts .claude/settings.json docs/superpowers/plans/2026-10-29-claude-code-tooling.md
