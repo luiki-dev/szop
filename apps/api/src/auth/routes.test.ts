@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
+import { createAuth } from "./auth.ts";
 import { sameOrigin } from "../test/auth.ts";
 import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
@@ -34,7 +35,7 @@ describe("/api/auth", () => {
     });
   }
 
-  it("ACC-1.4: signs in anonymously: a cookie, an anonymous user, no workspace", async () => {
+  it("signs in anonymously: a cookie, an anonymous user, no workspace", async () => {
     const response = await signInRequest();
 
     expect(response.statusCode).toBe(200);
@@ -70,7 +71,7 @@ describe("/api/auth", () => {
     expect(response.statusCode).toBe(415);
   });
 
-  it("NFR-4.9: on an https origin the cookie is __Secure-, HttpOnly, Secure, SameSite=Lax, Path=/, without Domain", async () => {
+  it("NFR-4.9: on an https origin the cookie is __Host-, HttpOnly, Secure, SameSite=Lax, Path=/, without Domain", async () => {
     app = buildApp({
       config: testConfig({ appOrigin: "https://szop.test" }),
       db: database.db,
@@ -85,7 +86,7 @@ describe("/api/auth", () => {
 
     expect(response.statusCode).toBe(200);
     const header = [response.headers["set-cookie"]].flat().join("\n");
-    expect(header).toMatch(/^__Secure-better-auth\.session_token=/);
+    expect(header).toMatch(/^__Host-better-auth\.session_token=/);
     expect(header).toMatch(/; HttpOnly/i);
     expect(header).toMatch(/; Secure/i);
     expect(header).toMatch(/; SameSite=Lax/i);
@@ -100,5 +101,19 @@ describe("/api/auth", () => {
     expect(header).toMatch(/; HttpOnly/i);
     expect(header).not.toMatch(/; Secure/i);
     expect(header).toMatch(/; SameSite=Lax/i);
+  });
+
+  it("hands the API's trusted proxies to Better Auth's rate limiter", () => {
+    const config = testConfig({ trustedProxies: ["10.0.0.0/16"] });
+    app = buildApp({ config, db: database.db, catalog: testCatalog });
+    const auth = createAuth({
+      db: database.db,
+      secret: config.betterAuthSecret,
+      origin: config.appOrigin,
+      trustedProxies: config.trustedProxies,
+    });
+    expect(auth.options.advanced.ipAddress.trustedProxies).toEqual([
+      "10.0.0.0/16",
+    ]);
   });
 });

@@ -8,13 +8,18 @@ const day = 24 * 60 * 60;
 
 // Better Auth over our Drizzle tables, with anonymous sessions only. Its
 // cookie is HttpOnly and SameSite=Lax by default, with no Domain. On an https
-// origin it is Secure and named `__Secure-better-auth.session_token`:
-// Better Auth always prefixes `__Secure-` and cannot yield `__Host-` (ADR 0057).
+// origin the session cookie is named `__Host-better-auth.session_token` and
+// every cookie is Secure (ADR 0057). `useSecureCookies` is false: left to its
+// default it follows the https baseURL and adds `__Secure-` in front of the name.
 export function createAuth(options: {
   db: Database;
   secret: string;
   origin: string;
+  // The API's TRUSTED_PROXIES, so the rate limiter resolves the client IP
+  // from X-Forwarded-For as the API does (ADR 0057).
+  trustedProxies?: string[];
 }) {
+  const https = options.origin.startsWith("https:");
   return betterAuth({
     secret: options.secret,
     baseURL: options.origin,
@@ -33,7 +38,14 @@ export function createAuth(options: {
     account: { modelName: "accounts" },
     verification: { modelName: "verifications" },
     advanced: {
-      useSecureCookies: options.origin.startsWith("https:"),
+      useSecureCookies: false,
+      ipAddress: { trustedProxies: options.trustedProxies ?? [] },
+      ...(https && {
+        defaultCookieAttributes: { secure: true },
+        cookies: {
+          session_token: { name: "__Host-better-auth.session_token" },
+        },
+      }),
       database: { generateId: "uuid" },
     },
     plugins: [anonymous()],

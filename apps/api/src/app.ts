@@ -89,6 +89,7 @@ export function buildApp({
     db,
     secret: config.betterAuthSecret,
     origin: config.appOrigin,
+    trustedProxies: config.trustedProxies,
   });
   app.register(authRoutes, { prefix: "/api", auth });
 
