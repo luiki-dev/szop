@@ -32,14 +32,14 @@ Workspace quotas:
 
 ## LIM-2
 
-🎯 [MVP] · ❔ Draft (0 of 2) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (0 of 2) · ❔ Criteria not finalized
 
 Text lengths: names (list, item, product, category, template, unit) at most 100 characters; item notes at most 500 characters. Forms enforce the same limits.
 
 | ID | Criterion | Status |
 |---|---|---|
-| LIM-2.1 | A list, item, product, category, template or unit name is at most 100 characters; an item's note is at most 500. | ❔ Draft |
-| LIM-2.2 | A form refuses a text over its limit before sending it, with the same limit the API applies. | ❔ Draft |
+| LIM-2.1 | A list, item, product, category, template or unit name is at most 100 characters; an item's note is at most 500. | 🚧 [PH-16a](../roadmap.md#ph-16a-guests-first-list) (list names) |
+| LIM-2.2 | A form refuses a text over its limit before sending it, with the same limit the API applies. | 🚧 [PH-16a](../roadmap.md#ph-16a-guests-first-list) (list names) |
 
 ## LIM-3
 

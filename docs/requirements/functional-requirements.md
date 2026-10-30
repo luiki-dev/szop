@@ -113,8 +113,8 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [LST-1](LST-shopping-lists.md#lst-1) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
-| [LST-2](LST-shopping-lists.md#lst-2) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [LST-1](LST-shopping-lists.md#lst-1) | 🎯 MVP | 🚧 In progress | 0 of 5 | ❔ Not finalized |
+| [LST-2](LST-shopping-lists.md#lst-2) | 🎯 MVP | 🚧 In progress | 0 of 3 | ❔ Not finalized |
 | [LST-3](LST-shopping-lists.md#lst-3) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
 | [LST-4](LST-shopping-lists.md#lst-4) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
 | [LST-5](LST-shopping-lists.md#lst-5) | 🎯 MVP | ❔ Draft | 0 of 1 | ❔ Not finalized |
@@ -195,7 +195,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [LIM-1](LIM-limits.md#lim-1) | 🎯 MVP | ❔ Draft | 0 of 8 | ❔ Not finalized |
-| [LIM-2](LIM-limits.md#lim-2) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [LIM-2](LIM-limits.md#lim-2) | 🎯 MVP | 🚧 In progress | 0 of 2 | ❔ Not finalized |
 | [LIM-3](LIM-limits.md#lim-3) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
 | [LIM-4](LIM-limits.md#lim-4) | 🎯 MVP | ❔ Draft | 0 of 10 | ❔ Not finalized |
 
@@ -284,7 +284,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 - AI-driven list creation for recipes, events, projects and other multi-product shopping
 - Social login (Google and similar)
 - Multiple store layouts (category orderings) per user, selectable per list
-- Manual reordering of items on a list
+- Manual reordering of lists and of items on a list (drag and drop)
 - Offline check-off with sync on reconnect
 - Full offline editing
 - Installable app: a web app manifest and a home-screen icon, together with offline use
