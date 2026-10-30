@@ -107,27 +107,37 @@ All bodies are serialized through schemas in `packages/shared`; errors use the o
 
 ### The screens
 
-Mockups of the three screens, light and dark, on a phone and on a desktop, are made and approved in a session of their own **before the plan is written**, and added here and to `docs/architecture/visual-design/` _(the owner's choice)_. They settle where ⋮ sits next to the raccoon tile, the peeking raccoon and the muted empty page. The plan builds the screens as the approved mockups show them.
+The three screens were drawn as mockups and approved in a session of their own before the plan, on a phone and on a desktop from `lg`, light and dark ([ADR 0057](../../decisions/0057-guests-first-list-phase-details.md), decision 20). The plan builds the screens as the mockups show them; the mockups are drawings, so the tokens and this text win over their pixels. They stay next to this spec: they are not final designs, and the screens of the phases that change the design move to `docs/architecture/visual-design/` together after the last of them _(the owner's choice, [OP-113](https://github.com/luiki-dev/szop/issues/316))_.
+
+![The lists page: on a phone, empty with the grey raccoon and "Create your first list", in light and dark; four cards, newest first, with a long name cut, in light and dark; skeleton cards while loading; on a desktop, empty in light and with lists in dark, "New list" in the page's header](2026-10-30-PH-16a-guests-first-list/lists-page.png)
+
+![A new list: on a phone and a desktop, light and dark, the header with ←, the focused name field showing "List name", and the raccoon tile; below, "Nothing on this list yet" and the peeking raccoon](2026-10-30-PH-16a-guests-first-list/new-list.png)
+
+![An empty list: on a phone, light and dark, the header with ←, the title with a dotted underline, ⋮ and the raccoon tile, and the raccoon peeking in from the left edge; ⋮ open with "Rename"; on a desktop, light and dark, the raccoon peeking in from the right edge](2026-10-30-PH-16a-guests-first-list/list-screen-empty.png)
 
 **The lists page, `/`** (the home screen; replaces the Start page, and "Lists" replaces "Start" in the menu; `apps/web/src/start/` is removed, and the tests and journeys that open Start are rewritten for the lists page):
 
 - with lists: one card per list, newest first, showing only the name, cut with "…" when too long; a card is a link to `/lists/:id` and has no other action;
-- with no list: the raccoon and "Create your first list", both in light, muted greys;
+- the content column is the shell's, at most 720 px and centered; a long name never widens it (`min-w-0` on the column and the card);
+- with no list: the raccoon and "Create your first list", centered, in the "Soft" greys: the raccoon in grayscale at 55% opacity, the text in `muted-foreground` at 20 px semibold (4.9:1 on the light page). Lighter text would fail [NFR-2](../../requirements/NFR-non-functional-requirements.md#nfr-2)'s contrast;
 - "+ New list": pinned at the bottom on a phone, in the page's header from `lg`, as on [the navigation mockup](../../architecture/visual-design/navigation.png); a sticky bar never covers the focused element ([APP-1](../../requirements/APP-app-wide-behavior.md#app-1).8);
-- states: loading (skeleton cards), failing to load (the error card with "Try again", as on the catalog page), empty, long names, dark mode.
+- states: loading (skeleton cards in `card`, pulsing with `motion-safe:animate-pulse` as on the catalog page), failing to load (the error card with "Try again", as on the catalog page), empty, long names, dark mode.
 
 **A new list, `/lists/new`:**
 
-- the list screen's header with ← and the name field, focused, with a visible label or an accessible name ("List name");
+- the list screen's header with ←, the name field, focused, and the raccoon tile; no ⋮, since there is nothing to rename yet _(Claude's call)_;
+- the field has the placeholder "List name" and the same accessible name, with no visible label: the third exception to "labels are always visible", after the add bar and the catalog's search, since a label would push the header down _(Claude's call)_;
+- the body is the empty list's ("Nothing on this list yet" and the peeking raccoon), so only the address changes when Enter creates the list _(Claude's call)_;
 - Enter with a valid name creates the list (see [Sending changes from the SPA](#sending-changes-from-the-spa)) and replaces the address with `/lists/<id>` without a new history entry, so ← and Back return to the lists page;
 - Esc, or leaving with ← while the name is empty, returns to the lists page and stores nothing; Enter with an empty name does nothing;
 - a name over 100 characters is refused before sending, with a message ([LIM-2](../../requirements/LIM-limits.md#lim-2).2).
 
 **A list, `/lists/:id`:**
 
-- the header: ← back to the lists page in place of ☰ ([APP-1](../../requirements/APP-app-wide-behavior.md#app-1).6), the name, the raccoon tile, and a ⋮ menu whose one item is "Rename"; where ⋮ sits next to the raccoon tile is settled on the mockup;
+- the header: ← back to the lists page in place of ☰ ([APP-1](../../requirements/APP-app-wide-behavior.md#app-1).6), the name, a ⋮ menu whose one item is "Rename", and the raccoon tile in the corner, ⋮ just before it;
 - the name is an editable field: a click or "Rename" focuses it; Enter or leaving the field saves a changed, valid name; Esc puts the old name back; an empty name is not saved;
-- the body: "Nothing on this list yet", with the raccoon peeking in from the bottom edge, cut halfway between its eyes and its nose; decorative, hidden from screen readers;
+- the field at rest reads as the title (Gabarito 800, cut with "…"), with a dotted 2 px underline in `input` as the only hint that it can be changed; focused, it becomes a `card` field with `rounded-control` corners and the 3 px `ring`. The same field is the name field of a new list;
+- the body: "Nothing on this list yet" in `muted-foreground`, and the raccoon peeking in, in the "Soft" greys of the lists page: the top of its head, cut 5 px (at a 200 px head) below its eyes. On a phone it peeks in from the left edge, halfway down, turned 90° to the right, so [PH-17a](../../roadmap.md#ph-17a-items-on-a-list)'s add bar at the bottom does not cover it; from `lg` it peeks in from the content area's right edge, turned 90° to the left. Decorative, hidden from screen readers;
 - a list that is not found (another workspace's, or deleted elsewhere) shows the not-found state of the catalog's error card pattern with a link to the lists page; the app-wide not-found page is [PH-16c](../../roadmap.md#ph-16c-managing-lists)'s;
 - the page's title in the tab is the list's name ("Weekly shop · Szop").
 
@@ -208,6 +218,7 @@ Each criterion's test name starts with its ID.
 - `docs/development/testing.md`: testing the session by moving `expires_at`; the lists journey.
 - `docs/development/setup.md` and `apps/api/.env.example`: the new environment variables.
 - `docs/operations/demo-environment.md`: the Better Auth secret now read by the app.
+- `docs/architecture/visual-design.md`: the title field (at rest with its dotted underline, focused), the "List name" placeholder as the third exception in "Forms and focus", the peeking raccoon, and "Create your first list" as the example of an empty state. The screens themselves stay in this spec.
 - `docs/glossary.md`: UUIDv7, anonymous session, sliding expiration.
 - `docs/requirements/`: the reworded and new criteria, statuses and index.
 - `docs/requirements/functional-requirements.md`: the future extension "Manual reordering of lists and of items on a list (drag and drop)" ([ADR 0057](../../decisions/0057-guests-first-list-phase-details.md), decision 6). Done in the spec's commit.
