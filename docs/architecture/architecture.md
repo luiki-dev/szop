@@ -100,6 +100,8 @@ Dependencies (database client, email sender, clock) are passed in explicitly whe
 
 **As built in [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only)** ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md)): `src/catalog/` holds the first feature module, without a service or a repository, since it only reads a file: `seed.ts` parses and checks the seed (`parseSeed`, `loadSeed`), `routes.ts` serves `GET /api/catalog`. `src/errors.ts` holds the error handler (`setErrorHandler`) and `sendError`, which the not-found handler in `src/web/routes.ts` calls too ([Errors](#errors)). `buildApp` sets the validator and serializer compilers of `fastify-type-provider-zod` once, so every route that declares a schema is validated and serialized through the shared Zod schemas; a route returns its body and Fastify refuses to send one that does not match, as a 500.
 
+**As built in PH-16a** ([ADR 0057](../decisions/0057-guests-first-list-phase-details.md)): `src/auth/auth.ts` creates Better Auth over the Drizzle tables (anonymous plugin), `auth/routes.ts` mounts it at `/api/auth/*` after the web baseline, and `auth/session.ts` holds `sessionHook`, a `preHandler` that sets `request.user` (`{ id }` or `null`) and forwards Better Auth's `Set-Cookie`. A session is a row in `sessions`, valid 30 days; a read after one day moves `expires_at` 30 days ahead and renews the cookie, a cookie cache is off, and deleting the row ends the session at once. The user's ID is a `uuidv7()` made by the database.
+
 ### Request lifecycle
 
 1. The request reaches Fastify.

@@ -10,6 +10,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
   - [Unsafe requests](#unsafe-requests)
   - [Reading the log](#reading-the-log)
   - [Testing a hook before its routes exist](#testing-a-hook-before-its-routes-exist)
+  - [Testing the session](#testing-the-session)
   - [Testing the served SPA](#testing-the-served-spa)
 - [Writing a database test](#writing-a-database-test)
 - [Writing a component test](#writing-a-component-test)
@@ -193,6 +194,10 @@ app.route({
 ```
 
 The route answers 200, so a test sees whether the hook let the request through. Name it `/api/test-…`, so it cannot be mistaken for a real one. Once a real route exists, a test of the hook may use it instead.
+
+### Testing the session
+
+`test/auth.ts` holds `signIn(app)`, which signs in anonymously and returns the `cookie` header for later `inject` calls, and `sameOrigin`, the headers of a request from the app itself. To test a session's lifetime, move its row instead of waiting: `UPDATE sessions SET expires_at = now() + interval '2 days'` makes the next read renew it, and a past `expires_at` or a deleted row makes `request.user` null. A route behind `sessionHook` is tested on a throwaway route, as in [Testing a hook before its routes exist](#testing-a-hook-before-its-routes-exist).
 
 ### Testing the served SPA
 

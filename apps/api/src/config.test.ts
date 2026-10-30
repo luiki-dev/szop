@@ -15,6 +15,8 @@ const valid = {
   WEB_ROOT: "../web/dist",
   TRUSTED_PROXIES: "none",
   GIT_COMMIT: "0123456789abcdef0123456789abcdef01234567",
+  BETTER_AUTH_SECRET: "0123456789abcdef0123456789abcdef",
+  APP_ORIGIN: "http://localhost:5173",
 };
 
 const names = Object.keys(valid);
@@ -46,7 +48,30 @@ describe("loadConfig", () => {
       webRoot: resolve("../web/dist"),
       trustedProxies: [],
       commit: "0123456789abcdef0123456789abcdef01234567",
+      betterAuthSecret: "0123456789abcdef0123456789abcdef",
+      appOrigin: "http://localhost:5173",
     });
+  });
+
+  it("refuses a BETTER_AUTH_SECRET under 32 characters, without echoing it", () => {
+    const secret = "a".repeat(31);
+    const message = errorFor({ ...valid, BETTER_AUTH_SECRET: secret });
+    expect(message).toContain("BETTER_AUTH_SECRET");
+    expect(message).not.toContain(secret);
+  });
+
+  it.each(["http://localhost/app", "ftp://localhost", "localhost:5173"])(
+    "refuses the APP_ORIGIN %s",
+    (value) => {
+      expect(errorFor({ ...valid, APP_ORIGIN: value })).toContain("APP_ORIGIN");
+    },
+  );
+
+  it("normalizes APP_ORIGIN to an origin", () => {
+    expect(
+      loadConfig({ ...valid, APP_ORIGIN: "https://szop.dzwoniec.com/" })
+        .appOrigin,
+    ).toBe("https://szop.dzwoniec.com");
   });
 
   it("ignores variables it does not know", () => {

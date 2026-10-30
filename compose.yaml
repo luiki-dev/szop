@@ -22,6 +22,10 @@ x-app: &app
     DATABASE_PASSWORD: szop
     DATABASE_TLS: none
     TRUSTED_PROXIES: none
+    BETTER_AUTH_SECRET: development-only-secret-change-me-0123456789
+    # The address the browser opens: the app profile's published port; the
+    # scale profile sets its own below.
+    APP_ORIGIN: http://localhost:8080
   # Proves the API writes nothing to disk (logs go to stdout). On ECS the
   # root filesystem stays writable, for ECS Exec.
   read_only: true
@@ -92,12 +96,14 @@ services:
     environment:
       <<: *app-environment
       DATABASE_NAME: szop_scale
+      APP_ORIGIN: http://localhost:8081
   app-b:
     <<: *app
     profiles: [scale]
     environment:
       <<: *app-environment
       DATABASE_NAME: szop_scale
+      APP_ORIGIN: http://localhost:8081
   # Stands in for the load balancer: sends each request to app-a or app-b in
   # turn (compose/nginx-scale.conf).
   nginx:

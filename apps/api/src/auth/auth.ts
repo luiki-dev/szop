@@ -6,8 +6,10 @@ import * as schema from "../db/schema.ts";
 
 const day = 24 * 60 * 60;
 
-// Better Auth over our Drizzle tables. Task 2 completes the options and
-// mounts it on Fastify.
+// Better Auth over our Drizzle tables, with anonymous sessions only. Its
+// cookie is HttpOnly and SameSite=Lax by default, with no Domain. On an https
+// origin it is Secure and named `__Secure-better-auth.session_token`:
+// Better Auth always prefixes `__Secure-` and cannot yield `__Host-` (ADR 0057).
 export function createAuth(options: {
   db: Database;
   secret: string;
@@ -20,17 +22,20 @@ export function createAuth(options: {
     database: drizzleAdapter(options.db, {
       provider: "pg",
       schema: {
-        user: schema.users,
-        session: schema.sessions,
-        account: schema.accounts,
-        verification: schema.verifications,
+        users: schema.users,
+        sessions: schema.sessions,
+        accounts: schema.accounts,
+        verifications: schema.verifications,
       },
     }),
     user: { modelName: "users" },
     session: { modelName: "sessions", expiresIn: 30 * day, updateAge: day },
     account: { modelName: "accounts" },
     verification: { modelName: "verifications" },
-    advanced: { database: { generateId: "uuid" } },
+    advanced: {
+      useSecureCookies: options.origin.startsWith("https:"),
+      database: { generateId: "uuid" },
+    },
     plugins: [anonymous()],
   });
 }

@@ -5,6 +5,8 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import { createAuth } from "./auth/auth.ts";
+import { authRoutes } from "./auth/routes.ts";
 import { catalogRoutes } from "./catalog/routes.ts";
 import type { Config } from "./config.ts";
 import type { Database } from "./db/database.ts";
@@ -80,6 +82,15 @@ export function buildApp({
   app.register(headers);
   app.register(crossSite);
   app.register(jsonOnly);
+
+  // Better Auth over this app's database. Null until a session hook sets it.
+  app.decorateRequest("user", null);
+  const auth = createAuth({
+    db,
+    secret: config.betterAuthSecret,
+    origin: config.appOrigin,
+  });
+  app.register(authRoutes, { prefix: "/api", auth });
 
   // Each feature's routes are a plugin; later ones get their services as
   // plugin options.

@@ -192,6 +192,7 @@ Since [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) Zod does three more 
 - The cookie is `HttpOnly` (JavaScript cannot read it, so injected scripts cannot steal it), `Secure` (sent only over HTTPS) and `SameSite=Lax`. `Lax` withholds the cookie from requests other sites trigger in the background (a form posted to us, an image, a script's `fetch`), but still sends it when the user follows a link to us from elsewhere, so they arrive logged in. "Site" means the registrable domain, so every subdomain of the same domain counts as the same site. `SameSite` alone is therefore not a full defence against cross-site request forgery; see [section 13](#13-web-security-in-the-browser).
 - The browser attaches the cookie to every request to our domain automatically. The server looks the session up and knows who is asking. Logging out, or revoking a session, simply deletes the row.
 - **Anonymous users** are real users with a flag: they get a session and a workspace without email or password, until they register.
+- **As built in PH-16a:** Better Auth's **anonymous plugin** creates the user on a `POST /api/auth/sign-in/anonymous`. The session lasts 30 days with **sliding expiration**: a request after more than a day moves the expiry 30 days ahead again, and the API forwards the fresh cookie, so a guest who only reads keeps the session. Our `sessionHook` asks Better Auth who the cookie belongs to; a deleted or expired row means no user. See [Better Auth](../development/tools/better-auth.md).
 
 ## 11. The monorepo
 

@@ -1,0 +1,104 @@
+import { sql } from "drizzle-orm";
+import type { FastifyInstance } from "fastify";
+import { afterEach, describe, expect, it } from "vitest";
+import { buildApp } from "../app.ts";
+import { sameOrigin } from "../test/auth.ts";
+import { testCatalog } from "../test/catalog.ts";
+import { testConfig } from "../test/config.ts";
+import { useTestDatabase } from "../test/database.ts";
+import type { Config } from "../config.ts";
+
+describe("/api/auth", () => {
+  const database = useTestDatabase();
+  let app: FastifyInstance;
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  function start(overrides: Partial<Config> = {}): FastifyInstance {
+    app = buildApp({
+      config: testConfig(overrides),
+      db: database.db,
+      catalog: testCatalog,
+    });
+    return app;
+  }
+
+  function signInRequest(headers: Record<string, string> = sameOrigin) {
+    return start().inject({
+      method: "POST",
+      url: "/api/auth/sign-in/anonymous",
+      headers,
+      payload: {},
+    });
+  }
+
+  it("ACC-1.4: signs in anonymously: a cookie, an anonymous user, no workspace", async () => {
+    const response = await signInRequest();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.cookies).toHaveLength(1);
+    const users = await database.db.execute<{
+      id: string;
+      is_anonymous: boolean;
+    }>(sql`SELECT id, is_anonymous FROM users`);
+    expect(users.rows).toHaveLength(1);
+    expect(users.rows[0]?.is_anonymous).toBe(true);
+    expect(users.rows[0]?.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    );
+    const workspaces = await database.db.execute(sql`SELECT 1 FROM workspaces`);
+    expect(workspaces.rows).toHaveLength(0);
+  });
+
+  it("answers 403 to a sign-in without Sec-Fetch-Site and Origin", async () => {
+    const response = await signInRequest({
+      "content-type": "application/json",
+    });
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({
+      error: { code: "forbidden_cross_site" },
+    });
+  });
+
+  it("answers 415 to a sign-in that is not JSON", async () => {
+    const response = await signInRequest({
+      ...sameOrigin,
+      "content-type": "text/plain",
+    });
+    expect(response.statusCode).toBe(415);
+  });
+
+  it("NFR-4.9: on an https origin the cookie is __Secure-, HttpOnly, Secure, SameSite=Lax, Path=/, without Domain", async () => {
+    app = buildApp({
+      config: testConfig({ appOrigin: "https://szop.test" }),
+      db: database.db,
+      catalog: testCatalog,
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/auth/sign-in/anonymous",
+      headers: { ...sameOrigin, origin: "https://szop.test" },
+      payload: {},
+    });
+
+    expect(response.statusCode).toBe(200);
+    const header = [response.headers["set-cookie"]].flat().join("\n");
+    expect(header).toMatch(/^__Secure-better-auth\.session_token=/);
+    expect(header).toMatch(/; HttpOnly/i);
+    expect(header).toMatch(/; Secure/i);
+    expect(header).toMatch(/; SameSite=Lax/i);
+    expect(header).toMatch(/; Path=\//i);
+    expect(header).not.toMatch(/; Domain=/i);
+  });
+
+  it("NFR-4.9: on an http origin the cookie has no prefix and no Secure", async () => {
+    const response = await signInRequest();
+    const header = [response.headers["set-cookie"]].flat().join("\n");
+    expect(header).toMatch(/^better-auth\.session_token=/);
+    expect(header).toMatch(/; HttpOnly/i);
+    expect(header).not.toMatch(/; Secure/i);
+    expect(header).toMatch(/; SameSite=Lax/i);
+  });
+});

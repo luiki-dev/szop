@@ -13,3 +13,4 @@ export {
   type OrderedCategory,
 } from "./catalog.ts";
 export { compareNames } from "./names.ts";
+export { uuidv7 } from "./uuid.ts";

@@ -19,6 +19,8 @@ export function testConfig(overrides: Partial<Config> = {}): Config {
     webRoot: "/nonexistent/szop-web-root",
     trustedProxies: [],
     commit: "unknown",
+    betterAuthSecret: "test-secret-".padEnd(32, "x"),
+    appOrigin: "http://localhost",
     ...overrides,
   };
 }

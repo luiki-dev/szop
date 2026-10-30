@@ -73,6 +73,7 @@ const overrides = {
   PORT: port,
   LOG_LEVEL: "warn",
   WEB_ROOT: fileURLToPath(webDist),
+  APP_ORIGIN: `http://127.0.0.1:${port}`,
 };
 const api = spawn(process.execPath, ["src/server.ts"], {
   cwd: apiDir,
