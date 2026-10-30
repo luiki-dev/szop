@@ -54,3 +54,9 @@ Criteria move between phases with the split: renaming ([LST-1](../requirements/L
 - The API reads `BETTER_AUTH_SECRET`. On the demo, the task reads it from the parameter `infra/base` already holds (`/szop/better-auth-secret`), so the task role's permission and the task definition change, and `infra/base` is applied from the branch ([ADR 0008](0008-hosting.md), decisions 21 and 22).
 - The guest cleanup of PH-31 removes anonymous users whose session has expired and those who have no workspace; both stay in the database until then.
 - `architecture.md` no longer says that creating the anonymous user creates its workspace.
+
+## Settled while building
+
+- **Task 1: Better Auth's generated tables were kept apart from its relations.** The CLI (1.4.21, run with `pnpm dlx` against the installed `better-auth` 1.7.14) also writes Drizzle `relations`; `auth-schema.ts` leaves them out, as nothing uses them. Its `unique()` and index names were replaced by the decision 14 names (`users_email_key`, `sessions_token_key`, `sessions_user_id_idx`, ...), and `is_anonymous` stays nullable with default `false`, as Better Auth generates it.
+- **Task 1: `lists` has a `CHECK` on the name** (`lists_name_check`, 1 to 100 characters), the builder's call the spec allows.
+- **Task 1: the migration keeps drizzle-kit's generated name** (`0001_fuzzy_goblin_queen`). Tests that assumed a single migration now read the journal.

@@ -103,6 +103,15 @@ jobs:
       # Both checks report in one run; a cancelled run still stops (OP-070).
       - if: success() || failure()
         run: pnpm format:check
+      # A schema change without its migration fails here (OP-076).
+      - if: success() || failure()
+        run: |
+          pnpm --filter @szop/api db:generate
+          if [ -n "$(git status --porcelain apps/api/drizzle)" ]; then
+            git status --porcelain apps/api/drizzle
+            echo "::error::The schema and the migrations differ: run pnpm db:generate and commit the migration."
+            exit 1
+          fi
 
   typecheck:
     name: typecheck

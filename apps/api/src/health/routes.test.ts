@@ -3,6 +3,7 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../app.ts";
 import { createDatabase } from "../db/database.ts";
+import { readJournal } from "../db/schema-version.ts";
 import { instanceId } from "../instance.ts";
 import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
@@ -31,7 +32,10 @@ describe("GET /api/health", () => {
       status: "ok",
       commit,
       instance: instanceId,
-      database: { status: "up", schemaVersion: "0000_init" },
+      database: {
+        status: "up",
+        schemaVersion: readJournal().entries.at(-1)?.tag,
+      },
     });
 
     // The schema accepts the real body and drops nothing from it: a field

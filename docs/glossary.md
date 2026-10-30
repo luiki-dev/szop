@@ -109,6 +109,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **TLS** | Transport Layer Security | The encryption behind HTTPS. |
 | **UTC** | Coordinated Universal Time | The time standard with no time zone or daylight saving, which logs use so their timestamps compare across machines. The usage log's timestamps are in it (see the [guide to working with Claude](development/working-with-claude.md#the-usage-log)). |
 | **UUID** | Universally Unique Identifier | A 128-bit random identifier, such as `3f2c…`, practically never repeated. Szop's request IDs fall back to one where the load balancer sent no trace ID (ADR 0036). |
+| **UUIDv7** | UUID version 7 | A UUID that starts with the creation time, so IDs sort by age and index well. Szop's tables default their IDs to PostgreSQL's `uuidv7()`. |
 | **vCPU** | Virtual CPU | A share of a processor as cloud providers sell it. Szop's demo task gets a quarter of one. |
 | **VPC** | Virtual Private Cloud | A private network inside AWS, divided into subnets. |
 | **VPS** | Virtual Private Server | A rented virtual machine you manage yourself (Hetzner, DigitalOcean). Considered, not used (see ADR 0008). |
