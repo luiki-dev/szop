@@ -47,7 +47,7 @@ gh project item-edit --project-id PVT_kwHOEVZTps4BmW8P --id <item> --field-id <f
 gh project item-edit --project-id PVT_kwHOEVZTps4BmW8P --id <item> --field-id <field> --text <url>
 ```
 
-**Every issue Claude creates gets its Status set right after `item-add`** (⬜ Backlog unless a step says otherwise): the workflow puts every new item in ❔ New, which is left for the items to triage.
+**Every issue Claude creates gets its Status set right after `item-add`** (⬜ Backlog unless a step says otherwise): the workflow puts every new item in ❔ New, which is kept for what waits for the triage.
 
 Status and Severity take `--single-select-option-id`, Started and Finished `--date`, Spec and Plan `--text` (the link to the document).
 
