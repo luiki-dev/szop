@@ -235,10 +235,10 @@ The change detection already counts every non-Markdown file as code, so `apps/ap
 **Interfaces:**
 - Consumes: the screens of Tasks 4 and 5; `expectAccessible`, `test`/`expect` (with the CSP guard) from `e2e/support/`.
 
-- [ ] **Step 1: Write the journey** `test("ACC-1.1, LST-1.1, LST-1.2, LST-1.5, LST-2.1, LST-2.3: a guest creates, renames and finds a list", …)`: `/` shows "Create your first list" (`expectAccessible`); "New list" → the field focused (`expectAccessible`); "Weekly shop" + Enter → the URL matches `/lists/<uuid>`; rename through ⋮ → "Rename" to "Saturday shop" + Enter → the heading text updates (`expectAccessible`); ← → the lists page shows "Saturday shop"; `page.reload()` → still there.
-- [ ] **Step 2: Write** `test("NFR-4.10, ACC-1.3, ACC-1.8: another visitor sees nothing, and clearing the cookies loses the lists", …)`: create a list; a second `browser.newContext()` opens `/` → "Create your first list"; and its `GET /api/lists/<first id>` through `page.request` → 404; back in the first context, `context.clearCookies()` and reload → "Create your first list". Before any write, the first context has no cookie (`context.cookies()` empty after loading `/`).
-- [ ] **Step 3: Run** `pnpm test:e2e`. Expected: PASS in all three projects, no CSP violation.
-- [ ] **Step 4:** Docs listed above. **Commit** `test(e2e): add the lists journey`.
+- [x] **Step 1: Write the journey** `test("ACC-1.1, LST-1.1, LST-1.2, LST-1.5, LST-2.1, LST-2.3: a guest creates, renames and finds a list", …)`: `/` shows "Create your first list" (`expectAccessible`); "New list" → the field focused (`expectAccessible`); "Weekly shop" + Enter → the URL matches `/lists/<uuid>`; rename through ⋮ → "Rename" to "Saturday shop" + Enter → the heading text updates (`expectAccessible`); ← → the lists page shows "Saturday shop"; `page.reload()` → still there.
+- [x] **Step 2: Write** `test("NFR-4.10, ACC-1.3, ACC-1.8: another visitor sees nothing, and clearing the cookies loses the lists", …)`: create a list; a second `browser.newContext()` opens `/` → "Create your first list"; and its `GET /api/lists/<first id>` through `page.request` → 404; back in the first context, `context.clearCookies()` and reload → "Create your first list". Before any write, the first context has no cookie (`context.cookies()` empty after loading `/`).
+- [x] **Step 3: Run** `pnpm test:e2e`. Expected: PASS in all three projects, no CSP violation.
+- [x] **Step 4:** Docs listed above. **Commit** `test(e2e): add the lists journey`.
 
 ### Task 7: The demo
 
