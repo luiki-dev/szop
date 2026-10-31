@@ -196,6 +196,15 @@ describe("AppShell title", () => {
     expect(document.title).toBe("");
   });
 
+  it("APP-2.1: a route that only asks for its own header still hides the shell's", () => {
+    renderWith({ header: "list" });
+
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open menu" }),
+    ).not.toBeInTheDocument();
+  });
+
   it.each([
     ["no handle", undefined],
     ["a null handle", null],

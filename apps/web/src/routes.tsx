@@ -2,7 +2,9 @@ import type { ReactNode } from "react";
 import type { RouteObject } from "react-router";
 import { CatalogPage } from "./catalog/catalog-page.tsx";
 import { DesignPage } from "./design/design-page.tsx";
+import { ListPage } from "./lists/list-page.tsx";
 import { ListsPage, NewListLink } from "./lists/lists-page.tsx";
+import { NewListPage } from "./lists/new-list-page.tsx";
 import { AppShell } from "./shell/app-shell.tsx";
 
 // What a route tells the shell: the title of its page, shown as the h1 and
@@ -28,6 +30,16 @@ export const routes: RouteObject[] = [
           title: "Lists",
           action: <NewListLink />,
         } satisfies RouteHandle,
+      },
+      {
+        path: "lists/new",
+        element: <NewListPage />,
+        handle: { header: "list" } satisfies RouteHandle,
+      },
+      {
+        path: "lists/:id",
+        element: <ListPage />,
+        handle: { header: "list" } satisfies RouteHandle,
       },
       {
         path: "catalog",

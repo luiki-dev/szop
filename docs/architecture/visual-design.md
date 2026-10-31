@@ -21,6 +21,8 @@ This page describes the design system, not the screens: each phase designs the s
 - [6. Interaction patterns](#6-interaction-patterns)
   - [Feedback](#feedback)
   - [Forms and focus](#forms-and-focus)
+  - [The title field](#the-title-field)
+  - [The peeking raccoon](#the-peeking-raccoon)
   - [Writing](#writing)
 - [7. How a phase designs its screens](#7-how-a-phase-designs-its-screens)
 
@@ -190,13 +192,21 @@ Decided in [ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision
 - **Messages are toasts** (Base UI Toast) that say what happened and what to do. Never a generic "Something went wrong"; limits explain themselves ([LIM-3](../requirements/LIM-limits.md#lim-3), [LIM-4](../requirements/LIM-limits.md#lim-4)).
 - **Undo rather than "Are you sure?"** for reversible actions; a confirmation dialog only for what cannot be undone, such as deleting an account. Which actions get undo is decided by their phases ([OP-051](https://github.com/luiki-dev/szop/issues/103)).
 - **Loading:** skeleton placeholders shaped like the content on a page's first load, never a full-screen spinner.
-- **Empty states:** every empty page says what it is for and offers the next action ("No lists yet" with "New list"). An illustration is optional.
+- **Empty states:** every empty page says what it is for and offers the next action ("Create your first list" with "New list" on the lists page). An illustration is optional: the raccoon, in grayscale at 55% opacity.
 - **Offline ([NET-1](../requirements/NET-connectivity.md#net-1)):** an amber `warning` banner stays at the top while offline; controls that change data are disabled with a visible reason.
 
 ### Forms and focus
 
-- **Labels are always visible**, never placeholder-only. The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../decisions/0022-ring-tail-redesign.md), decision 13). **The catalog's search field is the second exception**: a placeholder and the accessible name "Search the catalog", a magnifier icon and a clear button ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 10). Errors appear under their field, in words, checked when leaving the field and on submit.
+- **Labels are always visible**, never placeholder-only. The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../decisions/0022-ring-tail-redesign.md), decision 13). **The catalog's search field is the second exception**: a placeholder and the accessible name "Search the catalog", a magnifier icon and a clear button ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 10). **The list's name field is the third**: the placeholder and accessible name "List name", since a label would push the header down. Errors appear under their field, in words, checked when leaving the field and on submit.
 - **A visible focus ring** (`ring`) on everything focusable. Dialogs and drawers trap focus and return it when closed (Base UI does this). **The ring is drawn in the `ring` color on links as on buttons**, so the menu's links draw it too ([NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2).8).
+
+### The title field
+
+The name of a list is one field, on the new list's screen and on the list's. **At rest** it reads as the title (Gabarito 800, 20 px, cut with "…") with a dotted 2 px underline in `input`, the only hint that it can be edited. **Focused**, it becomes a `card` field with `rounded-control` corners and the 3 px `ring`. Enter saves, Esc puts the old name back, an empty name is never saved, and while saving the field is read-only; a failure is a short message under it, in `destructive`.
+
+### The peeking raccoon
+
+An empty list shows the grayscale raccoon (200 px, 55% opacity) peeking in, only the top of its head visible, up to just below the eyes. On a phone it comes from the left edge, halfway down, turned 90° to the right, so the add bar at the bottom does not cover it; from `lg` it comes from the right edge, turned 90° to the left. It is decorative (`aria-hidden`) and sits behind the page.
 
 ### Writing
 

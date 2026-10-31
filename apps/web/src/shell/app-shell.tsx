@@ -16,16 +16,18 @@ function isRouteHandle(handle: unknown): handle is RouteHandle {
   return typeof handle === "object" && handle !== null;
 }
 
-// What the deepest route that names a title says: the title, and that
-// route's own header and action.
+// What the deepest route that names a title says: the title and its action;
+// and the deepest route that asks for its own header (a page needs no title
+// then, since it sets the tab's itself).
 function useRouteHandle(): RouteHandle {
   const handles = useMatches()
     .map((match) => match.handle)
     .filter(isRouteHandle);
   const named = handles.findLast((handle) => typeof handle.title === "string");
+  const header = handles.findLast((handle) => handle.header)?.header;
   return {
     ...(named?.title === undefined ? {} : { title: named.title }),
-    ...(named?.header === undefined ? {} : { header: named.header }),
+    ...(header === undefined ? {} : { header }),
     ...(named?.action === undefined ? {} : { action: named.action }),
   };
 }

@@ -207,24 +207,24 @@ The change detection already counts every non-Markdown file as code, so `apps/ap
 - Consumes: `useList`, `useCreateList`, `useRenameList`, `ApiRequestError` (Task 4); `uuidv7`, `listNameSchema` (Tasks 2, 3); `RouteHandle.header` (Task 4).
 - Produces (`list-screen.tsx`): `ListHeader({ field, menu }: { field: ReactNode; menu?: ReactNode })` (← link "Back to lists" to `/`, the field, ⋮ when given, the raccoon tile `logo.svg` with `alt=""`); `TitleField(props: { initial: string; autoFocus?: boolean; pending: boolean; error?: string; onSave(name: string): void; onCancel(): void })`; `EmptyList()` ("Nothing on this list yet" and the peeking raccoon, `aria-hidden`).
 
-- [ ] **Step 1:** Add shadcn's `dropdown-menu` for Base UI through the shadcn CLI, as `sheet.tsx` was (`components.json`); check it renders no `<style>`.
-- [ ] **Step 2: Write the failing tests** in `new-list-page.test.tsx`:
+- [x] **Step 1:** Add shadcn's `dropdown-menu` for Base UI through the shadcn CLI, as `sheet.tsx` was (`components.json`); check it renders no `<style>`.
+- [x] **Step 2: Write the failing tests** in `new-list-page.test.tsx`:
   - `LST-1.5`: at `/lists/new` the textbox named "List name" has focus and the placeholder "List name"; no "List actions" button.
   - `LST-1.1, LST-1.5`: typing "Weekly shop" and Enter → one `POST /api/lists` with a v7 `id` and the name; the address becomes `/lists/<id>` with no new history entry (going back lands on `/`).
   - Esc → `/` and no request; Enter with "" or "   " → no request; the ← link with an empty name → `/`, no request.
   - `LIM-2.2`: 101 characters and Enter → "Name is too long (at most 100 characters)", no request.
   - A failed `POST` (500) → a short message next to the field, the text kept; Enter again → a `POST` with the **same** `id` (Review Focus 4). Enter twice quickly → one list ID across all requests, the field read-only while pending.
-- [ ] **Step 3: Write the failing tests** in `list-page.test.tsx`:
+- [x] **Step 3: Write the failing tests** in `list-page.test.tsx`:
   - `APP-1.6`: at `/lists/<id>` the "Back to lists" link goes to `/`; no "Open menu" button; the tab is "Weekly shop · Szop".
   - `LST-1.2`: clicking the title, typing a new name, Enter → `PATCH` with it, the field shows the server's name; ⋮ ("List actions") → "Rename" focuses the field with its text selected.
   - Leaving the field with a changed name saves once; Esc restores the old name and the blur after it sends nothing; Enter then blur sends one `PATCH` (Review Focus 5); an empty name is not saved and the old one returns.
   - `APP-4.2`: "Nothing on this list yet"; the peeking raccoon is hidden from the accessibility tree.
   - A 404 → "This list does not exist." and a link to the lists page.
-- [ ] **Step 4: Run** `pnpm test -- new-list-page list-page`. Expected: FAIL.
-- [ ] **Step 5: Implement.** Routes `lists/new` and `lists/:id`, both `handle: { header: "list" }`; the shell then renders neither `PhoneHeader` nor the desktop h1 and sets no `document.title` (the page does, from the list's name; "New list · Szop" on the new screen). The page's `<h1 className="sr-only">` holds the list's name ("New list" on the new screen), and `TitleField` is the visible `<input>` beside it with the accessible name "List name" on both screens, so the heading outline stays and the field is labelled. At rest: `font-extrabold text-xl truncate bg-transparent`, `border-b-2 border-dotted border-input`; focused: `bg-card rounded-control ring-3 ring-ring`. The ID for a new list comes from `uuidv7()` on the first Enter and is kept in a ref for retries; `navigate(\`/lists/${id}\`, { replace: true })` on success. The peeking raccoon: `raccoon.svg` at 200 px, `grayscale opacity-55`, positioned `fixed` at the left edge halfway down, `rotate-90`, shifted so only the top of the head up to 5 px below the eyes shows; from `lg` at the content area's right edge, `-rotate-90`. Check both against `list-screen-empty.png` in a browser (`pnpm dev`, light and dark, phone and `lg`).
-- [ ] **Step 6: Run** the tests of Step 4 and `shell.test.tsx`. Expected: PASS.
-- [ ] **Step 7:** Docs listed above. **Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS (the first-screen budget included).
-- [ ] **Step 8: Commit** `feat(web): add the new-list and list screens with renaming`.
+- [x] **Step 4: Run** `pnpm test -- new-list-page list-page`. Expected: FAIL.
+- [x] **Step 5: Implement.** Routes `lists/new` and `lists/:id`, both `handle: { header: "list" }`; the shell then renders neither `PhoneHeader` nor the desktop h1 and sets no `document.title` (the page does, from the list's name; "New list · Szop" on the new screen). The page's `<h1 className="sr-only">` holds the list's name ("New list" on the new screen), and `TitleField` is the visible `<input>` beside it with the accessible name "List name" on both screens, so the heading outline stays and the field is labelled. At rest: `font-extrabold text-xl truncate bg-transparent`, `border-b-2 border-dotted border-input`; focused: `bg-card rounded-control ring-3 ring-ring`. The ID for a new list comes from `uuidv7()` on the first Enter and is kept in a ref for retries; `navigate(\`/lists/${id}\`, { replace: true })` on success. The peeking raccoon: `raccoon.svg` at 200 px, `grayscale opacity-55`, positioned `fixed` at the left edge halfway down, `rotate-90`, shifted so only the top of the head up to 5 px below the eyes shows; from `lg` at the content area's right edge, `-rotate-90`. Check both against `list-screen-empty.png` in a browser (`pnpm dev`, light and dark, phone and `lg`).
+- [x] **Step 6: Run** the tests of Step 4 and `shell.test.tsx`. Expected: PASS.
+- [x] **Step 7:** Docs listed above. **Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS (the first-screen budget included).
+- [x] **Step 8: Commit** `feat(web): add the new-list and list screens with renaming`.
 
 ### Task 6: The lists journey
 
