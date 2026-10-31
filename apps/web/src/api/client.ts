@@ -96,7 +96,7 @@ async function withSession(write: () => Promise<Response>): Promise<Response> {
   const session = await fetch("/api/auth/get-session")
     .then((response) => response.json() as Promise<unknown>)
     .catch(unreadable);
-  if (session === null) await signIn();
+  if (!session) await signIn();
   const response = await write();
   if (response.status !== 401) return response;
   await signIn();

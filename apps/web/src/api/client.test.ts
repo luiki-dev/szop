@@ -100,6 +100,24 @@ describe("lists", () => {
     ]);
   });
 
+  it("signs in before the write when the session answer is not JSON", async () => {
+    const calls = stubApi(null);
+    server.use(
+      http.get("/api/auth/get-session", () => {
+        calls.push("GET /api/auth/get-session");
+        return new HttpResponse("<html>", { status: 200 });
+      }),
+    );
+
+    await createList(newList);
+
+    expect(calls).toEqual([
+      "GET /api/auth/get-session",
+      "POST /api/auth/sign-in/anonymous",
+      "POST /api/lists",
+    ]);
+  });
+
   it("does not sign in when there is a session", async () => {
     const calls = stubApi({ session: { id: "s" } });
 
