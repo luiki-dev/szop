@@ -183,18 +183,18 @@ The change detection already counts every non-Markdown file as code, so `apps/ap
   - `RouteHandle` becomes `{ title?: string; header?: "list"; action?: ReactNode }` (`isRouteHandle` accepts any object; the title still comes from the deepest handle that has one): `action` is shown by the shell next to the desktop h1; `header: "list"` (Task 5) hides the shell's phone header and desktop h1 and leaves `document.title` to the page.
   - `NewListLink({ sticky }: { sticky?: boolean })` exported from `lists-page.tsx`.
 
-- [ ] **Step 1: Write the failing tests** in `client.test.ts` (MSW): `createList` with no session → requests in order `GET get-session`, `POST sign-in/anonymous`, `POST /api/lists`; with a session → no sign-in; `POST /api/lists` answering 401 once → sign-in, then the retry, resolved; answering 401 twice → rejects, exactly two `POST /api/lists` (Review Focus 2); `getList` 404 → `ApiRequestError` with `status` 404; a 200 whose body is not a list → an error, as `getCatalog`.
-- [ ] **Step 2: Write the failing tests** in `lists-page.test.tsx` (the real `routes`, `createMemoryRouter`, MSW fixtures from `test/lists.ts`):
+- [x] **Step 1: Write the failing tests** in `client.test.ts` (MSW): `createList` with no session → requests in order `GET get-session`, `POST sign-in/anonymous`, `POST /api/lists`; with a session → no sign-in; `POST /api/lists` answering 401 once → sign-in, then the retry, resolved; answering 401 twice → rejects, exactly two `POST /api/lists` (Review Focus 2); `getList` 404 → `ApiRequestError` with `status` 404; a 200 whose body is not a list → an error, as `getCatalog`.
+- [x] **Step 2: Write the failing tests** in `lists-page.test.tsx` (the real `routes`, `createMemoryRouter`, MSW fixtures from `test/lists.ts`):
   - `LST-2.3, APP-4.2`: no lists → the text "Create your first list", a decorative image (`alt=""`) and a "New list" link to `/lists/new`.
   - `LST-2.1, APP-1.5`: three lists from the server → three links in the server's order, each to `/lists/<id>` with the name as its text; at `/` the h1 is "Lists", the tab "Lists · Szop".
   - Loading: skeleton cards (`data-testid="skeleton-card"`); an error → "The lists could not be loaded." and "Try again", which refetches.
   - `LST-1.4, APP-1.8`: on a phone one "New list" link, in the sticky bar; on a desktop (`stubMatchMedia` as desktop) one, in the header beside the h1.
   - `shell.test.tsx`: Start's tests rewritten: the menu holds "Lists" (active at `/`), the logo is "Szop, Lists", no "Start" anywhere.
-- [ ] **Step 3: Run** `pnpm test -- client lists-page shell`. Expected: FAIL.
-- [ ] **Step 4: Implement.** `raccoon.svg`: `logo.svg` without its `<rect>` tile and with `aria-label` removed. The empty state: the raccoon at about 120 px with `grayscale opacity-55`, the text `text-xl font-semibold text-muted-foreground`, centered. Cards: `rounded-surface bg-card min-h-12 px-4 font-semibold`, the name in `truncate`, `min-w-0` on the column and the card. `NewListLink`: `buttonVariants()` with the Lucide `Plus` icon; `sticky` places it in a bar `sticky bottom-0` with the page's background behind it on a phone. The route `index` gets `handle: { title: "Lists", action: <NewListLink /> }`; the shell renders `action` only on a desktop, and the page renders `<NewListLink sticky />` only on a phone (`useMediaQuery(desktopQuery)`). The menu's entry uses the Lucide `List` icon. Delete `start/`.
-- [ ] **Step 5: Run** the tests of Step 3. Expected: PASS.
-- [ ] **Step 6:** Update `e2e/tests/shell.spec.ts` (Start → Lists, the tab order of Step "Tab to the Start link") and any other spec that opens Start. **Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 7: Commit** `feat(web): make the lists page the home screen`.
+- [x] **Step 3: Run** `pnpm test -- client lists-page shell`. Expected: FAIL.
+- [x] **Step 4: Implement.** `raccoon.svg`: `logo.svg` without its `<rect>` tile and with `aria-label` removed. The empty state: the raccoon at about 120 px with `grayscale opacity-55`, the text `text-xl font-semibold text-muted-foreground`, centered. Cards: `rounded-surface bg-card min-h-12 px-4 font-semibold`, the name in `truncate`, `min-w-0` on the column and the card. `NewListLink`: `buttonVariants()` with the Lucide `Plus` icon; `sticky` places it in a bar `sticky bottom-0` with the page's background behind it on a phone. The route `index` gets `handle: { title: "Lists", action: <NewListLink /> }`; the shell renders `action` only on a desktop, and the page renders `<NewListLink sticky />` only on a phone (`useMediaQuery(desktopQuery)`). The menu's entry uses the Lucide `List` icon. Delete `start/`.
+- [x] **Step 5: Run** the tests of Step 3. Expected: PASS.
+- [x] **Step 6:** Update `e2e/tests/shell.spec.ts` (Start → Lists, the tab order of Step "Tab to the Start link") and any other spec that opens Start. **Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
+- [x] **Step 7: Commit** `feat(web): make the lists page the home screen`.
 
 ### Task 5: The new-list and list screens
 

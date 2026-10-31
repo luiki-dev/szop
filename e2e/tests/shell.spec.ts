@@ -12,7 +12,7 @@ test("APP-1.4: the shell shows the menu, the API's status and the pages", async 
 }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Start" }),
+    page.getByRole("heading", { level: 1, name: "Lists" }),
   ).toBeVisible();
 
   const menu = await openMenu(page, isMobile);
@@ -156,8 +156,8 @@ test("NFR-2.8: the focus ring is drawn in the ring color, on links as on buttons
       };
     });
 
-  // Tab to the "Start" link, then to the "Expand all" button.
-  for (const name of ["Start", "Expand all"]) {
+  // Tab to the "Lists" link, then to the "Expand all" button.
+  for (const name of ["Lists", "Expand all"]) {
     let focused = await focusedRing();
     for (let stop = 0; stop < 20 && focused.name?.trim() !== name; stop++) {
       await page.keyboard.press("Tab");

@@ -13,20 +13,21 @@ import { Menu } from "./menu.tsx";
 import { desktopQuery, useMediaQuery } from "./use-media-query.ts";
 
 function isRouteHandle(handle: unknown): handle is RouteHandle {
-  return (
-    typeof handle === "object" &&
-    handle !== null &&
-    typeof (handle as { title?: unknown }).title === "string"
-  );
+  return typeof handle === "object" && handle !== null;
 }
 
-// The title of the deepest route that names one.
-function usePageTitle(): string | undefined {
-  const matches = useMatches();
-  return matches
+// What the deepest route that names a title says: the title, and that
+// route's own header and action.
+function useRouteHandle(): RouteHandle {
+  const handles = useMatches()
     .map((match) => match.handle)
-    .filter(isRouteHandle)
-    .at(-1)?.title;
+    .filter(isRouteHandle);
+  const named = handles.findLast((handle) => typeof handle.title === "string");
+  return {
+    ...(named?.title === undefined ? {} : { title: named.title }),
+    ...(named?.header === undefined ? {} : { header: named.header }),
+    ...(named?.action === undefined ? {} : { action: named.action }),
+  };
 }
 
 // The phone's header bar: ☰ and the page's title, with the menu in a
@@ -74,11 +75,13 @@ function PhoneHeader({ title }: { title: string | undefined }) {
 // rotating) does not rebuild the page and lose what it holds.
 export function AppShell() {
   const desktop = useMediaQuery(desktopQuery);
-  const title = usePageTitle();
+  const { title, header, action } = useRouteHandle();
 
   useEffect(() => {
+    // A page with its own header sets the tab's title itself.
+    if (header) return;
     document.title = title ? `${title} · Szop` : "Szop";
-  }, [title]);
+  }, [title, header]);
 
   return (
     // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
@@ -90,7 +93,7 @@ export function AppShell() {
           </nav>
         </aside>
       ) : (
-        <PhoneHeader title={title} />
+        !header && <PhoneHeader title={title} />
       )}
       <main
         className={
@@ -101,7 +104,14 @@ export function AppShell() {
               "mx-auto max-w-[720px] px-4 pb-6 md:px-6"
         }
       >
-        {desktop && <h1 className="text-2xl font-extrabold">{title}</h1>}
+        {desktop && !header && (
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="min-w-0 truncate text-2xl font-extrabold">
+              {title}
+            </h1>
+            {action}
+          </div>
+        )}
         <Outlet />
       </main>
       {/* A new page starts at the top; Back and Forward restore the scroll. */}

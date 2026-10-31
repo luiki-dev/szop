@@ -304,7 +304,7 @@ test("the shell shows the menu, the API's status and the pages", async ({
 }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Start" }),
+    page.getByRole("heading", { level: 1, name: "Lists" }),
   ).toBeVisible();
 
   const menu = await openMenu(page, isMobile);
