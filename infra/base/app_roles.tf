@@ -68,12 +68,15 @@ data "aws_iam_policy_document" "app_task_execution" {
   }
 
   # szop_app's password, for DATABASE_PASSWORD in the app and
-  # APP_DATABASE_PASSWORD in db-setup. The Better Auth secret joins in PH-18,
-  # when the app first reads it.
+  # APP_DATABASE_PASSWORD in db-setup, and the Better Auth secret, for
+  # BETTER_AUTH_SECRET in the app.
   statement {
-    sid       = "ReadAppDatabasePassword"
-    actions   = ["ssm:GetParameters"]
-    resources = [aws_ssm_parameter.db_app_password.arn]
+    sid     = "ReadAppSecrets"
+    actions = ["ssm:GetParameters"]
+    resources = [
+      aws_ssm_parameter.db_app_password.arn,
+      aws_ssm_parameter.better_auth_secret.arn,
+    ]
   }
 
   # The master password RDS keeps in Secrets Manager, for db-setup's

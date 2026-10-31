@@ -249,9 +249,9 @@ The change detection already counts every non-Markdown file as code, so `apps/ap
 **Interfaces:**
 - Consumes: `BETTER_AUTH_SECRET` and `APP_ORIGIN` (Task 2).
 
-- [ ] **Step 1:** In `app_roles.tf`, the execution role's statement `ReadAppDatabasePassword` becomes `ReadAppSecrets` with both parameters' ARNs (`aws_ssm_parameter.db_app_password.arn`, `aws_ssm_parameter.better_auth_secret.arn`); the comment "joins in PH-18" goes. `locals.tf`: `better_auth_secret_arn` built from `/szop/better-auth-secret` like `db_app_password_arn`. `service.tf`: the app container gets `{ name = "BETTER_AUTH_SECRET", valueFrom = local.better_auth_secret_arn }` in `secrets` and `{ name = "APP_ORIGIN", value = "https://${local.app_hostname}" }` in `environment`. db-setup gets neither.
-- [ ] **Step 2: Run** `scripts/check-infra.sh` (fmt, validate, tflint, as CI's infra job does). Expected: PASS.
-- [ ] **Step 3:** Docs listed above. Tell the owner, in the task summary, that `infra/base` must be applied from this branch before `demo-up` ([ADR 0008](../../decisions/0008-hosting.md), decisions 21 and 22). **Commit** `feat(infra): give the demo app the Better Auth secret`.
+- [x] **Step 1:** In `app_roles.tf`, the execution role's statement `ReadAppDatabasePassword` becomes `ReadAppSecrets` with both parameters' ARNs (`aws_ssm_parameter.db_app_password.arn`, `aws_ssm_parameter.better_auth_secret.arn`); the comment "joins in PH-18" goes. `locals.tf`: `better_auth_secret_arn` built from `/szop/better-auth-secret` like `db_app_password_arn`. `service.tf`: the app container gets `{ name = "BETTER_AUTH_SECRET", valueFrom = local.better_auth_secret_arn }` in `secrets` and `{ name = "APP_ORIGIN", value = "https://${local.app_hostname}" }` in `environment`. db-setup gets neither.
+- [x] **Step 2: Run** `scripts/check-infra.sh` (fmt, validate, tflint, as CI's infra job does). Expected: PASS.
+- [x] **Step 3:** Docs listed above. Tell the owner, in the task summary, that `infra/base` must be applied from this branch before `demo-up` ([ADR 0008](../../decisions/0008-hosting.md), decisions 21 and 22). **Commit** `feat(infra): give the demo app the Better Auth secret`.
 
 ### Task 8: The mutation run
 
