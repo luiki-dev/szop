@@ -16,8 +16,10 @@ After [ADR 0059](../../../docs/decisions/0059-session-skills.md). The checks the
    | 2   | Owner  | `infra/base` from the branch ([Applying base](../../../docs/operations/demo-environment.md#applying-base)), only if the diff changes it                    | Applied                | —                                      |
    | 3   | Owner  | GitHub → Actions → demo-up → Run workflow → branch `<branch>`, then approve the `demo` environment ([Pressing the button](../../../docs/operations/demo-environment.md#pressing-the-button)) | Run started | "demo is up" after the run is green |
    | 4   | Claude | `curl https://szop.dzwoniec.com/api/health`                                                                                                                | `ok`, commit `<head>`  | —                                      |
-   | 5   | Owner  | The spec's demo behaviors, in a browser                                                                                                                    | Each works             | "done" with the behaviors checked      |
-   | 6   | Owner  | GitHub → Actions → demo-down ([With the button](../../../docs/operations/demo-environment.md#with-the-button))                                             | Destroyed              | in the same reply as row 5             |
+   | 5a, 5b, … | Owner | <the URL or screen of one demo behavior from the spec> | <what the owner should see> | — |
+   | 6   | Owner  | GitHub → Actions → demo-down ([With the button](../../../docs/operations/demo-environment.md#with-the-button))                                             | Destroyed              | "done" with the behaviors checked, in one reply             |
+
+   Row 5 stands for one row per behavior in the spec's "Demo check": write the steps out, never point the owner to the spec instead.
 
    Rows 1 and 2 are left out when the diff does not change `infra/base`. End the message with the two replies Claude waits for: **"demo is up"**, and later the behaviors checked and `demo-down` run. If the owner says at the start that they do everything, every row is theirs, Lighthouse included, and they reply once at the end with the report's path.
 
