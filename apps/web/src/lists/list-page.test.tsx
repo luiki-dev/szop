@@ -158,7 +158,38 @@ describe("ListPage", () => {
     );
 
     expect(await screen.findByText("This list does not exist.")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Back to lists" })).toHaveAttribute(
+      "href",
+      "/",
+    );
     expect(screen.getByRole("link", { name: "Show my lists" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+  });
+
+  it("APP-1.6: a list that fails to load still has a way back", async () => {
+    server.use(
+      http.get(`/api/lists/${id}`, () =>
+        HttpResponse.json(
+          { error: { code: "internal_error", message: "Boom" } },
+          { status: 500 },
+        ),
+      ),
+    );
+    const router = createMemoryRouter(routes, {
+      initialEntries: [`/lists/${id}`],
+    });
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
+    );
+
+    expect(
+      await screen.findByText("The list could not be loaded."),
+    ).toBeVisible();
+    expect(screen.getByRole("link", { name: "Back to lists" })).toHaveAttribute(
       "href",
       "/",
     );

@@ -88,7 +88,7 @@ export function TitleField({
         placeholder="List name"
         aria-label="List name"
         aria-invalid={message ? true : undefined}
-        className="h-10 w-full truncate rounded-control border-b-2 border-dotted border-input bg-transparent px-2 text-xl font-extrabold outline-none focus:border-transparent focus:bg-card focus:ring-3 focus:ring-ring"
+        className="h-12 w-full truncate rounded-control border-b-2 border-dotted border-input bg-transparent px-2 text-xl font-extrabold outline-none focus:border-transparent focus:bg-card focus:ring-3 focus:ring-ring"
         onChange={(event) => {
           setValue(event.target.value);
         }}

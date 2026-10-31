@@ -31,37 +31,49 @@ export function ListPage() {
     const missing =
       query.error instanceof ApiRequestError && query.error.status === 404;
     return (
-      <section className="mt-4 rounded-surface bg-card p-4 text-card-foreground">
-        <h1 className="text-lg font-bold">
-          {missing
-            ? "This list does not exist."
-            : "The list could not be loaded."}
-        </h1>
-        {missing ? (
-          <Link
-            to="/"
-            className={cn(buttonVariants({ variant: "outline" }), "mt-4")}
-          >
-            Show my lists
-          </Link>
-        ) : (
-          <>
-            <p className="mt-1 text-muted-foreground">{query.error.message}</p>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => {
-                void query.refetch();
-              }}
+      <>
+        <ListHeader field={null} />
+        <section className="mt-4 rounded-surface bg-card p-4 text-card-foreground">
+          <h1 className="text-lg font-bold">
+            {missing
+              ? "This list does not exist."
+              : "The list could not be loaded."}
+          </h1>
+          {missing ? (
+            <Link
+              to="/"
+              className={cn(buttonVariants({ variant: "outline" }), "mt-4")}
             >
-              Try again
-            </Button>
-          </>
-        )}
-      </section>
+              Show my lists
+            </Link>
+          ) : (
+            <>
+              <p className="mt-1 text-muted-foreground">
+                {query.error.message}
+              </p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => {
+                  void query.refetch();
+                }}
+              >
+                Try again
+              </Button>
+            </>
+          )}
+        </section>
+      </>
     );
   }
-  if (name === undefined) return <h1 className="sr-only">List</h1>;
+  if (name === undefined) {
+    return (
+      <>
+        <h1 className="sr-only">List</h1>
+        <ListHeader field={null} />
+      </>
+    );
+  }
 
   return (
     <>
