@@ -1,6 +1,6 @@
 # Project tracking
 
-How Szop's work is tracked on GitHub: the roadmap's phases, the open points and the decision work as issues, the stages as milestones, and all of them on the [Szop project](https://github.com/users/luiki-dev/projects/3). The decisions are in [ADR 0024](../decisions/0024-github-project-tracking.md) and [ADR 0027](../decisions/0027-open-points-on-github.md). GitHub is the source of status, of the open points and of what comes next; the [roadmap](../roadmap.md) is the source of each phase's plan, and its stage tables mirror the status (see [Keeping GitHub and the docs in step](#keeping-github-and-the-docs-in-step)). The old open points register is archived in `docs/archive/` and is never a source.
+How Szop's work is tracked on GitHub: the roadmap's phases, the open points and the decision work as issues, the stages as milestones, and all of them on the [Szop project](https://github.com/users/luiki-dev/projects/3). The decisions are in [ADR 0024](../decisions/0024-github-project-tracking.md) and [ADR 0027](../decisions/0027-open-points-on-github.md); bugs, in [ADR 0058](../decisions/0058-bug-reports.md). GitHub is the source of status, of the open points and of what comes next; the [roadmap](../roadmap.md) is the source of each phase's plan, and its stage tables mirror the status (see [Keeping GitHub and the docs in step](#keeping-github-and-the-docs-in-step)). The old open points register is archived in `docs/archive/` and is never a source.
 
 ## Contents
 
@@ -10,6 +10,7 @@ How Szop's work is tracked on GitHub: the roadmap's phases, the open points and 
 - [Issues](#issues)
   - [Phase issues](#phase-issues)
   - [Open-point issues](#open-point-issues)
+  - [Bug issues](#bug-issues)
   - [ADR issues](#adr-issues)
   - [Owner-step issues](#owner-step-issues)
   - [Links inside issue bodies](#links-inside-issue-bodies)
@@ -33,6 +34,7 @@ How Szop's work is tracked on GitHub: the roadmap's phases, the open points and 
 | Phase | Issue `PH-NN <name>`, label `phase`, the stage's milestone | The phase entry in `roadmap.md`, the source of its plan, with its issue in the stage table; the issue's body links it |
 | Owner step of a phase | Issue `PH-NN owner step K: <step>`, label `owner`, sub-issue of its phase; only while the phase is not done | The phase entry's **Owner steps** in `roadmap.md` |
 | Open point | Issue `OP-NNN <lead>`, label `open-point`, sub-issue of its phase | — (the issue is the only home) |
+| Bug | Issue with the bug's lead as its title, label `bug`, filed from the bug form; a sub-issue of the phase that fixes it once triaged | — (the issue is the only home) |
 | Spike | Its open point's issue, also labelled `spike`, blocking its phase | The phase's "Depends on" |
 | Candidate | Its open point's issue, also labelled `candidate`, no parent, no milestone | — |
 | ADR made outside a phase | Issue `ADR NNNN <title>`, label `adr` | The ADR in [`docs/decisions/`](../decisions/) |
@@ -53,6 +55,8 @@ One per stage, named after the stage's heading, with its **Exit:** line as the d
 | `candidate` | Optional work, not scheduled: a candidate phase or an upgrade waiting for its moment |
 | `owner` | Only the owner can do it: an AWS, domain or GitHub setting, a manual check, a purchase |
 | `adr` | Decision work whose result is one ADR, made outside a phase |
+| `bug` | Delivered work that behaves otherwise than the requirements, the design or common sense say |
+| `cannot-reproduce` | A bug no one could reproduce yet; the triage skips it until someone adds steps or sees it again |
 
 No other labels are used on issues. On pull requests, `skip-changelog` leaves a PR out of the release notes ([release-please](tools/release-please.md#release-notes)), and Dependabot creates `dependencies` and one label per ecosystem on its own.
 
@@ -65,6 +69,14 @@ Title: the roadmap heading, `PH-06b Web security baseline`. The body is a link t
 ### Open-point issues
 
 Title: the ID and the open point's bold lead, cut to 80 characters. The body starts with the open point's text, then **Parts** as a checklist (a done part ticked, with its PR), **Source** (the phase it came from and, for a review finding that was not fixed, the review), and **History** for "Moved from" notes. The issue is the only home of the open point. Issues created before ADR 0027 start instead with a link to their entry in the archived register (`docs/archive/open-points.md`); new issues start with the open point's text. The status lives in the project, so the body has no status line. A closed open point keeps a "settled by" comment, naming the ADR, PR or commit that settled it, or the reason it was dropped. The 25 entries closed before the register moved to GitHub are closed issues whose body starts with "Closed before the register moved to GitHub" and a link to ADR 0027.
+
+### Bug issues
+
+The owner files a bug through the form in `.github/ISSUE_TEMPLATE/bug.yml`; Claude files the bugs it finds (a review finding, something seen while building) with `gh` and the same headings. Title: the bug's lead, with no ID: the issue number is its ID. The body has the form's headings: **What happens**, **What was expected**, **Where** (demo or local, browser, device and window width), **Steps to reproduce**, **Severity** (the reporter's call), **Area** (one of the commit scopes, so the scope of its fix) and **Evidence** (screenshots and the rest), then **History** when it moves. The form's Area list follows the scopes in `commitlint.config.js`; a PR that adds a scope adds it to the form too.
+
+A finding is a bug when delivered work behaves otherwise than the requirements, the design or common sense say; it is an open point when something is not decided or built yet, or when it is an improvement ([ADR 0058](../decisions/0058-bug-reports.md), decision 8).
+
+**Triage**, at the start of each phase's brainstorm: every item in ❔ New is looked at. A bug gets its Severity (copied from its body, or settled with the owner in a comment) and goes to one of three places, always as a sub-issue: the phase starting now, when it touches code the phase changes anyway, as a task of its plan too; a later phase of its area; or a bug-fix phase, a small phase of fixes only, put on the roadmap when several bugs have no natural home. Its status follows the phase's: ⬜ Backlog, 📌 Todo or 🚧 In progress. A bug that can't be reproduced gets `cannot-reproduce`, no parent, and ⬜ Backlog. A 🔴 Critical bug joins the phase in progress, or, with none, blocks the next phase; the owner points the session to one filed during a phase.
 
 ### ADR issues
 
@@ -80,10 +92,10 @@ Relative links do not work in issues. A link to a phase or an open point that ha
 
 ## Relationships
 
-- **Sub-issue:** an open point sits under the phase that settles it. One with parts sits under the phase doing the current part, and moves to the next phase when that part is done. An owner step sits under its phase.
+- **Sub-issue:** an open point sits under the phase that settles it, and a triaged bug under the phase that fixes it. One with parts sits under the phase doing the current part, and moves to the next phase when that part is done. An owner step sits under its phase.
 - **Blocked by:** a phase is blocked by its spike (PH-13 by OP-025, PH-16 by OP-038) and by any issue its "Depends on" names. The issue and its board card show a blocked marker.
 - **Relates to:** a split phase relates to the phases it was split into. This link has no API yet: the owner adds it in the issue's sidebar.
-- **`Closes #N`:** a PR closes its phase's issue, each open point it settles and, for an ADR made outside a phase, its `adr` issue.
+- **`Closes #N`:** a PR closes its phase's issue, each open point it settles, each bug it fixes and, for an ADR made outside a phase, its `adr` issue.
 
 ## The project
 
@@ -93,17 +105,19 @@ The [Szop project](https://github.com/users/luiki-dev/projects/3) is public; onl
 
 | Field | Values |
 |---|---|
-| Status | The six statuses below |
+| Status | The seven statuses below |
 | Order | Phases: the roadmap position in steps of 10 (PH-01 is 10, the retired PH-06 is 60, PH-06a is 70). A new phase takes a free number between its neighbours. |
 | Path | Phases: `Full` or `Bounded` |
 | Spec, Plan | Phases: links to the files on `main` |
 | Started | Phases: the date of the phase branch's first commit; `adr` issues: the day the work started |
 | Finished | The merge date |
+| Severity | Bugs: `🔴 Critical` (breaks a use case, can lose data or is a security hole), `🟠 Major` (works, but wrongly, or only on some devices), `⚪ Minor` (cosmetic); set at the triage |
 
 ### Statuses
 
 | Status | Means | In `roadmap.md` |
 |---|---|---|
+| ❔ New | Not looked at yet: the status of every item added to the project. Claude moves what it files on at once; the rest waits for the triage | ⬜ Not started |
 | ⬜ Backlog | Planned further down the line | ⬜ Not started |
 | 📌 Todo | Picked next: the next phase, its open points and the owner's items it needs | ⬜ Not started |
 | ⏳ Blocked | Would be Todo or In progress but cannot move; a blocked-by link names the blocker when it is an issue | ⬜ Not started |
@@ -135,7 +149,7 @@ What each is for:
 - **Next Up** is what is picked, blocked or under way, by status.
 - **Owner Steps** is every item only the owner can do (label `owner`), grouped by phase.
 
-Backlog and Board have no filter, so they also hold the open points and the owner steps.
+Backlog and Board have no filter, so they also hold the open points, the bugs and the owner steps; both show Severity, as a colored token.
 
 ### Workflows
 
@@ -143,10 +157,10 @@ Five workflows are on and three are off, as read through the API. Their settings
 
 | Workflow | State | Setting |
 |---|---|---|
-| Item added to project | On | Status `⬜ Backlog` |
+| Item added to project | On | Status `❔ New` |
 | Item closed | On | Status `✅ Done` |
 | Item reopened | On | Status `📌 Todo` |
-| Auto-add to project | On | Repository `luiki-dev/szop`, filter `is:issue label:phase,open-point,adr,owner` |
+| Auto-add to project | On | Repository `luiki-dev/szop`, filter `is:issue label:phase,open-point,adr,owner,bug` |
 | Auto-add sub-issues to project | On | Sub-issues of an item already on the project are added to it |
 | Auto-close issue, Pull request linked to issue, Pull request merged | Off | Pull requests are not on the project; a PR closes its issues with `Closes #N` |
 | Auto-archive items | Not listed by the API | Meant to be off, so that done items stay visible |
@@ -163,12 +177,16 @@ The `/phase-tracking` skill (`.claude/skills/phase-tracking/`) holds the steps a
 | Its PR opens | The description says `Closes #<phase>` and `Closes #<OP>` for each open point it settles | Claude |
 | Its PR is merged | Those issues close; the workflow sets ✅ Done | Owner, by merging |
 | An open point's part is done | The part ticked with its PR; the issue re-parented to the next phase, still open, and its Status set to ⬜ Backlog, or 📌 Todo if that phase is already picked: no workflow changes it on a re-parent | Claude |
+| An item is added by Claude | Status set at once (⬜ Backlog unless the row says otherwise), out of ❔ New | Claude |
 | An open point is added | An issue with the next free ID (the highest `OP-` among the issues labelled `open-point`, plus one; the command is in [Checking with gh](#checking-with-gh)), under its phase, label `open-point`; mentioned, as a link, where it came up | Claude |
 | An open point moves | Re-parented; a History line added | Claude |
 | An open point gains or loses a part in another phase | That phase issue's **Also** section updated | Claude |
 | An item is dropped | Closed as not planned with the reason as a comment; Status → ✖️ Dropped | Claude |
 | A phase is split | New phase issues; the old one closed as not planned with a comment; its open points re-parented | Claude; the owner adds *Relates to* |
 | A candidate is picked up | `candidate` removed; a phase issue created | Claude |
+| A bug is filed | By the owner: the form sets `bug`, and the workflow sets ❔ New. By Claude: the issue with the form's headings, triaged at once with the owner; mentioned, as a link, where it came up | Owner or Claude |
+| The triage, when a phase's brainstorm starts | Every item in ❔ New: a bug gets its Severity, a parent and the phase's status, or `cannot-reproduce` and ⬜ Backlog | Claude, with the owner |
+| A bug is 🔴 Critical | A sub-issue of the phase in progress, or a blocked-by link on the next phase | Claude |
 | An ADR is made outside a phase | An `adr` issue, closed by its PR | Claude |
 | An owner step is done | Its issue closed; the workflow sets ✅ Done | Owner, or Claude when the owner says so |
 | A phase's owner steps change | Step issues added, or closed as not planned with the reason | Claude |
@@ -186,6 +204,7 @@ Each fact has one source; the other place only copies it, and changes when the t
 | Phase status | the project's Status field | the stage tables' Status column | work starts, the PR opens, the merge (in the PR, before it), in one commit |
 | Spec, plan and PR links of a phase | the stage tables | the project's Spec and Plan fields | when each is committed or opened |
 | Open points, open and closed: text, parts, history, status, phase | issues labelled `open-point` | nowhere | — |
+| Bugs: text, severity, status, phase | issues labelled `bug` and the project's Severity field | nowhere | — |
 | What comes next | the board's 📌 Todo | nowhere | — |
 | Whether an owner step is done | the `owner` issue | nowhere | — |
 | Also (the open points of other phases a phase does a part of) | the phase issue's body | nowhere | when the part is added, done or moved |
@@ -196,7 +215,7 @@ The rules that follow from it:
 
 - **Open points are issues only.** They are added, re-parented, ticked and closed on GitHub; no document keeps a list of them.
 - **When both sides were edited, GitHub wins** for status and open points, and `roadmap.md` wins for a phase's plan.
-- **Statuses map onto the stage tables:** ⬜ Backlog, 📌 Todo and ⏳ Blocked read ⬜ Not started; 🚧 In progress, ✅ Done and ✖️ Dropped read the same.
+- **Statuses map onto the stage tables:** ❔ New, ⬜ Backlog, 📌 Todo and ⏳ Blocked read ⬜ Not started; 🚧 In progress, ✅ Done and ✖️ Dropped read the same.
 - **Significant plan changes** (a new phase, a split, a reorder) go through a brainstorm, and through an ADR when they are significant.
 
 ## Setting up the project
@@ -205,7 +224,7 @@ Done on 2026-10-10; kept as the reference for rebuilding the project.
 
 The owner's steps, which GitHub offers only in the web UI:
 
-1. **Statuses:** *project → ⋯ → Settings → Status*: replace the options with `⬜ Backlog`, `📌 Todo`, `⏳ Blocked`, `🚧 In progress`, `✅ Done`, `✖️ Dropped`.
+1. **Statuses:** *project → ⋯ → Settings → Status*: replace the options with `❔ New`, `⬜ Backlog`, `📌 Todo`, `⏳ Blocked`, `🚧 In progress`, `✅ Done`, `✖️ Dropped`.
 2. **Workflows:** *project → ⋯ → Workflows*: set each workflow as in [Workflows](#workflows), then *Save and turn on workflow*.
 3. **Views:** for each row of [Views](#views): *New view*, choose the layout, type the filter, then set grouping, sorting and the fields shown from the view's menu, and *Save*.
 4. **Relates to:** on PH-06's issue, *Relationships → Relates to*, add PH-06a's and PH-06b's issues.

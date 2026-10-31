@@ -38,7 +38,7 @@ Follow [ADR 0024](docs/decisions/0024-github-project-tracking.md), [ADR 0027](do
 
 Run `/phase-tracking`:
 
-- when a phase's brainstorm starts, before the first question, and during the brainstorm (the acceptance criteria review);
+- when a phase's brainstorm starts, before the first question (the triage of ❔ New items, bugs included), and during the brainstorm (the acceptance criteria review);
 - in the phase branch's first commit;
 - when the spec or plan is committed;
 - when the phase's owner steps change;
@@ -47,7 +47,7 @@ Run `/phase-tracking`:
 - at the end of a phase;
 - never to set ✅ Done on GitHub by hand: merging the PR does it.
 
-Run it too for any open-point change: something left to a later phase or topic, part of an open point done, an open point moved, gaining or losing a part, or dropped, and for anything else that moves an item (a phase split, a candidate picked up, an item blocked, an ADR made outside a phase).
+Run it too when a bug is found, filed or triaged ([ADR 0058](docs/decisions/0058-bug-reports.md)), for any open-point change: something left to a later phase or topic, part of an open point done, an open point moved, gaining or losing a part, or dropped, and for anything else that moves an item (a phase split, a candidate picked up, an item blocked, an ADR made outside a phase).
 
 ## Working with Claude
 
@@ -95,11 +95,12 @@ Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `
   - ⏳ deferred or waiting: finding deferred to an open point, `⏳ Blocked` on the project
   - ✖️ rejected or dropped: finding rejected, open point dropped without being done, `✖️ Dropped` on the project
   - ❌ failed or blocking: a failed plan, a blocking finding in the PR comment
-  - ❔ pending: not decided or triaged yet, a draft acceptance criterion, a list of criteria not finalized
+  - ❔ pending: not decided or triaged yet, a draft acceptance criterion, a list of criteria not finalized, `❔ New` on the project
   - ➡️ moved: an acceptance criterion moved to another requirement, under a new ID
   - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
   - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell
   - ➖ not applicable: `➖ N/A: reason` in the roadmap's stage tables, a bare `➖ N/A` in the definition of done and the PR template
+  - 🔴 critical, 🟠 major, ⚪ minor: a bug's severity, the project's Severity field
   - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
 - **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1)`, `[UC-3](../requirements/UC-use-cases.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/SHR-sharing.md)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
 - Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.
