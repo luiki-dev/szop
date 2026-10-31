@@ -10,14 +10,15 @@ After [ADR 0059](../../../docs/decisions/0059-session-skills.md). The checks the
 1. **Work out the list** from: the fixed steps of the demo check; whether the branch changes `infra/base` (then the sign-in and the apply come first); whether it changes the UI (then Lighthouse); and the behaviors in the spec's "Demo check" section of the phase.
 2. **Send one message with the whole list**, a table, at most three exchanges in all. Example:
 
-   | #   | Who    | Where                                                                                                                                                      | Check                  | Reply                                  |
-   | --- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------------------------------------- |
-   | 1   | Owner  | Terminal: `aws sso login --profile szop` ([Sign in from the CLI](../../../docs/operations/demo-environment.md#5-sign-in-from-the-cli))                     | Signed in              | —                                      |
-   | 2   | Owner  | `infra/base` from the branch ([Applying base](../../../docs/operations/demo-environment.md#applying-base)), only if the diff changes it                    | Applied                | —                                      |
-   | 3   | Owner  | GitHub → Actions → demo-up → Run workflow → branch `<branch>`, then approve the `demo` environment ([Pressing the button](../../../docs/operations/demo-environment.md#pressing-the-button)) | Run started | "demo is up" after the run is green |
-   | 4   | Claude | `curl https://szop.dzwoniec.com/api/health`                                                                                                                | `ok`, commit `<head>`  | —                                      |
+   | # | Who | Where | Check | Reply |
+   |---|---|---|---|---|
+   | 1 | Owner | Terminal: `aws sso login --profile szop` ([Sign in from the CLI](../../../docs/operations/demo-environment.md#5-sign-in-from-the-cli)) | Signed in | — |
+   | 2 | Owner | `infra/base` from the branch ([Applying base](../../../docs/operations/demo-environment.md#applying-base)), only if the diff changes it | Applied | — |
+   | 3 | Owner | GitHub → Actions → demo-up → Run workflow → branch `<branch>`, then approve the `demo` environment ([Pressing the button](../../../docs/operations/demo-environment.md#pressing-the-button)) | Run started | "demo is up" after the run is green |
+   | 4 | Claude | `curl https://szop.dzwoniec.com/api/health` | `ok`, commit `<head>` | — |
+   | 4b | Claude | The redirect, the browser console and Lighthouse (if the UI changed), as step 3 lists | As step 3 says | — |
    | 5a, 5b, … | Owner | <the URL or screen of one demo behavior from the spec> | <what the owner should see> | — |
-   | 6   | Owner  | GitHub → Actions → demo-down ([With the button](../../../docs/operations/demo-environment.md#with-the-button))                                             | Destroyed              | "done" with the behaviors checked, in one reply             |
+   | 6 | Owner | GitHub → Actions → demo-down ([With the button](../../../docs/operations/demo-environment.md#with-the-button)) | Destroyed | "done" with the behaviors checked, in one reply |
 
    Row 5 stands for one row per behavior in the spec's "Demo check": write the steps out, never point the owner to the spec instead.
 

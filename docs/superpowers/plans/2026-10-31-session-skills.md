@@ -73,7 +73,7 @@ git commit -m "feat(claude): add the /handoff skill"
 git push
 ```
 
-- [ ] **Step 4: The owner's by-hand test**
+- [x] **Step 4: The owner's by-hand test**
 
 In the task summary, ask the owner to run the spec's [Tests](../specs/2026-10-31-session-skills-design.md#tests) for `/handoff` (a new session needs to see the skill): `/handoff` on this branch → `.superpowers/handoff/chore-adr-0059-session-skills.md` with every section and a two-line prompt; a new session with that prompt confirms stage and next step; a commit after the handoff, then resume again → the session stops on the head mismatch. A failure is fixed in this task with a new commit before Task 2.
 
@@ -197,7 +197,7 @@ git push
 
 - [x] **Step 1: CLAUDE.md**
 
-Following spec, [CLAUDE.md and the execution rules](../specs/2026-10-31-session-skills-design.md#claudemd-and-the-execution-rules): the worktree bullet ends "finish a branch with `/finish-phase`, not the superpowers finishing skill"; a "Working with Claude" bullet naming `/handoff` (the owner runs it to end a stage; `/handoff resume <branch>` opens the next), `/finish-phase` (the finishing stage) and `/demo-check` (after the PR opens) ([ADR 0059](docs/decisions/0059-session-skills.md)); the severity line becomes "a bug's severity, the project's Severity field, and a review finding's severity (🟠 for Important)".
+Following spec, [CLAUDE.md and the execution rules](../specs/2026-10-31-session-skills-design.md#claudemd-and-the-execution-rules): the worktree bullet ends "finish a branch with `/finish-phase`, not the superpowers finishing skill"; a "Working with Claude" bullet naming `/handoff` (the owner runs it to end a stage; `/handoff resume <branch>` opens the next), `/finish-phase` (the finishing stage) and `/demo-check` (after the PR opens) (`[ADR 0059](docs/decisions/0059-session-skills.md)`); the severity line becomes "a bug's severity, the project's Severity field, and a review finding's severity (🟠 for Important)".
 
 - [x] **Step 2: The guides**
 

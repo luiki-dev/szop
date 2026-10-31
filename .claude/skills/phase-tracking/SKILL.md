@@ -111,7 +111,7 @@ A decision taken while building goes into the phase ADR's "Settled while buildin
 
 ### Before opening the PR
 
-- On GitHub: every open-point issue of the phase closed (with a "settled by" comment) or re-assigned; every whole-branch-review finding not fixed was listed to the owner, and each one the owner chose is an open-point issue by now (the rest are noted as declined in the phase ADR's "Settled while building"); the phase issue's body updated only when its **Also** changed.
+- On GitHub: every open-point issue of the phase closed (with a "settled by" comment) or re-assigned; every finding of the `/finish-phase` triage that the owner chose to keep is an open-point or bug issue by now (the rest are noted as declined in the phase ADR's "Settled while building"); the phase issue's body updated only when its **Also** changed.
 - In the repo: the stage table row in line with GitHub, with the PR link; every criterion the PR delivers ✅, with a test whose name starts with its ID; each requirement's line and the index updated.
 - In the PR description: `Closes #<phase issue>`, `Closes #<open-point issue>` for each one it settles and `Closes #<bug issue>` for each bug it fixes.
 - In the PR description: a "Token usage" section with the output of `scripts/token-usage.py --branch <the phase branch>`.
