@@ -28,6 +28,7 @@ describe("the access layer", () => {
   it("ownWorkspace rejects with 401 without a user", async () => {
     await expect(ownWorkspace(database.db, null)).rejects.toMatchObject({
       statusCode: 401,
+      message: "Sign-in required",
     });
   });
 
@@ -59,9 +60,12 @@ describe("the access layer", () => {
     await ownWorkspace(database.db, other);
     await expect(
       requireListAccess(database.db, other, idOf(5)),
-    ).rejects.toMatchObject({ statusCode: 404 });
+    ).rejects.toMatchObject({ statusCode: 404, message: "Not found" });
     await expect(
       requireListAccess(database.db, owner, idOf(6)),
-    ).rejects.toMatchObject({ statusCode: 404 });
+    ).rejects.toMatchObject({ statusCode: 404, message: "Not found" });
+    await expect(
+      requireListAccess(database.db, await newUser(3), idOf(5)),
+    ).rejects.toMatchObject({ statusCode: 404, message: "Not found" });
   });
 });

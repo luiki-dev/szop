@@ -57,15 +57,18 @@ describe("loadConfig", () => {
     const secret = "a".repeat(31);
     const message = errorFor({ ...valid, BETTER_AUTH_SECRET: secret });
     expect(message).toContain("BETTER_AUTH_SECRET");
+    expect(message).toContain("must be at least 32 characters");
     expect(message).not.toContain(secret);
   });
 
-  it.each(["http://localhost/app", "ftp://localhost", "localhost:5173"])(
-    "refuses the APP_ORIGIN %s",
-    (value) => {
-      expect(errorFor({ ...valid, APP_ORIGIN: value })).toContain("APP_ORIGIN");
-    },
-  );
+  it.each([
+    "http://localhost/app",
+    "ftp://localhost",
+    "localhost:5173",
+    "not a url",
+  ])("refuses the APP_ORIGIN %s", (value) => {
+    expect(errorFor({ ...valid, APP_ORIGIN: value })).toContain("APP_ORIGIN");
+  });
 
   it("normalizes APP_ORIGIN to an origin", () => {
     expect(

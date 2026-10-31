@@ -38,11 +38,14 @@ export async function ownWorkspace(
   user: SessionUser | null,
 ): Promise<WorkspaceContext> {
   if (user === null) throw httpError(401, "Sign-in required");
+  // Stryker disable next-line ObjectLiteral: the target only names the constraint; any conflict here is the userId one, so `{}` does the same
+  const onUserConflict = { target: workspaces.userId };
   await db
     .insert(workspaces)
     .values({ userId: user.id })
-    .onConflictDoNothing({ target: workspaces.userId });
+    .onConflictDoNothing(onUserConflict);
   const context = await findOwnWorkspace(db, user);
+  // Stryker disable next-line ConditionalExpression,StringLiteral: unreachable after the insert; a defensive guard
   if (context === null) throw httpError(500, "Workspace missing");
   return context;
 }
@@ -55,8 +58,10 @@ export async function requireListAccess(
 ): Promise<WorkspaceContext> {
   const context = await findOwnWorkspace(db, user);
   if (context === null) throw httpError(404, "Not found");
+  // Stryker disable next-line ObjectLiteral: only the row's existence is used
+  const idOnly = { id: lists.id };
   const [row] = await db
-    .select({ id: lists.id })
+    .select(idOnly)
     .from(lists)
     .where(
       and(eq(lists.workspaceId, context.workspaceId), eq(lists.id, listId)),

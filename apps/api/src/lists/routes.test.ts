@@ -93,6 +93,9 @@ describe("the lists routes", () => {
     const response = await post(undefined, { id: randomUUID(), name: "X" });
     expect(response.statusCode).toBe(401);
     expect(response.json()).toMatchObject({ error: { code: "unauthorized" } });
+    expect(response.json()).toMatchObject({
+      error: { message: "Sign-in required" },
+    });
   });
 
   it.each([
@@ -142,7 +145,14 @@ describe("the lists routes", () => {
     expect(foreignPatch.statusCode).toBe(404);
     expect(foreignPatch.json()).toEqual(missing.json());
 
-    expect((await get(b, "/api/lists/not-a-uuid")).statusCode).toBe(404);
+    const notFound = { error: { code: "not_found", message: "Not found" } };
+    expect(missing.json()).toEqual(notFound);
+    const malformed = await get(b, "/api/lists/not-a-uuid");
+    expect(malformed.statusCode).toBe(404);
+    expect(malformed.json()).toEqual(notFound);
+    const malformedPatch = await patch(b, "not-a-uuid", "X");
+    expect(malformedPatch.statusCode).toBe(404);
+    expect(malformedPatch.json()).toEqual(notFound);
     expect((await get(undefined, `/api/lists/${id}`)).statusCode).toBe(404);
     expect((await patch(undefined, id, "X")).statusCode).toBe(404);
     expect((await get(a, `/api/lists/${id}`)).json()).toMatchObject({
@@ -172,5 +182,15 @@ describe("the lists routes", () => {
     const same = await patch(a, id, "New");
     expect(same.statusCode).toBe(200);
     expect(await updatedAt()).toBe(after);
+  });
+
+  it("LST-1.2: PATCH with a blank name is 400 invalid_input", async () => {
+    const id = randomUUID();
+    await post(a, { id, name: "Old" });
+
+    const response = await patch(a, id, "   ");
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: { code: "invalid_input" } });
   });
 });

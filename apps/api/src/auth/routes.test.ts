@@ -3,7 +3,7 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
 import { createAuth } from "./auth.ts";
-import { sameOrigin } from "../test/auth.ts";
+import { sameOrigin, signIn } from "../test/auth.ts";
 import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
@@ -115,5 +115,59 @@ describe("/api/auth", () => {
     expect(auth.options.advanced.ipAddress.trustedProxies).toEqual([
       "10.0.0.0/16",
     ]);
+  });
+
+  it("passes the JSON body, the status and the headers of Better Auth through", async () => {
+    app = start();
+    const cookie = await signIn(app);
+
+    const renamed = await app.inject({
+      method: "POST",
+      url: "/api/auth/update-user",
+      headers: { ...sameOrigin, cookie },
+      payload: { name: "Zed" },
+    });
+    expect(renamed.statusCode).toBe(200);
+    const users = await database.db.execute<{ name: string }>(
+      sql`SELECT name FROM users`,
+    );
+    expect(users.rows[0]?.name).toBe("Zed");
+
+    const session = await app.inject({
+      method: "GET",
+      url: "/api/auth/get-session",
+      headers: { cookie },
+    });
+    expect(session.headers["content-type"]).toMatch(/application\/json/);
+
+    const unknown = await app.inject({
+      method: "GET",
+      url: "/api/auth/no-such-endpoint",
+    });
+    expect(unknown.statusCode).toBe(404);
+  });
+
+  it("trusts only its own origin and sets no default proxies or Secure on http", () => {
+    const config = testConfig();
+    const auth = createAuth({
+      db: database.db,
+      secret: config.betterAuthSecret,
+      origin: config.appOrigin,
+    });
+    expect(auth.options.trustedOrigins).toEqual([config.appOrigin]);
+    expect(auth.options.advanced.ipAddress.trustedProxies).toEqual([]);
+    expect(auth.options.advanced.defaultCookieAttributes).toBeUndefined();
+  });
+
+  it("NFR-4.9: on an https origin every cookie is Secure", () => {
+    const config = testConfig();
+    const auth = createAuth({
+      db: database.db,
+      secret: config.betterAuthSecret,
+      origin: "https://szop.test",
+    });
+    expect(auth.options.advanced.defaultCookieAttributes).toEqual({
+      secure: true,
+    });
   });
 });

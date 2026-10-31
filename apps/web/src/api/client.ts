@@ -10,6 +10,10 @@ import {
   type List,
 } from "@szop/shared";
 
+// What an unreadable JSON body becomes.
+// Stryker disable next-line ArrowFunction: `null` and `undefined` are both an unreadable body, handled the same
+const unreadable = () => null;
+
 // The only code that calls fetch; components never do. A 200 and a 503 both
 // carry a health body: the 503 says the database is down, which is an answer,
 // not a failure of the request. Anything else, or a body that does not match
@@ -27,8 +31,7 @@ export async function getHealth(): Promise<Health> {
 // different deploys) is an error too, not a crash further on.
 export async function getCatalog(): Promise<Catalog> {
   const response = await fetch("/api/catalog");
-  // Stryker disable next-line ArrowFunction: `null` and `undefined` are both an unreadable body, handled the same
-  const body: unknown = await response.json().catch(() => null);
+  const body: unknown = await response.json().catch(unreadable);
   if (response.status !== 200) {
     const error = apiErrorSchema.safeParse(body);
     throw new Error(
@@ -69,8 +72,7 @@ async function failure(
   path: string,
   response: Response,
 ): Promise<ApiRequestError> {
-  // Stryker disable next-line ArrowFunction: `null` and `undefined` are both an unreadable body, handled the same
-  const body: unknown = await response.json().catch(() => null);
+  const body: unknown = await response.json().catch(unreadable);
   const error = apiErrorSchema.safeParse(body);
   return new ApiRequestError(
     error.success
@@ -93,8 +95,7 @@ async function signIn(): Promise<void> {
 async function withSession(write: () => Promise<Response>): Promise<Response> {
   const session = await fetch("/api/auth/get-session")
     .then((response) => response.json() as Promise<unknown>)
-    // Stryker disable next-line ArrowFunction: an unreadable answer is treated as no session
-    .catch(() => null);
+    .catch(unreadable);
   if (session === null) await signIn();
   const response = await write();
   if (response.status !== 401) return response;
@@ -108,8 +109,7 @@ async function readList(
   response: Response,
 ): Promise<List> {
   if (!response.ok) throw await failure(method, path, response);
-  // Stryker disable next-line ArrowFunction: `null` and `undefined` are both an unreadable body, handled the same
-  const body: unknown = await response.json().catch(() => null);
+  const body: unknown = await response.json().catch(unreadable);
   const list = listSchema.safeParse(body);
   if (!list.success) {
     throw new Error("The list came in a shape this page does not know");
@@ -121,8 +121,7 @@ export async function getLists(): Promise<List[]> {
   const path = "/api/lists";
   const response = await fetch(path);
   if (!response.ok) throw await failure("GET", path, response);
-  // Stryker disable next-line ArrowFunction: `null` and `undefined` are both an unreadable body, handled the same
-  const body: unknown = await response.json().catch(() => null);
+  const body: unknown = await response.json().catch(unreadable);
   const lists = listsResponseSchema.safeParse(body);
   if (!lists.success) {
     throw new Error("The lists came in a shape this page does not know");

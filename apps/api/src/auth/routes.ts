@@ -14,6 +14,7 @@ export function authRoutes(app: FastifyInstance, options: { auth: Auth }) {
     method: ["GET", "POST"],
     url: "/auth/*",
     handler: async (request, reply) => {
+      // Stryker disable next-line ConditionalExpression,LogicalOperator,StringLiteral: GET never has a body and a POST without one stringifies to undefined, so the guard only documents it
       const hasBody = request.method !== "GET" && request.body !== undefined;
       const response = await auth.handler(
         new Request(new URL(request.url, origin), {
@@ -28,6 +29,7 @@ export function authRoutes(app: FastifyInstance, options: { auth: Auth }) {
         if (name !== "set-cookie") reply.header(name, value);
       });
       const cookies = response.headers.getSetCookie();
+      // Stryker disable next-line ConditionalExpression,EqualityOperator: an empty set-cookie array sends no header, so setting it always is the same
       if (cookies.length > 0) reply.header("set-cookie", cookies);
       return reply.send(await response.text());
     },

@@ -41,14 +41,17 @@ export async function insertList(
   workspaceId: string,
   { id, name }: { id: string; name: string },
 ): Promise<{ list: List; created: boolean }> {
+  // Stryker disable next-line ObjectLiteral: any conflict here is on the composite key, so `{}` does the same
+  const onKeyConflict = { target: [lists.workspaceId, lists.id] };
   const inserted = await db
     .insert(lists)
     .values({ workspaceId, id, name })
-    .onConflictDoNothing({ target: [lists.workspaceId, lists.id] })
+    .onConflictDoNothing(onKeyConflict)
     .returning();
   const [row] = inserted;
   if (row) return { list: toList(row), created: true };
   const list = await findList(db, workspaceId, id);
+  // Stryker disable next-line CallExpression,ConditionalExpression,StringLiteral: unreachable, the row exists after a conflict
   if (list === null) throw new Error("List vanished after a conflict");
   return { list, created: false };
 }

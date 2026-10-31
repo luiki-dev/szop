@@ -194,4 +194,151 @@ describe("ListPage", () => {
       "/",
     );
   });
+
+  it("keeps the tab's title Szop until the list is loaded", async () => {
+    setup();
+
+    expect(document.title).toBe("Szop");
+    await field();
+  });
+
+  it("LST-1.2: closing the list's menu without Rename returns focus to the menu button, also after a Rename", async () => {
+    const user = userEvent.setup();
+    setup();
+    const input = (await field()) as HTMLInputElement;
+    const trigger = screen.getByRole("button", { name: "List actions" });
+
+    await user.click(trigger);
+    await screen.findByRole("menuitem", { name: "Rename" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
+
+    await user.click(trigger);
+    await user.click(await screen.findByRole("menuitem", { name: "Rename" }));
+    await waitFor(() => {
+      expect(input).toHaveFocus();
+    });
+    expect(input.selectionEnd).toBe("Weekly shop".length);
+
+    await user.click(trigger);
+    await screen.findByRole("menuitem", { name: "Rename" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
+  });
+
+  it("LST-1.2: Esc in the title leaves the field", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    await user.type(await field(), " 2{Escape}");
+
+    expect(screen.getByRole("textbox")).not.toHaveFocus();
+  });
+
+  it("LST-1.2: a name of spaces is not saved and the old one returns", async () => {
+    const user = userEvent.setup();
+    const { patches } = setup();
+
+    await user.clear(await field());
+    await user.type(screen.getByRole("textbox"), "   ");
+    await user.tab();
+
+    expect(screen.getByRole("textbox")).toHaveValue("Weekly shop");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(patches).toHaveLength(0);
+  });
+
+  it("LST-1.2: a name over 100 characters shows an invalid field that a valid name or Esc clears", async () => {
+    const user = userEvent.setup();
+    const { patches } = setup();
+    const long = "a".repeat(101);
+
+    await user.clear(await field());
+    await user.type(screen.getByRole("textbox"), long);
+    await user.tab();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Name is too long",
+    );
+    expect(screen.getByRole("textbox")).toHaveAttribute("aria-invalid", "true");
+    expect(patches).toHaveLength(0);
+
+    await user.clear(screen.getByRole("textbox"));
+    await user.type(screen.getByRole("textbox"), "Short");
+    await user.tab();
+    await waitFor(() => {
+      expect(patches).toEqual([{ name: "Short" }]);
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    await user.clear(screen.getByRole("textbox"));
+    await user.type(screen.getByRole("textbox"), long);
+    await user.tab();
+    expect(await screen.findByRole("alert")).toBeVisible();
+    await user.click(screen.getByRole("textbox"));
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("LST-1.2: editing again after Esc saves on leaving the field", async () => {
+    const user = userEvent.setup();
+    const { patches } = setup();
+
+    await user.type(await field(), " 2{Escape}");
+    await user.click(screen.getByRole("textbox"));
+    await user.type(screen.getByRole("textbox"), " 3");
+    await user.tab();
+
+    await waitFor(() => {
+      expect(patches).toEqual([{ name: "Weekly shop 3" }]);
+    });
+  });
+
+  it("LST-1.2: shows the server's message under the title when the rename fails", async () => {
+    const user = userEvent.setup();
+    setup();
+    server.use(
+      http.patch(`/api/lists/${id}`, () =>
+        HttpResponse.json(
+          { error: { code: "internal_error", message: "Boom" } },
+          { status: 500 },
+        ),
+      ),
+    );
+
+    await user.type(await field(), " 2{Enter}");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Boom");
+  });
+
+  it("asks again when Try again is pressed after a failed load", async () => {
+    const user = userEvent.setup();
+    let calls = 0;
+    server.use(
+      http.get(`/api/lists/${id}`, () => {
+        calls += 1;
+        return calls === 1
+          ? HttpResponse.json(
+              { error: { code: "internal_error", message: "Boom" } },
+              { status: 500 },
+            )
+          : HttpResponse.json(list);
+      }),
+    );
+    const router = createMemoryRouter(routes, {
+      initialEntries: [`/lists/${id}`],
+    });
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Try again" }));
+
+    expect(await field()).toHaveValue("Weekly shop");
+  });
 });

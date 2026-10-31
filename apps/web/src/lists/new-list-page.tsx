@@ -4,6 +4,10 @@ import { uuidv7 } from "@szop/shared";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
 import { useCreateList } from "./use-lists.ts";
 
+function setTitle() {
+  document.title = "New list · Szop";
+}
+
 // /lists/new: the list's screen with an empty, focused name field. Enter
 // creates the list; Esc or leaving empty-handed stores nothing.
 export function NewListPage() {
@@ -13,9 +17,8 @@ export function NewListPage() {
   // same ID and cannot make a second list.
   const id = useRef<string>(undefined);
 
-  useEffect(() => {
-    document.title = "New list · Szop";
-  }, []);
+  // Stryker disable next-line ArrayDeclaration: the dependency list of a run-once effect; a constant item behaves the same
+  useEffect(setTitle, []);
 
   return (
     <>

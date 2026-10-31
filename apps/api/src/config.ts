@@ -41,17 +41,14 @@ const trustedProxies = z
 const appOrigin = z
   .string()
   .refine((value) => {
-    try {
-      const url = new URL(value);
-      return (
-        (url.protocol === "http:" || url.protocol === "https:") &&
-        url.pathname === "/" &&
-        url.search === "" &&
-        url.hash === ""
-      );
-    } catch {
-      return false;
-    }
+    if (!URL.canParse(value)) return false;
+    const url = new URL(value);
+    return (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      url.pathname === "/" &&
+      url.search === "" &&
+      url.hash === ""
+    );
   }, "must be an http or https origin with no path")
   .transform((value) => new URL(value).origin);
 

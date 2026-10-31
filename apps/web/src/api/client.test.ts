@@ -208,4 +208,51 @@ describe("lists", () => {
       "The list came in a shape this page does not know",
     );
   });
+
+  it("says so when a 200 is not the lists", async () => {
+    server.use(
+      http.get("/api/lists", () => HttpResponse.json({ lists: [{}] })),
+    );
+
+    await expect(getLists()).rejects.toThrow(
+      "The lists came in a shape this page does not know",
+    );
+  });
+
+  it("names the request method and path when a failure has no API error body", async () => {
+    server.use(
+      http.get(
+        `/api/lists/${party?.id ?? ""}`,
+        () => new HttpResponse("<html>", { status: 502 }),
+      ),
+      http.get("/api/auth/get-session", () => HttpResponse.json({ s: 1 })),
+      http.post(
+        "/api/lists",
+        () => new HttpResponse("<html>", { status: 500 }),
+      ),
+      http.patch(
+        `/api/lists/${party?.id ?? ""}`,
+        () => new HttpResponse("<html>", { status: 503 }),
+      ),
+    );
+    const id = party?.id ?? "";
+
+    await expect(getList(id)).rejects.toThrow(
+      `GET /api/lists/${id} answered 502`,
+    );
+    await expect(createList(newList)).rejects.toThrow(
+      "POST /api/lists answered 500",
+    );
+    await expect(renameList(id, "X")).rejects.toThrow(
+      `PATCH /api/lists/${id} answered 503`,
+    );
+  });
+
+  it("names a failed request's error ApiRequestError", async () => {
+    server.use(
+      http.get("/api/lists", () => new HttpResponse("<html>", { status: 502 })),
+    );
+
+    await expect(getLists()).rejects.toMatchObject({ name: "ApiRequestError" });
+  });
 });

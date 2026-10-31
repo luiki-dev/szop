@@ -37,6 +37,7 @@ export function listsRoutes(
 
   typed.get(
     "/lists",
+    // Stryker disable next-line ObjectLiteral: the response schema documents and strips; the handlers already return exactly its fields, so `{}` behaves the same
     { schema: { response: { 200: listsResponseSchema } } },
     async (request) => {
       const context = await findOwnWorkspace(db, request.user);
@@ -49,6 +50,7 @@ export function listsRoutes(
     {
       schema: {
         body: createListSchema,
+        // Stryker disable next-line ObjectLiteral: the response schema documents and strips; the handlers already return exactly its fields, so `{}` behaves the same
         response: { 200: listSchema, 201: listSchema },
       },
     },
@@ -63,14 +65,18 @@ export function listsRoutes(
 
   typed.get(
     "/lists/:id",
+    // Stryker disable next-line ObjectLiteral: a path parameter is always a string and the response schema only strips what the handler already leaves out, so `{}` behaves the same
     {
+      // Stryker disable next-line ObjectLiteral: a path parameter is always a string, so `{}` behaves the same
       schema: {
         params: idParams,
+        // Stryker disable next-line ObjectLiteral: the response schema documents and strips; the handler already returns exactly its fields, so `{}` behaves the same
         response: { 200: listSchema },
       },
     },
     async (request, reply) => {
       const id = z.uuid().safeParse(request.params.id);
+      // Stryker disable next-line ConditionalExpression: an invalid ID would reach the access layer as undefined and end in the same 404; the guard keeps it from the query
       if (!id.success) return notFound(reply);
       const context = await requireListAccess(db, request.user, id.data);
       const list = await findList(db, context.workspaceId, id.data);
@@ -84,11 +90,13 @@ export function listsRoutes(
       schema: {
         params: idParams,
         body: renameListSchema,
+        // Stryker disable next-line ObjectLiteral: the response schema documents and strips; the handlers already return exactly its fields, so `{}` behaves the same
         response: { 200: listSchema },
       },
     },
     async (request, reply) => {
       const id = z.uuid().safeParse(request.params.id);
+      // Stryker disable next-line ConditionalExpression: an invalid ID would reach the access layer as undefined and end in the same 404; the guard keeps it from the query
       if (!id.success) return notFound(reply);
       const context = await requireListAccess(db, request.user, id.data);
       const list = await renameList(

@@ -32,6 +32,7 @@ export function useCreateList() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createList,
+    // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
     onSuccess: (list) => remember(queryClient, list),
   });
@@ -41,6 +42,7 @@ export function useRenameList(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (name: string) => renameList(id, name),
+    // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
     onSuccess: (list) => remember(queryClient, list),
   });

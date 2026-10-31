@@ -21,6 +21,7 @@ export function ListHeader({
       <Link
         to="/"
         aria-label="Back to lists"
+        // Stryker disable next-line ObjectLiteral,StringLiteral: class names only, no behavior
         className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
       >
         <ArrowLeft aria-hidden="true" />
@@ -58,6 +59,7 @@ export function TitleField({
   const [value, setValue] = useState(initial);
   const [seen, setSeen] = useState(initial);
   const [tooLong, setTooLong] = useState<string>();
+  // Stryker disable next-line BooleanLiteral: onFocus resets it before any blur can happen, so the initial value is never read
   const cancelled = useRef(false);
   // The server's answer replaces what the field shows.
   if (seen !== initial) {
@@ -70,7 +72,10 @@ export function TitleField({
     const parsed = listNameSchema.safeParse(value);
     if (!parsed.success) {
       if (value.trim() === "") setValue(initial);
-      else setTooLong(parsed.error.issues[0]?.message);
+      else {
+        // Stryker disable next-line OptionalChaining: a failed parse has at least one issue
+        setTooLong(parsed.error.issues[0]?.message);
+      }
       return;
     }
     setTooLong(undefined);

@@ -13,7 +13,9 @@ describe("listNameSchema", () => {
   });
 
   it.each(["", "   "])("LST-1.1: refuses %j", (name) => {
-    expect(listNameSchema.safeParse(name).success).toBe(false);
+    const result = listNameSchema.safeParse(name);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Name is required");
   });
 
   it.each(["a", "🛒"])(

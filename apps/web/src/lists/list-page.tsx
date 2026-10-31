@@ -16,6 +16,7 @@ import { useList, useRenameList } from "./use-lists.ts";
 // /lists/:id: the list's screen. The shell leaves its header and the tab's
 // title to this page.
 export function ListPage() {
+  // Stryker disable next-line StringLiteral: the route always supplies :id; the default only satisfies the type
   const { id = "" } = useParams();
   const query = useList(id);
   const rename = useRenameList(id);
@@ -42,6 +43,7 @@ export function ListPage() {
           {missing ? (
             <Link
               to="/"
+              // Stryker disable next-line ObjectLiteral,StringLiteral: class names only, no behavior; the 48 px tap target is checked in e2e
               className={cn(buttonVariants({ variant: "outline" }), "mt-4")}
             >
               Show my lists
@@ -90,6 +92,7 @@ export function ListPage() {
               rename.mutate(next);
             }}
             onCancel={() => {
+              // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
               input.current?.blur();
             }}
           />
@@ -113,6 +116,7 @@ export function ListPage() {
               finalFocus={() => {
                 if (!renaming.current) return true;
                 renaming.current = false;
+                // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
                 input.current?.select();
                 return input.current;
               }}

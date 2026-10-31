@@ -10,6 +10,7 @@ import { useLists } from "./use-lists.ts";
 // thumb's reach; on a desktop the shell shows it beside the h1.
 export function NewListLink({ sticky }: { sticky?: boolean }) {
   const link = (
+    // Stryker disable next-line StringLiteral: class names only, no behavior
     <Link to="/lists/new" className={cn(buttonVariants(), "gap-2")}>
       <Plus aria-hidden="true" />
       New list

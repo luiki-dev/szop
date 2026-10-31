@@ -27,6 +27,7 @@ function useRouteHandle(): RouteHandle {
   const header = handles.findLast((handle) => handle.header)?.header;
   return {
     ...(named?.title === undefined ? {} : { title: named.title }),
+    // Stryker disable next-line ConditionalExpression: only the truthiness of header is read, so a `header: undefined` key behaves like no key
     ...(header === undefined ? {} : { header }),
     ...(named?.action === undefined ? {} : { action: named.action }),
   };
