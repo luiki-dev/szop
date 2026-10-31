@@ -195,11 +195,11 @@ git push
 **Interfaces:**
 - Consumes: the skill names and modes of Tasks 1, 3 and 4; the `## Findings` table of Task 2.
 
-- [ ] **Step 1: CLAUDE.md**
+- [x] **Step 1: CLAUDE.md**
 
 Following spec, [CLAUDE.md and the execution rules](../specs/2026-10-31-session-skills-design.md#claudemd-and-the-execution-rules): the worktree bullet ends "finish a branch with `/finish-phase`, not the superpowers finishing skill"; a "Working with Claude" bullet naming `/handoff` (the owner runs it to end a stage; `/handoff resume <branch>` opens the next), `/finish-phase` (the finishing stage) and `/demo-check` (after the PR opens) ([ADR 0059](docs/decisions/0059-session-skills.md)); the severity line becomes "a bug's severity, the project's Severity field, and a review finding's severity (🟠 for Important)".
 
-- [ ] **Step 2: The guides**
+- [x] **Step 2: The guides**
 
 Following spec, [Documentation](../specs/2026-10-31-session-skills-design.md#documentation):
 - `working-with-claude.md`: the "Execution, continued" row (and any continued stage) uses `/handoff resume <branch>` with the second line, reading the handoff file first; the "Finishing" row is `/finish-phase`; the ledger paragraph names the `## Findings` list and the one triage of `/finish-phase` in place of today's listing; "Restart or compact" says a stage boundary ends with `/handoff`. Keep `## Contents` in sync.
@@ -207,16 +207,16 @@ Following spec, [Documentation](../specs/2026-10-31-session-skills-design.md#doc
 - `phase-walkthrough.md`: name `/finish-phase` and `/demo-check` where it describes those steps; no new sections.
 - `glossary.md`: add "handoff" only if the changed docs use it as a term.
 
-- [ ] **Step 3: The ADR notes**
+- [x] **Step 3: The ADR notes**
 
 At the bottom of decision 2's cell, after any existing note: in ADR 0052, `<br>➕ **Extended by [ADR 0059](0059-session-skills.md), decisions 2 to 5:** <one clause: a stage hands over with /handoff>`; in ADR 0054, `<br>✏️ **Refined by [ADR 0059](0059-session-skills.md), decisions 6 and 7:** <one clause: one findings list, triaged once with a recommendation each, bugs included>`. Run `/new-adr` for the note's rules first; the status lines stay.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `pnpm check && git status --short`
 Expected: passes; only the files above and this plan changed.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add CLAUDE.md docs/ 

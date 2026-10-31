@@ -97,14 +97,14 @@ A new session needs only a short prompt naming the stage and its document. CLAUD
 | Brainstorm and spec | `Brainstorm PH-NN` | the phase's entry in `docs/roadmap.md`, its issue and open-point issues, the requirements it delivers |
 | Plan | `Plan PH-NN from docs/superpowers/specs/<spec>.md` | the spec, the files it names |
 | Execution | `Execute the plan docs/superpowers/plans/<plan>.md` | the plan, `docs/superpowers/plans/CLAUDE.md` (the repo-wide rules; the plan does not repeat them), the spec |
-| Execution, continued | `Execute the plan docs/superpowers/plans/<plan>.md; tasks 1–3 are committed` | the plan, the progress ledger in `.superpowers/sdd/<plan>/progress.md`, `git log` |
-| Finishing | `Finish PH-NN: tracking and the PR` | the plan's last task, `/phase-tracking`'s "Before opening the PR", the branch's diff |
+| Execution, continued | `/handoff resume <branch>`, then a second line: the stage and the next step | the handoff file `.superpowers/handoff/<branch>.md` (with `/` replaced by `-`), then the documents it lists under **Read first** |
+| Finishing | `/finish-phase` | the branch's diff, the ledger's `## Findings`, `/phase-tracking`'s "Before opening the PR" |
 
-The ledger of a plan's workspace keeps each finished task, the rulings made along the way and the review findings deferred, so a new execution session picks up where the last one stopped without re-reading the whole conversation. The session that dispatches an implementer tells it to read `docs/superpowers/plans/CLAUDE.md` before its task. After the whole-branch review, the session that ran it lists the findings it did not fix to the owner; the owner chooses which become open-point issues, created in that session before the PR opens, and the rest are noted as declined in the phase ADR's "Settled while building". The ledger is where the findings wait until then.
+The ledger of a plan's workspace keeps each finished task, the rulings made along the way and the `## Findings` table (every finding a task review or an implementer reported and the task did not fix), so a new execution session picks up where the last one stopped without re-reading the whole conversation. The session that dispatches an implementer tells it to read `docs/superpowers/plans/CLAUDE.md` before its task. `/finish-phase` merges that table with the whole-branch review's findings and sends the owner one triage, each finding with a recommendation (fix now, open point, bug, drop); the open points and bugs chosen are created before the PR opens, and the rest are noted as declined in the phase ADR's "Settled while building" ([ADR 0059](../decisions/0059-session-skills.md), decisions 6 and 7).
 
 ### Restart or compact
 
-- **At a stage boundary:** start a new session (`/clear`). The committed document is a better hand-off than a summary.
+- **At a stage boundary:** end the stage with `/handoff` and start a new session (`/clear`) with `/handoff resume <branch>`. The committed document is a better hand-off than a summary.
 - **Within a stage:** `/compact` with a short instruction (what is done, what is next) keeps the working state the plan does not hold, for example a failing test being chased. A new session is also fine when the last task was just committed and pushed.
 - **Never in the middle of an edit** that is not committed: finish the step or the task first.
 
