@@ -153,16 +153,16 @@ git push
 **Interfaces:**
 - Consumes: [the demo check](../../development/definition-of-done.md#the-demo-check); the runbook anchors `#5-sign-in-from-the-cli`, `#applying-base`, `#pressing-the-button`, `#with-the-button`, `#debugging` of `docs/operations/demo-environment.md`; the spec's "Demo check" section of the phase.
 
-- [ ] **Step 1: Pin the Lighthouse version**
+- [x] **Step 1: Pin the Lighthouse version**
 
 Run: `npm view lighthouse version` and `npm view lighthouse time --json | tail -5`
 Pick the newest version published at least two weeks ago; it goes in the skill as `npx --yes lighthouse@<version> https://szop.dzwoniec.com/ --output=json --output-path=<scratchpad>/lighthouse.json --chrome-flags="--headless"` (default mobile profile). Do not run it against the demo now.
 
-- [ ] **Step 2: Write `.claude/skills/demo-check/SKILL.md`**
+- [x] **Step 2: Write `.claude/skills/demo-check/SKILL.md`**
 
 Frontmatter `name: demo-check` and a `description` saying: runs the demo check of the definition of done on a PR's final head as one list of who does what; run after the PR opens, by the owner or offered by `/finish-phase`; Claude never triggers `demo-up` or `demo-down`. Then the four steps of spec, [/demo-check](../specs/2026-10-31-session-skills-design.md#demo-check), with the table template of the spec inline (columns `# | Who | Where | Check | Reply`), the runbook links in **Where**, the two replies Claude waits for ("demo is up"; the behaviors done and `demo-down` run), and the "owner does everything" variant. Lighthouse: the command of Step 1; if it cannot run, the owner saves the report from Chrome and Claude reads the file (ADR 0059, Consequences).
 
-- [ ] **Step 3: Check the skill against the spec**
+- [x] **Step 3: Check the skill against the spec**
 
 Checklist, each yes:
 - the list is worked out from the definition of done, `infra/base` in the diff (sign-in and apply first), UI changes (Lighthouse), the spec's demo behaviors;
@@ -171,7 +171,7 @@ Checklist, each yes:
 - after the second reply: ✅ or ❌ per check, the "Checked at the demo:" line filled from the spec; the owner ticks `Demo check`;
 - `demo-up` and `demo-down` are never triggered by Claude.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```bash
 git add .claude/skills/demo-check/SKILL.md docs/superpowers/plans/2026-10-31-session-skills.md
