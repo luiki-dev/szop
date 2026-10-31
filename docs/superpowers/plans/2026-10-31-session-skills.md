@@ -119,11 +119,11 @@ git push
 - Consumes: the `## Findings` table of Task 2; `/phase-tracking`, section "Before opening the PR"; `scripts/token-usage.py --branch <branch>`; the reviewer prompt `code-reviewer.md` of `superpowers:requesting-code-review`.
 - Produces: the skill `/finish-phase`, whose last step offers `/demo-check` (Task 4).
 
-- [ ] **Step 1: Write `.claude/skills/finish-phase/SKILL.md`**
+- [x] **Step 1: Write `.claude/skills/finish-phase/SKILL.md`**
 
 Frontmatter `name: finish-phase` and a `description` saying: finishes a phase branch, or any other branch such as an ADR made outside a phase, with the checks on the final head, the whole-branch review on Opus, one triage of the findings and the PR; run at the finishing stage by its opening prompt, by the owner, or by Claude when a plan's last task is done; replaces `superpowers:finishing-a-development-branch`. Then the nine steps of spec, [/finish-phase](../specs/2026-10-31-session-skills-design.md#finish-phase), with _phase only_ marked on steps 5 (the declined ones), 6 and 8 (token usage). The triage message format goes inline as a short example (groups, numbering, the closing "now: 1, 4; OP: 2; bug: 7; the rest dropped").
 
-- [ ] **Step 2: Check the skill against the spec**
+- [x] **Step 2: Check the skill against the spec**
 
 Checklist, each yes:
 - checks on the final head: pushed, clean, `pnpm check`, plus `pnpm test:e2e` when the diff from the merge base touches `apps/`, `packages/` or `e2e/`; a failure stops everything; an earlier green run does not count;
@@ -135,7 +135,7 @@ Checklist, each yes:
 - `/phase-tracking` "Before opening the PR", then the PR from the template, "Checked at the demo:" left for `/demo-check`, `skip-changelog` when fitting; never merge, never force-push a rejected push;
 - wrap-up: a worktree is named, not removed; `/demo-check` offered when the definition of done needs one.
 
-- [ ] **Step 3: Commit and push**
+- [x] **Step 3: Commit and push**
 
 ```bash
 git add .claude/skills/finish-phase/SKILL.md docs/superpowers/plans/2026-10-31-session-skills.md
