@@ -108,12 +108,14 @@ resource "aws_ecs_task_definition" "app" {
         { name = "LOG_LEVEL", value = "info" },
         { name = "DATABASE_USER", value = "szop_app" },
         { name = "TRUSTED_PROXIES", value = local.trusted_proxies },
+        { name = "APP_ORIGIN", value = "https://${local.app_hostname}" },
       ])
 
       # ECS fetches the value when the task starts; the task definition holds
       # only where it is (ADR 0008, decision 22).
       secrets = [
         { name = "DATABASE_PASSWORD", valueFrom = local.db_app_password_arn },
+        { name = "BETTER_AUTH_SECRET", valueFrom = local.better_auth_secret_arn },
       ]
 
       logConfiguration = {

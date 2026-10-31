@@ -10,6 +10,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
   - [Unsafe requests](#unsafe-requests)
   - [Reading the log](#reading-the-log)
   - [Testing a hook before its routes exist](#testing-a-hook-before-its-routes-exist)
+  - [Testing the session](#testing-the-session)
   - [Testing the served SPA](#testing-the-served-spa)
 - [Writing a database test](#writing-a-database-test)
 - [Writing a component test](#writing-a-component-test)
@@ -194,6 +195,10 @@ app.route({
 
 The route answers 200, so a test sees whether the hook let the request through. Name it `/api/test-…`, so it cannot be mistaken for a real one. Once a real route exists, a test of the hook may use it instead.
 
+### Testing the session
+
+`test/auth.ts` holds `signIn(app)`, which signs in anonymously and returns the `cookie` header for later `inject` calls, and `sameOrigin`, the headers of a request from the app itself. To test a session's lifetime, move its row instead of waiting: `UPDATE sessions SET expires_at = now() + interval '2 days'` makes the next read renew it, and a past `expires_at` or a deleted row makes `request.user` null. A route behind `sessionHook` is tested on a throwaway route, as in [Testing a hook before its routes exist](#testing-a-hook-before-its-routes-exist).
+
 ### Testing the served SPA
 
 `apps/api/src/web/routes.test.ts` checks how the API serves the built web app: the compressed copies, the cache headers and the fallback to `index.html` ([ADR 0023](../decisions/0023-production-build-and-serving-details.md), decisions 5, 6 and 8). It never depends on running `pnpm build`:
@@ -299,7 +304,7 @@ test("the shell shows the menu, the API's status and the pages", async ({
 }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Start" }),
+    page.getByRole("heading", { level: 1, name: "Lists" }),
   ).toBeVisible();
 
   const menu = await openMenu(page, isMobile);
@@ -320,6 +325,10 @@ test("the shell shows the menu, the API's status and the pages", async ({
 - **Edge cases stay in lower layers.** A journey follows the main path of its use case; an ordering rule, a permission check or a validation message is proven by a unit, API or component test.
 
 The catalog's journey, `e2e/tests/catalog.spec.ts`, is a second pattern: it reads the real `seed.yaml`, so it names "Dairy & eggs", its subcategory "Milk", "Buttermilk" and "Oat milk" (the seed's header comment says to rename them together), opens a category, searches, clears the search and runs axe with a category open. It shows a check that depends on the viewport: on a phone the buttons "Expand all" and "Collapse all" show only an icon, so the test looks at the visibility of the label, not at the button's text (`toHaveText` reads hidden text too).
+
+The lists journey, `e2e/tests/lists.spec.ts`, shows two more things. A browser context is a fresh guest: a new `browser.newContext({ baseURL })` has no session cookie, so the second test uses one as "another visitor" (it is outside the CSP guard) and `context.clearCookies()` turns the first guest into a stranger. And an element that is only for screen readers, such as the list's `h1`, is asserted by role (`getByRole("heading", { level: 1 })`), since it is not visible.
+
+The page frame's check, `e2e/tests/frame.spec.ts`, measures instead of reading: it compares, page by page, where the title row's first element and the title stand ([visual-design.md, "The page frame"](../architecture/visual-design.md#the-page-frame)). It waits for the network to settle first, since a long page's scrollbar appears only with its data, and rounds the boxes to whole pixels.
 
 ### The CSP guard
 

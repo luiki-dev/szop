@@ -35,7 +35,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-41 Faster, steadier CI](#ph-41-faster-steadier-ci)
   - [PH-15a Seed catalog, read-only](#ph-15a-seed-catalog-read-only)
   - [PH-15b Mutation testing](#ph-15b-mutation-testing)
-  - [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists)
+  - [PH-16a Guest's first list](#ph-16a-guests-first-list)
+  - [PH-16b Workspace from the default data](#ph-16b-workspace-from-the-default-data)
+  - [PH-16c Managing lists](#ph-16c-managing-lists)
   - [PH-17a List items](#ph-17a-list-items)
   - [PH-17b The haul](#ph-17b-the-haul)
   - [PH-18 Registration and login](#ph-18-registration-and-login)
@@ -325,7 +327,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-41 Faster, steadier CI](#ph-41-faster-steadier-ci) | ✅ Done | ➖ N/A: bounded | ➖ N/A: bounded | [#303](https://github.com/luiki-dev/szop/pull/303) | [#295](https://github.com/luiki-dev/szop/issues/295) |
 | [PH-15a Seed catalog, read-only](#ph-15a-seed-catalog-read-only) | ✅ Done | [Spec](superpowers/specs/2026-10-25-PH-15a-seed-catalog-design.md) | [Plan](superpowers/plans/2026-10-27-PH-15a-seed-catalog.md) | [#306](https://github.com/luiki-dev/szop/pull/306) | [#287](https://github.com/luiki-dev/szop/issues/287) |
 | [PH-15b Mutation testing](#ph-15b-mutation-testing) | 🚧 In progress | [Spec](superpowers/specs/2026-10-28-PH-15b-mutation-testing-design.md) | [Plan](superpowers/plans/2026-10-28-PH-15b-mutation-testing.md) | [#310](https://github.com/luiki-dev/szop/pull/310) | [#288](https://github.com/luiki-dev/szop/issues/288) |
-| [PH-16 Guest workspace and lists](#ph-16-guest-workspace-and-lists) | ⬜ Not started | — | — | — | [#45](https://github.com/luiki-dev/szop/issues/45) |
+| [PH-16a Guest's first list](#ph-16a-guests-first-list) | 🚧 In progress | [Spec](superpowers/specs/2026-10-30-PH-16a-guests-first-list-design.md) | [Plan](superpowers/plans/2026-10-30-PH-16a-guests-first-list.md) | [#322](https://github.com/luiki-dev/szop/pull/322) | [#313](https://github.com/luiki-dev/szop/issues/313) |
+| [PH-16b Workspace from the default data](#ph-16b-workspace-from-the-default-data) | ⬜ Not started | — | — | — | [#314](https://github.com/luiki-dev/szop/issues/314) |
+| [PH-16c Managing lists](#ph-16c-managing-lists) | ⬜ Not started | — | — | — | [#315](https://github.com/luiki-dev/szop/issues/315) |
 | [PH-17a List items](#ph-17a-list-items) | ⬜ Not started | — | — | — | [#290](https://github.com/luiki-dev/szop/issues/290) |
 | [PH-17b The haul](#ph-17b-the-haul) | ⬜ Not started | — | — | — | [#291](https://github.com/luiki-dev/szop/issues/291) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
@@ -402,19 +406,40 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#288](https://github.com/luiki-dev/szop/issues/288).
 
-### PH-16 Guest workspace and lists
+### PH-16a Guest's first list
 
-- **Goal:** a guest creates their first list, which creates their anonymous workspace from the seed data. They rename and delete lists and see their active lists, and nobody can reach another workspace's data.
-- **Delivers:** [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1), [LST-1](requirements/LST-shopping-lists.md#lst-1), [LST-2](requirements/LST-shopping-lists.md#lst-2) (part: active lists), [APP-1](requirements/APP-app-wide-behavior.md#app-1) (part: APP-1.5 and APP-1.8, the lists as the home screen and "New list"), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.3, confirming a list's deletion), [APP-4](requirements/APP-app-wide-behavior.md#app-4) (part: APP-4.2, empty pages), [APP-5](requirements/APP-app-wide-behavior.md#app-5), [LIM-2](requirements/LIM-limits.md#lim-2) (part: list names), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.10, another workspace's records), [UNT-1](requirements/UNT-units.md#unt-1) (part: UNT-1.1, the default units); Better Auth with its anonymous plugin; the access layer and the composite workspace keys ([ADR 0012](decisions/0012-security-baseline.md), decisions 3–6); the data model conventions every later migration follows.
-- **Depends on:** the spike on Better Auth's anonymous plugin, before the brainstorm ([OP-038](https://github.com/luiki-dev/szop/issues/97)).
+- **Goal:** a guest creates their first list, which gives them an anonymous session and an empty workspace. They see their lists on the home screen, newest first, open one and rename it, and nobody else can reach them.
+- **Delivers:** [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.1, ACC-1.7 and ACC-1.8), [LST-1](requirements/LST-shopping-lists.md#lst-1) (part: creating and renaming, LST-1.1, LST-1.2, LST-1.4 and LST-1.5), [LST-2](requirements/LST-shopping-lists.md#lst-2) (part: active lists, LST-2.1 and LST-2.3), [APP-1](requirements/APP-app-wide-behavior.md#app-1) (part: APP-1.5, APP-1.6 and APP-1.8, the lists as the home screen, the back arrow inside a list and "New list"), [APP-4](requirements/APP-app-wide-behavior.md#app-4) (part: APP-4.2, empty pages), [LIM-2](requirements/LIM-limits.md#lim-2) (part: list names), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.9, the session cookie, and NFR-4.10 for lists); Better Auth with its anonymous plugin and a 30-day sliding session; the first tables and the data model conventions every later migration follows; the access layer for lists ([ADR 0012](decisions/0012-security-baseline.md), decisions 3–6); the check that migrations match the schema in CI. The details are in [ADR 0057](decisions/0057-guests-first-list-phase-details.md).
+- **Split from:** PH-16 Guest workspace and lists, now retired: it held about 25 acceptance criteria and three new concepts, anonymous sessions, workspace-owned data with the access layer, and the SPA's first changes ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0057](decisions/0057-guests-first-list-phase-details.md)). The copy of the default data became [PH-16b](#ph-16b-workspace-from-the-default-data), deleting lists and resilient changes [PH-16c](#ph-16c-managing-lists).
+- **Depends on:** the spike on Better Auth's anonymous plugin, done on 2026-10-30 ([OP-038](https://github.com/luiki-dev/szop/issues/97)).
 - **Owner steps:** none.
-- **Expected path:** full; a candidate for a split into anonymous sessions and the access layer.
-- **Open points:** the sub-issues of [#45](https://github.com/luiki-dev/szop/issues/45).
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#313](https://github.com/luiki-dev/szop/issues/313).
+
+### PH-16b Workspace from the default data
+
+- **Goal:** a guest's workspace is created as a copy of the default catalog, categories and units, and their first change works even when it refers to default data. The catalog page shows the guest's own copy, and two tabs making their first change at once end up in one workspace.
+- **Delivers:** [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.4, ACC-1.5, ACC-1.6 and ACC-1.9), [UNT-1](requirements/UNT-units.md#unt-1) (part: UNT-1.1, the default units), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.10 for references between records); the workspace's catalog, category and unit tables with composite keys; the two-workspace test helper and the schema test over PostgreSQL's catalog ([ADR 0012](decisions/0012-security-baseline.md), decision 6).
+- **Split from:** PH-16 Guest workspace and lists, now retired (see [PH-16a](#ph-16a-guests-first-list)).
+- **Depends on:** —
+- **Owner steps:** none.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#314](https://github.com/luiki-dev/szop/issues/314).
+
+### PH-16c Managing lists
+
+- **Goal:** a guest deletes a list after confirming it, a path that is not a page shows a not-found page, and a change sent on a weak connection fails visibly instead of hanging or being lost.
+- **Delivers:** [LST-1](requirements/LST-shopping-lists.md#lst-1) (part: LST-1.3, deleting), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.3, confirming a list's deletion), [APP-5](requirements/APP-app-wide-behavior.md#app-5); timeouts on requests, the "not saved" state and refetching after a failed change ([OP-040](https://github.com/luiki-dev/szop/issues/99)).
+- **Split from:** PH-16 Guest workspace and lists, now retired (see [PH-16a](#ph-16a-guests-first-list)).
+- **Depends on:** —
+- **Owner steps:** none.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#315](https://github.com/luiki-dev/szop/issues/315).
 
 ### PH-17a List items
 
 - **Goal:** a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added. Checked items leave the list for a plain section of checked items, which the haul replaces in [PH-17b](#ph-17b-the-haul).
-- **Delivers:** [ITM-1](requirements/ITM-list-items.md#itm-1), [ITM-6](requirements/ITM-list-items.md#itm-6), [ITM-7](requirements/ITM-list-items.md#itm-7), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2) (part: the list's order, ORD-2.1 to ORD-2.4), [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5) (part: ORD-5.1, ORD-5.2 and ORD-5.4), [APP-1](requirements/APP-app-wide-behavior.md#app-1) (part: APP-1.6, the back arrow inside a list), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.1 and APP-3.2, messages and undoing a removal), [APP-6](requirements/APP-app-wide-behavior.md#app-6), [APP-7](requirements/APP-app-wide-behavior.md#app-7), [LIM-2](requirements/LIM-limits.md#lim-2) (part: item names and notes); optimistic updates; forms with React Hook Form.
+- **Delivers:** [ITM-1](requirements/ITM-list-items.md#itm-1), [ITM-6](requirements/ITM-list-items.md#itm-6), [ITM-7](requirements/ITM-list-items.md#itm-7), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2) (part: the list's order, ORD-2.1 to ORD-2.4), [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5) (part: ORD-5.1, ORD-5.2 and ORD-5.4), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.1 and APP-3.2, messages and undoing a removal), [APP-6](requirements/APP-app-wide-behavior.md#app-6), [APP-7](requirements/APP-app-wide-behavior.md#app-7), [LIM-2](requirements/LIM-limits.md#lim-2) (part: item names and notes); optimistic updates; forms with React Hook Form.
 - **Split from:** PH-17 List items, now retired: with the haul it held about 40 acceptance criteria and two new concepts, the list's items with their forms and optimistic updates, and the haul with its drawer ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0051](decisions/0051-acceptance-criteria.md), decision 16). The haul became PH-17b.
 - **Depends on:** —
 - **Owner steps:** none.
@@ -434,7 +459,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-18 Registration and login
 
 - **Goal:** a guest registers with email and password, verifies the address and keeps their workspace as the account's. They log in and out, on any device.
-- **Delivers:** [ACC-2](requirements/ACC-accounts-and-guest-mode.md#acc-2), [ACC-3](requirements/ACC-accounts-and-guest-mode.md#acc-3) (part: logging in and out), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.8 and NFR-4.9, tokens in the address bar and the session cookie); the SES email sender, and a way for development and E2E tests to read the emails; completes [UC-8](requirements/UC-use-cases.md#uc-8-guest-becomes-a-user).
+- **Delivers:** [ACC-2](requirements/ACC-accounts-and-guest-mode.md#acc-2), [ACC-3](requirements/ACC-accounts-and-guest-mode.md#acc-3) (part: logging in and out), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.8, tokens in the address bar); the SES email sender, and a way for development and E2E tests to read the emails; completes [UC-8](requirements/UC-use-cases.md#uc-8-guest-becomes-a-user).
 - **Depends on:** —
 - **Owner steps:** verify the email addresses the demo will send to, while SES is in its sandbox.
 - **Expected path:** full; a candidate for a split into the authentication flows and sending email.

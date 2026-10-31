@@ -4,28 +4,29 @@ Creating, viewing, archiving, duplicating and resetting shopping lists. Part of 
 
 ## LST-1
 
-🎯 [MVP] · ❔ Draft (0 of 4) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (4 of 5) · ❔ Criteria not finalized
 
 Create, rename and delete a list. Deleting requires confirmation.
 
 | ID | Criterion | Status |
 |---|---|---|
-| LST-1.1 | A user creates a list by giving it a name. | ❔ Draft |
-| LST-1.2 | The owner renames a list. | ❔ Draft |
+| LST-1.1 | A user creates a list by giving it a name. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
+| LST-1.2 | The owner renames a list on its screen, by editing the title or through Rename in the list's menu. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
 | LST-1.3 | The owner deletes a list after confirming it. | ❔ Draft |
-| LST-1.4 | On the lists page, "New list" is the main action, pinned at the bottom on a phone. | ❔ Draft |
+| LST-1.4 | On the lists page, "New list" is the main action, pinned at the bottom on a phone. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
+| LST-1.5 | "New list" opens the new list's screen with its name field focused; Enter with a non-empty name creates the list, and Esc or an empty name leaves without creating anything. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
 
 ## LST-2
 
-🎯 [MVP] · ❔ Draft (0 of 3) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (2 of 3) · ❔ Criteria not finalized
 
 View all active lists. View archived lists separately.
 
 | ID | Criterion | Status |
 |---|---|---|
-| LST-2.1 | The lists page, the home screen, shows every active list. | ❔ Draft |
+| LST-2.1 | The lists page, the home screen, shows every active list, newest first. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
 | LST-2.2 | Archived lists are on a page of their own, "Archive" in the menu. | ❔ Draft |
-| LST-2.3 | With no list yet, the lists page says "No lists yet" and offers "New list". | ❔ Draft |
+| LST-2.3 | With no list yet, the lists page shows the raccoon and "Create your first list" and offers "New list". | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
 
 ## LST-3
 

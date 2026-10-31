@@ -150,15 +150,16 @@ describe("describeMismatch", () => {
 
 describe("readLocalMigrations", () => {
   it("reads each migration's name, timestamp and the SHA-256 of its SQL", () => {
-    const content = readFileSync(
-      join(migrationsFolder, "0000_init.sql"),
-      "utf8",
-    );
-    const hash = createHash("sha256").update(content).digest("hex");
+    const expected = readJournal().entries.map((entry) => {
+      const content = readFileSync(
+        join(migrationsFolder, `${entry.tag}.sql`),
+        "utf8",
+      );
+      const hash = createHash("sha256").update(content).digest("hex");
+      return { name: entry.tag, createdAt: entry.when, hash };
+    });
 
-    expect(readLocalMigrations(readJournal())).toEqual([
-      { name: "0000_init", createdAt: 1791307052475, hash },
-    ]);
+    expect(readLocalMigrations(readJournal())).toEqual(expected);
   });
 });
 
@@ -183,17 +184,18 @@ describe("readLocalMigrations naming", () => {
       ],
     };
 
-    expect(readLocalMigrations(journal).map(({ name }) => name)).toEqual([
+    // The folder holds the real migrations; only the first is in this journal.
+    expect(readLocalMigrations(journal).map(({ name }) => name)[0]).toBe(
       "0000_init",
-    ]);
+    );
   });
 
   it("falls back to the timestamp when the journal has no such entry", () => {
     const journal = { entries: [{ when: 1, tag: "0000_other" }] };
 
-    expect(readLocalMigrations(journal).map(({ name }) => name)).toEqual([
+    expect(readLocalMigrations(journal).map(({ name }) => name)[0]).toBe(
       "1791307052475",
-    ]);
+    );
   });
 });
 
@@ -246,10 +248,12 @@ describe("against a database", () => {
   it("reads what Drizzle recorded, and passes it", async () => {
     await runMigrations(db);
 
-    const [local] = readLocalMigrations(readJournal());
-    expect(await readRecordedMigrations(db)).toEqual([
-      { createdAt: 1791307052475, hash: local?.hash },
-    ]);
+    expect(await readRecordedMigrations(db)).toEqual(
+      readLocalMigrations(readJournal()).map(({ createdAt, hash }) => ({
+        createdAt,
+        hash,
+      })),
+    );
     await expect(checkMigrations(db, readJournal())).resolves.toBeUndefined();
   });
 

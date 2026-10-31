@@ -31,22 +31,23 @@ function openMenu() {
 }
 
 describe("AppShell", () => {
-  it("APP-1.2, APP-1.3, APP-2.1: shows Start at / with its title and the menu in a sidebar on a desktop", () => {
+  it("APP-1.2, APP-1.3, APP-2.1: shows Lists at / with its title and the menu in a sidebar on a desktop", () => {
     stubMatchMedia({ [desktopQuery]: true });
     renderApp();
 
     expect(
-      screen.getByRole("heading", { level: 1, name: "Start" }),
+      screen.getByRole("heading", { level: 1, name: "Lists" }),
     ).toBeInTheDocument();
-    expect(document.title).toBe("Start · Szop");
+    expect(document.title).toBe("Lists · Szop");
     const menu = screen.getByRole("navigation", { name: "Menu" });
     expect(
-      within(menu).getByRole("link", { name: "Szop, Start" }),
+      within(menu).getByRole("link", { name: "Szop, Lists" }),
     ).toHaveAttribute("href", "/");
-    expect(within(menu).getByRole("link", { name: "Start" })).toHaveAttribute(
+    expect(within(menu).getByRole("link", { name: "Lists" })).toHaveAttribute(
       "aria-current",
       "page",
     );
+    expect(screen.queryByText("Start")).not.toBeInTheDocument();
     expect(
       within(menu).getByRole("link", { name: "Design system" }),
     ).toHaveAttribute("href", "/design");
@@ -55,7 +56,6 @@ describe("AppShell", () => {
       "/catalog",
     );
     expect(within(menu).getByText("Developer")).toBeInTheDocument();
-    expect(screen.getByText("Welcome to Szop")).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Open menu" }),
     ).not.toBeInTheDocument();
@@ -96,7 +96,7 @@ describe("AppShell", () => {
     expect(screen.getByRole("button", { name: "Open menu" })).toHaveFocus();
   });
 
-  it.each(["Szop, Start", "Start", "Design system"])(
+  it.each(["Szop, Lists", "Lists", "Design system"])(
     "APP-1.1: closes the drawer after following %s",
     async (name) => {
       renderApp("/design");
@@ -186,12 +186,31 @@ describe("AppShell title", () => {
     expect(document.title).toBe("Szop");
   });
 
+  it("APP-2.1: leaves the header and the tab's title to a page that asks for it", () => {
+    renderWith({ title: "Party", header: "list" });
+
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open menu" }),
+    ).not.toBeInTheDocument();
+    expect(document.title).toBe("");
+  });
+
+  it("APP-2.1: a route that only asks for its own header still hides the shell's", () => {
+    renderWith({ header: "list" });
+
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open menu" }),
+    ).not.toBeInTheDocument();
+  });
+
   it.each([
     ["no handle", undefined],
     ["a null handle", null],
     ["a handle without a title", {}],
     ["a handle with a title that is not text", { title: 3 }],
-    ["a handle that is not an object", "Start"],
+    ["a handle that is not an object", "Lists"],
   ])(
     "APP-2.1: takes the title of the deepest route that names one, past %s",
     (_name, handle) => {
@@ -211,7 +230,7 @@ describe("Menu", () => {
     expect(
       within(menu).getByRole("link", { name: "Design system" }),
     ).toHaveClass("bg-accent");
-    expect(within(menu).getByRole("link", { name: "Start" })).not.toHaveClass(
+    expect(within(menu).getByRole("link", { name: "Lists" })).not.toHaveClass(
       "bg-accent",
     );
   });

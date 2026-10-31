@@ -36,6 +36,22 @@ const trustedProxies = z
     value === "none" ? [] : value.split(",").map((entry) => entry.trim()),
   );
 
+// The address the browser opens: http or https, no path. Normalized to the
+// origin, so a trailing slash is harmless.
+const appOrigin = z
+  .string()
+  .refine((value) => {
+    if (!URL.canParse(value)) return false;
+    const url = new URL(value);
+    return (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      url.pathname === "/" &&
+      url.search === "" &&
+      url.hash === ""
+    );
+  }, "must be an http or https origin with no path")
+  .transform((value) => new URL(value).origin);
+
 // Every setting is required: a missing one stops startup instead of
 // falling back to a default (ADR 0019, decision 2).
 const envSchema = z.object({
@@ -76,6 +92,9 @@ const envSchema = z.object({
       /^([0-9a-f]{40}|unknown)$/,
       'must be a full commit hash or "unknown"',
     ),
+  // Signs the session cookies (ADR 0057). Secret: never logged.
+  BETTER_AUTH_SECRET: z.string().min(32, "must be at least 32 characters"),
+  APP_ORIGIN: appOrigin,
 });
 
 export interface DatabaseSettings {
@@ -98,6 +117,9 @@ export interface Config {
   trustedProxies: string[];
   // The full hash of the commit the image was built from, or "unknown".
   commit: string;
+  betterAuthSecret: string;
+  // Normalized: scheme, host and port only.
+  appOrigin: string;
 }
 
 export function loadConfig(env: Record<string, string | undefined>): Config {
@@ -128,5 +150,7 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     webRoot: resolve(data.WEB_ROOT),
     trustedProxies: data.TRUSTED_PROXIES,
     commit: data.GIT_COMMIT,
+    betterAuthSecret: data.BETTER_AUTH_SECRET,
+    appOrigin: data.APP_ORIGIN,
   };
 }

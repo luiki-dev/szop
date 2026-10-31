@@ -5,6 +5,8 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import { createAuth } from "./auth/auth.ts";
+import { authRoutes } from "./auth/routes.ts";
 import { catalogRoutes } from "./catalog/routes.ts";
 import type { Config } from "./config.ts";
 import type { Database } from "./db/database.ts";
@@ -12,6 +14,7 @@ import { readJournal } from "./db/schema-version.ts";
 import { errorHandler } from "./errors.ts";
 import { healthRoutes } from "./health/routes.ts";
 import { instanceId } from "./instance.ts";
+import { listsRoutes } from "./lists/routes.ts";
 import { crossSite } from "./security/cross-site.ts";
 import { headers } from "./security/headers.ts";
 import { jsonOnly } from "./security/json-only.ts";
@@ -81,6 +84,16 @@ export function buildApp({
   app.register(crossSite);
   app.register(jsonOnly);
 
+  // Better Auth over this app's database. Null until a session hook sets it.
+  app.decorateRequest("user", null);
+  const auth = createAuth({
+    db,
+    secret: config.betterAuthSecret,
+    origin: config.appOrigin,
+    trustedProxies: config.trustedProxies,
+  });
+  app.register(authRoutes, { prefix: "/api", auth });
+
   // Each feature's routes are a plugin; later ones get their services as
   // plugin options.
   app.register(healthRoutes, {
@@ -92,6 +105,8 @@ export function buildApp({
   });
 
   app.register(catalogRoutes, { prefix: "/api", catalog });
+
+  app.register(listsRoutes, { prefix: "/api", db, auth });
 
   // The built SPA, and index.html for the app's own paths. Registered last:
   // its not-found handler answers every path no route above claims.

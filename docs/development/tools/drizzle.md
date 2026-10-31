@@ -10,14 +10,27 @@ Drizzle is a TypeScript object–relational mapper (ORM) that stays close to SQL
 ## Configuration
 
 - **`apps/api/drizzle.config.ts`:** drizzle-kit's settings. `dialect` is `postgresql`, `schema` points to `./src/db/schema.ts` and `out` to `./drizzle`. There are no credentials: `generate` compares the schema with the last snapshot and never connects to a database.
-- **`apps/api/src/db/schema.ts`:** the schema, every table the API stores. Empty until the first table.
+- **`apps/api/src/db/schema.ts`:** the schema, every table the API stores: `workspaces` and `lists`, and the re-export of `auth-schema.ts`.
+- **`apps/api/src/db/auth-schema.ts`:** Better Auth's four tables (`users`, `sessions`, `accounts`, `verifications`). Better Auth's command-line interface (CLI) generated it once (`pnpm dlx @better-auth/cli generate --config src/auth/cli.ts`, which reads a dummy instance in `src/auth/cli.ts`); it was then edited by hand to the conventions below and is ours. After upgrading `better-auth`, generate into a scratch file, compare the columns and copy over only what a new version added.
 - **`apps/api/drizzle/`:** committed. It holds each migration's SQL file, `meta/_journal.json` (every migration with its index, `when` timestamp and `tag`) and a snapshot per migration, which the next `generate` compares against.
 - **`.prettierignore`:** lists `apps/api/drizzle/meta/`, so the journal and the snapshots stay as drizzle-kit writes them.
 - **`apps/api/src/db/migrate.ts`:** calls `migrate()` with the migrations folder resolved from the file's own location, so it works from any working directory.
 
+## Table conventions
+
+[ADR 0057](../../decisions/0057-guests-first-list-phase-details.md), decision 14, holds for every table:
+
+- Tables are plural and `snake_case`, columns `snake_case`, fields `camelCase`.
+- `created_at` and `updated_at` are `timestamptz NOT NULL DEFAULT now()` (`{ withTimezone: true }` in Drizzle, since its `timestamp` is otherwise without a time zone), and `updated_at` has `$onUpdate(() => new Date())`.
+- IDs are `uuid` with `DEFAULT uuidv7()` where the server creates the row. A list's ID has no default: the browser creates it.
+- Constraints and indexes are named explicitly, in PostgreSQL's style: `<table>_pkey`, `<table>_<columns>_key` (unique), `<table>_<columns>_fkey`, `<table>_<columns>_idx`. Drizzle's generated names are longer and differ in style.
+- Deleting a user cascades to the user's sessions, accounts, workspace and lists.
+
+`db/schema.test.ts` checks the timestamps, the keys, the cascade and the ID defaults against a real database.
+
 ## Everyday use
 
-- **`pnpm --filter @szop/api db:generate`:** after changing `schema.ts`, writes the next numbered migration. Read the SQL before committing it.
+- **`pnpm --filter @szop/api db:generate`:** after changing `schema.ts`, writes the next numbered migration. Read the SQL before committing it. CI runs the same command and fails if it writes anything ([the migration check](#the-schema-and-migrations-in-ci)).
 - **`--custom --name=<name>`:** writes an empty migration for hand-written SQL, as `0000_init` was.
 - **Migrations run by themselves** when the API starts (`migrations applied` in the log, with the schema version) and when the tests start.
 - **The record of applied migrations:** Drizzle keeps it in `drizzle.__drizzle_migrations`. In `psql`, `\dt drizzle.*` lists the table and `SELECT * FROM drizzle.__drizzle_migrations;` shows the rows.
@@ -53,6 +66,10 @@ Reset the database: `pnpm db:reset` locally; on the demo, `demo-down` then `demo
 - **On the demo:** `demo-down`, then `demo-up`, which the owner triggers.
 
 The remedy belongs to the environment, not to the check. Both environments keep no data worth saving today; once one does, it needs a different remedy, such as fixing the migrations by hand ([OP-097](https://github.com/luiki-dev/szop/issues/224)).
+
+## The schema and migrations in CI
+
+The `lint` job of `ci.yml` runs `pnpm --filter @szop/api db:generate` and fails, with a message naming the fix, if `git status` then shows a change under `apps/api/drizzle/`: the schema was changed without its migration ([ADR 0057](../../decisions/0057-guests-first-list-phase-details.md), decision 16; [OP-076](https://github.com/luiki-dev/szop/issues/95)). To reproduce it, run `pnpm db:generate` and look at `git status`. This is a different check from the one above, which compares a database with the migrations at startup.
 
 ## Migrations and rolling deploys
 

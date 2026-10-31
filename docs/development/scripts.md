@@ -89,7 +89,7 @@ Each package in the workspace has its own `package.json` scripts. The root scrip
 |---|---|---|---|---|
 | `@szop/api` | `dev` | Run the API in watch mode | `tsx watch --env-file=.env src/server.ts \| pino-pretty` | `pnpm dev` |
 | `@szop/api` | `start` | Run the API | `node --env-file=.env src/server.ts` | `pnpm start` |
-| `@szop/api` | `db:generate` | Create a database migration | `drizzle-kit generate`: writes the next migration after a change to `schema.ts` ([Drizzle](tools/drizzle.md)) | By hand: `pnpm --filter @szop/api db:generate` |
+| `@szop/api` | `db:generate` | Create a database migration | `drizzle-kit generate`: writes the next migration after a change to `schema.ts` ([Drizzle](tools/drizzle.md)) | By hand: `pnpm --filter @szop/api db:generate`; CI's `lint` job runs it too, to fail on a schema change without its migration |
 | `@szop/web` | `dev` | Serve the web app for development | `vite`: the dev server on port 5173 ([Vite](tools/vite.md)) | `pnpm dev` |
 | `@szop/web` | `build` | Build the web app | `vite build` | `pnpm build` |
 | every package | `typecheck` | Check the package's types | `tsc --noEmit` | `pnpm typecheck` |

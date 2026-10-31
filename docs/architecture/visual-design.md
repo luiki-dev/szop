@@ -16,11 +16,14 @@ This page describes the design system, not the screens: each phase designs the s
   - [Spacing, size, shape and motion](#spacing-size-shape-and-motion)
 - [4. Icons and brand](#4-icons-and-brand)
 - [5. Layout and navigation](#5-layout-and-navigation)
+  - [The page frame](#the-page-frame)
   - [The list and the haul](#the-list-and-the-haul)
   - [The tree](#the-tree)
 - [6. Interaction patterns](#6-interaction-patterns)
   - [Feedback](#feedback)
   - [Forms and focus](#forms-and-focus)
+  - [The title field](#the-title-field)
+  - [The peeking raccoon](#the-peeking-raccoon)
   - [Writing](#writing)
 - [7. How a phase designs its screens](#7-how-a-phase-designs-its-screens)
 
@@ -111,10 +114,21 @@ The accent is **sage**; neutrals come from Tailwind's **`gray`**, and the light 
 
 - **Mobile first.** Styles are written for the phone; wider screens add to them, using Tailwind's default breakpoints.
 - **The lists are the home screen.** Everything else (templates, archive, catalog, categories, units, settings) is in one menu: **a drawer opened from ☰ on phones, a permanent sidebar from `lg` (1024 px)**, with the setup screens grouped under their own heading.
-- **The shell as built** ([ADR 0049](../decisions/0049-app-shell-phase-details.md)): every page is a child of one layout route, `AppShell` in `apps/web/src/shell/`. On a phone, a header bar holds ☰ and the page's title, cut with "…" when too long; ☰ opens the menu as a modal drawer from the left (focus trapped, Esc or a tap on the dimmed page closes it, focus returns to ☰, following a link closes it). From `lg`, the menu is a sidebar and the title tops the content column. Only one of the two is rendered. The menu is one component (`shell/menu.tsx`): the logo and wordmark (a link to Start), **only the pages that exist** (today Start, and Design system under "Developer"; each phase adds its own), and at the bottom the API's status and the color scheme control. Each route names its title in its `handle`, which the shell shows as the `h1` and in the tab ("Start · Szop").
+- **The shell as built** ([ADR 0049](../decisions/0049-app-shell-phase-details.md)): every page is a child of one layout route, `AppShell` in `apps/web/src/shell/`. On a phone, a header bar holds ☰ and the page's title, cut with "…" when too long; ☰ opens the menu as a modal drawer from the left (focus trapped, Esc or a tap on the dimmed page closes it, focus returns to ☰, following a link closes it). From `lg`, the menu is a sidebar and the title tops the content column. Only one of the two is rendered. The menu is one component (`shell/menu.tsx`): the logo and wordmark (a link to the lists page), **only the pages that exist** (today Lists, Catalog under "Setup" and Design system under "Developer"; each phase adds its own), and at the bottom the API's status and the color scheme control. Each route names its title in its `handle`, which the shell shows as the `h1` and in the tab ("Lists · Szop").
 - **Inside a list**, the menu gives way to a back arrow, and the add bar and the haul sit at the bottom ([below](#the-list-and-the-haul)).
 - **Desktop content is at most about 720 px wide**, so rows don't stretch across a wide screen.
 - **On phones, a screen's main action** ("New list", the add bar) **is pinned at the bottom**, within thumb reach. Sticky bars never cover the focused element.
+
+### The page frame
+
+Every screen puts its fixed parts at the same place, so moving between pages never makes the title or the buttons jump ([ADR 0057](../decisions/0057-guests-first-list-phase-details.md), "Settled while building"). `e2e/tests/frame.spec.ts` checks it on a phone and on a desktop.
+
+- **The title row is 48 px high, at the top.** On a phone it starts 8 px from the top, with ☰ 8 px from the left edge and the title from 64 px; inside a list, ← takes ☰'s place and the name field the title's. From `lg` it tops the content column, the title at the column's left edge; inside a list, ← stands there and the name follows it. The row keeps its 48 px whether or not it holds an action.
+- **The title** is Gabarito 800, 20 px on a phone and 24 px from `lg`, cut with "…". A list's name field looks the same at rest and starts its text where the title does.
+- **The right end of the row** holds the screen's actions: from `lg`, the main action ("New list"); in a list, ⋮ and, on a phone only, the raccoon tile (48 px, the size of the sidebar's), 12 px apart. From `lg` the sidebar shows the tile, so a list's header does not repeat it.
+- **On a phone, the main action** fills a bar fixed to the bottom of the screen, 16 px from each side and 12 px from the bottom, as on the [navigation mockup](visual-design/navigation.png); the content leaves room below it so the bar never covers the last row.
+- **The content** starts 16 px below the row, in a column at most 720 px wide. The page always keeps the scrollbar's gutter (`scrollbar-gutter: stable`), so a long page does not shift the centered column sideways.
+- **A page never draws its own title row.** It names its title and action in its route's `handle`, and the shell draws them; a list's screen asks for the list header (`header: "list"`). A new kind of header is added to the shell or beside the list header, never inside one page.
 
 ![Navigation: on a phone, the lists home with a ☰ menu and a "New list" button at the bottom; on a desktop, a permanent sidebar with the raccoon, Lists, Templates, Archive and the setup screens, next to the lists](visual-design/navigation.png)
 
@@ -190,13 +204,21 @@ Decided in [ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision
 - **Messages are toasts** (Base UI Toast) that say what happened and what to do. Never a generic "Something went wrong"; limits explain themselves ([LIM-3](../requirements/LIM-limits.md#lim-3), [LIM-4](../requirements/LIM-limits.md#lim-4)).
 - **Undo rather than "Are you sure?"** for reversible actions; a confirmation dialog only for what cannot be undone, such as deleting an account. Which actions get undo is decided by their phases ([OP-051](https://github.com/luiki-dev/szop/issues/103)).
 - **Loading:** skeleton placeholders shaped like the content on a page's first load, never a full-screen spinner.
-- **Empty states:** every empty page says what it is for and offers the next action ("No lists yet" with "New list"). An illustration is optional.
+- **Empty states:** every empty page says what it is for and offers the next action ("Create your first list" with "New list" on the lists page). An illustration is optional: the raccoon, in grayscale at 55% opacity.
 - **Offline ([NET-1](../requirements/NET-connectivity.md#net-1)):** an amber `warning` banner stays at the top while offline; controls that change data are disabled with a visible reason.
 
 ### Forms and focus
 
-- **Labels are always visible**, never placeholder-only. The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../decisions/0022-ring-tail-redesign.md), decision 13). **The catalog's search field is the second exception**: a placeholder and the accessible name "Search the catalog", a magnifier icon and a clear button ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 10). Errors appear under their field, in words, checked when leaving the field and on submit.
+- **Labels are always visible**, never placeholder-only. The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../decisions/0022-ring-tail-redesign.md), decision 13). **The catalog's search field is the second exception**: a placeholder and the accessible name "Search the catalog", a magnifier icon and a clear button ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 10). **The list's name field is the third**: the placeholder and accessible name "List name", since a label would push the header down. Errors appear under their field, in words, checked when leaving the field and on submit.
 - **A visible focus ring** (`ring`) on everything focusable. Dialogs and drawers trap focus and return it when closed (Base UI does this). **The ring is drawn in the `ring` color on links as on buttons**, so the menu's links draw it too ([NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2).8).
+
+### The title field
+
+The name of a list is one field, on the new list's screen and on the list's. **At rest** it reads as the title (Gabarito 800, 20 px, cut with "…") with a dotted 2 px underline in `input`, the only hint that it can be edited. **Focused**, it becomes a `card` field with `rounded-control` corners and the 3 px `ring`. Enter saves, Esc puts the old name back, an empty name is never saved, and while saving the field is read-only; a failure is a short message under it, in `destructive`.
+
+### The peeking raccoon
+
+An empty list shows the grayscale raccoon (200 px, 55% opacity) peeking in, only the top of its head visible, up to just below the eyes. On a phone it comes from the left edge, halfway down, turned 90° to the right, so the add bar at the bottom does not cover it; from `lg` it comes from the right edge, turned 90° to the left. It is decorative (`aria-hidden`) and sits behind the page.
 
 ### Writing
 

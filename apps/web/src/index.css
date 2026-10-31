@@ -125,6 +125,11 @@
 }
 
 @layer base {
+  /* The scrollbar's space is kept on every page, so a long page does not
+     shift the centered content sideways. */
+  html {
+    scrollbar-gutter: stable;
+  }
   body {
     @apply bg-background font-sans text-foreground antialiased;
   }

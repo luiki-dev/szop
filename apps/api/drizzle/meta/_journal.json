@@ -8,6 +8,13 @@
       "when": 1791307052475,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793401459694,
+      "tag": "0001_fuzzy_goblin_queen",
+      "breakpoints": true
     }
   ]
 }

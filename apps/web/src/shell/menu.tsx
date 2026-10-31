@@ -1,4 +1,4 @@
-import { House, ListTree, Palette, type LucideIcon } from "lucide-react";
+import { List, ListTree, Palette, type LucideIcon } from "lucide-react";
 import { Link, NavLink } from "react-router";
 import logo from "@/brand/logo.svg";
 import { cn } from "@/lib/utils.ts";
@@ -44,15 +44,15 @@ export function Menu({ onNavigate }: { onNavigate?: () => void }) {
       <Link
         to="/"
         onClick={onNavigate}
-        aria-label="Szop, Start"
+        aria-label="Szop, Lists"
         className="flex min-h-12 items-center gap-2 self-start rounded-control px-1 outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
-        <img src={logo} alt="" width={40} height={40} />
+        <img src={logo} alt="" width={48} height={48} />
         <span className="text-2xl font-bold text-link">szop</span>
       </Link>
       <ul className="flex flex-col gap-1">
         <li>
-          <MenuLink to="/" icon={House} label="Start" onNavigate={onNavigate} />
+          <MenuLink to="/" icon={List} label="Lists" onNavigate={onNavigate} />
         </li>
       </ul>
       <div>

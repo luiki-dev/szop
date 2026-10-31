@@ -378,7 +378,7 @@ In `secrets.tf`, raise `value_wo_version` by one, commit it on a branch, and app
 
 [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) adds to base what the app on ECS needs before a demo can run it ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md)):
 
-- the two roles `szop-app-task-execution` and `szop-app-task`, each trusted by `ecs-tasks.amazonaws.com` for tasks of this account only. The **task execution role** is what ECS uses to start a task: it pulls the image from the registry `szop`, writes to the log group `/szop/app` and fetches the secrets into the container's environment (`/szop/db-app-password`, and the master password RDS keeps in Secrets Manager, which only `db-setup`'s task definition names). The code in the container never holds it. The **task role** is what the code in the container may call: today only the four `ssmmessages:` actions that ECS Exec needs;
+- the two roles `szop-app-task-execution` and `szop-app-task`, each trusted by `ecs-tasks.amazonaws.com` for tasks of this account only. The **task execution role** is what ECS uses to start a task: it pulls the image from the registry `szop`, writes to the log group `/szop/app` and fetches the secrets into the container's environment (`/szop/db-app-password`, `/szop/better-auth-secret` for the app only since PH-16a, and the master password RDS keeps in Secrets Manager, which only `db-setup`'s task definition names). The code in the container never holds it. The **task role** is what the code in the container may call: today only the four `ssmmessages:` actions that ECS Exec needs;
 - the SSM parameter `/szop/db-app-password`, the password of the database role `szop_app` that the app connects as. Terraform generates it (64 letters and digits) and sends it through a write-only argument, as for the Better Auth secret, so it never enters the state. It lives in base because the database is recreated for every session, and the role with it, but the password need not change: `db-setup` creates the role with it at each `demo-up`;
 - the deploy role's three new managed policies, `szop-ci-deploy-demo-database`, `szop-ci-deploy-demo-service` and `szop-ci-deploy-image`, with the extra egress rules in `szop-ci-deploy-demo-network`, and the plan role's `DenyDataReads` statement.
 
@@ -391,10 +391,13 @@ aws iam list-attached-role-policies --role-name szop-ci-deploy --query 'Attached
 #   six, in any order: szop-ci-deploy-demo-network, -load-balancer, -dns, -database, -service, and szop-ci-deploy-image
 aws iam get-role --role-name szop-app-task-execution --query Role.AssumeRolePolicyDocument
 #   "ecs-tasks.amazonaws.com", with aws:SourceAccount and aws:SourceArn conditions; the same for szop-app-task
-aws ssm describe-parameters --parameter-filters Key=Name,Values=/szop/db-app-password \
+aws ssm describe-parameters --parameter-filters Key=Name,Values=/szop/db-app-password,/szop/better-auth-secret \
   --query 'Parameters[].[Name,Type]' --output text
-#   /szop/db-app-password   SecureString
+#   /szop/better-auth-secret   SecureString
+#   /szop/db-app-password      SecureString
 ```
+
+Since [PH-16a](../roadmap.md#ph-16a-guests-first-list) the app reads the Better Auth secret too (`BETTER_AUTH_SECRET`, with `APP_ORIGIN` set to the demo's address) and refuses to start without it. The execution role's statement `ReadAppSecrets` grants both parameters, so **apply `infra/base` from the PR's branch before the next `demo-up`**: until then ECS cannot fetch the secret and the app's tasks do not start. The plan shows one change, the role's inline policy `task-execution`.
 
 The PR's comment shows IAM Access Analyzer's findings for the new and changed policies; the known trust-policy findings stay accepted ([CI/CD](../development/ci-cd.md#the-pr-comment)). After the merge, apply base again from `main`; the plan must show no changes. Then check that the password is not in the state ([Checking that no password is in a state](#checking-that-no-password-is-in-a-state)).
 

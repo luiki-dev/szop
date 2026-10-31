@@ -130,6 +130,7 @@ flowchart LR
     execRole -->|can pull from| repo
     execRole -->|can write to| logGroup
     execRole -->|can read| dbPass
+    execRole -->|can read| authSecret
     caa -->|in| zone
     caaApp -->|in| zone
     pagesA -->|in| zone
@@ -298,6 +299,7 @@ flowchart LR
     end
 
     subgraph ssm["SSM Parameter Store"]
+        authSecret["SecureString<br/><b>/szop/better-auth-secret</b><br/><i>base</i>"]
         dbPass["SecureString<br/><b>/szop/db-app-password</b><br/><i>base</i>"]
     end
 
@@ -327,6 +329,7 @@ flowchart LR
     appTask -.->|logs to| logGroup
     setupTask -.->|logs to| logGroup
     appTask -.->|password from| dbPass
+    appTask -.->|secret from| authSecret
     setupTask -.->|password from| dbPass
 
     classDef demo fill:#bbf7d0,stroke:#15803d,color:#1f2937
@@ -334,11 +337,11 @@ flowchart LR
     classDef external fill:#f3f4f6,stroke:#6b7280,color:#1f2937,stroke-dasharray:5 3
     class appRecord,validationRecord,certificate,alb,httpListener,httpsListener,targetGroup demo
     class cluster,service,appTask,setupTask,database demo
-    class zone,appRoles,repo,logGroup,dbPass baseLookup
+    class zone,appRoles,repo,logGroup,authSecret,dbPass baseLookup
     class masterSecret external
 ```
 
-Demo-up runs the db-setup task definition with `aws ecs run-task` before it scales the service up, so the diagram draws no arrow from the service to it. The task definitions find the log group and the parameter through names and an ARN written in `infra/demo/locals.tf`. They find the roles and the repository through data sources that look them up by name.
+Demo-up runs the db-setup task definition with `aws ecs run-task` before it scales the service up, so the diagram draws no arrow from the service to it. The task definitions find the log group and the parameters through names and an ARN written in `infra/demo/locals.tf`. They find the roles and the repository through data sources that look them up by name.
 
 | Box | Terraform resources |
 |---|---|
@@ -369,3 +372,4 @@ Demo-up runs the db-setup task definition with `aws ecs run-task` before it scal
 | Repository `szop` | base's `aws_ecr_repository.app`, found by `data.aws_ecr_repository.app` |
 | Log group `/szop/app` | base's `aws_cloudwatch_log_group.app`, named in `locals.tf` |
 | SecureString `/szop/db-app-password` | base's `aws_ssm_parameter.db_app_password`, its ARN built in `locals.tf` |
+| SecureString `/szop/better-auth-secret` | base's `aws_ssm_parameter.better_auth_secret`, its ARN built in `locals.tf` |

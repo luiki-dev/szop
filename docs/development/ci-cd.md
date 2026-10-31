@@ -55,7 +55,7 @@ CodeQL's default setup also scans `main` once a week on its own schedule.
 | Job | Runs when | What it runs | Locally |
 |---|---|---|---|
 | `changes` | always | Lists the files the PR changes and decides which jobs are needed ([Change detection](#change-detection)) | — |
-| `lint` | code changed | ESLint, then Prettier in check mode | `pnpm lint` and `pnpm format:check` |
+| `lint` | code changed | ESLint, then Prettier in check mode, then `pnpm --filter @szop/api db:generate`, which must write nothing under `apps/api/drizzle/` (a schema change needs its migration) | `pnpm lint`, `pnpm format:check` and `pnpm --filter @szop/api db:generate` |
 | `typecheck` | code changed | TypeScript, without emitting files | `pnpm typecheck` |
 | `test` | code changed | Starts PostgreSQL from `compose.yaml` (`docker compose up -d --wait`, after copying `apps/api/.env.example` to `apps/api/.env`), then the tests: every Vitest project (`pnpm test:coverage`), with Vitest's test report and a coverage table in the job summary | `pnpm test` (or `pnpm test:coverage`) with PostgreSQL running |
 | `build` | code changed | `pnpm build`: the web app's production build, with its precompressed copies. It fails when the first screen's JavaScript exceeds 200 KB of Brotli ([NFR-3](../requirements/NFR-non-functional-requirements.md#nfr-3), [ADR 0023](../decisions/0023-production-build-and-serving-details.md)) and prints the size in its log. It needs no database | `pnpm build` |
@@ -132,6 +132,8 @@ The `changes` job decides which jobs a PR needs, from the list of files it chang
 - **Infra:** a change under `infra/`, to `.terraform-version`, to `scripts/check-infra.sh` or to `.github/workflows/ci.yml` runs the `infra` job and, on a PR from this repository, `plan`. `ci.yml` is on the list because tflint's version and checksum live in it, so a tflint update is checked in its own PR, and because it holds the `plan` job itself. A `.tf` file is not Markdown, so it counts as code too, and the code jobs run as well.
 - `commits` runs on every PR, whatever it changes.
 - **A push to `main` runs every job**, whatever it changes, except those that run on PRs only: `commits`, `scan-config`, `scan-image`, `plan` and `comment`. Every commit on `main` came through a PR that ran them.
+
+`apps/api/src/db/` and `apps/api/drizzle/` hold no Markdown, so a change there counts as code and runs the migration check in `lint`.
 
 The job prints the changed files and its three answers (`code=…, workflows=…, infra=…`) in its log.
 
