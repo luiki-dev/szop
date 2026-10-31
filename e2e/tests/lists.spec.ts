@@ -68,6 +68,9 @@ test("NFR-4.10, ACC-1.3, ACC-1.8: another visitor sees nothing, and clearing the
     await other.close();
   }
 
+  // The first guest still has the list until the cookies go.
+  await page.goto("/");
+  await expect(page.getByText("Weekly shop")).toBeVisible();
   await context.clearCookies();
   await page.goto("/");
   await expect(emptyState(page)).toBeVisible();

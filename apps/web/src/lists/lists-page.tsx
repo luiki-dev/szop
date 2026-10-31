@@ -54,19 +54,22 @@ export function ListsPage() {
 
   if (query.isError) {
     return (
-      <section className="mt-4 rounded-surface bg-card p-4 text-card-foreground">
-        <h2 className="text-lg font-bold">The lists could not be loaded.</h2>
-        <p className="mt-1 text-muted-foreground">{query.error.message}</p>
-        <Button
-          variant="outline"
-          className="mt-4"
-          onClick={() => {
-            void query.refetch();
-          }}
-        >
-          Try again
-        </Button>
-      </section>
+      <>
+        <section className="mt-4 rounded-surface bg-card p-4 text-card-foreground">
+          <h2 className="text-lg font-bold">The lists could not be loaded.</h2>
+          <p className="mt-1 text-muted-foreground">{query.error.message}</p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => {
+              void query.refetch();
+            }}
+          >
+            Try again
+          </Button>
+        </section>
+        {!desktop && <NewListLink sticky />}
+      </>
     );
   }
 

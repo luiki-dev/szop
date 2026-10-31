@@ -114,6 +114,22 @@ describe("ListsPage", () => {
     expect(link.parentElement).toHaveClass("fixed", "bottom-0");
   });
 
+  it("LST-1.4, APP-1.8: on a phone the New list link stays when the lists fail to load", async () => {
+    server.use(
+      http.get("/api/lists", () =>
+        HttpResponse.json(
+          { error: { code: "internal_error", message: "Boom" } },
+          { status: 500 },
+        ),
+      ),
+    );
+    renderApp();
+
+    await screen.findByText("The lists could not be loaded.");
+    const link = screen.getByRole("link", { name: "New list" });
+    expect(link.parentElement).toHaveClass("fixed", "bottom-0");
+  });
+
   it("LST-1.4, APP-1.8: on a desktop the one New list link sits in the header beside the h1", async () => {
     stubMatchMedia({ [desktopQuery]: true });
     serveLists();

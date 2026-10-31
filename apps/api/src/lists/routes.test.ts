@@ -111,6 +111,7 @@ describe("the lists routes", () => {
 
   it("LST-1.1: stores a decomposed name composed", async () => {
     const response = await post(a, { id: randomUUID(), name: "ó" });
+    expect(response.statusCode).toBe(201);
     expect(listSchema.parse(response.json()).name).toBe("ó");
   });
 
