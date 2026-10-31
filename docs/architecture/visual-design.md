@@ -16,6 +16,7 @@ This page describes the design system, not the screens: each phase designs the s
   - [Spacing, size, shape and motion](#spacing-size-shape-and-motion)
 - [4. Icons and brand](#4-icons-and-brand)
 - [5. Layout and navigation](#5-layout-and-navigation)
+  - [The page frame](#the-page-frame)
   - [The list and the haul](#the-list-and-the-haul)
   - [The tree](#the-tree)
 - [6. Interaction patterns](#6-interaction-patterns)
@@ -113,10 +114,21 @@ The accent is **sage**; neutrals come from Tailwind's **`gray`**, and the light 
 
 - **Mobile first.** Styles are written for the phone; wider screens add to them, using Tailwind's default breakpoints.
 - **The lists are the home screen.** Everything else (templates, archive, catalog, categories, units, settings) is in one menu: **a drawer opened from ☰ on phones, a permanent sidebar from `lg` (1024 px)**, with the setup screens grouped under their own heading.
-- **The shell as built** ([ADR 0049](../decisions/0049-app-shell-phase-details.md)): every page is a child of one layout route, `AppShell` in `apps/web/src/shell/`. On a phone, a header bar holds ☰ and the page's title, cut with "…" when too long; ☰ opens the menu as a modal drawer from the left (focus trapped, Esc or a tap on the dimmed page closes it, focus returns to ☰, following a link closes it). From `lg`, the menu is a sidebar and the title tops the content column. Only one of the two is rendered. The menu is one component (`shell/menu.tsx`): the logo and wordmark (a link to Start), **only the pages that exist** (today Start, and Design system under "Developer"; each phase adds its own), and at the bottom the API's status and the color scheme control. Each route names its title in its `handle`, which the shell shows as the `h1` and in the tab ("Start · Szop").
+- **The shell as built** ([ADR 0049](../decisions/0049-app-shell-phase-details.md)): every page is a child of one layout route, `AppShell` in `apps/web/src/shell/`. On a phone, a header bar holds ☰ and the page's title, cut with "…" when too long; ☰ opens the menu as a modal drawer from the left (focus trapped, Esc or a tap on the dimmed page closes it, focus returns to ☰, following a link closes it). From `lg`, the menu is a sidebar and the title tops the content column. Only one of the two is rendered. The menu is one component (`shell/menu.tsx`): the logo and wordmark (a link to the lists page), **only the pages that exist** (today Lists, Catalog under "Setup" and Design system under "Developer"; each phase adds its own), and at the bottom the API's status and the color scheme control. Each route names its title in its `handle`, which the shell shows as the `h1` and in the tab ("Lists · Szop").
 - **Inside a list**, the menu gives way to a back arrow, and the add bar and the haul sit at the bottom ([below](#the-list-and-the-haul)).
 - **Desktop content is at most about 720 px wide**, so rows don't stretch across a wide screen.
 - **On phones, a screen's main action** ("New list", the add bar) **is pinned at the bottom**, within thumb reach. Sticky bars never cover the focused element.
+
+### The page frame
+
+Every screen puts its fixed parts at the same place, so moving between pages never makes the title or the buttons jump ([ADR 0057](../decisions/0057-guests-first-list-phase-details.md), "Settled while building"). `e2e/tests/frame.spec.ts` checks it on a phone and on a desktop.
+
+- **The title row is 48 px high, at the top.** On a phone it starts 8 px from the top, with ☰ 8 px from the left edge and the title from 64 px; inside a list, ← takes ☰'s place and the name field the title's. From `lg` it tops the content column, the title at the column's left edge; inside a list, ← stands there and the name follows it. The row keeps its 48 px whether or not it holds an action.
+- **The title** is Gabarito 800, 20 px on a phone and 24 px from `lg`, cut with "…". A list's name field looks the same at rest and starts its text where the title does.
+- **The right end of the row** holds the screen's actions: from `lg`, the main action ("New list"); in a list, ⋮ and, on a phone only, the raccoon tile (48 px, the size of the sidebar's), 12 px apart. From `lg` the sidebar shows the tile, so a list's header does not repeat it.
+- **On a phone, the main action** fills a bar fixed to the bottom of the screen, 16 px from each side and 12 px from the bottom, as on the [navigation mockup](visual-design/navigation.png); the content leaves room below it so the bar never covers the last row.
+- **The content** starts 16 px below the row, in a column at most 720 px wide. The page always keeps the scrollbar's gutter (`scrollbar-gutter: stable`), so a long page does not shift the centered column sideways.
+- **A page never draws its own title row.** It names its title and action in its route's `handle`, and the shell draws them; a list's screen asks for the list header (`header: "list"`). A new kind of header is added to the shell or beside the list header, never inside one page.
 
 ![Navigation: on a phone, the lists home with a ☰ menu and a "New list" button at the bottom; on a desktop, a permanent sidebar with the raccoon, Lists, Templates, Archive and the setup screens, next to the lists](visual-design/navigation.png)
 

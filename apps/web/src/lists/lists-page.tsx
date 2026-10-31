@@ -6,12 +6,15 @@ import { cn } from "@/lib/utils.ts";
 import { desktopQuery, useMediaQuery } from "../shell/use-media-query.ts";
 import { useLists } from "./use-lists.ts";
 
-// On a phone the link waits in a bar at the bottom of the screen, within the
+// On a phone the link fills a bar at the bottom of the screen, within the
 // thumb's reach; on a desktop the shell shows it beside the h1.
 export function NewListLink({ sticky }: { sticky?: boolean }) {
   const link = (
     // Stryker disable next-line StringLiteral: class names only, no behavior
-    <Link to="/lists/new" className={cn(buttonVariants(), "gap-2")}>
+    <Link
+      to="/lists/new"
+      className={cn(buttonVariants(), "gap-2", sticky && "w-full")}
+    >
       <Plus aria-hidden="true" />
       New list
     </Link>
@@ -20,7 +23,7 @@ export function NewListLink({ sticky }: { sticky?: boolean }) {
     <>
       {/* Keeps the last card clear of the bar: the button's 48 px and py-3. */}
       <div className="h-18" />
-      <div className="fixed inset-x-0 bottom-0 mx-auto flex max-w-[720px] justify-end bg-background px-4 py-3 md:px-6">
+      <div className="fixed inset-x-0 bottom-0 mx-auto flex max-w-[720px] bg-background px-4 py-3 md:px-6">
         {link}
       </div>
     </>

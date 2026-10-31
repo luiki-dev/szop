@@ -328,6 +328,8 @@ The catalog's journey, `e2e/tests/catalog.spec.ts`, is a second pattern: it read
 
 The lists journey, `e2e/tests/lists.spec.ts`, shows two more things. A browser context is a fresh guest: a new `browser.newContext({ baseURL })` has no session cookie, so the second test uses one as "another visitor" (it is outside the CSP guard) and `context.clearCookies()` turns the first guest into a stranger. And an element that is only for screen readers, such as the list's `h1`, is asserted by role (`getByRole("heading", { level: 1 })`), since it is not visible.
 
+The page frame's check, `e2e/tests/frame.spec.ts`, measures instead of reading: it compares, page by page, where the title row's first element and the title stand ([visual-design.md, "The page frame"](../architecture/visual-design.md#the-page-frame)). It waits for the network to settle first, since a long page's scrollbar appears only with its data, and rounds the boxes to whole pixels.
+
 ### The CSP guard
 
 The Content Security Policy (CSP) tells the browser to refuse inline scripts, `<style>` elements and anything not served from Szop's own origin ([Web security](../architecture/architecture.md#web-security)). A page can break the policy without any visible sign: the browser silently drops the blocked style or script, and a test that only reads the page's text still passes. So every journey ends with a check that the browser reported no violation: the guard in `support/test.ts` listens for the browser's own `securitypolicyviolation` events on every page, and fails the test if it received any ([Playwright](tools/playwright.md#supporttestts)).

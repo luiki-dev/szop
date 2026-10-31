@@ -29,7 +29,12 @@ export function ListHeader({
       {/* -ml-3 puts the name where the shell's phone header puts its title. */}
       <div className="-ml-3 min-w-0 flex-1">{field}</div>
       {menu}
-      <img src={logo} alt="" className="size-12 shrink-0 rounded-control" />
+      {/* From lg the sidebar shows the same tile, so the header does not repeat it. */}
+      <img
+        src={logo}
+        alt=""
+        className="size-12 shrink-0 rounded-control lg:hidden"
+      />
     </header>
   );
 }

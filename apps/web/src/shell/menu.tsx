@@ -47,7 +47,7 @@ export function Menu({ onNavigate }: { onNavigate?: () => void }) {
         aria-label="Szop, Lists"
         className="flex min-h-12 items-center gap-2 self-start rounded-control px-1 outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
-        <img src={logo} alt="" width={40} height={40} />
+        <img src={logo} alt="" width={48} height={48} />
         <span className="text-2xl font-bold text-link">szop</span>
       </Link>
       <ul className="flex flex-col gap-1">
