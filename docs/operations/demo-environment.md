@@ -391,9 +391,10 @@ aws iam list-attached-role-policies --role-name szop-ci-deploy --query 'Attached
 #   six, in any order: szop-ci-deploy-demo-network, -load-balancer, -dns, -database, -service, and szop-ci-deploy-image
 aws iam get-role --role-name szop-app-task-execution --query Role.AssumeRolePolicyDocument
 #   "ecs-tasks.amazonaws.com", with aws:SourceAccount and aws:SourceArn conditions; the same for szop-app-task
-aws ssm describe-parameters --parameter-filters Key=Name,Values=/szop/db-app-password \
+aws ssm describe-parameters --parameter-filters Key=Name,Values=/szop/db-app-password,/szop/better-auth-secret \
   --query 'Parameters[].[Name,Type]' --output text
-#   /szop/db-app-password   SecureString
+#   /szop/better-auth-secret   SecureString
+#   /szop/db-app-password      SecureString
 ```
 
 Since [PH-16a](../roadmap.md#ph-16a-guests-first-list) the app reads the Better Auth secret too (`BETTER_AUTH_SECRET`, with `APP_ORIGIN` set to the demo's address) and refuses to start without it. The execution role's statement `ReadAppSecrets` grants both parameters, so **apply `infra/base` from the PR's branch before the next `demo-up`**: until then ECS cannot fetch the secret and the app's tasks do not start. The plan shows one change, the role's inline policy `task-execution`.

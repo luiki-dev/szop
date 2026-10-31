@@ -341,7 +341,7 @@ flowchart LR
     class masterSecret external
 ```
 
-Demo-up runs the db-setup task definition with `aws ecs run-task` before it scales the service up, so the diagram draws no arrow from the service to it. The task definitions find the log group and the parameter through names and an ARN written in `infra/demo/locals.tf`. They find the roles and the repository through data sources that look them up by name.
+Demo-up runs the db-setup task definition with `aws ecs run-task` before it scales the service up, so the diagram draws no arrow from the service to it. The task definitions find the log group and the parameters through names and an ARN written in `infra/demo/locals.tf`. They find the roles and the repository through data sources that look them up by name.
 
 | Box | Terraform resources |
 |---|---|
