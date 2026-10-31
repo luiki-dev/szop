@@ -146,7 +146,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
                                       └─▶ CodeQL         no new high/critical alerts
 ```
 
-- Claude reviews its own diff first, then opens the PR with the **template** filled in.
+- Claude finishes the branch with `/finish-phase`: the checks on the final head, a whole-branch review, one triage of the findings, then the PR with the **template** filled in.
 - The description has four sections: what and why (bullets, with a link to the phase ADR), the acceptance criteria and the `Closes #N` lines (the phase's issue and each open point it settles), the definition-of-done labels, and token usage. It does not list the issue changes or the tests.
 - The **PR title** matters most: it becomes the merge commit's message on `main`, and release-please reads it.
 - CI tests `refs/pull/12/merge`: what `main` would look like after the merge. A newer push cancels the older run.
@@ -168,7 +168,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
           └─ wait for https://szop.dzwoniec.com/api/health → summary: URL, commit, image
 ```
 
-The approval is the owner confirming that they started this run: a deploy nobody pressed, for example from a workflow a branch added, waits there and is rejected ([ADR 0012](../decisions/0012-security-baseline.md), decision 16). The owner then checks the phase's behavior in a browser on the demo, and reviews the PR commit by commit.
+The approval is the owner confirming that they started this run: a deploy nobody pressed, for example from a workflow a branch added, waits there and is rejected ([ADR 0012](../decisions/0012-security-baseline.md), decision 16). The owner runs the list that `/demo-check` sends and checks the phase's behavior in a browser on the demo, and reviews the PR commit by commit.
 
 ### Step 6 — Review comments and a fix
 

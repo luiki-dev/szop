@@ -1,6 +1,6 @@
 # Glossary
 
-Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP, JSON, SQL, URL) are not listed.
+Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP, JSON, SQL, URL) are not listed. #notoacronyms
 
 ## Acronyms
 

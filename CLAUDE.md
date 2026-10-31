@@ -30,7 +30,7 @@ Follow [ADR 0009](docs/decisions/0009-git-workflow.md) and the guide in `docs/de
 - **Never merge a PR**, including release-please's release PR. Only the owner merges; the merge is the approval.
 - **Never trigger `demo-up` or `demo-down`** unless the owner asks ([ADR 0010](docs/decisions/0010-ci-cd.md), consequences).
 - **Don't work around the deny rules in `.claude/settings.json` or the push hook in `.claude/hooks/`** ([ADR 0012](docs/decisions/0012-security-baseline.md), decision 19; [ADR 0015](docs/decisions/0015-git-push-guard-hook.md)). They back the rules above; if one blocks something the owner asked for, say so and let the owner run it.
-- **When a superpowers skill offers a git worktree or a local merge, don't take it.** Work on a plain branch in the main checkout (ADR 0009, decision 5), and finish by pushing the branch and opening a PR.
+- **When a superpowers skill offers a git worktree or a local merge, don't take it.** Work on a plain branch in the main checkout (ADR 0009, decision 5), and finish by pushing the branch and opening a PR. Finish a branch with `/finish-phase`, not the superpowers finishing skill ([ADR 0059](docs/decisions/0059-session-skills.md)).
 
 ## Project tracking
 
@@ -54,6 +54,7 @@ Run it too when a bug is found, filed or triaged ([ADR 0058](docs/decisions/0058
 Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `docs/development/working-with-claude.md`, which holds the reasons. In short:
 
 - **A session per stage:** brainstorm and spec, plan, execution, finishing; each starts a new session from the committed document or commits of the last ([A phase in sessions](docs/development/working-with-claude.md#a-phase-in-sessions)).
+- **Session skills** ([ADR 0059](docs/decisions/0059-session-skills.md)): the owner runs `/handoff` to end a stage, and `/handoff resume <branch>` opens the next; `/finish-phase` is the finishing stage; `/demo-check` runs after the PR opens.
 - **Restart or `/compact` above 150–200k of context**, never in the middle of an uncommitted edit ([Reading the status line](docs/development/working-with-claude.md#reading-the-status-line)).
 - **Before a break longer than an hour, finish the stage:** the prompt cache lives one hour, and the first call after it writes the whole context again ([Breaks and the cache](docs/development/working-with-claude.md#breaks-and-the-cache)).
 - **Implementers on Sonnet, the default; the whole-branch review on Opus, named explicitly** (`model: opus`) ([Choosing models](docs/development/working-with-claude.md#choosing-models)).
@@ -100,7 +101,7 @@ Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `
   - 📝 proposed, 🔁 superseded, ⛔ deprecated: ADR states
   - ✏️ refined, ➕ extended, 🧩 completed, 🔍 revisited (and 🔁 superseded): how a later ADR affected a decision, in the notes at the bottom of its cell
   - ➖ not applicable: `➖ N/A: reason` in the roadmap's stage tables, a bare `➖ N/A` in the definition of done and the PR template
-  - 🔴 critical, 🟠 major, ⚪ minor: a bug's severity, the project's Severity field
+  - 🔴 critical, 🟠 major, ⚪ minor: a bug's severity, the project's Severity field, and a review finding's severity (🟠 for Important)
   - 🎯 MVP, 🔜 Later, 💡 future extension, 🚫 out of scope: release slicing in the requirements
 - **Refer to requirements, use cases and requirement areas by link, never by plain ID**: `[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1)`, `[UC-3](../requirements/UC-use-cases.md#uc-3-shop-in-a-store)`, `[SHR](../requirements/SHR-sharing.md)` (the path relative to the document). Link every mention, not only the first. Headings and code stay plain. Audits are point-in-time records and stay as written.
 - Long documents (roughly over 100 lines, with several sections: guides, walkthroughs, living docs) start with a `## Contents` section right after the introduction, linking every `##` and `###` heading. Keep it in sync when headings change. ADRs and the glossary don't need one.
