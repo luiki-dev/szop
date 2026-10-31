@@ -111,7 +111,7 @@ describe("ListsPage", () => {
 
     const link = await screen.findByRole("link", { name: "New list" });
     expect(screen.getAllByRole("link", { name: "New list" })).toHaveLength(1);
-    expect(link.parentElement).toHaveClass("sticky", "bottom-0");
+    expect(link.parentElement).toHaveClass("fixed", "bottom-0");
   });
 
   it("LST-1.4, APP-1.8: on a desktop the one New list link sits in the header beside the h1", async () => {

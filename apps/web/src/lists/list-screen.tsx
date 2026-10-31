@@ -17,7 +17,7 @@ export function ListHeader({
   menu?: ReactNode;
 }) {
   return (
-    <header className="flex items-start gap-1 pt-2">
+    <header className="-ml-2 flex items-start gap-3 pt-2 md:-ml-4 lg:ml-0">
       <Link
         to="/"
         aria-label="Back to lists"
@@ -26,9 +26,10 @@ export function ListHeader({
       >
         <ArrowLeft aria-hidden="true" />
       </Link>
-      <div className="min-w-0 flex-1">{field}</div>
+      {/* -ml-3 puts the name where the shell's phone header puts its title. */}
+      <div className="-ml-3 min-w-0 flex-1">{field}</div>
       {menu}
-      <img src={logo} alt="" className="size-10 shrink-0 rounded-control" />
+      <img src={logo} alt="" className="size-12 shrink-0 rounded-control" />
     </header>
   );
 }
@@ -93,7 +94,7 @@ export function TitleField({
         placeholder="List name"
         aria-label="List name"
         aria-invalid={message ? true : undefined}
-        className="h-12 w-full truncate rounded-control border-b-2 border-dotted border-input bg-transparent px-2 text-xl font-extrabold outline-none focus:border-transparent focus:bg-card focus:ring-3 focus:ring-ring"
+        className="h-12 w-full truncate rounded-control bg-transparent px-2 text-xl font-extrabold underline decoration-input decoration-dotted decoration-2 underline-offset-2 outline-none placeholder:underline placeholder:decoration-input placeholder:decoration-dotted placeholder:decoration-2 placeholder:underline-offset-2 focus:bg-card focus:no-underline focus:ring-3 focus:ring-ring focus:placeholder:no-underline"
         onChange={(event) => {
           setValue(event.target.value);
         }}
@@ -124,7 +125,7 @@ export function TitleField({
 
 // The empty list's body. The raccoon peeks in from the left edge, halfway
 // down, so the add bar of a later phase does not cover it; from lg, from the
-// right edge. Only the top of its head shows: up to 5 px below the eyes.
+// right edge. Only the top of its head shows, down to just below the eyes.
 export function EmptyList() {
   return (
     <>
@@ -137,7 +138,7 @@ export function EmptyList() {
         aria-hidden="true"
         width={200}
         height={200}
-        className="pointer-events-none fixed top-1/2 -left-[85px] -z-10 -translate-y-1/2 rotate-90 opacity-55 grayscale lg:-right-[85px] lg:left-auto lg:-rotate-90"
+        className="pointer-events-none fixed top-1/2 -left-[65px] -z-10 -translate-y-1/2 rotate-90 opacity-55 grayscale lg:-right-[65px] lg:left-auto lg:-rotate-90"
       />
     </>
   );

@@ -17,9 +17,13 @@ export function NewListLink({ sticky }: { sticky?: boolean }) {
     </Link>
   );
   return sticky ? (
-    <div className="sticky bottom-0 -mx-4 flex justify-end bg-background px-4 py-3">
-      {link}
-    </div>
+    <>
+      {/* Keeps the last card clear of the bar: the button's 48 px and py-3. */}
+      <div className="h-18" />
+      <div className="fixed inset-x-0 bottom-0 mx-auto flex max-w-[720px] justify-end bg-background px-4 py-3 md:px-6">
+        {link}
+      </div>
+    </>
   ) : (
     link
   );
