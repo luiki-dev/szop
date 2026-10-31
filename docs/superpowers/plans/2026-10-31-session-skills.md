@@ -87,20 +87,20 @@ In the task summary, ask the owner to run the spec's [Tests](../specs/2026-10-31
 **Interfaces:**
 - Produces: the `## Findings` table in `.superpowers/sdd/<plan>/progress.md`, columns `# | Severity | Source | Where | Finding`, IDs `F1`, `F2`, …; Task 3 reads and merges it.
 
-- [ ] **Step 1: Replace the "Review findings" rule**
+- [x] **Step 1: Replace the "Review findings" rule**
 
 It says: every finding a task review or implementer reports and the task does not fix goes, in that task's turn, into the ledger's `## Findings` table (the columns above, with the example row of spec, [The findings list](../specs/2026-10-31-session-skills-design.md#the-findings-list)); the coordinating session writes it, implementers do not edit the ledger; a finding fixed later is marked fixed with the commit, not deleted; the log keeps its own lines but no longer lists deferred findings; the triage after the whole-branch review is `/finish-phase`'s ([ADR 0059](../../decisions/0059-session-skills.md), decisions 6 and 7; ADR 0054, decision 2).
 
-- [ ] **Step 2: Add the finishing rule**
+- [x] **Step 2: Add the finishing rule**
 
 A bullet "Finishing": when the last task is done, the branch is finished with `/finish-phase`, never `superpowers:finishing-a-development-branch`, even when the execution skill names it (ADR 0059, decision 8).
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `pnpm format:check && git diff --stat`
 Expected: passes; only `docs/superpowers/plans/CLAUDE.md` and this plan changed.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```bash
 git add docs/superpowers/plans/
