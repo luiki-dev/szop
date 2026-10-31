@@ -65,3 +65,6 @@ Criteria move between phases with the split: renaming ([LST-1](../requirements/L
 - **Task 2: `generateId: "uuid"` leaves the ID to the database.** The sign-in wrote a version 7 ID, the column's `uuidv7()` default, so `generateId: () => uuidv7()` is not needed. `uuidv7()` in `@szop/shared` is for the IDs the browser creates.
 - **Task 2: the adapter's `schema` is keyed by our table names** (`users`, `sessions`, ...), since `modelName` renames the models before the lookup; keyed `user`, `session`, ... it fails with "Drizzle schema mismatch".
 - **Task 2: `authRoutes` takes its origin from `auth.options.baseURL`**, so its options stay `{ auth }`.
+- **Task 3: the access layer throws plain errors with a `statusCode`** (401, 404), which `errorHandler` turns into the API's body, so the 404 for a foreign list and for a missing one is byte-identical. The routes call `sendError` only where there is no throw (a malformed path ID, a list gone between the check and the read).
+- **Task 3: `createListSchema` is not strict.** An unknown field in the body is ignored, not refused; the brief allowed either.
+- **Task 3: a list ID that is not a UUID is 404 even on `PATCH`**, before the body is looked at; an invalid body for a valid ID is 400.

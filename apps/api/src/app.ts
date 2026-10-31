@@ -14,6 +14,7 @@ import { readJournal } from "./db/schema-version.ts";
 import { errorHandler } from "./errors.ts";
 import { healthRoutes } from "./health/routes.ts";
 import { instanceId } from "./instance.ts";
+import { listsRoutes } from "./lists/routes.ts";
 import { crossSite } from "./security/cross-site.ts";
 import { headers } from "./security/headers.ts";
 import { jsonOnly } from "./security/json-only.ts";
@@ -104,6 +105,8 @@ export function buildApp({
   });
 
   app.register(catalogRoutes, { prefix: "/api", catalog });
+
+  app.register(listsRoutes, { prefix: "/api", db, auth });
 
   // The built SPA, and index.html for the app's own paths. Registered last:
   // its not-found handler answers every path no route above claims.

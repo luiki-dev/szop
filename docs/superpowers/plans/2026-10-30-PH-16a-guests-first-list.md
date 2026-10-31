@@ -152,20 +152,20 @@ The change detection already counts every non-Markdown file as code, so `apps/ap
   - `lists/repository.ts`, every function taking `workspaceId` first after `db`: `listLists(db, workspaceId): Promise<List[]>`, `findList(db, workspaceId, id): Promise<List | null>`, `insertList(db, workspaceId, { id, name }): Promise<{ list: List; created: boolean }>` (`ON CONFLICT (workspace_id, id) DO NOTHING`, then a read), `renameList(db, workspaceId, id, name): Promise<List | null>` (writes nothing when the name is unchanged).
   - `listsRoutes(app, { db, auth })` registered with prefix `/api`.
 
-- [ ] **Step 1: Write the failing tests** in `shared/lists.test.ts`: `listNameSchema` trims `"  Weekly  "` → `"Weekly"`; `"ó"` → `"ó"` (one code point); `""` and `"   "` refused; 100 × `"a"` accepted, 101 refused; 100 × `"🛒"` accepted, 101 refused (Review Focus 3); `createListSchema` refuses `id: "not-a-uuid"`.
-- [ ] **Step 2: Write the failing tests** in `access/workspace.test.ts`: `findOwnWorkspace` with `null` or a user without a workspace → `null`; `ownWorkspace(null)` → rejects with status 401; `ACC-1.1`: two `ownWorkspace` calls for one user at once (`Promise.all`) → the same `workspaceId` and one `workspaces` row; `requireListAccess` for a list of another user's workspace and for a missing ID → both reject with status 404.
-- [ ] **Step 3: Write the failing tests** in `lists/routes.test.ts` (two guests by two `signIn` calls; every write with `sameOrigin`):
+- [x] **Step 1: Write the failing tests** in `shared/lists.test.ts`: `listNameSchema` trims `"  Weekly  "` → `"Weekly"`; `"ó"` → `"ó"` (one code point); `""` and `"   "` refused; 100 × `"a"` accepted, 101 refused; 100 × `"🛒"` accepted, 101 refused (Review Focus 3); `createListSchema` refuses `id: "not-a-uuid"`.
+- [x] **Step 2: Write the failing tests** in `access/workspace.test.ts`: `findOwnWorkspace` with `null` or a user without a workspace → `null`; `ownWorkspace(null)` → rejects with status 401; `ACC-1.1`: two `ownWorkspace` calls for one user at once (`Promise.all`) → the same `workspaceId` and one `workspaces` row; `requireListAccess` for a list of another user's workspace and for a missing ID → both reject with status 404.
+- [x] **Step 3: Write the failing tests** in `lists/routes.test.ts` (two guests by two `signIn` calls; every write with `sameOrigin`):
   - `LST-1.1`: `POST` → 201 with the list; the same request → 200, the same `createdAt`; the same ID with another name → 200 with the first name; guest B posting guest A's ID → 201, a separate list in B's workspace.
   - `ACC-1.1`: a new guest's first `POST` creates exactly one workspace; two first `POST`s of one guest at once (different IDs) → one workspace, two lists.
   - `POST` without a cookie → 401 `unauthorized`; bodies with a missing `id`, `id: "x"`, `name: "   "`, a 101-character name, an extra unknown field if the schema is strict → 400 `invalid_input`; NFD name stored as NFC (Review Focus 3).
   - `LST-2.1`: three lists created in order → `GET /api/lists` newest first; without a cookie → `{ lists: [] }` and no `Set-Cookie` (`ACC-1.3`); with a session but no workspace → `{ lists: [] }`.
   - `NFR-4.10`: guest B's `GET` and `PATCH /api/lists/<A's id>` → 404 with a body equal to the one for a random UUID; `GET /api/lists/not-a-uuid` → 404; `GET` and `PATCH` without a cookie → 404.
   - `LST-1.2`: `PATCH { name }` → 200, the new name, `updated_at` later; the same name → 200 and `updated_at` unchanged.
-- [ ] **Step 4: Run** `pnpm test -- lists workspace`. Expected: FAIL.
-- [ ] **Step 5: Implement** the shared schemas (`.trim().normalize("NFC")` through `z.string().transform` or `.overwrite`, then `.refine` on `[...value].length`), the access layer, the repository (map rows to `List`, `createdAt` as ISO string), and the routes with Zod `body`/`params`/`response` schemas. The path param is parsed in the handler (`z.uuid().safeParse`), so a malformed ID answers 404, not the validator's 400. `POST` runs `ownWorkspace` and `insertList` in one `db.transaction`. The lists plugin adds `sessionHook(auth)` as its own `preHandler`, so only its routes read the session. 401 and 404 go through `sendError`.
-- [ ] **Step 6: Run** the tests of Step 4. Expected: PASS.
-- [ ] **Step 7:** Docs listed above. **Run** `pnpm check`. Expected: PASS.
-- [ ] **Step 8: Commit** `feat(api): add the lists routes behind the access layer`.
+- [x] **Step 4: Run** `pnpm test -- lists workspace`. Expected: FAIL.
+- [x] **Step 5: Implement** the shared schemas (`.trim().normalize("NFC")` through `z.string().transform` or `.overwrite`, then `.refine` on `[...value].length`), the access layer, the repository (map rows to `List`, `createdAt` as ISO string), and the routes with Zod `body`/`params`/`response` schemas. The path param is parsed in the handler (`z.uuid().safeParse`), so a malformed ID answers 404, not the validator's 400. `POST` runs `ownWorkspace` and `insertList` in one `db.transaction`. The lists plugin adds `sessionHook(auth)` as its own `preHandler`, so only its routes read the session. 401 and 404 go through `sendError`.
+- [x] **Step 6: Run** the tests of Step 4. Expected: PASS.
+- [x] **Step 7:** Docs listed above. **Run** `pnpm check`. Expected: PASS.
+- [x] **Step 8: Commit** `feat(api): add the lists routes behind the access layer`.
 
 ### Task 4: The lists page and writes from the SPA
 

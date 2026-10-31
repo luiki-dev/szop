@@ -1,0 +1,107 @@
+import {
+  createListSchema,
+  listSchema,
+  listsResponseSchema,
+  renameListSchema,
+} from "@szop/shared";
+import type { FastifyInstance } from "fastify";
+import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import { z } from "zod";
+import {
+  findOwnWorkspace,
+  ownWorkspace,
+  requireListAccess,
+} from "../access/workspace.ts";
+import type { Auth } from "../auth/auth.ts";
+import { sessionHook } from "../auth/session.ts";
+import type { Database } from "../db/database.ts";
+import { sendError } from "../errors.ts";
+import { findList, insertList, listLists, renameList } from "./repository.ts";
+
+export interface ListsRoutesOptions {
+  db: Database;
+  auth: Auth;
+}
+
+const idParams = z.object({ id: z.string() });
+
+// The lists API (PH-16a spec). Every route reads the session and goes
+// through the access layer; a missing or foreign list is one 404.
+export function listsRoutes(
+  app: FastifyInstance,
+  { db, auth }: ListsRoutesOptions,
+): void {
+  // Only these routes read the session (ACC-1.3).
+  app.addHook("preHandler", sessionHook(auth));
+  const typed = app.withTypeProvider<ZodTypeProvider>();
+
+  typed.get(
+    "/lists",
+    { schema: { response: { 200: listsResponseSchema } } },
+    async (request) => {
+      const context = await findOwnWorkspace(db, request.user);
+      return { lists: context ? await listLists(db, context.workspaceId) : [] };
+    },
+  );
+
+  typed.post(
+    "/lists",
+    {
+      schema: {
+        body: createListSchema,
+        response: { 200: listSchema, 201: listSchema },
+      },
+    },
+    async (request, reply) => {
+      const { list, created } = await db.transaction(async (tx) => {
+        const context = await ownWorkspace(tx, request.user);
+        return insertList(tx, context.workspaceId, request.body);
+      });
+      return reply.code(created ? 201 : 200).send(list);
+    },
+  );
+
+  typed.get(
+    "/lists/:id",
+    {
+      schema: {
+        params: idParams,
+        response: { 200: listSchema },
+      },
+    },
+    async (request, reply) => {
+      const id = z.uuid().safeParse(request.params.id);
+      if (!id.success) return notFound(reply);
+      const context = await requireListAccess(db, request.user, id.data);
+      const list = await findList(db, context.workspaceId, id.data);
+      return list ?? notFound(reply);
+    },
+  );
+
+  typed.patch(
+    "/lists/:id",
+    {
+      schema: {
+        params: idParams,
+        body: renameListSchema,
+        response: { 200: listSchema },
+      },
+    },
+    async (request, reply) => {
+      const id = z.uuid().safeParse(request.params.id);
+      if (!id.success) return notFound(reply);
+      const context = await requireListAccess(db, request.user, id.data);
+      const list = await renameList(
+        db,
+        context.workspaceId,
+        id.data,
+        request.body.name,
+      );
+      return list ?? notFound(reply);
+    },
+  );
+}
+
+function notFound(reply: Parameters<typeof sendError>[0]) {
+  return sendError(reply, 404, "not_found", "Not found");
+}
