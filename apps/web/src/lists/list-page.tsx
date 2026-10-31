@@ -92,6 +92,7 @@ export function ListPage() {
               rename.mutate(next);
             }}
             onCancel={() => {
+              rename.reset();
               // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
               input.current?.blur();
             }}

@@ -89,12 +89,14 @@ async function signIn(): Promise<void> {
 }
 
 // Runs a write with a session, asking for an anonymous one first when the
-// browser has none (Better Auth answers `null`). A 401 means the cookie went
+// browser has none (Better Auth answers `null`, or fails). A 401 means the cookie went
 // stale: sign in again and retry once, never in a loop. Plain fetch, not
 // better-auth/client, to keep the first screen's JavaScript small.
 async function withSession(write: () => Promise<Response>): Promise<Response> {
   const session = await fetch("/api/auth/get-session")
-    .then((response) => response.json() as Promise<unknown>)
+    .then((response) =>
+      response.ok ? (response.json() as Promise<unknown>) : null,
+    )
     .catch(unreadable);
   if (!session) await signIn();
   const response = await write();

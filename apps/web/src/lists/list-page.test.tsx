@@ -314,6 +314,28 @@ describe("ListPage", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Boom");
   });
 
+  it("LST-1.2: Esc after a failed rename clears the server's message", async () => {
+    const user = userEvent.setup();
+    setup();
+    server.use(
+      http.patch(`/api/lists/${id}`, () =>
+        HttpResponse.json(
+          { error: { code: "internal_error", message: "Boom" } },
+          { status: 500 },
+        ),
+      ),
+    );
+
+    await user.type(await field(), " 2{Enter}");
+    await screen.findByRole("alert");
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+    expect(await field()).toHaveValue("Weekly shop");
+  });
+
   it("asks again when Try again is pressed after a failed load", async () => {
     const user = userEvent.setup();
     let calls = 0;

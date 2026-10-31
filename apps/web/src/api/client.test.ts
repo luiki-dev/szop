@@ -118,6 +118,27 @@ describe("lists", () => {
     ]);
   });
 
+  it("signs in before the write when get-session fails with a JSON body", async () => {
+    const calls = stubApi(null);
+    server.use(
+      http.get("/api/auth/get-session", () => {
+        calls.push("GET /api/auth/get-session");
+        return HttpResponse.json(
+          { message: "Too many requests" },
+          { status: 429 },
+        );
+      }),
+    );
+
+    await createList(newList);
+
+    expect(calls).toEqual([
+      "GET /api/auth/get-session",
+      "POST /api/auth/sign-in/anonymous",
+      "POST /api/lists",
+    ]);
+  });
+
   it("does not sign in when there is a session", async () => {
     const calls = stubApi({ session: { id: "s" } });
 
