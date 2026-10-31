@@ -20,7 +20,7 @@ From `superpowers:finishing-a-development-branch` it keeps the checks on the fin
    ⚪ Minor
    2. Unused export in apps/web/src/lib (cn.ts:9). Open point: no caller yet, a later phase may use it.
 
-   Answer like: "now: 1; OP: 2; bug: 7; the rest dropped".
+   Answer like: "now: 1; OP: 2; the rest dropped".
    ```
 
 5. **Act on the answer.**

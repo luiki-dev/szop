@@ -233,11 +233,11 @@ git push
 
 This is the spec's test for the two skills that cannot run before the next phase ([Tests](../specs/2026-10-31-session-skills-design.md#tests)).
 
-- [ ] **Step 1: Read each skill next to the spec, step by step**
+- [x] **Step 1: Read each skill next to the spec, step by step**
 
 For `/finish-phase` and `/demo-check`, a table in the task summary: the spec's step, where the skill holds it (heading), ✅ kept or ❌ missing or changed. Also check: every _(Claude's call)_ kept; nothing the spec puts out of scope (`/start-phase`, a committed handoff file, a changed demo list); the [Risks](../specs/2026-10-31-session-skills-design.md#risks) each answered; the three skills use the same names for the ledger, the findings table and the handoff file. Fix every ❌ in the skill.
 
-- [ ] **Step 2: Check the links**
+- [x] **Step 2: Check the links**
 
 Run, from the repository root (relative links in the changed files point to existing files):
 
@@ -247,12 +247,12 @@ for f in $(git diff --name-only main... -- '*.md'); do d=$(dirname "$f"); grep -
 
 Expected: no output. Check each `#anchor` added in this branch by hand against its target heading.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `pnpm check`
 Expected: passes.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 Only if Step 1 or 2 changed a file:
 
