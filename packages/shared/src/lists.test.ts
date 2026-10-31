@@ -19,7 +19,7 @@ describe("listNameSchema", () => {
   });
 
   it.each(["a", "🛒"])(
-    "LST-1.1: counts code points of %s, at most 100",
+    "LIM-2.1, LST-1.1: counts code points of %s, at most 100",
     (c) => {
       expect(listNameSchema.safeParse(c.repeat(100)).success).toBe(true);
       const over = listNameSchema.safeParse(c.repeat(101));
