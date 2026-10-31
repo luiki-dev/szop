@@ -50,11 +50,11 @@
 **Interfaces:**
 - Produces: the skill `/handoff` (no arguments: write; `resume <branch>`: resume) and the file `.superpowers/handoff/<branch with / replaced by ->.md` with the six sections of the spec, in its order: **Stage and next step**, **Branch and head**, **Read first**, **Decided in the conversation**, **Waiting on the owner**, **Rules for this stage**. Task 5 names these in the guides.
 
-- [ ] **Step 1: Write `.claude/skills/handoff/SKILL.md`**
+- [x] **Step 1: Write `.claude/skills/handoff/SKILL.md`**
 
 Frontmatter `name: handoff` and a `description` saying: run by the owner to hand a stage over to a new session (writing), or as the first message of a new session with `resume <branch>`; Claude may suggest it at the end of a stage or at about 150–200k of context but does not start it (ADR 0059, decision 2). Then two sections, "Writing" and "Resuming", with every step of spec, [/handoff](../specs/2026-10-31-session-skills-design.md#handoff). The file's template goes inline in the skill as a fenced block with the six headings; no supporting file. The cloud signal: the owner's word, or an environment variable Claude Code sets in a cloud session (check Claude Code's docs for its name, such as `CLAUDE_CODE_REMOTE`; if none is documented, the owner's word only, noted in ADR 0059's "Settled while building" in this task's commit).
 
-- [ ] **Step 2: Check the skill against the spec**
+- [x] **Step 2: Check the skill against the spec**
 
 Read the spec's /handoff section next to the skill. Checklist, each yes:
 - the work is committed (work in progress allowed) and pushed before the file is written; the execution ledger is current;
@@ -65,7 +65,7 @@ Read the spec's /handoff section next to the skill. Checklist, each yes:
 - the full path is said, and that the session can be closed;
 - resume: `git status -sb` clean and on the branch, else stop; never switch branches; file or prompt content, else the second line and the stage's documents; head mismatch → stop, report both, wait; read **Read first**; confirm in two or three lines; wait for the go unless the rules say to go on.
 
-- [ ] **Step 3: Commit and push**
+- [x] **Step 3: Commit and push**
 
 ```bash
 git add .claude/skills/handoff/SKILL.md docs/superpowers/plans/2026-10-31-session-skills.md
