@@ -108,7 +108,9 @@ export function AppShell() {
         }
       >
         {desktop && !header && (
-          <div className="flex items-center justify-between gap-4">
+          // The row is 48 px whether or not it holds an action, so the title sits
+          // at the same height on every page.
+          <div className="flex min-h-12 items-center justify-between gap-4">
             <h1 className="min-w-0 truncate text-2xl font-extrabold">
               {title}
             </h1>

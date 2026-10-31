@@ -17,7 +17,7 @@ export function ListHeader({
   menu?: ReactNode;
 }) {
   return (
-    <header className="-ml-2 flex items-start gap-3 pt-2 md:-ml-4 lg:ml-0">
+    <header className="-ml-2 flex items-start gap-3 pt-2 md:-ml-4 lg:ml-0 lg:pt-0">
       <Link
         to="/"
         aria-label="Back to lists"
