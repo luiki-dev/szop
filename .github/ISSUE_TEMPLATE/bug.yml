@@ -1,0 +1,82 @@
+name: Bug
+description: "Delivered work that behaves otherwise than the requirements, the design or common sense say (ADR 0058)."
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happens
+    attributes:
+      label: What happens
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What was expected
+    validations:
+      required: true
+  - type: textarea
+    id: where
+    attributes:
+      label: Where
+      description: Demo or local, the browser, the device and the window's width
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: If you could not reproduce it, say so; the bug gets the cannot-reproduce label
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: Your call; the triage copies it into the project's Severity field
+      options:
+        - "🔴 Critical: breaks a use case, can lose data or is a security hole"
+        - "🟠 Major: works, but wrongly, or only on some devices"
+        - "⚪ Minor: cosmetic"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: The scope of its fix; the list follows the scopes in commitlint.config.js
+      options:
+        - web
+        - api
+        - shared
+        - e2e
+        - accounts
+        - lists
+        - items
+        - ordering
+        - categories
+        - catalog
+        - units
+        - templates
+        - sharing
+        - sync
+        - limits
+        - connectivity
+        - landing
+        - adr
+        - spec
+        - plan
+        - requirements
+        - audit
+        - roadmap
+        - infra
+        - deps
+        - deps-dev
+        - main
+        - claude
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Screenshots (drop or paste them here), console output, links

@@ -22,7 +22,8 @@ export default {
       ],
     ],
     // The scope is optional; when given, it must be one of these.
-    // A PR that needs a new scope adds it here.
+    // A PR that needs a new scope adds it here, and to the Area list of
+    // .github/ISSUE_TEMPLATE/bug.yml (ADR 0058, decision 2).
     "scope-enum": [
       2,
       "always",
