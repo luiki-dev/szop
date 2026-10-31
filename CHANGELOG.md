@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.0 (2026-10-31)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+* fix(api): let the landing page receive the health answer by @luiki-dev in https://github.com/luiki-dev/szop/pull/274
+* feat(landing): add a copyright line under the Szop link by @luiki-dev in https://github.com/luiki-dev/szop/pull/279
+* feat(web): add the design system with its tokens and a /design page by @luiki-dev in https://github.com/luiki-dev/szop/pull/282
+* feat(web): add the app shell with its menu, the raccoon logo and the color scheme choice by @luiki-dev in https://github.com/luiki-dev/szop/pull/285
+* feat: browse and search a seed catalog of categories and products (PH-15a) by @luiki-dev in https://github.com/luiki-dev/szop/pull/306
+* test: add StrykerJS mutation testing by @luiki-dev in https://github.com/luiki-dev/szop/pull/310
+* feat: let a guest create, open and rename lists (PH-16a) by @luiki-dev in https://github.com/luiki-dev/szop/pull/322
+
+
+**Full Changelog**: https://github.com/luiki-dev/szop/compare/v0.2.0...v0.3.0
+
 ## 0.2.0 (2026-10-23)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
