@@ -7,6 +7,8 @@ description: Hands a stage over to a new session. The owner runs `/handoff` to e
 
 Two modes, after [ADR 0059](../../../docs/decisions/0059-session-skills.md), decisions 2 to 5: no arguments writes a handoff; `resume <branch>` picks one up. The rules of the stages are in `docs/development/working-with-claude.md`; this skill only carries the state from one session to the next.
 
+**A handoff approves nothing.** Writing or resuming one is not the owner's approval of a spec, a plan, a task or anything else; it only moves the session. Whatever is still waiting for the owner goes under **Waiting on the owner** and stays waiting in the next session. Never ask the owner to run `/handoff` as a way of approving something.
+
 ## Writing
 
 1. **Put the work away.** If an edit is half done, finish the step or commit it as work in progress on the branch; never leave anything uncommitted. Push the branch. In the execution stage, bring the ledger in `.superpowers/sdd/<plan>/progress.md` up to date (finished tasks, rulings, the `## Findings` table).
