@@ -195,7 +195,7 @@
 **Files:**
 - Modify: whatever the owner's decisions touch (tests, `// Stryker disable next-line <Mutator>: <reason>` comments)
 
-- [ ] **Step 1: Run** `pnpm db:up`, then `pnpm test:mutation --mutate` over `apps/api/src/catalog/{seed,repository,routes}.ts`, `apps/api/src/access/workspace.ts` and `apps/api/src/lists/{repository,routes}.ts`, plus any non-test file that Task 1 changed.
-- [ ] **Step 2:** List the survivors for the owner, grouped by file, each with a proposal: a test that kills it, or an accepted reason. Stop and wait for the owner's decisions.
-- [ ] **Step 3:** Apply the decisions, and rerun the mutation run on the touched files. Expected: every survivor is killed or carries its reason ([definition of done](../../development/definition-of-done.md), item 2).
-- [ ] **Step 4: Run** `pnpm check`. Expected: PASS. **Commit** `test(api): kill or accept the PH-16b mutation survivors`.
+- [x] **Step 1: Run** `pnpm db:up`, then `pnpm test:mutation --mutate` over `apps/api/src/catalog/{seed,repository,routes}.ts`, `apps/api/src/access/workspace.ts` and `apps/api/src/lists/{repository,routes}.ts`, plus any non-test file that Task 1 changed.
+- [x] **Step 2:** List the survivors for the owner, grouped by file, each with a proposal: a test that kills it, or an accepted reason. Stop and wait for the owner's decisions.
+- [x] **Step 3:** Apply the decisions, and rerun the mutation run on the touched files. Expected: every survivor is killed or carries its reason ([definition of done](../../development/definition-of-done.md), item 2).
+- [x] **Step 4: Run** `pnpm check`. Expected: PASS. **Commit** `test(api): kill or accept the PH-16b mutation survivors`.

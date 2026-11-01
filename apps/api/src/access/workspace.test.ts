@@ -26,6 +26,16 @@ describe("the access layer", () => {
     expect(await findOwnWorkspace(database.db, await newUser(1))).toBeNull();
   });
 
+  it("findOwnWorkspace returns the owner's context for an existing workspace", async () => {
+    const user = await newUser(1);
+    const { workspaceId } = await ownWorkspace(database.db, user, testCatalog);
+    expect(await findOwnWorkspace(database.db, user)).toEqual({
+      user,
+      workspaceId,
+      role: "owner",
+    });
+  });
+
   it("ownWorkspace rejects with 401 without a user", async () => {
     await expect(
       ownWorkspace(database.db, null, testCatalog),
