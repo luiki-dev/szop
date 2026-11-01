@@ -30,7 +30,7 @@ Drizzle is a TypeScript object–relational mapper (ORM) that stays close to SQL
 
 ### Hand-edited migrations
 
-`foreignKey()` cannot write `ON DELETE SET NULL (column)` (PostgreSQL 15 and newer), which a composite reference needs so that deleting its target does not null `workspace_id`. `0002_tough_ultron.sql` adds the column list by hand to `products_workspace_id_category_id_fkey` and `products_workspace_id_unit_id_fkey`. The migration check still passes, because `db:generate` compares the schema with the snapshot in `meta/`, not with the SQL. Keep the edit if either constraint is ever regenerated.
+`foreignKey()` cannot write `ON DELETE SET NULL (column)` (PostgreSQL 15 and newer), which a composite reference needs so that deleting its target does not null `workspace_id`. `0002_tough_ultron.sql` adds the column list by hand to `products_workspace_id_category_id_fkey` and `products_workspace_id_unit_id_fkey`. The migration check still passes, because `db:generate` compares the schema with the snapshot in `meta/`, not with the SQL. Keep the edit if either constraint is ever regenerated; the delete test in `apps/api/src/db/schema.test.ts` fails if a later `db:generate` loses the column list.
 
 ## Everyday use
 

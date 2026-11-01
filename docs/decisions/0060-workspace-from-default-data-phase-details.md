@@ -31,6 +31,7 @@ The [spec](../superpowers/specs/2026-11-01-PH-16b-workspace-from-default-data-de
 ## Settled while building
 
 - **`SET NULL (column)` is a hand edit of the migration** _(Claude's call, as the spec's Risks allow)_. `drizzle-orm` 0.45.4 and `drizzle-kit` 0.31.11 accept only `ON DELETE set null` on a `foreignKey()`, with no column list, so the schema declares `.onDelete("set null")` and `0002_tough_ultron.sql` was edited to `ON DELETE set null ("category_id")` and `("unit_id")` on the two product references. The migration check stays green because `db:generate` compares the schema with the snapshot in `meta/`, not with the SQL, and the snapshot is unchanged by the edit. A later `db:generate` that touches these constraints would write plain `set null` again; [Drizzle](../development/tools/drizzle.md#hand-edited-migrations) says so.
+- **`GET /api/catalog` creates no session and sets no cookie of its own**, but a refresh of an existing session is passed on, as on every route with `sessionHook`.
 
 ## Consequences
 

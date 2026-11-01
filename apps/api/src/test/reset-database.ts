@@ -29,6 +29,7 @@ async function run(database: string, statements: string[]): Promise<boolean> {
 // is created once (WAL_LOG, which needs no checkpoint) and emptied by dropping
 // its schemas. Names go into the statements unquoted: they are numbered,
 // never input.
+// shortcut: clears only the `drizzle` and `public` schemas, so other schemas, `ALTER DATABASE … SET` and default privileges survive; upgrade when a migration adds another schema or a database-level setting.
 export async function resetDatabase(
   name: string,
   owner?: string,

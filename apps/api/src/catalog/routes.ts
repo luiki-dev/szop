@@ -14,7 +14,8 @@ export interface CatalogRoutesOptions {
 }
 
 // GET /api/catalog: the visitor's own workspace catalog, or the seed when they
-// have no workspace yet (PH-16b spec). Read-only; it creates nothing. The
+// have no workspace yet (PH-16b spec). Read-only; it creates nothing and sets no cookie of its own, but a
+// refreshed session's Set-Cookie is passed on by `sessionHook`. The
 // response schema serializes the body, so a catalog that breaks the contract
 // fails here with a generic 500 and never reaches the page.
 export function catalogRoutes(

@@ -33,7 +33,8 @@ export function listsRoutes(
   app: FastifyInstance,
   { db, auth, catalog }: ListsRoutesOptions,
 ): void {
-  // Only these routes read the session (ACC-1.3).
+  // The lists plugin adds the hook to its own routes only; the catalog plugin
+  // does the same for its route (ACC-1.3).
   app.addHook("preHandler", sessionHook(auth));
   const typed = app.withTypeProvider<ZodTypeProvider>();
 
