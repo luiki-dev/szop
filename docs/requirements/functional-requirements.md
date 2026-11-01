@@ -163,7 +163,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [UNT-1](UNT-units.md#unt-1) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [UNT-1](UNT-units.md#unt-1) | 🎯 MVP | 🚧 In progress | 0 of 4 | ❔ Not finalized |
 
 ### Templates (TPL)
 
