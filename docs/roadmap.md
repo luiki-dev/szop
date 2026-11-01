@@ -418,8 +418,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ### PH-16b Workspace from the default data
 
-- **Goal:** a guest's workspace is created as a copy of the default catalog, categories and units, with IDs that stay the same in the seed and every copy, so a later first change can refer to default data. The catalog page shows the guest's own copy, and two tabs making their first change at once end up in one workspace.
-- **Delivers:** [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.4, ACC-1.6 and ACC-1.9), [UNT-1](requirements/UNT-units.md#unt-1) (part: UNT-1.1, the default units); the workspace's catalog, category and unit tables with composite keys; the two-workspace test helper and the schema test over PostgreSQL's catalog ([ADR 0012](decisions/0012-security-baseline.md), decision 6); [ADR 0060](decisions/0060-workspace-from-default-data-phase-details.md).
+- **Goal:** a guest's workspace is created as a copy of the default catalog, categories and units, with IDs that stay the same in the seed and every copy, so a later first change can refer to default data. The catalog page shows the guest's own copy, and a guest's concurrent first changes end up in one workspace.
+- **Delivers:** [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.4 and ACC-1.9, and the server's side of ACC-1.6: one user's concurrent first changes make one workspace), [UNT-1](requirements/UNT-units.md#unt-1) (part: UNT-1.1, the default units); the workspace's catalog, category and unit tables with composite keys; the two-workspace test helper and the schema test over PostgreSQL's catalog ([ADR 0012](decisions/0012-security-baseline.md), decision 6); [ADR 0060](decisions/0060-workspace-from-default-data-phase-details.md).
 - **Split from:** PH-16 Guest workspace and lists, now retired (see [PH-16a](#ph-16a-guests-first-list)).
 - **Depends on:** —
 - **Owner steps:** none.
@@ -429,7 +429,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-16c Managing lists
 
 - **Goal:** a guest deletes a list after confirming it, a path that is not a page shows a not-found page, and a change sent on a weak connection fails visibly instead of hanging or being lost.
-- **Delivers:** [LST-1](requirements/LST-shopping-lists.md#lst-1) (part: LST-1.3, deleting), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.3, confirming a list's deletion), [APP-5](requirements/APP-app-wide-behavior.md#app-5); timeouts on requests, the "not saved" state and refetching after a failed change ([OP-040](https://github.com/luiki-dev/szop/issues/99)).
+- **Delivers:** [LST-1](requirements/LST-shopping-lists.md#lst-1) (part: LST-1.3, deleting), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.3, confirming a list's deletion), [APP-5](requirements/APP-app-wide-behavior.md#app-5), [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.6, one anonymous session across tabs, [OP-120](https://github.com/luiki-dev/szop/issues/329)); timeouts on requests, the "not saved" state and refetching after a failed change ([OP-040](https://github.com/luiki-dev/szop/issues/99)).
 - **Split from:** PH-16 Guest workspace and lists, now retired (see [PH-16a](#ph-16a-guests-first-list)).
 - **Depends on:** —
 - **Owner steps:** none.
