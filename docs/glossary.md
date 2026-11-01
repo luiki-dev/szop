@@ -34,6 +34,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **DKIM** | DomainKeys Identified Mail | A signature on outgoing email, checked against a key published in DNS, proving the mail really comes from the domain. |
 | **DMARC** | Domain-based Message Authentication, Reporting and Conformance | A DNS record telling receiving mail servers what to do with mail that fails the SPF and DKIM checks, which stops others sending mail in the domain's name. |
 | **DNS** | Domain Name System | The internet's directory that turns names (`szop.dzwoniec.com`) into addresses. |
+| **DNSSEC** | Domain Name System Security Extensions | Signatures on DNS records that let a resolver check an answer came from the zone's owner. Szop's zone has none; the 2026-11-01 security audit lists it as optional. |
 | **DOM** | Document Object Model | The browser's tree of objects representing a page; JavaScript reads and changes the page through it. |
 | **DoS** | Denial of Service | An attack that makes a service unavailable, either by flooding it with traffic (volumetric) or by making it exhaust resources such as database space (resource exhaustion). |
 | **E2E** | End-to-end | A test that drives the real app in a real browser, through every layer (SPA → API → database), the way a user would. Szop has one E2E journey per use case (see ADR 0007). |
@@ -119,6 +120,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **WASM** | WebAssembly | A compact binary format that browsers and Node.js can run at near-native speed. PGlite is PostgreSQL compiled to it; considered for tests, not used (see ADR 0007). |
 | **WCAG** | Web Content Accessibility Guidelines | The W3C's standard for accessible web content, with levels A, AA and AAA. Szop targets WCAG 2.2 AA ([NFR-2](requirements/NFR-non-functional-requirements.md#nfr-2)). |
 | **WSL** | Windows Subsystem for Linux | A Linux environment running inside Windows. Szop is developed in WSL 2 with Ubuntu. |
+| **XSS** | Cross-Site Scripting | An attack that gets a site to run the attacker's script in a visitor's page, for example through stored data shown without escaping. Szop's content security policy blocks inline and third-party scripts. |
 | **YAML** | YAML Ain't Markup Language | A text format for configuration, based on indentation. GitHub Actions workflows and `compose.yaml` are written in it. |
 
 ## Requirement ID prefixes
