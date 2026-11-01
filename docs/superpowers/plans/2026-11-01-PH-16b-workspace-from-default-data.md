@@ -133,16 +133,16 @@
   - `access/workspace.ts`: `ownWorkspace(db: Executor, user: SessionUser | null, catalog: Catalog): Promise<WorkspaceContext>`. Its insert of the workspace becomes `ON CONFLICT (user_id) DO NOTHING RETURNING id`; when a row comes back it calls `insertCatalog`. Its comment says it must run inside a transaction when it may create the workspace.
   - `listsRoutes(app, { db, auth, catalog })`; `app.ts` passes `catalog` to it.
 
-- [ ] **Step 1: Write the failing tests** (the copy tests in `lists/routes.test.ts`; the `ownWorkspace` unit tests in `access/workspace.test.ts`, updated to pass `testCatalog`):
+- [x] **Step 1: Write the failing tests** (the copy tests in `lists/routes.test.ts`; the `ownWorkspace` unit tests in `access/workspace.test.ts`, updated to pass `testCatalog`):
   - `ACC-1.4`: a new guest's first `POST /api/lists` → 201. Their workspace holds the list, and its `units`, `categories` and `products` rows, mapped to `Catalog`'s shape and sorted by `id`, equal `testCatalog`'s arrays sorted the same way;
   - `UNT-1.1`: an app built with `loadSeed()`; after the first `POST`, the workspace's unit names include `pcs`, `kg`, `g`, `l`, `ml` and `pack`;
   - `ACC-1.6`: two concurrent first `POST`s of one guest (`Promise.all`, different list IDs) → both 201, one `workspaces` row, `count(*)` of each table equal to `testCatalog`'s length for it, and both lists in that workspace (Review Focus 4);
   - a failed copy: an app built with a `Catalog` whose product's `unitId` is a UUID that is not in its units. The first `POST` → 500, and afterwards there are no `workspaces`, `lists`, `units`, `categories` or `products` rows (Review Focus 2);
   - a second `POST` by the same guest copies nothing: the row counts are unchanged.
-- [ ] **Step 2: Run** `pnpm --filter @szop/api test -- lists workspace`. Expected: FAIL.
-- [ ] **Step 3: Implement** `insertCatalog`, the new `ownWorkspace`, and the `catalog` option of `listsRoutes` and `app.ts`.
-- [ ] **Step 4: Run** `pnpm check`. Expected: PASS.
-- [ ] **Step 5:** Update the docs listed above. **Commit** `feat(api): copy the default data into a new workspace`.
+- [x] **Step 2: Run** `pnpm --filter @szop/api test -- lists workspace`. Expected: FAIL.
+- [x] **Step 3: Implement** `insertCatalog`, the new `ownWorkspace`, and the `catalog` option of `listsRoutes` and `app.ts`.
+- [x] **Step 4: Run** `pnpm check`. Expected: PASS.
+- [x] **Step 5:** Update the docs listed above. **Commit** `feat(api): copy the default data into a new workspace`.
 
 ### Task 5: Repositories take the context
 

@@ -1,4 +1,5 @@
 import {
+  type Catalog,
   createListSchema,
   listSchema,
   listsResponseSchema,
@@ -21,6 +22,7 @@ import { findList, insertList, listLists, renameList } from "./repository.ts";
 export interface ListsRoutesOptions {
   db: Database;
   auth: Auth;
+  catalog: Catalog;
 }
 
 const idParams = z.object({ id: z.string() });
@@ -29,7 +31,7 @@ const idParams = z.object({ id: z.string() });
 // through the access layer; a missing or foreign list is one 404.
 export function listsRoutes(
   app: FastifyInstance,
-  { db, auth }: ListsRoutesOptions,
+  { db, auth, catalog }: ListsRoutesOptions,
 ): void {
   // Only these routes read the session (ACC-1.3).
   app.addHook("preHandler", sessionHook(auth));
@@ -56,7 +58,7 @@ export function listsRoutes(
     },
     async (request, reply) => {
       const { list, created } = await db.transaction(async (tx) => {
-        const context = await ownWorkspace(tx, request.user);
+        const context = await ownWorkspace(tx, request.user, catalog);
         return insertList(tx, context.workspaceId, request.body);
       });
       return reply.code(created ? 201 : 200).send(list);

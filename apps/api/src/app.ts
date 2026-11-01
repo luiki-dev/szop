@@ -106,7 +106,7 @@ export function buildApp({
 
   app.register(catalogRoutes, { prefix: "/api", catalog });
 
-  app.register(listsRoutes, { prefix: "/api", db, auth });
+  app.register(listsRoutes, { prefix: "/api", db, auth, catalog });
 
   // The built SPA, and index.html for the app's own paths. Registered last:
   // its not-found handler answers every path no route above claims.

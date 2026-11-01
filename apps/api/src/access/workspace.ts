@@ -1,4 +1,6 @@
+import type { Catalog } from "@szop/shared";
 import { eq, and } from "drizzle-orm";
+import { insertCatalog } from "../catalog/repository.ts";
 import type { Database } from "../db/database.ts";
 import { lists, workspaces } from "../db/schema.ts";
 import type { SessionUser } from "../auth/session.ts";
@@ -31,19 +33,32 @@ export async function findOwnWorkspace(
   return row ? { user, workspaceId: row.id, role: "owner" } : null;
 }
 
-// The user's workspace, created on first use. Concurrent first calls end in
-// one row: the unique user_id makes the loser's insert do nothing.
+// The user's workspace, created on first use with a copy of the catalog.
+// Concurrent first calls end in one row: the unique user_id makes the loser's
+// insert do nothing, and only the winner copies. Run it inside a transaction
+// when it may create the workspace, so a failed copy leaves no workspace.
 export async function ownWorkspace(
   db: Executor,
   user: SessionUser | null,
+  catalog: Catalog,
 ): Promise<WorkspaceContext> {
   if (user === null) throw httpError(401, "Sign-in required");
   // Stryker disable next-line ObjectLiteral: the target only names the constraint; any conflict here is the userId one, so `{}` does the same
   const onUserConflict = { target: workspaces.userId };
-  await db
+  const [created] = await db
     .insert(workspaces)
     .values({ userId: user.id })
-    .onConflictDoNothing(onUserConflict);
+    .onConflictDoNothing(onUserConflict)
+    .returning({ id: workspaces.id });
+  if (created) {
+    const context: WorkspaceContext = {
+      user,
+      workspaceId: created.id,
+      role: "owner",
+    };
+    await insertCatalog(db, context, catalog);
+    return context;
+  }
   const context = await findOwnWorkspace(db, user);
   // Stryker disable next-line ConditionalExpression,StringLiteral: unreachable after the insert; a defensive guard
   if (context === null) throw httpError(500, "Workspace missing");

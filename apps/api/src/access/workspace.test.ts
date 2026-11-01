@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { lists } from "../db/schema.ts";
+import { testCatalog } from "../test/catalog.ts";
 import { useTestDatabase } from "../test/database.ts";
 import {
   findOwnWorkspace,
@@ -26,7 +27,9 @@ describe("the access layer", () => {
   });
 
   it("ownWorkspace rejects with 401 without a user", async () => {
-    await expect(ownWorkspace(database.db, null)).rejects.toMatchObject({
+    await expect(
+      ownWorkspace(database.db, null, testCatalog),
+    ).rejects.toMatchObject({
       statusCode: 401,
       message: "Sign-in required",
     });
@@ -35,8 +38,8 @@ describe("the access layer", () => {
   it("ACC-1.1: two concurrent calls make one workspace", async () => {
     const user = await newUser(1);
     const [a, b] = await Promise.all([
-      ownWorkspace(database.db, user),
-      ownWorkspace(database.db, user),
+      ownWorkspace(database.db, user, testCatalog),
+      ownWorkspace(database.db, user, testCatalog),
     ]);
     expect(a.workspaceId).toBe(b.workspaceId);
     expect(a.role).toBe("owner");
@@ -49,7 +52,7 @@ describe("the access layer", () => {
   it("NFR-4.10: requireListAccess rejects 404 for a foreign and a missing list", async () => {
     const owner = await newUser(1);
     const other = await newUser(2);
-    const { workspaceId } = await ownWorkspace(database.db, owner);
+    const { workspaceId } = await ownWorkspace(database.db, owner, testCatalog);
     await database.db
       .insert(lists)
       .values({ workspaceId, id: idOf(5), name: "Mine" });
@@ -57,7 +60,7 @@ describe("the access layer", () => {
     await expect(
       requireListAccess(database.db, owner, idOf(5)),
     ).resolves.toMatchObject({ workspaceId });
-    await ownWorkspace(database.db, other);
+    await ownWorkspace(database.db, other, testCatalog);
     await expect(
       requireListAccess(database.db, other, idOf(5)),
     ).rejects.toMatchObject({ statusCode: 404, message: "Not found" });
