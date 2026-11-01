@@ -26,7 +26,11 @@ Drizzle is a TypeScript object–relational mapper (ORM) that stays close to SQL
 - Constraints and indexes are named explicitly, in PostgreSQL's style: `<table>_pkey`, `<table>_<columns>_key` (unique), `<table>_<columns>_fkey`, `<table>_<columns>_idx`. Drizzle's generated names are longer and differ in style.
 - Deleting a user cascades to the user's sessions, accounts, workspace and lists.
 
-`db/schema.test.ts` checks the timestamps, the keys, the cascade and the ID defaults against a real database.
+`db/schema.test.ts` checks the timestamps, the keys, the cascade and the ID defaults against a real database. It also reads PostgreSQL's catalog so that every table with a `workspace_id` follows [ADR 0060](../../decisions/0060-workspace-from-default-data-phase-details.md), decision 3: `workspace_id NOT NULL` referencing `workspaces`, a key starting `(workspace_id, id)`, and every reference to such a table including `workspace_id` on both sides.
+
+### Hand-edited migrations
+
+`foreignKey()` cannot write `ON DELETE SET NULL (column)` (PostgreSQL 15 and newer), which a composite reference needs so that deleting its target does not null `workspace_id`. `0002_tough_ultron.sql` adds the column list by hand to `products_workspace_id_category_id_fkey` and `products_workspace_id_unit_id_fkey`. The migration check still passes, because `db:generate` compares the schema with the snapshot in `meta/`, not with the SQL. Keep the edit if either constraint is ever regenerated.
 
 ## Everyday use
 

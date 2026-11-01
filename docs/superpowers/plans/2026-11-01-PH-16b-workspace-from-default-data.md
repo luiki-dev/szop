@@ -106,18 +106,18 @@
 **Interfaces:**
 - Produces: Drizzle tables `units`, `categories` and `products` exported from `schema.ts`, with the columns and constraints of the spec's [The tables](../specs/2026-11-01-PH-16b-workspace-from-default-data-design.md#the-tables). Their fields are `workspaceId`, `id`, `name`, `parentId`, `position`, `categoryId`, `unitId`, `createdAt` and `updatedAt`.
 
-- [ ] **Step 1: Check Drizzle** (context7, the installed `drizzle-orm` version) for `ON DELETE SET NULL (column)` on a composite `foreignKey()`. If it can be expressed, use it. If not, the generated SQL is edited by hand only if `db:generate` then still writes nothing. If no way keeps the migration check green, stop and report to the owner ([spec, Risks](../specs/2026-11-01-PH-16b-workspace-from-default-data-design.md#risks)).
-- [ ] **Step 2: Write the failing tests** in `schema.test.ts`:
+- [x] **Step 1: Check Drizzle** (context7, the installed `drizzle-orm` version) for `ON DELETE SET NULL (column)` on a composite `foreignKey()`. If it can be expressed, use it. If not, the generated SQL is edited by hand only if `db:generate` then still writes nothing. If no way keeps the migration check green, stop and report to the owner ([spec, Risks](../specs/2026-11-01-PH-16b-workspace-from-default-data-design.md#risks)).
+- [x] **Step 2: Write the failing tests** in `schema.test.ts`:
   - the table list in the existing `created_at`/`updated_at` test gains `categories`, `products` and `units`;
   - **workspace-owned tables:** from `information_schema.columns` and `pg_constraint`, every public table with a `workspace_id` has it `NOT NULL`, has a foreign key from it to `workspaces (id)`, and has a primary key or unique key whose first two columns are `(workspace_id, id)`. The tables without `workspace_id` equal exactly `["accounts", "sessions", "users", "verifications", "workspaces"]`;
   - **references stay in the workspace:** every foreign key whose target table has a `workspace_id` includes `workspace_id` on both sides (`conkey` and `confkey` both contain it);
   - the database refuses, with error code `23503`, a product in workspace A whose `category_id` exists only in B, and the same for a category's `parent_id` and a product's `unit_id`;
   - deleting a category deletes its subcategories and sets `category_id` to `NULL` on its products while `workspace_id` stays. Deleting a unit sets `unit_id` to `NULL`. Deleting a workspace deletes its rows in all three tables;
   - a `name` of `""` or 101 characters, and a `position` of `-1`, are refused with error code `23514`.
-- [ ] **Step 3: Run** `pnpm --filter @szop/api test -- schema`. Expected: FAIL.
-- [ ] **Step 4: Implement** the three tables in `schema.ts` following `lists`, then `pnpm --filter @szop/api db:generate`. Apply Step 1's outcome.
-- [ ] **Step 5: Run** `pnpm check`. Expected: PASS, the migration check included.
-- [ ] **Step 6:** Update the docs listed above. **Commit** `feat(api): add the workspace's units, categories and products tables`.
+- [x] **Step 3: Run** `pnpm --filter @szop/api test -- schema`. Expected: FAIL.
+- [x] **Step 4: Implement** the three tables in `schema.ts` following `lists`, then `pnpm --filter @szop/api db:generate`. Apply Step 1's outcome.
+- [x] **Step 5: Run** `pnpm check`. Expected: PASS, the migration check included.
+- [x] **Step 6:** Update the docs listed above. **Commit** `feat(api): add the workspace's units, categories and products tables`.
 
 ### Task 4: The copy at the first change
 

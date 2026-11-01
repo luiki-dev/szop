@@ -5,6 +5,7 @@ import {
   check,
   foreignKey,
   index,
+  integer,
   pgTable,
   primaryKey,
   text,
@@ -70,6 +71,118 @@ export const lists = pgTable(
     ),
     check(
       "lists_name_check",
+      sql`char_length(${table.name}) BETWEEN 1 AND 100`,
+    ),
+  ],
+);
+
+// The workspace's copy of the default data. Like `lists`, `id` has no default:
+// the seed and, later, the browser create the IDs. ADR 0060, decision 3.
+export const units = pgTable(
+  "units",
+  {
+    workspaceId: uuid("workspace_id").notNull(),
+    id: uuid("id").notNull(),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ name: "units_pkey", columns: [table.workspaceId, table.id] }),
+    foreignKey({
+      name: "units_workspace_id_fkey",
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+    }).onDelete("cascade"),
+    check(
+      "units_name_check",
+      sql`char_length(${table.name}) BETWEEN 1 AND 100`,
+    ),
+  ],
+);
+
+export const categories = pgTable(
+  "categories",
+  {
+    workspaceId: uuid("workspace_id").notNull(),
+    id: uuid("id").notNull(),
+    parentId: uuid("parent_id"),
+    position: integer("position").notNull(),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({
+      name: "categories_pkey",
+      columns: [table.workspaceId, table.id],
+    }),
+    foreignKey({
+      name: "categories_workspace_id_fkey",
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "categories_workspace_id_parent_id_fkey",
+      columns: [table.workspaceId, table.parentId],
+      foreignColumns: [table.workspaceId, table.id],
+    }).onDelete("cascade"),
+    check(
+      "categories_name_check",
+      sql`char_length(${table.name}) BETWEEN 1 AND 100`,
+    ),
+    check("categories_position_check", sql`${table.position} >= 0`),
+  ],
+);
+
+export const products = pgTable(
+  "products",
+  {
+    workspaceId: uuid("workspace_id").notNull(),
+    id: uuid("id").notNull(),
+    name: text("name").notNull(),
+    categoryId: uuid("category_id"),
+    unitId: uuid("unit_id"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({
+      name: "products_pkey",
+      columns: [table.workspaceId, table.id],
+    }),
+    foreignKey({
+      name: "products_workspace_id_fkey",
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "products_workspace_id_category_id_fkey",
+      columns: [table.workspaceId, table.categoryId],
+      foreignColumns: [categories.workspaceId, categories.id],
+    }).onDelete("set null"),
+    foreignKey({
+      name: "products_workspace_id_unit_id_fkey",
+      columns: [table.workspaceId, table.unitId],
+      foreignColumns: [units.workspaceId, units.id],
+    }).onDelete("set null"),
+    check(
+      "products_name_check",
       sql`char_length(${table.name}) BETWEEN 1 AND 100`,
     ),
   ],

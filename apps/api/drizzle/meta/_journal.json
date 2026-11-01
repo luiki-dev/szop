@@ -15,6 +15,13 @@
       "when": 1793401459694,
       "tag": "0001_fuzzy_goblin_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793546568894,
+      "tag": "0002_tough_ultron",
+      "breakpoints": true
     }
   ]
 }
