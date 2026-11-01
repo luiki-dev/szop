@@ -1,6 +1,6 @@
 import type { List } from "@szop/shared";
 import { and, desc, eq, ne } from "drizzle-orm";
-import type { Executor } from "../access/workspace.ts";
+import type { Executor, WorkspaceContext } from "../access/workspace.ts";
 import { lists } from "../db/schema.ts";
 
 function toList(row: typeof lists.$inferSelect): List {
@@ -13,7 +13,7 @@ function toList(row: typeof lists.$inferSelect): List {
 
 export async function listLists(
   db: Executor,
-  workspaceId: string,
+  { workspaceId }: WorkspaceContext,
 ): Promise<List[]> {
   const rows = await db
     .select()
@@ -25,7 +25,7 @@ export async function listLists(
 
 export async function findList(
   db: Executor,
-  workspaceId: string,
+  { workspaceId }: WorkspaceContext,
   id: string,
 ): Promise<List | null> {
   const [row] = await db
@@ -38,19 +38,19 @@ export async function findList(
 // A repeated ID keeps the stored list (a retried request is not an error).
 export async function insertList(
   db: Executor,
-  workspaceId: string,
+  context: WorkspaceContext,
   { id, name }: { id: string; name: string },
 ): Promise<{ list: List; created: boolean }> {
   // Stryker disable next-line ObjectLiteral: any conflict here is on the composite key, so `{}` does the same
   const onKeyConflict = { target: [lists.workspaceId, lists.id] };
   const inserted = await db
     .insert(lists)
-    .values({ workspaceId, id, name })
+    .values({ workspaceId: context.workspaceId, id, name })
     .onConflictDoNothing(onKeyConflict)
     .returning();
   const [row] = inserted;
   if (row) return { list: toList(row), created: true };
-  const list = await findList(db, workspaceId, id);
+  const list = await findList(db, context, id);
   // Stryker disable next-line CallExpression,ConditionalExpression,StringLiteral: unreachable, the row exists after a conflict
   if (list === null) throw new Error("List vanished after a conflict");
   return { list, created: false };
@@ -59,7 +59,7 @@ export async function insertList(
 // Writes nothing, so updated_at stays, when the name is unchanged.
 export async function renameList(
   db: Executor,
-  workspaceId: string,
+  context: WorkspaceContext,
   id: string,
   name: string,
 ): Promise<List | null> {
@@ -68,11 +68,11 @@ export async function renameList(
     .set({ name })
     .where(
       and(
-        eq(lists.workspaceId, workspaceId),
+        eq(lists.workspaceId, context.workspaceId),
         eq(lists.id, id),
         ne(lists.name, name),
       ),
     )
     .returning();
-  return row ? toList(row) : findList(db, workspaceId, id);
+  return row ? toList(row) : findList(db, context, id);
 }

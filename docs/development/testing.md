@@ -11,6 +11,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
   - [Reading the log](#reading-the-log)
   - [Testing a hook before its routes exist](#testing-a-hook-before-its-routes-exist)
   - [Testing the session](#testing-the-session)
+  - [Two guests with a workspace each](#two-guests-with-a-workspace-each)
   - [Testing the served SPA](#testing-the-served-spa)
 - [Writing a database test](#writing-a-database-test)
 - [Writing a component test](#writing-a-component-test)
@@ -199,6 +200,10 @@ The route answers 200, so a test sees whether the hook let the request through. 
 
 `test/auth.ts` holds `signIn(app)`, which signs in anonymously and returns the `cookie` header for later `inject` calls, and `sameOrigin`, the headers of a request from the app itself. To test a session's lifetime, move its row instead of waiting: `UPDATE sessions SET expires_at = now() + interval '2 days'` makes the next read renew it, and a past `expires_at` or a deleted row makes `request.user` null. A route behind `sessionHook` is tested on a throwaway route, as in [Testing a hook before its routes exist](#testing-a-hook-before-its-routes-exist).
 
+### Two guests with a workspace each
+
+`twoWorkspaces(app, db, catalog)` in `apps/api/src/test/workspaces.ts` signs in two guests and makes each a workspace holding a copy of the catalog (`ownWorkspace`). It returns two `Guest` objects: `cookie`, `context` (the `WorkspaceContext`) and `inject(options)`, which sends a request as that guest with the cookie and the same-origin headers added. Use it for tests that check one guest cannot reach the other's records, as in the `NFR-4.10` test in `lists/routes.test.ts`.
+
 ### Testing the served SPA
 
 `apps/api/src/web/routes.test.ts` checks how the API serves the built web app: the compressed copies, the cache headers and the fallback to `index.html` ([ADR 0023](../decisions/0023-production-build-and-serving-details.md), decisions 5, 6 and 8). It never depends on running `pnpm build`:
@@ -211,13 +216,13 @@ The route answers 200, so a test sees whether the hook let the request through. 
 
 A database test runs against a real PostgreSQL, so a query, a migration or a cleanup is proven the way production runs it ([ADR 0007](../decisions/0007-testing-strategy.md), decisions 12 and 13).
 
-- **The databases.** Once per run, before any test, `globalSetup` (`apps/api/src/test/global-setup.ts`) drops and recreates `szop_test_template`, migrates it with the same `runMigrations` as production, and copies it to `szop_test_1`, `szop_test_2` and so on, one per possible worker. That takes about 0.6 s on 16 CPUs. Each Vitest worker uses its own copy, so test files run in parallel without touching each other's rows.
+- **The databases.** Once per run, before any test, `globalSetup` (`apps/api/src/test/global-setup.ts`) drops and recreates `szop_test_template`, migrates it with the same `runMigrations` as production, and copies it to `szop_test_1`, `szop_test_2` and so on, one per possible worker. The per-test databases of the migration and role tests (`szop_test_migrations_N`, `szop_setup_N`) are created once and persist between runs, emptied by `resetDatabase` and not dropped. That takes about 0.6 s on 16 CPUs. Each Vitest worker uses its own copy, so test files run in parallel without touching each other's rows.
 - **One test run at a time.** A second run drops and recreates the databases the first is using (`DROP DATABASE … WITH (FORCE)` closes its connections), so the first fails with strange errors. That includes the Vitest extension for VS Code or `pnpm test:watch` running next to `pnpm test`. Watch mode does not run `globalSetup` again when a migration is added, so its template goes stale: restart it after adding a migration.
 - **`useTestDatabase()` at the top of the file**, then `database.db` inside the tests. Pass it on to the app with `buildApp({ config, db })`.
 - **Empty tables, before each test.** Every table of the `public` schema is emptied before each test (`TRUNCATE … RESTART IDENTITY CASCADE`), so a test starts clean even if the previous one crashed. Drizzle's own record of applied migrations lives in another schema and is kept.
 - **A test that creates its own table drops it** in `finally`, as `test/database.test.ts` does, so the table does not leak into the next file that uses the same worker's database.
 - **A test that creates its own `Database` closes it** with `db.$client.end()`.
-- **A test that needs a database of its own** (one never migrated, or one whose `drizzle.__drizzle_migrations` it changes) creates `szop_test_<name>_${VITEST_POOL_ID}` through the `postgres` maintenance database in `beforeEach` and drops it `WITH (FORCE)` in `afterEach`, after closing its pool, as `db/migration-check.test.ts` and `db/migration-lock.test.ts` do. Changing Drizzle's table in the worker's shared copy would break the next file's tests, and the truncation before each test leaves that table alone.
+- **A test that needs a database of its own** (one never migrated, or one whose `drizzle.__drizzle_migrations` it changes) calls `resetDatabase("szop_test_<name>_${VITEST_POOL_ID}")` (`apps/api/src/test/reset-database.ts`) in `beforeEach`, as `db/migration-check.test.ts` and `db/migration-lock.test.ts` do, after closing its pool in `afterEach`. It gives an empty database, creating it the first time and dropping its schemas after that, and never runs `DROP DATABASE` or the default `CREATE DATABASE`: each of those waits for a checkpoint, and under load (many workers, a busy CPU) the wait outlasts the 10-second hook timeout ([#317](https://github.com/luiki-dev/szop/issues/317)). Changing Drizzle's table in the worker's shared copy would break the next file's tests, and the truncation before each test leaves that table alone. The database stays after the run, like the others.
 - **Inspecting after a failure.** Nothing is dropped when a run ends, so the databases stay until the next run: `docker compose exec postgres psql -U szop -d szop_test_1`.
 - **The development database `szop` is never touched.** Tests only connect to `postgres` (to create the others) and to `szop_test_*`.
 

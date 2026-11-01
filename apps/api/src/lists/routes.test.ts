@@ -2,12 +2,14 @@ import { randomUUID } from "node:crypto";
 import { listsResponseSchema, listSchema } from "@szop/shared";
 import { sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../app.ts";
+import { loadSeed } from "../catalog/seed.ts";
 import { sameOrigin, signIn } from "../test/auth.ts";
 import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
+import { twoWorkspaces } from "../test/workspaces.ts";
 
 describe("the lists routes", () => {
   const database = useTestDatabase();
@@ -161,6 +163,42 @@ describe("the lists routes", () => {
     });
   });
 
+  it("NFR-4.10: a guest made by twoWorkspaces cannot read the other's list", async () => {
+    const [one, two] = await twoWorkspaces(app, database.db, testCatalog);
+    const id = randomUUID();
+    const created = await one.inject({
+      method: "POST",
+      url: "/api/lists",
+      payload: { id, name: "Mine" },
+    });
+    expect(created.statusCode).toBe(201);
+    expect(
+      (await one.inject({ method: "GET", url: `/api/lists/${id}` })).statusCode,
+    ).toBe(200);
+    expect(
+      (await two.inject({ method: "GET", url: `/api/lists/${id}` })).statusCode,
+    ).toBe(404);
+  });
+
+  it("GET /api/lists/:id reads the lists table once", async () => {
+    const id = randomUUID();
+    await post(a, { id, name: "Mine" });
+    const spy = vi.spyOn(database.db.$client, "query");
+    try {
+      expect((await get(a, `/api/lists/${id}`)).statusCode).toBe(200);
+      const reads = spy.mock.calls.filter(([query]) =>
+        /from "lists"/i.test(
+          typeof query === "string"
+            ? query
+            : ((query as { text?: string }).text ?? ""),
+        ),
+      );
+      expect(reads).toHaveLength(1);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it("LST-1.2: renames, and leaves updated_at alone for the same name", async () => {
     const id = randomUUID();
     await post(a, { id, name: "Old" });
@@ -193,5 +231,129 @@ describe("the lists routes", () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({ error: { code: "invalid_input" } });
+  });
+
+  const sortById = <T extends { id: string }>(rows: T[]) =>
+    [...rows].sort((x, y) => x.id.localeCompare(y.id));
+  const rowsOf = async (table: string) =>
+    (await database.db.execute(sql.raw(`SELECT * FROM ${table}`))).rows;
+  const catalogRows = async () => ({
+    units: sortById(
+      (await rowsOf("units")).map((r) => ({
+        id: r.id as string,
+        name: r.name as string,
+      })),
+    ),
+    categories: sortById(
+      (await rowsOf("categories")).map((r) => ({
+        id: r.id as string,
+        parentId: r.parent_id as string | null,
+        position: r.position as number,
+        name: r.name as string,
+      })),
+    ),
+    products: sortById(
+      (await rowsOf("products")).map((r) => ({
+        id: r.id as string,
+        name: r.name as string,
+        categoryId: r.category_id as string | null,
+        unitId: r.unit_id as string | null,
+      })),
+    ),
+  });
+
+  it("ACC-1.4: the first POST copies the catalog into the new workspace", async () => {
+    const response = await post(a, { id: randomUUID(), name: "Weekly" });
+    expect(response.statusCode).toBe(201);
+    expect(await count("lists")).toBe(1);
+    expect(await catalogRows()).toEqual({
+      units: sortById(testCatalog.units),
+      categories: sortById(testCatalog.categories),
+      products: sortById(testCatalog.products),
+    });
+  });
+
+  it("UNT-1.1: the copy of the seed holds the default units", async () => {
+    const seeded = buildApp({
+      config: testConfig(),
+      db: database.db,
+      catalog: loadSeed(),
+    });
+    try {
+      const cookie = await signIn(seeded);
+      const response = await seeded.inject({
+        method: "POST",
+        url: "/api/lists",
+        headers: { ...sameOrigin, cookie },
+        payload: { id: randomUUID(), name: "Weekly" },
+      });
+      expect(response.statusCode).toBe(201);
+    } finally {
+      await seeded.close();
+    }
+    const names = (await catalogRows()).units.map((u) => u.name);
+    expect(names).toEqual(
+      expect.arrayContaining(["pcs", "kg", "g", "l", "ml", "pack"]),
+    );
+  });
+
+  it("ACC-1.6: two concurrent first POSTs copy the catalog once", async () => {
+    const [x, y] = await Promise.all([
+      post(a, { id: randomUUID(), name: "One" }),
+      post(a, { id: randomUUID(), name: "Two" }),
+    ]);
+    expect([x.statusCode, y.statusCode]).toEqual([201, 201]);
+    expect(await count("workspaces")).toBe(1);
+    expect(await count("lists")).toBe(2);
+    expect(await count("units")).toBe(testCatalog.units.length);
+    expect(await count("categories")).toBe(testCatalog.categories.length);
+    expect(await count("products")).toBe(testCatalog.products.length);
+  });
+
+  it("a second POST copies nothing", async () => {
+    await post(a, { id: randomUUID(), name: "One" });
+    await post(a, { id: randomUUID(), name: "Two" });
+    expect(await count("units")).toBe(testCatalog.units.length);
+    expect(await count("categories")).toBe(testCatalog.categories.length);
+    expect(await count("products")).toBe(testCatalog.products.length);
+  });
+
+  it("a failed copy is a 500 and leaves no workspace, list or catalog row", async () => {
+    const broken = buildApp({
+      config: testConfig(),
+      db: database.db,
+      catalog: {
+        ...testCatalog,
+        products: [
+          {
+            id: randomUUID(),
+            name: "Orphan",
+            categoryId: null,
+            unitId: randomUUID(),
+          },
+        ],
+      },
+    });
+    try {
+      const cookie = await signIn(broken);
+      const response = await broken.inject({
+        method: "POST",
+        url: "/api/lists",
+        headers: { ...sameOrigin, cookie },
+        payload: { id: randomUUID(), name: "Weekly" },
+      });
+      expect(response.statusCode).toBe(500);
+    } finally {
+      await broken.close();
+    }
+    for (const table of [
+      "workspaces",
+      "lists",
+      "units",
+      "categories",
+      "products",
+    ]) {
+      expect(await count(table)).toBe(0);
+    }
   });
 });

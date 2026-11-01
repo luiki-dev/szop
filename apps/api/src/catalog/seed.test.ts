@@ -1,6 +1,7 @@
 import { catalogSchema } from "@szop/shared";
 import { describe, expect, it } from "vitest";
-import { loadSeed, parseSeed, seedLimits } from "./seed.ts";
+import { readFileSync } from "node:fs";
+import { loadSeed, parseSeed, seedLimits, uuidv5 } from "./seed.ts";
 
 const valid = `
 units: [pcs, kg, g, l, ml, pack]
@@ -245,14 +246,58 @@ describe("parseSeed messages and ids", () => {
     ).toHaveLength(seedLimits.units);
   });
 
-  it("numbers units, categories and products from 1", () => {
+  it("computes version 5 UUIDs as RFC 9562 does", () => {
+    expect(
+      uuidv5("www.example.com", "6ba7b810-9dad-11d1-80b4-00c04fd430c8"),
+    ).toBe("2ed6657d-e927-568b-95e1-2665a8aea6a2");
+  });
+
+  it("gives every entry a UUIDv5 and the same one on every parse", () => {
+    const text = readFileSync(new URL("./seed.yaml", import.meta.url), "utf8");
+    const catalog = parseSeed(text);
+    const v5 =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+    for (const list of [catalog.categories, catalog.products, catalog.units]) {
+      for (const entry of list) expect(entry.id).toMatch(v5);
+    }
+    expect(parseSeed(text)).toEqual(catalog);
+  });
+
+  it("takes the ID from the trimmed, lower-cased name, per kind", () => {
+    const idOf = (text: string) => must(parseSeed(text).products[0]).id;
+    const product = (name: string) =>
+      `units: []\ncategories:\n  - name: A\n    products:\n      - { name: "${name}" }\n`;
+    expect(idOf(product("milk"))).toBe(idOf(product("Milk")));
+    expect(idOf(product(" Milk "))).toBe(idOf(product("Milk")));
+    const catalog = parseSeed(
+      "units: []\ncategories:\n  - name: Milk\n    products:\n      - { name: Milk }\n",
+    );
+    expect(must(catalog.categories[0]).id).not.toBe(
+      must(catalog.products[0]).id,
+    );
+  });
+
+  it("leaves an entry's ID unchanged when another is added before it", () => {
+    const before = parseSeed("units: [kg]\ncategories:\n  - name: B\n");
+    const after = parseSeed(
+      "units: [pcs, kg]\ncategories:\n  - name: A\n  - name: B\n",
+    );
+    expect(after.units.find((u) => u.name === "kg")).toEqual(before.units[0]);
+    expect(after.categories.find((c) => c.name === "B")?.id).toBe(
+      must(before.categories[0]).id,
+    );
+  });
+
+  it("points parentId, categoryId and unitId at the IDs of the entries they name", () => {
     const catalog = parseSeed(valid);
-    expect(catalog.units.map((u) => u.id).slice(0, 2)).toEqual(["u1", "u2"]);
-    expect(catalog.categories.map((c) => c.id).slice(0, 2)).toEqual([
-      "c1",
-      "c2",
-    ]);
-    expect(catalog.products.map((p) => p.id).slice(0, 2)).toEqual(["p1", "p2"]);
+    const id = (list: { id: string; name: string }[], name: string) =>
+      must(list.find((x) => x.name === name)).id;
+    expect(
+      must(catalog.categories.find((c) => c.name === "Milk")).parentId,
+    ).toBe(id(catalog.categories, "Dairy & eggs"));
+    const oat = must(catalog.products.find((p) => p.name === "Oat milk"));
+    expect(oat.categoryId).toBe(id(catalog.categories, "Plant-based"));
+    expect(oat.unitId).toBe(id(catalog.units, "l"));
   });
 
   it("compares names in lower case, so names that differ only in upper case are different", () => {
@@ -293,6 +338,20 @@ describe("the real seed file", () => {
     expect(top.length).toBeLessThanOrEqual(22);
     expect(catalog.products.length).toBeGreaterThanOrEqual(300);
     expect(catalog.products.length).toBeLessThanOrEqual(500);
+  });
+
+  it("keeps known IDs", () => {
+    const idOf = (list: { id: string; name: string }[], name: string) =>
+      must(list.find((x) => x.name === name)).id;
+    expect(idOf(catalog.units, "pcs")).toBe(
+      "6069ea93-202a-5281-9ec1-53cc06373993",
+    );
+    expect(idOf(catalog.categories, "Dairy & eggs")).toBe(
+      "2c580789-cfd6-57e9-ac71-c82def957521",
+    );
+    expect(idOf(catalog.products, "Oat milk")).toBe(
+      "8ad28561-c512-5dee-9696-290b912a3c56",
+    );
   });
 
   it("holds Dairy & eggs > Milk > Plant-based > Oat milk", () => {

@@ -1,4 +1,5 @@
 import {
+  type Catalog,
   createListSchema,
   listSchema,
   listsResponseSchema,
@@ -16,11 +17,12 @@ import type { Auth } from "../auth/auth.ts";
 import { sessionHook } from "../auth/session.ts";
 import type { Database } from "../db/database.ts";
 import { sendError } from "../errors.ts";
-import { findList, insertList, listLists, renameList } from "./repository.ts";
+import { insertList, listLists, renameList } from "./repository.ts";
 
 export interface ListsRoutesOptions {
   db: Database;
   auth: Auth;
+  catalog: Catalog;
 }
 
 const idParams = z.object({ id: z.string() });
@@ -29,9 +31,10 @@ const idParams = z.object({ id: z.string() });
 // through the access layer; a missing or foreign list is one 404.
 export function listsRoutes(
   app: FastifyInstance,
-  { db, auth }: ListsRoutesOptions,
+  { db, auth, catalog }: ListsRoutesOptions,
 ): void {
-  // Only these routes read the session (ACC-1.3).
+  // The lists plugin adds the hook to its own routes only; the catalog plugin
+  // does the same for its route (ACC-1.3).
   app.addHook("preHandler", sessionHook(auth));
   const typed = app.withTypeProvider<ZodTypeProvider>();
 
@@ -41,7 +44,7 @@ export function listsRoutes(
     { schema: { response: { 200: listsResponseSchema } } },
     async (request) => {
       const context = await findOwnWorkspace(db, request.user);
-      return { lists: context ? await listLists(db, context.workspaceId) : [] };
+      return { lists: context ? await listLists(db, context) : [] };
     },
   );
 
@@ -56,8 +59,8 @@ export function listsRoutes(
     },
     async (request, reply) => {
       const { list, created } = await db.transaction(async (tx) => {
-        const context = await ownWorkspace(tx, request.user);
-        return insertList(tx, context.workspaceId, request.body);
+        const context = await ownWorkspace(tx, request.user, catalog);
+        return insertList(tx, context, request.body);
       });
       return reply.code(created ? 201 : 200).send(list);
     },
@@ -78,9 +81,8 @@ export function listsRoutes(
       const id = z.uuid().safeParse(request.params.id);
       // Stryker disable next-line ConditionalExpression: an invalid ID would reach the access layer as undefined and end in the same 404; the guard keeps it from the query
       if (!id.success) return notFound(reply);
-      const context = await requireListAccess(db, request.user, id.data);
-      const list = await findList(db, context.workspaceId, id.data);
-      return list ?? notFound(reply);
+      const { list } = await requireListAccess(db, request.user, id.data);
+      return list;
     },
   );
 
@@ -98,13 +100,8 @@ export function listsRoutes(
       const id = z.uuid().safeParse(request.params.id);
       // Stryker disable next-line ConditionalExpression: an invalid ID would reach the access layer as undefined and end in the same 404; the guard keeps it from the query
       if (!id.success) return notFound(reply);
-      const context = await requireListAccess(db, request.user, id.data);
-      const list = await renameList(
-        db,
-        context.workspaceId,
-        id.data,
-        request.body.name,
-      );
+      const { context } = await requireListAccess(db, request.user, id.data);
+      const list = await renameList(db, context, id.data, request.body.name);
       return list ?? notFound(reply);
     },
   );

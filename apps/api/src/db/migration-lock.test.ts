@@ -3,7 +3,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import pg from "pg";
 import {
   afterAll,
   afterEach,
@@ -13,6 +12,7 @@ import {
   expect,
   it,
 } from "vitest";
+import { resetDatabase } from "../test/reset-database.ts";
 import { testDatabaseSettings } from "../test/database.ts";
 import { createDatabase, type Database } from "./database.ts";
 import { withMigrationLock } from "./migration-lock.ts";
@@ -65,23 +65,6 @@ async function writeFolder(root: string, count: number): Promise<string> {
   return folder;
 }
 
-async function admin(statement: string): Promise<void> {
-  const settings = testDatabaseSettings("postgres");
-  const client = new pg.Client({
-    host: settings.host,
-    port: settings.port,
-    database: settings.name,
-    user: settings.user,
-    password: settings.password,
-  });
-  await client.connect();
-  try {
-    await client.query(statement);
-  } finally {
-    await client.end();
-  }
-}
-
 const silentLog = { info: (): void => {} };
 
 describe("withMigrationLock", () => {
@@ -121,8 +104,7 @@ describe("withMigrationLock", () => {
   });
 
   beforeEach(async () => {
-    await admin(`DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
-    await admin(`CREATE DATABASE ${name}`);
+    await resetDatabase(name);
   });
 
   afterEach(async () => {

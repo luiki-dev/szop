@@ -2,9 +2,9 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { sql } from "drizzle-orm";
-import pg from "pg";
 import { readMigrationFiles } from "drizzle-orm/migrator";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { resetDatabase } from "../test/reset-database.ts";
 import { testDatabaseName, testDatabaseSettings } from "../test/database.ts";
 import { createDatabase, type Database } from "./database.ts";
 import {
@@ -202,39 +202,19 @@ describe("readLocalMigrations naming", () => {
 // A database of its own, not this worker's copy: these tests need one that
 // has never been migrated, and they change Drizzle's own table.
 describe("against a database", () => {
-  const admin = testDatabaseSettings("postgres");
   let name: string;
   let db: Database;
-
-  // The name is numbered, never input, so it is safe in the statement.
-  async function runAdmin(statement: string): Promise<void> {
-    const client = new pg.Client({
-      host: admin.host,
-      port: admin.port,
-      database: admin.name,
-      user: admin.user,
-      password: admin.password,
-    });
-    await client.connect();
-    try {
-      await client.query(statement);
-    } finally {
-      await client.end();
-    }
-  }
 
   beforeEach(async () => {
     const worker = process.env.VITEST_POOL_ID;
     if (!worker) throw new Error("these tests run only under Vitest");
     name = testDatabaseName(`migrations_${worker}`);
-    await runAdmin(`DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
-    await runAdmin(`CREATE DATABASE ${name}`);
+    await resetDatabase(name);
     db = createDatabase(testDatabaseSettings(name));
   });
 
   afterEach(async () => {
     await db.$client.end();
-    await runAdmin(`DROP DATABASE ${name} WITH (FORCE)`);
   });
 
   it("reads nothing recorded from a database never migrated", async () => {
