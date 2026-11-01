@@ -112,7 +112,7 @@ describe("the schema", () => {
         FROM pg_constraint k
         WHERE k.contype IN ('p', 'u') AND k.conrelid = ${`public.${t}`}::regclass`);
       expect(
-        keys.some((r) => String(r.cols).startsWith("workspace_id,id")),
+        keys.some((r) => r.cols === "workspace_id,id"),
         t + " key (workspace_id, id)",
       ).toBe(true);
     }
@@ -138,11 +138,12 @@ describe("the schema", () => {
       WHERE k.contype = 'f'
         AND EXISTS (SELECT 1 FROM pg_attribute t
                     WHERE t.attrelid = k.confrelid AND t.attname = 'workspace_id')
-        AND NOT (
-          (SELECT a.attnum FROM pg_attribute a
-            WHERE a.attrelid = k.conrelid AND a.attname = 'workspace_id') = ANY (k.conkey)
-          AND (SELECT a.attnum FROM pg_attribute a
-            WHERE a.attrelid = k.confrelid AND a.attname = 'workspace_id') = ANY (k.confkey))`);
+        AND NOT EXISTS (
+          SELECT 1 FROM generate_series(1, array_length(k.conkey, 1)) AS i
+          WHERE k.conkey[i] = (SELECT a.attnum FROM pg_attribute a
+                WHERE a.attrelid = k.conrelid AND a.attname = 'workspace_id')
+            AND k.confkey[i] = (SELECT a.attnum FROM pg_attribute a
+                WHERE a.attrelid = k.confrelid AND a.attname = 'workspace_id'))`);
     expect(result).toEqual([]);
   });
 

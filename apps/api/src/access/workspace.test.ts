@@ -48,8 +48,8 @@ describe("the access layer", () => {
   it("ACC-1.1: two concurrent calls make one workspace", async () => {
     const user = await newUser(1);
     const [a, b] = await Promise.all([
-      ownWorkspace(database.db, user, testCatalog),
-      ownWorkspace(database.db, user, testCatalog),
+      database.db.transaction((tx) => ownWorkspace(tx, user, testCatalog)),
+      database.db.transaction((tx) => ownWorkspace(tx, user, testCatalog)),
     ]);
     expect(a.workspaceId).toBe(b.workspaceId);
     expect(a.role).toBe("owner");

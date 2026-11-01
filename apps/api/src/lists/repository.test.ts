@@ -18,7 +18,10 @@ describe("the lists repository", () => {
     const { list } = await insertList(database.db, context, { id, name: "A" });
 
     expect(await listLists(database.db, context)).toEqual([list]);
-    // @ts-expect-error a workspace ID alone is no longer accepted
-    await listLists(database.db, context.workspaceId).catch(() => undefined);
+    // Never called: only the type is checked.
+    const typeOnly = () =>
+      // @ts-expect-error a workspace ID alone is no longer accepted
+      listLists(database.db, context.workspaceId);
+    expect(typeOnly).toBeTypeOf("function");
   });
 });

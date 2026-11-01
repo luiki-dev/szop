@@ -117,6 +117,9 @@ describe("GET /api/catalog", () => {
       (await get(cookie)).json<Catalog>().products.map((p) => p.name);
     expect(await names(a.cookie)).toContain("Renamed");
     expect(await names(b.cookie)).not.toContain("Renamed");
+    expect(await names(b.cookie)).toEqual(
+      testCatalog.products.map((p) => p.name),
+    );
   });
 
   it("serves an empty catalog to a workspace whose rows are gone", async () => {

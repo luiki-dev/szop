@@ -166,11 +166,12 @@ describe("the lists routes", () => {
   it("NFR-4.10: a guest made by twoWorkspaces cannot read the other's list", async () => {
     const [one, two] = await twoWorkspaces(app, database.db, testCatalog);
     const id = randomUUID();
-    await one.inject({
+    const created = await one.inject({
       method: "POST",
       url: "/api/lists",
       payload: { id, name: "Mine" },
     });
+    expect(created.statusCode).toBe(201);
     expect(
       (await one.inject({ method: "GET", url: `/api/lists/${id}` })).statusCode,
     ).toBe(200);
