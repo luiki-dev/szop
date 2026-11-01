@@ -67,11 +67,11 @@
 **Interfaces:**
 - Produces: nothing other tasks call.
 
-- [ ] **Step 1: Reproduce** [#317](https://github.com/luiki-dev/szop/issues/317). With `pnpm db:up`, load the machine (for example `stress --cpu <cores>`, or a second `pnpm test` running in parallel) and run `pnpm --filter @szop/api test -- setup-role migration-check migration-lock` several times. Record how many runs fail and in which hook. If nothing fails after about 10 loaded runs, record that, and use the timing of `CREATE DATABASE` and `DROP DATABASE … WITH (FORCE)` under load as the signal.
-- [ ] **Step 2: Find the cause.** Time each statement of the failing hooks (`performance.now()` around them, temporarily). Check `pg_stat_activity` for connections left open by these tests when a hook starts. Look at how many Vitest workers run these files at once. Name the cause from the spec's suspects (the hook timeout, PostgreSQL's speed at creating databases with many workers, connections left open) or another one the evidence shows.
-- [ ] **Step 3: Fix the cause** at its root, and remove the temporary timing. A longer `hookTimeout` alone is not a fix ([spec](../specs/2026-11-01-PH-16b-workspace-from-default-data-design.md#the-database-tests-under-load)).
-- [ ] **Step 4: Run** Step 1's loaded runs again. Expected: no `Hook timed out` in 10 runs. Then run `pnpm check`. Expected: PASS.
-- [ ] **Step 5:** Write the cause, the evidence and the fix in the ledger and in the task summary for the owner (the PR description takes them from there); update `testing.md` if a rule changed. **Commit** `fix(api): <the fix> so the database tests survive load`; the PR's description carries `Closes #317`.
+- [x] **Step 1: Reproduce** [#317](https://github.com/luiki-dev/szop/issues/317). With `pnpm db:up`, load the machine (for example `stress --cpu <cores>`, or a second `pnpm test` running in parallel) and run `pnpm --filter @szop/api test -- setup-role migration-check migration-lock` several times. Record how many runs fail and in which hook. If nothing fails after about 10 loaded runs, record that, and use the timing of `CREATE DATABASE` and `DROP DATABASE … WITH (FORCE)` under load as the signal.
+- [x] **Step 2: Find the cause.** Time each statement of the failing hooks (`performance.now()` around them, temporarily). Check `pg_stat_activity` for connections left open by these tests when a hook starts. Look at how many Vitest workers run these files at once. Name the cause from the spec's suspects (the hook timeout, PostgreSQL's speed at creating databases with many workers, connections left open) or another one the evidence shows.
+- [x] **Step 3: Fix the cause** at its root, and remove the temporary timing. A longer `hookTimeout` alone is not a fix ([spec](../specs/2026-11-01-PH-16b-workspace-from-default-data-design.md#the-database-tests-under-load)).
+- [x] **Step 4: Run** Step 1's loaded runs again. Expected: no `Hook timed out` in 10 runs. Then run `pnpm check`. Expected: PASS.
+- [x] **Step 5:** Write the cause, the evidence and the fix in the ledger and in the task summary for the owner (the PR description takes them from there); update `testing.md` if a rule changed. **Commit** `fix(api): <the fix> so the database tests survive load`; the PR's description carries `Closes #317`.
 
 ### Task 2: The default data's IDs
 

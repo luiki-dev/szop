@@ -2,6 +2,7 @@ import pg from "pg";
 import { sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { testDatabaseSettings } from "../test/database.ts";
+import { resetDatabase } from "../test/reset-database.ts";
 import { createDatabase, type Database } from "./database.ts";
 import { runMigrations } from "./migrate.ts";
 import { loadSetupConfig, scramVerifier, setupAppRole } from "./setup-role.ts";
@@ -192,22 +193,19 @@ describe("setupAppRole", () => {
     adminName = `szop_setup_admin_${worker}`;
     appName = `szop_setup_app_${worker}`;
     opened = [];
-    await runSuperuser(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
-    await runSuperuser(`DROP ROLE IF EXISTS ${appName}`);
-    await runSuperuser(`DROP ROLE IF EXISTS ${adminName}`);
+    // No DROP DATABASE (see resetDatabase): the database goes back to the
+    // admin and empty, then the app roles, which now own nothing, are dropped.
     await runSuperuser(
-      `CREATE ROLE ${adminName} LOGIN CREATEROLE CREATEDB PASSWORD '${adminPassword}'`,
+      `DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${adminName}') THEN CREATE ROLE ${adminName} LOGIN CREATEROLE CREATEDB PASSWORD '${adminPassword}'; END IF; END $$`,
     );
-    await runSuperuser(`CREATE DATABASE ${databaseName} OWNER ${adminName}`);
+    await resetDatabase(databaseName, adminName);
+    await runSuperuser(`DROP ROLE IF EXISTS ${appName}_other`);
+    await runSuperuser(`DROP ROLE IF EXISTS ${appName}`);
     admin = connect(adminName, adminPassword);
   });
 
   afterEach(async () => {
     await Promise.all(opened.map((db) => db.$client.end()));
-    await runSuperuser(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
-    await runSuperuser(`DROP ROLE IF EXISTS ${appName}_other`);
-    await runSuperuser(`DROP ROLE IF EXISTS ${appName}`);
-    await runSuperuser(`DROP ROLE IF EXISTS ${adminName}`);
   });
 
   it("creates the role, which owns the database", async () => {
