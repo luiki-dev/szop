@@ -158,14 +158,14 @@
   - `access/workspace.ts`: `requireListAccess(db, user, listId): Promise<{ context: WorkspaceContext; list: List }>`, which reads the list once and keeps the same 404s.
   - `test/workspaces.ts`: `twoWorkspaces(app: FastifyInstance, db: Database, catalog: Catalog): Promise<[Guest, Guest]>`, where `interface Guest { cookie: string; context: WorkspaceContext; inject(options: InjectOptions): Promise<LightMyRequest.Response> }`. `inject` adds the cookie and `sameOrigin`. Each guest is signed in through `signIn`, and their workspace is made by `ownWorkspace`, so it holds a copy.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
   - `lists/repository.test.ts`: `// @ts-expect-error` on `listLists(db, "00000000-0000-4000-8000-000000000001")`, plus one real call with a context, so the file is type-checked and runs;
   - `lists/routes.test.ts`: `GET /api/lists/:id` sends one query that reads `lists`. Count with a spy on the pool's `query` (`vi.spyOn(database.db.$client, "query")`) and filter the statements on `from "lists"`. The `NFR-4.10` tests still pass unchanged; one of them uses `twoWorkspaces`;
   - `access/workspace.test.ts`: `requireListAccess` resolves to `{ context, list }`, where `list` equals the stored one.
-- [ ] **Step 2: Run** `pnpm --filter @szop/api test -- lists workspace` and `pnpm typecheck`. Expected: FAIL (the `@ts-expect-error` is unused, and the counts are wrong).
-- [ ] **Step 3: Implement** the signatures. The routes use `requireListAccess`'s `list` for `GET /lists/:id`. `PATCH` keeps its rename and takes the context.
-- [ ] **Step 4: Run** `pnpm check`. Expected: PASS.
-- [ ] **Step 5:** Update the docs listed above. **Commit** `refactor(api): make repositories take the workspace context`.
+- [x] **Step 2: Run** `pnpm --filter @szop/api test -- lists workspace` and `pnpm typecheck`. Expected: FAIL (the `@ts-expect-error` is unused, and the counts are wrong).
+- [x] **Step 3: Implement** the signatures. The routes use `requireListAccess`'s `list` for `GET /lists/:id`. `PATCH` keeps its rename and takes the context.
+- [x] **Step 4: Run** `pnpm check`. Expected: PASS.
+- [x] **Step 5:** Update the docs listed above. **Commit** `refactor(api): make repositories take the workspace context`.
 
 ### Task 6: The catalog route reads the workspace
 

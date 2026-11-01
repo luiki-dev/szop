@@ -2,13 +2,14 @@ import { randomUUID } from "node:crypto";
 import { listsResponseSchema, listSchema } from "@szop/shared";
 import { sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "../app.ts";
 import { loadSeed } from "../catalog/seed.ts";
 import { sameOrigin, signIn } from "../test/auth.ts";
 import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
+import { twoWorkspaces } from "../test/workspaces.ts";
 
 describe("the lists routes", () => {
   const database = useTestDatabase();
@@ -160,6 +161,41 @@ describe("the lists routes", () => {
     expect((await get(a, `/api/lists/${id}`)).json()).toMatchObject({
       name: "Mine",
     });
+  });
+
+  it("NFR-4.10: a guest made by twoWorkspaces cannot read the other's list", async () => {
+    const [one, two] = await twoWorkspaces(app, database.db, testCatalog);
+    const id = randomUUID();
+    await one.inject({
+      method: "POST",
+      url: "/api/lists",
+      payload: { id, name: "Mine" },
+    });
+    expect(
+      (await one.inject({ method: "GET", url: `/api/lists/${id}` })).statusCode,
+    ).toBe(200);
+    expect(
+      (await two.inject({ method: "GET", url: `/api/lists/${id}` })).statusCode,
+    ).toBe(404);
+  });
+
+  it("GET /api/lists/:id reads the lists table once", async () => {
+    const id = randomUUID();
+    await post(a, { id, name: "Mine" });
+    const spy = vi.spyOn(database.db.$client, "query");
+    try {
+      expect((await get(a, `/api/lists/${id}`)).statusCode).toBe(200);
+      const reads = spy.mock.calls.filter(([query]) =>
+        /from "lists"/i.test(
+          typeof query === "string"
+            ? query
+            : ((query as { text?: string }).text ?? ""),
+        ),
+      );
+      expect(reads).toHaveLength(1);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it("LST-1.2: renames, and leaves updated_at alone for the same name", async () => {

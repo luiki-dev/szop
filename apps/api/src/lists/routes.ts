@@ -17,7 +17,7 @@ import type { Auth } from "../auth/auth.ts";
 import { sessionHook } from "../auth/session.ts";
 import type { Database } from "../db/database.ts";
 import { sendError } from "../errors.ts";
-import { findList, insertList, listLists, renameList } from "./repository.ts";
+import { insertList, listLists, renameList } from "./repository.ts";
 
 export interface ListsRoutesOptions {
   db: Database;
@@ -43,7 +43,7 @@ export function listsRoutes(
     { schema: { response: { 200: listsResponseSchema } } },
     async (request) => {
       const context = await findOwnWorkspace(db, request.user);
-      return { lists: context ? await listLists(db, context.workspaceId) : [] };
+      return { lists: context ? await listLists(db, context) : [] };
     },
   );
 
@@ -59,7 +59,7 @@ export function listsRoutes(
     async (request, reply) => {
       const { list, created } = await db.transaction(async (tx) => {
         const context = await ownWorkspace(tx, request.user, catalog);
-        return insertList(tx, context.workspaceId, request.body);
+        return insertList(tx, context, request.body);
       });
       return reply.code(created ? 201 : 200).send(list);
     },
@@ -80,9 +80,8 @@ export function listsRoutes(
       const id = z.uuid().safeParse(request.params.id);
       // Stryker disable next-line ConditionalExpression: an invalid ID would reach the access layer as undefined and end in the same 404; the guard keeps it from the query
       if (!id.success) return notFound(reply);
-      const context = await requireListAccess(db, request.user, id.data);
-      const list = await findList(db, context.workspaceId, id.data);
-      return list ?? notFound(reply);
+      const { list } = await requireListAccess(db, request.user, id.data);
+      return list;
     },
   );
 
@@ -100,13 +99,8 @@ export function listsRoutes(
       const id = z.uuid().safeParse(request.params.id);
       // Stryker disable next-line ConditionalExpression: an invalid ID would reach the access layer as undefined and end in the same 404; the guard keeps it from the query
       if (!id.success) return notFound(reply);
-      const context = await requireListAccess(db, request.user, id.data);
-      const list = await renameList(
-        db,
-        context.workspaceId,
-        id.data,
-        request.body.name,
-      );
+      const { context } = await requireListAccess(db, request.user, id.data);
+      const list = await renameList(db, context, id.data, request.body.name);
       return list ?? notFound(reply);
     },
   );

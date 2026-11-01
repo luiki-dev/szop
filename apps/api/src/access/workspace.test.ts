@@ -57,9 +57,14 @@ describe("the access layer", () => {
       .insert(lists)
       .values({ workspaceId, id: idOf(5), name: "Mine" });
 
-    await expect(
-      requireListAccess(database.db, owner, idOf(5)),
-    ).resolves.toMatchObject({ workspaceId });
+    const access = await requireListAccess(database.db, owner, idOf(5));
+    expect(access.context.workspaceId).toBe(workspaceId);
+    const [stored] = await database.db.select().from(lists);
+    expect(access.list).toEqual({
+      id: idOf(5),
+      name: "Mine",
+      createdAt: stored?.createdAt.toISOString(),
+    });
     await ownWorkspace(database.db, other, testCatalog);
     await expect(
       requireListAccess(database.db, other, idOf(5)),

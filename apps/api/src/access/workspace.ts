@@ -1,8 +1,9 @@
-import type { Catalog } from "@szop/shared";
-import { eq, and } from "drizzle-orm";
+import type { Catalog, List } from "@szop/shared";
+import { eq } from "drizzle-orm";
 import { insertCatalog } from "../catalog/repository.ts";
 import type { Database } from "../db/database.ts";
-import { lists, workspaces } from "../db/schema.ts";
+import { workspaces } from "../db/schema.ts";
+import { findList } from "../lists/repository.ts";
 import type { SessionUser } from "../auth/session.ts";
 
 // The database or a transaction on it.
@@ -65,22 +66,16 @@ export async function ownWorkspace(
   return context;
 }
 
-// Missing and foreign lists answer alike, so an ID reveals nothing.
+// Missing and foreign lists answer alike, so an ID reveals nothing. The list
+// is read here, once, so a route that shows it needs no second query.
 export async function requireListAccess(
   db: Executor,
   user: SessionUser | null,
   listId: string,
-): Promise<WorkspaceContext> {
+): Promise<{ context: WorkspaceContext; list: List }> {
   const context = await findOwnWorkspace(db, user);
   if (context === null) throw httpError(404, "Not found");
-  // Stryker disable next-line ObjectLiteral: only the row's existence is used
-  const idOnly = { id: lists.id };
-  const [row] = await db
-    .select(idOnly)
-    .from(lists)
-    .where(
-      and(eq(lists.workspaceId, context.workspaceId), eq(lists.id, listId)),
-    );
-  if (!row) throw httpError(404, "Not found");
-  return context;
+  const list = await findList(db, context, listId);
+  if (list === null) throw httpError(404, "Not found");
+  return { context, list };
 }

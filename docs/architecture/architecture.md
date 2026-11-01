@@ -124,7 +124,7 @@ The same Zod route schemas generate an OpenAPI description of the API (via `@fas
   - `ownWorkspace(user)`: the session's own workspace, for one's own data (categories, catalog, units, templates, settings, the list overview);
   - `requireListAccess(user, listId, minRole)`: for anything reached through a list, the **list owner's** workspace and the caller's role. In the MVP the only role is owner; sharing (Later) adds shopper and editor here, without changing services or queries.
 - **Item routes nest under their list** (`/api/lists/:listId/items/:itemId`), and an item is looked up within that list.
-- **Every repository function takes `workspaceId` as a required parameter**; there is no lookup by ID alone, so a forgotten scope is a TypeScript error.
+- **Every repository function takes the `WorkspaceContext` as a required parameter** (since [PH-16b](../roadmap.md#ph-16b-workspace-from-the-default-data); a bare workspace ID is a type error) and filters by its `workspaceId`; there is no lookup by ID alone, so a forgotten scope is a TypeScript error. `requireListAccess` returns `{ context, list }`, reading the list once, so a route that shows the list needs no second query.
 - "Not found", "not allowed" and a reference into another workspace all return **404**, so nobody can probe whether another user's records exist.
 - **Tests:** for every field that references another record, an API test checks that a reference into another workspace returns 404; a schema test checks that every workspace-owned table and every reference to one follows the composite-key rule below.
 
