@@ -179,16 +179,16 @@
   - `readCatalog(db: Executor, context: WorkspaceContext): Promise<Catalog>`, which maps the rows to the flat shape.
   - `catalogRoutes(app, { db, auth, catalog })`: the plugin adds `sessionHook(auth)` as its own `preHandler`, like the lists plugin. It answers with `readCatalog` when `findOwnWorkspace(db, request.user)` finds a workspace, and with the seed otherwise.
 
-- [ ] **Step 1: Write the failing tests** in `catalog/routes.test.ts`:
+- [x] **Step 1: Write the failing tests** in `catalog/routes.test.ts`:
   - without a session, and with a session but no workspace: the body equals the app's catalog and there is no `Set-Cookie` without a session (`ACC-1.3`, kept);
   - a cookie for a session whose row was deleted: 200 with the seed (Review Focus 5);
   - with a workspace: after `UPDATE products SET name = 'Renamed'` in guest A's workspace, A's catalog shows `Renamed` and B's does not (`twoWorkspaces`);
   - a workspace with its catalog rows deleted: `{ units: [], categories: [], products: [] }` (Review Focus 3);
   - `ACC-1.9`: two `buildApp` instances on `database.db`, one with seed A (`testCatalog`) and one with seed B (A plus one product, and with one product renamed, so it gets a new UUID). Guest 1 signs in to the first app and makes a list, and guest 2 does the same in the second. Through the second app, guest 1's catalog equals A and guest 2's equals B. Compare sorted arrays.
-- [ ] **Step 2: Run** `pnpm --filter @szop/api test -- catalog`. Expected: FAIL.
-- [ ] **Step 3: Implement** `readCatalog` and the route, and pass `db` and `auth` to `catalogRoutes` in `app.ts`.
-- [ ] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 5:** Update the docs listed above. **Commit** `feat(api): serve a workspace's own catalog`.
+- [x] **Step 2: Run** `pnpm --filter @szop/api test -- catalog`. Expected: FAIL.
+- [x] **Step 3: Implement** `readCatalog` and the route, and pass `db` and `auth` to `catalogRoutes` in `app.ts`.
+- [x] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
+- [x] **Step 5:** Update the docs listed above. **Commit** `feat(api): serve a workspace's own catalog`.
 
 ### Task 7: The mutation run
 

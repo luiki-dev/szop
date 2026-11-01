@@ -1,4 +1,5 @@
 import type { Catalog } from "@szop/shared";
+import { eq } from "drizzle-orm";
 import type { Executor, WorkspaceContext } from "../access/workspace.ts";
 import { categories, products, units } from "../db/schema.ts";
 
@@ -25,4 +26,37 @@ export async function insertCatalog(
       .insert(products)
       .values(catalog.products.map((row) => ({ workspaceId, ...row })));
   }
+}
+
+// The workspace's catalog in the flat shape of the API. Row order is not
+// meaningful: the page orders what it shows.
+export async function readCatalog(
+  db: Executor,
+  { workspaceId }: WorkspaceContext,
+): Promise<Catalog> {
+  const [unitRows, categoryRows, productRows] = await Promise.all([
+    db
+      .select({ id: units.id, name: units.name })
+      .from(units)
+      .where(eq(units.workspaceId, workspaceId)),
+    db
+      .select({
+        id: categories.id,
+        parentId: categories.parentId,
+        position: categories.position,
+        name: categories.name,
+      })
+      .from(categories)
+      .where(eq(categories.workspaceId, workspaceId)),
+    db
+      .select({
+        id: products.id,
+        name: products.name,
+        categoryId: products.categoryId,
+        unitId: products.unitId,
+      })
+      .from(products)
+      .where(eq(products.workspaceId, workspaceId)),
+  ]);
+  return { units: unitRows, categories: categoryRows, products: productRows };
 }

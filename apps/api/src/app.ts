@@ -104,7 +104,7 @@ export function buildApp({
     instance: instanceId,
   });
 
-  app.register(catalogRoutes, { prefix: "/api", catalog });
+  app.register(catalogRoutes, { prefix: "/api", db, auth, catalog });
 
   app.register(listsRoutes, { prefix: "/api", db, auth, catalog });
 
