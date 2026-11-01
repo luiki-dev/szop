@@ -14,6 +14,7 @@ How to coordinate Claude Code so that one Pro subscription lasts the week: how a
   - [The stages](#the-stages)
   - [Opening prompts](#opening-prompts)
   - [Restart or compact](#restart-or-compact)
+  - [Why 150–200k](#why-150200k)
   - [Remote Control](#remote-control)
 - [Reading the status line](#reading-the-status-line)
 - [Breaks and the cache](#breaks-and-the-cache)
@@ -107,6 +108,23 @@ The ledger of a plan's workspace keeps each finished task, the rulings made alon
 - **At a stage boundary:** end the stage with `/handoff` and start a new session (`/clear`) with `/handoff resume <branch>`. The committed document is a better hand-off than a summary.
 - **Within a stage:** `/compact` with a short instruction (what is done, what is next) keeps the working state the plan does not hold, for example a failing test being chased. A new session is also fine when the last task was just committed and pushed.
 - **Never in the middle of an edit** that is not committed: finish the step or the task first.
+
+### Why 150–200k
+
+A restart has a price, and so does a long session; the threshold sits where the two balance ([ADR 0061](../decisions/0061-token-usage-evaluations.md), decision 3). The figures come from the 46 main sessions of the first week with these habits ([Evaluation 2026-11-02](token-usage-evaluations.md#evaluation-2026-11-02)):
+
+- a new session starts at about 53k of context: 27k of it, the system prompt and the tools, is already in the cache from other sessions, and 26k is written again;
+- the context grows by about 2k per call;
+- in its first 20 calls a session adds about 43k, part of it reading the spec, the plan and the code again.
+
+A session of *n* calls pays for its growth on every call: call *i* reads about *i·g* more than the first, at 0.1 a token, so the growth costs about `0.05·g·n` per call on average. A restart costs *R* once, `R/n` per call. Their sum is lowest at `n = √(20R/g)`:
+
+| A restart costs *R* | Cheapest session length | Context at the restart |
+|---|---|---|
+| about 35k units, the cache alone | about 19 calls | about 90k |
+| about 65k units, with the documents read again | about 25 calls | about 110–130k |
+
+The curve is flat around its lowest point. Against it, a restart at about 100k costs about 15% more per call (restarts too often), at about 175k about 7% more, and at about 300k about 45% more. So 150–200k is close to the cheapest point; the saving came from cutting the sessions of 300k and more, not from the exact threshold. A lower one would save a few percent and add hand-offs, which lose working state and take the owner's attention. The model assumes steady growth and leaves out what a hand-off costs in quality, so its numbers are an order of magnitude, not a measurement. A `/compact` costs more than a restart: it reads the whole context once and writes the summary as output.
 
 ### Remote Control
 
@@ -254,14 +272,16 @@ Before opening a phase's PR, Claude runs `python3 scripts/token-usage.py --branc
 
 ### The evaluation
 
-After 3–4 phases worked with these habits, their reports are compared with the baseline and with the targets of [ADR 0052](../decisions/0052-working-with-claude.md), decision 14:
+Every few phases, the reports of the phases since the last evaluation, and of the whole period with the sessions outside phases, are compared with the baseline and with the targets of [ADR 0052](../decisions/0052-working-with-claude.md), decision 14 ([ADR 0061](../decisions/0061-token-usage-evaluations.md)):
 
 - median context per main-session call below 120k;
 - share of main-session cost above 200k below 20%;
 - per-phase cost at least 25% below the baseline median;
 - the owner not running out of the weekly limit before its reset.
 
-The findings go into this guide. If the targets need to change, that is recorded in a new ADR or an audit of its own. [OP-110](https://github.com/luiki-dev/szop/issues/298) tracks the evaluation.
+The period counts because about a quarter of the cost is spent outside phases (ADRs, audits, tooling), which the per-phase reports do not see. [Token usage evaluations](token-usage-evaluations.md) holds the steps, each evaluation's findings, and the data file that collects the numbers for comparing and charting them. If the targets need to change, that is recorded in a new ADR.
+
+The first evaluation, on 2026-11-02, met three targets: median context 107k, 3.6% of main-session cost above 200k, and the weekly limit at 75% with no reset. The per-phase cost was 13–34% below the baseline median, depending on which phases count, so that target is left to the next evaluation.
 
 ## The settings involved
 
