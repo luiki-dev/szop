@@ -84,17 +84,17 @@
   - `seed.ts`: `export function uuidv5(name: string, namespace: string): string`, a lower-case, hyphenated version 5 UUID, using SHA-1 from `node:crypto` (RFC 9562); `export const seedNamespaces = { units, categories, products }`, three fixed UUIDs chosen once; `parseSeed` keeps its signature, and each entry's `id` is `uuidv5(lower(name.trim()), seedNamespaces.<kind>)`.
   - `testCatalog`: the same shape and names as today, with fixed UUIDs as IDs (any valid UUIDs written as literals), and `parentId`, `categoryId` and `unitId` pointing at them. It keeps one product whose unit is `null` and whose category is `null`.
 
-- [ ] **Step 1: Write the failing tests** in `seed.test.ts`:
+- [x] **Step 1: Write the failing tests** in `seed.test.ts`:
   - `uuidv5` matches RFC 9562's example: name `"www.example.com"` in the DNS namespace `6ba7b810-9dad-11d1-80b4-00c04fd430c8` gives `2ed6657d-e927-568b-95e1-2665a8aea6a2`;
   - every ID from `parseSeed(<the real seed.yaml>)` matches `/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/`;
   - two parses of the same text give equal catalogs. A product named `Milk` in one seed and `milk` in another gets the same ID, and so does `" Milk "` (Review Focus 1). A category and a product both named `Milk` get different IDs;
   - adding an entry before another leaves the other's ID unchanged;
   - `parentId`, `categoryId` and `unitId` equal the IDs of the entries they name;
   - known values: the IDs of the unit `pcs`, of one top-level category and of one product of the real `seed.yaml`, written as literals. They replace today's `["u1", "u2"]`, `"c1"` and `["p1", "p2"]` assertions.
-- [ ] **Step 2: Run** `pnpm --filter @szop/api test -- seed`. Expected: FAIL.
-- [ ] **Step 3: Implement** `uuidv5` and `seedNamespaces`, and use them in `parseSeed` in place of the counters. Rewrite the comment at the top of `seed.ts` and the one in `seed.yaml` that say the seed has no IDs and is never put in tables. Give `testCatalog` UUIDs, and fix the tests that assert on its old IDs.
-- [ ] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 5:** Update the docs listed above. **Commit** `feat(api): give the default data UUIDv5 IDs from their names`.
+- [x] **Step 2: Run** `pnpm --filter @szop/api test -- seed`. Expected: FAIL.
+- [x] **Step 3: Implement** `uuidv5` and `seedNamespaces`, and use them in `parseSeed` in place of the counters. Rewrite the comment at the top of `seed.ts` and the one in `seed.yaml` that say the seed has no IDs and is never put in tables. Give `testCatalog` UUIDs, and fix the tests that assert on its old IDs.
+- [x] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
+- [x] **Step 5:** Update the docs listed above. **Commit** `feat(api): give the default data UUIDv5 IDs from their names`.
 
 ### Task 3: The catalog tables and the schema test
 

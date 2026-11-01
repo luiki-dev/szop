@@ -1,12 +1,34 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import type { Catalog } from "@szop/shared";
 import { parseDocument } from "yaml";
 import { z } from "zod";
 
-// The seed catalog (PH-15a spec, decisions 1 to 3): a YAML file nested the
-// way the store is, with no IDs; read by the API, never put in tables. It is
+// The default data (PH-15a spec, decisions 1 to 3; PH-16b, decision 2): a YAML
+// file nested the way the store is, with no IDs in the file. Each entry's ID is
+// a UUIDv5 of its trimmed, lower-cased name in the namespace of its kind, so
+// the IDs are the same on every start and fit the tables' uuid columns. It is
 // parsed as YAML 1.2, where `no` and `off` stay strings, and checked at
 // startup, so a bad edit is a failed deploy and not a broken page.
+
+// Fixed, chosen once: changing one changes every ID of its kind.
+export const seedNamespaces = {
+  units: "7c1f0a52-3b6e-4d0a-9f5c-2e8a41b6d701",
+  categories: "a94d3e18-5c27-4f6b-8e0d-91b7c3f2a802",
+  products: "3e6b8d47-0f19-4a85-b2c6-d5e04a7193f3",
+} as const;
+
+// RFC 9562 version 5: SHA-1 of the namespace's bytes followed by the name.
+export function uuidv5(name: string, namespace: string): string {
+  const hash = createHash("sha1")
+    .update(Buffer.from(namespace.replaceAll("-", ""), "hex"))
+    .update(name)
+    .digest();
+  hash[6] = ((hash[6] ?? 0) & 0x0f) | 0x50;
+  hash[8] = ((hash[8] ?? 0) & 0x3f) | 0x80;
+  const hex = hash.subarray(0, 16).toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 export const seedLimits = {
   categories: 300,
   depth: 5,
@@ -103,7 +125,7 @@ export function parseSeed(text: string): Catalog {
     if (unitIds.has(lower(unit))) {
       fail(["units"], `the name "${unit}" is used twice`);
     }
-    const id = `u${String(catalog.units.length + 1)}`;
+    const id = uuidv5(lower(unit), seedNamespaces.units);
     unitIds.set(lower(unit), id);
     catalog.units.push({ id, name: unit });
   }
@@ -127,7 +149,7 @@ export function parseSeed(text: string): Catalog {
       if (catalog.categories.length >= seedLimits.categories) {
         fail(path, `more than ${String(seedLimits.categories)} categories`);
       }
-      const id = `c${String(catalog.categories.length + 1)}`;
+      const id = uuidv5(lower(category.name), seedNamespaces.categories);
       catalog.categories.push({ id, parentId, position, name: category.name });
 
       for (const product of category.products ?? []) {
@@ -150,7 +172,7 @@ export function parseSeed(text: string): Catalog {
           }
         }
         catalog.products.push({
-          id: `p${String(catalog.products.length + 1)}`,
+          id: uuidv5(lower(product.name), seedNamespaces.products),
           name: product.name,
           categoryId: id,
           unitId,
