@@ -30,4 +30,4 @@ From `superpowers:finishing-a-development-branch` it keeps the checks on the fin
 6. **Token usage** _(phase only)_: `python3 scripts/token-usage.py --branch <branch>`, kept for the PR.
 7. **`/phase-tracking`, "Before opening the PR".**
 8. **Open the PR** from the template: a Conventional Commits title, the definition of done items ticked or `➖ N/A`, "Checked at the demo:" left for `/demo-check`, the token usage section _(phase only)_, the `skip-changelog` label when the release notes need no line. Never merge. A rejected push is never forced.
-9. **Wrap up.** If the branch is in a worktree, say so and that it is removed after the merge. Offer `/demo-check` when the definition of done needs one.
+9. **Wrap up.** If the branch is in a worktree, say so and that it is removed after the merge. When the spec has a "Demo check" section, or the definition of done needs one, end with one question asked with `AskUserQuestion`: run `/demo-check` now? On yes, invoke it in this session. Never list it only among the owner's steps, where it is easy to miss.
