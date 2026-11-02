@@ -16,7 +16,7 @@
 name: demo-up
 
 # Shows what was deployed in the Actions list and in the approval request, so
-# the owner approves a ref they can see (PH-42, SEC-16).
+# the owner approves a ref they can see (PH-42, SEC-15).
 run-name: demo-up ${{ inputs.ref || github.ref_name }}
 
 on:
@@ -96,17 +96,18 @@ jobs:
 
       # Only a commit that a branch of this repository holds, one that went
       # through a PR here. A pull ref of a fork, or a hash that only a fork
-      # holds, is refused before anything is built or deployed (PH-42, SEC-16).
+      # holds, is refused before anything is built or deployed (PH-42, SEC-15).
       - name: Check a branch holds the commit
         env:
           COMMIT: ${{ steps.commit.outputs.sha }}
         run: |
-          branches=$(git branch -r --contains "$COMMIT" | grep -v ' -> ' || true)
+          # Only origin/*: checkout also fetches a pull ref as refs/remotes/pull/N/head.
+          branches=$(git for-each-ref --contains "$COMMIT" --format='%(refname:short)' refs/remotes/origin/ | grep -v '^origin/HEAD$' || true)
           if [ -z "$branches" ]; then
             echo "::error::No branch of this repository holds $COMMIT; push it to a branch here and press demo-up again"
             exit 1
           fi
-          echo "Held by:$branches"
+          echo "Held by: $branches"
 
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 

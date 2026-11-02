@@ -107,13 +107,16 @@ jobs:
           # through a PR here is trusted, and only with main's provider lock
           # (PH-42, SEC-14). No way around it by an input: merge the branch or
           # destroy by hand (runbook).
-          branches=$(git branch -r --contains "$COMMIT" | grep -v ' -> ' || true)
+          branches=$(git for-each-ref --contains "$COMMIT" --format='%(refname:short)' refs/remotes/origin/ | grep -v '^origin/HEAD$' || true)
           if [ -z "$branches" ]; then
             echo "::error::No branch of this repository holds the recorded commit $COMMIT; not destroying with its code. Destroy the demo by hand."
             echo "reason=no-branch" >> "$GITHUB_OUTPUT"
             exit 1
           fi
-          if ! git diff --quiet origin/main "$COMMIT" -- infra/demo/.terraform.lock.hcl; then
+          # A commit main holds (a demo deployed before main's lock moved) needs
+          # no comparison: its providers went through review already.
+          if ! git merge-base --is-ancestor "$COMMIT" origin/main \
+            && ! git diff --quiet origin/main "$COMMIT" -- infra/demo/.terraform.lock.hcl; then
             echo "::error::The recorded commit $COMMIT locks other providers than main does; not destroying with its code. Merge its branch, or destroy the demo by hand."
             echo "reason=lock" >> "$GITHUB_OUTPUT"
             exit 1
@@ -144,7 +147,7 @@ jobs:
 
       # Terraform only destroys what its state knows. Anything still tagged
       # group = demo (a resource created outside the state) would go on costing
-      # money, so the run fails and lists it (PH-42, SEC-15). The tagging API
+      # money, so the run fails and lists it (PH-42, SEC-18). The tagging API
       # can list a just-deleted resource for minutes, so it retries for 10.
       # Inactive task definition revisions stay listed for good: they cost
       # nothing and cannot start a task (runbook, "Checking that nothing is
@@ -166,12 +169,9 @@ jobs:
             sleep 30
           done
           echo "::error::Resources tagged group=demo are left after the destroy; remove them by hand (runbook)"
-          {
-            echo "## Left after the destroy"
-            echo
-            # shellcheck disable=SC2086
-            printf -- "- \`%s\`\n" $found
-          } >> "$GITHUB_STEP_SUMMARY"
+          # The Summary step writes them under its own heading.
+          # shellcheck disable=SC2086
+          printf -- "  - \`%s\`\n" $found > "$RUNNER_TEMP/leftovers.txt"
           exit 1
 
       - name: Summary
@@ -183,6 +183,7 @@ jobs:
           CHECKOUT: ${{ steps.checkout-recorded.outcome }}
           REASON: ${{ steps.checkout-recorded.outputs.reason }}
           DESTROY: ${{ steps.destroy.outcome }}
+          LEFTOVERS: ${{ steps.leftovers.outcome }}
         run: |
           {
             echo "## demo-down"
@@ -209,5 +210,11 @@ jobs:
               echo "- Result: $(grep 'Destroy complete!' "$RUNNER_TEMP/destroy.log" || echo 'destroy finished')"
             else
               echo "- Result: destroy did not finish (step outcome: $DESTROY); see the log"
+            fi
+            if [ "$LEFTOVERS" = failure ]; then
+              echo "- Left after the destroy: resources still tagged \`group = demo\`:"
+              cat "$RUNNER_TEMP/leftovers.txt"
+            elif [ "$LEFTOVERS" = success ]; then
+              echo "- Left after the destroy: nothing tagged \`group = demo\`"
             fi
           } >> "$GITHUB_STEP_SUMMARY"

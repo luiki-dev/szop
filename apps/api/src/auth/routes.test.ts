@@ -155,11 +155,22 @@ describe("/api/auth", () => {
     );
     expect(users.rows[0]?.name).not.toBe("Zed");
 
+    // A query string on an allowed path still answers (not a 404).
+    const withQuery = await app.inject({
+      method: "GET",
+      url: "/api/auth/get-session?disableCookieCache=true",
+      headers: { cookie },
+    });
+    expect(withQuery.statusCode).toBe(200);
+
     for (const [method, url] of [
       ["GET", "/api/auth/no-such-endpoint"],
       ["GET", "/api/auth/sign-in/anonymous"],
       ["POST", "/api/auth/get-session"],
       ["GET", "/api/auth/list-sessions"],
+      ["GET", "/api/auth/get-session/"],
+      ["GET", "/api/auth//get-session"],
+      ["HEAD", "/api/auth/list-sessions?x=get-session"],
     ] as const) {
       const response = await app.inject({
         method,

@@ -422,7 +422,7 @@ jobs:
   # Not for Dependabot's pushes: its PRs hold code written by a package
   # maintainer, and the plan would run it (data "external", a provider) with
   # the plan role. After reading the diff, the owner's Re-run all jobs makes
-  # the owner the triggering actor, and the plan runs (PH-42, SEC-13).
+  # the owner the triggering actor, and the plan runs (PH-42, SEC-16).
   plan:
     name: plan
     needs: changes

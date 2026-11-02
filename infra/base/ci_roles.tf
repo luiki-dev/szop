@@ -290,7 +290,7 @@ data "aws_iam_policy_document" "ci_deploy_state" {
   }
 
   # demo-down lists what is still tagged group = demo after the destroy
-  # (PH-42, SEC-15). The tagging API reads tags and names; it takes no
+  # (PH-42, SEC-18). The tagging API reads tags and names; it takes no
   # resource-level scope, so "*" is the only resource it accepts. Read-only.
   statement {
     sid       = "FindDemoLeftovers"

@@ -41,7 +41,7 @@ resource "aws_db_instance" "main" {
 
   instance_class    = "db.t4g.micro"
   allocated_storage = 20
-  # Autoscaling instead of a full disk that stops the database (SEC-12): RDS
+  # Autoscaling instead of a full disk that stops the database (SEC-02): RDS
   # grows the volume up to this limit, and the nightly destroy removes it.
   max_allocated_storage = 40
   storage_type          = "gp3"
