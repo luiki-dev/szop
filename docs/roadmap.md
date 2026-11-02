@@ -37,6 +37,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-15b Mutation testing](#ph-15b-mutation-testing)
   - [PH-16a Guest's first list](#ph-16a-guests-first-list)
   - [PH-16b Workspace from the default data](#ph-16b-workspace-from-the-default-data)
+  - [PH-42 Urgent security fixes](#ph-42-urgent-security-fixes)
+  - [PH-43 Minor security fixes](#ph-43-minor-security-fixes)
   - [PH-16c Managing lists](#ph-16c-managing-lists)
   - [PH-17a List items](#ph-17a-list-items)
   - [PH-17b The haul](#ph-17b-the-haul)
@@ -329,6 +331,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-15b Mutation testing](#ph-15b-mutation-testing) | ✅ Done | [Spec](superpowers/specs/2026-10-28-PH-15b-mutation-testing-design.md) | [Plan](superpowers/plans/2026-10-28-PH-15b-mutation-testing.md) | [#310](https://github.com/luiki-dev/szop/pull/310) | [#288](https://github.com/luiki-dev/szop/issues/288) |
 | [PH-16a Guest's first list](#ph-16a-guests-first-list) | ✅ Done | [Spec](superpowers/specs/2026-10-30-PH-16a-guests-first-list-design.md) | [Plan](superpowers/plans/2026-10-30-PH-16a-guests-first-list.md) | [#322](https://github.com/luiki-dev/szop/pull/322) | [#313](https://github.com/luiki-dev/szop/issues/313) |
 | [PH-16b Workspace from the default data](#ph-16b-workspace-from-the-default-data) | 🚧 In progress | [Spec](superpowers/specs/2026-11-01-PH-16b-workspace-from-default-data-design.md) | [Plan](superpowers/plans/2026-11-01-PH-16b-workspace-from-default-data.md) | [#330](https://github.com/luiki-dev/szop/pull/330) | [#314](https://github.com/luiki-dev/szop/issues/314) |
+| [PH-42 Urgent security fixes](#ph-42-urgent-security-fixes) | ⬜ Not started | — | — | — | [#336](https://github.com/luiki-dev/szop/issues/336) |
+| [PH-43 Minor security fixes](#ph-43-minor-security-fixes) | ⬜ Not started | — | — | — | [#337](https://github.com/luiki-dev/szop/issues/337) |
 | [PH-16c Managing lists](#ph-16c-managing-lists) | ⬜ Not started | — | — | — | [#315](https://github.com/luiki-dev/szop/issues/315) |
 | [PH-17a List items](#ph-17a-list-items) | ⬜ Not started | — | — | — | [#290](https://github.com/luiki-dev/szop/issues/290) |
 | [PH-17b The haul](#ph-17b-the-haul) | ⬜ Not started | — | — | — | [#291](https://github.com/luiki-dev/szop/issues/291) |
@@ -425,6 +429,24 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** none.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#314](https://github.com/luiki-dev/szop/issues/314).
+
+### PH-42 Urgent security fixes
+
+- **Goal:** the demo can no longer be filled or taken down through Better Auth's unused endpoints, a Claude session can neither merge, dispatch, re-run nor approve a deploy, an advisory in any production dependency reaches the owner, and an approved or nightly run executes only code from this repository's branches.
+- **Delivers:** the fixes of the [security audit of 2026-11-01](audits/2026-11-01-security-audit.md)'s suggested order, points 1 to 5: SEC-01 only Szop's auth paths and a body limit ([#338](https://github.com/luiki-dev/szop/issues/338)); SEC-06 and SEC-07 the `gh` deny rules and a token of Claude's own, with a note on [ADR 0012](decisions/0012-security-baseline.md), decision 16 ([#339](https://github.com/luiki-dev/szop/issues/339), [#340](https://github.com/luiki-dev/szop/issues/340)); SEC-12 and SEC-13 a scheduled dependency audit of `main` and the three updates ([#341](https://github.com/luiki-dev/szop/issues/341), [#342](https://github.com/luiki-dev/szop/issues/342)); SEC-02's interim bound on the database's growth ([OP-121](https://github.com/luiki-dev/szop/issues/354)); SEC-14, SEC-15, SEC-16 and part of SEC-18, what `demo-up` and `demo-down` may run ([#343](https://github.com/luiki-dev/szop/issues/343), [OP-122](https://github.com/luiki-dev/szop/issues/355), [OP-123](https://github.com/luiki-dev/szop/issues/356), [OP-124](https://github.com/luiki-dev/szop/issues/357)).
+- **Depends on:** —
+- **Owner steps:** give Claude sessions a GitHub token of their own ([#360](https://github.com/luiki-dev/szop/issues/360)).
+- **Expected path:** bounded.
+- **Open points:** the sub-issues of [#336](https://github.com/luiki-dev/szop/issues/336).
+
+### PH-43 Minor security fixes
+
+- **Goal:** the remaining minor findings of the security audit are fixed: the push hook catches the spellings it misses, a fork's branch can be reviewed safely, a vulnerability can be reported privately, no administrator bypasses an environment, the plan role reads no personal data, no wildcard certificate covers the app, and the threat model matches the code.
+- **Delivers:** the [security audit of 2026-11-01](audits/2026-11-01-security-audit.md)'s SEC-08 to SEC-11 and SEC-19 to SEC-21 ([#347](https://github.com/luiki-dev/szop/issues/347), [#348](https://github.com/luiki-dev/szop/issues/348), [#349](https://github.com/luiki-dev/szop/issues/349), [#350](https://github.com/luiki-dev/szop/issues/350), [#351](https://github.com/luiki-dev/szop/issues/351), [#352](https://github.com/luiki-dev/szop/issues/352), [#353](https://github.com/luiki-dev/szop/issues/353)), and the cheap observations (`.env.*` in `.gitignore`). The audit's other findings go with the phases that change their code: SEC-05 and the list name's control characters with [PH-16c](#ph-16c-managing-lists), SEC-04's code with [PH-18](#ph-18-registration-and-login), SEC-03 with [PH-20](#ph-20-quotas-and-rate-limits), SEC-17 and the rest of SEC-18 with [PH-39](#ph-39-redis-in-the-stack).
+- **Depends on:** —
+- **Owner steps:** turn on private vulnerability reporting ([#361](https://github.com/luiki-dev/szop/issues/361)); switch off the administrators' bypass on the four environments ([#362](https://github.com/luiki-dev/szop/issues/362)); apply `infra/base` from the branch, and again from `main` after the merge ([#363](https://github.com/luiki-dev/szop/issues/363)).
+- **Expected path:** bounded.
+- **Open points:** the sub-issues of [#337](https://github.com/luiki-dev/szop/issues/337).
 
 ### PH-16c Managing lists
 
