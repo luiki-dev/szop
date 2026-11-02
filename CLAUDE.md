@@ -78,6 +78,7 @@ Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `
 - `docs/development/definition-of-done.md` — the one definition of done: every item, what it means, which PRs need it, and when the demo check must be repeated. The PR template mirrors it.
 - `docs/development/phase-walkthrough.md` — one example phase end to end: commits, PRs, CI, demo, release-please and version tags, in order.
 - `docs/development/working-with-claude.md` — working with Claude Code within the weekly limit: how usage builds up, a phase in sessions, the status line, choosing models, and measuring a phase with `scripts/token-usage.py`. Keep it updated when a habit, a threshold or the script changes.
+- `docs/development/token-usage-evaluations.md` — the token usage evaluations: how to run one, each evaluation's findings, and the data file `docs/audits/token-usage/evaluations.csv` that collects their numbers for comparing and charting. Add a section and rows at each evaluation.
 - `docs/development/github-settings.md` — every GitHub setting the workflow relies on, where it lives in GitHub, and why. Keep it updated when a setting changes.
 - `docs/development/scripts.md` — every script in the `package.json` files: what it runs, when to run it, and which CI job or git hook runs it. Keep it updated when a script is added, changed or removed.
 - `docs/development/setup.md` — the setup guide, from a clean Windows machine to passing checks, and the setup script of a Claude Code session in the cloud. Keep it updated when a tool or a step changes.
