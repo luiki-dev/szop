@@ -22,6 +22,7 @@ IDs of the project (looked up with `gh project view 3 --owner luiki-dev --format
 | Field Spec | `PVTF_lAHOEVZTps4BmW8PzhlCq4o` |
 | Field Plan | `PVTF_lAHOEVZTps4BmW8PzhlCq5k` |
 | Field Severity | `PVTSSF_lAHOEVZTps4BmW8PzhoClbY` |
+| Field Order | `PVTF_lAHOEVZTps4BmW8PzhlCq3o` |
 | Status ❔ New | `7ed3d47c` (set by the project's workflow on every added item) |
 | Status ⬜ Backlog | `9700a2cc` |
 | Status 📌 Todo | `d4b70e5b` |
@@ -47,9 +48,9 @@ gh project item-edit --project-id PVT_kwHOEVZTps4BmW8P --id <item> --field-id <f
 gh project item-edit --project-id PVT_kwHOEVZTps4BmW8P --id <item> --field-id <field> --text <url>
 ```
 
-**Every issue Claude creates gets its Status set right after `item-add`** (⬜ Backlog unless a step says otherwise): the workflow puts every new item in ❔ New, which is kept for what waits for the triage.
+**Every issue Claude creates gets its Status set right after `item-add`** (⬜ Backlog unless a step says otherwise): the workflow puts every new item in ❔ New, which is kept for what waits for the triage. **A new phase issue also gets its Order**, or it sorts last in its milestone: a free number between its neighbours' on the roadmap ([Fields](../../../docs/development/project-tracking.md#fields)); read theirs with `gh project item-list 3 --owner luiki-dev --limit 500 --format json --jq '.items[] | select(.content.title | startswith("PH-")) | "\(.order) \(.content.title)"'`.
 
-Status and Severity take `--single-select-option-id`, Started and Finished `--date`, Spec and Plan `--text` (the link to the document).
+Status and Severity take `--single-select-option-id`, Started and Finished `--date`, Order `--number`, Spec and Plan `--text` (the link to the document).
 
 The next free open-point ID is one more than the highest `OP-` ID, which this prints ([Checking with gh](../../../docs/development/project-tracking.md#checking-with-gh)):
 
