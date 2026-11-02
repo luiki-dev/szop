@@ -230,7 +230,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 | [NFR-1](NFR-non-functional-requirements.md#nfr-1) | 🎯 MVP | ✅ Done | 1 of 1 | ✅ Finalized |
 | [NFR-2](NFR-non-functional-requirements.md#nfr-2) | 🎯 MVP | 🚧 In progress | 8 of 8 | ❔ Not finalized |
 | [NFR-3](NFR-non-functional-requirements.md#nfr-3) | 🎯 MVP | 🚧 In progress | 3 of 3 | ❔ Not finalized |
-| [NFR-4](NFR-non-functional-requirements.md#nfr-4) | 🎯 MVP | 🚧 In progress | 8 of 11 | ❔ Not finalized |
+| [NFR-4](NFR-non-functional-requirements.md#nfr-4) | 🎯 MVP | 🚧 In progress | 10 of 13 | ❔ Not finalized |
 
 ## General assumptions, actors, domain concepts
 

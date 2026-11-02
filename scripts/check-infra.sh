@@ -20,7 +20,7 @@ for dir in infra/*/; do
   compgen -G "${dir}*.tf" > /dev/null || continue
   echo "==> terraform validate ${dir}"
   export TF_DATA_DIR="$cache/$(basename "$dir")"
-  terraform -chdir="$dir" init -backend=false -input=false > /dev/null \
+  terraform -chdir="$dir" init -backend=false -lockfile=readonly -input=false > /dev/null \
     || { echo "FAIL: terraform init in ${dir}" >&2; exit 1; }
   terraform -chdir="$dir" validate \
     || { echo "FAIL: terraform validate in ${dir}" >&2; exit 1; }

@@ -288,6 +288,15 @@ data "aws_iam_policy_document" "ci_deploy_state" {
     actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
     resources = ["arn:aws:s3:::szop-tfstate-ntrtcr/demo/terraform.tfstate.tflock"]
   }
+
+  # demo-down lists what is still tagged group = demo after the destroy
+  # (PH-42, SEC-18). The tagging API reads tags and names; it takes no
+  # resource-level scope, so "*" is the only resource it accepts. Read-only.
+  statement {
+    sid       = "FindDemoLeftovers"
+    actions   = ["tag:GetResources"]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_role_policy" "ci_deploy_state" {

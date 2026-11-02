@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { testConfig } from "./config.ts";
 
@@ -15,7 +16,10 @@ export async function signIn(app: FastifyInstance): Promise<string> {
   const response = await app.inject({
     method: "POST",
     url: "/api/auth/sign-in/anonymous",
-    headers: sameOrigin,
+    headers: {
+      ...sameOrigin,
+      "x-forwarded-for": `198.51.100.${String(randomInt(1, 255))}`,
+    },
     payload: {},
   });
   if (response.statusCode !== 200) {

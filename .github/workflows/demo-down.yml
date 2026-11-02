@@ -74,7 +74,7 @@ jobs:
       # demo up, the state has none and jq gives empty.
       - id: state
         run: |
-          terraform -chdir=infra/demo init -input=false -lock-timeout=15m
+          terraform -chdir=infra/demo init -input=false -lockfile=readonly -lock-timeout=15m
           commit=$(terraform -chdir=infra/demo output -json | jq -r '.deployed_commit.value // empty')
           echo "commit=$commit" >> "$GITHUB_OUTPUT"
 
@@ -102,6 +102,25 @@ jobs:
             echo "reason=fetch" >> "$GITHUB_OUTPUT"
             exit 1
           fi
+          # Its Terraform code and providers run with the deploy role, which
+          # can delete anything tagged group = demo, so only a commit that went
+          # through a PR here is trusted, and only with main's provider lock
+          # (PH-42, SEC-14). No way around it by an input: merge the branch or
+          # destroy by hand (runbook).
+          branches=$(git for-each-ref --contains "$COMMIT" --format='%(refname:short)' refs/remotes/origin/ | grep -v '^origin/HEAD$' || true)
+          if [ -z "$branches" ]; then
+            echo "::error::No branch of this repository holds the recorded commit $COMMIT; not destroying with its code. Destroy the demo by hand."
+            echo "reason=no-branch" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          # A commit main holds (a demo deployed before main's lock moved) needs
+          # no comparison: its providers went through review already.
+          if ! git merge-base --is-ancestor "$COMMIT" origin/main \
+            && ! git diff --quiet origin/main "$COMMIT" -- infra/demo/.terraform.lock.hcl; then
+            echo "::error::The recorded commit $COMMIT locks other providers than main does; not destroying with its code. Merge its branch, or destroy the demo by hand."
+            echo "reason=lock" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
           git checkout --detach "$COMMIT"
           echo "switched=true" >> "$GITHUB_OUTPUT"
 
@@ -121,10 +140,39 @@ jobs:
           terraform_wrapper: false
 
       - if: steps.checkout-recorded.outputs.switched == 'true'
-        run: terraform -chdir=infra/demo init -input=false -lock-timeout=15m
+        run: terraform -chdir=infra/demo init -input=false -lockfile=readonly -lock-timeout=15m
 
       - id: destroy
         run: terraform -chdir=infra/demo destroy -auto-approve -input=false -lock-timeout=15m -no-color | tee "$RUNNER_TEMP/destroy.log"
+
+      # Terraform only destroys what its state knows. Anything still tagged
+      # group = demo (a resource created outside the state) would go on costing
+      # money, so the run fails and lists it (PH-42, SEC-18). The tagging API
+      # can list a just-deleted resource for minutes, so it retries for 10.
+      # Inactive task definition revisions stay listed for good: they cost
+      # nothing and cannot start a task (runbook, "Checking that nothing is
+      # left").
+      - id: leftovers
+        run: |
+          deadline=$((SECONDS + 600))
+          while true; do
+            found=$(aws resourcegroupstaggingapi get-resources --tag-filters Key=group,Values=demo \
+              --query "ResourceTagMappingList[?!contains(ResourceARN, ':task-definition/')].ResourceARN" --output text)
+            if [ -z "$found" ]; then
+              echo "Nothing tagged group=demo is left."
+              exit 0
+            fi
+            if (( SECONDS >= deadline )); then
+              break
+            fi
+            echo "Still listed after $SECONDS seconds: $found"
+            sleep 30
+          done
+          echo "::error::Resources tagged group=demo are left after the destroy; remove them by hand (runbook)"
+          # The Summary step writes them under its own heading.
+          # shellcheck disable=SC2086
+          printf -- "  - \`%s\`\n" $found > "$RUNNER_TEMP/leftovers.txt"
+          exit 1
 
       - name: Summary
         if: always()
@@ -135,6 +183,7 @@ jobs:
           CHECKOUT: ${{ steps.checkout-recorded.outcome }}
           REASON: ${{ steps.checkout-recorded.outputs.reason }}
           DESTROY: ${{ steps.destroy.outcome }}
+          LEFTOVERS: ${{ steps.leftovers.outcome }}
         run: |
           {
             echo "## demo-down"
@@ -145,6 +194,10 @@ jobs:
             elif [ "$CHECKOUT" = failure ]; then
               if [ "$REASON" = invalid ]; then
                 echo "- Code used: none, the recorded commit \`$COMMIT\` is not a full commit hash"
+              elif [ "$REASON" = no-branch ]; then
+                echo "- Code used: none, no branch of this repository holds the recorded commit \`$COMMIT\`"
+              elif [ "$REASON" = lock ]; then
+                echo "- Code used: none, the recorded commit \`$COMMIT\` locks other providers than \`main\`"
               else
                 echo "- Code used: none, the recorded commit \`$COMMIT\` could not be fetched"
               fi
@@ -157,5 +210,11 @@ jobs:
               echo "- Result: $(grep 'Destroy complete!' "$RUNNER_TEMP/destroy.log" || echo 'destroy finished')"
             else
               echo "- Result: destroy did not finish (step outcome: $DESTROY); see the log"
+            fi
+            if [ "$LEFTOVERS" = failure ]; then
+              echo "- Left after the destroy: resources still tagged \`group = demo\`:"
+              cat "$RUNNER_TEMP/leftovers.txt"
+            elif [ "$LEFTOVERS" = success ]; then
+              echo "- Left after the destroy: nothing tagged \`group = demo\`"
             fi
           } >> "$GITHUB_STEP_SUMMARY"

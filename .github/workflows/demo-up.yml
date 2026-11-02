@@ -15,6 +15,10 @@
 # exist creates it unprotected, and the deploy would then run with no approval.
 name: demo-up
 
+# Shows what was deployed in the Actions list and in the approval request, so
+# the owner approves a ref they can see (PH-42, SEC-15).
+run-name: demo-up ${{ inputs.ref || github.ref_name }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -74,7 +78,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref }}
-          fetch-depth: 1
+          # Every branch, so the next step can tell whether one holds the commit.
+          fetch-depth: 0
           persist-credentials: false
 
       # Whatever the ref was (branch, tag, hash), the image is tagged with the
@@ -88,6 +93,21 @@ jobs:
             exit 1
           fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      # Only a commit that a branch of this repository holds, one that went
+      # through a PR here. A pull ref of a fork, or a hash that only a fork
+      # holds, is refused before anything is built or deployed (PH-42, SEC-15).
+      - name: Check a branch holds the commit
+        env:
+          COMMIT: ${{ steps.commit.outputs.sha }}
+        run: |
+          # Only origin/*: checkout also fetches a pull ref as refs/remotes/pull/N/head.
+          branches=$(git for-each-ref --contains "$COMMIT" --format='%(refname:short)' refs/remotes/origin/ | grep -v '^origin/HEAD$' || true)
+          if [ -z "$branches" ]; then
+            echo "::error::No branch of this repository holds $COMMIT; push it to a branch here and press demo-up again"
+            exit 1
+          fi
+          echo "Held by: $branches"
 
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
@@ -201,7 +221,7 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform init
-        run: terraform -chdir=infra/demo init -input=false -lock-timeout=15m
+        run: terraform -chdir=infra/demo init -input=false -lockfile=readonly -lock-timeout=15m
 
       # Before the apply: on a redeploy Terraform swaps the task definition at
       # once, and the new task must find its image (PH-12c spec, decision 9).
