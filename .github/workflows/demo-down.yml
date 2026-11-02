@@ -102,6 +102,22 @@ jobs:
             echo "reason=fetch" >> "$GITHUB_OUTPUT"
             exit 1
           fi
+          # Its Terraform code and providers run with the deploy role, which
+          # can delete anything tagged group = demo, so only a commit that went
+          # through a PR here is trusted, and only with main's provider lock
+          # (PH-42, SEC-14). No way around it by an input: merge the branch or
+          # destroy by hand (runbook).
+          branches=$(git branch -r --contains "$COMMIT" | grep -v ' -> ' || true)
+          if [ -z "$branches" ]; then
+            echo "::error::No branch of this repository holds the recorded commit $COMMIT; not destroying with its code. Destroy the demo by hand."
+            echo "reason=no-branch" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          if ! git diff --quiet origin/main "$COMMIT" -- infra/demo/.terraform.lock.hcl; then
+            echo "::error::The recorded commit $COMMIT locks other providers than main does; not destroying with its code. Merge its branch, or destroy the demo by hand."
+            echo "reason=lock" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
           git checkout --detach "$COMMIT"
           echo "switched=true" >> "$GITHUB_OUTPUT"
 
@@ -126,6 +142,38 @@ jobs:
       - id: destroy
         run: terraform -chdir=infra/demo destroy -auto-approve -input=false -lock-timeout=15m -no-color | tee "$RUNNER_TEMP/destroy.log"
 
+      # Terraform only destroys what its state knows. Anything still tagged
+      # group = demo (a resource created outside the state) would go on costing
+      # money, so the run fails and lists it (PH-42, SEC-15). The tagging API
+      # can list a just-deleted resource for minutes, so it retries for 10.
+      # Inactive task definition revisions stay listed for good: they cost
+      # nothing and cannot start a task (runbook, "Checking that nothing is
+      # left").
+      - id: leftovers
+        run: |
+          deadline=$((SECONDS + 600))
+          while true; do
+            found=$(aws resourcegroupstaggingapi get-resources --tag-filters Key=group,Values=demo \
+              --query "ResourceTagMappingList[?!contains(ResourceARN, ':task-definition/')].ResourceARN" --output text)
+            if [ -z "$found" ]; then
+              echo "Nothing tagged group=demo is left."
+              exit 0
+            fi
+            if (( SECONDS >= deadline )); then
+              break
+            fi
+            echo "Still listed after $SECONDS seconds: $found"
+            sleep 30
+          done
+          echo "::error::Resources tagged group=demo are left after the destroy; remove them by hand (runbook)"
+          {
+            echo "## Left after the destroy"
+            echo
+            # shellcheck disable=SC2086
+            printf -- "- \`%s\`\n" $found
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
       - name: Summary
         if: always()
         env:
@@ -145,6 +193,10 @@ jobs:
             elif [ "$CHECKOUT" = failure ]; then
               if [ "$REASON" = invalid ]; then
                 echo "- Code used: none, the recorded commit \`$COMMIT\` is not a full commit hash"
+              elif [ "$REASON" = no-branch ]; then
+                echo "- Code used: none, no branch of this repository holds the recorded commit \`$COMMIT\`"
+              elif [ "$REASON" = lock ]; then
+                echo "- Code used: none, the recorded commit \`$COMMIT\` locks other providers than \`main\`"
               else
                 echo "- Code used: none, the recorded commit \`$COMMIT\` could not be fetched"
               fi
