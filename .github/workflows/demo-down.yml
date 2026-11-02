@@ -74,7 +74,7 @@ jobs:
       # demo up, the state has none and jq gives empty.
       - id: state
         run: |
-          terraform -chdir=infra/demo init -input=false -lock-timeout=15m
+          terraform -chdir=infra/demo init -input=false -lockfile=readonly -lock-timeout=15m
           commit=$(terraform -chdir=infra/demo output -json | jq -r '.deployed_commit.value // empty')
           echo "commit=$commit" >> "$GITHUB_OUTPUT"
 
@@ -137,7 +137,7 @@ jobs:
           terraform_wrapper: false
 
       - if: steps.checkout-recorded.outputs.switched == 'true'
-        run: terraform -chdir=infra/demo init -input=false -lock-timeout=15m
+        run: terraform -chdir=infra/demo init -input=false -lockfile=readonly -lock-timeout=15m
 
       - id: destroy
         run: terraform -chdir=infra/demo destroy -auto-approve -input=false -lock-timeout=15m -no-color | tee "$RUNNER_TEMP/destroy.log"

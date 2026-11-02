@@ -220,7 +220,7 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform init
-        run: terraform -chdir=infra/demo init -input=false -lock-timeout=15m
+        run: terraform -chdir=infra/demo init -input=false -lockfile=readonly -lock-timeout=15m
 
       # Before the apply: on a redeploy Terraform swaps the task definition at
       # once, and the new task must find its image (PH-12c spec, decision 9).
