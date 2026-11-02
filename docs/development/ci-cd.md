@@ -16,6 +16,8 @@ The checks run the PR's own code and configuration: its workflows, its `package.
 - [Reading a failed run](#reading-a-failed-run)
   - [Reading a failed E2E run](#reading-a-failed-e2e-run)
 - [Dependabot](#dependabot)
+- [The dependency audit](#the-dependency-audit)
+  - [When deps-audit fails](#when-deps-audit-fails)
 - [CI's access to AWS](#cis-access-to-aws)
 - [The security scans and the PR comment](#the-security-scans-and-the-pr-comment)
   - [The thresholds](#the-thresholds)
@@ -40,6 +42,7 @@ The checks run the PR's own code and configuration: its workflows, its `package.
 | A push to `main` (every merge) | `ci.yml`, without the jobs that run on PRs only (`commits`, the scans, `plan` and `comment`), CodeQL, and `release-please.yml`, which opens or updates the release PR when `main` holds a releasable commit ([Releases](#releases)) |
 | The release PR merged | `release-please.yml` tags the version, publishes the GitHub Release and pushes the image as `szop:<version>` ([Releases](#releases)) |
 | A push to `main` that changes `apps/landing/` or `pages.yml`, and when started by hand | `pages.yml` deploys the landing page to GitHub Pages ([The landing page](#the-landing-page)) |
+| Every night at 05:17 UTC, and when started by hand | `deps-audit.yml` audits the production dependencies against known advisories ([The dependency audit](#the-dependency-audit)) |
 | Every Monday | Dependabot looks for updates and opens PRs, which then run like any PR |
 | Every night at 01:17 UTC, and when started by hand (*Actions → demo-down → Run workflow*) | `demo-down.yml` destroys `infra/demo` ([runbook](../operations/demo-environment.md#tearing-down)) |
 | When started by hand (*Actions → demo-up → Run workflow*) | `demo-up.yml` builds the image, then pushes it and applies `infra/demo` after the owner's approval, and starts the app ([runbook](../operations/demo-environment.md#spinning-up)) |
@@ -186,6 +189,18 @@ Dependabot ([tool page](tools/dependabot.md)) opens update PRs every Monday:
 - **The AWS provider's major updates are not ignored:** each comes as its own PR, to be read against the provider's upgrade guide. Terraform itself, tflint and its AWS ruleset are not something Dependabot sees; their tool pages say how to update them.
 
 A Dependabot PR is reviewed and merged by the owner like any other PR; nothing merges by itself. Merging one makes the others out of date, so each needs *Update branch* and a new CI run before it can be merged.
+
+## The dependency audit
+
+`deps-audit.yml` runs `pnpm audit --prod --audit-level=moderate` on `main` every night and when started by hand. It holds no secret and only `contents: read`. Dependabot's security updates cover direct dependencies only ([ADR 0010](../decisions/0010-ci-cd.md), decision 18); a flaw in a dependency of a dependency (`fast-uri` under Fastify, `glob` under `@fastify/static`) reaches the owner through this run instead. A failed scheduled run makes GitHub email the owner; no PR check runs it, so an advisory published today never blocks an unrelated PR.
+
+### When deps-audit fails
+
+The run's log lists each advisory with the vulnerable package, the patched version and the path that pulls it in. In order:
+
+1. **A patched version exists and the parent's range allows it:** a `fix(deps)` PR with `pnpm update -r <package>`.
+2. **It exists but the parent's range does not allow it:** an entry under `overrides` in `pnpm-workspace.yaml`, with a comment naming the advisories and when to remove it (as for `glob` and `minimatch`), in a `fix(deps)` PR. Run the API tests: an override can break the parent.
+3. **No fix exists, or the advisory cannot be reached** (a dev-only code path, a function Szop never calls): ignore that one advisory in pnpm's audit configuration (`auditConfig.ignoreGhsas` in `pnpm-workspace.yaml`), with the reason and a date to look again next to it. Never raise `--audit-level` to make the run pass.
 
 ## CI's access to AWS
 
