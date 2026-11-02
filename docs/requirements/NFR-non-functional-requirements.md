@@ -43,7 +43,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 
 ## NFR-4
 
-🎯 [MVP] · 🚧 In progress (8 of 11) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (8 of 13) · ❔ Criteria not finalized
 
 **Security:** other sites cannot act in a user's name or frame the app, nothing travels over plain HTTP, tokens do not leak through addresses or logs, users reach only their own data, and errors reveal nothing about the server ([ADR 0012](../decisions/0012-security-baseline.md), [ADR 0025](../decisions/0025-web-security-baseline-details.md), the [threat model](../architecture/threat-model.md)). The account rules (passwords, sessions, never revealing whether an account exists) are in [ACC](ACC-accounts-and-guest-mode.md).
 
