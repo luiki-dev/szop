@@ -17,7 +17,9 @@ export function testConfig(overrides: Partial<Config> = {}): Config {
     },
     // Not served: tests that serve the SPA pass their own folder.
     webRoot: "/nonexistent/szop-web-root",
-    trustedProxies: [],
+    // The test client, so signIn can give each guest its own address: Better
+    // Auth's sign-in limit counts in memory shared by a whole test file.
+    trustedProxies: ["127.0.0.1"],
     commit: "unknown",
     betterAuthSecret: "test-secret-".padEnd(32, "x"),
     appOrigin: "http://localhost",

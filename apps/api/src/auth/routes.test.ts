@@ -121,30 +121,92 @@ describe("/api/auth", () => {
     app = start();
     const cookie = await signIn(app);
 
-    const renamed = await app.inject({
-      method: "POST",
-      url: "/api/auth/update-user",
-      headers: { ...sameOrigin, cookie },
-      payload: { name: "Zed" },
-    });
-    expect(renamed.statusCode).toBe(200);
-    const users = await database.db.execute<{ name: string }>(
-      sql`SELECT name FROM users`,
-    );
-    expect(users.rows[0]?.name).toBe("Zed");
-
     const session = await app.inject({
       method: "GET",
       url: "/api/auth/get-session",
       headers: { cookie },
     });
+    expect(session.statusCode).toBe(200);
     expect(session.headers["content-type"]).toMatch(/application\/json/);
+    expect(session.json()).toMatchObject({ user: { isAnonymous: true } });
 
-    const unknown = await app.inject({
-      method: "GET",
-      url: "/api/auth/no-such-endpoint",
+    const out = await app.inject({
+      method: "POST",
+      url: "/api/auth/sign-out",
+      headers: { ...sameOrigin, cookie },
+      payload: {},
     });
-    expect(unknown.statusCode).toBe(404);
+    expect(out.statusCode).toBe(200);
+  });
+
+  it("NFR-4.12: any other path or method under /api/auth answers 404 in the error format", async () => {
+    app = start();
+    const cookie = await signIn(app);
+    const rename = await app.inject({
+      method: "POST",
+      url: "/api/auth/update-user",
+      headers: { ...sameOrigin, cookie },
+      payload: { name: "Zed" },
+    });
+    expect(rename.statusCode).toBe(404);
+    expect(rename.json()).toMatchObject({ error: { code: "not_found" } });
+    const users = await database.db.execute<{ name: string }>(
+      sql`SELECT name FROM users`,
+    );
+    expect(users.rows[0]?.name).not.toBe("Zed");
+
+    for (const [method, url] of [
+      ["GET", "/api/auth/no-such-endpoint"],
+      ["GET", "/api/auth/sign-in/anonymous"],
+      ["POST", "/api/auth/get-session"],
+      ["GET", "/api/auth/list-sessions"],
+    ] as const) {
+      const response = await app.inject({
+        method,
+        url,
+        headers: { ...sameOrigin, cookie },
+        payload: method === "POST" ? {} : undefined,
+      });
+      expect(response.statusCode, `${method} ${url}`).toBe(404);
+    }
+  });
+
+  it("NFR-4.13: a body larger than 16 KiB answers 413, on an auth route and on another", async () => {
+    app = start();
+    const cookie = await signIn(app);
+    const payload = { name: "x".repeat(16 * 1024) };
+    for (const url of ["/api/auth/sign-in/anonymous", "/api/lists"]) {
+      const response = await app.inject({
+        method: "POST",
+        url,
+        headers: { ...sameOrigin, cookie },
+        payload,
+      });
+      expect(response.statusCode, url).toBe(413);
+    }
+  });
+
+  it("limits anonymous sign-ins to 30 an hour per address", async () => {
+    // Its own address: Better Auth keeps the counters in memory shared by the
+    // whole test file.
+    app = start();
+    const headers = { ...sameOrigin, "x-forwarded-for": "203.0.113.7" };
+    for (let i = 0; i < 30; i++) {
+      const ok = await app.inject({
+        method: "POST",
+        url: "/api/auth/sign-in/anonymous",
+        headers,
+        payload: {},
+      });
+      expect(ok.statusCode, `sign-in ${String(i + 1)}`).toBe(200);
+    }
+    const limited = await app.inject({
+      method: "POST",
+      url: "/api/auth/sign-in/anonymous",
+      headers,
+      payload: {},
+    });
+    expect(limited.statusCode).toBe(429);
   });
 
   it("trusts only its own origin and sets no default proxies or Secure on http", () => {

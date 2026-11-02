@@ -48,6 +48,14 @@ export function createAuth(options: {
       }),
       database: { generateId: "uuid" },
     },
+    // Anyone can mint a guest, so signing in is limited per address (SEC-02).
+    // shortcut: memory storage is per task, so two tasks allow up to 60 an hour;
+    // upgrade with the quotas of PH-20. `enabled` because Better Auth only
+    // limits in production by default.
+    rateLimit: {
+      enabled: true,
+      customRules: { "/sign-in/anonymous": { window: 60 * 60, max: 30 } },
+    },
     plugins: [anonymous()],
   });
 }
