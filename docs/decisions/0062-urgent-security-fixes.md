@@ -29,7 +29,7 @@ The [security audit of 2026-11-01](../audits/2026-11-01-security-audit.md) found
 - Every `/api/auth/*` path the app starts to use needs an entry in the allowlist, PH-18's first.
 - A demo deployed from an unmerged branch stops the nightly destroy; the runbook says how to destroy by hand.
 - The owner's steps, in order: `terraform apply` of `infra/base` after the PR opens and before the merge, or the nightly `demo-down` fails with AccessDenied; the token of [#360](https://github.com/luiki-dev/szop/issues/360), any time.
-- The deny rules still do not stop a determined attacker; only the token does ([threat model](../architecture/threat-model.md)).
+- The deny rules still do not stop a determined attacker; the token stops re-runs and deployment approvals, but not a merge (see "Settled while building") ([threat model](../architecture/threat-model.md)).
 - Left to later phases: the rest of the audit's findings, as the [roadmap](../roadmap.md#ph-43-minor-security-fixes) lists. Left to PH-39: conditions on `CreateDBInstance` (OP-124, part 2).
 
 ## Settled while building
@@ -38,4 +38,5 @@ The [security audit of 2026-11-01](../audits/2026-11-01-security-audit.md) found
 - `tag:GetResources` is added to the deploy role's inline `state` policy, since it takes no resource scope.
 - The whole-branch review found that checkout's full fetch also creates a pull ref under `refs/remotes/pull/`, which `git branch -r --contains` counted as a branch; both workflows now look at `refs/remotes/origin/` only. It also found that a demo deployed from a `main` commit before a provider bump merged would be refused by the lock check, so a commit that is in `main`'s history skips the comparison.
 - Findings left to open points: [OP-127](https://github.com/luiki-dev/szop/issues/367) (deny rules for `gh api … rerun`, and the reads they block), [OP-128](https://github.com/luiki-dev/szop/issues/368) (one sign-in bucket without a trusted address), and a note on [OP-124](https://github.com/luiki-dev/szop/issues/357) (`max_allocated_storage` against the `StorageSize` condition).
+- The token of [#360](https://github.com/luiki-dev/szop/issues/360) cannot merge-proof Claude: it acts as the owner's account, and the `main` ruleset asks for no approvals and has an empty bypass list ([ADR 0009](0009-git-workflow.md), decision 7), so with *Pull requests* write it can merge a PR whose checks pass. A second account for Claude, kept off a "Restrict updates" bypass list, would close it; Pull requests read-only would stop Claude opening and editing PRs. The owner accepted the gap: only the `gh pr * merge` deny rule and the habit stand before a merge.
 - Declined: a Dependabot infrastructure PR passes `ci-ok` with `plan` skipped (decision 10 accepts it; the owner's re-run is a habit, not a gate).
