@@ -160,7 +160,7 @@ jobs:
               --query "ResourceTagMappingList[?!contains(ResourceARN, ':task-definition/')].ResourceARN" --output text)
             found=""
             for arn in $listed; do
-              if [[ "$arn" == *:cluster/* ]] \
+              if [[ "$arn" == arn:aws:ecs:*:cluster/* ]] \
                 && [ "$(aws ecs describe-clusters --clusters "$arn" --query 'clusters[0].status' --output text)" = INACTIVE ]; then
                 continue
               fi
