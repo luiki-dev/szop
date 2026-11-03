@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@fastify/helmet": "^13.2.0",
-    "@fastify/static": "^10.1.6",
+    "@fastify/static": "^10.1.7",
     "@szop/shared": "workspace:*",
     "better-auth": "^1.7.14",
     "drizzle-orm": "^0.45.4",
