@@ -334,7 +334,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-16b Workspace from the default data](#ph-16b-workspace-from-the-default-data) | ✅ Done | [Spec](superpowers/specs/2026-11-01-PH-16b-workspace-from-default-data-design.md) | [Plan](superpowers/plans/2026-11-01-PH-16b-workspace-from-default-data.md) | [#330](https://github.com/luiki-dev/szop/pull/330) | [#314](https://github.com/luiki-dev/szop/issues/314) |
 | [PH-42 Urgent security fixes](#ph-42-urgent-security-fixes) | ✅ Done | ➖ N/A: bounded | ➖ N/A: bounded | [#369](https://github.com/luiki-dev/szop/pull/369) | [#336](https://github.com/luiki-dev/szop/issues/336) |
 | [PH-43 Minor security fixes](#ph-43-minor-security-fixes) | ⬜ Not started | — | — | — | [#337](https://github.com/luiki-dev/szop/issues/337) |
-| [PH-44 Leaner demo check](#ph-44-leaner-demo-check) | 🚧 In progress | — | — | — | [#376](https://github.com/luiki-dev/szop/issues/376) |
+| [PH-44 Leaner demo check](#ph-44-leaner-demo-check) | 🚧 In progress | [Spec](superpowers/specs/2026-11-03-PH-44-leaner-demo-check-design.md) | — | — | [#376](https://github.com/luiki-dev/szop/issues/376) |
 | [PH-16c Managing lists](#ph-16c-managing-lists) | ⬜ Not started | — | — | — | [#315](https://github.com/luiki-dev/szop/issues/315) |
 | [PH-17a List items](#ph-17a-list-items) | ⬜ Not started | — | — | — | [#290](https://github.com/luiki-dev/szop/issues/290) |
 | [PH-17b The haul](#ph-17b-the-haul) | ⬜ Not started | — | — | — | [#291](https://github.com/luiki-dev/szop/issues/291) |
