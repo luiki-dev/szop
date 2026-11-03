@@ -149,15 +149,24 @@ jobs:
       # group = demo (a resource created outside the state) would go on costing
       # money, so the run fails and lists it (PH-42, SEC-18). The tagging API
       # can list a just-deleted resource for minutes, so it retries for 10.
-      # Inactive task definition revisions stay listed for good: they cost
-      # nothing and cannot start a task (runbook, "Checking that nothing is
-      # left").
+      # Inactive task definition revisions stay listed for good, and a deleted
+      # ECS cluster stays listed as INACTIVE for hours: both cost nothing and
+      # cannot start a task (runbook, "Checking that nothing is left").
       - id: leftovers
         run: |
           deadline=$((SECONDS + 600))
           while true; do
-            found=$(aws resourcegroupstaggingapi get-resources --tag-filters Key=group,Values=demo \
+            listed=$(aws resourcegroupstaggingapi get-resources --tag-filters Key=group,Values=demo \
               --query "ResourceTagMappingList[?!contains(ResourceARN, ':task-definition/')].ResourceARN" --output text)
+            found=""
+            for arn in $listed; do
+              if [[ "$arn" == *:cluster/* ]] \
+                && [ "$(aws ecs describe-clusters --clusters "$arn" --query 'clusters[0].status' --output text)" = INACTIVE ]; then
+                continue
+              fi
+              found="$found $arn"
+            done
+            found=${found# }
             if [ -z "$found" ]; then
               echo "Nothing tagged group=demo is left."
               exit 0
