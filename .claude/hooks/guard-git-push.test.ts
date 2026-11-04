@@ -23,6 +23,8 @@ const allowed: string[] = [
   "env FOO=1 git log",
   "git -c alias.st=status st",
   "(cd x && git push -u origin feat/x)",
+  "echo a \\\n  b\ngit status",
+  "env -u X git status",
 ];
 
 const blocked: [command: string, reason: string][] = [
@@ -64,6 +66,12 @@ const blocked: [command: string, reason: string][] = [
   ["if true; then git push -f; fi", "force"],
   ["while x; do git push -f; done", "force"],
   ["! git push -f", "force"],
+  ["git \\\n push -f", "force"],
+  ["env FOO=1 \\\n git push -f", "force"],
+  ["env -S 'git push -f'", "env -S"],
+  ["env --split-string='git push -f'", "env -S"],
+  ["env --chdir d git push -f", "force"],
+  ["xargs -a f git push -f", "force"],
   ["git -c alias.p=push p -f", "alias"],
   ["git -c 'alias.p=!git push -f' p", "alias"],
 ];

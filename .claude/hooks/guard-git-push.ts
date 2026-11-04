@@ -49,8 +49,18 @@ const KEYWORDS = new Set([
 // Wrappers that run the rest of the line as a command, with the options that
 // take their value as the next word.
 const WRAPPERS: Record<string, Set<string>> = {
-  env: new Set(["-u", "-C", "-S"]),
-  xargs: new Set(["-I", "-n", "-L", "-P", "-d", "-E", "-s"]),
+  env: new Set(["-u", "--unset", "-C", "--chdir"]),
+  xargs: new Set([
+    "-I",
+    "-n",
+    "-L",
+    "-P",
+    "-d",
+    "-E",
+    "-s",
+    "-a",
+    "--arg-file",
+  ]),
   command: new Set(),
   time: new Set(),
   nohup: new Set(),
@@ -86,13 +96,18 @@ export function parseSegments(command: string): string[][] {
       else word = (word ?? "") + char;
     } else if (quote === '"') {
       if (char === '"') quote = null;
+      else if (char === "\\" && next === "\n")
+        i++; // line continuation
       else if (char === "\\" && '"\\$`'.includes(next) && next) {
         word = (word ?? "") + next;
         i++;
       } else word = (word ?? "") + char;
+    } else if (char === "\\" && next === "\n") {
+      i++; // line continuation: bash removes both characters
     } else if (char === "\\") {
       word = (word ?? "") + (chars[++i] ?? "");
     } else if (char === "$" && next === "'") {
+      // shortcut: $'…' decodes only single-character escapes (not \xHH or \NNN) and $"…" is not handled; upgrade if a real bypass shows up.
       quote = "$";
       word ??= "";
       i++;
@@ -126,6 +141,13 @@ function pushArguments(words: string[]): string[] | string | null {
     } else if (wrapper) {
       i++;
       while (words[i]?.startsWith("-") || isAssignment(words[i])) {
+        // env -S splits a string into a command and its arguments: not followed.
+        if (
+          word === "env" &&
+          /^(-[^-]*S|--split-string)/.test(words[i] ?? "")
+        ) {
+          return "env -S runs a command the hook cannot read and can bypass the push checks";
+        }
         i += wrapper.has(words[i] as string) ? 2 : 1;
       }
     } else break;
