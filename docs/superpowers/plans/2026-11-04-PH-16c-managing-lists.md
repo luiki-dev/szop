@@ -117,18 +117,18 @@
   - `useDeleteLists()` is a mutation over `ids: string[]`. One ID calls `deleteList`; more call `deleteLists`. A `404` from `deleteList` counts as success (Review Focus 2). On success it removes `["lists", id]` for each ID and invalidates `["lists"]` (exact). It uses `networkMode: "always"`, as the others do.
   - `DeleteListsDialog({ lists, open, onOpenChange, onDeleted }: { lists: Pick<List, "id" | "name">[]; open: boolean; onOpenChange: (open: boolean) => void; onDeleted: () => void })` owns the mutation and resets it when it closes.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - `client.test.ts`: `deleteList` sends `DELETE /api/lists/<id>` and resolves on `204`. `deleteLists` sends `POST /api/lists/delete` with `{ ids }`. A `500` rejects with `ApiRequestError`.
   - `delete-lists-dialog.test.tsx`: the spec's APP-3.3 tests, without a click outside. The title is `Delete list "Weekly"?` for one list and `Delete 3 lists?` for three. While the request hangs, Delete and Cancel are disabled and Esc does nothing; Delete sends one request even when pressed twice. A `404` closes the dialog and calls `onDeleted`.
   - `list-page.test.tsx`: LST-1.3, per the spec.
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test`. Expected: FAIL.
-- [ ] **Step 3: Implement.**
+- [x] **Step 2: Run** `pnpm --filter @szop/web test`. Expected: FAIL.
+- [x] **Step 3: Implement.**
   - Add the shadcn component.
   - In the dialog, the title is `lists.length === 1 ? `Delete list "${name}"?` : `Delete ${lists.length} lists?``. Delete uses the button's destructive variant. `initialFocus` points at Cancel. `onOpenChange` ignores closing while `isPending`. The error line uses `role="alert"`.
   - `list-page.tsx`: a Delete item under Rename (lucide `Trash2`) opens the dialog. `onDeleted` runs `navigate("/", { replace: true })`.
-- [ ] **Step 4: Run** the web tests. Expected: PASS.
-- [ ] **Step 5: Add** the first half of the spec's E2E journey to `lists.spec.ts`: create a list, then delete it from its screen. Check that it lands on `/` without the list, with `expectAccessible` while the dialog is open. **Run** `pnpm check && pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 6: Update** the docs, tick the steps. **Commit** `feat(lists): delete a list from its screen after a confirmation`.
+- [x] **Step 4: Run** the web tests. Expected: PASS.
+- [x] **Step 5: Add** the first half of the spec's E2E journey to `lists.spec.ts`: create a list, then delete it from its screen. Check that it lands on `/` without the list, with `expectAccessible` while the dialog is open. **Run** `pnpm check && pnpm test:e2e`. Expected: PASS.
+- [x] **Step 6: Update** the docs, tick the steps. **Commit** `feat(lists): delete a list from its screen after a confirmation`.
 
 ### Task 4: Selecting lists
 

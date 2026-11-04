@@ -75,3 +75,28 @@ test("NFR-4.10, ACC-1.3, ACC-1.8: another visitor sees nothing, and clearing the
   await page.goto("/");
   await expect(emptyState(page)).toBeVisible();
 });
+
+test("LST-1.3, APP-3.3: a guest deletes a list from its screen after a confirmation", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "New list" }).click();
+  await page.getByRole("textbox", { name: "List name" }).fill("Weekly shop");
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
+
+  await page.getByRole("button", { name: "List actions" }).click();
+  await page.getByRole("menuitem", { name: "Delete" }).click();
+  const dialog = page.getByRole("alertdialog", {
+    name: 'Delete list "Weekly shop"?',
+  });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Cancel" })).toBeFocused();
+  await expect(dialog).toHaveCSS("opacity", "1");
+  await expectAccessible(page);
+
+  await dialog.getByRole("button", { name: "Delete" }).click();
+  await expect(page).toHaveURL("/");
+  await expect(emptyState(page)).toBeVisible();
+  await expect(page.getByText("Weekly shop")).toHaveCount(0);
+});

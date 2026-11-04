@@ -363,4 +363,32 @@ describe("ListPage", () => {
 
     expect(await field()).toHaveValue("Weekly shop");
   });
+
+  it("LST-1.3: Delete in the list's menu, confirmed, sends the request and lands on the lists page", async () => {
+    const user = userEvent.setup();
+    let deleted = 0;
+    const { router } = setup();
+    server.use(
+      http.delete(`/api/lists/${id}`, () => {
+        deleted += 1;
+        return new HttpResponse(null, { status: 204 });
+      }),
+      http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+    );
+    await field();
+
+    await user.click(screen.getByRole("button", { name: "List actions" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    expect(
+      await screen.findByRole("alertdialog", {
+        name: 'Delete list "Weekly shop"?',
+      }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/");
+    });
+    expect(deleted).toBe(1);
+  });
 });

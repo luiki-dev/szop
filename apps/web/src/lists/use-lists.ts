@@ -5,7 +5,15 @@ import {
   type QueryClient,
 } from "@tanstack/react-query";
 import type { List } from "@szop/shared";
-import { createList, getList, getLists, renameList } from "../api/client.ts";
+import {
+  ApiRequestError,
+  createList,
+  deleteList,
+  deleteLists,
+  getList,
+  getLists,
+  renameList,
+} from "../api/client.ts";
 
 // No retries: the error card's "Try again" is the retry.
 export function useLists() {
@@ -45,5 +53,33 @@ export function useRenameList(id: string) {
     // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
     onSuccess: (list) => remember(queryClient, list),
+  });
+}
+
+// A list that is already gone (404) is what the user asked for.
+async function remove(ids: string[]) {
+  if (ids.length > 1) return deleteLists(ids);
+  try {
+    await deleteList(ids[0] ?? "");
+  } catch (error) {
+    if (!(error instanceof ApiRequestError && error.status === 404))
+      throw error;
+  }
+}
+
+export function useDeleteLists() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: remove,
+    // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
+    networkMode: "always",
+    onSuccess: (_, ids) => {
+      for (const id of ids)
+        queryClient.removeQueries({ queryKey: ["lists", id] });
+      return queryClient.invalidateQueries({
+        queryKey: ["lists"],
+        exact: true,
+      });
+    },
   });
 }

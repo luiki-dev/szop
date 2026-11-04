@@ -6,6 +6,8 @@ import { threeLists } from "../test/lists.ts";
 import {
   ApiRequestError,
   createList,
+  deleteList,
+  deleteLists,
   getCatalog,
   getHealth,
   getList,
@@ -285,6 +287,46 @@ describe("lists", () => {
     await expect(renameList(id, "X")).rejects.toThrow(
       `PATCH /api/lists/${id} answered 503`,
     );
+  });
+
+  it("deletes one list with a DELETE that carries no body or JSON type", async () => {
+    const seen: (string | null)[] = [];
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.delete(`/api/lists/${party?.id ?? ""}`, ({ request }) => {
+        seen.push(request.headers.get("content-type"));
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    await expect(deleteList(party?.id ?? "")).resolves.toBeUndefined();
+    expect(seen).toEqual([null]);
+  });
+
+  it("deletes several lists with POST /api/lists/delete and their IDs", async () => {
+    let body: unknown;
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.post("/api/lists/delete", async ({ request }) => {
+        body = await request.json();
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    await expect(deleteLists(["a", "b"])).resolves.toBeUndefined();
+    expect(body).toEqual({ ids: ["a", "b"] });
+  });
+
+  it("rejects a failed delete with ApiRequestError", async () => {
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.delete(
+        "/api/lists/x",
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+
+    await expect(deleteList("x")).rejects.toBeInstanceOf(ApiRequestError);
   });
 
   it("names a failed request's error ApiRequestError", async () => {

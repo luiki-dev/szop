@@ -1,6 +1,6 @@
-import { MoreVertical, Pencil } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { Link, useParams } from "react-router";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
 import { Button, buttonVariants } from "@/components/ui/button.tsx";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 import { cn } from "@/lib/utils.ts";
 import { ApiRequestError } from "../api/client.ts";
+import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
 import { useList, useRenameList } from "./use-lists.ts";
 
@@ -20,6 +21,8 @@ export function ListPage() {
   const { id = "" } = useParams();
   const query = useList(id);
   const rename = useRenameList(id);
+  const navigate = useNavigate();
+  const [deleting, setDeleting] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const renaming = useRef(false);
   const name = query.data?.name;
@@ -130,11 +133,27 @@ export function ListPage() {
                 <Pencil aria-hidden="true" />
                 Rename
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setDeleting(true);
+                }}
+              >
+                <Trash2 aria-hidden="true" />
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         }
       />
       <EmptyList />
+      <DeleteListsDialog
+        lists={[{ id, name }]}
+        open={deleting}
+        onOpenChange={setDeleting}
+        onDeleted={() => {
+          void navigate("/", { replace: true });
+        }}
+      />
     </>
   );
 }
