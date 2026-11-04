@@ -69,17 +69,17 @@
 **Interfaces:**
 - Produces: `deleteListsSchema = z.object({ ids })`, where `ids` is an array of 1 to 100 UUIDs without duplicates, and `type DeleteLists`. `deleteList(db: Executor, context: WorkspaceContext, id: string): Promise<boolean>` returns whether a row was deleted. `deleteLists(db: Executor, context: WorkspaceContext, ids: string[]): Promise<void>`.
 
-- [ ] **Step 1: Write the failing shared tests** in `lists.test.ts`. `listNameSchema` refuses `"a\u0000b"`, `"a\tb"`, `"a\nb"`, `"a‮b"` and `"a​b"`, each with the message `"Name can't contain control characters"`. It accepts `"Żółw"`, `"🛒 Weekly"`, `"Big shop"`, `"👨‍👩‍👧"` and `"🏴󠁧󠁢󠁳󠁣󠁴󠁿"` (Review Focus 1). `deleteListsSchema` refuses `[]`, 101 IDs, a duplicated ID and `"x"`, and accepts 1 and 100 distinct UUIDs.
-- [ ] **Step 2: Run** `pnpm --filter @szop/shared test`. Expected: FAIL.
-- [ ] **Step 3: Implement** the check as one more `.refine` after the length checks, with `/(?![‍\u{E0020}-\u{E007F}])[\p{Cc}\p{Cf}]/u` (the joiner and the tag characters build emoji). Then implement `deleteListsSchema`. Run the tests again. Expected: PASS.
-- [ ] **Step 4: Write the failing API tests** with the existing helpers (`signIn`, `sameOrigin`, `twoWorkspaces`). The test names and their assertions are in the spec's [Tests](../specs/2026-11-04-PH-16c-managing-lists-design.md#tests), under API. Use the names `"LST-1.3: …"` and `"LST-1.8: …"` where the spec ties them. For the forced failure in the middle, delete through a transaction that throws after `deleteLists` in a repository test, then check that every list remains.
-- [ ] **Step 5: Run** `pnpm --filter @szop/api test -- lists`. Expected: FAIL.
-- [ ] **Step 6: Implement** the repository functions and the routes in `routes.ts`, next to `PATCH`, using the same `idParams` guard and `notFound`.
+- [x] **Step 1: Write the failing shared tests** in `lists.test.ts`. `listNameSchema` refuses `"a\u0000b"`, `"a\tb"`, `"a\nb"`, `"a‮b"` and `"a​b"`, each with the message `"Name can't contain control characters"`. It accepts `"Żółw"`, `"🛒 Weekly"`, `"Big shop"`, `"👨‍👩‍👧"` and `"🏴󠁧󠁢󠁳󠁣󠁴󠁿"` (Review Focus 1). `deleteListsSchema` refuses `[]`, 101 IDs, a duplicated ID and `"x"`, and accepts 1 and 100 distinct UUIDs.
+- [x] **Step 2: Run** `pnpm --filter @szop/shared test`. Expected: FAIL.
+- [x] **Step 3: Implement** the check as one more `.refine` after the length checks, with `/(?![‍\u{E0020}-\u{E007F}])[\p{Cc}\p{Cf}]/u` (the joiner and the tag characters build emoji). Then implement `deleteListsSchema`. Run the tests again. Expected: PASS.
+- [x] **Step 4: Write the failing API tests** with the existing helpers (`signIn`, `sameOrigin`, `twoWorkspaces`). The test names and their assertions are in the spec's [Tests](../specs/2026-11-04-PH-16c-managing-lists-design.md#tests), under API. Use the names `"LST-1.3: …"` and `"LST-1.8: …"` where the spec ties them. For the forced failure in the middle, delete through a transaction that throws after `deleteLists` in a repository test, then check that every list remains.
+- [x] **Step 5: Run** `pnpm --filter @szop/api test -- lists`. Expected: FAIL.
+- [x] **Step 6: Implement** the repository functions and the routes in `routes.ts`, next to `PATCH`, using the same `idParams` guard and `notFound`.
   - `DELETE` uses `requireListAccess`, then `deleteList`, then `204`.
   - `POST /lists/delete` takes `body: deleteListsSchema`. It runs `findOwnWorkspace`, which gives `204` when there is no workspace. Otherwise it runs `deleteLists` in `db.transaction`, then answers `204`.
   - A request without a session answers `401` on both routes: check `request.user === null` the way `ownWorkspace` does.
-- [ ] **Step 7: Run** `pnpm --filter @szop/api test`, then `pnpm check`. Expected: PASS.
-- [ ] **Step 8: Update** the docs listed under **Files**, and tick this task's steps. **Commit** `feat(lists): delete lists through the API and refuse control characters in names`. Its body carries `Closes #346`.
+- [x] **Step 7: Run** `pnpm --filter @szop/api test`, then `pnpm check`. Expected: PASS.
+- [x] **Step 8: Update** the docs listed under **Files**, and tick this task's steps. **Commit** `feat(lists): delete lists through the API and refuse control characters in names`. Its body carries `Closes #346`.
 
 ### Task 2: The version in the menu
 

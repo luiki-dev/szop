@@ -223,6 +223,152 @@ describe("the lists routes", () => {
     expect(await updatedAt()).toBe(after);
   });
 
+  it.each(["a\u0000b", "a\u202eb"])(
+    "LST-1.1: a name with a control character (%j) is 400 on create and rename",
+    async (name) => {
+      const id = randomUUID();
+      const created = await post(a, { id, name });
+      expect(created.statusCode).toBe(400);
+      expect(created.json()).toMatchObject({
+        error: { code: "invalid_input" },
+      });
+      await post(a, { id, name: "Ok" });
+      const renamed = await patch(a, id, name);
+      expect(renamed.statusCode).toBe(400);
+      expect(renamed.json()).toMatchObject({
+        error: { code: "invalid_input" },
+      });
+    },
+  );
+
+  // No body, so no JSON content type (Fastify refuses an empty JSON body).
+  const del = (cookie: string | undefined, id: string) =>
+    app.inject({
+      method: "DELETE",
+      url: `/api/lists/${id}`,
+      headers: {
+        "sec-fetch-site": sameOrigin["sec-fetch-site"],
+        origin: sameOrigin.origin,
+        ...(cookie ? { cookie } : {}),
+      },
+    });
+  const delMany = (cookie: string | undefined, payload: unknown) =>
+    app.inject({
+      method: "POST",
+      url: "/api/lists/delete",
+      headers: { ...sameOrigin, ...(cookie ? { cookie } : {}) },
+      payload: payload as object,
+    });
+
+  it("LST-1.3: DELETE removes the list; a foreign, missing and non-UUID ID are one 404", async () => {
+    const [one, two] = await twoWorkspaces(app, database.db, testCatalog);
+    const mine = randomUUID();
+    const theirs = randomUUID();
+    await one.inject({
+      method: "POST",
+      url: "/api/lists",
+      payload: { id: mine, name: "Mine" },
+    });
+    await two.inject({
+      method: "POST",
+      url: "/api/lists",
+      payload: { id: theirs, name: "Theirs" },
+    });
+
+    const missing = await del(one.cookie, randomUUID());
+    expect(missing.statusCode).toBe(404);
+    const foreign = await del(one.cookie, theirs);
+    const malformed = await del(one.cookie, "not-a-uuid");
+    expect(foreign.statusCode).toBe(404);
+    expect(malformed.statusCode).toBe(404);
+    expect(foreign.body).toBe(missing.body);
+    expect(malformed.body).toBe(missing.body);
+    expect(
+      (await two.inject({ method: "GET", url: `/api/lists/${theirs}` }))
+        .statusCode,
+    ).toBe(200);
+
+    const deleted = await del(one.cookie, mine);
+    expect(deleted.statusCode).toBe(204);
+    expect(deleted.body).toBe("");
+    expect(
+      (await one.inject({ method: "GET", url: `/api/lists/${mine}` }))
+        .statusCode,
+    ).toBe(404);
+  });
+
+  it("LST-1.8: POST /lists/delete deletes the caller's lists among ids, skips foreign ones", async () => {
+    const [one, two] = await twoWorkspaces(app, database.db, testCatalog);
+    const [x, y, z, theirs] = [
+      randomUUID(),
+      randomUUID(),
+      randomUUID(),
+      randomUUID(),
+    ];
+    for (const id of [x, y, z])
+      await one.inject({
+        method: "POST",
+        url: "/api/lists",
+        payload: { id, name: "L" },
+      });
+    await two.inject({
+      method: "POST",
+      url: "/api/lists",
+      payload: { id: theirs, name: "T" },
+    });
+
+    const response = await delMany(one.cookie, {
+      ids: [x, y, theirs, randomUUID()],
+    });
+    expect(response.statusCode).toBe(204);
+    expect(response.body).toBe("");
+    const remaining = await one.inject({ method: "GET", url: "/api/lists" });
+    expect(
+      remaining.json<{ lists: { id: string }[] }>().lists.map((l) => l.id),
+    ).toEqual([z]);
+    expect(
+      (await two.inject({ method: "GET", url: `/api/lists/${theirs}` }))
+        .statusCode,
+    ).toBe(200);
+  });
+
+  it.each([
+    ["no ids", { ids: [] }],
+    ["101 ids", { ids: Array.from({ length: 101 }, () => randomUUID()) }],
+    ["a missing ids", {}],
+    ["a non-UUID", { ids: ["x"] }],
+  ])("LST-1.8: POST /lists/delete with %s is 400", async (_label, payload) => {
+    const response = await delMany(a, payload);
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: { code: "invalid_input" } });
+  });
+
+  it("LST-1.8: POST /lists/delete with a duplicated ID is 400 and deletes nothing", async () => {
+    const id = randomUUID();
+    await post(a, { id, name: "Keep" });
+    expect((await delMany(a, { ids: [id, id] })).statusCode).toBe(400);
+    expect((await get(a, `/api/lists/${id}`)).statusCode).toBe(200);
+  });
+
+  it("both delete routes are 401 without a session", async () => {
+    const id = randomUUID();
+    for (const response of [
+      await del(undefined, id),
+      await delMany(undefined, { ids: [id] }),
+    ]) {
+      expect(response.statusCode).toBe(401);
+      expect(response.json()).toMatchObject({
+        error: { code: "unauthorized", message: "Sign-in required" },
+      });
+    }
+  });
+
+  it("with no workspace, DELETE is 404, POST /lists/delete is 204, and neither makes a workspace", async () => {
+    expect((await del(a, randomUUID())).statusCode).toBe(404);
+    expect((await delMany(a, { ids: [randomUUID()] })).statusCode).toBe(204);
+    expect(await count("workspaces")).toBe(0);
+  });
+
   it("LST-1.2: PATCH with a blank name is 400 invalid_input", async () => {
     const id = randomUUID();
     await post(a, { id, name: "Old" });

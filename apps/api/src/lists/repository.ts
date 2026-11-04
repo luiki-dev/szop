@@ -1,5 +1,5 @@
 import type { List } from "@szop/shared";
-import { and, desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, ne } from "drizzle-orm";
 import type { Executor, WorkspaceContext } from "../access/workspace.ts";
 import { lists } from "../db/schema.ts";
 
@@ -75,4 +75,28 @@ export async function renameList(
     )
     .returning();
   return row ? toList(row) : findList(db, context, id);
+}
+
+// Whether a row was deleted; a missing list is not an error here.
+export async function deleteList(
+  db: Executor,
+  { workspaceId }: WorkspaceContext,
+  id: string,
+): Promise<boolean> {
+  const rows = await db
+    .delete(lists)
+    .where(and(eq(lists.workspaceId, workspaceId), eq(lists.id, id)))
+    .returning({ id: lists.id });
+  return rows.length > 0;
+}
+
+// IDs of lists outside the workspace match nothing and are skipped.
+export async function deleteLists(
+  db: Executor,
+  { workspaceId }: WorkspaceContext,
+  ids: string[],
+): Promise<void> {
+  await db
+    .delete(lists)
+    .where(and(eq(lists.workspaceId, workspaceId), inArray(lists.id, ids)));
 }

@@ -31,7 +31,7 @@ The [spec](../superpowers/specs/2026-11-04-PH-16c-managing-lists-design.md) hold
 
 ## Settled while building
 
-—
+- **The name check allows the zero-width joiner (U+200D) and the tag characters (U+E0020 to U+E007F)**, though they are in category `Cf`: family and flag emoji (`👨‍👩‍👧`, `🏴󠁧󠁢󠁳󠁣󠁴󠁿`) are built from them, so refusing them would break names the app should accept. The other `Cc` and `Cf` characters stay refused.
 
 ## Consequences
 
