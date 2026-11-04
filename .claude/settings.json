@@ -17,6 +17,7 @@
       "Bash(gh run * rerun*)",
       "Bash(gh api *pending_deployments*)",
       "Bash(gh api *dispatches*)",
+      "Bash(gh api *rerun*)",
       "Bash(gh api *rulesets*)",
       "Bash(gh api *environments*)",
       "Bash(gh api *merge*)",

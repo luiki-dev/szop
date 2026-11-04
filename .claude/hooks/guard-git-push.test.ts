@@ -18,6 +18,11 @@ const allowed: string[] = [
   "git fetch -f",
   'echo "git push -f"',
   "ls -d dir",
+  'echo "\\\\+x"',
+  "time git status",
+  "env FOO=1 git log",
+  "git -c alias.st=status st",
+  "(cd x && git push -u origin feat/x)",
 ];
 
 const blocked: [command: string, reason: string][] = [
@@ -42,6 +47,25 @@ const blocked: [command: string, reason: string][] = [
   ["git add . ; git push origin :feat/x", "delete"],
   ["true || git push --tags", "tags"],
   ["git push -- origin :feat/x", "delete"],
+  ["git push origin \\+main", "force"],
+  ["git push \\-f", "force"],
+  ["git push $'-f'", "force"],
+  ["env git push -f", "force"],
+  ["env -i FOO=1 git push -f", "force"],
+  ["env -u NAME git push -f", "force"],
+  ["command git push -f", "force"],
+  ["time git push -f", "force"],
+  ["nohup git push -f", "force"],
+  ["xargs git push -f", "force"],
+  ["xargs -n1 git push -f", "force"],
+  ["xargs -I {} git push -f", "force"],
+  ["(git push -f)", "force"],
+  ["{ git push -f; }", "force"],
+  ["if true; then git push -f; fi", "force"],
+  ["while x; do git push -f; done", "force"],
+  ["! git push -f", "force"],
+  ["git -c alias.p=push p -f", "alias"],
+  ["git -c 'alias.p=!git push -f' p", "alias"],
 ];
 
 test.each(allowed)("allows: %s", (command) => {

@@ -1,5 +1,10 @@
 // Claude Code PreToolUse hook: refuses git pushes that force, delete or push tags.
 //
+// It also sees through backslash escapes and $'...' quoting, wrappers (env,
+// command, time, nohup, xargs), subshells and braces, shell keywords (if, then,
+// do, !) and `git -c alias.x=...push...`. Still a seatbelt, not a boundary
+// (ADR 0065).
+//
 // It backs the deny rules in .claude/settings.json where a pattern cannot reach:
 // a `+branch` or `:branch` refspec, bundled short flags (`-uf`, `-ud`), `--mirror`,
 // `--prune`, `--follow-tags` and `git -C dir push`. Like the deny rules, it guards
@@ -27,13 +32,38 @@ const GIT_OPTIONS_WITH_VALUE = new Set([
   "--namespace",
 ]);
 
-// Splits a shell command into segments (at ; & | and newlines) of words,
-// honouring quotes. Subshells and expansions are not interpreted.
+// Words that start a command without being one: skipped at the start of a segment.
+const KEYWORDS = new Set([
+  "if",
+  "then",
+  "do",
+  "else",
+  "elif",
+  "while",
+  "until",
+  "!",
+  "{",
+  "}",
+]);
+
+// Wrappers that run the rest of the line as a command, with the options that
+// take their value as the next word.
+const WRAPPERS: Record<string, Set<string>> = {
+  env: new Set(["-u", "-C", "-S"]),
+  xargs: new Set(["-I", "-n", "-L", "-P", "-d", "-E", "-s"]),
+  command: new Set(),
+  time: new Set(),
+  nohup: new Set(),
+};
+
+// Splits a shell command into segments (at ; & | ( ) and newlines) of words,
+// honouring quotes and backslash escapes (including $'...'). Subshells and
+// expansions are not interpreted.
 export function parseSegments(command: string): string[][] {
   const segments: string[][] = [];
   let words: string[] = [];
   let word: string | null = null;
-  let quote: string | null = null;
+  let quote: string | null = null; // ', ", or $ for $'...'
   const endWord = () => {
     if (word !== null) words.push(word);
     word = null;
@@ -43,14 +73,33 @@ export function parseSegments(command: string): string[][] {
     segments.push(words);
     words = [];
   };
-  for (const char of command) {
-    if (quote) {
-      if (char === quote) quote = null;
+  const chars = Array.from(command);
+  for (let i = 0; i < chars.length; i++) {
+    const char = chars[i] as string;
+    const next = chars[i + 1] ?? "";
+    if (quote === "'") {
+      if (char === "'") quote = null;
       else word = (word ?? "") + char;
+    } else if (quote === "$") {
+      if (char === "'") quote = null;
+      else if (char === "\\") word = (word ?? "") + (chars[++i] ?? "");
+      else word = (word ?? "") + char;
+    } else if (quote === '"') {
+      if (char === '"') quote = null;
+      else if (char === "\\" && '"\\$`'.includes(next) && next) {
+        word = (word ?? "") + next;
+        i++;
+      } else word = (word ?? "") + char;
+    } else if (char === "\\") {
+      word = (word ?? "") + (chars[++i] ?? "");
+    } else if (char === "$" && next === "'") {
+      quote = "$";
+      word ??= "";
+      i++;
     } else if (char === '"' || char === "'") {
       quote = char;
       word ??= "";
-    } else if (";&|\n".includes(char)) {
+    } else if (";&|()\n".includes(char)) {
       endSegment();
     } else if (/\s/.test(char)) {
       endWord();
@@ -62,14 +111,33 @@ export function parseSegments(command: string): string[][] {
   return segments;
 }
 
-// Returns the words after `push` if the segment runs `git push`, otherwise null.
-function pushArguments(words: string[]): string[] | null {
+const isAssignment = (word: string | undefined) =>
+  /^[A-Za-z_][A-Za-z0-9_]*=/.test(word ?? "");
+
+// Returns the words after `push` if the segment runs `git push`, a reason if it
+// sets a git alias that pushes, otherwise null.
+function pushArguments(words: string[]): string[] | string | null {
   let i = 0;
-  while (/^[A-Za-z_][A-Za-z0-9_]*=/.test(words[i] ?? "")) i++; // VAR=value prefixes
+  for (;;) {
+    const word = words[i] ?? "";
+    const wrapper = WRAPPERS[word.split("/").pop() ?? ""];
+    if (isAssignment(word) || KEYWORDS.has(word)) {
+      i++;
+    } else if (wrapper) {
+      i++;
+      while (words[i]?.startsWith("-") || isAssignment(words[i])) {
+        i += wrapper.has(words[i] as string) ? 2 : 1;
+      }
+    } else break;
+  }
   const git = words[i];
   if (git !== "git" && !git?.endsWith("/git")) return null;
   i++;
   for (let option = words[i]; option?.startsWith("-"); option = words[i]) {
+    const config = option === "-c" ? words[i + 1] : option.slice(2);
+    if (option.startsWith("-c") && /^alias\..*=.*push/.test(config ?? "")) {
+      return `a git alias that pushes (${config ?? ""}) can bypass the push checks`;
+    }
     i += GIT_OPTIONS_WITH_VALUE.has(option) ? 2 : 1;
   }
   return words[i] === "push" ? words.slice(i + 1) : null;
@@ -118,6 +186,7 @@ function checkPushArguments(args: string[]): string | null {
 export function findViolation(command: string): string | null {
   for (const words of parseSegments(command)) {
     const args = pushArguments(words);
+    if (typeof args === "string") return args;
     const violation = args && checkPushArguments(args);
     if (violation) return violation;
   }
