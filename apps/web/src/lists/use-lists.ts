@@ -74,8 +74,13 @@ export function useDeleteLists() {
     // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
     onSuccess: (_, ids) => {
+      // Inactive only: a list's screen still observes its list until the
+      // navigation lands, and removing that entry would refetch it (a 404).
       for (const id of ids)
-        queryClient.removeQueries({ queryKey: ["lists", id] });
+        queryClient.removeQueries({
+          queryKey: ["lists", id],
+          type: "inactive",
+        });
       return queryClient.invalidateQueries({
         queryKey: ["lists"],
         exact: true,

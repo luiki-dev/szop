@@ -367,10 +367,16 @@ describe("ListPage", () => {
   it("LST-1.3: Delete in the list's menu, confirmed, sends the request and lands on the lists page", async () => {
     const user = userEvent.setup();
     let deleted = 0;
+    const seen: string[] = [];
     const { router } = setup();
     server.use(
+      http.get(`/api/lists/${id}`, () => {
+        seen.push("GET");
+        return HttpResponse.json(list);
+      }),
       http.delete(`/api/lists/${id}`, () => {
         deleted += 1;
+        seen.push("DELETE");
         return new HttpResponse(null, { status: 204 });
       }),
       http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
@@ -390,5 +396,30 @@ describe("ListPage", () => {
       expect(router.state.location.pathname).toBe("/");
     });
     expect(deleted).toBe(1);
+    // No refetch of the deleted list after the DELETE.
+    expect(seen).toEqual(["GET", "DELETE"]);
   });
+
+  it.each(["Escape", "Cancel"])(
+    "APP-3.3: closing the dialog with %s returns the focus to the list's menu button",
+    async (how) => {
+      const user = userEvent.setup();
+      setup();
+      await field();
+      const trigger = screen.getByRole("button", { name: "List actions" });
+
+      await user.click(trigger);
+      await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+      await screen.findByRole("alertdialog");
+      if (how === "Escape") await user.keyboard("{Escape}");
+      else await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+      await waitFor(() => {
+        expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+      });
+      await waitFor(() => {
+        expect(trigger).toHaveFocus();
+      });
+    },
+  );
 });

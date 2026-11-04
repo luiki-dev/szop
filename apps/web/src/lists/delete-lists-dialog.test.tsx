@@ -36,11 +36,10 @@ function setup(lists = one) {
       <Harness lists={lists} onDeleted={onDeleted} />
     </QueryClientProvider>,
   );
-  const requests: string[] = [];
   server.use(
     http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
   );
-  return { onDeleted, requests };
+  return { onDeleted };
 }
 
 const deleteButton = () => screen.getByRole("button", { name: "Delete" });
@@ -64,7 +63,7 @@ describe("DeleteListsDialog", () => {
     ).toBeInTheDocument();
   });
 
-  it("APP-3.3: Esc and Cancel close it without a request", async () => {
+  it("APP-3.3: Esc closes it without a request", async () => {
     const user = userEvent.setup();
     setup();
     await screen.findByRole("alertdialog");
