@@ -29,3 +29,8 @@ The [security audit of 2026-11-01](../audits/2026-11-01-security-audit.md) left 
 - A fork's PR is safe to review only by following the procedure; nothing enforces it.
 
 ## Settled while building
+
+- The fork-review procedure (decision 3) changed from `HUSKY=0 gh pr checkout <N>` to a fresh clone, because a fork can ship `.husky/_` hooks that bypass `HUSKY` (found in the whole-branch review).
+- The push hook's known gaps stay: `$'…'` decodes only single-character escapes; an alias set through `--config-env`, `GIT_CONFIG_PARAMETERS` or `GIT_CONFIG_KEY_n` and `GIT_CONFIG_VALUE_n` is not refused (decision 1 covers `-c` only); `env -S` is refused outright.
+- Decision 6 leaves out the audit's `sso:*`, `cloudtrail:GetQueryResults`, `ses:ListContacts` and `ses:GetContact`: Szop uses no CloudTrail Lake and no SES contact lists, and `sso:*` holds no personal data that `sso-directory:*` and `identitystore:*` do not already cover.
+- The threat model's "Links in emails" row stays "stored hashed": SEC-04's part in PH-18 is the log fix, not hashing.

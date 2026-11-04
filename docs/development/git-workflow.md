@@ -116,11 +116,11 @@ The owner reviews; Claude addresses the comments.
 
 ### Reviewing a fork's PR
 
-A fork's branch can change the husky hooks in `.husky/` and the scripts in `package.json`, and git and pnpm run them as the owner ([ADR 0065](../decisions/0065-minor-security-fixes.md), decision 3). Nothing enforces this procedure:
+A fork's branch can change the husky hooks and the scripts in `package.json`, and git and pnpm run them as the owner. `HUSKY=0` does not stop the hooks: a fork can force-add files under `.husky/_` (gitignored locally, so a checkout overwrites them), and git runs them directly through `core.hooksPath=.husky/_`, never calling husky's wrapper that reads `HUSKY` ([ADR 0065](../decisions/0065-minor-security-fixes.md), decision 3). Nothing enforces this procedure:
 
 - **Read it on GitHub first:** the *Files changed* tab and CI's results need nothing on the machine.
-- **To run it locally, switch the hooks off for the whole visit:** `HUSKY=0 gh pr checkout <N>`, and `HUSKY=0` on every git command while on that branch, the switch back included.
-- **Never run `pnpm install` or a `pnpm` script on it** until its `package.json`, lockfile and `.husky/` have been read: install runs `prepare` and the dependencies' install scripts.
+- **To run it locally, use a fresh clone in a separate directory:** `gh repo clone luiki-dev/szop <directory>`, then `gh pr checkout <N>` there. A fresh clone has no `core.hooksPath`, so no hook runs. Never check a fork's branch out in the working checkout.
+- **Never run `pnpm install` or a `pnpm` script in it** until its `package.json`, lockfile and `.husky/` have been read: install runs `prepare` and the dependencies' install scripts. Delete the clone when done.
 
 ## 5. Keep the branch up to date
 
