@@ -11,12 +11,12 @@
 
 ## Definition of done
 
-<!-- Each item: docs/development/definition-of-done.md. An item that does not apply replaces its box with ➖ N/A, as in "- ➖ N/A Mutants". When criteria are checked at the demo, add under Demo check: "Checked at the demo:" with their linked IDs, from the spec. -->
+<!-- Each item: docs/development/definition-of-done.md. An item that does not apply replaces its box with ➖ N/A, as in "- ➖ N/A Mutants". Under Checks, add "Checked by hand:" with the linked IDs of the criteria checked locally or on the demo, from the spec, and "Deferred:" with the link to the deferred-checks issue when the PR deferred a check. -->
 
 - [ ] Tests
 - [ ] Mutants
 - [ ] CI green
-- [ ] Demo check
+- [ ] Checks
 - [ ] infra/base applied
 - [ ] Living docs
 - [ ] Guides

@@ -16,7 +16,7 @@ In this order:
 4. **Acceptance criteria:** linked IDs, each marked whole or in part.
 5. **Tests.**
 6. **Documentation:** the living docs the phase changes.
-7. **Demo check:** the behaviors to check at the demo, and the IDs (linked) of the criteria checked there, from which the PR's "Checked at the demo:" line is filled.
+7. **Demo check:** each behavior to check by hand and where it is checked, local (the production-like environment) or AWS (only when the behavior needs AWS), and the line "Checked by hand:" with the IDs (linked) of the criteria checked there, from which the PR's "Checked by hand:" line is filled ([ADR 0064](../../decisions/0064-leaner-demo-check-phase-details.md), decision 5).
 8. **Risks.**
 9. **Out of scope.**
 10. **Left to the builder.**

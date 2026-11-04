@@ -70,10 +70,10 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **A phase** is the work item: one brainstorm, one branch, one PR, merged when it meets the [definition of done](development/definition-of-done.md). Its ID (`PH-01`, `PH-02`, …) never changes and is never reused; the order is the order on this page.
 - **Status lives on GitHub and is mirrored in each stage's table:** ⬜ Not started, 🚧 In progress, ✅ Done, ✖️ Dropped (with the reason). When a phase's work starts, its row gets 🚧 and the links to the spec and the plan as they are committed (a bounded phase has no spec or plan: "➖ N/A: bounded"); the PR link follows when the PR opens. Before the merge, the PR sets the row to ✅, which becomes true when the owner merges it.
 - **Each phase entry** says:
-  - **Goal:** what works when the phase is done. It is also what the demo check looks at.
+  - **Goal:** what works when the phase is done. It is also what the hand checks look at.
   - **Delivers:** the requirements and use cases it implements, as links, marked "part" when it delivers only part of one, naming the acceptance criteria it covers where that makes the part clearer; for tooling and infrastructure, what it builds and the ADRs behind it.
   - **Depends on:** what must happen first, when that is more than the order on this page, such as a spike.
-  - **Owner steps:** what only the owner can do. The owner's items of the definition of done (applying `infra/base` from the branch, the demo check) are named only where a phase needs them for the first time or in an unusual way.
+  - **Owner steps:** what only the owner can do. The owner's items of the definition of done (applying `infra/base` from the branch, the checks) are named only where a phase needs them for the first time or in an unusual way.
   - **Expected path:** full (spec and plan) or bounded (a short design in chat), as expected today; the phase's brainstorm decides ([ADR 0004](decisions/0004-implementation-process.md), decision 8).
   - **Open points:** the phase issue's sub-issues labelled `open-point` on GitHub, and the open points its **Also** section lists; the brainstorm starts from them.
 - **Size of a phase** ([ADR 0014](decisions/0014-roadmap.md), decision 6): it ends with something working, brings at most one big concept new to the project, and its plan has about 3 to 8 tasks. A phase that grows past about 10 tasks or a second new concept is split before it is planned or executed, and the owner can ask for a split at any time.

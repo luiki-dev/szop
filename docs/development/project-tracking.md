@@ -38,6 +38,7 @@ How Szop's work is tracked on GitHub: the roadmap's phases, the open points and 
 | Spike | Its open point's issue, also labelled `spike`, blocking its phase | The phase's "Depends on" |
 | Candidate | Its open point's issue, also labelled `candidate`, no parent, no milestone | — |
 | ADR made outside a phase | Issue `ADR NNNN <title>`, label `adr` | The ADR in [`docs/decisions/`](../decisions/) |
+| Deferred checks | One open issue, `Deferred demo checks`, label `deferred-checks`, ⬜ Backlog: a checklist of what to check, the PR it came from and that PR's merge date ([#377](https://github.com/luiki-dev/szop/issues/377)); it stays open when its list is empty | — (the issue is the only home) |
 | Requirements, use cases | — (linked from a phase's "Delivers") | [`functional-requirements.md`](../requirements/functional-requirements.md) |
 | Status | The project's Status field | The stage tables (⬜ 🚧 ✅ ✖️) |
 
@@ -57,6 +58,7 @@ One per stage, named after the stage's heading, with its **Exit:** line as the d
 | `adr` | Decision work whose result is one ADR, made outside a phase |
 | `bug` | Delivered work that behaves otherwise than the requirements, the design or common sense say |
 | `cannot-reproduce` | A bug no one could reproduce yet; the triage skips it until someone adds steps or sees it again |
+| `deferred-checks` | The one issue listing the hand checks deferred to the next AWS demo, [#377](https://github.com/luiki-dev/szop/issues/377) ([ADR 0064](../decisions/0064-leaner-demo-check-phase-details.md), decision 3) |
 
 No other labels are used on issues. On pull requests, `skip-changelog` leaves a PR out of the release notes ([release-please](tools/release-please.md#release-notes)), and Dependabot creates `dependencies` and one label per ecosystem on its own.
 
@@ -190,6 +192,7 @@ The `/phase-tracking` skill (`.claude/skills/phase-tracking/`) holds the steps a
 | An ADR is made outside a phase | An `adr` issue, closed by its PR | Claude |
 | An owner step is done | Its issue closed; the workflow sets ✅ Done | Owner, or Claude when the owner says so |
 | A phase's owner steps change | Step issues added, or closed as not planned with the reason | Claude |
+| A check is deferred, or a demo runs the deferred ones | A line added to [#377](https://github.com/luiki-dev/szop/issues/377) per deferred check, the merge date filled in after the merge; the lines a demo passed ticked. Before a phase PR, the phase PRs since the oldest open line are counted; at the fourth, the PR runs an AWS demo to clear the list | Claude, in `/demo-check` and `/phase-tracking` |
 | An item cannot move | Status → ⏳ Blocked, with a blocked-by link when the blocker is an issue | Owner or Claude |
 | An acceptance criterion is finalized, added, moved, dropped or delivered | Nothing on GitHub: the criterion's status, its requirement's line and the index's table in `docs/requirements/`, in the phase's branch: finalized at the brainstorm, ✅ in the PR ([ADR 0051](../decisions/0051-acceptance-criteria.md)) | Claude |
 | Before a PR, and at the start of a phase | The stage tables brought in line | Claude |

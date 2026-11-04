@@ -297,20 +297,20 @@ git commit -m "feat(claude): propose checks from the diff in /demo-check"
 **Interfaces:**
 - Consumes: Task 4's issue number and skill.
 
-- [ ] **Step 1: The definition of done and the template**
+- [x] **Step 1: The definition of done and the template**
 
 As the spec's [The definition of done and the PR template](../specs/2026-11-03-PH-44-leaner-demo-check-design.md#the-definition-of-done-and-the-pr-template) lists, item by item. The item's label in both files is `Checks`.
 
-- [ ] **Step 2: The other docs**
+- [x] **Step 2: The other docs**
 
 `specs/CLAUDE.md`: the "Demo check" section's rule. `project-tracking.md`: the label, the issue (linked by number) and a row in "How items move". `phase-walkthrough.md` step 5: a phase with local checks only, and when the demo is needed. `ci-cd.md`: wherever it says the demo check comes with every phase. Keep each `## Contents` in sync.
 
-- [ ] **Step 3: Check the links**
+- [x] **Step 3: Check the links**
 
 Run: `grep -rn "Demo check\|demo check" docs .github .claude CLAUDE.md | grep -v "docs/archive\|docs/audits\|docs/decisions\|docs/superpowers"`
 Expected: every remaining hit is right under the new rules.
 
-- [ ] **Step 4: `pnpm check`, commit**
+- [x] **Step 4: `pnpm check`, commit**
 
 ```bash
 git commit -m "docs: make the demo check a set of checks chosen from the diff"
