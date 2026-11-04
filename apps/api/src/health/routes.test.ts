@@ -9,6 +9,7 @@ import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { testDatabaseSettings, useTestDatabase } from "../test/database.ts";
 import { captureLog, type LogLine } from "../test/log.ts";
+import { readVersion } from "../version.ts";
 
 const commit = "0123456789abcdef0123456789abcdef01234567";
 const config = testConfig({ commit });
@@ -31,6 +32,7 @@ describe("GET /api/health", () => {
     expect(response.json()).toEqual({
       status: "ok",
       commit,
+      version: readVersion(),
       instance: instanceId,
       database: {
         status: "up",
@@ -83,6 +85,7 @@ describe("GET /api/health", () => {
       expect(response.json()).toEqual({
         status: "error",
         commit,
+        version: readVersion(),
         instance: instanceId,
         database: { status: "down" },
       });

@@ -8,6 +8,7 @@ export interface HealthRoutesOptions {
   db: Database;
   journal: Journal;
   commit: string;
+  version: string;
   instance: string;
 }
 
@@ -17,7 +18,7 @@ export interface HealthRoutesOptions {
 // up or down.
 export function healthRoutes(
   app: FastifyInstance,
-  { db, journal, commit, instance }: HealthRoutesOptions,
+  { db, journal, commit, version, instance }: HealthRoutesOptions,
 ): void {
   // GET /api/live: the load balancer's check. It touches only the process, so
   // a database outage does not make the load balancer replace the task
@@ -42,6 +43,7 @@ export function healthRoutes(
           return {
             status: "ok",
             commit,
+            version,
             instance,
             database: { status: "up", schemaVersion },
           } satisfies Health;
@@ -51,6 +53,7 @@ export function healthRoutes(
           return reply.code(503).send({
             status: "error",
             commit,
+            version,
             instance,
             database: { status: "down" },
           } satisfies Health);

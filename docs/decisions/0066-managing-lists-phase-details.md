@@ -32,6 +32,7 @@ The [spec](../superpowers/specs/2026-11-04-PH-16c-managing-lists-design.md) hold
 ## Settled while building
 
 - **The name check allows the zero-width joiner (U+200D) and the tag characters (U+E0020 to U+E007F)**, though they are in category `Cf`: family and flag emoji (`👨‍👩‍👧`, `🏴󠁧󠁢󠁳󠁣󠁴󠁿`) are built from them, so refusing them would break names the app should accept. The other `Cc` and `Cf` characters stay refused.
+- **The release version reaches the image by copying the root `package.json`, not by a build argument.** The API reads `../../../package.json` relative to its source, which is the repository's root file both in the tree and in the image once its final stage has `COPY package.json ./`. The version is then in the copied files already, release-please's bump of that file is the only place to change it, and no builder (Compose, CI, `demo-up`) has to pass it, as they do for `GIT_COMMIT`.
 
 ## Consequences
 

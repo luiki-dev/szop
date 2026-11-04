@@ -19,7 +19,11 @@ import { crossSite } from "./security/cross-site.ts";
 import { headers } from "./security/headers.ts";
 import { jsonOnly } from "./security/json-only.ts";
 import { requestSerializer } from "./security/log.ts";
+import { readVersion } from "./version.ts";
 import { webRoutes } from "./web/routes.ts";
+
+// Read once, when the module loads.
+const version = readVersion();
 
 // Where the log goes: anything that takes one line at a time.
 export interface LogStream {
@@ -103,6 +107,7 @@ export function buildApp({
     db,
     journal: readJournal(),
     commit: config.commit,
+    version,
     instance: instanceId,
   });
 

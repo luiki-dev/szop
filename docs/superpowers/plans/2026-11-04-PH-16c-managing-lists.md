@@ -91,17 +91,17 @@
 **Interfaces:**
 - Produces: `readVersion(): string` returns the root `package.json`'s `version`, parsed with Zod. `HealthRoutesOptions.version: string`. `Health` gains `version: string` in both variants.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - API: `readVersion()` equals the root `package.json`'s version. `GET /api/health` has `version` in the `200` and in the `503`.
   - Web, in `api-status.test.tsx`: with `commit: "a1b2c3d4e5…"` (40 characters) and `version: "0.2.0"`, the menu shows `Version 0.2.0 · a1b2c3d`. With `commit: "unknown"`, it shows `Version 0.2.0`. Both hold with the database up and with it down.
-- [ ] **Step 2: Run** the API and web tests. Expected: FAIL.
-- [ ] **Step 3: Implement.**
+- [x] **Step 2: Run** the API and web tests. Expected: FAIL.
+- [x] **Step 3: Implement.**
   - `readVersion` reads `new URL("../../../package.json", import.meta.url)` with `readFileSync`.
   - The API reads it once at startup and passes it to `healthRoutes`.
   - The `Dockerfile`'s final stage gains `COPY package.json ./`, so the same file is read in the image. This replaces a build argument, since the version is already in the copied tree. Record it in "Settled while building".
   - `api-status.tsx` puts the line above "Schema version" in the same `text-xs text-muted-foreground tabular-nums` style, and in the database-down branch too.
-- [ ] **Step 4: Run** `pnpm check`. Expected: PASS. Then build the image (`docker build .`) and run it, or run `pnpm` with the production-like Compose setup if that is quicker. Expected: `/api/health` answers `"version":"0.2.0"`.
-- [ ] **Step 5: Update** the docs, tick the steps. **Commit** `feat(api): report the release version in the health check and the menu`. Its body carries `Closes #380`.
+- [x] **Step 4: Run** `pnpm check`. Expected: PASS. Then build the image (`docker build .`) and run it, or run `pnpm` with the production-like Compose setup if that is quicker. Expected: `/api/health` answers `"version":"0.2.0"`.
+- [x] **Step 5: Update** the docs, tick the steps. **Commit** `feat(api): report the release version in the health check and the menu`. Its body carries `Closes #380`.
 
 ### Task 3: The confirmation dialog and deleting from the list's screen
 
