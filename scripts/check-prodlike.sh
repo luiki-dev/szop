@@ -90,7 +90,8 @@ mkdir -p "$certs"
   done
   # Readable by the containers' users; postgres-tls copies its key to 0600.
   chmod 0644 ./*
-) || fail "openssl could not make the certificates"
+  [[ -s ca.pem && -s localhost.pem && -s postgres.pem ]]
+) || fail "could not make the certificates (is openssl installed and working?)"
 
 if $build; then
   echo "==> Building the image"

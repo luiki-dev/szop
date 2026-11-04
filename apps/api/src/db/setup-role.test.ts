@@ -61,6 +61,12 @@ describe("loadSetupConfig", () => {
     ).toEqual(loadSetupConfig(valid));
   });
 
+  it("accepts DATABASE_TLS=none", () => {
+    expect(
+      loadSetupConfig({ ...valid, DATABASE_TLS: "none" }).database.tls,
+    ).toBe("none");
+  });
+
   it("leaves caFile unset without DATABASE_CA_FILE", () => {
     expect(loadSetupConfig(valid).database.caFile).toBeUndefined();
   });
