@@ -324,19 +324,19 @@ git commit -m "docs: make the demo check a set of checks chosen from the diff"
 - Modify: `docs/architecture/threat-model.md`, `docs/architecture/stack-overview.md`, `docs/glossary.md`, `docs/decisions/0008-hosting.md`, `0013-visual-design.md`, `0059-session-skills.md`, `0062-urgent-security-fixes.md`
 - On GitHub: a comment on [#360](https://github.com/luiki-dev/szop/issues/360) linking ADR 0064; the issue stays closed
 
-- [ ] **Step 1: The notes**
+- [x] **Step 1: The notes**
 
 Run `/new-adr` for the notes' format. ADR 0008 decision 29, ADR 0013 decision 4 and ADR 0059 decision 9 get ✏️ refined by ADR 0064; ADR 0062 decision 5 gets 🔍 revisited.
 
-- [ ] **Step 2: The other docs**
+- [x] **Step 2: The other docs**
 
 `threat-model.md`: the token was withdrawn, the deny rules and the push hook are the only guard; the Claude Code row is unchanged. `stack-overview.md`: a TLS-terminating proxy and a private certificate authority, short. `glossary.md`: SAN, if missing.
 
-- [ ] **Step 3: The comment on #360**
+- [x] **Step 3: The comment on #360**
 
 `gh issue comment 360 --body "…"`: one or two sentences linking ADR 0064, decision 11.
 
-- [ ] **Step 4: `pnpm check`, commit**
+- [x] **Step 4: `pnpm check`, commit**
 
 ```bash
 git commit -m "docs: record the withdrawn token and the ADR notes for PH-44"
