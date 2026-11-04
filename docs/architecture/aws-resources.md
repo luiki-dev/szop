@@ -85,7 +85,7 @@ flowchart LR
 
     subgraph route53["Route 53"]
         zone["Hosted zone<br/><b>dzwoniec.com</b><br/><i>base</i>"]
-        caa["CAA record<br/><b>dzwoniec.com</b><br/>Amazon and Let's Encrypt issue certificates<br/><i>base</i>"]
+        caa["CAA record<br/><b>dzwoniec.com</b><br/>Amazon and Let's Encrypt issue certificates, no wildcards<br/><i>base</i>"]
         caaApp["CAA record<br/><b>szop.dzwoniec.com</b><br/>only Amazon issues certificates<br/><i>base</i>"]
         pagesA["A and AAAA records<br/><b>dzwoniec.com</b><br/>GitHub Pages<br/><i>base</i>"]
         pagesWww["CNAME record<br/><b>www.dzwoniec.com</b><br/>GitHub Pages<br/><i>base</i>"]

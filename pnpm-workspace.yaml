@@ -21,3 +21,6 @@ allowBuilds:
 overrides:
   glob: ^14.0.2
   minimatch: ^11.0.1
+  # Stryker's typed-rest-client pins qs 6.15.1 (Dependabot alerts 2 and 5; ADR 0065,
+  # decision 8); remove once it accepts 6.16.1.
+  qs: ^6.16.1

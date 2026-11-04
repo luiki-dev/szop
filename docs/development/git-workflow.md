@@ -9,6 +9,7 @@ How a change travels from an idea to `main`, and how releases are cut. The decis
 - [2. Commit](#2-commit)
 - [3. Open a pull request](#3-open-a-pull-request)
 - [4. Review](#4-review)
+  - [Reviewing a fork's PR](#reviewing-a-forks-pr)
 - [5. Keep the branch up to date](#5-keep-the-branch-up-to-date)
 - [6. Merge](#6-merge)
 - [7. Read the history](#7-read-the-history)
@@ -112,6 +113,14 @@ The owner reviews; Claude addresses the comments.
 - **Review commit by commit** in the PR's *Commits* tab, or pick a commit from the *Files changed* tab's commit menu. Each commit is one task of the plan. Look at the whole diff last.
 - **Comments are answered with new commits on the branch**, not by rewriting existing ones. Rewriting history during a review (a rebase and force push) hides what changed since the last look, and changes the hashes of commits whose images may already have been checked.
 - **Every conversation must be resolved** before the merge button unlocks, so no comment is skipped by accident.
+
+### Reviewing a fork's PR
+
+A fork's branch can change the husky hooks and the scripts in `package.json`, and git and pnpm run them as the owner. `HUSKY=0` does not stop the hooks: a fork can force-add files under `.husky/_` (gitignored locally, so a checkout overwrites them), and git runs them directly through `core.hooksPath=.husky/_`, never calling husky's wrapper that reads `HUSKY` ([ADR 0065](../decisions/0065-minor-security-fixes.md), decision 3). Nothing enforces this procedure:
+
+- **Read it on GitHub first:** the *Files changed* tab and CI's results need nothing on the machine.
+- **To run it locally, use a fresh clone in a separate directory:** `gh repo clone luiki-dev/szop <directory>`, then `gh pr checkout <N>` there. A fresh clone has no `core.hooksPath`, so no hook runs. Never check a fork's branch out in the working checkout.
+- **Never run `pnpm install` or a `pnpm` script in it** until its `package.json`, lockfile and `.husky/` have been read: install runs `prepare` and the dependencies' install scripts. Delete the clone when done.
 
 ## 5. Keep the branch up to date
 

@@ -26,13 +26,14 @@ resource "aws_route53_zone" "main" {
 # refuse, even if an attacker passes its validation. Amazon's issues the
 # app's certificates. Let's Encrypt is here because GitHub Pages obtains the
 # landing page's certificate from it and accepts no other (PH-34 spec,
-# decision 3). The szop name has a record of its own below.
+# decision 3). The szop name has a record of its own below. No authority may
+# issue a wildcard, which would cover the szop name too (ADR 0065, decision 7).
 resource "aws_route53_record" "caa" {
   zone_id = aws_route53_zone.main.zone_id
   name    = local.domain
   type    = "CAA"
   ttl     = 3600
-  records = ["0 issue \"amazon.com\"", "0 issue \"letsencrypt.org\""]
+  records = ["0 issue \"amazon.com\"", "0 issue \"letsencrypt.org\"", "0 issuewild \";\""]
 }
 
 # A CAA record on a name takes precedence over its parent's, so the app's name
