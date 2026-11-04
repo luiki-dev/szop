@@ -159,15 +159,23 @@ data "aws_iam_policy_document" "ci_plan_denies" {
     resources = ["*"]
   }
 
-  # A pull request could print the owner's contact details into a public log
-  # (ADR 0032, decision 5).
+  # A pull request could print the owner's contact details or other personal
+  # data into a public log: the Organization's root email, Identity Center's
+  # users, CloudTrail's event history and SES's suppressed addresses (ADR 0032,
+  # decision 5; ADR 0065, decision 6). No Terraform configuration reads them.
   statement {
-    sid    = "DenyAccountContacts"
+    sid    = "DenyPersonalData"
     effect = "Deny"
     actions = [
       "account:GetPrimaryEmail",
       "account:GetContactInformation",
       "account:GetAlternateContact",
+      "organizations:*",
+      "identitystore:*",
+      "sso-directory:*",
+      "cloudtrail:LookupEvents",
+      "ses:ListSuppressedDestinations",
+      "ses:GetSuppressedDestination",
     ]
     resources = ["*"]
   }
