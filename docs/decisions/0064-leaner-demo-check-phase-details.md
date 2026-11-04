@@ -46,3 +46,4 @@ The owner settled the direction in the brainstorm on 2026-11-03; the [spec](../s
 ## Settled while building
 
 - **`caFile` is optional** (Task 1): `DatabaseSettings.caFile` is set only when `DATABASE_CA_FILE` is, and `createDatabase` falls back to the RDS bundle, instead of the loaders always setting it to the bundle's path as the spec says. The bundle's path stays in one place, `database.ts`, and the tests' `DatabaseSettings` literals stay as they are.
+- **The phase-PR count never names "merge"** (Task 4): `gh pr list --state merged` is blocked by the deny rule `gh pr * merge*` ([ADR 0012](0012-security-baseline.md), decision 19), so `/demo-check` lists closed PRs and keeps those whose state is not `CLOSED`, which are the merged ones. The deny rule stays as it is _(the owner's choice)_.

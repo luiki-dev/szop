@@ -265,23 +265,23 @@ git commit -m "test: run a Playwright project against the prodlike environment"
 - Consumes: `pnpm check:prodlike --keep` and `--down` (Tasks 2 and 3).
 - Produces: the skill text Task 5's docs link to; the issue's number, which Task 5 writes into `project-tracking.md`.
 
-- [ ] **Step 1: Make the label and the issue**
+- [x] **Step 1: Make the label and the issue**
 
 `gh label create deferred-checks --description "Checks deferred to the next demo (ADR 0064, decision 3)"`; `gh issue create --title "Deferred demo checks" --label deferred-checks --body …` with a body that says what the list is, the counting rule, and an empty checklist; add it to the project and set Status to ⬜ Backlog (the `/phase-tracking` skill has the commands). Note its number.
 
-- [ ] **Step 2: Rewrite `/demo-check`**
+- [x] **Step 2: Rewrite `/demo-check`**
 
 The four steps of the spec's [`/demo-check`](../specs/2026-11-03-PH-44-leaner-demo-check-design.md#demo-check-1) section, with the buckets table linked (not copied), the counting rule with its `gh pr list --state merged --search "merged:>YYYY-MM-DD" --json headRefName` command and the `<type>/ph-NN-…` filter, `--keep` always passed, Lighthouse with `--chrome-flags="--headless --ignore-certificate-errors"` on `https://localhost:8443/`, and `--down` at the end. Keep ADR 0059's one-table message and "Claude never triggers `demo-up` or `demo-down`". Update the skill's `description` front matter.
 
-- [ ] **Step 3: `/finish-phase` and `/phase-tracking`**
+- [x] **Step 3: `/finish-phase` and `/phase-tracking`**
 
 Only the lines the spec names.
 
-- [ ] **Step 4: Check the skill by reading it as a fresh session would**
+- [x] **Step 4: Check the skill by reading it as a fresh session would**
 
 Read the rewritten skill against this branch's diff: it must propose the local checks and no AWS demo (the spec's Demo check, last line). Fix what it gets wrong.
 
-- [ ] **Step 5: `pnpm check`, commit**
+- [x] **Step 5: `pnpm check`, commit**
 
 ```bash
 git commit -m "feat(claude): propose checks from the diff in /demo-check"
