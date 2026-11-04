@@ -13,10 +13,10 @@ One example phase, from the first commit to the release, showing where each thin
   - [Step 2 — Implement, task by task, test first](#step-2--implement-task-by-task-test-first)
   - [Step 3 — Check locally while implementing](#step-3--check-locally-while-implementing)
   - [Step 4 — Self-review, then open the PR](#step-4--self-review-then-open-the-pr)
-  - [Step 5 — Deploy the branch to the demo](#step-5--deploy-the-branch-to-the-demo)
+  - [Step 5 — Run the checks the diff calls for](#step-5--run-the-checks-the-diff-calls-for)
   - [Step 6 — Review comments and a fix](#step-6--review-comments-and-a-fix)
   - [Step 7 — `main` moves: update the branch](#step-7--main-moves-update-the-branch)
-  - [Step 8 — Redeploy, check, tear down](#step-8--redeploy-check-tear-down)
+  - [Step 8 — Repeat a check whose area changed](#step-8--repeat-a-check-whose-area-changed)
   - [Step 9 — The owner merges the phase](#step-9--the-owner-merges-the-phase)
   - [Step 10 — The release PR waits](#step-10--the-release-pr-waits)
   - [Step 11 — The owner merges the release PR](#step-11--the-owner-merges-the-release-pr)
@@ -54,7 +54,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
           1   2   3   4   5   6   7       8            9                      v0.4.0
           └──────────── feat/templates (PR #12) ──────────┘                   (tag on M14)
                                   ▲                    ▲
-                        demo-up @ 7 (create)  demo-up @ 9 (redeploy) → check → demo-down
+                  check:prodlike @ 7 (local)  check:prodlike @ 9 (re-run: a dependency bump came in)
 ```
 
 | # | Branch | Commit message | Why it is there |
@@ -115,7 +115,7 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
 
 ### Step 3 — Check locally while implementing
 
-*Where: the owner's machine.* The demo is for the end of a phase; the day-to-day checks are local and take seconds to minutes ([ADR 0005](../decisions/0005-development-environment.md), [ADR 0007](../decisions/0007-testing-strategy.md)).
+*Where: the owner's machine.* The demo is only for a PR whose diff changes what only AWS can show; the day-to-day checks are local and take seconds to minutes ([ADR 0005](../decisions/0005-development-environment.md), [ADR 0007](../decisions/0007-testing-strategy.md)).
 
 ```
  docker compose up -d        PostgreSQL in a container
@@ -152,23 +152,43 @@ Time flows left to right. `●` is a commit, `M` a merge commit.
 - CI tests `refs/pull/12/merge`: what `main` would look like after the merge. A newer push cancels the older run.
 - Until a check's phase lands, `ci.yml` simply has no such job; the jobs today are listed in [CI/CD](ci-cd.md).
 
-### Step 5 — Deploy the branch to the demo
+### Step 5 — Run the checks the diff calls for
 
-*Where: GitHub Actions → AWS.*
+*Where: the owner's machine; GitHub Actions → AWS only when the diff calls for it.*
 
 ```
- owner: Actions ▶ demo-up ▶ ref = feat/templates
+ /demo-check   reads git diff main...HEAD, the spec's "Demo check" and the deferred-checks issue
+     │
+     ├─ proposes: # | bucket | check | why (from the diff) | who, where
+     │            1 | Local  | pnpm check:prodlike         | apps/api/src/ changed (templates routes)
+     │            2 | Local  | the spec's behaviors, https://localhost:8443 | the phase's screens
+     │            3 | Local  | Lighthouse on a phone profile | apps/web/ changed (a new page)
+     ├─ owner: run 1–3
+     ├─ Claude: pnpm check:prodlike --keep → Lighthouse; owner: the behaviors in the browser
+     └─ one line per check ✅/❌, the PR's "Checked by hand:" filled, pnpm check:prodlike --down
+```
+
+The templates phase changes the API and a page, not `infra/`, so `/demo-check` proposes only local checks ([definition of done](definition-of-done.md#the-checks)). The owner chooses which run; a declined check is dropped. The owner reviews the PR commit by commit.
+
+The demo is needed only when the diff changes what only AWS can show: Terraform under `infra/` (beyond a provider lock bump), the demo workflows, a task definition's environment or secrets, or a behavior the spec says needs AWS. Then `/demo-check` adds the AWS rows, and the owner presses `demo-up` on the branch:
+
+```
+ owner: Actions ▶ demo-up ▶ ref = <branch>
           │
-          ├─ resolve ref → full commit hash of 7 (a1b2c3d…)
+          ├─ resolve ref → full commit hash of the head
           ├─ ⏸ image and deploy jobs (environment "demo") wait → owner: Review deployments ▶ Approve
-          ├─ image job:  ECR has szop:a1b2c3d? no → build and push szop:a1b2c3d
+          ├─ image job:  ECR has the image? no → build and push szop:<hash>
           ├─ deploy job: terraform apply infra/demo   ~10–15 min (RDS)
           │                                   migrations run as the container starts
           ├─ re-enable the nightly demo-down schedule
           └─ wait for https://szop.dzwoniec.com/api/health → summary: URL, commit, image
+ owner and Claude: the list /demo-check sent … done
+ owner: demo-down ▶ ref = main ▶ terraform destroy infra/demo   (by hand, right away; no approval)
+        safety net: demo-down also runs every night at 01:17 UTC, and does nothing if there is no demo
+        both run in the environment "demo-teardown", which only main may use
 ```
 
-The approval is the owner confirming that they started this run: a deploy nobody pressed, for example from a workflow a branch added, waits there and is rejected ([ADR 0012](../decisions/0012-security-baseline.md), decision 16). The owner runs the list that `/demo-check` sends and checks the phase's behavior in a browser on the demo, and reviews the PR commit by commit.
+The approval is the owner confirming that they started this run: a deploy nobody pressed, for example from a workflow a branch added, waits there and is rejected ([ADR 0012](../decisions/0012-security-baseline.md), decision 16). A check that could affect AWS without changing it, such as an AWS provider bump, is deferred to the next demo on the deferred-checks issue, at most four phase PRs later.
 
 ### Step 6 — Review comments and a fix
 
@@ -199,30 +219,24 @@ The approval is the owner confirming that they started this run: a deploy nobody
 ```
 
 - `build(deps)` is not a releasable change, so release-please opens **no** release PR for M13 (see [what makes a release](#what-makes-a-release-and-which-number-changes)).
-- PR #12 is now behind `main`, and the ruleset requires it to be up to date. *Update branch* (or `git merge main` locally) adds merge commit 9. **No rebase**, so hashes 1–8, and the image `szop:a1b2c3d` built from 7, stay valid.
+- PR #12 is now behind `main`, and the ruleset requires it to be up to date. *Update branch* (or `git merge main` locally) adds merge commit 9. **No rebase**, so hashes 1–8, and the local check at 7, stay valid.
 - commitlint ignores merge commits such as 9. CI runs again on the new head.
 
-### Step 8 — Redeploy, check, tear down
+### Step 8 — Repeat a check whose area changed
 
-*Where: GitHub Actions → AWS.*
+*Where: the owner's machine.*
 
 ```
- owner: demo-up ▶ ref = feat/templates → hash of 9 (e4f5a6b…) ▶ Approve
-          ├─ build and push szop:e4f5a6b
-          └─ terraform apply: only the ECS service's image changes
-                → ECS rolling update: starts a task on the new image, waits for it to be healthy,
-                  then stops the old one (a few minutes, the demo stays up)
-
- owner checks the demo again … done
-
- owner: demo-down ▶ ref = main ▶ terraform destroy infra/demo   (by hand, right away; no approval)
-        safety net: demo-down also runs every night at 01:17 UTC, and does nothing if there is no demo
-        both run in the environment "demo-teardown", which only main may use
+ merge 9 brought szop's npm dependencies from M13 into the image
+     → it changes what check:prodlike covers: /demo-check proposes it again
+ owner: run it → Claude: pnpm check:prodlike --keep … ✅ → --down
+ fix 8 changed a React component only
+     → no check repeated for it, except Lighthouse if Lighthouse was chosen
 ```
 
-- **Redeploying** with the demo up does not rebuild everything: the ECS service replaces its tasks one by one (a rolling update).
-- `demo-up` and `demo-down` never run Terraform at the same time: each waits for the other's state lock, and neither cancels a running job. `demo-down` destroys with the Terraform code of the commit that was deployed, which `demo-up` records ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7).
-- The *Deployed* box of the [definition of done](definition-of-done.md) can now be ticked, with a link to this `demo-up` run: the image of the head that will be merged was built, deployed, checked and destroyed.
+- A check that passed is repeated only when a later commit changes what it covers ([definition of done](definition-of-done.md#when-a-check-must-be-repeated)). A documentation-only commit repeats none.
+- Had the phase needed the demo, a later change in its area would mean `demo-up` again on the branch: with the demo up, the ECS service replaces its tasks one by one (a rolling update), then `demo-down`. `demo-up` and `demo-down` never run Terraform at the same time: each waits for the other's state lock, and neither cancels a running job. `demo-down` destroys with the Terraform code of the commit that was deployed, which `demo-up` records ([ADR 0011](../decisions/0011-design-sanity-check-follow-ups.md), decision 7).
+- The `Checks` box of the [definition of done](definition-of-done.md) can now be ticked: every chosen check passed on the head that will be merged.
 - Szop has no *rollout* in the usual sense (getting a new version to users, often gradually, with canary releases or feature flags): there are no users, and the demo exists only for a session.
 
 ### Step 9 — The owner merges the phase

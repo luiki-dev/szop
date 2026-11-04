@@ -67,8 +67,8 @@ A criterion's status:
 |---|---|
 | ❔ Draft | Written from a decision, or from an open point's direction (then linked); no phase has finalized it. |
 | ⬜ Not started | Finalized by a phase's brainstorm, which is named; not built yet. |
-| 🚧 In progress | The named phase is building it; or it is built, but no test covers it yet ("no test yet"), or a person has yet to check it at a demo check ("to check at the next demo"). |
-| ✅ Done | Delivered by the named phase and covered by a test, or checked by a person at the demo check ("checked at the demo"). |
+| 🚧 In progress | The named phase is building it; or it is built, but no test covers it yet ("no test yet"), or a person has yet to check it by hand, locally or on the demo ("to check by hand"; "to check at the next demo" before [PH-44](../roadmap.md#ph-44-leaner-demo-check)). |
+| ✅ Done | Delivered by the named phase and covered by a test, or checked by a person by hand ("checked by hand"; "checked at the demo" before [PH-44](../roadmap.md#ph-44-leaner-demo-check)). |
 | ➡️ Moved | Moved to another requirement, under the ID named. |
 | ✖️ Dropped | No longer wanted, for the reason given. |
 

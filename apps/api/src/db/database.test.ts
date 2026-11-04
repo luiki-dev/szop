@@ -1,5 +1,7 @@
-import { readFileSync } from "node:fs";
-import { afterEach, describe, expect, it } from "vitest";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { DatabaseSettings } from "../config.ts";
 import { createDatabase, rdsCaBundle, type Database } from "./database.ts";
 
@@ -38,6 +40,40 @@ describe("createDatabase", () => {
       ca: bundle,
       rejectUnauthorized: true,
     });
+  });
+
+  describe("with caFile", () => {
+    let dir: string;
+    let file: string;
+
+    beforeEach(() => {
+      dir = mkdtempSync(join(tmpdir(), "szop-ca-"));
+      file = join(dir, "ca.pem");
+      writeFileSync(file, "-----BEGIN CERTIFICATE-----\ntest\n");
+    });
+
+    afterEach(() => {
+      rmSync(dir, { recursive: true, force: true });
+    });
+
+    it("verifies the server against caFile when it is set", () => {
+      db = createDatabase({ ...settings, tls: "verify-full", caFile: file });
+
+      expect(db.$client.options.ssl).toEqual({
+        ca: "-----BEGIN CERTIFICATE-----\ntest\n",
+        rejectUnauthorized: true,
+      });
+    });
+  });
+
+  it("stops when caFile does not exist", () => {
+    expect(() =>
+      createDatabase({
+        ...settings,
+        tls: "verify-full",
+        caFile: "/nonexistent/ca.pem",
+      }),
+    ).toThrow(/ENOENT/);
   });
 
   it("opens at most 5 connections", () => {

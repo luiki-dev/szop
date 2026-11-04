@@ -5,7 +5,7 @@ description: Finishes a phase branch, or any other branch such as an ADR made ou
 
 # Finish a phase
 
-After [ADR 0059](../../../docs/decisions/0059-session-skills.md), decisions 6 to 8. The steps marked _phase only_ are skipped on a branch outside a phase (an ADR, a chore). The skill points to other documents and does not restate them: the tracking steps are in `/phase-tracking`, the PR's items in `.github/pull_request_template.md`, the demo check in the [definition of done](../../../docs/development/definition-of-done.md#the-demo-check).
+After [ADR 0059](../../../docs/decisions/0059-session-skills.md), decisions 6 to 8. The steps marked _phase only_ are skipped on a branch outside a phase (an ADR, a chore). The skill points to other documents and does not restate them: the tracking steps are in `/phase-tracking`, the PR's items in `.github/pull_request_template.md`, the checks in the [definition of done](../../../docs/development/definition-of-done.md#the-checks).
 
 From `superpowers:finishing-a-development-branch` it keeps the checks on the final head and the rule never to force-push a rejected push. It drops the menu, the local merge and the worktree cleanup. It never merges, never triggers `demo-up` or `demo-down`, and never removes a worktree.
 
@@ -29,5 +29,5 @@ From `superpowers:finishing-a-development-branch` it keeps the checks on the fin
    - The dropped ones noted as declined in the phase ADR's "Settled while building" _(phase only)_.
 6. **Token usage** _(phase only)_: `python3 scripts/token-usage.py --branch <branch>`, kept for the PR.
 7. **`/phase-tracking`, "Before opening the PR".**
-8. **Open the PR** from the template: a Conventional Commits title, the definition of done items ticked or `➖ N/A`, "Checked at the demo:" left for `/demo-check`, the token usage section _(phase only)_, the `skip-changelog` label when the release notes need no line. Never merge. A rejected push is never forced.
-9. **Wrap up.** If the branch is in a worktree, say so and that it is removed after the merge. When the spec has a "Demo check" section, or the definition of done needs one, end with one question asked with `AskUserQuestion`: run `/demo-check` now? On yes, invoke it in this session. Never list it only among the owner's steps, where it is easy to miss.
+8. **Open the PR** from the template: a Conventional Commits title, the definition of done items ticked or `➖ N/A`, "Checked by hand:" and "Deferred:" left for `/demo-check`, the token usage section _(phase only)_, the `skip-changelog` label when the release notes need no line. Never merge. A rejected push is never forced.
+9. **Wrap up.** If the branch is in a worktree, say so and that it is removed after the merge. Unless the branch changes only documentation or process files, end with one question asked with `AskUserQuestion`: run `/demo-check` now? It proposes the checks the diff calls for, which may be none or local ones only (ADR 0064). On yes, invoke it in this session. Never list it only among the owner's steps, where it is easy to miss.

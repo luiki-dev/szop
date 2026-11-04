@@ -39,6 +39,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-16b Workspace from the default data](#ph-16b-workspace-from-the-default-data)
   - [PH-42 Urgent security fixes](#ph-42-urgent-security-fixes)
   - [PH-43 Minor security fixes](#ph-43-minor-security-fixes)
+  - [PH-44 Leaner demo check](#ph-44-leaner-demo-check)
   - [PH-16c Managing lists](#ph-16c-managing-lists)
   - [PH-17a List items](#ph-17a-list-items)
   - [PH-17b The haul](#ph-17b-the-haul)
@@ -69,10 +70,10 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **A phase** is the work item: one brainstorm, one branch, one PR, merged when it meets the [definition of done](development/definition-of-done.md). Its ID (`PH-01`, `PH-02`, …) never changes and is never reused; the order is the order on this page.
 - **Status lives on GitHub and is mirrored in each stage's table:** ⬜ Not started, 🚧 In progress, ✅ Done, ✖️ Dropped (with the reason). When a phase's work starts, its row gets 🚧 and the links to the spec and the plan as they are committed (a bounded phase has no spec or plan: "➖ N/A: bounded"); the PR link follows when the PR opens. Before the merge, the PR sets the row to ✅, which becomes true when the owner merges it.
 - **Each phase entry** says:
-  - **Goal:** what works when the phase is done. It is also what the demo check looks at.
+  - **Goal:** what works when the phase is done. It is also what the hand checks look at.
   - **Delivers:** the requirements and use cases it implements, as links, marked "part" when it delivers only part of one, naming the acceptance criteria it covers where that makes the part clearer; for tooling and infrastructure, what it builds and the ADRs behind it.
   - **Depends on:** what must happen first, when that is more than the order on this page, such as a spike.
-  - **Owner steps:** what only the owner can do. The owner's items of the definition of done (applying `infra/base` from the branch, the demo check) are named only where a phase needs them for the first time or in an unusual way.
+  - **Owner steps:** what only the owner can do. The owner's items of the definition of done (applying `infra/base` from the branch, the checks) are named only where a phase needs them for the first time or in an unusual way.
   - **Expected path:** full (spec and plan) or bounded (a short design in chat), as expected today; the phase's brainstorm decides ([ADR 0004](decisions/0004-implementation-process.md), decision 8).
   - **Open points:** the phase issue's sub-issues labelled `open-point` on GitHub, and the open points its **Also** section lists; the brainstorm starts from them.
 - **Size of a phase** ([ADR 0014](decisions/0014-roadmap.md), decision 6): it ends with something working, brings at most one big concept new to the project, and its plan has about 3 to 8 tasks. A phase that grows past about 10 tasks or a second new concept is split before it is planned or executed, and the owner can ask for a split at any time.
@@ -330,9 +331,10 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-15a Seed catalog, read-only](#ph-15a-seed-catalog-read-only) | ✅ Done | [Spec](superpowers/specs/2026-10-25-PH-15a-seed-catalog-design.md) | [Plan](superpowers/plans/2026-10-27-PH-15a-seed-catalog.md) | [#306](https://github.com/luiki-dev/szop/pull/306) | [#287](https://github.com/luiki-dev/szop/issues/287) |
 | [PH-15b Mutation testing](#ph-15b-mutation-testing) | ✅ Done | [Spec](superpowers/specs/2026-10-28-PH-15b-mutation-testing-design.md) | [Plan](superpowers/plans/2026-10-28-PH-15b-mutation-testing.md) | [#310](https://github.com/luiki-dev/szop/pull/310) | [#288](https://github.com/luiki-dev/szop/issues/288) |
 | [PH-16a Guest's first list](#ph-16a-guests-first-list) | ✅ Done | [Spec](superpowers/specs/2026-10-30-PH-16a-guests-first-list-design.md) | [Plan](superpowers/plans/2026-10-30-PH-16a-guests-first-list.md) | [#322](https://github.com/luiki-dev/szop/pull/322) | [#313](https://github.com/luiki-dev/szop/issues/313) |
-| [PH-16b Workspace from the default data](#ph-16b-workspace-from-the-default-data) | 🚧 In progress | [Spec](superpowers/specs/2026-11-01-PH-16b-workspace-from-default-data-design.md) | [Plan](superpowers/plans/2026-11-01-PH-16b-workspace-from-default-data.md) | [#330](https://github.com/luiki-dev/szop/pull/330) | [#314](https://github.com/luiki-dev/szop/issues/314) |
-| [PH-42 Urgent security fixes](#ph-42-urgent-security-fixes) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#369](https://github.com/luiki-dev/szop/pull/369) | [#336](https://github.com/luiki-dev/szop/issues/336) |
+| [PH-16b Workspace from the default data](#ph-16b-workspace-from-the-default-data) | ✅ Done | [Spec](superpowers/specs/2026-11-01-PH-16b-workspace-from-default-data-design.md) | [Plan](superpowers/plans/2026-11-01-PH-16b-workspace-from-default-data.md) | [#330](https://github.com/luiki-dev/szop/pull/330) | [#314](https://github.com/luiki-dev/szop/issues/314) |
+| [PH-42 Urgent security fixes](#ph-42-urgent-security-fixes) | ✅ Done | ➖ N/A: bounded | ➖ N/A: bounded | [#369](https://github.com/luiki-dev/szop/pull/369) | [#336](https://github.com/luiki-dev/szop/issues/336) |
 | [PH-43 Minor security fixes](#ph-43-minor-security-fixes) | ⬜ Not started | — | — | — | [#337](https://github.com/luiki-dev/szop/issues/337) |
+| [PH-44 Leaner demo check](#ph-44-leaner-demo-check) | 🚧 In progress | [Spec](superpowers/specs/2026-11-03-PH-44-leaner-demo-check-design.md) | [Plan](superpowers/plans/2026-11-03-PH-44-leaner-demo-check.md) | [#378](https://github.com/luiki-dev/szop/pull/378) | [#376](https://github.com/luiki-dev/szop/issues/376) |
 | [PH-16c Managing lists](#ph-16c-managing-lists) | ⬜ Not started | — | — | — | [#315](https://github.com/luiki-dev/szop/issues/315) |
 | [PH-17a List items](#ph-17a-list-items) | ⬜ Not started | — | — | — | [#290](https://github.com/luiki-dev/szop/issues/290) |
 | [PH-17b The haul](#ph-17b-the-haul) | ⬜ Not started | — | — | — | [#291](https://github.com/luiki-dev/szop/issues/291) |
@@ -447,6 +449,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** turn on private vulnerability reporting ([#361](https://github.com/luiki-dev/szop/issues/361)); switch off the administrators' bypass on the four environments ([#362](https://github.com/luiki-dev/szop/issues/362)); apply `infra/base` from the branch, and again from `main` after the merge ([#363](https://github.com/luiki-dev/szop/issues/363)).
 - **Expected path:** bounded.
 - **Open points:** the sub-issues of [#337](https://github.com/luiki-dev/szop/issues/337).
+
+### PH-44 Leaner demo check
+
+- **Goal:** the demo environment is spun up only when a PR changes what only AWS can show; what a local copy of production can show is checked on the owner's machine, at the owner's choice; checks made "just in case" wait for the next demo, at most four phases; and Claude sessions act on GitHub with the owner's own login.
+- **Delivers:** the demo check of the [definition of done](development/definition-of-done.md) split by what the diff touches; a local production-like environment (the image behind a TLS proxy, PostgreSQL over TLS) and a script that checks it; `/demo-check` proposing the checks from the diff; an issue of deferred demo checks; the fine-grained token of [#360](https://github.com/luiki-dev/szop/issues/360) withdrawn.
+- **Depends on:** —
+- **Owner steps:** —
+- **Expected path:** full.
+- **Open points:** —
 
 ### PH-16c Managing lists
 

@@ -86,7 +86,7 @@ STRIDE names six kinds of threat: **S**poofing (pretending to be someone else), 
 
 ## Risks accepted on purpose
 
-- **The deny rules and the token** ([ADR 0062](../decisions/0062-urgent-security-fixes.md), decision 5). A shell command can be written in a form a deny pattern does not match, so until the owner gives Claude sessions a fine-grained token ([#360](https://github.com/luiki-dev/szop/issues/360)) that cannot merge, approve a deployment or change settings, a session with the owner's credentials can still do what the owner can.
+- **The deny rules are the only guard** ([ADR 0062](../decisions/0062-urgent-security-fixes.md), decision 5; [ADR 0064](../decisions/0064-leaner-demo-check-phase-details.md), decision 11). The fine-grained token of [#360](https://github.com/luiki-dev/szop/issues/360) was withdrawn: sessions use the owner's own `gh auth login`. A shell command can be written in a form a deny pattern or the push hook does not match, so a session with the owner's credentials can still do what the owner can.
 - **Sign-in limits are per task until PH-20/PH-39.** Two tasks allow up to 60 guest sign-ins an hour per address, and an attacker with many addresses is not slowed (decision 3).
 - **`demo-down` trusts the providers `main` locks.** The recorded commit must be on a branch here and lock the same providers as `main`; code on a branch of this repository still runs with the deploy role, so review of the PR is the gate. A commit on no branch, or with other providers, destroys nothing and needs the owner (decision 8).
 - **The leftover check reads tags.** A resource without the `group = demo` tag that a branch's Terraform created is not found; the deploy role's creating policies require the tag (decision 9).

@@ -86,6 +86,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **REST** | Representational State Transfer | An API style where URLs name resources (`/api/lists/42`) and HTTP methods say what to do with them (`GET`, `POST`, `PATCH`, `DELETE`). |
 | **RLS** | Row-Level Security | A PostgreSQL feature that filters every query by policies attached to a table, such as "only this workspace's rows". Considered for Szop, not used (see ADR 0012). |
 | **S3** | Simple Storage Service | AWS's file (object) storage. Holds Szop's Terraform state. |
+| **SAN** | Subject Alternative Name | The part of a TLS certificate that lists the host names it is valid for. Browsers and `verify-full` check the host against it. `check:prodlike`'s certificates name `localhost` and `postgres-tls` there. |
 | **SBOM** | Software Bill of Materials | A machine-readable list of everything inside a piece of software, such as every package in a container image. Not produced yet (see ADR 0010). |
 | **SCRAM** | Salted Challenge Response Authentication Mechanism | How PostgreSQL checks a password without the password being sent: client and server prove they know it through a salted, hashed exchange. Szop's is SCRAM-SHA-256, which uses the SHA-256 hash. It is built on SASL, the Simple Authentication and Security Layer, a framework for such exchanges. PostgreSQL stores a password as a *SCRAM verifier* ([term](#terms)). |
 | **SDK** | Software Development Kit | A library for calling a platform from code, such as the AWS SDK for JavaScript. |

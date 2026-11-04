@@ -30,5 +30,8 @@ coverage/
 reports/
 .stryker-tmp/
 
+# check:prodlike's throwaway certificates (ADR 0064, decision 7)
+.prodlike/
+
 # graphify's code map, built on each machine (ADR 0056)
 graphify-out/

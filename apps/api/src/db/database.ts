@@ -30,12 +30,16 @@ export function createDatabase(settings: DatabaseSettings): Database {
     // Fail fast when the database is unreachable, including in the health
     // check, instead of waiting for the operating system's timeout.
     connectionTimeoutMillis: 2000,
-    // verify-full: the server's certificate must chain to the bundle and name
-    // the host (ADR 0033, decision 5). Read here, so a missing bundle stops
-    // startup instead of the first query.
+    // verify-full: the server's certificate must chain to caFile, or the RDS
+    // bundle when it is unset, and name the host (ADR 0033, decision 5;
+    // ADR 0064, decision 8). Read here, so a missing file stops startup
+    // instead of the first query.
     ssl:
       settings.tls === "verify-full"
-        ? { ca: readFileSync(rdsCaBundle, "utf8"), rejectUnauthorized: true }
+        ? {
+            ca: readFileSync(settings.caFile ?? rdsCaBundle, "utf8"),
+            rejectUnauthorized: true,
+          }
         : false,
   });
   // An idle connection that drops (the server restarted or stopped) makes the

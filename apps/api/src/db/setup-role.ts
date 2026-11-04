@@ -1,4 +1,5 @@
 import { createHash, createHmac, pbkdf2Sync, randomBytes } from "node:crypto";
+import { resolve } from "node:path";
 import pg from "pg";
 import { z } from "zod";
 import type { DatabaseSettings } from "../config.ts";
@@ -16,6 +17,9 @@ const envSchema = z.object({
   DATABASE_USER: z.string().min(1),
   DATABASE_PASSWORD: z.string().min(1),
   DATABASE_TLS: z.enum(["none", "verify-full"]),
+  // The certificate authority verify-full checks against; the RDS bundle when
+  // unset (ADR 0064, decision 8).
+  DATABASE_CA_FILE: z.string().min(1).optional(),
   // A plain lower-case identifier, at most PostgreSQL's 63 bytes.
   APP_DATABASE_USER: z.string().regex(/^[a-z_][a-z0-9_]{0,62}$/),
   // Printable ASCII only: PostgreSQL would normalize other characters
@@ -62,6 +66,7 @@ export function loadSetupConfig(
       user: data.DATABASE_USER,
       password: data.DATABASE_PASSWORD,
       tls: data.DATABASE_TLS,
+      ...(data.DATABASE_CA_FILE && { caFile: resolve(data.DATABASE_CA_FILE) }),
     },
     appRole: {
       name: data.APP_DATABASE_USER,
