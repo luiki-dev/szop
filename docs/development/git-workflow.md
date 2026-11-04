@@ -130,7 +130,7 @@ GitHub requires the branch to be up to date before merging (the `main` ruleset, 
 
 **Only the owner merges; the merge is the approval.** GitHub does not let an author approve their own PR, and every PR is authored by the owner's account, so there is no formal approving review.
 
-A PR is merged when the [definition of done](definition-of-done.md) is met on the branch. For a phase, that includes a check on a demo environment created from the branch's image with the `demo-up` workflow ([ADR 0010](../decisions/0010-ci-cd.md)), covering the PR's final head.
+A PR is merged when the [definition of done](definition-of-done.md) is met on the branch. For a phase, that includes the checks `/demo-check` proposes from the diff ([definition of done](definition-of-done.md#the-checks)), covering the PR's final head; a demo on AWS (`demo-up`, [ADR 0010](../decisions/0010-ci-cd.md)) only when the diff changes what only AWS can show ([ADR 0064](../decisions/0064-leaner-demo-check-phase-details.md), decision 1).
 
 The only merge method is a **merge commit**. GitHub deletes the remote branch afterwards. Locally:
 

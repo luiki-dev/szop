@@ -87,11 +87,11 @@ A new profile in `compose.yaml`, `prodlike` (decision 7). Its services sit next 
 
 One open issue, `Deferred demo checks`, labelled `deferred-checks` (a new label), on the project at ⬜ Backlog (decision 3). Its body is a checklist, one line per check: what to check, the PR it came from and the date that PR was merged, filled in at the merge's next `/demo-check` or `/phase-tracking`.
 
-**Counting** _(Claude's call)_: the phase PRs counted are the merged PRs whose branch is a phase branch (`<type>/ph-NN-…`), merged after the date of the oldest open line, whether they deferred anything or not, plus the PR being prepared. Other PRs do not count. `gh pr list --state merged --search "merged:>YYYY-MM-DD" --json headRefName` gives them. `/demo-check`:
+**Counting** _(Claude's call)_: the phase PRs counted are the merged PRs whose branch is a phase branch (`<type>/ph-NN-…`), merged on or after the date of the oldest open line, the PR that line came from left out, whether they deferred anything or not, plus the PR being prepared. Other PRs do not count. `gh pr list --state merged --search "merged:>=YYYY-MM-DD" --json headRefName` gives them. `/demo-check`:
 
 - adds a line for every check the owner defers;
 - at every AWS demo, adds every open line to the demo's list and ticks those that passed;
-- before a phase PR, counts the phase PRs since the oldest open line was added. When this PR is the fourth, it proposes an AWS demo to clear the list, even if nothing in its diff calls for one.
+- before a phase PR, counts the phase PRs since the oldest open line was added (its own PR left out). When this PR is the fourth, it proposes an AWS demo to clear the list, even if nothing in its diff calls for one.
 
 The issue stays open when its list is empty. `/phase-tracking`'s "Before opening the PR" step names the count.
 

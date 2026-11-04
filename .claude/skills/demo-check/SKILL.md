@@ -11,10 +11,10 @@ After [ADR 0059](../../../docs/decisions/0059-session-skills.md), decision 9, re
 
 2. **Sort each check into a bucket** by [the three buckets](../../../docs/superpowers/specs/2026-11-03-PH-44-leaner-demo-check-design.md#the-three-buckets): **AWS** when the diff changes what only AWS can show, **Local** when the production-like environment can show it, **Deferred** when the diff could affect AWS without changing it directly. The table's examples are a guide: give each check the reason the diff calls for it. A check that passed earlier on this PR is repeated only when a later commit changes what it covers (ADR 0064, decision 4).
 
-   **Count the phase PRs** for the deferred-checks issue when it has open lines (ADR 0064, decision 3): the merged PRs whose branch is a phase branch, after the date of the oldest open line, plus this PR if it is a phase PR.
+   **Count the phase PRs** for the deferred-checks issue when it has open lines (ADR 0064, decision 3): the merged PRs whose branch is a phase branch, closed on or after the date of the oldest open line, leaving out the PR that line came from (replace `BRANCH` with its head branch), plus this PR if it is a phase PR.
 
    ```bash
-   gh pr list --repo luiki-dev/szop --state closed --search "closed:>YYYY-MM-DD" --limit 100 --json headRefName,state --jq '[.[] | select(.state != "CLOSED") | .headRefName | select(test("^[a-z]+/ph-[0-9]+"))] | length'
+   gh pr list --repo luiki-dev/szop --state closed --search "closed:>=YYYY-MM-DD" --limit 100 --json headRefName,state --jq '[.[] | select(.state != "CLOSED") | .headRefName | select(test("^[a-z]+/ph-[0-9]+") and . != "BRANCH")] | length'
    ```
 
    The command never names "merge": the deny rule `gh pr * merge*` would block it. A merged PR's state is `MERGED` and its closing date is its merge date, so `state != "CLOSED"` keeps the merged ones.

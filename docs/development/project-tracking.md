@@ -192,7 +192,7 @@ The `/phase-tracking` skill (`.claude/skills/phase-tracking/`) holds the steps a
 | An ADR is made outside a phase | An `adr` issue, closed by its PR | Claude |
 | An owner step is done | Its issue closed; the workflow sets ✅ Done | Owner, or Claude when the owner says so |
 | A phase's owner steps change | Step issues added, or closed as not planned with the reason | Claude |
-| A check is deferred, or a demo runs the deferred ones | A line added to [#377](https://github.com/luiki-dev/szop/issues/377) per deferred check, the merge date filled in after the merge; the lines a demo passed ticked. Before a phase PR, the phase PRs since the oldest open line are counted; at the fourth, the PR runs an AWS demo to clear the list | Claude, in `/demo-check` and `/phase-tracking` |
+| A check is deferred, or a demo runs the deferred ones | A line added to [#377](https://github.com/luiki-dev/szop/issues/377) per deferred check, the merge date filled in after the merge; the lines a demo passed ticked. Before a phase PR, the phase PRs on or after the oldest open line's date, its own PR left out, are counted; at the fourth, the PR runs an AWS demo to clear the list | Claude, in `/demo-check` and `/phase-tracking` |
 | An item cannot move | Status → ⏳ Blocked, with a blocked-by link when the blocker is an issue | Owner or Claude |
 | An acceptance criterion is finalized, added, moved, dropped or delivered | Nothing on GitHub: the criterion's status, its requirement's line and the index's table in `docs/requirements/`, in the phase's branch: finalized at the brainstorm, ✅ in the PR ([ADR 0051](../decisions/0051-acceptance-criteria.md)) | Claude |
 | Before a PR, and at the start of a phase | The stage tables brought in line | Claude |

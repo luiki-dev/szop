@@ -219,7 +219,7 @@ The approval is the owner confirming that they started this run: a deploy nobody
 ```
 
 - `build(deps)` is not a releasable change, so release-please opens **no** release PR for M13 (see [what makes a release](#what-makes-a-release-and-which-number-changes)).
-- PR #12 is now behind `main`, and the ruleset requires it to be up to date. *Update branch* (or `git merge main` locally) adds merge commit 9. **No rebase**, so hashes 1–8, and the image `szop:a1b2c3d` built from 7, stay valid.
+- PR #12 is now behind `main`, and the ruleset requires it to be up to date. *Update branch* (or `git merge main` locally) adds merge commit 9. **No rebase**, so hashes 1–8, and the local check at 7, stay valid.
 - commitlint ignores merge commits such as 9. CI runs again on the new head.
 
 ### Step 8 — Repeat a check whose area changed

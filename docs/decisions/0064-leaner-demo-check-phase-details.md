@@ -2,7 +2,7 @@
 
 - **Status:** ✅ Accepted
 - **Date:** 2026-11-03
-- **Refines:** [ADR 0008](0008-hosting.md), decision 29; [ADR 0013](0013-visual-design.md), decision 4; [ADR 0059](0059-session-skills.md), decision 9
+- **Refines:** [ADR 0008](0008-hosting.md), decision 29; [ADR 0013](0013-visual-design.md), decision 4; [ADR 0059](0059-session-skills.md), decisions 9 and 10
 - **Revisits:** [ADR 0062](0062-urgent-security-fixes.md), decision 5
 
 ## Context
@@ -47,3 +47,5 @@ The owner settled the direction in the brainstorm on 2026-11-03; the [spec](../s
 
 - **`caFile` is optional** (Task 1): `DatabaseSettings.caFile` is set only when `DATABASE_CA_FILE` is, and `createDatabase` falls back to the RDS bundle, instead of the loaders always setting it to the bundle's path as the spec says. The bundle's path stays in one place, `database.ts`, and the tests' `DatabaseSettings` literals stay as they are.
 - **The phase-PR count never names "merge"** (Task 4): `gh pr list --state merged` is blocked by the deny rule `gh pr * merge*` ([ADR 0012](0012-security-baseline.md), decision 19), so `/demo-check` lists closed PRs and keeps those whose state is not `CLOSED`, which are the merged ones. The deny rule stays as it is _(the owner's choice)_.
+- **The phase-PR count includes the oldest line's day** (whole-branch review): the count uses `closed:>=` the date of the oldest open line and leaves out the PR that line came from, so a PR merged the same day is not missed and the line's own PR is not counted.
+- **Declined at the whole-branch review**: leaving `.prodlike/certs` (with the throwaway CA's key) after `--down` (ignored by git, installed nowhere, expires in 3 days); the hard-coded Compose names `szop_postgres-prodlike-data` and `szop_prodlike` (they assume the project name `szop` and never touch the developer's database); `DATABASE_CA_FILE` silently ignored with `DATABASE_TLS=none` (as the spec says) _(the owner's choice)_.
