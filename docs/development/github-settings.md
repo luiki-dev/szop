@@ -93,10 +93,11 @@ Leave **Allow auto-merge** off: the owner's manual merge is the approval (ADR 00
 | | **Prevent self-review** | Off | The owner is the only person who can press the button; with it on, the person who started the run could never approve it. |
 | | **Deployment branches and tags** | **No restriction** | `demo-up` is pressed on the branch being checked, before it is merged, so any branch must be allowed. Unlike `demo-teardown`, the trust policy has no `ref` pin to back a rule, so nothing but the approval limits what a run deploys. |
 | | **Secrets and variables** | None | The role ARN is a repository variable (below). |
-| `github-pages` | **Deployment branches and tags** | **Selected branches and tags**: branch **`main`**, and, **only while PH-34 is open, `feat/landing-page`** | GitHub creates this environment when Pages is switched on, restricted to the default branch. The landing page is first deployed from the phase's branch so the certificate can be issued early; the owner removes that rule once the PR is merged. It holds no secrets and grants no AWS access. [ADR 0044](../decisions/0044-landing-page-details.md). |
+| `github-pages` | **Deployment branches and tags** | **Selected branches and tags**, with one rule: branch **`main`** | GitHub creates this environment when Pages is switched on, restricted to the default branch. PH-34 deployed the landing page from its branch for a while, so the certificate could be issued early, with a second rule removed after the merge. It holds no secrets and grants no AWS access. [ADR 0044](../decisions/0044-landing-page-details.md). |
 | `release` | **Required reviewers** | None | `release-please.yml` runs on every push to `main`, so a reviewer would mean approving every merge; the owner's merge of the release PR is the approval. [ADR 0042](../decisions/0042-releases-details.md), decision 8. |
 | | **Deployment branches and tags** | **Selected branches and tags**, with one rule: branch **`main`** | No PR or branch workflow can use the environment, read its secret or get the release role's token. The role's trust also requires the `ref` `refs/heads/main`, as for `demo-teardown`. |
 | | **Secrets and variables** | Variable `RELEASE_APP_CLIENT_ID`; secret `RELEASE_APP_PRIVATE_KEY` | The [release App](#the-release-app)'s client ID and private key, kept in the environment so only `main`'s jobs that name it can read them. The release role's ARN is a repository variable (below). |
+| All four | **Allow administrators to bypass configured protection rules** | **Off** | With it on, an administrator, the owner and so any session acting with the owner's credentials, could skip the reviewer of `demo` and the branch rules of the others. Nothing needs the bypass: a rule that blocks something on purpose is changed, not skipped. [ADR 0065](../decisions/0065-minor-security-fixes.md), decision 5. |
 
 Create `demo-teardown` by hand, **before** `demo-down.yml` is merged: GitHub creates an environment, with no protection, the first time a job names a missing one. Create `demo` before base is applied with its trust and before `demo-up.yml` first runs ([PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button), [runbook](../operations/demo-environment.md#cis-roles-and-variables)). Create `release` before the [PH-13](../roadmap.md#ph-13-releases) PR is merged: the merge runs `release-please.yml`, whose jobs name it.
 
@@ -190,6 +191,7 @@ Then add the App to the [version tags ruleset](#ruleset-for-version-tags)'s bypa
 | **Dependabot security updates** | Enabled | Opens a PR that upgrades a dependency with a known vulnerability, without waiting for the cooldown of version updates. It needs Dependabot alerts. ADR 0010, decision 18. |
 | **Secret Protection** (secret scanning) | Enabled | Finds secrets committed to the repository. ADR 0009, decision 14; ADR 0008, decision 22. |
 | ↳ **Push protection** | Enabled | Rejects a push that contains a recognized secret before it reaches GitHub. ADR 0009, decision 14. |
+| **Private vulnerability reporting** | Enabled | A finder can report a hole privately from the *Security* tab, as [`SECURITY.md`](../../SECURITY.md) asks. [ADR 0065](../decisions/0065-minor-security-fixes.md), decision 4. |
 | **CodeQL analysis** (under *Code scanning*) | **Default setup**, languages JavaScript/TypeScript and Actions | Scans the code and the workflows on every PR and push to `main`, with no workflow file to maintain. See [CI/CD](ci-cd.md#codeql). ADR 0010, decision 21; [ADR 0018](../decisions/0018-ci-details.md). |
 
 For public repositories some of these may already be on.
@@ -219,7 +221,7 @@ The [Szop project](https://github.com/users/luiki-dev/projects/3), owned by the 
 
 ## Checking the settings
 
-The GitHub CLI shows most settings without opening the browser:
+The GitHub CLI shows most settings without opening the browser. The owner runs the commands that read rulesets and environments: Claude's deny rules match those words in any `gh api` call, reads included, since a pattern cannot tell a read from a write ([ADR 0065](../decisions/0065-minor-security-fixes.md), decision 2). The same goes for other reads that contain a denied word, such as `gh pr view --json mergedAt`.
 
 ```bash
 # Visibility and pull request settings
@@ -240,11 +242,16 @@ gh api repos/luiki-dev/szop/actions/permissions/fork-pr-contributor-approval
 gh api repos/luiki-dev/szop/actions/oidc/customization/sub
 # CodeQL's default setup
 gh api repos/luiki-dev/szop/code-scanning/default-setup
+# Private vulnerability reporting
+gh api repos/luiki-dev/szop/private-vulnerability-reporting
 
-# The demo-teardown, demo and release environments, the branch rules, and the variables
+# The administrators' bypass on every environment
+gh api repos/luiki-dev/szop/environments --jq '.environments[] | {name, can_admins_bypass}'
+# The demo-teardown, demo, github-pages and release environments, the branch rules, and the variables
 gh api repos/luiki-dev/szop/environments/demo-teardown
 gh api repos/luiki-dev/szop/environments/demo-teardown/deployment-branch-policies
 gh api repos/luiki-dev/szop/environments/demo
+gh api repos/luiki-dev/szop/environments/github-pages/deployment-branch-policies
 gh api repos/luiki-dev/szop/environments/release
 gh api repos/luiki-dev/szop/environments/release/deployment-branch-policies
 gh variable list --repo luiki-dev/szop
@@ -269,5 +276,7 @@ Expected:
 - `default_workflow_permissions` is `read` and `can_approve_pull_request_reviews` is `false`.
 - `approval_policy` is `all_external_contributors`.
 - The environment `demo-teardown` exists with `protection_rules` empty (no reviewer) and `deployment_branch_policy` set to `custom_branch_policies: true`; its one branch policy has the name `main`. The environment `demo` has one `required_reviewers` rule naming the owner, with `prevent_self_review` `false`, and `deployment_branch_policy` `null` (no restriction). The `version-tags` ruleset's `bypass_actors` holds one entry, `actor_type` `Integration` with `bypass_mode` `always`: the release App. An empty list (`[]`) means the App was not saved, and the first release would fail. The environment `release` has `protection_rules` with no reviewer and one branch policy named `main`. `gh variable list` shows `AWS_PLAN_ROLE_ARN`, `AWS_DEPLOY_ROLE_ARN` and `AWS_RELEASE_ROLE_ARN`, and no other variable; for `release` it shows `RELEASE_APP_CLIENT_ID`, and `gh secret list` shows `RELEASE_APP_PRIVATE_KEY`.
+- Private vulnerability reporting's `enabled` is `true`.
+- Every environment has `can_admins_bypass` `false`, and `github-pages` has one branch policy named `main`.
 - CodeQL's `state` is `configured`, with `actions` among its `languages` once the workflows are on `main` (until then, only the JavaScript and TypeScript entries; [OP-067](https://github.com/luiki-dev/szop/issues/27)).
 - Seven labels; six milestones, with `Definition` and `Stage 1: Local foundations` closed; the project is public.
