@@ -131,6 +131,8 @@ for header in strict-transport-security content-security-policy; do
   grep -qi "^$header:" <<< "$headers" || fail "$url/ has no $header header"
 done
 
-# Task 3: the Playwright project runs here.
+echo "==> Running the prodlike Playwright project"
+pnpm --filter @szop/e2e exec playwright test -c playwright.prodlike.config.ts ||
+  fail "the prodlike Playwright project failed"
 
-echo "OK: the prodlike profile serves commit ${GIT_COMMIT:0:7} over HTTPS, redirects HTTP, sends HSTS and the CSP, and reaches PostgreSQL over TLS"
+echo "OK: the prodlike profile serves commit ${GIT_COMMIT:0:7} over HTTPS, redirects HTTP, sends HSTS and the CSP, reaches PostgreSQL over TLS, sets a __Host- cookie and logs nothing on any screen"

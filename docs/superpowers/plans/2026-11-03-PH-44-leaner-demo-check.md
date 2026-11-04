@@ -211,11 +211,11 @@ git commit -m "test: check a production-like environment locally with check:prod
 
 `e2e/support/` has no console listener; the screens test collects `page.on("console")` messages itself.
 
-- [ ] **Step 1: The config**
+- [x] **Step 1: The config**
 
 `testDir: "prodlike"`, `baseURL: "https://localhost:8443"`, `ignoreHTTPSErrors: true`, one project `prodlike` with `devices["Desktop Chrome"]`, no `webServer`, `retries: 0`, the `list` reporter. A comment says it runs only from `check:prodlike` (ADR 0064, decision 2).
 
-- [ ] **Step 2: The tests**
+- [x] **Step 2: The tests**
 
 `session.spec.ts`:
 
@@ -234,20 +234,20 @@ test("a guest's first change sets a __Host- session cookie", async ({ page, cont
 
 `screens.spec.ts`: one test per path in `["/", "/lists/new", "/catalog", "/design"]` (written out, with a comment that it follows `apps/web/src/routes.tsx`; `/lists/:id` is covered by `session.spec.ts`): go to the path, wait for `networkidle`, and expect the collected console messages to equal `[]`. The CSP guard comes from the fixture.
 
-- [ ] **Step 3: Run them against a kept environment**
+- [x] **Step 3: Run them against a kept environment**
 
 Run: `pnpm check:prodlike --keep`, then `pnpm --filter @szop/e2e exec playwright test -c playwright.prodlike.config.ts`
 Expected: all pass. Then confirm `pnpm test:e2e --list` does not list `prodlike/` tests.
 
-- [ ] **Step 4: Wire it into the script**
+- [x] **Step 4: Wire it into the script**
 
 Replace the placeholder with the Playwright command; a failure calls `fail "the prodlike Playwright project failed"`.
 
-- [ ] **Step 5: Measure the whole run once**
+- [x] **Step 5: Measure the whole run once**
 
 With the image already built, run `time pnpm check:prodlike --no-build` and note the `real` time: from `up` to teardown, the certificates, all checks and Playwright included. Write it into `testing.md` ("about N minutes on the owner's machine, measured on 2026-11-DD"), and into the task summary for the owner. This is a one-time number, not a feature: the script does not time itself.
 
-- [ ] **Step 6: Docs, `pnpm check`, commit**
+- [x] **Step 6: Docs, `pnpm check`, commit**
 
 ```bash
 git commit -m "test: run a Playwright project against the prodlike environment"

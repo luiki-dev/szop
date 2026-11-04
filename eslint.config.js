@@ -42,7 +42,7 @@ export default defineConfig(
   // CSP guard: one importing @playwright/test would run unguarded and still
   // pass (ADR 0026, decision 7).
   {
-    files: ["e2e/tests/**/*.ts"],
+    files: ["e2e/tests/**/*.ts", "e2e/prodlike/**/*.ts"],
     rules: {
       "no-restricted-imports": [
         "error",
