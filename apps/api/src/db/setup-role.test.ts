@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import pg from "pg";
 import { sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -58,6 +59,23 @@ describe("loadSetupConfig", () => {
     expect(
       loadSetupConfig({ ...valid, HOST: "0.0.0.0", PORT: "3000" }),
     ).toEqual(loadSetupConfig(valid));
+  });
+
+  it("leaves caFile unset without DATABASE_CA_FILE", () => {
+    expect(loadSetupConfig(valid).database.caFile).toBeUndefined();
+  });
+
+  it("resolves DATABASE_CA_FILE", () => {
+    expect(
+      loadSetupConfig({ ...valid, DATABASE_CA_FILE: "certs/ca.pem" }).database
+        .caFile,
+    ).toBe(resolve("certs/ca.pem"));
+  });
+
+  it("rejects an empty DATABASE_CA_FILE", () => {
+    expect(errorFor({ ...valid, DATABASE_CA_FILE: "" })).toMatch(
+      /DATABASE_CA_FILE: (?!missing)/,
+    );
   });
 
   it("names a missing setting", () => {

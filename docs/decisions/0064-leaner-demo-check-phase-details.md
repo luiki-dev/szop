@@ -44,3 +44,5 @@ The owner settled the direction in the brainstorm on 2026-11-03; the [spec](../s
 - PH-44 added in Stage 4, after PH-43.
 
 ## Settled while building
+
+- **`caFile` is optional** (Task 1): `DatabaseSettings.caFile` is set only when `DATABASE_CA_FILE` is, and `createDatabase` falls back to the RDS bundle, instead of the loaders always setting it to the bundle's path as the spec says. The bundle's path stays in one place, `database.ts`, and the tests' `DatabaseSettings` literals stay as they are.

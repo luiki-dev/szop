@@ -142,6 +142,23 @@ describe("loadConfig", () => {
     ).toBe("verify-full");
   });
 
+  it("leaves caFile unset without DATABASE_CA_FILE", () => {
+    expect(loadConfig(valid).database.caFile).toBeUndefined();
+  });
+
+  it("resolves DATABASE_CA_FILE", () => {
+    expect(
+      loadConfig({ ...valid, DATABASE_CA_FILE: "certs/ca.pem" }).database
+        .caFile,
+    ).toBe(resolve("certs/ca.pem"));
+  });
+
+  it("rejects an empty DATABASE_CA_FILE", () => {
+    expect(errorFor({ ...valid, DATABASE_CA_FILE: "" })).toMatch(
+      /DATABASE_CA_FILE: (?!missing)/,
+    );
+  });
+
   it.each(["require", "VERIFY-FULL", ""])(
     "rejects DATABASE_TLS=%j",
     (value) => {

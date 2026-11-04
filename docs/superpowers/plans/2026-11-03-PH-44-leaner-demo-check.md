@@ -68,7 +68,7 @@
 
 `caFile` is optional rather than always set to the RDS path as the spec says: the RDS path stays in one place (`database.ts`), and the eight `DatabaseSettings` literals in the tests stay as they are. Record this under "Settled while building" in ADR 0064, in this task's commit.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `config.test.ts`:
 
@@ -111,26 +111,26 @@ it("stops when caFile does not exist", () => {
 
 The temp file is made with `mkdtempSync(join(tmpdir(), "szop-ca-"))` and removed in `afterEach`.
 
-- [ ] **Step 2: Run them to see them fail**
+- [x] **Step 2: Run them to see them fail**
 
 Run: `pnpm vitest run apps/api/src/config.test.ts apps/api/src/db/setup-role.test.ts apps/api/src/db/database.test.ts`
 Expected: the new tests fail (`caFile` undefined where a path is expected; `ssl.ca` is the RDS bundle).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 - Both schemas: `DATABASE_CA_FILE: z.string().min(1).optional()`, with a one-line comment: the authority `verify-full` checks against, the RDS bundle when unset (ADR 0064, decision 8).
 - Both loaders: `...(data.DATABASE_CA_FILE && { caFile: resolve(data.DATABASE_CA_FILE) })` in `database`.
 - `DatabaseSettings`: `caFile?: string` with its comment.
 - `database.ts`: `readFileSync(settings.caFile ?? rdsCaBundle, "utf8")`; the comment above it names `caFile`.
 
-- [ ] **Step 4: Run the tests and the mutation run**
+- [x] **Step 4: Run the tests and the mutation run**
 
 Run: `pnpm vitest run apps/api/src/config.test.ts apps/api/src/db/setup-role.test.ts apps/api/src/db/database.test.ts`
 Expected: PASS.
 Run: `pnpm test:mutation --mutate apps/api/src/config.ts,apps/api/src/db/setup-role.ts,apps/api/src/db/database.ts`
 Expected: no surviving mutant on the new lines.
 
-- [ ] **Step 5: Docs, `pnpm check`, commit**
+- [x] **Step 5: Docs, `pnpm check`, commit**
 
 `architecture.md` names `DATABASE_CA_FILE` where it describes `DATABASE_TLS`; `.env.example` gets a commented `# DATABASE_CA_FILE=` line under `DATABASE_TLS`.
 
