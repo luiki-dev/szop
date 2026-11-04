@@ -306,6 +306,8 @@ pnpm image:up
 
 Open `http://localhost:8080`: the same page as `pnpm start`, served from inside the container, with the development database. It uses port 8080, so it can run next to `pnpm dev` or `pnpm start`. Stop it with Ctrl+C, and remove its containers with `pnpm image:down`, which also removes PostgreSQL's container (the data stays; `pnpm db:up` brings it back). The two scripts run `docker compose --profile app up --build` and `docker compose --profile app down`: the profile matters, since a plain `docker compose down` leaves out every service behind a profile, so it removes PostgreSQL but leaves the app running, and warns `Network szop_default Resource is still in use`. The [testing guide](testing.md#running-the-tests) explains a failed check.
 
+`pnpm check:prodlike` starts a production-like copy with HTTPS and TLS to the database ([Docker](tools/docker.md#the-prodlike-profile)). Besides Docker it needs `openssl`, which Ubuntu ships (`openssl version` prints it). With `--keep` it stays up at `https://localhost:8443`: its certificate is signed by a throwaway authority made at each run and never installed, so the browser warns once per session; accept the warning to go on.
+
 ## 12. What the git hooks do
 
 On every commit, a pre-commit hook formats and lints the staged files (a staged workflow under `.github/` goes through actionlint and zizmor, installed in section 9), and a commit-msg hook checks that the message follows Conventional Commits. See [husky and lint-staged](tools/husky-and-lint-staged.md) and [commitlint](tools/commitlint.md).

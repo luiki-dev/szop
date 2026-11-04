@@ -10,6 +10,7 @@ Docker builds and runs **containers**: a program packed together with everything
   - [The Dockerfile, stage by stage](#the-dockerfile-stage-by-stage)
   - [What the image holds](#what-the-image-holds)
   - [Running it: the app profile and the check](#running-it-the-app-profile-and-the-check)
+  - [The prodlike profile](#the-prodlike-profile)
 - [Everyday use](#everyday-use)
 - [Updating the base image](#updating-the-base-image)
 - [Official documentation](#official-documentation)
@@ -78,6 +79,17 @@ No pnpm, no development dependencies, no tests, no web sources, no `.env`. Every
 4. On any failure it prints `FAIL: …` and the app's logs and exits 1. In every case it removes the `app` container and leaves PostgreSQL running.
 
 CI's `docker` job builds the image itself and runs the script with `--no-build` ([CI/CD](../ci-cd.md#the-jobs)).
+
+### The prodlike profile
+
+The profile `prodlike` is a production-like copy of the demo on this machine, for the checks that need HTTPS or TLS to the database but not AWS ([ADR 0064](../../decisions/0064-leaner-demo-check-phase-details.md), decision 7). Its four services share a network of their own, `prodlike`, with the fixed subnet `10.89.44.0/24`, and a volume of their own, so the developer's database and the other profiles are untouched:
+
+- **`postgres-tls`** stands in for RDS: the same `postgres:18.6` image with `ssl=on`, and a `pg_hba.conf` that accepts TCP connections over TLS only (`hostssl … scram-sha-256`); the Unix socket stays open for `psql` inside the container. PostgreSQL refuses a key file it does not own with mode `0600`, which a bind mount from WSL cannot give, so its entrypoint copies the certificate and key from `/certs` before starting the server. It publishes no port.
+- **`db-setup-prodlike`** runs the image's `node src/db-setup.ts` as the master user, as `demo-up` does, then exits; the app waits for it (`service_completed_successfully`).
+- **`app-prodlike`** is the image with the AWS settings that matter: `DATABASE_TLS=verify-full` against `DATABASE_CA_FILE=/certs/ca.pem`, the app's own role `szop_app`, `APP_ORIGIN=https://localhost:8443` and `TRUSTED_PROXIES` set to the network's subnet, so it believes nginx's `X-Forwarded-Proto` and `X-Forwarded-For`. It publishes no port.
+- **`nginx-prodlike`** stands in for the load balancer (`compose/nginx-prodlike.conf`): HTTPS on `127.0.0.1:8443`, and on `127.0.0.1:8082` a `301` to the same path on `https://localhost:8443`. It passes `Host` as `$http_host`, port included, since the API's cross-site check compares it with `Origin`.
+
+**`scripts/check-prodlike.sh`**, run as `pnpm check:prodlike`, never in CI, removes a previous run, makes a throwaway certificate authority and two certificates it signs (for `localhost` and `postgres-tls`, each naming its host in the subject alternative name (SAN)) with `openssl` in `.prodlike/certs/`, which git ignores, builds the image unless `--no-build`, starts the profile and checks `/api/health` over HTTPS with the image's commit, that the app's connections use TLS (`pg_stat_ssl`) and one without TLS is refused, the redirect, and HSTS and the CSP on `/`. On a failure it prints `FAIL: …` and each service's logs. Without `--keep` it removes the profile's containers, volume and network on exit; with it, it leaves them up, after a failure too, until `pnpm check:prodlike --down`. It never uses `docker compose down --volumes`, which would remove the developer's database too. If Docker says the subnet overlaps another network, change it in `compose.yaml` and in `app-prodlike`'s `TRUSTED_PROXIES` together.
 
 ## Everyday use
 

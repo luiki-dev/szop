@@ -151,19 +151,19 @@ git commit -m "feat(api): read the database's certificate authority from DATABAS
 - Consumes: Task 1's `DATABASE_CA_FILE`.
 - Produces: the script's steps 1 to 4 and 6 from the spec, and a placeholder where step 5 (Playwright) goes in Task 3. Flags: `--no-build`, `--keep`, `--down` (only removes and exits). Files: `.prodlike/certs/ca.pem`, `localhost.{pem,key}`, `postgres.{pem,key}`.
 
-- [ ] **Step 1: Settle the key file's permissions first** (spec, Risks)
+- [x] **Step 1: Settle the key file's permissions first** (spec, Risks)
 
 Make the certificates by hand into `.prodlike/certs/`, start `postgres-tls` alone and see whether a read-only bind mount of `postgres.key` is accepted. Expected: PostgreSQL refuses a key that is not `0600` and owned by `postgres`. The fix the plan expects: mount the folder at `/certs:ro`, and start the server with an entrypoint that runs `install -m 0600 -o postgres -g postgres /certs/postgres.{pem,key} /var/lib/postgresql/` and writes the `pg_hba.conf` below, then `exec docker-entrypoint.sh postgres -c ssl=on -c ssl_cert_file=… -c ssl_key_file=… -c hba_file=…`. `pg_hba.conf`: `local all all trust` (for `docker compose exec … psql` and the image's init) and `hostssl all all all scram-sha-256`, nothing else. If another way turns out simpler, use it and add a line to ADR 0064's "Settled while building".
 
-- [ ] **Step 2: The profile in `compose.yaml`**
+- [x] **Step 2: The profile in `compose.yaml`**
 
 The four services as the spec's [The production-like environment](../specs/2026-11-03-PH-44-leaner-demo-check-design.md#the-production-like-environment) describes, with `profiles: [prodlike]`, the network `prodlike` (`ipam.config: [{subnet: 10.89.44.0/24}]`) and the volume `postgres-prodlike-data`. `app-prodlike` reuses `*app` and overrides `depends_on` (`db-setup-prodlike: service_completed_successfully`) and the environment: `DATABASE_HOST: postgres-tls`, `DATABASE_NAME: szop`, `DATABASE_USER: szop_app`, `DATABASE_PASSWORD: szop-app-local`, `DATABASE_TLS: verify-full`, `DATABASE_CA_FILE: /certs/ca.pem`, `TRUSTED_PROXIES: 10.89.44.0/24`, `APP_ORIGIN: https://localhost:8443`. `db-setup-prodlike`: the same image, `command: ["node", "src/db-setup.ts"]`, the master user `szop`/`szop`, `APP_DATABASE_USER: szop_app`, `APP_DATABASE_PASSWORD: szop-app-local`, `DATABASE_TLS: verify-full`, `DATABASE_CA_FILE: /certs/ca.pem`, `restart: "no"`. Each mounts `./.prodlike/certs:/certs:ro`. A comment above the profile says what it stands in for (the load balancer, RDS) and links ADR 0064, decision 7; a comment on the subnet says `TRUSTED_PROXIES` must change with it. `nginx-prodlike` has a healthcheck like `nginx`'s, against `https://127.0.0.1:8443/api/live` with `--no-check-certificate`.
 
-- [ ] **Step 3: `compose/nginx-prodlike.conf`**
+- [x] **Step 3: `compose/nginx-prodlike.conf`**
 
 Two `server` blocks: `listen 8443 ssl` with `localhost.pem`/`.key`, proxying to `app-prodlike:3000` with `proxy_set_header Host $http_host`, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto $scheme`; and `listen 8080` with `return 301 https://localhost:8443$request_uri`. The header comment says why `$http_host`, not `$host` (the spec's reason, one line).
 
-- [ ] **Step 4: `scripts/check-prodlike.sh`**
+- [x] **Step 4: `scripts/check-prodlike.sh`**
 
 In `check-scale.sh`'s shape (`set -euo pipefail`, `GIT_COMMIT`, `fail` printing `FAIL: …` then each service's logs). Order:
 
@@ -179,7 +179,7 @@ In `check-scale.sh`'s shape (`set -euo pipefail`, `GIT_COMMIT`, `fail` printing 
 
 Print `OK: …` at the end, as the other scripts do.
 
-- [ ] **Step 5: Run it**
+- [x] **Step 5: Run it**
 
 Run: `pnpm check:prodlike`
 Expected: `OK: …`, and afterwards `docker compose --profile prodlike ps -a` lists nothing.
@@ -188,7 +188,7 @@ Expected: both pass; the second starts fresh; after `--down` nothing is left.
 Change the expected commit by hand (`GIT_COMMIT=0000… pnpm check:prodlike --no-build --keep`).
 Expected: `FAIL: …`, the logs, a non-zero exit, and the environment still up (Review Focus 1). Then `--down`.
 
-- [ ] **Step 6: Docs, `pnpm check`, commit**
+- [x] **Step 6: Docs, `pnpm check`, commit**
 
 `.gitignore`: `.prodlike/` with a comment. The three docs as listed above.
 

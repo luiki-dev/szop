@@ -29,6 +29,7 @@
     "image:down": "docker compose --profile app down",
     "check:image": "scripts/check-image.sh",
     "check:scale": "scripts/check-scale.sh",
+    "check:prodlike": "scripts/check-prodlike.sh",
     "check:infra": "scripts/check-infra.sh",
     "check:workflows": "scripts/check-workflows.sh",
     "check:scan": "scripts/scan.sh all",
