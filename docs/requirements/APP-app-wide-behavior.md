@@ -36,7 +36,7 @@ Every page names itself, in the page and in the browser's tab.
 
 ## APP-3
 
-🎯 [MVP] · ❔ Draft (0 of 3) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (0 of 3) · ❔ Criteria not finalized
 
 The app tells the user what happened and what to do, and asks for confirmation only when an action cannot be undone.
 
@@ -44,7 +44,7 @@ The app tells the user what happened and what to do, and asks for confirmation o
 |---|---|---|
 | APP-3.1 | Messages appear as toasts that say what happened and what to do; no message is a generic "Something went wrong". | ❔ Draft |
 | APP-3.2 | An action that can be reversed offers an undo instead of asking "Are you sure?". | ❔ Draft · [OP-051](https://github.com/luiki-dev/szop/issues/103) |
-| APP-3.3 | An action that cannot be undone, such as deleting the account, asks for confirmation first. | ❔ Draft |
+| APP-3.3 | An action that cannot be undone, such as deleting a list or the account, asks for confirmation first; Cancel has the focus, and Esc or a click outside cancels. When the action fails, the confirmation stays open and says so. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) · lists; the account in its phase |
 
 ## APP-4
 
@@ -60,13 +60,14 @@ Pages show their state while loading, when empty and when their data cannot be l
 
 ## APP-5
 
-🎯 [MVP] · ❔ Draft (0 of 1) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (0 of 2) · ✅ Criteria finalized ([PH-16c](../roadmap.md#ph-16c-managing-lists))
 
 An address that leads nowhere shows a page saying so.
 
 | ID | Criterion | Status |
 |---|---|---|
-| APP-5.1 | A path that is not a page shows a not-found page inside the app shell, with a way back to the home screen. | ❔ Draft |
+| APP-5.1 | A path that is not a page shows a not-found page inside the app shell, with a way back to the home screen. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) |
+| APP-5.2 | A list's address that is not a list ID, or names a list the user cannot open (deleted, someone else's), shows "This list doesn't exist or was deleted" with "Back to lists"; an address that is not a list ID never reaches the API. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) |
 
 ## APP-6
 

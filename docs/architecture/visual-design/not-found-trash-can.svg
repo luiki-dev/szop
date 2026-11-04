@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<!-- Sketch approved at the PH-16c brainstorm (version A2): the not-found page's trash can. -->
+<defs><clipPath id="body"><path d="M160,95 L225,73 A72,93 0 0 1 225,259 L160,219 A46,62 0 0 1 160,95 Z"/></clipPath></defs>
+<ellipse cx="225" cy="266" rx="160" ry="13" fill="#b4bcc5" opacity=".6"/>
+<path d="M160,95 L225,73 A72,93 0 0 1 225,259 L160,219 A46,62 0 0 1 160,95 Z" fill="#6c7882"/>
+<g clip-path="url(#body)">
+ <polygon points="80,185 300,225 300,290 80,290" fill="#3a4654"/>
+ <polygon points="80,104 300,64 300,82 80,122" fill="#b4bcc5"/>
+ <path d="M182,87 A54,72 0 0 0 182,233" fill="none" stroke="#3a4654" stroke-width="7"/>
+ <path d="M203,80 A63,82 0 0 0 203,246" fill="none" stroke="#3a4654" stroke-width="7"/>
+</g>
+<ellipse cx="225" cy="166" rx="72" ry="93" fill="#b4bcc5"/>
+<ellipse cx="228" cy="166" rx="62" ry="83" fill="#141c2b"/>
+<ellipse cx="205" cy="158" rx="36" ry="48" fill="#3a4654"/>
+<ellipse cx="203" cy="157" rx="29" ry="40" fill="#6c7882" opacity=".55"/>
+<g transform="rotate(-10 345 200)">
+ <ellipse cx="345" cy="200" rx="32" ry="68" fill="#3a4654"/>
+ <ellipse cx="341" cy="200" rx="27" ry="62" fill="#6c7882"/>
+ <rect x="333" y="178" width="14" height="44" rx="7" fill="#b4bcc5"/>
+</g>
+</svg>

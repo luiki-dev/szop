@@ -4,7 +4,7 @@ Creating, viewing, archiving, duplicating and resetting shopping lists. Part of 
 
 ## LST-1
 
-🎯 [MVP] · 🚧 In progress (4 of 5) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (4 of 9) · ✅ Criteria finalized ([PH-16c](../roadmap.md#ph-16c-managing-lists))
 
 Create, rename and delete a list. Deleting requires confirmation.
 
@@ -12,9 +12,13 @@ Create, rename and delete a list. Deleting requires confirmation.
 |---|---|---|
 | LST-1.1 | A user creates a list by giving it a name. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
 | LST-1.2 | The owner renames a list on its screen, by editing the title or through Rename in the list's menu. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
-| LST-1.3 | The owner deletes a list after confirming it. | ❔ Draft |
+| LST-1.3 | The owner deletes a list through Delete in the list's menu; after confirming, the lists page opens. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) |
 | LST-1.4 | On the lists page, "New list" is the main action, pinned at the bottom on a phone. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
 | LST-1.5 | "New list" opens the new list's screen with its name field focused; Enter with a non-empty name creates the list, and Esc or an empty name leaves without creating anything. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
+| LST-1.6 | On the lists page, "Select" starts selecting lists, and on a phone a long press on a list starts it with that list selected. While selecting, a tap on a list toggles it instead of opening it, and X, Esc or Back stops selecting. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) |
+| LST-1.7 | While selecting, the header shows how many lists are selected, "Select all" (or "Deselect all" when all are) and Delete, disabled with none selected; selecting started by a long press stops when the last list is deselected. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) |
+| LST-1.8 | Delete asks once for the selected lists, naming their count; after confirming, all of them are deleted or, on failure, none, and the lists page stays. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) |
+| LST-1.9 | The new list's screen keeps the name a field until the list is created, with "Create", which creates it as Enter does; "Create" is disabled while the name is empty or too long. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) |
 
 ## LST-2
 
