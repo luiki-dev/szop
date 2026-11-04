@@ -55,11 +55,11 @@ Rows are deleted from `lists`; no soft delete. Items, when [PH-17a](../../roadma
 
 ### The confirmation dialog
 
-shadcn/ui's `AlertDialog` (Radix), added with the shadcn CLI as `apps/web/src/components/ui/alert-dialog.tsx` (decision 4):
+shadcn/ui's `AlertDialog` on Base UI, the library under the app's `Sheet` and `DropdownMenu`, added with the shadcn CLI as `apps/web/src/components/ui/alert-dialog.tsx` (decision 4):
 
 - **Title:** `Delete list "<name>"?` for one list, `Delete <N> lists?` for several. The body: "This can't be undone."
-- **Buttons:** Cancel, which has the focus when the dialog opens, and Delete in the destructive style. Esc and a click outside cancel; the focus returns to what opened the dialog.
-- **While deleting:** Delete shows it is busy and both buttons are disabled; Esc and a click outside do nothing until it ends.
+- **Buttons:** Cancel, which has the focus when the dialog opens, and Delete in the destructive style. Esc cancels; a click outside does nothing, as in every alert dialog of Base UI. The focus returns to what opened the dialog.
+- **While deleting:** Delete shows it is busy and both buttons are disabled; Esc does nothing until it ends.
 - **On failure:** the dialog stays open and shows "Couldn't delete the list." or "Couldn't delete the lists." under the body, with the buttons enabled again. Delete then tries again.
 - **On success:** the dialog closes. No toast ([APP-3](../../requirements/APP-app-wide-behavior.md#app-3).1 is PH-17a's).
 
@@ -137,7 +137,7 @@ Each criterion's test name starts with its ID.
   - LST-1.8: `POST /api/lists/delete` deletes the caller's lists among `ids` and leaves the rest; a foreign ID among them is skipped and its list is still there; an empty, a too long or a duplicated `ids`, and a non-UUID, answer `400`; a failure in the middle (a forced error) leaves every list;
   - `GET /api/health` has `version` in both variants.
 - **Web (Vitest, Testing Library, MSW):**
-  - APP-3.3: the dialog opens with Cancel focused; Esc, a click outside and Cancel close it without a request; a failed delete keeps it open with the message; the title names the list, or the count;
+  - APP-3.3: the dialog opens with Cancel focused; Esc and Cancel close it without a request; a failed delete keeps it open with the message; the title names the list, or the count;
   - LST-1.3: Delete in the list's menu, confirmed, sends the request and lands on `/`;
   - LST-1.6 and LST-1.7: "Select" starts the mode with nothing selected and it stays at zero; a tap toggles instead of navigating; ✕ and Esc stop it; the count, "Select all" and "Deselect all", and Delete disabled at zero; a long press (fake timers) starts it with the list selected, and deselecting it stops it; a press shorter than the threshold opens the list;
   - LST-1.8: Delete with three selected sends one request with the three IDs, and the page shows the remaining lists, not selecting;
@@ -157,7 +157,7 @@ Each criterion's test name starts with its ID.
 - `docs/architecture/architecture.md`: the delete routes; the not-found route; the selection mode's state in the frontend section; `version` in the health answer.
 - `docs/architecture/threat-model.md`: the two delete routes as entry points, with their guards; the SPA's ID check and the encoded path.
 - `docs/architecture/visual-design.md`: the confirmation dialog, the selection bar, the not-found pages with the trash can, Create on the new list's screen; the sketch `docs/architecture/visual-design/not-found-trash-can.svg` (added with this spec).
-- `docs/architecture/stack-overview.md`: Radix's `AlertDialog` and what a modal must do (focus trap, return of focus).
+- `docs/architecture/stack-overview.md`: Base UI's `AlertDialog` and what a modal must do (focus trap, return of focus).
 - `docs/requirements/`: LST-1 and APP-5 finalized, the new criteria, the statuses; [ACC-1](../../requirements/ACC-accounts-and-guest-mode.md#acc-1).6 pointing at PH-16d. Done in the spec's commit, except the ✅s.
 - `docs/roadmap.md`: PH-16c's **Goal** and **Delivers**, and PH-16d's entry and row ([ADR 0066](../../decisions/0066-managing-lists-phase-details.md#changes-to-the-roadmap)). Done in the spec's commit.
 

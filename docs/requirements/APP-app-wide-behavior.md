@@ -44,7 +44,7 @@ The app tells the user what happened and what to do, and asks for confirmation o
 |---|---|---|
 | APP-3.1 | Messages appear as toasts that say what happened and what to do; no message is a generic "Something went wrong". | ❔ Draft |
 | APP-3.2 | An action that can be reversed offers an undo instead of asking "Are you sure?". | ❔ Draft · [OP-051](https://github.com/luiki-dev/szop/issues/103) |
-| APP-3.3 | An action that cannot be undone, such as deleting a list or the account, asks for confirmation first; Cancel has the focus, and Esc or a click outside cancels. When the action fails, the confirmation stays open and says so. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) · lists; the account in its phase |
+| APP-3.3 | An action that cannot be undone, such as deleting a list or the account, asks for confirmation first; Cancel has the focus, and Esc cancels. When the action fails, the confirmation stays open and says so. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) · lists; the account in its phase |
 
 ## APP-4
 
