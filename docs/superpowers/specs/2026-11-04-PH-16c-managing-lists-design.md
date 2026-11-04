@@ -90,7 +90,7 @@ Decision 6:
 - **A path that is not a page:** a catch-all route (`*`) inside the app shell shows the not-found page: the trash can, "Nothing here" as its heading, "This page doesn't exist." and a "Back to lists" link to `/`. The route's title is "Not found", which the shell shows in the tab as it does for every page.
 - **A list that cannot be opened:** `/lists/:id` shows the same layout with "This list doesn't exist or was deleted." when `:id` is not a UUID, without any request, and when the API answers `404`. It replaces today's "This list does not exist." and "Show my lists". Other errors keep today's "The list could not be loaded." with "Try again" ([APP-4](../../requirements/APP-app-wide-behavior.md#app-4).3).
 - **The ID check** uses the UUID schema `@szop/shared` already has for list IDs. The API client also encodes the ID it puts into a path (`encodeURIComponent`), so no caller can send a request to another API path even if it skips the check ([#345](https://github.com/luiki-dev/szop/issues/345)).
-- **The trash can:** a new `apps/web/src/brand/trash-can.svg`, made from the approved sketch [`not-found-trash-can.svg`](../../architecture/visual-design/not-found-trash-can.svg): a grey, old-style metal can lying on its side, its open end toward the viewer and a little to the right, its empty bottom showing inside, its lid with a handle leaning on the right. It uses only the raccoon's five colours (`#141c2b`, `#3a4654`, `#6c7882`, `#b4bcc5`, `#f9f7f2`) in flat shapes without outlines, as the raccoon does, and is decorative (`alt=""`). The builder may refine the shapes but keeps the pose, the palette and the style; it must read well on the light and the dark page.
+- **The trash can:** a new `apps/web/src/brand/trash-can.svg`, converted from the owner's image [`trash-can.png`](2026-11-04-PH-16c-managing-lists/trash-can.png), which replaces the earlier sketch [`not-found-trash-can.svg`](../../architecture/visual-design/not-found-trash-can.svg) as the source: a grey, old-style metal can lying on its side, its open end to the right with its empty inside showing, its lid with a handle leaning on the left. The SVG keeps the image's pose and uses only the raccoon's five colours (`#141c2b`, `#3a4654`, `#6c7882`, `#b4bcc5`, `#f9f7f2`) in flat shapes, as the raccoon does; the orange checkered patch under the lid is a leftover of the image's background and is left out. It is decorative (`alt=""`) and must read well on the light and the dark page. The owner sees the converted SVG before the work goes on.
 
 ### The new list's screen
 
@@ -156,7 +156,7 @@ Each criterion's test name starts with its ID.
 
 - `docs/architecture/architecture.md`: the delete routes; the not-found route; the selection mode's state in the frontend section; `version` in the health answer.
 - `docs/architecture/threat-model.md`: the two delete routes as entry points, with their guards; the SPA's ID check and the encoded path.
-- `docs/architecture/visual-design.md`: the confirmation dialog, the selection bar, the not-found pages with the trash can, Create on the new list's screen; the sketch `docs/architecture/visual-design/not-found-trash-can.svg` (added with this spec).
+- `docs/architecture/visual-design.md`: the confirmation dialog, the selection bar, the not-found pages with the trash can, Create on the new list's screen; the trash can's source image `docs/superpowers/specs/2026-11-04-PH-16c-managing-lists/trash-can.png`.
 - `docs/architecture/stack-overview.md`: Base UI's `AlertDialog` and what a modal must do (focus trap, return of focus).
 - `docs/requirements/`: LST-1 and APP-5 finalized, the new criteria, the statuses; [ACC-1](../../requirements/ACC-accounts-and-guest-mode.md#acc-1).6 pointing at PH-16d. Done in the spec's commit, except the ✅s.
 - `docs/roadmap.md`: PH-16c's **Goal** and **Delivers**, and PH-16d's entry and row ([ADR 0066](../../decisions/0066-managing-lists-phase-details.md#changes-to-the-roadmap)). Done in the spec's commit.
@@ -179,7 +179,7 @@ Checked by hand: [LST-1](../../requirements/LST-shopping-lists.md#lst-1).6, [APP
 
 - **The long press fights the browser:** a touch-and-hold opens a context menu or selects text on some phones, and a press must not fire after a scroll. The builder suppresses both on the list rows only and checks it with touch emulation; if a phone's behavior cannot be tested in E2E, it is checked by hand.
 - **Back in the selection mode:** the pushed history entry must be removed when the mode stops by ✕, Esc, a delete or the last deselect, or Back would step through stray entries. A test covers each way out.
-- **The trash can's look** is judged by eye; the sketch fixes the pose and the palette, and the demo check looks at it in both themes.
+- **The trash can's look** is judged by eye; the owner's image fixes the pose, the five colours fix the palette, the owner approves the SVG before it is used, and the demo check looks at it in both themes.
 
 ## Out of scope
 
@@ -193,5 +193,5 @@ Checked by hand: [LST-1](../../requirements/LST-shopping-lists.md#lst-1).6, [APP
 - How the selection state is held (component state or a small hook), and the exact long-press threshold within 400 to 600 ms.
 - Whether the delete invalidates the lists query or edits its cache.
 - How `version` reaches the API in the image, following `GIT_COMMIT`.
-- The trash can's final shapes within the sketch's pose, palette and style.
+- How the image is turned into the SVG (a tracing tool or by hand) and its final shapes, within the image's pose and the five colours.
 - The cause and fix of the raccoon's gap.

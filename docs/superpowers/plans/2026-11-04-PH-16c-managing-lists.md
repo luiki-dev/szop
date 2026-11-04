@@ -168,28 +168,32 @@
 ### Task 5: The not-found pages
 
 **Files:**
-- Create: `apps/web/src/not-found/not-found.tsx`, `not-found.test.tsx`, `apps/web/src/brand/trash-can.svg`
+- Create: `apps/web/src/not-found/not-found.tsx`, `not-found.test.tsx`, `apps/web/src/brand/trash-can.svg` (from [`trash-can.png`](../specs/2026-11-04-PH-16c-managing-lists/trash-can.png))
 - Modify: `apps/web/src/routes.tsx`, `apps/web/src/lists/list-page.tsx`, `list-page.test.tsx`, `apps/web/src/api/client.ts`, `client.test.ts`, `e2e/tests/lists.spec.ts` (or `shell.spec.ts`)
 - Docs: `docs/architecture/architecture.md` (the not-found route), `docs/architecture/threat-model.md` (the SPA's ID check and the encoded path), `docs/architecture/visual-design.md` (the not-found pages and the trash can)
 
 **Interfaces:**
 - Produces: `NotFound({ message }: { message: string })` draws the trash can, the "Nothing here" heading, the message and the "Back to lists" link. `notFoundRoute` is a `{ path: "*", element: <NotFound message="This page doesn't exist." />, handle: { title: "Not found" } }` entry, last among the shell's children.
 
-- [ ] **Step 1: Write the failing tests.**
+- [ ] **Step 1: Convert the image to SVG.** Turn [`trash-can.png`](../specs/2026-11-04-PH-16c-managing-lists/trash-can.png) into `apps/web/src/brand/trash-can.svg`.
+  - Trace it into flat shapes quantized to the raccoon's five colours (`#141c2b`, `#3a4654`, `#6c7882`, `#b4bcc5`, `#f9f7f2`). Use a tracing tool if one can be installed without adding a project dependency (for example `vtracer` or `potrace` run once from the scratchpad), or draw it by hand.
+  - Keep the image's pose. Leave out the orange checkered patch under the lid. Keep the file small enough to inline as an asset (aim under 30 KB), with a `viewBox` and no fixed `width` or `height`.
+  - Render it on the light and the dark page background, as PNG screenshots next to the original.
+- [ ] **Step 2: Stop and show the owner** the SVG and the screenshots. Go on only when the owner approves it; rework it on their comments otherwise. Record the method used in ADR 0066's "Settled while building".
+- [ ] **Step 3: Write the failing tests.**
   - APP-5.1 and APP-5.2, per the spec. MSW fails on unhandled requests, so `/lists/not-a-uuid` sending nothing is checked by having no handler.
   - `client.test.ts`: `getList("a/b")` requests `/api/lists/a%2Fb`.
-- [ ] **Step 2: Run** the web tests. Expected: FAIL.
-- [ ] **Step 3: Implement.**
-  - **The trash can:** `trash-can.svg` from [`not-found-trash-can.svg`](../../architecture/visual-design/not-found-trash-can.svg), within the spec's pose, five colours and flat style.
+- [ ] **Step 4: Run** the web tests. Expected: FAIL.
+- [ ] **Step 5: Implement.**
   - **`NotFound`:** use the trash can with `alt=""` and the shell's heading level.
   - **`list-page.tsx`:**
     - `listSchema.shape.id.safeParse(id)` decides before `useList` fetches; pass `enabled` to the query so no request leaves.
     - A failed check, or a `404`, renders `NotFound` with "This list doesn't exist or was deleted." inside the list's header layout.
     - Other errors keep "Try again".
   - **The client:** apply `encodeURIComponent` to the ID in `getList`, `renameList` and `deleteList`.
-- [ ] **Step 4: Run** the web tests. Expected: PASS.
-- [ ] **Step 5: Add** an E2E test: an unknown path shows "Nothing here" and its link leads to `/`. `/lists/..%2F..%2Fauth%2Fsign-out` shows the list's message and sends no request to `/api/auth/sign-out` (`page.on("request")`). Run `expectAccessible` on the page. **Run** `pnpm check && pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 6: Update** the docs, tick the steps. **Commit** `feat(web): show a not-found page for unknown addresses and lists`. Its body carries `Closes #345`.
+- [ ] **Step 6: Run** the web tests. Expected: PASS.
+- [ ] **Step 7: Add** an E2E test: an unknown path shows "Nothing here" and its link leads to `/`. `/lists/..%2F..%2Fauth%2Fsign-out` shows the list's message and sends no request to `/api/auth/sign-out` (`page.on("request")`). Run `expectAccessible` on the page. **Run** `pnpm check && pnpm test:e2e`. Expected: PASS.
+- [ ] **Step 8: Update** the docs, tick the steps. **Commit** `feat(web): show a not-found page for unknown addresses and lists`. Its body carries `Closes #345`.
 
 ### Task 6: The new list's screen and the raccoon
 
