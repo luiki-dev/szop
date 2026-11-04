@@ -1,5 +1,6 @@
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import { Button, buttonVariants } from "@/components/ui/button.tsx";
 import {
@@ -23,6 +24,21 @@ export function ListPage() {
   const rename = useRenameList(id);
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
+  const queryClient = useQueryClient();
+  const deleted = useRef(false);
+  const askDelete = useRef(false);
+  const actions = useRef<HTMLButtonElement>(null);
+
+  // A deleted list leaves the cache once this screen no longer observes it:
+  // removed earlier, it would be refetched (a 404) before the navigation lands.
+  useEffect(
+    () => () => {
+      if (deleted.current) {
+        queryClient.removeQueries({ queryKey: ["lists", id], exact: true });
+      }
+    },
+    [queryClient, id],
+  );
   const input = useRef<HTMLInputElement>(null);
   const renaming = useRef(false);
   const name = query.data?.name;
@@ -102,12 +118,20 @@ export function ListPage() {
           />
         }
         menu={
-          <DropdownMenu>
+          // The dialog opens once the menu has closed and given the focus back
+          // to ⋮; opened sooner, that return takes the focus from Cancel.
+          <DropdownMenu
+            onOpenChangeComplete={(open) => {
+              if (open || !askDelete.current) return;
+              setDeleting(true);
+            }}
+          >
             <DropdownMenuTrigger
               render={
                 <Button
                   variant="ghost"
                   size="icon"
+                  ref={actions}
                   aria-label="List actions"
                   className="shrink-0"
                 />
@@ -118,6 +142,8 @@ export function ListPage() {
             {/* After Rename, focus goes to the title; otherwise back to ⋮. */}
             <DropdownMenuContent
               finalFocus={() => {
+                // The dialog gets the focus, and gives it back to ⋮ itself.
+                if (askDelete.current) return false;
                 if (!renaming.current) return true;
                 renaming.current = false;
                 // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
@@ -135,7 +161,7 @@ export function ListPage() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  setDeleting(true);
+                  askDelete.current = true;
                 }}
               >
                 <Trash2 aria-hidden="true" />
@@ -149,8 +175,14 @@ export function ListPage() {
       <DeleteListsDialog
         lists={[{ id, name }]}
         open={deleting}
-        onOpenChange={setDeleting}
+        onOpenChange={(open) => {
+          setDeleting(open);
+          if (!open) askDelete.current = false;
+          // Stryker disable next-line OptionalChaining: the ref is set while ⋮ is mounted
+          if (!open) actions.current?.focus();
+        }}
         onDeleted={() => {
+          deleted.current = true;
           void navigate("/", { replace: true });
         }}
       />

@@ -400,6 +400,40 @@ describe("ListPage", () => {
     expect(seen).toEqual(["GET", "DELETE"]);
   });
 
+  it("LST-1.3: a deleted list is not shown again from the cache", async () => {
+    const user = userEvent.setup();
+    const { router } = setup();
+    server.use(
+      http.delete(
+        `/api/lists/${id}`,
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+      http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+    );
+    await field();
+    await user.click(screen.getByRole("button", { name: "List actions" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    await user.click(await screen.findByRole("button", { name: "Delete" }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/");
+    });
+
+    // The next visit's request is held: nothing may show the name meanwhile.
+    server.use(
+      http.get(`/api/lists/${id}`, () => new Promise(() => undefined)),
+    );
+    await router.navigate(`/lists/${id}`);
+
+    // With no cached list the page shows its loading heading, not the name.
+    expect(
+      await screen.findByRole("heading", { name: "List" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByDisplayValue("Weekly shop")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Weekly shop" }),
+    ).not.toBeInTheDocument();
+  });
+
   it.each(["Escape", "Cancel"])(
     "APP-3.3: closing the dialog with %s returns the focus to the list's menu button",
     async (how) => {
