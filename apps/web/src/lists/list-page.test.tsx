@@ -616,8 +616,13 @@ describe("ListPage", () => {
       await user.type(await field(), " 2{Enter}");
 
       await waitFor(() => {
-        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+        expect(requests).toHaveLength(1);
       });
+      // Only the refetch changes the heading, which follows the saved name.
+      expect(
+        await screen.findByRole("heading", { name: "Weekly shop 2" }),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
       expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
     });
 

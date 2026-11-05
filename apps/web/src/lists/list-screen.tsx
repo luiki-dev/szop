@@ -47,7 +47,6 @@ export function ListHeader({
         // Stryker disable next-line ObjectLiteral,StringLiteral: class names only, no behavior
         className={cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
-          // Stryker disable next-line StringLiteral: class names only, no behavior
           "aria-disabled:opacity-50",
         )}
       >
@@ -193,7 +192,11 @@ export function TitleField({
       {!create && failed && (
         <p role="alert" className="px-2 pt-1 text-sm text-destructive">
           Not saved.{" "}
-          <button type="button" className="underline" onClick={commit}>
+          <button
+            type="button"
+            className="inline-flex min-h-12 items-center rounded-control px-1 underline outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            onClick={commit}
+          >
             Try again
           </button>
         </p>
