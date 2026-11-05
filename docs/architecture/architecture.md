@@ -283,6 +283,8 @@ Checking, adding and editing items update the TanStack Query cache immediately a
 
 The app watches the browser's online/offline events and failed requests. When offline it shows a clear banner and disables actions that change data. Changes are blocked, not queued. Queueing is the "offline check-off" future extension.
 
+Every request of `src/api/client.ts` is given up after `timeLimit` (10 seconds) with `timeoutMessage` ("The server didn't answer in time."), so a weak connection ends in an error, not in a wait. A change's whole run (the write, the lock, the session check, the sign-in and the retried write) shares one deadline ([PH-16d](../roadmap.md#ph-16d-resilient-changes)).
+
 ### Forms
 
 React Hook Form with the Zod resolver and the shared schemas: the browser and the API reject exactly the same invalid input.

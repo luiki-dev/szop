@@ -135,7 +135,6 @@ function guestSignIn(signal: AbortSignal): Promise<void> {
       });
     if (!session) await signIn(signal);
   };
-  // Stryker disable next-line ConditionalExpression: jsdom has no locks, so this is only the browser's path
   return "locks" in navigator
     ? navigator.locks.request(
         "szop-guest-sign-in",
