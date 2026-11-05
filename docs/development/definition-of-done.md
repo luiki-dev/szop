@@ -25,7 +25,7 @@ Whoever made an item true, **the owner verifies every item when reviewing the PR
 | 8 | **Significant decisions have ADRs** (`ADRs`) | Claude → owner | A decision about architecture, technology, tooling or process is recorded in a new ADR, with the options considered. | ADR 0004, decision 7 |
 | 9 | **Open points handled** (`Open points`) | Claude | Open points closed, re-assigned or added on GitHub (`open-point` issues); the whole-branch review's findings that are not fixed are listed to the owner, and the ones the owner chooses are open-point issues; the rest are noted as declined in the phase ADR. | ADR 0011, decision 1; ADR 0027, decision 2 |
 | 10 | **Commits follow the convention** (`Conventional Commits`) | Claude | Commit messages and the PR title follow Conventional Commits; in a phase, commits follow the plan's tasks. | ADR 0009, decisions 3 and 9 |
-| 11 | **UI changes shown** (`Screenshots`) | Claude | A PR that changes what users see includes screenshots of it: phone in light and dark mode, desktop in light mode. The PR also committed the approved mockups of every UI or UX decision it built, next to its spec. | ADR 0013, decision 21; ADR 0068, decision 1 |
+| 11 | **UI changes shown** (`Screenshots`) | Claude | A PR that changes what users see includes screenshots of it: phone in light and dark mode, desktop in light mode. The PR also committed the approved mockups of every UI or UX decision it built, next to its spec, except those the owner declined. | ADR 0013, decision 21; ADR 0068, decision 1; ADR 0069, decision 1 |
 
 ## Items that don't apply
 
