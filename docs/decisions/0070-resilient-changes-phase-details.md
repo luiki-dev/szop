@@ -38,3 +38,6 @@ The [spec](../superpowers/specs/2026-11-05-PH-16d-resilient-changes-design.md) h
 - PH-22 is left with the banner, the disabled controls and the journey with the network cut.
 
 ## Settled while building
+
+- **The deadline is built with a timer, not `AbortSignal.timeout`** (Task 1). `deadline()` in `client.ts` is an `AbortController` aborted by `setTimeout` after `timeLimit` (10 000 ms), because Vitest's fake timers do not drive `AbortSignal.timeout`, which would leave the limit untestable. Aborting with our own `Error` makes `fetch` reject with it, so no conversion is needed.
+- **The timeout's text** is "The server didn't answer in time." (`timeoutMessage`), the one message every request that waited for the limit rejects with.

@@ -1,5 +1,5 @@
-import { http, HttpResponse, type JsonBodyType } from "msw";
-import { describe, expect, it } from "vitest";
+import { delay, http, HttpResponse, type JsonBodyType } from "msw";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { smallCatalog } from "../test/catalog.ts";
 import { server } from "../test/server.ts";
 import { threeLists } from "../test/lists.ts";
@@ -13,6 +13,8 @@ import {
   getList,
   getLists,
   renameList,
+  timeLimit,
+  timeoutMessage,
 } from "./client.ts";
 
 describe("getHealth", () => {
@@ -113,20 +115,29 @@ describe("lists", () => {
     return calls;
   }
 
-  it("signs in anonymously before the first write when there is no session", async () => {
-    const calls = stubApi(null);
+  it("OP-116: a write with a session sends one request", async () => {
+    const calls = stubApi({ session: { id: "s" } });
+
+    await expect(createList(newList)).resolves.toEqual(party);
+
+    expect(calls).toEqual(["POST /api/lists"]);
+  });
+
+  it("OP-116: a 401 signs in once and sends the write once more", async () => {
+    const calls = stubApi(null, [401, 201]);
 
     await expect(createList(newList)).resolves.toEqual(party);
 
     expect(calls).toEqual([
+      "POST /api/lists",
       "GET /api/auth/get-session",
       "POST /api/auth/sign-in/anonymous",
       "POST /api/lists",
     ]);
   });
 
-  it("signs in before the write when the session answer is not JSON", async () => {
-    const calls = stubApi(null);
+  it("signs in when the session answer is not JSON", async () => {
+    const calls = stubApi(null, [401, 201]);
     server.use(
       http.get("/api/auth/get-session", () => {
         calls.push("GET /api/auth/get-session");
@@ -137,14 +148,15 @@ describe("lists", () => {
     await createList(newList);
 
     expect(calls).toEqual([
+      "POST /api/lists",
       "GET /api/auth/get-session",
       "POST /api/auth/sign-in/anonymous",
       "POST /api/lists",
     ]);
   });
 
-  it("signs in before the write when get-session fails with a JSON body", async () => {
-    const calls = stubApi(null);
+  it("signs in when get-session fails with a JSON body", async () => {
+    const calls = stubApi(null, [401, 201]);
     server.use(
       http.get("/api/auth/get-session", () => {
         calls.push("GET /api/auth/get-session");
@@ -158,35 +170,15 @@ describe("lists", () => {
     await createList(newList);
 
     expect(calls).toEqual([
+      "POST /api/lists",
       "GET /api/auth/get-session",
       "POST /api/auth/sign-in/anonymous",
       "POST /api/lists",
     ]);
   });
 
-  it("does not sign in when there is a session", async () => {
-    const calls = stubApi({ session: { id: "s" } });
-
-    await createList(newList);
-
-    expect(calls).toEqual(["GET /api/auth/get-session", "POST /api/lists"]);
-  });
-
-  it("signs in again and retries once after a 401", async () => {
-    const calls = stubApi({ session: { id: "s" } }, [401, 201]);
-
-    await expect(createList(newList)).resolves.toEqual(party);
-
-    expect(calls).toEqual([
-      "GET /api/auth/get-session",
-      "POST /api/lists",
-      "POST /api/auth/sign-in/anonymous",
-      "POST /api/lists",
-    ]);
-  });
-
-  it("stops after a second 401", async () => {
-    const calls = stubApi({ session: { id: "s" } }, [401]);
+  it("OP-116: a second 401 is an error with no third try", async () => {
+    const calls = stubApi(null, [401]);
 
     await expect(createList(newList)).rejects.toMatchObject({
       status: 401,
@@ -197,8 +189,8 @@ describe("lists", () => {
   });
 
   it("fails when the anonymous sign-in is refused", async () => {
+    stubApi(null, [401]);
     server.use(
-      http.get("/api/auth/get-session", () => HttpResponse.json(null)),
       http.post(
         "/api/auth/sign-in/anonymous",
         () => new HttpResponse(null, { status: 429 }),
@@ -208,6 +200,127 @@ describe("lists", () => {
     await expect(createList(newList)).rejects.toThrow(
       "POST /api/auth/sign-in/anonymous answered 429",
     );
+  });
+
+  describe("with locks", () => {
+    // A navigator.locks that runs the callbacks one after another.
+    let chain: Promise<unknown> = Promise.resolve();
+    beforeEach(() => {
+      chain = Promise.resolve();
+      Object.defineProperty(navigator, "locks", {
+        configurable: true,
+        value: {
+          request: (
+            _name: string,
+            _options: unknown,
+            callback: () => Promise<unknown>,
+          ) => {
+            const run = chain.then(callback);
+            chain = run.catch(() => undefined);
+            return run;
+          },
+        },
+      });
+    });
+    afterEach(() => {
+      Reflect.deleteProperty(navigator, "locks");
+    });
+
+    it("ACC-1.6: two sign-ins that meet make one sign-in request", async () => {
+      const calls: string[] = [];
+      let signedIn = false;
+      server.use(
+        http.get("/api/auth/get-session", () =>
+          HttpResponse.json(signedIn ? { session: {} } : null),
+        ),
+        http.post("/api/auth/sign-in/anonymous", () => {
+          calls.push("POST /api/auth/sign-in/anonymous");
+          signedIn = true;
+          return HttpResponse.json({ ok: true });
+        }),
+        http.post("/api/lists", () =>
+          signedIn
+            ? HttpResponse.json(party, { status: 201 })
+            : HttpResponse.json(
+                { error: { code: "unauthorized", message: "Sign in" } },
+                { status: 401 },
+              ),
+        ),
+      );
+
+      await expect(
+        Promise.all([
+          createList(newList),
+          createList({ ...newList, id: "other-id" }),
+        ]),
+      ).resolves.toHaveLength(2);
+
+      expect(calls).toEqual(["POST /api/auth/sign-in/anonymous"]);
+    });
+
+    it("a failed sign-in releases the lock for the next change", async () => {
+      let signIns = 0;
+      server.use(
+        http.get("/api/auth/get-session", () => HttpResponse.json(null)),
+        http.post("/api/auth/sign-in/anonymous", () =>
+          ++signIns === 1
+            ? new HttpResponse(null, { status: 500 })
+            : HttpResponse.json({ ok: true }),
+        ),
+        http.post("/api/lists", () =>
+          signIns < 2
+            ? HttpResponse.json(
+                { error: { code: "unauthorized", message: "Sign in" } },
+                { status: 401 },
+              )
+            : HttpResponse.json(party, { status: 201 }),
+        ),
+      );
+
+      await expect(createList(newList)).rejects.toThrow();
+      await expect(createList(newList)).resolves.toEqual(party);
+    });
+  });
+
+  describe("NET-1.4: the time limit", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("NET-1.4: a read with no answer fails after the limit", async () => {
+      server.use(http.get("/api/lists", () => delay("infinite")));
+      const result = getLists().catch((error: unknown) => error);
+      let settled = false;
+      void result.then(() => (settled = true));
+
+      await vi.advanceTimersByTimeAsync(timeLimit - 1);
+      expect(settled).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(await result).toEqual(new Error(timeoutMessage));
+    });
+
+    it("NET-1.4: the limit covers the whole change", async () => {
+      server.use(
+        http.post("/api/lists", async () => {
+          await delay(6_000);
+          return HttpResponse.json(
+            { error: { code: "unauthorized", message: "Sign in" } },
+            { status: 401 },
+          );
+        }),
+        http.get("/api/auth/get-session", () => HttpResponse.json(null)),
+        http.post("/api/auth/sign-in/anonymous", () => delay("infinite")),
+      );
+      const result = createList(newList).catch((error: unknown) => error);
+
+      await vi.advanceTimersByTimeAsync(timeLimit);
+
+      expect(await result).toEqual(new Error(timeoutMessage));
+    });
   });
 
   it("renames a list with a session", async () => {

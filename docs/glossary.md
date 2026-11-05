@@ -383,6 +383,7 @@ Used in the [functional requirements](requirements/functional-requirements.md), 
 | **Walking skeleton** | The thinnest possible version of the whole system that runs end to end (here: SPA → API → database, built by CI and deployed) and does almost nothing yet. Built early to test the foundation decisions. |
 | **WebSocket** | A persistent two-way connection between browser and server, letting the server push messages (used for live updates). |
 | **WHOIS** | The public lookup of who registered a domain, through which registrar and until when. Route 53's privacy protection hides the owner's contact details from it. |
+| **Web Locks API** | A browser API (`navigator.locks`) for locks that every tab of the same origin shares: code that asks for a lock by name waits until the holder is done. Szop uses it so that two tabs make one guest sign-in. |
 | **Workspace** | Everything one user owns: lists, templates, catalog, categories, units, settings. |
 | **Workspace (pnpm)** | Unrelated to the above: one package of the monorepo (`apps/web`, `apps/api`, `packages/shared`, `e2e/`) as pnpm manages it. pnpm links workspaces to each other so they can import one another. |
 | **Worktree (git)** | An extra working directory of the same repository, with another branch checked out, so two branches can be worked on side by side. Not used by default in Szop (see ADR 0009). |

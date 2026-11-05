@@ -204,3 +204,29 @@ test("APP-5.1, APP-5.2: an unknown path and an unusable list address show a not-
   await page.getByRole("link", { name: "Back to lists" }).last().click();
   await expect(page).toHaveURL("/");
 });
+
+test("ACC-1.6: two fresh tabs that create a list at the same moment share one workspace", async ({
+  context,
+}) => {
+  const names = ["Tab one", "Tab two"];
+  const pages = await Promise.all([context.newPage(), context.newPage()]);
+  for (const [index, page] of pages.entries()) {
+    await page.goto("/lists/new");
+    await page
+      .getByRole("textbox", { name: "List name" })
+      .fill(names[index] ?? "");
+  }
+
+  await Promise.all(
+    pages.map((page) =>
+      page.getByRole("textbox", { name: "List name" }).press("Enter"),
+    ),
+  );
+  for (const page of pages)
+    await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
+
+  for (const page of pages) {
+    await page.goto("/");
+    for (const name of names) await expect(page.getByText(name)).toBeVisible();
+  }
+});

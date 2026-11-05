@@ -65,7 +65,7 @@
 **Interfaces:**
 - Produces: `export const timeLimit = 10_000`. `export const timeoutMessage = "The server didn't answer in time."`. Every exported function keeps its signature (`getHealth`, `getCatalog`, `getLists`, `getList`, `createList`, `renameList`, `deleteList`, `deleteLists`); each now rejects with `new Error(timeoutMessage)` when no answer comes within `timeLimit`, and a write's whole run (the write, the lock, the session check, the sign-in, the retried write) shares one deadline.
 
-- [ ] **Step 1: Write the failing tests** in `client.test.ts`, with `vi.useFakeTimers({ shouldAdvanceTime: true })` where a test waits for the limit and MSW's `delay("infinite")` for a request with no answer. Rewrite the `lists` block's session tests for the new order (`stubApi` stays; `get-session` is now asked only inside the sign-in):
+- [x] **Step 1: Write the failing tests** in `client.test.ts`, with `vi.useFakeTimers({ shouldAdvanceTime: true })` where a test waits for the limit and MSW's `delay("infinite")` for a request with no answer. Rewrite the `lists` block's session tests for the new order (`stubApi` stays; `get-session` is now asked only inside the sign-in):
   - `"NET-1.4: a read with no answer fails after the limit"`: `GET /api/lists` never answers; after `advanceTimersByTimeAsync(9_999)` `getLists()` is still pending; after 1 ms more it rejects with `timeoutMessage`.
   - `"NET-1.4: the limit covers the whole change"`: `POST /api/lists` answers `401` after `delay(6_000)`, `get-session` answers `null`, the sign-in never answers; `createList` rejects with `timeoutMessage` at 10 000 ms, not at 16 000 (it has rejected after advancing 10 000 ms in total).
   - `"OP-116: a write with a session sends one request"`: `calls` is `["POST /api/lists"]`.
@@ -74,17 +74,17 @@
   - Keep, in the new order: the sign-in when `get-session` answers non-JSON or a `429` JSON body (both count as no session), and "fails when the anonymous sign-in is refused".
   - `"ACC-1.6: two sign-ins that meet make one sign-in request"`: install a fake `navigator.locks` with `Object.defineProperty` (`request(name, options, callback)` runs callbacks one after another on a promise chain and returns the callback's promise; remove it after the test). The handlers keep a `signedIn` flag: `POST /api/lists` answers `401` until it is set, `get-session` answers `null` or a session by it, the sign-in sets it. Two `createList` calls with different IDs started together both resolve, and `calls` holds one `POST /api/auth/sign-in/anonymous`.
   - `"a failed sign-in releases the lock for the next change"` (Review Focus 5): with the fake locks, the first sign-in answers `500`, so the first `createList` rejects; the second `createList` signs in and resolves.
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test -- client`. Expected: FAIL.
-- [ ] **Step 3: Implement** in `client.ts`:
+- [x] **Step 2: Run** `pnpm --filter @szop/web test -- client`. Expected: FAIL.
+- [x] **Step 3: Implement** in `client.ts`:
   - `function deadline(): AbortSignal`: an `AbortController` aborted with `new Error(timeoutMessage)` by `setTimeout(…, timeLimit)`. Not `AbortSignal.timeout`: Vitest's fake timers do not drive it (checked while planning), and aborting with our own error makes `fetch` reject with that error, so no conversion is needed. Record this in ADR 0070's "Settled while building".
   - Every `fetch` gets a `signal`: a read and the health check `deadline()`; `send(method, path, body, signal)` takes it.
   - `withSession(write: (signal: AbortSignal) => Promise<Response>)`: one `deadline()`; the write goes first; on a `401`, `guestSignIn(signal)`, then the write once more and its answer returned whatever it is.
   - `guestSignIn(signal)`: under `navigator.locks.request("szop-guest-sign-in", { signal }, callback)`, or the callback alone when `navigator.locks` is missing (jsdom). The callback asks `GET /api/auth/get-session` (same reading as today: not ok, not JSON or `null` mean no session) and calls `signIn(signal)` only when there is none.
   - Update the comments on `withSession` and the file's top: get-session is no longer asked before each write.
-- [ ] **Step 4: Run** the tests again. Expected: PASS.
-- [ ] **Step 5: Write the E2E test** in `e2e/tests/lists.spec.ts`: `"ACC-1.6: two fresh tabs that create a list at the same moment share one workspace"`. Two pages in the test's fresh context, each on `/lists/new` with a name typed; both Enters pressed in one `Promise.all`; both reach `/lists/<id>`; after `reload` of `/` on each page, both names are on both pages.
-- [ ] **Step 6: Run** `pnpm test:e2e -- lists`. Expected: PASS. Then `pnpm check`. Expected: PASS.
-- [ ] **Step 7: Update the docs** listed above and commit: `feat(connectivity): give every request a time limit and sign in only on a 401`.
+- [x] **Step 4: Run** the tests again. Expected: PASS.
+- [x] **Step 5: Write the E2E test** in `e2e/tests/lists.spec.ts`: `"ACC-1.6: two fresh tabs that create a list at the same moment share one workspace"`. Two pages in the test's fresh context, each on `/lists/new` with a name typed; both Enters pressed in one `Promise.all`; both reach `/lists/<id>`; after `reload` of `/` on each page, both names are on both pages.
+- [x] **Step 6: Run** `pnpm test:e2e -- lists`. Expected: PASS. Then `pnpm check`. Expected: PASS.
+- [x] **Step 7: Update the docs** listed above and commit: `feat(connectivity): give every request a time limit and sign in only on a 401`.
 
 ### Task 2: Saving a rename
 
