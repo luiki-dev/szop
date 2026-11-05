@@ -46,6 +46,9 @@ The [spec](../superpowers/specs/2026-11-04-PH-16c-managing-lists-design.md) hold
   - During a rolling deploy, an old task's health answer has no `version`, and the menu shows the API's status as failed for about a minute. The same mixed-version gap the rolling deploys already have.
   - Other minor findings, left as they are: a selection bar shown with no lists after a reload or a refetch; a duplicate-ID check that is case-sensitive; `400` before `401` on an invalid body without a session, as `POST /api/lists`; the input remounting when the window crosses `lg`; `useMediaQuery` running for the rename field; the raccoon check's exact 65 px; two headings on the phone's not-found page; test-only polish.
   - An unknown address whose last segment looks like a file name (`/foo.bar`) still gets the API's JSON 404: kept as the bug [#383](https://github.com/luiki-dev/szop/issues/383).
+- **Left to [PH-16d](../roadmap.md#ph-16d-resilient-changes) after the demo check** _(the owner's choice)_:
+  - Starting to select moves the lists up, since the bar replaces the page's header and the Select row goes away. The selection controls will take the Select row's place instead, with the lists staying where they are ([OP-131](https://github.com/luiki-dev/szop/issues/385)).
+  - In Firefox with classic scrollbars, the raccoon still stands off the window's right edge. Rather than chase the edge, the desktop raccoon will peek in from under the sidebar, as it peeks in from the window's left edge on a phone ([OP-132](https://github.com/luiki-dev/szop/issues/386)).
 
 ## Consequences
 
