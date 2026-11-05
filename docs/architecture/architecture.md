@@ -252,7 +252,7 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../deci
 | `/shared` *(Later)* | Shared with me |
 | `/s/:token` *(Later)* | Opening a share link |
 
-Only `/` (the lists), `/lists/new`, `/lists/:id`, `/catalog` and `/design` exist so far; the table above is the target. Any other path shows React Router's default error screen until a not-found route is added ([ADR 0021](../decisions/0021-spa-skeleton-details.md), consequences).
+Only `/` (the lists), `/lists/new`, `/lists/:id`, `/catalog` and `/design` exist so far; the table above is the target. Any other path matches a catch-all route (`*`) last among the shell's children, which shows `NotFound` (`src/not-found/`): the trash can, "Nothing here", "This page doesn't exist." and a link to `/`, with the route title "Not found" ([ADR 0066](../decisions/0066-managing-lists-phase-details.md), decision 6). `/lists/:id` shows the same component with "This list doesn't exist or was deleted." when the ID is not a UUID (checked with `listSchema.shape.id`, and the query is then disabled so no request leaves) and when the API answers `404`. The API client also applies `encodeURIComponent` to every list ID it puts into a path.
 
 As built in PH-15a, the app shell renders React Router's `ScrollRestoration`: a page opened from the menu or a link starts at the top, and Back and Forward return to where the page was scrolled ([APP-1](../requirements/APP-app-wide-behavior.md#app-1), criterion APP-1.10), except the catalog's expansion and search, left to [OP-112](https://github.com/luiki-dev/szop/issues/305). The router keeps the positions in `sessionStorage`; in this single-page mode the component renders no script, so the Content Security Policy is untouched.
 

@@ -140,7 +140,7 @@ export async function getLists(): Promise<List[]> {
 }
 
 export async function getList(id: string): Promise<List> {
-  const path = `/api/lists/${id}`;
+  const path = `/api/lists/${encodeURIComponent(id)}`;
   return readList("GET", path, await fetch(path));
 }
 
@@ -154,7 +154,7 @@ export async function createList(body: CreateList): Promise<List> {
 }
 
 export async function renameList(id: string, name: string): Promise<List> {
-  const path = `/api/lists/${id}`;
+  const path = `/api/lists/${encodeURIComponent(id)}`;
   return readList(
     "PATCH",
     path,
@@ -172,7 +172,7 @@ async function expectNoContent(
 }
 
 export async function deleteList(id: string): Promise<void> {
-  const path = `/api/lists/${id}`;
+  const path = `/api/lists/${encodeURIComponent(id)}`;
   await expectNoContent(
     "DELETE",
     path,

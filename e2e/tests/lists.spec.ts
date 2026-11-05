@@ -171,3 +171,32 @@ test("LST-1.6, LST-1.7: on a phone a long press selects a list, and Back stops s
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   await expect(page).toHaveURL("/");
 });
+
+test("APP-5.1, APP-5.2: an unknown path and an unusable list address show a not-found page", async ({
+  page,
+}) => {
+  await page.goto("/no/such/page");
+  await expect(
+    page.getByRole("heading", { name: "Nothing here" }),
+  ).toBeVisible();
+  await expect(page.getByText("This page doesn't exist.")).toBeVisible();
+  await expectAccessible(page);
+  const back = page.getByRole("link", { name: "Back to lists" });
+  const box = await back.boundingBox();
+  expect(box?.height).toBeGreaterThanOrEqual(48);
+  await back.click();
+  await expect(page).toHaveURL("/");
+
+  const requests: string[] = [];
+  page.on("request", (request) => requests.push(request.url()));
+  await page.goto("/lists/%2E%2E%2F%2E%2E%2Fauth%2Fsign-out");
+  await expect(
+    page.getByText("This list doesn't exist or was deleted."),
+  ).toBeVisible();
+  await expectAccessible(page);
+  expect(requests.filter((url) => url.includes("/api/auth/sign-out"))).toEqual(
+    [],
+  );
+  await page.getByRole("link", { name: "Back to lists" }).last().click();
+  await expect(page).toHaveURL("/");
+});

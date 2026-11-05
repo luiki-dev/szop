@@ -225,6 +225,10 @@ On the lists page, "Select" (outline, right-aligned above the lists, shown only 
 
 The name of a list is one field, on the new list's screen and on the list's. **At rest** it reads as the title (Gabarito 800, 20 px, cut with "…") with a dotted 2 px underline in `input`, the only hint that it can be edited. **Focused**, it becomes a `card` field with `rounded-control` corners and the 3 px `ring`. Enter saves, Esc puts the old name back, an empty name is never saved, and while saving the field is read-only; a failure is a short message under it, in `destructive`.
 
+### The not-found pages
+
+A path that is not a page, and a list that cannot be opened, show one layout: the trash can (`brand/trash-can.svg`, about 200 px wide, centered, decorative), "Nothing here" as a bold heading, one line of what is wrong in `muted-foreground`, and an outline "Back to lists" button of the usual 48 px height. The trash can is a grey, old-style metal can lying on its side, its open end to the right and its lid leaning on its left, drawn in the raccoon's five colours in flat shapes, so it reads on the light and the dark page. It was traced from the owner's image ([ADR 0066](../decisions/0066-managing-lists-phase-details.md), "Settled while building"); the earlier sketch `visual-design/not-found-trash-can.svg` is superseded.
+
 ### The peeking raccoon
 
 An empty list shows the grayscale raccoon (200 px, 55% opacity) peeking in, only the top of its head visible, up to just below the eyes. On a phone it comes from the left edge, halfway down, turned 90° to the right, so the add bar at the bottom does not cover it; from `lg` it comes from the right edge, turned 90° to the left. It is decorative (`aria-hidden`) and sits behind the page.

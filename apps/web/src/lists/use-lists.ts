@@ -20,10 +20,11 @@ export function useLists() {
   return useQuery({ queryKey: ["lists"], queryFn: getLists, retry: false });
 }
 
-export function useList(id: string) {
+export function useList(id: string, enabled = true) {
   return useQuery({
     queryKey: ["lists", id],
     queryFn: () => getList(id),
+    enabled,
     retry: false,
   });
 }

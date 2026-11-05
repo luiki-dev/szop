@@ -25,6 +25,29 @@ describe("getHealth", () => {
   });
 });
 
+describe("APP-5.2: IDs in a path", () => {
+  it("are encoded, so no caller can reach another API path", async () => {
+    const paths: string[] = [];
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.all("/api/lists/*", ({ request }) => {
+        paths.push(`${request.method} ${new URL(request.url).pathname}`);
+        return new HttpResponse(null, { status: 404 });
+      }),
+    );
+
+    await getList("a/b").catch(() => undefined);
+    await renameList("../x", "N").catch(() => undefined);
+    await deleteList("a?b").catch(() => undefined);
+
+    expect(paths).toEqual([
+      "GET /api/lists/a%2Fb",
+      "PATCH /api/lists/..%2Fx",
+      "DELETE /api/lists/a%3Fb",
+    ]);
+  });
+});
+
 describe("getCatalog", () => {
   it("returns the catalog", async () => {
     server.use(http.get("/api/catalog", () => HttpResponse.json(smallCatalog)));

@@ -139,7 +139,7 @@ describe("ListPage", () => {
     );
   });
 
-  it("says the list does not exist on a 404, with a link to the lists page", async () => {
+  it("APP-5.2: says the list does not exist or was deleted on a 404, with a link to the lists page", async () => {
     server.use(
       http.get(`/api/lists/${id}`, () =>
         HttpResponse.json(
@@ -157,15 +157,30 @@ describe("ListPage", () => {
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByText("This list does not exist.")).toBeVisible();
-    expect(screen.getByRole("link", { name: "Back to lists" })).toHaveAttribute(
-      "href",
-      "/",
+    expect(
+      await screen.findByText("This list doesn't exist or was deleted."),
+    ).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Nothing here" })).toBeVisible();
+    const links = screen.getAllByRole("link", { name: "Back to lists" });
+    expect(links).toHaveLength(2);
+    for (const link of links) expect(link).toHaveAttribute("href", "/");
+  });
+
+  it("APP-5.2: an address that is not a list ID shows the same page and sends no request", async () => {
+    // No handler for /api/lists/not-a-uuid: MSW fails a request nobody handles.
+    const router = createMemoryRouter(routes, {
+      initialEntries: ["/lists/not-a-uuid"],
+    });
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
     );
-    expect(screen.getByRole("link", { name: "Show my lists" })).toHaveAttribute(
-      "href",
-      "/",
-    );
+
+    expect(
+      await screen.findByText("This list doesn't exist or was deleted."),
+    ).toBeVisible();
+    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
   });
 
   it("APP-1.6: a list that fails to load still has a way back", async () => {
