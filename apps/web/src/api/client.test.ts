@@ -285,7 +285,8 @@ describe("lists", () => {
 
   describe("NET-1.4: the time limit", () => {
     beforeEach(() => {
-      vi.useFakeTimers({ shouldAdvanceTime: true });
+      // Only the timers: real time must not move the clock, or the limit could fire before the check just under it.
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     });
     afterEach(() => {
       vi.useRealTimers();
