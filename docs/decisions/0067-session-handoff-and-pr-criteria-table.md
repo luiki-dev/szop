@@ -6,7 +6,7 @@
 
 ## Context
 
-The owner asked for two changes to the session skills. The first renames `/handoff` to `/session-handoff`, with "Session Handoff" as the skill's title. The second asked `/demo-check` for a table of every acceptance criterion the phase delivers or starts, before its list of checks, even when no check is proposed. While choosing where that list would come from, the owner noted that the PR's Links section already lists those criteria, as a bulleted line of linked IDs, and chose to turn that line into a table instead of adding a second one to `/demo-check`.
+The owner asked for two changes to the session skills. The first renamed `/handoff` to `/session-handoff`, with "Session Handoff" as the skill's title. The second asked for a table in `/demo-check` of every acceptance criterion the phase delivers or starts, before its list of checks, even when no check is proposed. While choosing where that list would come from, the owner noted that the PR's Links section already lists those criteria, as a bulleted line of linked IDs, and chose to turn that line into a table instead of adding a second one to `/demo-check`.
 
 ## Decisions
 
