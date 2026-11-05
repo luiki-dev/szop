@@ -40,6 +40,7 @@ describe("APP-1.4: ApiStatus", () => {
     const databaseDown = {
       status: "error",
       commit: "unknown",
+      version: "0.2.0",
       instance: "00000000",
       database: { status: "down" },
     } satisfies Health;
@@ -56,6 +57,50 @@ describe("APP-1.4: ApiStatus", () => {
     expect(dot("API: reachable")).toHaveClass("bg-primary");
     expect(dot("Database: down")).toHaveClass("bg-destructive");
   });
+
+  const commit = "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678";
+  const downBody = {
+    status: "error",
+    commit,
+    version: "0.2.0",
+    instance: "00000000",
+    database: { status: "down" },
+  } satisfies Health;
+
+  it.each([
+    [
+      "up",
+      "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+      "Version 0.2.0 · a1b2c3d",
+    ],
+    ["up", "unknown", "Version 0.2.0"],
+    [
+      "down",
+      "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+      "Version 0.2.0 · a1b2c3d",
+    ],
+    ["down", "unknown", "Version 0.2.0"],
+  ])(
+    "with the database %s and commit %s, shows %s",
+    async (database, c, text) => {
+      server.use(
+        http.get("/api/health", () =>
+          database === "up"
+            ? HttpResponse.json({ ...healthyBody, commit: c, version: "0.2.0" })
+            : HttpResponse.json({ ...downBody, commit: c }, { status: 503 }),
+        ),
+      );
+
+      renderStatus();
+
+      const line = await screen.findByText(text);
+      expect(line).toHaveClass(
+        "text-xs",
+        "text-muted-foreground",
+        "tabular-nums",
+      );
+    },
+  );
 
   it("says it cannot reach the API when the request fails", async () => {
     server.use(http.get("/api/health", () => HttpResponse.error()));

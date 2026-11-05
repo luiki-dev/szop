@@ -10,7 +10,15 @@ export const listNameSchema = z
   })
   .refine((value) => Array.from(value).length <= 100, {
     message: "Name is too long (at most 100 characters)",
-  });
+  })
+  // Control and format characters, except the joiner and the tag characters
+  // that build emoji sequences (ZWJ families, flags of regions).
+  .refine(
+    (value) => !/(?![\u200D\u{E0020}-\u{E007F}])[\p{Cc}\p{Cf}]/u.test(value),
+    {
+      message: "Name can't contain control characters",
+    },
+  );
 
 export const listSchema = z.object({
   id: z.uuid(),
@@ -27,6 +35,17 @@ export const createListSchema = z.object({
 
 export const renameListSchema = z.object({ name: listNameSchema });
 
+export const deleteListsSchema = z.object({
+  ids: z
+    .array(z.uuid())
+    .min(1)
+    .max(100)
+    .refine((ids) => new Set(ids).size === ids.length, {
+      message: "IDs must be unique",
+    }),
+});
+
 export type List = z.infer<typeof listSchema>;
 export type CreateList = z.infer<typeof createListSchema>;
 export type RenameList = z.infer<typeof renameListSchema>;
+export type DeleteLists = z.infer<typeof deleteListsSchema>;

@@ -20,7 +20,9 @@ export {
   listsResponseSchema,
   createListSchema,
   renameListSchema,
+  deleteListsSchema,
   type List,
   type CreateList,
   type RenameList,
+  type DeleteLists,
 } from "./lists.ts";

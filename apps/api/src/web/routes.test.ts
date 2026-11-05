@@ -108,6 +108,16 @@ describe("serving the SPA", () => {
     expect(response.body).toBe(webRootFiles["index.html"]);
   });
 
+  it("serves the app for a page address whose encoded ID holds dots", async () => {
+    const response = await start().inject({
+      method: "GET",
+      url: "/lists/..%2F..%2Fauth%2Fsign-out",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBe(webRootFiles["index.html"]);
+  });
+
   it("serves only the files found at startup", async () => {
     start();
     const late = join(webRoot.path, "late.txt");

@@ -56,6 +56,8 @@ COPY apps/api/drizzle ./apps/api/drizzle
 # The RDS certificate authorities, for the pool's TLS: DATABASE_TLS=verify-full
 # (PH-12a), set on the demo in PH-12c (OP-017).
 COPY apps/api/certs ./apps/api/certs
+# The root package.json, which holds the release version /api/health reports.
+COPY package.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/shared/src ./packages/shared/src
 COPY --from=build /app/apps/web/dist ./apps/web/dist

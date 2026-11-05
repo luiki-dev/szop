@@ -28,6 +28,7 @@ export function NewListPage() {
           <TitleField
             initial=""
             autoFocus
+            create
             pending={create.isPending}
             {...(create.error ? { error: create.error.message } : {})}
             onSave={(name) => {

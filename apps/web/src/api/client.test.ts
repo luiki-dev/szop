@@ -6,6 +6,8 @@ import { threeLists } from "../test/lists.ts";
 import {
   ApiRequestError,
   createList,
+  deleteList,
+  deleteLists,
   getCatalog,
   getHealth,
   getList,
@@ -20,6 +22,29 @@ describe("getHealth", () => {
     );
 
     await expect(getHealth()).rejects.toThrow("GET /api/health answered 500");
+  });
+});
+
+describe("APP-5.2: IDs in a path", () => {
+  it("are encoded, so no caller can reach another API path", async () => {
+    const paths: string[] = [];
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.all("/api/lists/*", ({ request }) => {
+        paths.push(`${request.method} ${new URL(request.url).pathname}`);
+        return new HttpResponse(null, { status: 404 });
+      }),
+    );
+
+    await getList("a/b").catch(() => undefined);
+    await renameList("../x", "N").catch(() => undefined);
+    await deleteList("a?b").catch(() => undefined);
+
+    expect(paths).toEqual([
+      "GET /api/lists/a%2Fb",
+      "PATCH /api/lists/..%2Fx",
+      "DELETE /api/lists/a%3Fb",
+    ]);
   });
 });
 
@@ -284,6 +309,67 @@ describe("lists", () => {
     );
     await expect(renameList(id, "X")).rejects.toThrow(
       `PATCH /api/lists/${id} answered 503`,
+    );
+  });
+
+  it("deletes one list with a DELETE that carries no body or JSON type", async () => {
+    const seen: (string | null)[] = [];
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.delete(`/api/lists/${party?.id ?? ""}`, ({ request }) => {
+        seen.push(request.headers.get("content-type"));
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    await expect(deleteList(party?.id ?? "")).resolves.toBeUndefined();
+    expect(seen).toEqual([null]);
+  });
+
+  it("deletes several lists with POST /api/lists/delete and their IDs", async () => {
+    let body: unknown;
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.post("/api/lists/delete", async ({ request }) => {
+        body = await request.json();
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    await expect(deleteLists(["a", "b"])).resolves.toBeUndefined();
+    expect(body).toEqual({ ids: ["a", "b"] });
+  });
+
+  it("rejects a failed delete with ApiRequestError", async () => {
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.delete(
+        "/api/lists/x",
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+
+    await expect(deleteList("x")).rejects.toBeInstanceOf(ApiRequestError);
+  });
+
+  it("names the method and path of a failed delete", async () => {
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.delete(
+        "/api/lists/x",
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+      http.post(
+        "/api/lists/delete",
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+
+    await expect(deleteList("x")).rejects.toThrow(
+      "DELETE /api/lists/x answered 500",
+    );
+    await expect(deleteLists(["a"])).rejects.toThrow(
+      "POST /api/lists/delete answered 500",
     );
   });
 

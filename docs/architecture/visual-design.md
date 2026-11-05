@@ -22,6 +22,7 @@ This page describes the design system, not the screens: each phase designs the s
 - [6. Interaction patterns](#6-interaction-patterns)
   - [Feedback](#feedback)
   - [Forms and focus](#forms-and-focus)
+  - [The selection bar](#the-selection-bar)
   - [The title field](#the-title-field)
   - [The peeking raccoon](#the-peeking-raccoon)
   - [Writing](#writing)
@@ -212,13 +213,27 @@ Decided in [ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision
 - **Labels are always visible**, never placeholder-only. The one exception is the list's add bar, which works like a search field: its accessible name says which list it adds to, and its button says "Add" ([ADR 0022](../decisions/0022-ring-tail-redesign.md), decision 13). **The catalog's search field is the second exception**: a placeholder and the accessible name "Search the catalog", a magnifier icon and a clear button ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 10). **The list's name field is the third**: the placeholder and accessible name "List name", since a label would push the header down. Errors appear under their field, in words, checked when leaving the field and on submit.
 - **A visible focus ring** (`ring`) on everything focusable. Dialogs and drawers trap focus and return it when closed (Base UI does this). **The ring is drawn in the `ring` color on links as on buttons**, so the menu's links draw it too ([NFR-2](../requirements/NFR-non-functional-requirements.md#nfr-2).8).
 
+### The confirmation dialog
+
+Deleting lists asks first, in an alert dialog ([APP-3](../requirements/APP-app-wide-behavior.md#app-3).3). The title names what goes: `Delete list "<name>"?` or `Delete <N> lists?`, and the body says "This can't be undone." Cancel (outline) has the focus when it opens; Delete is the destructive button. While the request runs both buttons are disabled and Esc does nothing; on failure the dialog stays open with "Couldn't delete the list." (or "lists.") in `destructive` under the body, and Delete tries again. A click outside does not close it. Both buttons keep the 48 px tap target and the focus ring.
+
+### The selection bar
+
+On the lists page, "Select" (outline, right-aligned above the lists, shown only when there are lists) starts selecting; on a phone a long press of about 500 ms on a list does too. While selecting, the shell draws no header and the page draws a bar in its place: ✕ ("Cancel selection"), "`N` selected" (`aria-live="polite"`), "Select all" or "Deselect all" (ghost) and Delete (destructive, disabled at zero). Each row becomes a label around a checkbox, so a tap anywhere on it toggles it and Space works on the focused one; a checked row has a 2 px `primary` ring. The pinned "New list" is hidden. Every control keeps the 48 px tap target and the focus ring. Rows are not text-selectable on a long press (`select-none`, no touch callout) so the browser's own menu does not compete with the mode.
+
 ### The title field
 
 The name of a list is one field, on the new list's screen and on the list's. **At rest** it reads as the title (Gabarito 800, 20 px, cut with "…") with a dotted 2 px underline in `input`, the only hint that it can be edited. **Focused**, it becomes a `card` field with `rounded-control` corners and the 3 px `ring`. Enter saves, Esc puts the old name back, an empty name is never saved, and while saving the field is read-only; a failure is a short message under it, in `destructive`.
 
+**On the new list's screen** the list does not exist yet, so the field never turns into the title: it stays a `card` field with a 2 px `input` border, focused or not. **Create** (the primary button, 48 px) makes the list, as Enter does, and is disabled while the name is empty or too long and while the create is in flight. On a phone it is pinned at the bottom in the same bar as "New list" on the lists page; from `lg` it stands right after the field, in its row.
+
+### The not-found pages
+
+A path that is not a page, and a list that cannot be opened, show one layout: the trash can (`brand/trash-can.svg`, about 200 px wide, centered, decorative), "Nothing here" as a bold heading, one line of what is wrong in `muted-foreground`, and an outline "Back to lists" button of the usual 48 px height. The trash can is a grey, old-style metal can lying on its side, its open end to the right and its lid leaning on its left, drawn in the raccoon's five colours in flat shapes, so it reads on the light and the dark page. It was traced from the owner's image ([ADR 0066](../decisions/0066-managing-lists-phase-details.md), "Settled while building"); the earlier sketch `visual-design/not-found-trash-can.svg` is superseded.
+
 ### The peeking raccoon
 
-An empty list shows the grayscale raccoon (200 px, 55% opacity) peeking in, only the top of its head visible, up to just below the eyes. On a phone it comes from the left edge, halfway down, turned 90° to the right, so the add bar at the bottom does not cover it; from `lg` it comes from the right edge, turned 90° to the left. It is decorative (`aria-hidden`) and sits behind the page.
+An empty list shows the grayscale raccoon (200 px, 55% opacity) peeking in, only the top of its head visible, up to just below the eyes. On a phone it comes from the left edge, halfway down, turned 90° to the right, so the add bar at the bottom does not cover it; from `lg` it comes from the right edge, turned 90° to the left, with no gap even though the page keeps its scrollbar gutter (the offset adds the gutter's width). It is decorative (`aria-hidden`) and sits behind the page.
 
 ### Writing
 

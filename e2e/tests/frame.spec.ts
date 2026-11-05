@@ -79,3 +79,22 @@ test("APP-1.8: on a phone, New list fills a bar at the bottom of the screen", as
   expect(Math.round(link.x)).toBe(16);
   expect(Math.round(link.width)).toBe(viewport.width - 32);
 });
+
+test("LST-1.9: on a desktop the empty list's raccoon peeks in with no gap to the window's edge", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "a phone shows the raccoon at the left edge");
+  await page.goto("/lists/new");
+  const raccoon = page.locator('img[width="200"]');
+  // The raccoon is 200 px wide and 65 px of it sits outside the window.
+  for (const height of [0, 3000]) {
+    await page.evaluate((min) => {
+      document.body.style.minHeight = `${String(min)}px`;
+    }, height);
+    const right = await raccoon.evaluate(
+      (image) => image.getBoundingClientRect().right - innerWidth,
+    );
+    expect(right, `page ${String(height)} px tall`).toBe(65);
+  }
+});

@@ -1,6 +1,7 @@
 import {
   type Catalog,
   createListSchema,
+  deleteListsSchema,
   listSchema,
   listsResponseSchema,
   renameListSchema,
@@ -17,7 +18,13 @@ import type { Auth } from "../auth/auth.ts";
 import { sessionHook } from "../auth/session.ts";
 import type { Database } from "../db/database.ts";
 import { sendError } from "../errors.ts";
-import { insertList, listLists, renameList } from "./repository.ts";
+import {
+  deleteList,
+  deleteLists,
+  insertList,
+  listLists,
+  renameList,
+} from "./repository.ts";
 
 export interface ListsRoutesOptions {
   db: Database;
@@ -105,6 +112,40 @@ export function listsRoutes(
       return list ?? notFound(reply);
     },
   );
+
+  typed.delete(
+    "/lists/:id",
+    // Stryker disable next-line ObjectLiteral: a path parameter is always a string, so `{}` behaves the same
+    { schema: { params: idParams } },
+    async (request, reply) => {
+      if (request.user === null) return unauthorized(reply);
+      const id = z.uuid().safeParse(request.params.id);
+      // Stryker disable next-line ConditionalExpression: an invalid ID would reach the access layer as undefined and end in the same 404; the guard keeps it from the query
+      if (!id.success) return notFound(reply);
+      const { context } = await requireListAccess(db, request.user, id.data);
+      return (await deleteList(db, context, id.data))
+        ? reply.code(204).send()
+        : notFound(reply);
+    },
+  );
+
+  // A POST, not a DELETE with a body: some proxies drop a DELETE's body.
+  typed.post(
+    "/lists/delete",
+    { schema: { body: deleteListsSchema } },
+    async (request, reply) => {
+      if (request.user === null) return unauthorized(reply);
+      await db.transaction(async (tx) => {
+        const context = await findOwnWorkspace(tx, request.user);
+        if (context) await deleteLists(tx, context, request.body.ids);
+      });
+      return reply.code(204).send();
+    },
+  );
+}
+
+function unauthorized(reply: Parameters<typeof sendError>[0]) {
+  return sendError(reply, 401, "unauthorized", "Sign-in required");
 }
 
 function notFound(reply: Parameters<typeof sendError>[0]) {

@@ -18,6 +18,17 @@ function Line({ up, children }: { up: boolean; children: string }) {
   );
 }
 
+// The release version, with the commit's first 7 characters when the image
+// knows it. Under the status lines, in both variants.
+function Version({ version, commit }: { version: string; commit: string }) {
+  return (
+    <p className="text-xs text-muted-foreground tabular-nums">
+      Version {version}
+      {commit === "unknown" ? "" : ` · ${commit.slice(0, 7)}`}
+    </p>
+  );
+}
+
 function Status({ query }: { query: ReturnType<typeof useHealth> }) {
   if (query.isPending) {
     return <p>Checking the API…</p>;
@@ -30,6 +41,7 @@ function Status({ query }: { query: ReturnType<typeof useHealth> }) {
       <>
         <Line up>API: ok</Line>
         <Line up>Database: up</Line>
+        <Version version={query.data.version} commit={query.data.commit} />
         <p className="text-xs text-muted-foreground tabular-nums">
           Schema version: {query.data.database.schemaVersion}
         </p>
@@ -40,6 +52,7 @@ function Status({ query }: { query: ReturnType<typeof useHealth> }) {
     <>
       <Line up>API: reachable</Line>
       <Line up={false}>Database: down</Line>
+      <Version version={query.data.version} commit={query.data.commit} />
     </>
   );
 }

@@ -60,9 +60,17 @@ export class ApiRequestError extends Error {
 
 const json = { "content-type": "application/json" };
 
-// The API refuses writes that are not JSON, so every write sends the header.
-function send(method: "POST" | "PATCH", path: string, body: unknown) {
-  return fetch(path, { method, headers: json, body: JSON.stringify(body) });
+// The API refuses writes that are not JSON, so every write with a body sends
+// the header. A DELETE has no body and must not claim one: Fastify answers 400
+// to JSON with nothing in it.
+function send(
+  method: "POST" | "PATCH" | "DELETE",
+  path: string,
+  body?: unknown,
+) {
+  return body === undefined
+    ? fetch(path, { method })
+    : fetch(path, { method, headers: json, body: JSON.stringify(body) });
 }
 
 // The body of a response that is not the answer: the API's message when it
@@ -132,7 +140,7 @@ export async function getLists(): Promise<List[]> {
 }
 
 export async function getList(id: string): Promise<List> {
-  const path = `/api/lists/${id}`;
+  const path = `/api/lists/${encodeURIComponent(id)}`;
   return readList("GET", path, await fetch(path));
 }
 
@@ -146,10 +154,37 @@ export async function createList(body: CreateList): Promise<List> {
 }
 
 export async function renameList(id: string, name: string): Promise<List> {
-  const path = `/api/lists/${id}`;
+  const path = `/api/lists/${encodeURIComponent(id)}`;
   return readList(
     "PATCH",
     path,
     await withSession(() => send("PATCH", path, { name })),
+  );
+}
+
+// A 204 has no body to read.
+async function expectNoContent(
+  method: string,
+  path: string,
+  response: Response,
+) {
+  if (!response.ok) throw await failure(method, path, response);
+}
+
+export async function deleteList(id: string): Promise<void> {
+  const path = `/api/lists/${encodeURIComponent(id)}`;
+  await expectNoContent(
+    "DELETE",
+    path,
+    await withSession(() => send("DELETE", path)),
+  );
+}
+
+export async function deleteLists(ids: string[]): Promise<void> {
+  const path = "/api/lists/delete";
+  await expectNoContent(
+    "POST",
+    path,
+    await withSession(() => send("POST", path, { ids })),
   );
 }

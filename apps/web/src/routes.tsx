@@ -5,6 +5,7 @@ import { DesignPage } from "./design/design-page.tsx";
 import { ListPage } from "./lists/list-page.tsx";
 import { ListsPage, NewListLink } from "./lists/lists-page.tsx";
 import { NewListPage } from "./lists/new-list-page.tsx";
+import { NotFound } from "./not-found/not-found.tsx";
 import { AppShell } from "./shell/app-shell.tsx";
 
 // What a route tells the shell: the title of its page, shown as the h1 and
@@ -50,6 +51,11 @@ export const routes: RouteObject[] = [
         path: "design",
         element: <DesignPage />,
         handle: { title: "Design system" } satisfies RouteHandle,
+      },
+      {
+        path: "*",
+        element: <NotFound message="This page doesn't exist." />,
+        handle: { title: "Not found" } satisfies RouteHandle,
       },
     ],
   },

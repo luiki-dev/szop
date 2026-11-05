@@ -5,17 +5,26 @@ import {
   type QueryClient,
 } from "@tanstack/react-query";
 import type { List } from "@szop/shared";
-import { createList, getList, getLists, renameList } from "../api/client.ts";
+import {
+  ApiRequestError,
+  createList,
+  deleteList,
+  deleteLists,
+  getList,
+  getLists,
+  renameList,
+} from "../api/client.ts";
 
 // No retries: the error card's "Try again" is the retry.
 export function useLists() {
   return useQuery({ queryKey: ["lists"], queryFn: getLists, retry: false });
 }
 
-export function useList(id: string) {
+export function useList(id: string, enabled = true) {
   return useQuery({
     queryKey: ["lists", id],
     queryFn: () => getList(id),
+    enabled,
     retry: false,
   });
 }
@@ -45,5 +54,39 @@ export function useRenameList(id: string) {
     // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
     onSuccess: (list) => remember(queryClient, list),
+  });
+}
+
+// A list that is already gone (404) is what the user asked for.
+async function remove(ids: string[]) {
+  if (ids.length > 1) return deleteLists(ids);
+  try {
+    // Stryker disable next-line StringLiteral: ids has at least one entry
+    await deleteList(ids[0] ?? "");
+  } catch (error) {
+    if (!(error instanceof ApiRequestError && error.status === 404))
+      throw error;
+  }
+}
+
+export function useDeleteLists() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: remove,
+    // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
+    networkMode: "always",
+    onSuccess: (_, ids) => {
+      // Inactive only: the list's screen still observes its list until the
+      // navigation lands (it removes its own entry then, see ListPage).
+      for (const id of ids)
+        queryClient.removeQueries({
+          queryKey: ["lists", id],
+          type: "inactive",
+        });
+      return queryClient.invalidateQueries({
+        queryKey: ["lists"],
+        exact: true,
+      });
+    },
   });
 }

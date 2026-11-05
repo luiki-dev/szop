@@ -11,6 +11,7 @@ import { server } from "../test/server.ts";
 import { threeLists } from "../test/lists.ts";
 import {
   useCreateList,
+  useDeleteLists,
   useList,
   useLists,
   useRenameList,
@@ -122,5 +123,31 @@ describe("the lists hooks", () => {
       expect(result.current.create.error?.message).toBe("Boom");
       expect(result.current.rename.error?.message).toBe("Boom");
     });
+  });
+
+  it("LST-1.3: a deleted list leaves the cache, the other lists stay", async () => {
+    const [, other] = threeLists;
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.delete(
+        `/api/lists/${id}`,
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+      http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+    );
+    const client = new QueryClient();
+    client.setQueryData(["lists", id], party);
+    client.setQueryData(["lists", other?.id], other);
+    const { result } = renderHook(() => useDeleteLists(), {
+      wrapper: wrapper(client),
+    });
+
+    result.current.mutate([id]);
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+    expect(client.getQueryData(["lists", id])).toBeUndefined();
+    expect(client.getQueryData(["lists", other?.id])).toEqual(other);
   });
 });

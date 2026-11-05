@@ -1,15 +1,18 @@
-import { MoreVertical, Pencil } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { Link, useParams } from "react-router";
-import { Button, buttonVariants } from "@/components/ui/button.tsx";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { listSchema } from "@szop/shared";
+import { useNavigate, useParams } from "react-router";
+import { Button } from "@/components/ui/button.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
-import { cn } from "@/lib/utils.ts";
 import { ApiRequestError } from "../api/client.ts";
+import { NotFound } from "../not-found/not-found.tsx";
+import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
 import { useList, useRenameList } from "./use-lists.ts";
 
@@ -18,8 +21,28 @@ import { useList, useRenameList } from "./use-lists.ts";
 export function ListPage() {
   // Stryker disable next-line StringLiteral: the route always supplies :id; the default only satisfies the type
   const { id = "" } = useParams();
-  const query = useList(id);
+  // An address that is not a list ID never reaches the API.
+  const valid = listSchema.shape.id.safeParse(id).success;
+  const query = useList(id, valid);
   const rename = useRenameList(id);
+  const navigate = useNavigate();
+  const [deleting, setDeleting] = useState(false);
+  const queryClient = useQueryClient();
+  const deleted = useRef(false);
+  const askDelete = useRef(false);
+
+  // A deleted list leaves the cache once this screen no longer observes it:
+  // removed earlier, it would be refetched (a 404) before the navigation lands.
+  useEffect(
+    () => () => {
+      if (deleted.current) {
+        // Stryker disable next-line BooleanLiteral: no query key extends ["lists", id], so exact and prefix match the same entry
+        queryClient.removeQueries({ queryKey: ["lists", id], exact: true });
+      }
+    },
+    // Stryker disable next-line ArrayDeclaration: both dependencies are stable for the life of the screen
+    [queryClient, id],
+  );
   const input = useRef<HTMLInputElement>(null);
   const renaming = useRef(false);
   const name = query.data?.name;
@@ -28,42 +51,34 @@ export function ListPage() {
     document.title = name ? `${name} · Szop` : "Szop";
   }, [name]);
 
+  const missing =
+    !valid ||
+    (query.error instanceof ApiRequestError && query.error.status === 404);
+  if (missing) {
+    return (
+      <>
+        <h1 className="sr-only">List</h1>
+        <ListHeader field={null} />
+        <NotFound message="This list doesn't exist or was deleted." />
+      </>
+    );
+  }
   if (query.error) {
-    const missing =
-      query.error instanceof ApiRequestError && query.error.status === 404;
     return (
       <>
         <ListHeader field={null} />
         <section className="mt-4 rounded-surface bg-card p-4 text-card-foreground">
-          <h1 className="text-lg font-bold">
-            {missing
-              ? "This list does not exist."
-              : "The list could not be loaded."}
-          </h1>
-          {missing ? (
-            <Link
-              to="/"
-              // Stryker disable next-line ObjectLiteral,StringLiteral: class names only, no behavior; the 48 px tap target is checked in e2e
-              className={cn(buttonVariants({ variant: "outline" }), "mt-4")}
-            >
-              Show my lists
-            </Link>
-          ) : (
-            <>
-              <p className="mt-1 text-muted-foreground">
-                {query.error.message}
-              </p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => {
-                  void query.refetch();
-                }}
-              >
-                Try again
-              </Button>
-            </>
-          )}
+          <h1 className="text-lg font-bold">The list could not be loaded.</h1>
+          <p className="mt-1 text-muted-foreground">{query.error.message}</p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => {
+              void query.refetch();
+            }}
+          >
+            Try again
+          </Button>
         </section>
       </>
     );
@@ -99,7 +114,14 @@ export function ListPage() {
           />
         }
         menu={
-          <DropdownMenu>
+          // The dialog opens once the menu has closed and given the focus back
+          // to ⋮; opened sooner, that return takes the focus from Cancel.
+          <DropdownMenu
+            onOpenChangeComplete={(open) => {
+              if (open || !askDelete.current) return;
+              setDeleting(true);
+            }}
+          >
             <DropdownMenuTrigger
               render={
                 <Button
@@ -130,11 +152,32 @@ export function ListPage() {
                 <Pencil aria-hidden="true" />
                 Rename
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  askDelete.current = true;
+                }}
+              >
+                <Trash2 aria-hidden="true" />
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         }
       />
       <EmptyList />
+      <DeleteListsDialog
+        lists={[{ id, name }]}
+        open={deleting}
+        onOpenChange={(open) => {
+          setDeleting(open);
+          // Stryker disable next-line ConditionalExpression: the dialog never calls onOpenChange(true), so `true` behaves as `!open`
+          if (!open) askDelete.current = false;
+        }}
+        onDeleted={() => {
+          deleted.current = true;
+          void navigate("/", { replace: true, state: { deleted: true } });
+        }}
+      />
     </>
   );
 }

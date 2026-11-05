@@ -25,12 +25,13 @@ function setup() {
   const router = createMemoryRouter(routes, {
     initialEntries: [`/lists/${id}`],
   });
+  const queryClient = new QueryClient();
   render(
-    <QueryClientProvider client={new QueryClient()}>
+    <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
-  return { router, patches };
+  return { router, patches, queryClient };
 }
 
 const field = () => screen.findByRole("textbox", { name: "List name" });
@@ -139,7 +140,7 @@ describe("ListPage", () => {
     );
   });
 
-  it("says the list does not exist on a 404, with a link to the lists page", async () => {
+  it("APP-5.2: says the list does not exist or was deleted on a 404, with a link to the lists page", async () => {
     server.use(
       http.get(`/api/lists/${id}`, () =>
         HttpResponse.json(
@@ -157,15 +158,32 @@ describe("ListPage", () => {
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByText("This list does not exist.")).toBeVisible();
-    expect(screen.getByRole("link", { name: "Back to lists" })).toHaveAttribute(
-      "href",
-      "/",
+    expect(
+      await screen.findByText("This list doesn't exist or was deleted."),
+    ).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Nothing here" })).toBeVisible();
+    const links = screen.getAllByRole("link", { name: "Back to lists" });
+    expect(links).toHaveLength(2);
+    for (const link of links) expect(link).toHaveAttribute("href", "/");
+  });
+
+  it("APP-5.2: an address that is not a list ID shows the same page and sends no request", async () => {
+    // No handler for /api/lists/not-a-uuid: MSW fails a request nobody handles.
+    const router = createMemoryRouter(routes, {
+      initialEntries: ["/lists/not-a-uuid"],
+    });
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
     );
-    expect(screen.getByRole("link", { name: "Show my lists" })).toHaveAttribute(
-      "href",
-      "/",
-    );
+
+    expect(
+      await screen.findByText("This list doesn't exist or was deleted."),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "List" }),
+    ).toBeInTheDocument();
   });
 
   it("APP-1.6: a list that fails to load still has a way back", async () => {
@@ -362,5 +380,163 @@ describe("ListPage", () => {
     await user.click(await screen.findByRole("button", { name: "Try again" }));
 
     expect(await field()).toHaveValue("Weekly shop");
+  });
+
+  it("LST-1.3: Delete in the list's menu, confirmed, sends the request and lands on the lists page", async () => {
+    const user = userEvent.setup();
+    let deleted = 0;
+    const seen: string[] = [];
+    const { router } = setup();
+    server.use(
+      http.get(`/api/lists/${id}`, () => {
+        seen.push("GET");
+        return HttpResponse.json(list);
+      }),
+      http.delete(`/api/lists/${id}`, () => {
+        deleted += 1;
+        seen.push("DELETE");
+        return new HttpResponse(null, { status: 204 });
+      }),
+      http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+    );
+    await field();
+
+    await user.click(screen.getByRole("button", { name: "List actions" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    expect(
+      await screen.findByRole("alertdialog", {
+        name: 'Delete list "Weekly shop"?',
+      }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/");
+    });
+    expect(deleted).toBe(1);
+    // The list's page was replaced, so Back does not return to it.
+    expect(router.state.historyAction).toBe("REPLACE");
+    // No refetch of the deleted list after the DELETE.
+    expect(seen).toEqual(["GET", "DELETE"]);
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Lists" })).toHaveFocus();
+    });
+  });
+
+  it("LST-1.3: a deleted list is not shown again from the cache", async () => {
+    const user = userEvent.setup();
+    const { router } = setup();
+    server.use(
+      http.delete(
+        `/api/lists/${id}`,
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+      http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+    );
+    await field();
+    await user.click(screen.getByRole("button", { name: "List actions" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    await user.click(await screen.findByRole("button", { name: "Delete" }));
+    // The lists page is on screen, so the list's screen has unmounted (and
+    // dropped its cache entry): the router's state changes before that.
+    await screen.findByText("Create your first list");
+    expect(router.state.location.pathname).toBe("/");
+
+    // The next visit's request is held: nothing may show the name meanwhile.
+    server.use(
+      http.get(`/api/lists/${id}`, () => new Promise(() => undefined)),
+    );
+    await router.navigate(`/lists/${id}`);
+
+    // With no cached list the page shows its loading heading, not the name.
+    expect(
+      await screen.findByRole("heading", { name: "List" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByDisplayValue("Weekly shop")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Weekly shop" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it.each(["Escape", "Cancel"])(
+    "APP-3.3: closing the dialog with %s returns the focus to the list's menu button",
+    async (how) => {
+      const user = userEvent.setup();
+      setup();
+      await field();
+      const trigger = screen.getByRole("button", { name: "List actions" });
+
+      await user.click(trigger);
+      await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+      await screen.findByRole("alertdialog");
+      if (how === "Escape") await user.keyboard("{Escape}");
+      else await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+      await waitFor(() => {
+        expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+      });
+      await waitFor(() => {
+        expect(trigger).toHaveFocus();
+      });
+    },
+  );
+
+  it("LST-1.3: deleting a list evicts only its own cache entry", async () => {
+    const user = userEvent.setup();
+    const { router, queryClient } = setup();
+    const other = { ...list, id: "0198a000-0000-7000-8000-0000000000bb" };
+    server.use(
+      http.delete(
+        `/api/lists/${id}`,
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+      http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+    );
+    await field();
+    queryClient.setQueryData(["lists", other.id], other);
+
+    await user.click(screen.getByRole("button", { name: "List actions" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    await user.click(await screen.findByRole("button", { name: "Delete" }));
+    await screen.findByText("Create your first list");
+
+    expect(router.state.location.pathname).toBe("/");
+    expect(queryClient.getQueryData(["lists", id])).toBeUndefined();
+    expect(queryClient.getQueryData(["lists", other.id])).toEqual(other);
+  });
+
+  it("LST-1.3: leaving a list that was not deleted keeps its cache entry", async () => {
+    const user = userEvent.setup();
+    const { queryClient } = setup();
+    server.use(http.get("/api/lists", () => HttpResponse.json({ lists: [] })));
+    await field();
+
+    await user.click(screen.getByRole("link", { name: "Back to lists" }));
+    await screen.findByText("Create your first list");
+
+    expect(queryClient.getQueryData(["lists", id])).toEqual(list);
+  });
+
+  it("APP-3.3: after a cancelled delete, closing the menu returns the focus to its button", async () => {
+    const user = userEvent.setup();
+    setup();
+    await field();
+    const trigger = screen.getByRole("button", { name: "List actions" });
+
+    await user.click(trigger);
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    await screen.findByRole("alertdialog");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
+
+    await user.click(trigger);
+    await screen.findByRole("menuitem", { name: "Rename" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
+    });
+    expect(trigger).toHaveFocus();
   });
 });

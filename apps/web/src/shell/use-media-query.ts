@@ -4,6 +4,9 @@ import { useCallback, useSyncExternalStore } from "react";
 // drawer (visual-design.md, section 5).
 export const desktopQuery = "(min-width: 64rem)";
 
+// A touch screen: the long press that starts selecting lists works only here.
+export const coarseQuery = "(pointer: coarse)";
+
 // Whether a media query matches now, re-rendering when that changes.
 export function useMediaQuery(query: string): boolean {
   const subscribe = useCallback(

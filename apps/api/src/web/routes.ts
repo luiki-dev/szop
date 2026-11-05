@@ -44,7 +44,7 @@ export async function webRoutes(
     const isPage =
       (request.method === "GET" || request.method === "HEAD") &&
       !isApi &&
-      !lastSegment.includes(".");
+      !/\.[a-z0-9]+$/i.test(lastSegment);
     if (isPage) {
       // React Router renders the path; setHeaders above marks it no-cache.
       // Stryker disable next-line StringLiteral: an empty file name resolves to the root's index.html, the same file

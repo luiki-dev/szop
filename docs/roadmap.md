@@ -41,6 +41,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-43 Minor security fixes](#ph-43-minor-security-fixes)
   - [PH-44 Leaner demo check](#ph-44-leaner-demo-check)
   - [PH-16c Managing lists](#ph-16c-managing-lists)
+  - [PH-16d Resilient changes](#ph-16d-resilient-changes)
   - [PH-17a List items](#ph-17a-list-items)
   - [PH-17b The haul](#ph-17b-the-haul)
   - [PH-18 Registration and login](#ph-18-registration-and-login)
@@ -335,7 +336,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-42 Urgent security fixes](#ph-42-urgent-security-fixes) | ✅ Done | ➖ N/A: bounded | ➖ N/A: bounded | [#369](https://github.com/luiki-dev/szop/pull/369) | [#336](https://github.com/luiki-dev/szop/issues/336) |
 | [PH-43 Minor security fixes](#ph-43-minor-security-fixes) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#381](https://github.com/luiki-dev/szop/pull/381) | [#337](https://github.com/luiki-dev/szop/issues/337) |
 | [PH-44 Leaner demo check](#ph-44-leaner-demo-check) | 🚧 In progress | [Spec](superpowers/specs/2026-11-03-PH-44-leaner-demo-check-design.md) | [Plan](superpowers/plans/2026-11-03-PH-44-leaner-demo-check.md) | [#378](https://github.com/luiki-dev/szop/pull/378) | [#376](https://github.com/luiki-dev/szop/issues/376) |
-| [PH-16c Managing lists](#ph-16c-managing-lists) | ⬜ Not started | — | — | — | [#315](https://github.com/luiki-dev/szop/issues/315) |
+| [PH-16c Managing lists](#ph-16c-managing-lists) | 🚧 In progress | [Spec](superpowers/specs/2026-11-04-PH-16c-managing-lists-design.md) | [Plan](superpowers/plans/2026-11-04-PH-16c-managing-lists.md) | [#384](https://github.com/luiki-dev/szop/pull/384) | [#315](https://github.com/luiki-dev/szop/issues/315) |
+| [PH-16d Resilient changes](#ph-16d-resilient-changes) | ⬜ Not started | — | — | — | [#382](https://github.com/luiki-dev/szop/issues/382) |
 | [PH-17a List items](#ph-17a-list-items) | ⬜ Not started | — | — | — | [#290](https://github.com/luiki-dev/szop/issues/290) |
 | [PH-17b The haul](#ph-17b-the-haul) | ⬜ Not started | — | — | — | [#291](https://github.com/luiki-dev/szop/issues/291) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
@@ -461,13 +463,23 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 ### PH-16c Managing lists
 
-- **Goal:** a guest deletes a list after confirming it, a path that is not a page shows a not-found page, and a change sent on a weak connection fails visibly instead of hanging or being lost.
-- **Delivers:** [LST-1](requirements/LST-shopping-lists.md#lst-1) (part: LST-1.3, deleting), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.3, confirming a list's deletion), [APP-5](requirements/APP-app-wide-behavior.md#app-5), [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.6, one anonymous session across tabs, [OP-120](https://github.com/luiki-dev/szop/issues/329)); timeouts on requests, the "not saved" state and refetching after a failed change ([OP-040](https://github.com/luiki-dev/szop/issues/99)).
-- **Split from:** PH-16 Guest workspace and lists, now retired (see [PH-16a](#ph-16a-guests-first-list)).
+- **Goal:** a guest deletes a list from its screen, or several at once from the lists page, after confirming it; an address that leads nowhere shows a page saying so; and the lists screens get their pending fixes.
+- **Delivers:** [LST-1](requirements/LST-shopping-lists.md#lst-1) (part: LST-1.3 and LST-1.6 to LST-1.9, deleting, selecting lists and the new list's Create), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.3, confirming a list's deletion), [APP-5](requirements/APP-app-wide-behavior.md#app-5); the new list's Create button ([OP-115](https://github.com/luiki-dev/szop/issues/318)), the raccoon at the window's edge ([#323](https://github.com/luiki-dev/szop/issues/323)), the list ID checked before it reaches an API path ([#345](https://github.com/luiki-dev/szop/issues/345)), control characters refused in a list's name ([#346](https://github.com/luiki-dev/szop/issues/346)), the app's version in the menu ([OP-130](https://github.com/luiki-dev/szop/issues/380)) ([ADR 0066](decisions/0066-managing-lists-phase-details.md#changes-to-the-roadmap)).
+- **Split from:** PH-16 Guest workspace and lists, now retired (see [PH-16a](#ph-16a-guests-first-list)); split again at its brainstorm, the resilient changes becoming [PH-16d](#ph-16d-resilient-changes) ([ADR 0066](decisions/0066-managing-lists-phase-details.md), decision 1).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#315](https://github.com/luiki-dev/szop/issues/315).
+
+### PH-16d Resilient changes
+
+- **Goal:** a change sent on a weak connection fails visibly instead of hanging or being lost, is sent once, and a guest's writes need no session check first; two fresh tabs end up in one anonymous session.
+- **Delivers:** [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.6, one anonymous session across tabs, [OP-120](https://github.com/luiki-dev/szop/issues/329)); timeouts on requests, the "not saved" state and refetching after a failed change ([OP-040](https://github.com/luiki-dev/szop/issues/99)); a change sent once ([#320](https://github.com/luiki-dev/szop/issues/320)); no session check before each write ([OP-116](https://github.com/luiki-dev/szop/issues/319)).
+- **Split from:** [PH-16c](#ph-16c-managing-lists), at its brainstorm ([ADR 0066](decisions/0066-managing-lists-phase-details.md), decision 1).
+- **Depends on:** —
+- **Owner steps:** none.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#382](https://github.com/luiki-dev/szop/issues/382).
 
 ### PH-17a List items
 

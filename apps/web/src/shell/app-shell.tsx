@@ -1,6 +1,11 @@
 import { Menu as MenuIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Outlet, ScrollRestoration, useMatches } from "react-router";
+import {
+  Outlet,
+  ScrollRestoration,
+  useLocation,
+  useMatches,
+} from "react-router";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Sheet,
@@ -8,6 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet.tsx";
+import { isSelecting } from "../lists/lists-page.tsx";
 import type { RouteHandle } from "../routes.tsx";
 import { Menu } from "./menu.tsx";
 import { desktopQuery, useMediaQuery } from "./use-media-query.ts";
@@ -54,7 +60,12 @@ function PhoneHeader({ title }: { title: string | undefined }) {
         >
           <MenuIcon aria-hidden="true" />
         </SheetTrigger>
-        <h1 className="min-w-0 truncate text-xl font-extrabold">{title}</h1>
+        <h1
+          tabIndex={-1}
+          className="min-w-0 truncate text-xl font-extrabold outline-none"
+        >
+          {title}
+        </h1>
       </header>
       <SheetContent closeLabel="Close menu" className="w-[280px] max-w-[85vw]">
         <SheetTitle className="sr-only">Menu</SheetTitle>
@@ -79,6 +90,9 @@ function PhoneHeader({ title }: { title: string | undefined }) {
 export function AppShell() {
   const desktop = useMediaQuery(desktopQuery);
   const { title, header, action } = useRouteHandle();
+  // Selecting lists replaces the header with the page's selection bar; the
+  // title stays for screen readers.
+  const selecting = isSelecting(useLocation().state);
 
   useEffect(() => {
     // A page with its own header sets the tab's title itself.
@@ -96,7 +110,7 @@ export function AppShell() {
           </nav>
         </aside>
       ) : (
-        !header && <PhoneHeader title={title} />
+        !header && !selecting && <PhoneHeader title={title} />
       )}
       <main
         className={
@@ -107,11 +121,19 @@ export function AppShell() {
               "mx-auto max-w-[720px] px-4 pb-6 md:px-6"
         }
       >
-        {desktop && !header && (
+        {selecting && (
+          <h1 tabIndex={-1} className="sr-only">
+            {title}
+          </h1>
+        )}
+        {desktop && !header && !selecting && (
           // The row is 48 px whether or not it holds an action, so the title sits
           // at the same height on every page.
           <div className="flex min-h-12 items-center justify-between gap-4">
-            <h1 className="min-w-0 truncate text-2xl font-extrabold">
+            <h1
+              tabIndex={-1}
+              className="min-w-0 truncate text-2xl font-extrabold outline-none"
+            >
               {title}
             </h1>
             {action}
