@@ -1,10 +1,18 @@
-import { Plus } from "lucide-react";
-import { Link } from "react-router";
+import { Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
+import type { List } from "@szop/shared";
 import raccoon from "@/brand/raccoon.svg";
 import { Button, buttonVariants } from "@/components/ui/button.tsx";
 import { cn } from "@/lib/utils.ts";
-import { desktopQuery, useMediaQuery } from "../shell/use-media-query.ts";
+import {
+  coarseQuery,
+  desktopQuery,
+  useMediaQuery,
+} from "../shell/use-media-query.ts";
+import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
 import { useLists } from "./use-lists.ts";
+import { useLongPress } from "./use-long-press.ts";
 
 // On a phone the link fills a bar at the bottom of the screen, within the
 // thumb's reach; on a desktop the shell shows it beside the h1.
@@ -46,11 +54,122 @@ function Skeleton() {
   );
 }
 
+// Selecting is held in the history entry's state: starting it pushes an
+// entry, so Back stops it without leaving the page, and every other way out
+// pops that entry again.
+export function isSelecting(state: unknown): boolean {
+  return (
+    typeof state === "object" &&
+    state !== null &&
+    "selecting" in state &&
+    state.selecting === true
+  );
+}
+
+// A list's row: a link, or while selecting a label around a checkbox, so a
+// tap anywhere on it toggles. On a touch screen a long press starts selecting.
+function ListRow({
+  list,
+  selecting,
+  checked,
+  coarse,
+  onLongPress,
+  onToggle,
+}: {
+  list: List;
+  selecting: boolean;
+  checked: boolean;
+  coarse: boolean;
+  onLongPress: () => void;
+  onToggle: () => void;
+}) {
+  const press = useLongPress(() => {
+    if (!selecting) onLongPress();
+  });
+  const row =
+    "flex min-h-12 min-w-0 items-center rounded-surface bg-card px-4 font-semibold text-card-foreground outline-none";
+  return (
+    <li
+      className="min-w-0"
+      {...(coarse ? press.handlers : {})}
+      // The click that ends a long press must neither open nor toggle the row.
+      onClickCapture={(event) => {
+        if (!press.pressed()) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+    >
+      {selecting ? (
+        <label
+          className={cn(
+            row,
+            "cursor-pointer gap-3 has-checked:ring-2 has-checked:ring-primary has-focus-visible:ring-3 has-focus-visible:ring-ring",
+          )}
+        >
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={onToggle}
+            className="size-5 shrink-0 accent-primary"
+          />
+          <span className="truncate">{list.name}</span>
+        </label>
+      ) : (
+        <Link
+          to={`/lists/${list.id}`}
+          className={cn(
+            row,
+            "focus-visible:ring-3 focus-visible:ring-ring",
+            // No text selection or callout menu on a long press.
+            "select-none [-webkit-touch-callout:none]",
+          )}
+        >
+          <span className="truncate">{list.name}</span>
+        </Link>
+      )}
+    </li>
+  );
+}
+
 // The lists page at /: the home screen. The shell gives it its title and,
 // on a desktop, the New list link.
 export function ListsPage() {
   const query = useLists();
   const desktop = useMediaQuery(desktopQuery);
+  const coarse = useMediaQuery(coarseQuery);
+  const navigate = useNavigate();
+  const loc = useLocation();
+  const selecting = isSelecting(loc.state);
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  const [byLongPress, setByLongPress] = useState(false);
+  const [confirming, setConfirming] = useState<Pick<List, "id" | "name">[]>([]);
+  const [asking, setAsking] = useState(false);
+
+  const stop = () => {
+    void navigate(-1);
+  };
+  // Whenever selecting ends, whichever way, what it held is cleared.
+  const [wasSelecting, setWasSelecting] = useState(selecting);
+  if (wasSelecting !== selecting) {
+    setWasSelecting(selecting);
+    if (!selecting) {
+      setSelected(new Set());
+      setByLongPress(false);
+      setAsking(false);
+    }
+  }
+  useEffect(() => {
+    if (!selecting || asking) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") stop();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+    };
+    // stop only wraps the stable navigate
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selecting, asking]);
 
   if (query.isError) {
     return (
@@ -74,8 +193,70 @@ export function ListsPage() {
   }
 
   const lists = query.data;
+  // A selected list that a refetch dropped is not counted.
+  const chosen = (lists ?? []).filter((list) => selected.has(list.id));
+  const allChosen = lists !== undefined && chosen.length === lists.length;
+  const start = (id?: string) => {
+    void navigate("/", { state: { selecting: true } });
+    if (id) {
+      setSelected(new Set([id]));
+      setByLongPress(true);
+    }
+  };
+  const toggle = (id: string) => {
+    const next = new Set(chosen.map((list) => list.id));
+    if (!next.delete(id)) next.add(id);
+    setSelected(next);
+    if (next.size === 0 && byLongPress) stop();
+  };
   return (
     <>
+      {selecting && lists ? (
+        <div className="mt-2 flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Cancel selection"
+            onClick={stop}
+          >
+            <X aria-hidden="true" />
+          </Button>
+          <p aria-live="polite" className="min-w-0 flex-1 font-bold">
+            {chosen.length} selected
+          </p>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setSelected(
+                allChosen ? new Set() : new Set(lists.map((list) => list.id)),
+              );
+            }}
+          >
+            {allChosen ? "Deselect all" : "Select all"}
+          </Button>
+          <Button
+            variant="destructive"
+            disabled={chosen.length === 0}
+            onClick={() => {
+              setConfirming(chosen);
+              setAsking(true);
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+      ) : lists && lists.length > 0 ? (
+        <div className="mt-4 flex justify-end">
+          <Button
+            variant="outline"
+            onClick={() => {
+              start();
+            }}
+          >
+            Select
+          </Button>
+        </div>
+      ) : null}
       <div className="mt-4 flex min-w-0 flex-col gap-3">
         {!lists ? (
           <Skeleton />
@@ -95,19 +276,30 @@ export function ListsPage() {
         ) : (
           <ul className="flex min-w-0 flex-col gap-3">
             {lists.map((list) => (
-              <li key={list.id} className="min-w-0">
-                <Link
-                  to={`/lists/${list.id}`}
-                  className="flex min-h-12 min-w-0 items-center rounded-surface bg-card px-4 font-semibold text-card-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring"
-                >
-                  <span className="truncate">{list.name}</span>
-                </Link>
-              </li>
+              <ListRow
+                key={list.id}
+                list={list}
+                selecting={selecting}
+                checked={selected.has(list.id)}
+                coarse={coarse}
+                onLongPress={() => {
+                  start(list.id);
+                }}
+                onToggle={() => {
+                  toggle(list.id);
+                }}
+              />
             ))}
           </ul>
         )}
       </div>
-      {!desktop && <NewListLink sticky />}
+      {!desktop && !selecting && <NewListLink sticky />}
+      <DeleteListsDialog
+        lists={confirming}
+        open={asking}
+        onOpenChange={setAsking}
+        onDeleted={stop}
+      />
     </>
   );
 }

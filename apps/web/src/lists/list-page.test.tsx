@@ -414,9 +414,10 @@ describe("ListPage", () => {
     await user.click(screen.getByRole("button", { name: "List actions" }));
     await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
     await user.click(await screen.findByRole("button", { name: "Delete" }));
-    await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/");
-    });
+    // The lists page is on screen, so the list's screen has unmounted (and
+    // dropped its cache entry): the router's state changes before that.
+    await screen.findByText("Create your first list");
+    expect(router.state.location.pathname).toBe("/");
 
     // The next visit's request is held: nothing may show the name meanwhile.
     server.use(

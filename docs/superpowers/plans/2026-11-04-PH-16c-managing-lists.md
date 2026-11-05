@@ -145,7 +145,7 @@
 
 **How the mode is held:** starting the mode runs `navigate(".", { state: { selecting: true } })` (a pushed entry). Selecting is `isSelecting(useLocation().state)`, so the browser's Back stops it without leaving `/`. Every other way out (✕, Esc, a successful delete, and the last deselect after a long-press start) runs `navigate(-1)`, which removes the entry. The selected IDs and "started by a long press" live in component state and are cleared whenever selecting becomes false. While selecting, the shell draws neither its phone header nor its desktop title row, and keeps the title as an `sr-only` h1. The lists page draws the bar in their place.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - `use-long-press.test.ts`, with fake timers: it fires after 500 ms. It does not fire after a `pointerup` at 300 ms, after a `pointermove` of more than 10 px (Review Focus 5) or after a `pointercancel`. Its `onContextMenu` calls `preventDefault` while a press is held.
   - `lists-page.test.tsx`: LST-1.6, LST-1.7 and LST-1.8, per the spec. Add these:
     - Back (`history.back()` on the memory router, or `navigate(-1)`) stops the mode and keeps `/`.
@@ -155,15 +155,15 @@
     - Select is not shown with no lists.
     - The long press works only when `(pointer: coarse)` matches (`stubMatchMedia`).
   - `shell.test.tsx`: with `{ selecting: true }` as the location state, the phone header and the desktop title row are absent and an `sr-only` h1 "Lists" remains.
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test`. Expected: FAIL.
-- [ ] **Step 3: Implement.**
+- [x] **Step 2: Run** `pnpm --filter @szop/web test`. Expected: FAIL.
+- [x] **Step 3: Implement.**
   - **Hook and shell:** implement the hook, then the shell's check.
   - **Rows:** while selecting, each row is a `<label>` holding a checkbox, so a tap anywhere toggles it and Space works on the focused checkbox. Otherwise it is today's `Link`, which gains the long-press handlers on a coarse pointer and `select-none [-webkit-touch-callout:none]`.
   - **The bar:** `aria-live="polite"` on the count. A Select button sits beside the count on a phone and in place of "New list" on a desktop. On a phone, the pinned "New list" is hidden while selecting.
   - **Esc:** a `keydown` listener on `document` while selecting.
-- [ ] **Step 4: Run** the web tests. Expected: PASS.
-- [ ] **Step 5: Extend** the E2E journey of Task 3: create a second list, select it with Select, delete it, and check the page is empty. Add the phone-sized journey: `hasTouch` and a phone viewport, a long press (`page.touchscreen` or dispatched pointer events held 600 ms), then `page.goBack()` stops selecting and the URL stays `/`. **Run** `pnpm check && pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 6: Update** the docs, tick the steps. **Commit** `feat(lists): select several lists and delete them at once`.
+- [x] **Step 4: Run** the web tests. Expected: PASS.
+- [x] **Step 5: Extend** the E2E journey of Task 3: create a second list, select it with Select, delete it, and check the page is empty. Add the phone-sized journey: `hasTouch` and a phone viewport, a long press (`page.touchscreen` or dispatched pointer events held 600 ms), then `page.goBack()` stops selecting and the URL stays `/`. **Run** `pnpm check && pnpm test:e2e`. Expected: PASS.
+- [x] **Step 6: Update** the docs, tick the steps. **Commit** `feat(lists): select several lists and delete them at once`.
 
 ### Task 5: The not-found pages
 

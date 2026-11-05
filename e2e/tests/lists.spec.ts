@@ -100,3 +100,74 @@ test("LST-1.3, APP-3.3: a guest deletes a list from its screen after a confirmat
   await expect(emptyState(page)).toBeVisible();
   await expect(page.getByText("Weekly shop")).toHaveCount(0);
 });
+
+async function createList(page: import("@playwright/test").Page, name: string) {
+  await page.getByRole("link", { name: "New list" }).click();
+  const field = page.getByRole("textbox", { name: "List name" });
+  // Typing before the field has the focus loses the Enter.
+  await expect(field).toBeFocused();
+  await field.fill(name);
+  await field.press("Enter");
+  await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
+  await page.getByRole("link", { name: "Back to lists" }).click();
+  await expect(page.getByText(name)).toBeVisible();
+}
+
+test("LST-1.6, LST-1.7, LST-1.8: a guest selects lists with Select and deletes them at once", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await createList(page, "Weekly shop");
+  await createList(page, "Party");
+
+  await page.getByRole("button", { name: "Select" }).click();
+  await expect(page.getByText("0 selected")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Delete" })).toBeDisabled();
+  await page.getByRole("checkbox", { name: "Party" }).check();
+  await expect(page.getByText("1 selected")).toBeVisible();
+  await expectAccessible(page);
+
+  // Esc stops selecting and leaves the page.
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("link", { name: "Party" })).toBeVisible();
+  await expect(page).toHaveURL("/");
+
+  await page.getByRole("button", { name: "Select" }).click();
+  await page.getByRole("button", { name: "Select all" }).click();
+  await expect(page.getByText("2 selected")).toBeVisible();
+  await page.getByRole("button", { name: "Delete" }).click();
+  const dialog = page.getByRole("alertdialog", { name: "Delete 2 lists?" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Delete" }).click();
+
+  await expect(emptyState(page)).toBeVisible();
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("checkbox")).toHaveCount(0);
+});
+
+test("LST-1.6, LST-1.7: on a phone a long press selects a list, and Back stops selecting", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, "a long press needs a coarse pointer");
+  await page.goto("/");
+  await createList(page, "Weekly shop");
+
+  // Playwright cannot hold a touch, so the pointer events are dispatched.
+  // The row stays when its link turns into a checkbox.
+  const link = page.getByRole("listitem").filter({ hasText: "Weekly shop" });
+  const touch = { pointerType: "touch", clientX: 20, clientY: 200 };
+  await link.dispatchEvent("pointerdown", touch);
+  await page.waitForTimeout(600);
+  await link.dispatchEvent("pointerup", touch);
+  await expect(page.getByText("1 selected")).toBeVisible();
+  await expect(
+    page.getByRole("checkbox", { name: "Weekly shop" }),
+  ).toBeChecked();
+  await expect(page).toHaveURL("/");
+
+  await page.goBack();
+  await expect(page.getByRole("link", { name: "Weekly shop" })).toBeVisible();
+  await expect(page.getByRole("checkbox")).toHaveCount(0);
+  await expect(page).toHaveURL("/");
+});

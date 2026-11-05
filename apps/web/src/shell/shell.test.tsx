@@ -16,8 +16,10 @@ import { desktopQuery } from "./use-media-query.ts";
 
 // The real route table; the menu's status asks the API, which MSW answers
 // as healthy. setup.ts stubs matchMedia as a phone before each test.
-function renderApp(path = "/") {
-  const router = createMemoryRouter(routes, { initialEntries: [path] });
+function renderApp(path = "/", state?: unknown) {
+  const router = createMemoryRouter(routes, {
+    initialEntries: [{ pathname: path, state }],
+  });
   render(
     <QueryClientProvider client={new QueryClient()}>
       <RouterProvider router={router} />
@@ -234,4 +236,22 @@ describe("Menu", () => {
       "bg-accent",
     );
   });
+
+  it.each([false, true])(
+    "LST-1.6: while selecting (desktop %s) the shell draws no header or title row, only an sr-only h1",
+    (desktop) => {
+      stubMatchMedia({ [desktopQuery]: desktop });
+      renderApp("/", { selecting: true });
+
+      const heading = screen.getByRole("heading", { level: 1, name: "Lists" });
+      expect(heading).toHaveClass("sr-only");
+      expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "New list" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Open menu" }),
+      ).not.toBeInTheDocument();
+    },
+  );
 });

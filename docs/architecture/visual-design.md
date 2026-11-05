@@ -22,6 +22,7 @@ This page describes the design system, not the screens: each phase designs the s
 - [6. Interaction patterns](#6-interaction-patterns)
   - [Feedback](#feedback)
   - [Forms and focus](#forms-and-focus)
+  - [The selection bar](#the-selection-bar)
   - [The title field](#the-title-field)
   - [The peeking raccoon](#the-peeking-raccoon)
   - [Writing](#writing)
@@ -215,6 +216,10 @@ Decided in [ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision
 ### The confirmation dialog
 
 Deleting lists asks first, in an alert dialog ([APP-3](../requirements/APP-app-wide-behavior.md#app-3).3). The title names what goes: `Delete list "<name>"?` or `Delete <N> lists?`, and the body says "This can't be undone." Cancel (outline) has the focus when it opens; Delete is the destructive button. While the request runs both buttons are disabled and Esc does nothing; on failure the dialog stays open with "Couldn't delete the list." (or "lists.") in `destructive` under the body, and Delete tries again. A click outside does not close it. Both buttons keep the 48 px tap target and the focus ring.
+
+### The selection bar
+
+On the lists page, "Select" (outline, right-aligned above the lists, shown only when there are lists) starts selecting; on a phone a long press of about 500 ms on a list does too. While selecting, the shell draws no header and the page draws a bar in its place: ✕ ("Cancel selection"), "`N` selected" (`aria-live="polite"`), "Select all" or "Deselect all" (ghost) and Delete (destructive, disabled at zero). Each row becomes a label around a checkbox, so a tap anywhere on it toggles it and Space works on the focused one; a checked row has a 2 px `primary` ring. The pinned "New list" is hidden. Every control keeps the 48 px tap target and the focus ring. Rows are not text-selectable on a long press (`select-none`, no touch callout) so the browser's own menu does not compete with the mode.
 
 ### The title field
 

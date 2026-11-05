@@ -267,9 +267,11 @@ The rate-limit (429) and quota (`quota_exceeded`) errors are shown as clear mess
 | Kind | Examples | Owner |
 |---|---|---|
 | **Server state** | lists, items, catalog, categories | TanStack Query (fetching, caching, refreshing) |
-| **URL state** | which list is open | React Router |
+| **URL state** | which list is open; whether the lists page is selecting (the history entry's state, `{ selecting: true }`) | React Router |
 | **Local UI state** | an open dialog, text typed in an input | the component (`useState`) |
 | **Device preference** | none yet | `localStorage` |
+
+**The selection mode** of the lists page ([LST-1](../requirements/LST-shopping-lists.md#lst-1).6) lives in the history entry's state: starting it pushes an entry, so Back stops it without leaving `/`, and every other way out (Cancel selection, Esc, a successful delete, the last deselect after a long-press start) runs `navigate(-1)` to remove that entry. The shell reads the same state to draw no header while the page shows its selection bar. The selected IDs live in the page's `useState` and are cleared when the mode ends; only the lists still returned by the query are counted.
 
 There is no global client-state library (Redux, Zustand). One is added only when a real need appears.
 
