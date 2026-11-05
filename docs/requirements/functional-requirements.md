@@ -27,6 +27,7 @@ Decisions behind these requirements are recorded in [ADR 0001](../decisions/0001
   - [Limits (LIM)](#limits-lim)
   - [Connectivity (NET)](#connectivity-net)
   - [Appearance (APR)](#appearance-apr)
+  - [Language (LNG)](#language-lng)
   - [App-wide behavior (APP)](#app-wide-behavior-app)
   - [Non-functional requirements (NFR)](#non-functional-requirements-nfr)
 - [General assumptions, actors, domain concepts](#general-assumptions-actors-domain-concepts)
@@ -211,6 +212,12 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 |---|---|---|---|---|
 | [APR-1](APR-appearance.md#apr-1) | 🎯 MVP | ✅ Done | 5 of 5 | ✅ Finalized |
 
+### Language (LNG)
+
+| Requirement | Release | Status | Criteria done | Criteria list |
+|---|---|---|---|---|
+| [LNG-1](LNG-language.md#lng-1) | 🔜 Later | ❔ Draft | 0 of 5 | ❔ Not finalized |
+
 ### App-wide behavior (APP)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
@@ -272,7 +279,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 
 ### Later (planned core functionality)
 
-🔜 [SHR](SHR-sharing.md) (sharing, roles, links) and [SYN](SYN-live-updates.md) (live updates).
+🔜 [SHR](SHR-sharing.md) (sharing, roles, links), [SYN](SYN-live-updates.md) (live updates) and [LNG](LNG-language.md) (English and Polish).
 
 ### Future extensions (ideas, not committed)
 
@@ -288,7 +295,6 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 - Offline check-off with sync on reconnect
 - Full offline editing
 - Installable app: a web app manifest and a home-screen icon, together with offline use
-- Internationalization (such as Polish)
 - Admin role and admin panel (defaults management, user management, moderation)
 
 ### Explicitly out of scope for now
