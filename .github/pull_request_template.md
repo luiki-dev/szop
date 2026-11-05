@@ -4,10 +4,15 @@
 
 ## Links
 
-- Acceptance criteria:
-- Closes:
+Acceptance criteria:
 
-<!-- Acceptance criteria: each delivered (✅) or started (🚧) criterion, linked; "none" when there are none. Closes: one `Closes #N` per line. -->
+| ID | Criterion | Status |
+|---|---|---|
+| | | |
+
+Closes:
+
+<!-- Acceptance criteria: one row per criterion the PR delivers or starts, with the columns of the requirement files: the ID linked to its requirement, the criterion's text, and `✅ Delivered` or `🚧 Started`; "none" in place of the table when there are none. Closes: one `Closes #N` per line. -->
 
 ## Definition of done
 
