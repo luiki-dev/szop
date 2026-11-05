@@ -12,7 +12,7 @@ Two modes, after [ADR 0059](../../../docs/decisions/0059-session-skills.md), dec
 ## Writing
 
 1. **Put the work away.** If an edit is half done, finish the step or commit it as work in progress on the branch; never leave anything uncommitted. Push the branch. In the execution stage, bring the ledger in `.superpowers/sdd/<plan>/progress.md` up to date (finished tasks, rulings, the `## Findings` table).
-2. **Write `.superpowers/handoff/<branch>.md`**, the branch name with `/` replaced by `-` (`feat/ph-16a-guests-first-list` → `feat-ph-16a-guests-first-list.md`), overwriting an earlier one. The file never names a head that is not pushed. Use this template:
+2. **Write `.superpowers/session-handoff/<branch>.md`**, the branch name with `/` replaced by `-` (`feat/ph-16a-guests-first-list` → `feat-ph-16a-guests-first-list.md`), overwriting an earlier one. The file never names a head that is not pushed. Use this template:
 
    ```markdown
    # Session handoff: <branch>
@@ -61,6 +61,6 @@ Two modes, after [ADR 0059](../../../docs/decisions/0059-session-skills.md), dec
 The first message of a new session is `/session-handoff resume <branch>`, with the stage and next step on the second line. The branch is given with `/`; find the file under the name with `/` replaced by `-`.
 
 1. **`git status -sb`:** the checkout is clean and on the named branch. If not, stop and tell the owner. Never switch branches in a checkout that holds someone else's changes.
-2. **Read `.superpowers/handoff/<branch>.md`**, or the content in the prompt. If neither is there, work from the prompt's second line and the stage's documents. Compare the file's head commit with `git log -1`: on a mismatch, stop, say what the file says and what git says, and wait for the owner to say which to trust.
+2. **Read `.superpowers/session-handoff/<branch>.md`**, or the content in the prompt. If neither is there, work from the prompt's second line and the stage's documents. Compare the file's head commit with `git log -1`: on a mismatch, stop, say what the file says and what git says, and wait for the owner to say which to trust.
 3. **Read the documents** under **Read first**, in order.
 4. **Confirm in two or three lines:** the stage, what is done, the next step, and what waits on the owner. Then wait for the owner's go, unless **Rules for this stage** say to go on.

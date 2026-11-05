@@ -2,7 +2,7 @@
 
 - **Status:** ✅ Accepted
 - **Date:** 2026-11-05
-- **Refines:** [ADR 0059](0059-session-skills.md), decision 1 (`/handoff` is renamed `/session-handoff`, see decision 1); [ADR 0054](0054-leaner-documentation.md), decision 6 (the PR's acceptance criteria become a table, see decision 2)
+- **Refines:** [ADR 0059](0059-session-skills.md), decisions 1 and 3 (`/handoff` is renamed `/session-handoff`, and its file moves, see decision 1); [ADR 0054](0054-leaner-documentation.md), decision 6 (the PR's acceptance criteria become a table, see decision 2)
 
 ## Context
 
@@ -12,7 +12,7 @@ The owner asked for two changes to the session skills. The first renames `/hando
 
 | # | Decision | Options considered | Outcome |
 |---|---|---|---|
-| 1 | The handoff skill's name | `/handoff`; `/session-handoff` | **`/session-handoff`, titled "Session Handoff"** _(the owner's choice)_. The handoff file keeps its place, `.superpowers/handoff/<branch>.md`. |
+| 1 | The handoff skill's name and file | `/handoff`; `/session-handoff` | **`/session-handoff`, titled "Session Handoff"** _(the owner's choice)_. The handoff file moves with it, to `.superpowers/session-handoff/<branch>.md`; the files in `.superpowers/handoff/` are not carried over _(the owner's choice)_. |
 | 2 | Where the phase's criteria are shown as a table | A table in `/demo-check`'s message, from the PR's list; the PR's list turned into a table | **The PR's "Acceptance criteria" is a table with the columns ID (linked), Criterion and Status, as in the requirement files; "none" when there are none. `/demo-check` is unchanged** _(the owner's choice)_. The PR already holds the list, so a second table in `/demo-check` would repeat it. |
 
 ## Consequences
