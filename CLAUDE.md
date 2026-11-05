@@ -54,7 +54,7 @@ Run it too when a bug is found, filed or triaged ([ADR 0058](docs/decisions/0058
 Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `docs/development/working-with-claude.md`, which holds the reasons. In short:
 
 - **A session per stage:** brainstorm and spec, plan, execution, finishing; each starts a new session from the committed document or commits of the last ([A phase in sessions](docs/development/working-with-claude.md#a-phase-in-sessions)).
-- **Session skills** ([ADR 0059](docs/decisions/0059-session-skills.md)): the owner runs `/handoff` to end a stage, and `/handoff resume <branch>` opens the next; `/finish-phase` is the finishing stage; `/demo-check` runs after the PR opens.
+- **Session skills** ([ADR 0059](docs/decisions/0059-session-skills.md)): the owner runs `/session-handoff` to end a stage, and `/session-handoff resume <branch>` opens the next; `/finish-phase` is the finishing stage; `/demo-check` runs after the PR opens.
 - **Restart or `/compact` above 150–200k of context**, never in the middle of an uncommitted edit ([Reading the status line](docs/development/working-with-claude.md#reading-the-status-line)).
 - **Before a break longer than an hour, finish the stage:** the prompt cache lives one hour, and the first call after it writes the whole context again ([Breaks and the cache](docs/development/working-with-claude.md#breaks-and-the-cache)).
 - **Implementers on Sonnet, the default; the whole-branch review on Opus, named explicitly** (`model: opus`) ([Choosing models](docs/development/working-with-claude.md#choosing-models)).

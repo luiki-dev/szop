@@ -1,13 +1,13 @@
 ---
-name: handoff
-description: Hands a stage over to a new session. The owner runs `/handoff` to end a stage (writing), and starts the next session with `/handoff resume <branch>` as its first message (resuming). Claude may suggest it at the end of a stage or at about 150–200k of context, but never starts it (ADR 0059, decision 2).
+name: session-handoff
+description: Session Handoff: hands a stage over to a new session. The owner runs `/session-handoff` to end a stage (writing), and starts the next session with `/session-handoff resume <branch>` as its first message (resuming). Claude may suggest it at the end of a stage or at about 150–200k of context, but never starts it (ADR 0059, decision 2).
 ---
 
-# Handoff
+# Session Handoff
 
-Two modes, after [ADR 0059](../../../docs/decisions/0059-session-skills.md), decisions 2 to 5: no arguments writes a handoff; `resume <branch>` picks one up. The rules of the stages are in `docs/development/working-with-claude.md`; this skill only carries the state from one session to the next.
+Two modes, after [ADR 0059](../../../docs/decisions/0059-session-skills.md), decisions 2 to 5, renamed by [ADR 0067](../../../docs/decisions/0067-session-handoff-and-pr-criteria-table.md), decision 1: no arguments writes a handoff; `resume <branch>` picks one up. The rules of the stages are in `docs/development/working-with-claude.md`; this skill only carries the state from one session to the next.
 
-**A handoff approves nothing.** Writing or resuming one is not the owner's approval of a spec, a plan, a task or anything else; it only moves the session. Whatever is still waiting for the owner goes under **Waiting on the owner** and stays waiting in the next session. Never ask the owner to run `/handoff` as a way of approving something.
+**A handoff approves nothing.** Writing or resuming one is not the owner's approval of a spec, a plan, a task or anything else; it only moves the session. Whatever is still waiting for the owner goes under **Waiting on the owner** and stays waiting in the next session. Never ask the owner to run `/session-handoff` as a way of approving something.
 
 ## Writing
 
@@ -15,7 +15,7 @@ Two modes, after [ADR 0059](../../../docs/decisions/0059-session-skills.md), dec
 2. **Write `.superpowers/handoff/<branch>.md`**, the branch name with `/` replaced by `-` (`feat/ph-16a-guests-first-list` → `feat-ph-16a-guests-first-list.md`), overwriting an earlier one. The file never names a head that is not pushed. Use this template:
 
    ```markdown
-   # Handoff: <branch>
+   # Session handoff: <branch>
 
    ## Stage and next step
 
@@ -49,7 +49,7 @@ Two modes, after [ADR 0059](../../../docs/decisions/0059-session-skills.md), dec
 3. **Give the prompt** in a code block of two lines:
 
    ````text
-   /handoff resume <branch>
+   /session-handoff resume <branch>
    <stage>; next: <next step>
    ````
 
@@ -58,7 +58,7 @@ Two modes, after [ADR 0059](../../../docs/decisions/0059-session-skills.md), dec
 
 ## Resuming
 
-The first message of a new session is `/handoff resume <branch>`, with the stage and next step on the second line. The branch is given with `/`; find the file under the name with `/` replaced by `-`.
+The first message of a new session is `/session-handoff resume <branch>`, with the stage and next step on the second line. The branch is given with `/`; find the file under the name with `/` replaced by `-`.
 
 1. **`git status -sb`:** the checkout is clean and on the named branch. If not, stop and tell the owner. Never switch branches in a checkout that holds someone else's changes.
 2. **Read `.superpowers/handoff/<branch>.md`**, or the content in the prompt. If neither is there, work from the prompt's second line and the stage's documents. Compare the file's head commit with `git log -1`: on a mismatch, stop, say what the file says and what git says, and wait for the owner to say which to trust.
