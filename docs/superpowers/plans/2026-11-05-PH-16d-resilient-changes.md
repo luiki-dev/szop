@@ -101,7 +101,7 @@
   - `TitleField` gains `failed?: boolean`. Without `create`: while `pending`, "Saving…" in the muted text colour under the field; with `failed`, "Not saved." in the destructive colour followed by a link-style "Try again" button that does what Enter does, both in the `role="alert"` paragraph. With `failed`, leaving the field sends nothing. While `pending`, Esc does nothing.
   - `useRenameList(id)`'s `onError` invalidates `["lists", id]` and `["lists"]` (exact).
 
-- [ ] **Step 1: Write the failing tests** (the spec's Tests, rename part), in `list-page.test.tsx` unless named otherwise:
+- [x] **Step 1: Write the failing tests** (the spec's Tests, rename part), in `list-page.test.tsx` unless named otherwise:
   - `"NET-1.3: a rename started offline is sent at once and nothing is sent later"`: `navigator.onLine` stubbed `false`; the PATCH handler counts requests and answers with `HttpResponse.error()`; after Enter one request and "Not saved."; after `window.dispatchEvent(new Event("online"))` and waiting, still one.
   - `"NET-1.4: a rename with no answer shows Not saved. after the limit"` (fake timers, `delay("infinite")`), and `"NET-1.4: a list read with no answer shows its error card"`: "The list could not be loaded." with `timeoutMessage`.
   - `"NET-1.5: a rename whose answer was lost shows the saved name"`: PATCH answers `HttpResponse.error()`, and `GET /api/lists/:id` answers the new name from then on; the alert goes, the field shows the new name.
@@ -110,12 +110,12 @@
   - Review Focus 3: a PATCH answering `400` with an API error body shows that message, no "Try again"; a PATCH answering `404` shows its message as today.
   - Review Focus 4: two Enters, and Enter then "Try again", while the PATCH is held send one request.
   - In `client.test.ts`: `notSaved` is `false` for `ApiRequestError` `400`, `404`, `429`, and `true` for `401`, `500`, `new Error(timeoutMessage)` and a `TypeError`.
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test -- list-page client`. Expected: FAIL.
-- [ ] **Step 3: Implement** the Interfaces above. In `ListPage`: `failed` is `rename.isError && notSaved(rename.error) && rename.variables !== name`; `error` is passed only for a refusal with its own message (`rename.isError && !notSaved(rename.error)`); keep `saveOnBlur`: a rename that never failed still saves on blur, and `TitleField` skips it while `failed`.
-- [ ] **Step 4: Run** the tests again, then the whole web suite. Expected: PASS.
-- [ ] **Step 5: Write the E2E test** in `e2e/tests/lists.spec.ts`: `"NET-1.7, NET-1.8: a rename on a held connection shows Saving…, cannot be left, then Not saved."`. Create a list, then `page.route` on `PATCH /api/lists/*` that never answers; rename; "Saving…" shows; `page.goBack()` keeps the list's URL; after the limit "Not saved." with the typed name in the field; `page.unroute`, "Try again"; the heading shows the new name.
-- [ ] **Step 6: Run** `pnpm test:e2e -- lists`, then `pnpm check`. Expected: PASS.
-- [ ] **Step 7: Update the docs** listed above and commit: `feat(lists): show a rename as saving or not saved and hold the screen while it runs`.
+- [x] **Step 2: Run** `pnpm --filter @szop/web test -- list-page client`. Expected: FAIL.
+- [x] **Step 3: Implement** the Interfaces above. In `ListPage`: `failed` is `rename.isError && notSaved(rename.error) && rename.variables !== name`; `error` is passed only for a refusal with its own message (`rename.isError && !notSaved(rename.error)`); keep `saveOnBlur`: a rename that never failed still saves on blur, and `TitleField` skips it while `failed`.
+- [x] **Step 4: Run** the tests again, then the whole web suite. Expected: PASS.
+- [x] **Step 5: Write the E2E test** in `e2e/tests/lists.spec.ts`: `"NET-1.7, NET-1.8: a rename on a held connection shows Saving…, cannot be left, then Not saved."`. Create a list, then `page.route` on `PATCH /api/lists/*` that never answers; rename; "Saving…" shows; `page.goBack()` keeps the list's URL; after the limit "Not saved." with the typed name in the field; `page.unroute`, "Try again"; the heading shows the new name.
+- [x] **Step 6: Run** `pnpm test:e2e -- lists`, then `pnpm check`. Expected: PASS.
+- [x] **Step 7: Update the docs** listed above and commit: `feat(lists): show a rename as saving or not saved and hold the screen while it runs`.
 
 ### Task 3: Saving a create and a delete
 

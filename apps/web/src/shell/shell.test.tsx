@@ -179,7 +179,11 @@ describe("AppShell title", () => {
         children: [{ index: true, element: <p>Page</p>, handle }],
       },
     ];
-    render(<RouterProvider router={createMemoryRouter(table)} />);
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RouterProvider router={createMemoryRouter(table)} />
+      </QueryClientProvider>,
+    );
   }
 
   it("APP-2.1: is just Szop when no route names a title", () => {

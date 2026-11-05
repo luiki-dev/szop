@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { useRef, useState, type ReactNode, type Ref } from "react";
+import { useIsMutating } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { listNameSchema } from "@szop/shared";
 import logo from "@/brand/logo.svg";
@@ -31,13 +32,24 @@ export function ListHeader({
   field: ReactNode;
   menu?: ReactNode;
 }) {
+  // While a change is in flight ← looks and acts disabled; it stays a link, so
+  // it keeps its place in the tab order.
+  const busy = useIsMutating() > 0;
   return (
     <header className="-ml-2 flex items-start gap-3 pt-2 md:-ml-4 lg:ml-0 lg:pt-0">
       <Link
         to="/"
         aria-label="Back to lists"
+        {...(busy ? { "aria-disabled": true } : {})}
+        onClick={(event) => {
+          if (busy) event.preventDefault();
+        }}
         // Stryker disable next-line ObjectLiteral,StringLiteral: class names only, no behavior
-        className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "icon" }),
+          // Stryker disable next-line StringLiteral: class names only, no behavior
+          "aria-disabled:opacity-50",
+        )}
       >
         <ArrowLeft aria-hidden="true" />
       </Link>
@@ -67,6 +79,7 @@ export function TitleField({
   create,
   inputRef,
   pending,
+  failed,
   error,
   onSave,
   onCancel,
@@ -77,6 +90,7 @@ export function TitleField({
   create?: boolean;
   inputRef?: Ref<HTMLInputElement>;
   pending: boolean;
+  failed?: boolean;
   error?: string;
   onSave: (name: string) => void;
   onCancel: () => void;
@@ -150,7 +164,7 @@ export function TitleField({
       }}
       onKeyDown={(event) => {
         if (event.key === "Enter") commit();
-        if (event.key === "Escape") {
+        if (event.key === "Escape" && !pending) {
           cancelled.current = true;
           setValue(initial);
           setTooLong(undefined);
@@ -158,7 +172,7 @@ export function TitleField({
         }
       }}
       onBlur={() => {
-        if (saveOnBlur && !cancelled.current) commit();
+        if (saveOnBlur && !cancelled.current && !failed) commit();
       }}
     />
   );
@@ -173,6 +187,17 @@ export function TitleField({
         input
       )}
       {create && !desktop && <BottomBar>{createButton}</BottomBar>}
+      {!create && pending && (
+        <p className="px-2 pt-1 text-sm text-muted-foreground">Saving…</p>
+      )}
+      {!create && failed && (
+        <p role="alert" className="px-2 pt-1 text-sm text-destructive">
+          Not saved.{" "}
+          <button type="button" className="underline" onClick={commit}>
+            Try again
+          </button>
+        </p>
+      )}
       {message && (
         <p role="alert" className="px-2 pt-1 text-sm text-destructive">
           {message}

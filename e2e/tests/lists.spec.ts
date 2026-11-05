@@ -230,3 +230,39 @@ test("ACC-1.6: two fresh tabs that create a list at the same moment share one wo
     for (const name of names) await expect(page.getByText(name)).toBeVisible();
   }
 });
+
+test("NET-1.7, NET-1.8: a rename on a held connection shows Saving…, cannot be left, then Not saved.", async ({
+  page,
+}) => {
+  // Back must lead to a page of the app, so the journey starts on the lists.
+  await page.goto("/");
+  await page.getByRole("link", { name: "New list" }).click();
+  const field = page.getByRole("textbox", { name: "List name" });
+  await field.fill("Weekly shop");
+  await field.press("Enter");
+  await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
+  const url = page.url();
+
+  // A route that neither answers nor continues holds the request for good.
+  await page.route("**/api/lists/*", (route) => {
+    if (route.request().method() !== "PATCH") return route.fallback();
+  });
+  await field.fill("Saturday shop");
+  await field.press("Enter");
+  await expect(page.getByText("Saving…")).toBeVisible();
+
+  await page.goBack();
+  await expect(page).toHaveURL(url);
+
+  // After the limit (10 s) the change is given up.
+  await expect(page.getByRole("alert")).toContainText("Not saved.", {
+    timeout: 15_000,
+  });
+  await expect(field).toHaveValue("Saturday shop");
+
+  await page.unroute("**/api/lists/*");
+  await page.getByRole("button", { name: "Try again" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Saturday shop",
+  );
+});

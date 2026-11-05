@@ -1,10 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { createMemoryRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { timeoutMessage } from "../api/client.ts";
 import { routes } from "../routes.tsx";
 import { server } from "../test/server.ts";
 
@@ -321,8 +322,8 @@ describe("ListPage", () => {
     server.use(
       http.patch(`/api/lists/${id}`, () =>
         HttpResponse.json(
-          { error: { code: "internal_error", message: "Boom" } },
-          { status: 500 },
+          { error: { code: "invalid", message: "Boom" } },
+          { status: 400 },
         ),
       ),
     );
@@ -338,8 +339,8 @@ describe("ListPage", () => {
     server.use(
       http.patch(`/api/lists/${id}`, () =>
         HttpResponse.json(
-          { error: { code: "internal_error", message: "Boom" } },
-          { status: 500 },
+          { error: { code: "invalid", message: "Boom" } },
+          { status: 400 },
         ),
       ),
     );
@@ -538,5 +539,233 @@ describe("ListPage", () => {
       expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
     });
     expect(trigger).toHaveFocus();
+  });
+
+  describe("a rename that is not saved", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    const failing = () => {
+      const requests: string[] = [];
+      server.use(
+        http.patch(`/api/lists/${id}`, async ({ request }) => {
+          requests.push(((await request.json()) as { name: string }).name);
+          return HttpResponse.error();
+        }),
+      );
+      return requests;
+    };
+
+    it("NET-1.3: a rename started offline is sent at once and nothing is sent later", async () => {
+      vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+      const user = userEvent.setup();
+      setup();
+      const requests = failing();
+
+      await user.type(await field(), " 2{Enter}");
+
+      expect(await screen.findByRole("alert")).toHaveTextContent("Not saved.");
+      expect(requests).toHaveLength(1);
+      window.dispatchEvent(new Event("online"));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(requests).toHaveLength(1);
+    });
+
+    it("NET-1.4: a rename with no answer shows Not saved. after the limit", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      setup();
+      server.use(http.patch(`/api/lists/${id}`, () => delay("infinite")));
+
+      await user.type(await field(), " 2{Enter}");
+      expect(await screen.findByText("Saving…")).toBeVisible();
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(await screen.findByRole("alert")).toHaveTextContent("Not saved.");
+      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+    });
+
+    it("NET-1.4: a list read with no answer shows its error card", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      setup();
+      server.use(http.get(`/api/lists/${id}`, () => delay("infinite")));
+
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(
+        await screen.findByText("The list could not be loaded."),
+      ).toBeVisible();
+      expect(screen.getByText(timeoutMessage)).toBeVisible();
+    });
+
+    it("NET-1.5: a rename whose answer was lost shows the saved name", async () => {
+      const user = userEvent.setup();
+      setup();
+      const requests = failing();
+      // From the first PATCH on, the server holds the new name.
+      server.use(
+        http.get(`/api/lists/${id}`, () =>
+          HttpResponse.json(
+            requests.length > 0 ? { ...list, name: "Weekly shop 2" } : list,
+          ),
+        ),
+      );
+
+      await user.type(await field(), " 2{Enter}");
+
+      await waitFor(() => {
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      });
+      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+    });
+
+    it("NET-1.7: after a failed rename the typed name stays and only a retry sends it", async () => {
+      const user = userEvent.setup();
+      setup();
+      const requests = failing();
+
+      await user.type(await field(), " 2{Enter}");
+      await screen.findByRole("alert");
+      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      await user.tab();
+      expect(requests).toHaveLength(1);
+
+      await user.click(screen.getByRole("button", { name: "Try again" }));
+      await waitFor(() => {
+        expect(requests).toHaveLength(2);
+      });
+      await screen.findByRole("alert");
+      await user.click(screen.getByRole("textbox"));
+      await user.keyboard("{Enter}");
+      await waitFor(() => {
+        expect(requests).toHaveLength(3);
+      });
+      await screen.findByRole("alert");
+
+      await user.keyboard("{Escape}");
+
+      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("a rename in flight", () => {
+    function held() {
+      let answer: () => void = () => undefined;
+      const gate = new Promise<void>((resolve) => {
+        answer = resolve;
+      });
+      const requests: string[] = [];
+      server.use(
+        http.patch(`/api/lists/${id}`, async ({ request }) => {
+          requests.push(((await request.json()) as { name: string }).name);
+          await gate;
+          return HttpResponse.json({ ...list, name: "Weekly shop 2" });
+        }),
+      );
+      return { answer, requests };
+    }
+
+    it("NET-1.8: while a rename is saved, the screen cannot be left", async () => {
+      const user = userEvent.setup();
+      const router = createMemoryRouter(routes, {
+        initialEntries: ["/", `/lists/${id}`],
+        initialIndex: 1,
+      });
+      server.use(
+        http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+        http.get(`/api/lists/${id}`, () => HttpResponse.json(list)),
+        http.get("/api/auth/get-session", () =>
+          HttpResponse.json({ ok: true }),
+        ),
+      );
+      const { answer } = held();
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>,
+      );
+
+      await user.type(await field(), " 2{Enter}");
+      expect(await screen.findByText("Saving…")).toBeVisible();
+      const back = screen.getByRole("link", { name: "Back to lists" });
+      expect(back).toHaveAttribute("aria-disabled", "true");
+      await user.click(back);
+      await user.keyboard("{Escape}");
+      await router.navigate(-1);
+
+      expect(router.state.location.pathname).toBe(`/lists/${id}`);
+      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.getByText("Saving…")).toBeVisible();
+
+      answer();
+      await waitFor(() => {
+        expect(back).not.toHaveAttribute("aria-disabled");
+      });
+      await user.click(back);
+      await waitFor(() => {
+        expect(router.state.location.pathname).toBe("/");
+      });
+    });
+
+    it("NET-1.7: a refusal shows its own message and no Try again", async () => {
+      const user = userEvent.setup();
+      setup();
+      server.use(
+        http.patch(`/api/lists/${id}`, () =>
+          HttpResponse.json(
+            { error: { code: "invalid", message: "Not a good name" } },
+            { status: 400 },
+          ),
+        ),
+      );
+
+      await user.type(await field(), " 2{Enter}");
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Not a good name",
+      );
+      expect(
+        screen.queryByRole("button", { name: "Try again" }),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Not saved.")).not.toBeInTheDocument();
+    });
+
+    it("NET-1.7: a 404 shows its message as before", async () => {
+      const user = userEvent.setup();
+      setup();
+      server.use(
+        http.patch(`/api/lists/${id}`, () =>
+          HttpResponse.json(
+            { error: { code: "not_found", message: "List not found" } },
+            { status: 404 },
+          ),
+        ),
+      );
+
+      await user.type(await field(), " 2{Enter}");
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "List not found",
+      );
+    });
+
+    it("NET-1.8: Enter twice, or Enter then Try again, sends one request", async () => {
+      const user = userEvent.setup();
+      setup();
+      const { answer, requests } = held();
+
+      await user.type(await field(), " 2{Enter}{Enter}");
+      await screen.findByText("Saving…");
+      await user.keyboard("{Enter}");
+      answer();
+
+      await waitFor(() => {
+        expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
+      });
+      expect(requests).toEqual(["Weekly shop 2"]);
+    });
   });
 });

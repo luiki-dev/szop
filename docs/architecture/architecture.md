@@ -285,6 +285,13 @@ The app watches the browser's online/offline events and failed requests. When of
 
 Every request of `src/api/client.ts` is given up after `timeLimit` (10 seconds) with `timeoutMessage` ("The server didn't answer in time."), so a weak connection ends in an error, not in a wait. A change's whole run (the write, the lock, the session check, the sign-in and the retried write) shares one deadline ([PH-16d](../roadmap.md#ph-16d-resilient-changes)).
 
+What is built for a rename (the create and the delete follow in the same phase):
+
+- **In flight:** the name field shows "Saving…" under it and is read-only. `AppShell` holds the screen with `useBlocker(() => queryClient.isMutating() > 0)` and resets a blocked navigation at once, so Back and every in-app link do nothing; ← on the list's screen is `aria-disabled` while a change is in flight. The function is read at the moment of the navigation, so a change that just ended (and navigates from its `onSuccess`) is not blocked.
+- **Not saved:** `notSaved(error)` in `client.ts` is `false` only for a 4xx other than 401 (a refusal with its own message, shown as before, with no retry) and `true` for a timeout, no network, a 5xx, a second 401 or an unreadable answer. Then the field keeps the typed name and shows "Not saved." with "Try again", which sends it again, as does Enter; leaving the field sends nothing, and Esc puts the saved name back.
+- **A lost answer:** a failed rename refetches the list and the lists, so a change the server did apply shows as saved and the alert goes.
+- **Nothing is queued:** a change started offline is sent at once and, when it fails, waits for the user's retry; the `online` event sends nothing. PH-22 adds the banner and the disabled controls ([NET-1](../requirements/NET-connectivity.md#net-1)).
+
 ### Forms
 
 React Hook Form with the Zod resolver and the shared schemas: the browser and the API reject exactly the same invalid input.

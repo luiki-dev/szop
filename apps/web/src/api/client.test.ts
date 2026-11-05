@@ -12,6 +12,7 @@ import {
   getHealth,
   getList,
   getLists,
+  notSaved,
   renameList,
   timeLimit,
   timeoutMessage,
@@ -492,5 +493,21 @@ describe("lists", () => {
     );
 
     await expect(getLists()).rejects.toMatchObject({ name: "ApiRequestError" });
+  });
+});
+
+describe("notSaved", () => {
+  it("NET-1.7: is false only for a refusal with its own message", () => {
+    for (const status of [400, 404, 429]) {
+      expect(notSaved(new ApiRequestError("No", status))).toBe(false);
+    }
+    for (const error of [
+      new ApiRequestError("Sign in", 401),
+      new ApiRequestError("Boom", 500),
+      new Error(timeoutMessage),
+      new TypeError("Failed to fetch"),
+    ]) {
+      expect(notSaved(error)).toBe(true);
+    }
   });
 });

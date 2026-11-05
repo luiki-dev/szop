@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import {
   Outlet,
   ScrollRestoration,
+  useBlocker,
   useLocation,
   useMatches,
 } from "react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Sheet,
@@ -93,6 +95,16 @@ export function AppShell() {
   // Selecting lists replaces the header with the page's selection bar; the
   // title stays for screen readers.
   const selecting = isSelecting(useLocation().state);
+
+  // While a change is in flight the screen cannot be left: Back and every
+  // in-app link do nothing. A function, read at the moment of the navigation,
+  // so a change that just ended (and navigates from its onSuccess) is not
+  // counted.
+  const queryClient = useQueryClient();
+  const blocker = useBlocker(() => queryClient.isMutating() > 0);
+  useEffect(() => {
+    if (blocker.state === "blocked") blocker.reset();
+  }, [blocker]);
 
   useEffect(() => {
     // A page with its own header sets the tab's title itself.

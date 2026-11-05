@@ -54,6 +54,12 @@ export function useRenameList(id: string) {
     // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
     onSuccess: (list) => remember(queryClient, list),
+    // The answer may have been lost on its way: ask what the server holds.
+    onError: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["lists", id] }),
+        queryClient.invalidateQueries({ queryKey: ["lists"], exact: true }),
+      ]),
   });
 }
 

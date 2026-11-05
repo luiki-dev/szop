@@ -75,6 +75,19 @@ export class ApiRequestError extends Error {
   }
 }
 
+// Whether a failed change leaves the user unsure it was saved: false only for
+// a refusal with its own message (a 4xx but 401), which a retry would not
+// change; true for a timeout, no network, a 5xx, a second 401 and an
+// unreadable answer.
+export function notSaved(error: Error): boolean {
+  return !(
+    error instanceof ApiRequestError &&
+    error.status >= 400 &&
+    error.status < 500 &&
+    error.status !== 401
+  );
+}
+
 const json = { "content-type": "application/json" };
 
 // The API refuses writes that are not JSON, so every write with a body sends
