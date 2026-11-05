@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { createMemoryRouter } from "react-router";
@@ -135,6 +135,32 @@ describe("NewListPage", () => {
       await screen.findByText("Name is too long (at most 100 characters)"),
     ).toBeVisible();
     expect(posts).toHaveLength(0);
+  });
+
+  it("LST-1.9: shows the error of a too long name without Enter", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    await user.type(screen.getByRole("textbox"), "a".repeat(101));
+
+    expect(
+      await screen.findByText("Name is too long (at most 100 characters)"),
+    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
+  });
+
+  it("LST-1.9: shows the error of a name with a control character, and clearing the field removes it", async () => {
+    const user = userEvent.setup();
+    const { field } = setup();
+
+    await user.type(field(), "a");
+    fireEvent.change(field(), { target: { value: "a\u0007b" } });
+    expect(
+      await screen.findByText("Name can't contain control characters"),
+    ).toBeVisible();
+
+    await user.clear(field());
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
   it("keeps the text after a failure and retries with the same ID", async () => {

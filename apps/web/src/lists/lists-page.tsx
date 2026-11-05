@@ -163,6 +163,20 @@ export function ListsPage() {
       setAsking(false);
     }
   }
+  // After a delete the opener is gone, so the focus moves to the page title:
+  // from a list's page (location state), or when selecting ends here.
+  const refocus = useRef(false);
+  useEffect(() => {
+    const fromList =
+      typeof loc.state === "object" &&
+      loc.state !== null &&
+      "deleted" in loc.state;
+    if (selecting || !(refocus.current || fromList)) return;
+    refocus.current = false;
+    document.querySelector("h1")?.focus();
+    // loc.state only matters when the page mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selecting]);
   useEffect(() => {
     if (!selecting || asking) return;
     const onKey = (event: KeyboardEvent) => {
@@ -304,7 +318,10 @@ export function ListsPage() {
         lists={confirming}
         open={asking}
         onOpenChange={setAsking}
-        onDeleted={stop}
+        onDeleted={() => {
+          refocus.current = true;
+          stop();
+        }}
       />
     </>
   );

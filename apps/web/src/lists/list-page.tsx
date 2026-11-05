@@ -175,7 +175,7 @@ export function ListPage() {
         }}
         onDeleted={() => {
           deleted.current = true;
-          void navigate("/", { replace: true });
+          void navigate("/", { replace: true, state: { deleted: true } });
         }}
       />
     </>

@@ -418,6 +418,9 @@ describe("ListPage", () => {
     expect(router.state.historyAction).toBe("REPLACE");
     // No refetch of the deleted list after the DELETE.
     expect(seen).toEqual(["GET", "DELETE"]);
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Lists" })).toHaveFocus();
+    });
   });
 
   it("LST-1.3: a deleted list is not shown again from the cache", async () => {

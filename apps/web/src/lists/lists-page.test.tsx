@@ -381,6 +381,30 @@ describe("ListsPage", () => {
       expect(router.state.location.pathname).toBe("/");
     });
 
+    it("APP-3.3: after a confirmed delete the focus is on the Lists heading", async () => {
+      server.use(
+        http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+        http.get("/api/auth/get-session", () =>
+          HttpResponse.json({ ok: true }),
+        ),
+        http.post(
+          "/api/lists/delete",
+          () => new HttpResponse(null, { status: 204 }),
+        ),
+      );
+      renderApp();
+      await select();
+      fireEvent.click(row("Party"));
+      fireEvent.click(row("Hardware store"));
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      const dialog = await screen.findByRole("alertdialog");
+      fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+      await waitFor(() => {
+        expect(screen.getByRole("heading", { name: "Lists" })).toHaveFocus();
+      });
+    });
+
     it("LST-1.8: one selected list is named in the dialog", async () => {
       serveLists();
       renderApp();

@@ -53,4 +53,9 @@ echo "==> Checking that /api/health reports the commit"
 health=$(curl --silent --max-time 10 http://127.0.0.1:8080/api/health) || fail "GET /api/health did not answer within 10 seconds"
 [[ "$health" == *"\"commit\":\"$GIT_COMMIT\""* ]] || fail "/api/health answered '$health', which lacks the commit $GIT_COMMIT"
 
+# The version is the root package.json's, so the deployed build can be named.
+echo "==> Checking that /api/health reports the version"
+version=$(node -p "require('./package.json').version")
+[[ "$health" == *"\"version\":\"$version\""* ]] || fail "/api/health answered '$health', which lacks the version $version"
+
 echo "OK: the image starts, migrates, runs as $user (uid $uid), serves the app and reports commit $GIT_COMMIT"

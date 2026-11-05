@@ -108,10 +108,16 @@ export function TitleField({
     if (parsed.data !== initial) onSave(parsed.data);
   }
 
-  const message = tooLong ?? error;
+  const valid = listNameSchema.safeParse(value);
+  // With create, the reason Create is disabled shows as soon as it is typed.
+  const live =
+    create && value.trim() !== "" && !valid.success
+      ? valid.error.issues[0]?.message
+      : undefined;
+  const message = tooLong ?? live ?? error;
   const createButton = create && (
     <Button
-      disabled={pending || !listNameSchema.safeParse(value).success}
+      disabled={pending || !valid.success}
       // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
       className={desktop ? "shrink-0" : "w-full"}
       onClick={commit}
