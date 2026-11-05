@@ -95,4 +95,74 @@ describe("useLongPress", () => {
     hook.handlers.onContextMenu(held);
     expect(held.preventDefault).toHaveBeenCalled();
   });
+
+  it("LST-1.6: a short tap leaves the browser's context menu alone", () => {
+    const { hook } = setup();
+    hook.handlers.onPointerDown(at(10, 10));
+    hook.handlers.onPointerUp();
+    const after = at(10, 10);
+    hook.handlers.onContextMenu(after);
+    expect(after.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("LST-1.6: does not fire once the component is gone", () => {
+    const onLongPress = vi.fn();
+    const { result, unmount } = renderHook(() => useLongPress(onLongPress));
+    result.current.handlers.onPointerDown(at(10, 10));
+    unmount();
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    expect(onLongPress).not.toHaveBeenCalled();
+  });
+
+  it("LST-1.6: a second press restarts the wait", () => {
+    const { onLongPress, hook } = setup();
+    hook.handlers.onPointerDown(at(10, 10));
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    hook.handlers.onPointerDown(at(10, 10));
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(onLongPress).not.toHaveBeenCalled();
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(onLongPress).toHaveBeenCalledTimes(1);
+  });
+
+  it("LST-1.6: a disabled press fires nothing and holds back no context menu", () => {
+    const onLongPress = vi.fn();
+    const { result } = renderHook(() =>
+      useLongPress(onLongPress, { disabled: true }),
+    );
+    result.current.handlers.onPointerDown(at(10, 10));
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    const menu = at(10, 10);
+    result.current.handlers.onContextMenu(menu);
+    expect(onLongPress).not.toHaveBeenCalled();
+    expect(menu.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("LST-1.6: a move without a press does nothing", () => {
+    const { hook } = setup();
+    expect(() => {
+      hook.handlers.onPointerMove(at(10, 10));
+    }).not.toThrow();
+  });
+
+  it("LST-1.6: a small move, and a move of exactly 10 px, still fire", () => {
+    const { onLongPress, hook } = setup();
+    hook.handlers.onPointerDown(at(100, 100));
+    hook.handlers.onPointerMove(at(103, 104));
+    hook.handlers.onPointerMove(at(106, 108));
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(onLongPress).toHaveBeenCalledTimes(1);
+  });
 });

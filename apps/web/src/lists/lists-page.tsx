@@ -22,6 +22,9 @@ export function NewListLink({ sticky }: { sticky?: boolean }) {
     // Stryker disable next-line StringLiteral: class names only, no behavior
     <Link
       to="/lists/new"
+      // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
+      // Stryker disable next-line ConditionalExpression: a Tailwind class chosen by a flag, jsdom applies no CSS
+      // Stryker disable next-line LogicalOperator: a Tailwind class chosen by a flag, jsdom applies no CSS
       className={cn(buttonVariants(), "gap-2", sticky && "w-full")}
     >
       <Plus aria-hidden="true" />
@@ -76,6 +79,7 @@ function ListRow({
 }) {
   const press = useLongPress(onLongPress, { disabled: selecting });
   const row =
+    // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
     "flex min-h-12 min-w-0 items-center rounded-surface bg-card px-4 font-semibold text-card-foreground outline-none";
   return (
     <li
@@ -92,6 +96,7 @@ function ListRow({
         <label
           className={cn(
             row,
+            // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
             "cursor-pointer gap-3 has-checked:ring-2 has-checked:ring-primary has-focus-visible:ring-3 has-focus-visible:ring-ring",
           )}
         >
@@ -108,8 +113,10 @@ function ListRow({
           to={`/lists/${list.id}`}
           className={cn(
             row,
+            // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
             "focus-visible:ring-3 focus-visible:ring-ring",
             // No text selection or callout menu on a long press.
+            // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
             "select-none [-webkit-touch-callout:none]",
           )}
         >
@@ -131,10 +138,12 @@ export function ListsPage() {
   const selecting = isSelecting(loc.state);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [byLongPress, setByLongPress] = useState(false);
+  // Stryker disable next-line ArrayDeclaration: confirming is set before the dialog opens
   const [confirming, setConfirming] = useState<Pick<List, "id" | "name">[]>([]);
   const [asking, setAsking] = useState(false);
 
   // One Back per selecting: a repeated Esc or a double tap must not leave the page.
+  // Stryker disable next-line BooleanLiteral: the effect on [selecting] resets it on mount
   const stopped = useRef(false);
   const stop = () => {
     if (stopped.current) return;
@@ -190,6 +199,7 @@ export function ListsPage() {
 
   const lists = query.data;
   // A selected list that a refetch dropped is not counted.
+  // Stryker disable next-line ArrayDeclaration: a non-list entry is filtered out the same as no entry
   const chosen = (lists ?? []).filter((list) => selected.has(list.id));
   const allChosen = lists !== undefined && chosen.length === lists.length;
   const start = (id?: string) => {

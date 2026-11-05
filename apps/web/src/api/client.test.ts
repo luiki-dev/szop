@@ -352,6 +352,27 @@ describe("lists", () => {
     await expect(deleteList("x")).rejects.toBeInstanceOf(ApiRequestError);
   });
 
+  it("names the method and path of a failed delete", async () => {
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.delete(
+        "/api/lists/x",
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+      http.post(
+        "/api/lists/delete",
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+
+    await expect(deleteList("x")).rejects.toThrow(
+      "DELETE /api/lists/x answered 500",
+    );
+    await expect(deleteLists(["a"])).rejects.toThrow(
+      "POST /api/lists/delete answered 500",
+    );
+  });
+
   it("names a failed request's error ApiRequestError", async () => {
     server.use(
       http.get("/api/lists", () => new HttpResponse("<html>", { status: 502 })),

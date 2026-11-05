@@ -28,6 +28,7 @@ export function useLongPress(
     origin.current = undefined;
     holding.current = false;
   };
+  // Stryker disable next-line ArrayDeclaration: a constant dependency list is the same as an empty one
   useEffect(() => cancel, []);
 
   return {

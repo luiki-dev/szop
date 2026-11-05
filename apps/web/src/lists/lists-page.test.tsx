@@ -17,10 +17,14 @@ import { threeLists } from "../test/lists.ts";
 import { stubMatchMedia } from "../test/match-media.ts";
 import { server } from "../test/server.ts";
 import { routes } from "../routes.tsx";
+import { isSelecting } from "./lists-page.tsx";
 
 // The real route table; a phone unless a test says otherwise (setup.ts).
-function renderApp(path = "/") {
-  const router = createMemoryRouter(routes, { initialEntries: [path] });
+function renderApp(path = "/", before: string[] = []) {
+  const router = createMemoryRouter(routes, {
+    initialEntries: [...before, path],
+    initialIndex: before.length,
+  });
   const client = new QueryClient();
   render(
     <QueryClientProvider client={client}>
@@ -152,6 +156,29 @@ describe("ListsPage", () => {
     expect(heading.parentElement).toContainElement(links[0] ?? null);
   });
 
+  it.each([
+    [undefined, false],
+    [null, false],
+    ["selecting", false],
+    [1, false],
+    [{}, false],
+    [{ selecting: false }, false],
+    [{ selecting: "yes" }, false],
+    [{ selecting: true }, true],
+  ])("LST-1.7: isSelecting(%j) is %s", (state, expected) => {
+    expect(isSelecting(state)).toBe(expected);
+  });
+
+  it("LST-1.7: Esc on the lists page, not selecting, goes nowhere", async () => {
+    serveLists();
+    const { router } = renderApp("/", ["/other"]);
+    await screen.findByRole("link", { name: "Party" });
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(router.state.location.pathname).toBe("/");
+  });
+
   describe("selecting", () => {
     const [party, groceries, hardware] = threeLists;
     const row = (name: string) => screen.getByRole("checkbox", { name });
@@ -260,6 +287,51 @@ describe("ListsPage", () => {
       expect(router.state.location.pathname).toBe("/");
       expect(window.history.length).toBe(before);
       expect(router.state.location.state).toBeNull();
+    });
+
+    it("LST-1.7: two Esc and taps in one go leave the page only once", async () => {
+      serveLists();
+      const { router } = renderApp("/", ["/other"]);
+      await select();
+      const cancel = screen.getByRole("button", { name: "Cancel selection" });
+
+      act(() => {
+        fireEvent.click(cancel);
+        fireEvent.click(cancel);
+        fireEvent.keyDown(document, { key: "Escape" });
+      });
+
+      await screen.findByRole("link", { name: "Party" });
+      expect(router.state.location.pathname).toBe("/");
+    });
+
+    it("LST-1.7: after selecting stops, Esc does nothing", async () => {
+      serveLists();
+      const { router } = renderApp("/", ["/other"]);
+      await select();
+      fireEvent.click(screen.getByRole("button", { name: "Cancel selection" }));
+      await screen.findByRole("link", { name: "Party" });
+
+      fireEvent.keyDown(document, { key: "Escape" });
+
+      expect(router.state.location.pathname).toBe("/");
+    });
+
+    it("LST-1.7: Esc in the delete dialog closes the dialog and keeps selecting", async () => {
+      serveLists();
+      const { router } = renderApp("/", ["/other"]);
+      await select();
+      fireEvent.click(row("Party"));
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      await screen.findByRole("alertdialog");
+
+      fireEvent.keyDown(document.activeElement ?? document, { key: "Escape" });
+
+      await waitFor(() => {
+        expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+      });
+      expect(screen.getByText("1 selected")).toBeInTheDocument();
+      expect(router.state.location.pathname).toBe("/");
     });
 
     it("LST-1.7: stopping leaves the history as it was before the mode started", async () => {
@@ -410,6 +482,79 @@ describe("ListsPage", () => {
           vi.useRealTimers();
         }
         expect(row("Party")).toBeChecked();
+      });
+
+      it("LST-1.6: while selecting, a hold on a row adds no history entry", async () => {
+        stubMatchMedia({ [coarseQuery]: true });
+        serveLists();
+        renderApp();
+        await select();
+        const checkbox = row("Party");
+        vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+        try {
+          fireEvent.pointerDown(checkbox, { clientX: 5, clientY: 5 });
+          await act(() => {
+            vi.advanceTimersByTime(600);
+            return Promise.resolve();
+          });
+          fireEvent.pointerUp(checkbox);
+        } finally {
+          vi.useRealTimers();
+        }
+
+        fireEvent.click(
+          screen.getByRole("button", { name: "Cancel selection" }),
+        );
+        expect(
+          await screen.findByRole("link", { name: "Party" }),
+        ).toBeVisible();
+        expect(screen.queryByRole("checkbox")).toBeNull();
+      });
+
+      it("LST-1.6: a second list tapped after a long press keeps selecting", async () => {
+        stubMatchMedia({ [coarseQuery]: true });
+        serveLists();
+        renderApp();
+        await screen.findByRole("link", { name: "Party" });
+        vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+        try {
+          await longPress("Party");
+        } finally {
+          vi.useRealTimers();
+        }
+        const checkbox = await screen.findByRole("checkbox", { name: "Party" });
+        fireEvent.pointerUp(checkbox);
+        fireEvent.click(checkbox);
+
+        fireEvent.click(row("Hardware store"));
+
+        expect(screen.getByText("2 selected")).toBeInTheDocument();
+      });
+
+      it("LST-1.6: the long-press flag does not outlive the selecting it started", async () => {
+        stubMatchMedia({ [coarseQuery]: true });
+        serveLists();
+        renderApp();
+        await screen.findByRole("link", { name: "Party" });
+        vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+        try {
+          await longPress("Party");
+        } finally {
+          vi.useRealTimers();
+        }
+        const held = await screen.findByRole("checkbox", { name: "Party" });
+        fireEvent.pointerUp(held);
+        fireEvent.click(held);
+        fireEvent.click(
+          screen.getByRole("button", { name: "Cancel selection" }),
+        );
+        await screen.findByRole("link", { name: "Party" });
+
+        await select();
+        fireEvent.click(row("Party"));
+        fireEvent.click(row("Party"));
+
+        expect(screen.getByText("0 selected")).toBeInTheDocument();
       });
 
       it("LST-1.6: a finger that moves during the press starts nothing", async () => {

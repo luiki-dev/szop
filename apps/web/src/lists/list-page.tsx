@@ -30,16 +30,17 @@ export function ListPage() {
   const queryClient = useQueryClient();
   const deleted = useRef(false);
   const askDelete = useRef(false);
-  const actions = useRef<HTMLButtonElement>(null);
 
   // A deleted list leaves the cache once this screen no longer observes it:
   // removed earlier, it would be refetched (a 404) before the navigation lands.
   useEffect(
     () => () => {
       if (deleted.current) {
+        // Stryker disable next-line BooleanLiteral: no query key extends ["lists", id], so exact and prefix match the same entry
         queryClient.removeQueries({ queryKey: ["lists", id], exact: true });
       }
     },
+    // Stryker disable next-line ArrayDeclaration: both dependencies are stable for the life of the screen
     [queryClient, id],
   );
   const input = useRef<HTMLInputElement>(null);
@@ -126,7 +127,6 @@ export function ListPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  ref={actions}
                   aria-label="List actions"
                   className="shrink-0"
                 />
@@ -137,8 +137,6 @@ export function ListPage() {
             {/* After Rename, focus goes to the title; otherwise back to ⋮. */}
             <DropdownMenuContent
               finalFocus={() => {
-                // The dialog gets the focus, and gives it back to ⋮ itself.
-                if (askDelete.current) return false;
                 if (!renaming.current) return true;
                 renaming.current = false;
                 // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
@@ -172,9 +170,8 @@ export function ListPage() {
         open={deleting}
         onOpenChange={(open) => {
           setDeleting(open);
+          // Stryker disable next-line ConditionalExpression: the dialog never calls onOpenChange(true), so `true` behaves as `!open`
           if (!open) askDelete.current = false;
-          // Stryker disable next-line OptionalChaining: the ref is set while ⋮ is mounted
-          if (!open) actions.current?.focus();
         }}
         onDeleted={() => {
           deleted.current = true;

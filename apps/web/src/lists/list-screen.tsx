@@ -112,6 +112,7 @@ export function TitleField({
   const createButton = create && (
     <Button
       disabled={pending || !listNameSchema.safeParse(value).success}
+      // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
       className={desktop ? "shrink-0" : "w-full"}
       onClick={commit}
     >
@@ -128,10 +129,12 @@ export function TitleField({
       aria-label="List name"
       aria-invalid={message ? true : undefined}
       className={cn(
+        // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
         "h-12 w-full truncate rounded-control px-2 text-xl font-extrabold outline-none focus:ring-3 focus:ring-ring",
         create
           ? "border-2 border-input bg-card"
-          : "bg-transparent underline decoration-input decoration-dotted decoration-2 underline-offset-2 placeholder:underline placeholder:decoration-input placeholder:decoration-dotted placeholder:decoration-2 placeholder:underline-offset-2 focus:bg-card focus:no-underline focus:placeholder:no-underline",
+          : // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
+            "bg-transparent underline decoration-input decoration-dotted decoration-2 underline-offset-2 placeholder:underline placeholder:decoration-input placeholder:decoration-dotted placeholder:decoration-2 placeholder:underline-offset-2 focus:bg-card focus:no-underline focus:placeholder:no-underline",
       )}
       onChange={(event) => {
         setValue(event.target.value);

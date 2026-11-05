@@ -30,7 +30,9 @@ export function DeleteListsDialog({
   const [first] = lists;
   const title =
     lists.length === 1
-      ? `Delete list "${first?.name ?? ""}"?`
+      ? // Stryker disable next-line StringLiteral: first exists when lists.length is 1
+        // Stryker disable next-line OptionalChaining: first exists when lists.length is 1
+        `Delete list "${first?.name ?? ""}"?`
       : `Delete ${String(lists.length)} lists?`;
 
   return (
@@ -38,6 +40,7 @@ export function DeleteListsDialog({
       open={open}
       onOpenChange={(next) => {
         if (remove.isPending) return;
+        // Stryker disable next-line ConditionalExpression: the dialog never calls onOpenChange(true), so `true` behaves as `!next`
         if (!next) remove.reset();
         onOpenChange(next);
       }}
@@ -67,6 +70,7 @@ export function DeleteListsDialog({
                 lists.map((list) => list.id),
                 {
                   onSuccess: () => {
+                    // Stryker disable next-line CallExpression: a successful mutation renders nothing, and the next line closes the dialog
                     remove.reset();
                     onOpenChange(false);
                     onDeleted();

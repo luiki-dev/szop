@@ -61,6 +61,7 @@ export function useRenameList(id: string) {
 async function remove(ids: string[]) {
   if (ids.length > 1) return deleteLists(ids);
   try {
+    // Stryker disable next-line StringLiteral: ids has at least one entry
     await deleteList(ids[0] ?? "");
   } catch (error) {
     if (!(error instanceof ApiRequestError && error.status === 404))

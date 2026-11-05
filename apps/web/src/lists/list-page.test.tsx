@@ -25,12 +25,13 @@ function setup() {
   const router = createMemoryRouter(routes, {
     initialEntries: [`/lists/${id}`],
   });
+  const queryClient = new QueryClient();
   render(
-    <QueryClientProvider client={new QueryClient()}>
+    <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
-  return { router, patches };
+  return { router, patches, queryClient };
 }
 
 const field = () => screen.findByRole("textbox", { name: "List name" });
@@ -413,6 +414,8 @@ describe("ListPage", () => {
       expect(router.state.location.pathname).toBe("/");
     });
     expect(deleted).toBe(1);
+    // The list's page was replaced, so Back does not return to it.
+    expect(router.state.historyAction).toBe("REPLACE");
     // No refetch of the deleted list after the DELETE.
     expect(seen).toEqual(["GET", "DELETE"]);
   });
@@ -474,4 +477,63 @@ describe("ListPage", () => {
       });
     },
   );
+
+  it("LST-1.3: deleting a list evicts only its own cache entry", async () => {
+    const user = userEvent.setup();
+    const { router, queryClient } = setup();
+    const other = { ...list, id: "0198a000-0000-7000-8000-0000000000bb" };
+    server.use(
+      http.delete(
+        `/api/lists/${id}`,
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+      http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+    );
+    await field();
+    queryClient.setQueryData(["lists", other.id], other);
+
+    await user.click(screen.getByRole("button", { name: "List actions" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    await user.click(await screen.findByRole("button", { name: "Delete" }));
+    await screen.findByText("Create your first list");
+
+    expect(router.state.location.pathname).toBe("/");
+    expect(queryClient.getQueryData(["lists", id])).toBeUndefined();
+    expect(queryClient.getQueryData(["lists", other.id])).toEqual(other);
+  });
+
+  it("LST-1.3: leaving a list that was not deleted keeps its cache entry", async () => {
+    const user = userEvent.setup();
+    const { queryClient } = setup();
+    server.use(http.get("/api/lists", () => HttpResponse.json({ lists: [] })));
+    await field();
+
+    await user.click(screen.getByRole("link", { name: "Back to lists" }));
+    await screen.findByText("Create your first list");
+
+    expect(queryClient.getQueryData(["lists", id])).toEqual(list);
+  });
+
+  it("APP-3.3: after a cancelled delete, closing the menu returns the focus to its button", async () => {
+    const user = userEvent.setup();
+    setup();
+    await field();
+    const trigger = screen.getByRole("button", { name: "List actions" });
+
+    await user.click(trigger);
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    await screen.findByRole("alertdialog");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
+
+    await user.click(trigger);
+    await screen.findByRole("menuitem", { name: "Rename" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
+    });
+    expect(trigger).toHaveFocus();
+  });
 });

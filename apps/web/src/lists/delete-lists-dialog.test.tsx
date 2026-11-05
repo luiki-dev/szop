@@ -20,12 +20,21 @@ function Harness({
 }) {
   const [open, setOpen] = useState(true);
   return (
-    <DeleteListsDialog
-      lists={lists}
-      open={open}
-      onOpenChange={setOpen}
-      onDeleted={onDeleted}
-    />
+    <>
+      <button
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        Reopen
+      </button>
+      <DeleteListsDialog
+        lists={lists}
+        open={open}
+        onOpenChange={setOpen}
+        onDeleted={onDeleted}
+      />
+    </>
   );
 }
 
@@ -133,6 +142,29 @@ describe("DeleteListsDialog", () => {
       expect(onDeleted).toHaveBeenCalledOnce();
     });
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+  });
+
+  it("APP-3.3: closing after a failed delete forgets the message", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.delete(
+        `/api/lists/${one[0]?.id ?? ""}`,
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+    setup();
+    await screen.findByRole("alertdialog");
+    await user.click(deleteButton());
+    await screen.findByRole("alert");
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    });
+    await user.click(screen.getByRole("button", { name: "Reopen" }));
+
+    await screen.findByRole("alertdialog");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("APP-3.3: says lists in the plural, and sends one request with every ID", async () => {

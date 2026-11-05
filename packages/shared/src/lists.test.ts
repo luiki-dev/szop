@@ -72,6 +72,13 @@ describe("deleteListsSchema", () => {
   ])("LST-1.8: refuses %s", (_label, value) => {
     expect(deleteListsSchema.safeParse({ ids: value }).success).toBe(false);
   });
+
+  it("LST-1.8: names the duplicate rule in the error", () => {
+    const result = deleteListsSchema.safeParse({ ids: [ids(1)[0], ids(1)[0]] });
+    expect(result.error?.issues.map((issue) => issue.message)).toEqual([
+      "IDs must be unique",
+    ]);
+  });
 });
 
 describe("createListSchema", () => {
