@@ -189,7 +189,7 @@ test("APP-5.1, APP-5.2: an unknown path and an unusable list address show a not-
 
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
-  await page.goto("/lists/%2E%2E%2F%2E%2E%2Fauth%2Fsign-out");
+  await page.goto("/lists/..%2F..%2Fauth%2Fsign-out");
   await expect(
     page.getByText("This list doesn't exist or was deleted."),
   ).toBeVisible();

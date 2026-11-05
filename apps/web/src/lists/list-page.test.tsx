@@ -180,7 +180,9 @@ describe("ListPage", () => {
     expect(
       await screen.findByText("This list doesn't exist or was deleted."),
     ).toBeVisible();
-    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "List" }),
+    ).toBeInTheDocument();
   });
 
   it("APP-1.6: a list that fails to load still has a way back", async () => {
