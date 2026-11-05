@@ -113,7 +113,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [LST-1](LST-shopping-lists.md#lst-1) | 🎯 MVP | 🚧 In progress | 4 of 9 | ✅ Finalized |
+| [LST-1](LST-shopping-lists.md#lst-1) | 🎯 MVP | ✅ Done | 9 of 9 | ✅ Finalized |
 | [LST-2](LST-shopping-lists.md#lst-2) | 🎯 MVP | 🚧 In progress | 2 of 3 | ❔ Not finalized |
 | [LST-3](LST-shopping-lists.md#lst-3) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
 | [LST-4](LST-shopping-lists.md#lst-4) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
@@ -219,7 +219,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 | [APP-2](APP-app-wide-behavior.md#app-2) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
 | [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | 🚧 In progress | 0 of 3 | ❔ Not finalized |
 | [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | 🚧 In progress | 3 of 3 | ❔ Not finalized |
-| [APP-5](APP-app-wide-behavior.md#app-5) | 🎯 MVP | 🚧 In progress | 0 of 2 | ✅ Finalized |
+| [APP-5](APP-app-wide-behavior.md#app-5) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
 | [APP-6](APP-app-wide-behavior.md#app-6) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
 | [APP-7](APP-app-wide-behavior.md#app-7) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
 

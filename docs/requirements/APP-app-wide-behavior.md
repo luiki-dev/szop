@@ -60,14 +60,14 @@ Pages show their state while loading, when empty and when their data cannot be l
 
 ## APP-5
 
-🎯 [MVP] · 🚧 In progress (0 of 2) · ✅ Criteria finalized ([PH-16c](../roadmap.md#ph-16c-managing-lists))
+🎯 [MVP] · ✅ Done (2 of 2) · ✅ Criteria finalized ([PH-16c](../roadmap.md#ph-16c-managing-lists))
 
 An address that leads nowhere shows a page saying so.
 
 | ID | Criterion | Status |
 |---|---|---|
-| APP-5.1 | A path that is not a page shows a not-found page inside the app shell, with a way back to the home screen. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) |
-| APP-5.2 | A list's address that is not a list ID, or names a list the user cannot open (deleted, someone else's), shows "This list doesn't exist or was deleted" with "Back to lists"; an address that is not a list ID never reaches the API. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) |
+| APP-5.1 | A path that is not a page shows a not-found page inside the app shell, with a way back to the home screen. | ✅ [PH-16c](../roadmap.md#ph-16c-managing-lists) |
+| APP-5.2 | A list's address that is not a list ID, or names a list the user cannot open (deleted, someone else's), shows "This list doesn't exist or was deleted" with "Back to lists"; an address that is not a list ID never reaches the API. | ✅ [PH-16c](../roadmap.md#ph-16c-managing-lists) |
 
 ## APP-6
 
