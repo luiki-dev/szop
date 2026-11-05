@@ -1,5 +1,5 @@
 import { Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import type { List } from "@szop/shared";
 import raccoon from "@/brand/raccoon.svg";
@@ -83,9 +83,7 @@ function ListRow({
   onLongPress: () => void;
   onToggle: () => void;
 }) {
-  const press = useLongPress(() => {
-    if (!selecting) onLongPress();
-  });
+  const press = useLongPress(onLongPress, { disabled: selecting });
   const row =
     "flex min-h-12 min-w-0 items-center rounded-surface bg-card px-4 font-semibold text-card-foreground outline-none";
   return (
@@ -145,9 +143,16 @@ export function ListsPage() {
   const [confirming, setConfirming] = useState<Pick<List, "id" | "name">[]>([]);
   const [asking, setAsking] = useState(false);
 
+  // One Back per selecting: a repeated Esc or a double tap must not leave the page.
+  const stopped = useRef(false);
   const stop = () => {
+    if (stopped.current) return;
+    stopped.current = true;
     void navigate(-1);
   };
+  useEffect(() => {
+    stopped.current = false;
+  }, [selecting]);
   // Whenever selecting ends, whichever way, what it held is cleared.
   const [wasSelecting, setWasSelecting] = useState(selecting);
   if (wasSelecting !== selecting) {
@@ -161,7 +166,7 @@ export function ListsPage() {
   useEffect(() => {
     if (!selecting || asking) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") stop();
+      if (event.key === "Escape" && !event.repeat) stop();
     };
     document.addEventListener("keydown", onKey);
     return () => {

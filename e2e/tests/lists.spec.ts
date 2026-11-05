@@ -127,7 +127,7 @@ test("LST-1.6, LST-1.7, LST-1.8: a guest selects lists with Select and deletes t
   await expect(page.getByText("1 selected")).toBeVisible();
   await expectAccessible(page);
 
-  // Esc stops selecting and leaves the page.
+  // Esc stops selecting and keeps the page.
   await page.keyboard.press("Escape");
   await expect(page.getByRole("link", { name: "Party" })).toBeVisible();
   await expect(page).toHaveURL("/");

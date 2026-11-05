@@ -246,6 +246,22 @@ describe("ListsPage", () => {
       expect(screen.getByText("0 selected")).toBeInTheDocument();
     });
 
+    it("LST-1.7: a repeated Esc and two quick taps on cancel go back only once", async () => {
+      serveLists();
+      const { router } = renderApp();
+      await screen.findByRole("link", { name: "Party" });
+      const before = window.history.length;
+      await select();
+      const cancel = screen.getByRole("button", { name: "Cancel selection" });
+      fireEvent.click(cancel);
+      fireEvent.click(cancel);
+      fireEvent.keyDown(document, { key: "Escape" });
+      await screen.findByRole("link", { name: "Party" });
+      expect(router.state.location.pathname).toBe("/");
+      expect(window.history.length).toBe(before);
+      expect(router.state.location.state).toBeNull();
+    });
+
     it("LST-1.7: stopping leaves the history as it was before the mode started", async () => {
       serveLists();
       const { router } = renderApp();
@@ -373,6 +389,27 @@ describe("ListsPage", () => {
         } finally {
           vi.useRealTimers();
         }
+      });
+
+      it("LST-1.6: while selecting, a 600 ms hold on a row then the click still toggles it", async () => {
+        stubMatchMedia({ [coarseQuery]: true });
+        serveLists();
+        renderApp();
+        await select();
+        const checkbox = row("Party");
+        vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+        try {
+          fireEvent.pointerDown(checkbox, { clientX: 5, clientY: 5 });
+          await act(() => {
+            vi.advanceTimersByTime(600);
+            return Promise.resolve();
+          });
+          fireEvent.pointerUp(checkbox);
+          fireEvent.click(checkbox);
+        } finally {
+          vi.useRealTimers();
+        }
+        expect(row("Party")).toBeChecked();
       });
 
       it("LST-1.6: a finger that moves during the press starts nothing", async () => {

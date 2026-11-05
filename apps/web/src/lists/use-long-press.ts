@@ -13,7 +13,10 @@ interface PointerPoint {
 // that ends a long press, so the element's click handler can ignore it.
 export function useLongPress(
   onLongPress: () => void,
-  { delay = 500 }: { delay?: number } = {},
+  {
+    delay = 500,
+    disabled = false,
+  }: { delay?: number; disabled?: boolean } = {},
 ) {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const origin = useRef<PointerPoint | undefined>(undefined);
@@ -32,6 +35,8 @@ export function useLongPress(
       onPointerDown(event: PointerPoint) {
         cancel();
         fired.current = false;
+        // Disabled: a press only forgets the last long press.
+        if (disabled) return;
         holding.current = true;
         origin.current = { clientX: event.clientX, clientY: event.clientY };
         timer.current = setTimeout(() => {
