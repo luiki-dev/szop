@@ -47,11 +47,14 @@ function setup(lists = one) {
   );
   server.use(
     http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+    // What the server holds when a failed delete makes the dialog ask.
+    http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
   );
   return { onDeleted };
 }
 
 const deleteButton = () => screen.getByRole("button", { name: "Delete" });
+const deletingButton = () => screen.getByRole("button", { name: "Deleting…" });
 
 describe("DeleteListsDialog", () => {
   it("APP-3.3: names the list, or the count, and focuses Cancel", async () => {
@@ -93,7 +96,7 @@ describe("DeleteListsDialog", () => {
     expect(onDeleted).not.toHaveBeenCalled();
   });
 
-  it("APP-3.3: while deleting, both buttons are off, Esc does nothing and Delete sends one request", async () => {
+  it("NET-1.8: while lists are deleted, Delete reads Deleting…", async () => {
     const user = userEvent.setup();
     let count = 0;
     server.use(
@@ -107,17 +110,17 @@ describe("DeleteListsDialog", () => {
 
     await user.click(deleteButton());
     await waitFor(() => {
-      expect(deleteButton()).toBeDisabled();
+      expect(deletingButton()).toBeDisabled();
     });
     expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
     await user.keyboard("{Escape}");
-    await user.click(deleteButton());
+    await user.click(deletingButton());
 
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     expect(count).toBe(1);
   });
 
-  it("APP-3.3: a failed delete keeps it open with the message, and Delete tries again", async () => {
+  it("NET-1.7: a failed delete keeps the dialog and its message, and Delete sends again", async () => {
     const user = userEvent.setup();
     let status = 500;
     server.use(
@@ -132,7 +135,7 @@ describe("DeleteListsDialog", () => {
 
     await user.click(deleteButton());
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Couldn't delete the list.",
+      "Couldn't delete the list. Check your connection and try again.",
     );
     expect(deleteButton()).toBeEnabled();
 
@@ -183,7 +186,7 @@ describe("DeleteListsDialog", () => {
 
     await user.click(deleteButton());
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Couldn't delete the lists.",
+      "Couldn't delete the lists. Check your connection and try again.",
     );
     fail = false;
     await user.click(deleteButton());
@@ -191,6 +194,60 @@ describe("DeleteListsDialog", () => {
       expect(onDeleted).toHaveBeenCalledOnce();
     });
     expect(body).toEqual({ ids: lists.map((list) => list.id) });
+  });
+
+  it("NET-1.5: a delete whose answer was lost closes the dialog", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.delete(`/api/lists/${one[0]?.id ?? ""}`, () => HttpResponse.error()),
+    );
+    const { onDeleted } = setup();
+    server.use(http.get("/api/lists", () => HttpResponse.json({ lists: [] })));
+    await screen.findByRole("alertdialog");
+
+    await user.click(deleteButton());
+
+    await waitFor(() => {
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    });
+    expect(onDeleted).toHaveBeenCalledOnce();
+  });
+
+  it("NET-1.5: a failed delete whose cached lists already lack the ID keeps the dialog while the refetch runs", async () => {
+    const user = userEvent.setup();
+    const client = new QueryClient();
+    client.setQueryData(["lists"], []);
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.delete(`/api/lists/${one[0]?.id ?? ""}`, () => HttpResponse.error()),
+      http.get("/api/lists", async () => {
+        await gate;
+        return HttpResponse.json({ lists: threeLists });
+      }),
+    );
+    const onDeleted = vi.fn();
+    render(
+      <QueryClientProvider client={client}>
+        <Harness lists={one} onDeleted={onDeleted} />
+      </QueryClientProvider>,
+    );
+    await screen.findByRole("alertdialog");
+
+    await user.click(deleteButton());
+    await screen.findByRole("alert");
+
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(onDeleted).not.toHaveBeenCalled();
+    release();
+    await waitFor(() => {
+      expect(client.getQueryState(["lists"])?.fetchStatus).toBe("idle");
+    });
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(onDeleted).not.toHaveBeenCalled();
   });
 
   it("APP-3.3: a 404 counts as deleted", async () => {

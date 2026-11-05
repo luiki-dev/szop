@@ -135,7 +135,7 @@ export function TitleField({
       className={desktop ? "shrink-0" : "w-full"}
       onClick={commit}
     >
-      Create
+      {pending ? "Creating…" : "Create"}
     </Button>
   );
   const input = (

@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { createMemoryRouter } from "react-router";
@@ -163,14 +169,16 @@ describe("NewListPage", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("keeps the text after a failure and retries with the same ID", async () => {
+  it("NET-1.7: after a failed create the name stays and Create sends it again", async () => {
     const user = userEvent.setup();
     const { router, posts, answer, field } = setup();
     answer(500);
 
     await user.type(field(), "Weekly shop{Enter}");
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Boom");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Not saved. Check your connection and create again.",
+    );
     expect(field()).toHaveValue("Weekly shop");
     expect(router.state.location.pathname).toBe("/lists/new");
 
@@ -267,10 +275,109 @@ describe("NewListPage", () => {
     await user.click(screen.getByRole("button", { name: "Create" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
+      expect(screen.getByRole("button", { name: "Creating…" })).toBeDisabled();
     });
     expect(posts).toHaveLength(1);
     release();
+  });
+
+  it("NET-1.8: while a list is created, Create reads Creating… and the screen cannot be left", async () => {
+    const user = userEvent.setup();
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const { router, field } = setup();
+    server.use(
+      http.post("/api/lists", async ({ request }) => {
+        const body = (await request.json()) as { id: string; name: string };
+        await gate;
+        return HttpResponse.json(
+          { ...body, createdAt: "2026-10-30T12:00:00.000Z" },
+          { status: 201 },
+        );
+      }),
+    );
+
+    await user.type(field(), "Weekly shop");
+    await user.click(screen.getByRole("button", { name: "Create" }));
+    await screen.findByRole("button", { name: "Creating…" });
+
+    expect(screen.getByRole("link", { name: "Back to lists" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    await user.keyboard("{Escape}");
+    await act(() => router.navigate(-1));
+    expect(router.state.location.pathname).toBe("/lists/new");
+
+    release();
+    await waitFor(() => {
+      expect(router.state.location.pathname).toMatch(
+        /^\/lists\/[0-9a-f-]{36}$/,
+      );
+    });
+  });
+
+  it("NET-1.6: Create after a failed Create sends the same ID", async () => {
+    const user = userEvent.setup();
+    const { posts, answer, field } = setup();
+    answer(500);
+
+    await user.type(field(), "Weekly shop");
+    await user.click(screen.getByRole("button", { name: "Create" }));
+    await screen.findByRole("alert");
+    answer(201);
+    await user.click(screen.getByRole("button", { name: "Create" }));
+
+    await waitFor(() => {
+      expect(posts).toHaveLength(2);
+    });
+    expect(posts[1]?.id).toBe(posts[0]?.id);
+  });
+
+  it("NET-1.7: a refusal with its own message shows that message", async () => {
+    const user = userEvent.setup();
+    const { field } = setup();
+    server.use(
+      http.post("/api/lists", () =>
+        HttpResponse.json(
+          { error: { code: "invalid_request", message: "Name is taken" } },
+          { status: 400 },
+        ),
+      ),
+    );
+
+    await user.type(field(), "Weekly shop{Enter}");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Name is taken");
+  });
+
+  it("NET-1.5: a create whose answer was lost opens the new list", async () => {
+    const user = userEvent.setup();
+    const { router, field } = setup();
+    let created: { id: string; name: string } | undefined;
+    server.use(
+      http.post("/api/lists", async ({ request }) => {
+        created = (await request.json()) as { id: string; name: string };
+        return HttpResponse.error();
+      }),
+      http.get("/api/lists", () =>
+        HttpResponse.json({
+          lists: created
+            ? [{ ...created, createdAt: "2026-10-30T12:00:00.000Z" }]
+            : [],
+        }),
+      ),
+    );
+
+    await user.type(field(), "Weekly shop{Enter}");
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(
+        `/lists/${created?.id ?? ""}`,
+      );
+    });
   });
 
   it("LST-1.9: the field keeps its border when the focus leaves it", async () => {

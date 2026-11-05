@@ -381,6 +381,40 @@ describe("ListsPage", () => {
       expect(router.state.location.pathname).toBe("/");
     });
 
+    it("NET-1.8: during a delete Back keeps the selection, and after it the selection ends with the focus on the title", async () => {
+      let release = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      server.use(
+        http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+        http.get("/api/auth/get-session", () =>
+          HttpResponse.json({ ok: true }),
+        ),
+        http.post("/api/lists/delete", async () => {
+          await gate;
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+      const { router } = renderApp();
+      await select();
+      fireEvent.click(row("Party"));
+      fireEvent.click(row("Hardware store"));
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      const dialog = await screen.findByRole("alertdialog");
+      fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+      await within(dialog).findByRole("button", { name: "Deleting…" });
+
+      await act(() => router.navigate(-1));
+      expect(screen.getByText("2 selected")).toBeInTheDocument();
+
+      release();
+      await waitFor(() => {
+        expect(screen.getByRole("heading", { name: "Lists" })).toHaveFocus();
+      });
+      expect(screen.queryByRole("checkbox")).toBeNull();
+    });
+
     it("APP-3.3: after a confirmed delete the focus is on the Lists heading", async () => {
       server.use(
         http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),

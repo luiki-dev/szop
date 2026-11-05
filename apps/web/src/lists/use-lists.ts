@@ -15,9 +15,16 @@ import {
   renameList,
 } from "../api/client.ts";
 
-// No retries: the error card's "Try again" is the retry.
-export function useLists() {
-  return useQuery({ queryKey: ["lists"], queryFn: getLists, retry: false });
+// No retries: the error card's "Try again" is the retry. A failed create or
+// delete passes its isError as `enabled`: turning the observer on refetches
+// the stale lists, to see whether the change was applied after all.
+export function useLists(enabled = true) {
+  return useQuery({
+    queryKey: ["lists"],
+    queryFn: getLists,
+    enabled,
+    retry: false,
+  });
 }
 
 export function useList(id: string, enabled = true) {

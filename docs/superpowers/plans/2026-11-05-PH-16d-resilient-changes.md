@@ -127,16 +127,16 @@
 - Consumes: Task 2's `notSaved`, the shell's blocker, `TitleField`'s states.
 - Produces: `useLists(enabled = true)`. The "applied" check of a create and a delete observes `["lists"]` with `useLists(<mutation>.isError)`: a failure turns the observer on, which refetches the stale lists; a later failure turns it on again. Only lists fetched after the change was sent count: `lists.dataUpdatedAt > <mutation>.submittedAt` (Review Focus 1).
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
   - New list's screen: `"NET-1.8: while a list is created, Create reads Creating… and the screen cannot be left"` (← disabled, Esc stays, navigation held, then the list opens: Review Focus 2); `"NET-1.6: Create after a failed Create sends the same ID"` (the two POST bodies have one `id`); `"NET-1.7: after a failed create the name stays and Create sends it again"` with "Not saved. Check your connection and create again."; a `400` with an API body shows its message, as today; `"NET-1.5: a create whose answer was lost opens the new list"` (POST answers `HttpResponse.error()`, `GET /api/lists` then holds the list; the URL becomes `/lists/<id>`).
   - Dialog: `"NET-1.8: while lists are deleted, Delete reads Deleting…"` (Cancel disabled, Esc keeps it open); `"NET-1.7: a failed delete keeps the dialog and its message, and Delete sends again"`, for one list ("Couldn't delete the list. Check your connection and try again.") and for several ("…the lists…"); `"NET-1.5: a delete whose answer was lost closes the dialog"` (`GET /api/lists` then lacks the IDs; `onDeleted` is called once); Review Focus 1: a failed delete whose cached lists already lack the ID, while the refetch is held, keeps the dialog open.
   - List's screen: a delete that succeeds goes to `/` (not blocked).
   - Lists page: during a delete from the selection, `router.navigate(-1)` keeps the selection; after the delete the selection ends and the focus goes to the page title, as in PH-16c (Review Focus 2).
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test -- new-list-page delete-lists-dialog lists-page list-page`. Expected: FAIL.
-- [ ] **Step 3: Implement:** `TitleField`'s Create button reads "Creating…" while `pending`; `NewListPage` passes `error` only for a refusal with its own message and otherwise shows the spec's text; when the check finds `id.current` among fresh lists, it navigates as `onSuccess` does. In the dialog, Delete reads "Deleting…" while pending; the failure text follows `notSaved`; when the check finds none of the IDs among fresh lists, an effect runs the same steps as `onSuccess` (`reset`, `onOpenChange(false)`, `onDeleted()`).
-- [ ] **Step 4: Run** the tests again, then the whole web suite. Expected: PASS.
-- [ ] **Step 5: Run** `pnpm test:e2e`, then `pnpm check`. Expected: PASS.
-- [ ] **Step 6: Update the docs** listed above and commit: `feat(lists): show a create and a delete as saving or not saved, and see a lost answer`.
+- [x] **Step 2: Run** `pnpm --filter @szop/web test -- new-list-page delete-lists-dialog lists-page list-page`. Expected: FAIL.
+- [x] **Step 3: Implement:** `TitleField`'s Create button reads "Creating…" while `pending`; `NewListPage` passes `error` only for a refusal with its own message and otherwise shows the spec's text; when the check finds `id.current` among fresh lists, it navigates as `onSuccess` does. In the dialog, Delete reads "Deleting…" while pending; the failure text follows `notSaved`; when the check finds none of the IDs among fresh lists, an effect runs the same steps as `onSuccess` (`reset`, `onOpenChange(false)`, `onDeleted()`).
+- [x] **Step 4: Run** the tests again, then the whole web suite. Expected: PASS.
+- [x] **Step 5: Run** `pnpm test:e2e`, then `pnpm check`. Expected: PASS.
+- [x] **Step 6: Update the docs** listed above and commit: `feat(lists): show a create and a delete as saving or not saved, and see a lost answer`.
 
 ### Task 4: Selecting lists without moving them
 

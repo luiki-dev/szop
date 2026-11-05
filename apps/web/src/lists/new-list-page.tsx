@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { uuidv7 } from "@szop/shared";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
-import { useCreateList } from "./use-lists.ts";
+import { notSaved } from "../api/client.ts";
+import { useCreateList, useLists } from "./use-lists.ts";
 
 function setTitle() {
   document.title = "New list · Szop";
@@ -16,6 +17,19 @@ export function NewListPage() {
   // Made on the first Enter and kept, so a retry after a failure sends the
   // same ID and cannot make a second list.
   const id = useRef<string>(undefined);
+  // Only lists fetched after the create was sent can tell whether it was applied.
+  const lists = useLists(create.isError);
+  const applied =
+    create.isError &&
+    lists.dataUpdatedAt > create.submittedAt &&
+    lists.data?.some((list) => list.id === create.variables.id) === true;
+
+  // The answer was lost but the list exists: go on as after a success. The
+  // mutation has settled here, so the shell's blocker does not hold this.
+  useEffect(() => {
+    if (applied)
+      void navigate(`/lists/${create.variables.id}`, { replace: true });
+  }, [applied, create.variables, navigate]);
 
   // Stryker disable next-line ArrayDeclaration: the dependency list of a run-once effect; a constant item behaves the same
   useEffect(setTitle, []);
@@ -30,7 +44,13 @@ export function NewListPage() {
             autoFocus
             create
             pending={create.isPending}
-            {...(create.error ? { error: create.error.message } : {})}
+            {...(create.error
+              ? {
+                  error: notSaved(create.error)
+                    ? "Not saved. Check your connection and create again."
+                    : create.error.message,
+                }
+              : {})}
             onSave={(name) => {
               id.current ??= uuidv7();
               create.mutate(
