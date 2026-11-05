@@ -203,7 +203,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [NET-1](NET-connectivity.md#net-1) | 🎯 MVP | ❔ Draft | 0 of 6 | ❔ Not finalized |
+| [NET-1](NET-connectivity.md#net-1) | 🎯 MVP | 🚧 In progress | 0 of 8 | ❔ Not finalized |
 
 ### Appearance (APR)
 
