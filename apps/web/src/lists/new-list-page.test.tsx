@@ -6,6 +6,8 @@ import { createMemoryRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { describe, expect, it } from "vitest";
 import { routes } from "../routes.tsx";
+import { desktopQuery } from "../shell/use-media-query.ts";
+import { stubMatchMedia } from "../test/match-media.ts";
 import { server } from "../test/server.ts";
 
 // Starts on the lists page and goes to /lists/new, so "back" has somewhere
@@ -184,5 +186,93 @@ describe("NewListPage", () => {
     });
     expect(posts).toHaveLength(1);
     release();
+  });
+
+  it("LST-1.9: Create makes the list, as Enter does", async () => {
+    const user = userEvent.setup();
+    const { router, posts, field } = setup();
+    const create = screen.getByRole("button", { name: "Create" });
+
+    expect(create).toBeDisabled();
+    await user.type(field(), "Weekly shop");
+    expect(create).toBeEnabled();
+    await user.click(create);
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(
+        `/lists/${posts[0]?.id ?? ""}`,
+      );
+    });
+    expect(posts).toHaveLength(1);
+    expect(posts[0]?.name).toBe("Weekly shop");
+  });
+
+  it.each(["   ", "a".repeat(101)])(
+    "LST-1.9: Create is disabled for the name %j",
+    async (text) => {
+      const user = userEvent.setup();
+      const { field } = setup();
+
+      await user.type(field(), text);
+
+      expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
+    },
+  );
+
+  it("LST-1.9: Create is disabled while the create is in flight", async () => {
+    const user = userEvent.setup();
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const { posts, field } = setup();
+    server.use(
+      http.post("/api/lists", async ({ request }) => {
+        posts.push((await request.json()) as { id: string; name: string });
+        await gate;
+        return HttpResponse.json(
+          { ...posts[0], createdAt: "2026-10-30T12:00:00.000Z" },
+          { status: 201 },
+        );
+      }),
+    );
+
+    await user.type(field(), "Weekly shop");
+    await user.click(screen.getByRole("button", { name: "Create" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
+    });
+    expect(posts).toHaveLength(1);
+    release();
+  });
+
+  it("LST-1.9: the field keeps its border when the focus leaves it", async () => {
+    const user = userEvent.setup();
+    const { field } = setup();
+
+    await user.type(field(), "Weekly shop");
+    await user.tab();
+
+    expect(field()).not.toHaveFocus();
+    expect(field()).toHaveClass("border-2");
+    expect(field()).not.toHaveClass("underline");
+  });
+
+  it("LST-1.9: on a desktop Create stands in the field's row", () => {
+    stubMatchMedia({ [desktopQuery]: true });
+    const { field } = setup();
+
+    expect(screen.getByRole("button", { name: "Create" }).parentElement).toBe(
+      field().parentElement,
+    );
+  });
+
+  it("LST-1.9: on a phone Create is pinned at the bottom", () => {
+    setup();
+
+    expect(
+      screen.getByRole("button", { name: "Create" }).parentElement,
+    ).toHaveClass("fixed", "bottom-0");
   });
 });

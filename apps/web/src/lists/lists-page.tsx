@@ -10,6 +10,7 @@ import {
   desktopQuery,
   useMediaQuery,
 } from "../shell/use-media-query.ts";
+import { BottomBar } from "./list-screen.tsx";
 import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
 import { useLists } from "./use-lists.ts";
 import { useLongPress } from "./use-long-press.ts";
@@ -27,17 +28,7 @@ export function NewListLink({ sticky }: { sticky?: boolean }) {
       New list
     </Link>
   );
-  return sticky ? (
-    <>
-      {/* Keeps the last card clear of the bar: the button's 48 px and py-3. */}
-      <div className="h-18" />
-      <div className="fixed inset-x-0 bottom-0 mx-auto flex max-w-[720px] bg-background px-4 py-3 md:px-6">
-        {link}
-      </div>
-    </>
-  ) : (
-    link
-  );
+  return sticky ? <BottomBar>{link}</BottomBar> : link;
 }
 
 function Skeleton() {

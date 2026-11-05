@@ -17,6 +17,10 @@ test("ACC-1.1, LST-1.1, LST-1.2, LST-1.5, LST-2.1, LST-2.3: a guest creates, ren
   await expectAccessible(page);
 
   await field.fill("Weekly shop");
+  await field.blur();
+  // The name is still a bordered field and Create is still there.
+  await expect(field).toHaveCSS("border-top-width", "2px");
+  await field.focus();
   await field.press("Enter");
   await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
   await expect(field).toHaveValue("Weekly shop");
@@ -52,7 +56,7 @@ test("NFR-4.10, ACC-1.3, ACC-1.8: another visitor sees nothing, and clearing the
 
   await page.getByRole("link", { name: "New list" }).click();
   await page.getByRole("textbox", { name: "List name" }).fill("Weekly shop");
-  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Create" }).click();
   await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
   const id = page.url().split("/").pop();
 
@@ -82,7 +86,7 @@ test("LST-1.3, APP-3.3: a guest deletes a list from its screen after a confirmat
   await page.goto("/");
   await page.getByRole("link", { name: "New list" }).click();
   await page.getByRole("textbox", { name: "List name" }).fill("Weekly shop");
-  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Create" }).click();
   await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
 
   await page.getByRole("button", { name: "List actions" }).click();
@@ -107,7 +111,7 @@ async function createList(page: import("@playwright/test").Page, name: string) {
   // Typing before the field has the focus loses the Enter.
   await expect(field).toBeFocused();
   await field.fill(name);
-  await field.press("Enter");
+  await page.getByRole("button", { name: "Create" }).click();
   await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
   await page.getByRole("link", { name: "Back to lists" }).click();
   await expect(page.getByText(name)).toBeVisible();

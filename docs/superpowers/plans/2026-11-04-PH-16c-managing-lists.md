@@ -204,12 +204,12 @@
 **Interfaces:**
 - Produces: `TitleField` gains `create?: boolean`. With it, the field keeps its border after blur, and a Create button calls the same `commit()` as Enter. On a phone the button is pinned at the bottom in the bar `NewListLink` uses; on a desktop it sits beside the field. It is disabled while `listNameSchema` refuses the value or while `pending` is true.
 
-- [ ] **Step 1: Write the failing tests**, for LST-1.9, per the spec. ← and Esc still create nothing.
-- [ ] **Step 2: Run** the web tests. Expected: FAIL.
-- [ ] **Step 3: Implement.** If the pinned bar's markup would otherwise be copied, take it out of `NewListLink` as a small `BottomBar` used by both. `NewListPage` passes `create`.
-- [ ] **Step 4: Find the raccoon's gap.** On a desktop-sized window in Chromium and Firefox, with a page short enough to have no scrollbar and one long enough to have it, measure the image's right edge against `innerWidth`. Name the cause, then fix it in `EmptyList` with `scrollbar-gutter: stable` kept.
-- [ ] **Step 5: Add** to `frame.spec.ts` (desktop size): on an empty list's screen, the raccoon's box ends at the viewport's right edge. Adapt the `lists.spec.ts` journeys to Create where they now press Enter only for convenience, and keep one that presses Enter. **Run** `pnpm check && pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 6: Update** the docs, tick the steps. **Commit** `feat(lists): create a list with a Create button and keep the raccoon at the edge`. Its body carries `Closes #318` and `Closes #323`.
+- [x] **Step 1: Write the failing tests**, for LST-1.9, per the spec. ← and Esc still create nothing.
+- [x] **Step 2: Run** the web tests. Expected: FAIL.
+- [x] **Step 3: Implement.** If the pinned bar's markup would otherwise be copied, take it out of `NewListLink` as a small `BottomBar` used by both. `NewListPage` passes `create`.
+- [x] **Step 4: Find the raccoon's gap.** On a desktop-sized window in Chromium and Firefox, with a page short enough to have no scrollbar and one long enough to have it, measure the image's right edge against `innerWidth`. Name the cause, then fix it in `EmptyList` with `scrollbar-gutter: stable` kept.
+- [x] **Step 5: Add** to `frame.spec.ts` (desktop size): on an empty list's screen, the raccoon's box ends at the viewport's right edge. Adapt the `lists.spec.ts` journeys to Create where they now press Enter only for convenience, and keep one that presses Enter. **Run** `pnpm check && pnpm test:e2e`. Expected: PASS.
+- [x] **Step 6: Update** the docs, tick the steps. **Commit** `feat(lists): create a list with a Create button and keep the raccoon at the edge`. Its body carries `Closes #318` and `Closes #323`.
 
 ### Task 7: The mutation run
 
