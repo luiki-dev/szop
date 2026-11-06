@@ -1,4 +1,8 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
@@ -56,7 +60,15 @@ describe("AddBar", () => {
         return HttpResponse.json(posts.at(-1), { status: 201 });
       }),
     );
-    const client = new QueryClient();
+    // Hold every add before it starts, so the second submit and the render
+    // that renews the next ID both land while the first add is pending.
+    let release = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const client = new QueryClient({
+      mutationCache: new MutationCache({ onMutate: () => gate }),
+    });
     client.setQueryData(["lists", listId], listWith());
     render(
       <QueryClientProvider client={client}>
@@ -71,6 +83,7 @@ describe("AddBar", () => {
       client
         .getQueryData<ListWithItems>(["lists", listId])
         ?.items.map(({ id, name }) => ({ id, name }));
+    release();
     await waitFor(() => {
       expect(posts).toHaveLength(2);
     });
