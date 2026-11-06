@@ -149,6 +149,23 @@ test("LST-1.6, LST-1.7, LST-1.8: a guest selects lists with Select and deletes t
   await expect(page.getByRole("checkbox")).toHaveCount(0);
 });
 
+test("OP-131: selecting lists does not move them", async ({ page }) => {
+  await page.goto("/");
+  await createList(page, "Weekly shop");
+  await createList(page, "Party");
+
+  const card = page.getByRole("listitem").filter({ hasText: "Party" });
+  const before = (await card.boundingBox())?.y;
+  expect(typeof before).toBe("number");
+  await page.getByRole("button", { name: "Select" }).click();
+  await expect(page.getByText("0 selected")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Lists" }),
+  ).toBeVisible();
+  const after = (await card.boundingBox())?.y;
+  expect(after).toBe(before);
+});
+
 test("LST-1.6, LST-1.7: on a phone a long press selects a list, and Back stops selecting", async ({
   page,
   isMobile,
@@ -203,4 +220,66 @@ test("APP-5.1, APP-5.2: an unknown path and an unusable list address show a not-
   );
   await page.getByRole("link", { name: "Back to lists" }).last().click();
   await expect(page).toHaveURL("/");
+});
+
+test("ACC-1.6: two fresh tabs that create a list at the same moment share one workspace", async ({
+  context,
+}) => {
+  const names = ["Tab one", "Tab two"];
+  const pages = await Promise.all([context.newPage(), context.newPage()]);
+  for (const [index, page] of pages.entries()) {
+    await page.goto("/lists/new");
+    await page
+      .getByRole("textbox", { name: "List name" })
+      .fill(names[index] ?? "");
+  }
+
+  await Promise.all(
+    pages.map((page) =>
+      page.getByRole("textbox", { name: "List name" }).press("Enter"),
+    ),
+  );
+  for (const page of pages)
+    await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
+
+  for (const page of pages) {
+    await page.goto("/");
+    for (const name of names) await expect(page.getByText(name)).toBeVisible();
+  }
+});
+
+test("NET-1.7, NET-1.8: a rename on a held connection shows Saving…, cannot be left, then Not saved.", async ({
+  page,
+}) => {
+  // Back must lead to a page of the app, so the journey starts on the lists.
+  await page.goto("/");
+  await page.getByRole("link", { name: "New list" }).click();
+  const field = page.getByRole("textbox", { name: "List name" });
+  await field.fill("Weekly shop");
+  await field.press("Enter");
+  await expect(page).toHaveURL(/\/lists\/[0-9a-f-]{36}$/);
+  const url = page.url();
+
+  // A route that neither answers nor continues holds the request for good.
+  await page.route("**/api/lists/*", (route) => {
+    if (route.request().method() !== "PATCH") return route.fallback();
+  });
+  await field.fill("Saturday shop");
+  await field.press("Enter");
+  await expect(page.getByText("Saving…")).toBeVisible();
+
+  await page.goBack();
+  await expect(page).toHaveURL(url);
+
+  // After the limit (10 s) the change is given up.
+  await expect(page.getByRole("alert")).toContainText("Not saved.", {
+    timeout: 15_000,
+  });
+  await expect(field).toHaveValue("Saturday shop");
+
+  await page.unroute("**/api/lists/*");
+  await page.getByRole("button", { name: "Try again" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Saturday shop",
+  );
 });

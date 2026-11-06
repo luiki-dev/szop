@@ -14,12 +14,29 @@ import {
 // Stryker disable next-line ArrowFunction: `null` and `undefined` are both an unreadable body, handled the same
 const unreadable = () => null;
 
-// The only code that calls fetch; components never do. A 200 and a 503 both
+// How long a request may wait for the server, and what a request that waited
+// that long fails with.
+export const timeLimit = 10_000;
+export const timeoutMessage = "The server didn't answer in time.";
+
+// A signal that aborts with our own error after the limit, so fetch rejects
+// with it as it is. Not AbortSignal.timeout: Vitest's fake timers do not
+// drive it.
+function deadline(): AbortSignal {
+  const controller = new AbortController();
+  setTimeout(() => {
+    controller.abort(new Error(timeoutMessage));
+  }, timeLimit);
+  return controller.signal;
+}
+
+// The only code that calls fetch; components never do. Every request has a
+// time limit. A 200 and a 503 both
 // carry a health body: the 503 says the database is down, which is an answer,
 // not a failure of the request. Anything else, or a body that does not match
 // the schema, is an error.
 export async function getHealth(): Promise<Health> {
-  const response = await fetch("/api/health");
+  const response = await fetch("/api/health", { signal: deadline() });
   if (response.status !== 200 && response.status !== 503) {
     throw new Error(`GET /api/health answered ${String(response.status)}`);
   }
@@ -30,7 +47,7 @@ export async function getHealth(): Promise<Health> {
 // status. A 200 whose body is not a catalog (the SPA and the API from
 // different deploys) is an error too, not a crash further on.
 export async function getCatalog(): Promise<Catalog> {
-  const response = await fetch("/api/catalog");
+  const response = await fetch("/api/catalog", { signal: deadline() });
   const body: unknown = await response.json().catch(unreadable);
   if (response.status !== 200) {
     const error = apiErrorSchema.safeParse(body);
@@ -58,6 +75,16 @@ export class ApiRequestError extends Error {
   }
 }
 
+// Whether a failed change leaves the user unsure it was saved: false only for
+// a refusal with its own message (a 4xx but 401), which a retry would not
+// change; true for a timeout, no network, a 5xx, a second 401 and an
+// unreadable answer.
+export function notSaved(error: Error): boolean {
+  if (!(error instanceof ApiRequestError)) return true;
+  // An ApiRequestError is only made for a failed response (status 400 or more).
+  return error.status >= 500 || error.status === 401;
+}
+
 const json = { "content-type": "application/json" };
 
 // The API refuses writes that are not JSON, so every write with a body sends
@@ -66,11 +93,17 @@ const json = { "content-type": "application/json" };
 function send(
   method: "POST" | "PATCH" | "DELETE",
   path: string,
-  body?: unknown,
+  body: unknown,
+  signal: AbortSignal,
 ) {
   return body === undefined
-    ? fetch(path, { method })
-    : fetch(path, { method, headers: json, body: JSON.stringify(body) });
+    ? fetch(path, { method, signal })
+    : fetch(path, {
+        method,
+        headers: json,
+        body: JSON.stringify(body),
+        signal,
+      });
 }
 
 // The body of a response that is not the answer: the API's message when it
@@ -90,27 +123,46 @@ async function failure(
   );
 }
 
-async function signIn(): Promise<void> {
+async function signIn(signal: AbortSignal): Promise<void> {
   const path = "/api/auth/sign-in/anonymous";
-  const response = await send("POST", path, {});
+  const response = await send("POST", path, {}, signal);
   if (!response.ok) throw await failure("POST", path, response);
 }
 
-// Runs a write with a session, asking for an anonymous one first when the
-// browser has none (Better Auth answers `null`, or fails). A 401 means the cookie went
-// stale: sign in again and retry once, never in a loop. Plain fetch, not
-// better-auth/client, to keep the first screen's JavaScript small.
-async function withSession(write: () => Promise<Response>): Promise<Response> {
-  const session = await fetch("/api/auth/get-session")
-    .then((response) =>
-      response.ok ? (response.json() as Promise<unknown>) : null,
-    )
-    .catch(unreadable);
-  if (!session) await signIn();
-  const response = await write();
+// Signs in as a guest unless a session exists by the time this runs. Under a
+// lock shared by all tabs, so tabs that meet make one sign-in, not one each
+// (Better Auth answers `null`, or fails, when there is no session). jsdom has
+// no navigator.locks, so the callback runs alone there.
+function guestSignIn(signal: AbortSignal): Promise<void> {
+  const signInUnlessSession = async () => {
+    const session = await fetch("/api/auth/get-session", { signal })
+      .then((response) =>
+        response.ok ? (response.json() as Promise<unknown>) : null,
+      )
+      .catch(() => undefined);
+    if (!session) await signIn(signal);
+  };
+  return "locks" in navigator
+    ? navigator.locks.request(
+        "szop-guest-sign-in",
+        { signal },
+        signInUnlessSession,
+      )
+    : signInUnlessSession();
+}
+
+// Runs a write, and on a 401 (no session, or a stale cookie) signs in as a
+// guest and writes once more, never in a loop. The whole run shares one
+// deadline. Plain fetch, not better-auth/client, to keep the first screen's
+// JavaScript small.
+async function withSession(
+  write: (signal: AbortSignal) => Promise<Response>,
+): Promise<Response> {
+  const signal = deadline();
+  const response = await write(signal);
   if (response.status !== 401) return response;
-  await signIn();
-  return write();
+  await guestSignIn(signal);
+  return write(signal);
 }
 
 async function readList(
@@ -129,7 +181,7 @@ async function readList(
 
 export async function getLists(): Promise<List[]> {
   const path = "/api/lists";
-  const response = await fetch(path);
+  const response = await fetch(path, { signal: deadline() });
   if (!response.ok) throw await failure("GET", path, response);
   const body: unknown = await response.json().catch(unreadable);
   const lists = listsResponseSchema.safeParse(body);
@@ -141,7 +193,7 @@ export async function getLists(): Promise<List[]> {
 
 export async function getList(id: string): Promise<List> {
   const path = `/api/lists/${encodeURIComponent(id)}`;
-  return readList("GET", path, await fetch(path));
+  return readList("GET", path, await fetch(path, { signal: deadline() }));
 }
 
 export async function createList(body: CreateList): Promise<List> {
@@ -149,7 +201,7 @@ export async function createList(body: CreateList): Promise<List> {
   return readList(
     "POST",
     path,
-    await withSession(() => send("POST", path, body)),
+    await withSession((signal) => send("POST", path, body, signal)),
   );
 }
 
@@ -158,7 +210,7 @@ export async function renameList(id: string, name: string): Promise<List> {
   return readList(
     "PATCH",
     path,
-    await withSession(() => send("PATCH", path, { name })),
+    await withSession((signal) => send("PATCH", path, { name }, signal)),
   );
 }
 
@@ -176,7 +228,7 @@ export async function deleteList(id: string): Promise<void> {
   await expectNoContent(
     "DELETE",
     path,
-    await withSession(() => send("DELETE", path)),
+    await withSession((signal) => send("DELETE", path, undefined, signal)),
   );
 }
 
@@ -185,6 +237,6 @@ export async function deleteLists(ids: string[]): Promise<void> {
   await expectNoContent(
     "POST",
     path,
-    await withSession(() => send("POST", path, { ids })),
+    await withSession((signal) => send("POST", path, { ids }, signal)),
   );
 }

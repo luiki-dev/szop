@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
-import { ApiRequestError } from "../api/client.ts";
+import { ApiRequestError, notSaved } from "../api/client.ts";
 import { NotFound } from "../not-found/not-found.tsx";
 import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
@@ -63,7 +63,8 @@ export function ListPage() {
       </>
     );
   }
-  if (query.error) {
+  // A failed refetch keeps the screen: the card is for a list never loaded.
+  if (query.isLoadingError) {
     return (
       <>
         <ListHeader field={null} />
@@ -102,7 +103,14 @@ export function ListPage() {
             saveOnBlur
             inputRef={input}
             pending={rename.isPending}
-            {...(rename.error ? { error: rename.error.message } : {})}
+            failed={
+              rename.isError &&
+              notSaved(rename.error) &&
+              rename.variables !== name
+            }
+            {...(rename.isError && !notSaved(rename.error)
+              ? { error: rename.error.message }
+              : {})}
             onSave={(next) => {
               rename.mutate(next);
             }}

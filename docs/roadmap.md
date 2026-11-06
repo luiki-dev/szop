@@ -337,8 +337,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-42 Urgent security fixes](#ph-42-urgent-security-fixes) | ✅ Done | ➖ N/A: bounded | ➖ N/A: bounded | [#369](https://github.com/luiki-dev/szop/pull/369) | [#336](https://github.com/luiki-dev/szop/issues/336) |
 | [PH-43 Minor security fixes](#ph-43-minor-security-fixes) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#381](https://github.com/luiki-dev/szop/pull/381) | [#337](https://github.com/luiki-dev/szop/issues/337) |
 | [PH-44 Leaner demo check](#ph-44-leaner-demo-check) | 🚧 In progress | [Spec](superpowers/specs/2026-11-03-PH-44-leaner-demo-check-design.md) | [Plan](superpowers/plans/2026-11-03-PH-44-leaner-demo-check.md) | [#378](https://github.com/luiki-dev/szop/pull/378) | [#376](https://github.com/luiki-dev/szop/issues/376) |
-| [PH-16c Managing lists](#ph-16c-managing-lists) | 🚧 In progress | [Spec](superpowers/specs/2026-11-04-PH-16c-managing-lists-design.md) | [Plan](superpowers/plans/2026-11-04-PH-16c-managing-lists.md) | [#384](https://github.com/luiki-dev/szop/pull/384) | [#315](https://github.com/luiki-dev/szop/issues/315) |
-| [PH-16d Resilient changes](#ph-16d-resilient-changes) | ⬜ Not started | — | — | — | [#382](https://github.com/luiki-dev/szop/issues/382) |
+| [PH-16c Managing lists](#ph-16c-managing-lists) | ✅ Done | [Spec](superpowers/specs/2026-11-04-PH-16c-managing-lists-design.md) | [Plan](superpowers/plans/2026-11-04-PH-16c-managing-lists.md) | [#384](https://github.com/luiki-dev/szop/pull/384) | [#315](https://github.com/luiki-dev/szop/issues/315) |
+| [PH-16d Resilient changes](#ph-16d-resilient-changes) | 🚧 In progress | [Spec](superpowers/specs/2026-11-05-PH-16d-resilient-changes-design.md) | [Plan](superpowers/plans/2026-11-05-PH-16d-resilient-changes.md) | [#396](https://github.com/luiki-dev/szop/pull/396) | [#382](https://github.com/luiki-dev/szop/issues/382) |
 | [PH-17a List items](#ph-17a-list-items) | ⬜ Not started | — | — | — | [#290](https://github.com/luiki-dev/szop/issues/290) |
 | [PH-17b The haul](#ph-17b-the-haul) | ⬜ Not started | — | — | — | [#291](https://github.com/luiki-dev/szop/issues/291) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
@@ -475,7 +475,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-16d Resilient changes
 
 - **Goal:** a change sent on a weak connection fails visibly instead of hanging or being lost, is sent once, and a guest's writes need no session check first; two fresh tabs end up in one anonymous session.
-- **Delivers:** [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.6, one anonymous session across tabs, [OP-120](https://github.com/luiki-dev/szop/issues/329)); timeouts on requests, the "not saved" state and refetching after a failed change ([OP-040](https://github.com/luiki-dev/szop/issues/99)); a change sent once ([#320](https://github.com/luiki-dev/szop/issues/320)); no session check before each write ([OP-116](https://github.com/luiki-dev/szop/issues/319)).
+- **Delivers:** [NET-1](requirements/NET-connectivity.md#net-1) (part: NET-1.3 to NET-1.8, the time limit, the "not saved" state, refetching after a failed change, the retry and no leaving while a change is saved, [OP-040](https://github.com/luiki-dev/szop/issues/99)); [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.6, one anonymous session across tabs, [OP-120](https://github.com/luiki-dev/szop/issues/329)); a change sent once ([#320](https://github.com/luiki-dev/szop/issues/320)); no session check before each write ([OP-116](https://github.com/luiki-dev/szop/issues/319)); selecting lists without moving them ([OP-131](https://github.com/luiki-dev/szop/issues/385)) and the raccoon under the sidebar ([OP-132](https://github.com/luiki-dev/szop/issues/386)) ([ADR 0070](decisions/0070-resilient-changes-phase-details.md#changes-to-the-roadmap)).
 - **Split from:** [PH-16c](#ph-16c-managing-lists), at its brainstorm ([ADR 0066](decisions/0066-managing-lists-phase-details.md), decision 1).
 - **Depends on:** —
 - **Owner steps:** none.
@@ -550,7 +550,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-22 Offline state
 
 - **Goal:** when the connection drops or hangs, the app says so clearly and blocks changes instead of losing them.
-- **Delivers:** [NET-1](requirements/NET-connectivity.md#net-1).
+- **Delivers:** [NET-1](requirements/NET-connectivity.md#net-1) (the rest: NET-1.1 and NET-1.2, the banner and the disabled controls, with the end-to-end journey with the network cut or slowed, [OP-040](https://github.com/luiki-dev/szop/issues/99)); NET-1.3 to NET-1.8 came with [PH-16d](#ph-16d-resilient-changes).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** bounded, likely.

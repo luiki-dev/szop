@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { List } from "@szop/shared";
 import {
   AlertDialog,
@@ -10,7 +10,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { useDeleteLists } from "./use-lists.ts";
+import { notSaved } from "../api/client.ts";
+import { useDeleteLists, useLists } from "./use-lists.ts";
 
 // The confirmation before lists are deleted. It owns the request: while it
 // runs both buttons and Esc are off, and a failure keeps the dialog open.
@@ -27,6 +28,14 @@ export function DeleteListsDialog({
 }) {
   const remove = useDeleteLists();
   const cancel = useRef<HTMLButtonElement>(null);
+  // Only lists fetched after the delete was sent can tell whether it was applied.
+  const fresh = useLists(remove.isError);
+  const applied =
+    remove.isError &&
+    fresh.dataUpdatedAt > remove.submittedAt &&
+    // Stryker disable next-line ConditionalExpression: dataUpdatedAt above submittedAt is false until the data exists; the line narrows the type
+    fresh.data !== undefined &&
+    !fresh.data.some((list) => remove.variables.includes(list.id));
   const [first] = lists;
   const title =
     lists.length === 1
@@ -34,6 +43,16 @@ export function DeleteListsDialog({
         // Stryker disable next-line OptionalChaining: first exists when lists.length is 1
         `Delete list "${first?.name ?? ""}"?`
       : `Delete ${String(lists.length)} lists?`;
+
+  // The answer was lost but the lists are gone: do what onSuccess does. The
+  // mutation has settled here, so the shell's blocker does not hold the
+  // navigation onDeleted starts.
+  useEffect(() => {
+    if (!applied) return;
+    remove.reset();
+    onOpenChange(false);
+    onDeleted();
+  }, [applied, remove, onOpenChange, onDeleted]);
 
   return (
     <AlertDialog
@@ -55,6 +74,9 @@ export function DeleteListsDialog({
             {lists.length === 1
               ? "Couldn't delete the list."
               : "Couldn't delete the lists."}
+            {notSaved(remove.error)
+              ? " Check your connection and try again."
+              : ""}
           </p>
         ) : null}
         <AlertDialogFooter>
@@ -79,7 +101,7 @@ export function DeleteListsDialog({
               );
             }}
           >
-            Delete
+            {remove.isPending ? "Deleting…" : "Delete"}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

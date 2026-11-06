@@ -208,6 +208,49 @@ describe("ListsPage", () => {
       expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled();
     });
 
+    it.each([false, true])(
+      "OP-131: selecting keeps the page's heading and puts the controls where Select was (desktop %s)",
+      async (desktop) => {
+        stubMatchMedia({ [desktopQuery]: desktop });
+        serveLists();
+        renderApp();
+        const selectButton = await screen.findByRole("button", {
+          name: "Select",
+        });
+        const rowOfSelect = selectButton.parentElement;
+        fireEvent.click(selectButton);
+
+        const heading = screen.getByRole("heading", {
+          level: 1,
+          name: "Lists",
+        });
+        expect(heading).not.toHaveClass("sr-only");
+        if (desktop) {
+          expect(
+            within(heading.parentElement as HTMLElement).getByRole("link", {
+              name: "New list",
+            }),
+          ).toBeVisible();
+        } else {
+          expect(
+            screen.getByRole("button", { name: "Open menu" }),
+          ).toBeVisible();
+        }
+        const bar = screen.getByRole("button", {
+          name: "Cancel selection",
+        }).parentElement;
+        expect(bar).toBe(rowOfSelect);
+        for (const name of ["Select all", "Delete"]) {
+          expect(
+            within(bar as HTMLElement).getByRole("button", { name }),
+          ).toBeVisible();
+        }
+        expect(
+          within(bar as HTMLElement).getByText("0 selected"),
+        ).toBeVisible();
+      },
+    );
+
     it("LST-1.6: Select is not shown with no lists", async () => {
       serveLists([]);
       renderApp();
@@ -381,9 +424,138 @@ describe("ListsPage", () => {
       expect(router.state.location.pathname).toBe("/");
     });
 
-    it("APP-3.3: after a confirmed delete the focus is on the Lists heading", async () => {
+    it.each([false, true])(
+      "NET-1.8: during a delete Back keeps the selection, and after it the selection ends with the focus on the title (desktop %s)",
+      async (desktop) => {
+        stubMatchMedia({ [desktopQuery]: desktop });
+        let release = () => {};
+        const gate = new Promise<void>((resolve) => {
+          release = resolve;
+        });
+        server.use(
+          http.get("/api/lists", () =>
+            HttpResponse.json({ lists: threeLists }),
+          ),
+          http.get("/api/auth/get-session", () =>
+            HttpResponse.json({ ok: true }),
+          ),
+          http.post("/api/lists/delete", async () => {
+            await gate;
+            return new HttpResponse(null, { status: 204 });
+          }),
+        );
+        const { router } = renderApp();
+        await select();
+        fireEvent.click(row("Party"));
+        fireEvent.click(row("Hardware store"));
+        fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+        const dialog = await screen.findByRole("alertdialog");
+        fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+        await within(dialog).findByRole("button", { name: "Deleting…" });
+
+        await act(() => router.navigate(-1));
+        expect(screen.getByText("2 selected")).toBeInTheDocument();
+
+        release();
+        await waitFor(() => {
+          expect(screen.getByRole("heading", { name: "Lists" })).toHaveFocus();
+        });
+        expect(screen.queryByRole("checkbox")).toBeNull();
+      },
+    );
+
+    it.each([false, true])(
+      "APP-3.3: after a confirmed delete the focus is on the Lists heading (desktop %s)",
+      async (desktop) => {
+        stubMatchMedia({ [desktopQuery]: desktop });
+        server.use(
+          http.get("/api/lists", () =>
+            HttpResponse.json({ lists: threeLists }),
+          ),
+          http.get("/api/auth/get-session", () =>
+            HttpResponse.json({ ok: true }),
+          ),
+          http.post(
+            "/api/lists/delete",
+            () => new HttpResponse(null, { status: 204 }),
+          ),
+        );
+        renderApp();
+        await select();
+        fireEvent.click(row("Party"));
+        fireEvent.click(row("Hardware store"));
+        fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+        const dialog = await screen.findByRole("alertdialog");
+        fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+        await waitFor(() => {
+          expect(screen.getByRole("heading", { name: "Lists" })).toHaveFocus();
+        });
+      },
+    );
+
+    it("NET-1.5: a failed delete and a failed refetch keep the page, the selection and the dialog", async () => {
+      const posts: string[][] = [];
       server.use(
         http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+        http.get("/api/auth/get-session", () =>
+          HttpResponse.json({ ok: true }),
+        ),
+        http.post("/api/lists/delete", async ({ request }) => {
+          posts.push(((await request.json()) as { ids: string[] }).ids);
+          return HttpResponse.error();
+        }),
+      );
+      renderApp();
+      await select();
+      fireEvent.click(row("Party"));
+      fireEvent.click(row("Hardware store"));
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      const dialog = await screen.findByRole("alertdialog");
+      // From now on the lists answer fails too.
+      let reads = 0;
+      server.use(
+        http.get("/api/lists", () => {
+          reads += 1;
+          return HttpResponse.error();
+        }),
+      );
+      fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+      expect(
+        await within(dialog).findByText(
+          "Couldn't delete the lists. Check your connection and try again.",
+        ),
+      ).toBeVisible();
+      await waitFor(() => {
+        expect(reads).toBe(1);
+      });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(
+        screen.queryByText("The lists could not be loaded."),
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole("alertdialog")).toBeVisible();
+      expect(screen.getByText("2 selected")).toBeInTheDocument();
+      expect(screen.getAllByRole("checkbox", { hidden: true })).toHaveLength(3);
+      fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+      await waitFor(() => {
+        expect(posts).toHaveLength(2);
+      });
+    });
+
+    it("LST-1.8: a delete does not wait for the lists refetch, and the deleted lists do not flash back", async () => {
+      let release = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let reads = 0;
+      server.use(
+        http.get("/api/lists", async () => {
+          reads += 1;
+          if (reads > 1) await gate;
+          return HttpResponse.json({ lists: threeLists });
+        }),
         http.get("/api/auth/get-session", () =>
           HttpResponse.json({ ok: true }),
         ),
@@ -401,8 +573,16 @@ describe("ListsPage", () => {
       fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
 
       await waitFor(() => {
-        expect(screen.getByRole("heading", { name: "Lists" })).toHaveFocus();
+        expect(screen.queryByRole("alertdialog")).toBeNull();
+        expect(reads).toBe(2);
       });
+      expect(screen.queryByRole("checkbox")).toBeNull();
+      expect(screen.queryByRole("link", { name: "Party" })).toBeNull();
+      expect(screen.queryByRole("link", { name: "Hardware store" })).toBeNull();
+      expect(
+        screen.getByRole("link", { name: "Weekend groceries" }),
+      ).toBeVisible();
+      release();
     });
 
     it("LST-1.8: one selected list is named in the dialog", async () => {

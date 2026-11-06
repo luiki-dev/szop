@@ -101,7 +101,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | 🚧 In progress | 6 of 9 | ❔ Not finalized |
+| [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | 🚧 In progress | 7 of 9 | ❔ Not finalized |
 | [ACC-2](ACC-accounts-and-guest-mode.md#acc-2) | 🎯 MVP | ❔ Draft | 0 of 8 | ❔ Not finalized |
 | [ACC-3](ACC-accounts-and-guest-mode.md#acc-3) | 🎯 MVP | ❔ Draft | 0 of 9 | ❔ Not finalized |
 | [ACC-4](ACC-accounts-and-guest-mode.md#acc-4) | 🎯 MVP | ❔ Draft | 0 of 5 | ❔ Not finalized |
@@ -204,7 +204,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [NET-1](NET-connectivity.md#net-1) | 🎯 MVP | ❔ Draft | 0 of 6 | ❔ Not finalized |
+| [NET-1](NET-connectivity.md#net-1) | 🎯 MVP | 🚧 In progress | 6 of 8 | ❔ Not finalized |
 
 ### Appearance (APR)
 

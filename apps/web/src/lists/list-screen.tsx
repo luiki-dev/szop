@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
-import { useRef, useState, type ReactNode, type Ref } from "react";
+import { useRef, useState, type ReactNode, type RefObject } from "react";
+import { useIsMutating } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { listNameSchema } from "@szop/shared";
 import logo from "@/brand/logo.svg";
@@ -31,13 +32,25 @@ export function ListHeader({
   field: ReactNode;
   menu?: ReactNode;
 }) {
+  // While a change is in flight ← looks and acts disabled; it stays a link, so
+  // it keeps its place in the tab order.
+  const busy = useIsMutating() > 0;
   return (
     <header className="-ml-2 flex items-start gap-3 pt-2 md:-ml-4 lg:ml-0 lg:pt-0">
       <Link
         to="/"
         aria-label="Back to lists"
-        // Stryker disable next-line ObjectLiteral,StringLiteral: class names only, no behavior
-        className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+        {...(busy ? { "aria-disabled": true } : {})}
+        onClick={(event) => {
+          if (busy) event.preventDefault();
+        }}
+        className={cn(
+          // Stryker disable next-line ObjectLiteral: class names only, no behavior
+          // Stryker disable next-line StringLiteral: class names only, no behavior
+          buttonVariants({ variant: "ghost", size: "icon" }),
+          // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
+          "aria-disabled:opacity-50",
+        )}
       >
         <ArrowLeft aria-hidden="true" />
       </Link>
@@ -67,6 +80,7 @@ export function TitleField({
   create,
   inputRef,
   pending,
+  failed,
   error,
   onSave,
   onCancel,
@@ -75,8 +89,9 @@ export function TitleField({
   autoFocus?: boolean;
   saveOnBlur?: boolean;
   create?: boolean;
-  inputRef?: Ref<HTMLInputElement>;
+  inputRef?: RefObject<HTMLInputElement | null>;
   pending: boolean;
+  failed?: boolean;
   error?: string;
   onSave: (name: string) => void;
   onCancel: () => void;
@@ -85,6 +100,8 @@ export function TitleField({
   const [seen, setSeen] = useState(initial);
   const [tooLong, setTooLong] = useState<string>();
   const desktop = useMediaQuery(desktopQuery);
+  const ownRef = useRef<HTMLInputElement>(null);
+  const field = inputRef ?? ownRef;
   // Stryker disable next-line BooleanLiteral: onFocus resets it before any blur can happen, so the initial value is never read
   const cancelled = useRef(false);
   // The server's answer replaces what the field shows.
@@ -122,12 +139,12 @@ export function TitleField({
       className={desktop ? "shrink-0" : "w-full"}
       onClick={commit}
     >
-      Create
+      {pending ? "Creating…" : "Create"}
     </Button>
   );
   const input = (
     <input
-      ref={inputRef}
+      ref={field}
       value={value}
       autoFocus={autoFocus}
       readOnly={pending}
@@ -150,7 +167,7 @@ export function TitleField({
       }}
       onKeyDown={(event) => {
         if (event.key === "Enter") commit();
-        if (event.key === "Escape") {
+        if (event.key === "Escape" && !pending) {
           cancelled.current = true;
           setValue(initial);
           setTooLong(undefined);
@@ -158,7 +175,7 @@ export function TitleField({
         }
       }}
       onBlur={() => {
-        if (saveOnBlur && !cancelled.current) commit();
+        if (saveOnBlur && !cancelled.current && !failed) commit();
       }}
     />
   );
@@ -173,6 +190,26 @@ export function TitleField({
         input
       )}
       {create && !desktop && <BottomBar>{createButton}</BottomBar>}
+      {!create && pending && (
+        <p className="px-2 pt-1 text-sm text-muted-foreground">Saving…</p>
+      )}
+      {!create && failed && (
+        <p role="alert" className="px-2 pt-1 text-sm text-destructive">
+          Not saved.{" "}
+          <button
+            type="button"
+            className="inline-flex min-h-12 items-center rounded-control px-1 underline outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            onClick={() => {
+              commit();
+              // The button goes away while the retry runs: keep the focus.
+              // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
+              field.current?.focus();
+            }}
+          >
+            Try again
+          </button>
+        </p>
+      )}
       {message && (
         <p role="alert" className="px-2 pt-1 text-sm text-destructive">
           {message}
@@ -183,8 +220,9 @@ export function TitleField({
 }
 
 // The empty list's body. The raccoon peeks in from the left edge, halfway
-// down, so the add bar of a later phase does not cover it; from lg, from the
-// right edge. Only the top of its head shows, down to just below the eyes.
+// down, so the add bar of a later phase does not cover it; from lg, from under
+// the sidebar's right edge (the sidebar is w-64 and paints over it). Only the
+// top of its head shows, down to just below the eyes.
 export function EmptyList() {
   return (
     <>
@@ -197,7 +235,7 @@ export function EmptyList() {
         aria-hidden="true"
         width={200}
         height={200}
-        className="pointer-events-none fixed top-1/2 -left-[65px] -z-10 -translate-y-1/2 rotate-90 opacity-55 grayscale lg:right-[calc(-65px-(100vw-100%))] lg:left-auto lg:-rotate-90"
+        className="pointer-events-none fixed top-1/2 -left-[65px] -z-10 -translate-y-1/2 rotate-90 opacity-55 grayscale lg:left-[calc(16rem-65px)]"
       />
     </>
   );
