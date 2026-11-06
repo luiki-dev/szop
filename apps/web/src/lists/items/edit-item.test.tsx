@@ -79,6 +79,28 @@ describe("EditItem", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
+  it.each([false, true])(
+    "ITM-6.1: the Category field opens the picker, and picking saves the category (desktop %s)",
+    async (desktop) => {
+      const { patches } = setup(bananas, desktop);
+      await userEvent.click(screen.getByRole("button", { name: /^Category/ }));
+      await userEvent.click(
+        screen.getByRole("button", { name: "Dairy & eggs, subcategories" }),
+      );
+      await userEvent.click(screen.getByRole("radio", { name: "Cheese" }));
+
+      const field = screen.getByRole("button", { name: /^Category/ });
+      await waitFor(() => {
+        expect(field).toHaveFocus();
+      });
+      expect(field).toHaveTextContent("Cheese");
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+      await waitFor(() => {
+        expect(patches[0]).toMatchObject({ categoryId: "c4" });
+      });
+    },
+  );
+
   it("APP-6.1: the fields come in order, each with its label, and none has the focus", async () => {
     setup();
 

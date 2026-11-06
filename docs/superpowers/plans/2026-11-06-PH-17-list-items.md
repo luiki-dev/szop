@@ -242,11 +242,11 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
 - Consumes: `buildCatalogTree`, `searchTree`, `findMatch` (`apps/web/src/catalog/`), called with the catalog's categories and no products (`{ ...catalog, products: [] }`).
 - Produces: `CategoryPicker({ catalog, value, onPick, onBack }: { catalog: Catalog; value: string | null; onPick: (categoryId: string | null) => void; onBack: () => void })`: a radio group named "Category"; on a phone it is a second Drawer over the edit sheet, on a desktop it replaces the dialog's content with ← back; picking calls `onPick` and returns the focus to the Category field.
 
-- [ ] **Step 1: Write the failing tests:** the chevron opens and closes a category's subcategories without picking it; the rest of the row picks it and closes the picker; "No category" first, and picking it clears the category; `"Search categories"` narrows the tree to matches with their ancestors, the match highlighted (`<mark>`), with Polish folding ("zywnosc" finds "Żywność"); the current category's radio is checked; a category without subcategories keeps the chevron's space empty (same left offset as one with); the E2E picks a subcategory on a phone and on a desktop with the keyboard only.
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test src/lists/items/category-picker`. Expected: FAIL.
-- [ ] **Step 3: Implement** to the spec's [Picking a category](../specs/2026-11-06-PH-17-list-items-design.md#picking-a-category) and `category-picker-v3.png`: one bordered box, rows at least 52 px, the chevron's target 44 × 52 px, every level below the top on one muted band indented 20 px per level, the radio circle at the end.
-- [ ] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(items): pick an item's category from the tree`.
+- [x] **Step 1: Write the failing tests:** the chevron opens and closes a category's subcategories without picking it; the rest of the row picks it and closes the picker; "No category" first, and picking it clears the category; `"Search categories"` narrows the tree to matches with their ancestors, the match highlighted (`<mark>`), with Polish folding ("zywnosc" finds "Żywność"); the current category's radio is checked; a category without subcategories keeps the chevron's space empty (same left offset as one with); the E2E picks a subcategory on a phone and on a desktop with the keyboard only.
+- [x] **Step 2: Run** `pnpm --filter @szop/web test src/lists/items/category-picker`. Expected: FAIL.
+- [x] **Step 3: Implement** to the spec's [Picking a category](../specs/2026-11-06-PH-17-list-items-design.md#picking-a-category) and `category-picker-v3.png`: one bordered box, rows at least 52 px, the chevron's target 44 × 52 px, every level below the top on one muted band indented 20 px per level, the radio circle at the end.
+- [x] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
+- [x] **Step 5: Commit** `feat(items): pick an item's category from the tree`.
 
 ### Task 8: Checking and the haul
 

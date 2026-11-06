@@ -64,7 +64,7 @@ test("ITM-2.3, ITM-2.4: a guest adds items one after another with Enter, and the
     .toBeCloseTo(700, 0);
 });
 
-test("ITM-6.1, APP-3.1: a guest edits an item in the sheet, removes it and undoes", async ({
+test("ITM-6.1, APP-3.1: a guest edits an item in the sheet, picks its category, removes it and undoes", async ({
   page,
 }) => {
   await page.goto("/lists/new");
@@ -101,4 +101,36 @@ test("ITM-6.1, APP-3.1: a guest edits an item in the sheet, removes it and undoe
   await expect(page.getByRole("button", { name: /Bananas/ })).toContainText(
     "€1.98",
   );
+
+  // The category picker by keyboard on both sizes, in this test because each
+  // test signs a guest in and the sign-in route's rate limit is suite-wide.
+  for (const size of [
+    { width: 390, height: 700 },
+    { width: 1280, height: 800 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.getByRole("button", { name: /Bananas/ }).press("Enter");
+    const field = page.getByRole("button", { name: /^Category/ });
+    await field.focus();
+    await field.press("Enter");
+
+    const picker = page.getByRole("radiogroup", { name: "Category" });
+    const chevron = picker.getByRole("button", { name: /subcategories$/ });
+    await chevron.first().focus();
+    await chevron.first().press("Enter");
+    // No category, the first category, its first subcategory.
+    const sub = picker.getByRole("radio").nth(2);
+    const subName = (await sub.textContent()) ?? "";
+    await expectAccessible(page);
+    await sub.focus();
+    await sub.press("Enter");
+
+    await expect(field).toBeFocused();
+    await expect(field).toContainText(subName);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.getByRole("button", { name: "Save" }).press("Enter");
+    // The items API is not on the server yet, so the saved value is not read back.
+    await expect(page.getByRole("dialog", { name: "Edit item" })).toBeHidden();
+  }
 });
