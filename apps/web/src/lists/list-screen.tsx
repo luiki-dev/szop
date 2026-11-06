@@ -221,7 +221,7 @@ export function TitleField({
 }
 
 // The empty list's body. The raccoon peeks in from the left edge, halfway
-// down, so the add bar of a later phase does not cover it; from lg, from under
+// down, so the add bar does not cover it; from lg, from under
 // the sidebar's right edge (the sidebar is w-64 and paints over it). Only the
 // top of its head shows, down to just below the eyes.
 export function EmptyList() {

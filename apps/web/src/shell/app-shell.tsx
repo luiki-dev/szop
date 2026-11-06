@@ -8,6 +8,7 @@ import {
 } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button.tsx";
+import { cn } from "@/lib/utils.ts";
 import {
   Sheet,
   SheetContent,
@@ -121,13 +122,16 @@ export function AppShell() {
         !header && <PhoneHeader title={title} />
       )}
       <main
-        className={
+        // A page with its own header (a list's screen) fills the screen, so
+        // its add bar can sit at the bottom of a short page.
+        className={cn(
+          header && "flex min-h-dvh flex-col",
           desktop
             ? // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
               "mx-auto w-full max-w-[720px] px-6 py-6"
             : // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
-              "mx-auto max-w-[720px] px-4 pb-6 md:px-6"
-        }
+              "mx-auto max-w-[720px] px-4 pb-6 md:px-6",
+        )}
       >
         {desktop && !header && (
           // The row is 48 px whether or not it holds an action, so the title sits

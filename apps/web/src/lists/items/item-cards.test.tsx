@@ -4,11 +4,11 @@ import { itemCards, orderCategories, type ListItem } from "@szop/shared";
 import { describe, expect, it, vi } from "vitest";
 import { smallCatalog } from "../../test/catalog.ts";
 import { bananas as bananasItem, milk as milkItem } from "../../test/items.ts";
+import { ItemCards } from "./item-cards.tsx";
 
 // Widened: the fixtures' literal types would pin every field to null.
 const bananas: ListItem = bananasItem;
 const milk: ListItem = milkItem;
-import { ItemCards } from "./item-cards.tsx";
 
 const categories = orderCategories(smallCatalog.categories);
 const cards = (items = [bananas, milk], sort = true) =>

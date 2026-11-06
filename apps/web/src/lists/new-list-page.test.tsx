@@ -242,17 +242,14 @@ describe("NewListPage", () => {
     expect(posts[0]?.name).toBe("Weekly shop");
   });
 
-  it.each(["   "])(
-    "LST-1.9: Create is disabled for the name %j",
-    async (text) => {
-      const user = userEvent.setup();
-      const { field } = setup();
+  it("LST-1.9: Create is disabled for a name of spaces", async () => {
+    const user = userEvent.setup();
+    const { field } = setup();
 
-      await user.type(field(), text);
+    await user.type(field(), "   ");
 
-      expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
-    },
-  );
+    expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
+  });
 
   it("LST-1.9: Create is disabled while the create is in flight", async () => {
     const user = userEvent.setup();

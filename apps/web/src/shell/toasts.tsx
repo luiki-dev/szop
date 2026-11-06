@@ -35,7 +35,7 @@ function ToastList() {
 export function Toasts() {
   return (
     <Toast.Provider toastManager={toastManager} limit={1}>
-      <Toast.Viewport className="fixed bottom-20 left-1/2 z-50 w-3/4 -translate-x-1/2">
+      <Toast.Viewport className="fixed bottom-24 left-1/2 z-50 w-3/4 -translate-x-1/2">
         <ToastList />
       </Toast.Viewport>
     </Toast.Provider>

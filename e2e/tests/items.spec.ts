@@ -16,6 +16,10 @@ test("ITM-2.3, ITM-2.4: a guest adds items one after another with Enter, and the
   const add = page.getByRole("textbox", {
     name: "Add an item to Weekend groceries",
   });
+  const barBottom = () =>
+    add.evaluate((el) => el.closest("form")?.getBoundingClientRect().bottom);
+  // On an empty list the bar is already at the bottom of the screen.
+  expect(await barBottom()).toBeCloseTo(700, 0);
   await add.fill("Bananas");
   await add.press("Enter");
   await expect(add).toBeFocused();
@@ -33,6 +37,7 @@ test("ITM-2.3, ITM-2.4: a guest adds items one after another with Enter, and the
     /Milk/,
   ]);
   await expect(card.getByText("3 left")).toBeVisible();
+  await expect.poll(barBottom).toBeCloseTo(700, 0);
   await expectAccessible(page);
 
   for (let i = 1; i <= 20; i++) {

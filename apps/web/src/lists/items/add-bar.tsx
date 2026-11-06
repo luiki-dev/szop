@@ -37,7 +37,7 @@ export function AddBar({
       onSubmit={(event) => {
         void onSubmit(event);
       }}
-      className="sticky bottom-0 z-10 -mx-4 mt-4 flex gap-2 rounded-t-surface border-t border-border bg-background px-4 py-3 shadow-[0_-4px_12px_rgb(0_0_0/0.08)] md:-mx-6 md:px-6"
+      className="sticky bottom-0 z-10 -mx-4 mt-auto -mb-6 flex gap-2 rounded-t-surface border-t border-border bg-background px-4 py-3 shadow-[0_-4px_12px_rgb(0_0_0/0.08)] md:-mx-6 md:px-6"
     >
       <input
         {...register("name", {
