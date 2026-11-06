@@ -102,12 +102,23 @@ test("ITM-6.1, APP-3.1: a guest edits an item in the sheet, picks its category, 
     "€1.98",
   );
 
-  // The category picker by keyboard on both sizes, in this test because each
-  // test signs a guest in and the sign-in route's rate limit is suite-wide.
-  for (const size of [
-    { width: 390, height: 700 },
-    { width: 1280, height: 800 },
-  ]) {
+  // The category picker by keyboard on both layouts, in this test to save a
+  // guest's sign-in. The desktop pass proves its layout by ← Back.
+  const picks = [
+    {
+      size: { width: 390, height: 700 },
+      parent: "Fruit & vegetables",
+      sub: "Fresh fruit",
+      desktop: false,
+    },
+    {
+      size: { width: 1280, height: 800 },
+      parent: "Bakery",
+      sub: "",
+      desktop: true,
+    },
+  ];
+  for (const { size, parent, sub: wanted, desktop } of picks) {
     await page.setViewportSize(size);
     await page.getByRole("button", { name: /Bananas/ }).press("Enter");
     const field = page.getByRole("button", { name: /^Category/ });
@@ -115,22 +126,49 @@ test("ITM-6.1, APP-3.1: a guest edits an item in the sheet, picks its category, 
     await field.press("Enter");
 
     const picker = page.getByRole("radiogroup", { name: "Category" });
-    const chevron = picker.getByRole("button", { name: /subcategories$/ });
-    await chevron.first().focus();
-    await chevron.first().press("Enter");
-    // No category, the first category, its first subcategory.
-    const sub = picker.getByRole("radio").nth(2);
+    const chevron = picker.getByRole("button", {
+      name: `${parent}, subcategories`,
+    });
+    if ((await chevron.getAttribute("aria-expanded")) === "false") {
+      await chevron.focus();
+      await chevron.press("Enter");
+    }
+    // The first subcategory of the parent: the radio after its own.
+    const radios = picker.getByRole("radio");
+    const at = await radios.evaluateAll(
+      (all, name) => all.findIndex((r) => r.textContent === name),
+      parent,
+    );
+    const sub = radios.nth(at + 1);
     const subName = (await sub.textContent()) ?? "";
+    expect(subName).toBeTruthy();
+    if (wanted) expect(subName).toBe(wanted);
+    if (desktop) {
+      await expect(page.getByRole("button", { name: "Back" })).toBeVisible();
+    } else {
+      await expect(
+        page.getByRole("button", { name: "Close" }).last(),
+      ).toBeVisible();
+    }
     await expectAccessible(page);
     await sub.focus();
+    const saved = page.waitForResponse(
+      (r) => r.request().method() === "PATCH" && r.url().includes("/items/"),
+    );
     await sub.press("Enter");
 
     await expect(field).toBeFocused();
     await expect(field).toContainText(subName);
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
     await page.getByRole("button", { name: "Save" }).press("Enter");
-    // The items API is not on the server yet, so the saved value is not read back.
+    expect((await saved).status()).toBe(200);
     await expect(page.getByRole("dialog", { name: "Edit item" })).toBeHidden();
+    await expect(page.getByText("wasn't saved")).toHaveCount(0);
+
+    // Reopened, the field holds what was picked.
+    await page.getByRole("button", { name: /Bananas/ }).press("Enter");
+    await expect(page.getByRole("button", { name: /^Category/ })).toContainText(
+      subName,
+    );
+    await page.keyboard.press("Escape");
   }
 });

@@ -19,6 +19,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
 - [Writing a unit test](#writing-a-unit-test)
 - [Writing a property test](#writing-a-property-test)
 - [Writing an E2E journey](#writing-an-e2e-journey)
+  - [Each test is its own client address](#each-test-is-its-own-client-address)
   - [The CSP guard](#the-csp-guard)
   - [The accessibility check](#the-accessibility-check)
   - [The token contrast test](#the-token-contrast-test)
@@ -358,6 +359,10 @@ The catalog's journey, `e2e/tests/catalog.spec.ts`, is a second pattern: it read
 The lists journey, `e2e/tests/lists.spec.ts`, shows two more things. A browser context is a fresh guest: a new `browser.newContext({ baseURL })` has no session cookie, so the second test uses one as "another visitor" (it is outside the CSP guard) and `context.clearCookies()` turns the first guest into a stranger. And an element that is only for screen readers, such as the list's `h1`, is asserted by role (`getByRole("heading", { level: 1 })`), since it is not visible.
 
 The page frame's check, `e2e/tests/frame.spec.ts`, measures instead of reading: it compares, page by page, where the title row's first element and the title stand ([visual-design.md, "The page frame"](../architecture/visual-design.md#the-page-frame)). It waits for the network to settle first, since a long page's scrollbar appears only with its data, and rounds the boxes to whole pixels.
+
+### Each test is its own client address
+
+The anonymous sign-in route allows 30 an hour per address. A suite of more than 30 guests from one address would be refused at its end, so the E2E server trusts `127.0.0.1` as a proxy (`TRUSTED_PROXIES` in `e2e/start-server.ts`) and the `context` fixture of `e2e/support/test.ts` sends a random `X-Forwarded-For` for each test. Production's limit is untouched.
 
 ### The CSP guard
 

@@ -72,6 +72,9 @@ const overrides = {
   HOST: "127.0.0.1",
   PORT: port,
   LOG_LEVEL: "warn",
+  // The tests send X-Forwarded-For (support/test.ts): each is its own address
+  // for the sign-in rate limit.
+  TRUSTED_PROXIES: "127.0.0.1",
   WEB_ROOT: fileURLToPath(webDist),
   APP_ORIGIN: `http://127.0.0.1:${port}`,
 };
