@@ -183,24 +183,29 @@ describe("the item hooks", () => {
   });
 
   it("a failed change of one item leaves another item's change as it is", async () => {
+    const oatMilk = { ...milk, name: "Oat milk" };
+    const answer = gate();
+    let refetched = 0;
     server.use(
       withSession,
       http.patch(itemPath(bananas.id), () =>
         HttpResponse.json({ error: { message: "x" } }, { status: 500 }),
       ),
-      http.patch(itemPath(milk.id), () => delay("infinite")),
-      // A refetch would answer the server's old milk.
+      http.patch(itemPath(milk.id), async () => {
+        await answer.opened;
+        return HttpResponse.json(oatMilk);
+      }),
       http.get(listPath, () => {
         refetched += 1;
-        return HttpResponse.json(listWith(bananas, milk));
+        return HttpResponse.json(listWith(bananas, oatMilk));
       }),
     );
-    let refetched = 0;
     const { wrapper, items } = setup(listWith(bananas, milk));
     const { result } = renderHook(
       () => ({
         a: useUpdateItem(listId, bananas.id),
         b: useUpdateItem(listId, milk.id),
+        observed: useObservedList(),
       }),
       { wrapper },
     );
@@ -219,6 +224,58 @@ describe("the item hooks", () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(refetched).toBe(0);
     expect(byId(milk.id)?.name).toBe("Oat milk");
+
+    answer.open();
+
+    await waitFor(() => {
+      expect(refetched).toBe(1);
+    });
+    expect(byId(milk.id)?.name).toBe("Oat milk");
+  });
+
+  it("a failed update with a remove of the same item queued ends with the item gone", async () => {
+    const refusal = gate();
+    let refetched = 0;
+    server.use(
+      withSession,
+      http.patch(itemPath(bananas.id), async () => {
+        await refusal.opened;
+        return HttpResponse.json({ error: { message: "x" } }, { status: 500 });
+      }),
+      http.delete(
+        itemPath(bananas.id),
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+      http.get(listPath, () => {
+        refetched += 1;
+        return HttpResponse.json(listWith(milk));
+      }),
+    );
+    const { wrapper, items } = setup(listWith(bananas, milk));
+    const { result } = renderHook(
+      () => ({
+        update: useUpdateItem(listId, bananas.id),
+        remove: useRemoveItem(listId, bananas.id),
+        observed: useObservedList(),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.update.mutate({ name: "Plantains" });
+      result.current.remove.mutate();
+    });
+    refusal.open();
+
+    await waitFor(() => {
+      expect(result.current.remove.isSuccess).toBe(true);
+    });
+    await waitFor(() => {
+      expect(refetched).toBe(1);
+    });
+    await waitFor(() => {
+      expect(items()).toEqual([milk]);
+    });
   });
 
   it("a removed item leaves the list and comes back when the remove fails", async () => {

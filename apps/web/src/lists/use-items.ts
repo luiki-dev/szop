@@ -28,9 +28,10 @@ function writeItems(queryClient: QueryClient, listId: string, change: Items) {
   );
 }
 
-// The failed change asks the server what it holds, but only when it is the
-// last change of the list in flight: a refetch earlier would answer without
-// the changes still on their way and wipe their optimistic state.
+// The last change of the list to settle, success or failure, asks the server
+// what it holds: a refetch earlier would answer without the changes still on
+// their way and wipe their optimistic state, and a lost answer or a rollback
+// next to a queued change is only settled by the server's word.
 function refetchIfLast(queryClient: QueryClient, listId: string) {
   if (queryClient.isMutating({ mutationKey: listKey(listId) }) === 1)
     void queryClient.invalidateQueries({ queryKey: listKey(listId) });
@@ -94,7 +95,8 @@ function useItemMutation<Variables, Answer extends ListItem | undefined>(
         return rest.toSpliced(at < 0 ? rest.length : at, 0, previous);
       });
       showNotSaved(change.name(variables, previous));
-      // The answer may have been lost on its way: ask what the server holds.
+    },
+    onSettled: () => {
       refetchIfLast(queryClient, listId);
     },
   });
@@ -193,6 +195,8 @@ export function useSortByCategory(listId: string) {
     onError: (_, __, context) => {
       setSort(context?.previous);
       showSortNotSaved();
+    },
+    onSettled: () => {
       refetchIfLast(queryClient, listId);
     },
   });
