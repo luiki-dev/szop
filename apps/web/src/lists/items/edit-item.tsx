@@ -1,0 +1,332 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Dialog } from "@base-ui/react/dialog";
+import { Drawer } from "@base-ui/react/drawer";
+import { Minus, Plus, X } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
+import {
+  formatAmountInput,
+  formatPrice,
+  formatQuantity,
+  itemLimits,
+  lineTotal,
+  parseAmount,
+  type Catalog,
+  type CatalogUnit,
+  type ListItem,
+  type UpdateItem,
+} from "@szop/shared";
+import { Button } from "@/components/ui/button.tsx";
+import { cn } from "@/lib/utils.ts";
+import { desktopQuery, useMediaQuery } from "../../shell/use-media-query.ts";
+import { useRemoveItem, useUpdateItem } from "../use-items.ts";
+import {
+  itemFormSchema,
+  toFormValues,
+  type ItemFormValues,
+} from "./item-form.ts";
+
+const control =
+  "min-h-12 w-full rounded-control border-2 border-input bg-card px-3 outline-none focus:ring-3 focus:ring-ring aria-invalid:border-destructive";
+const stepper =
+  "size-12 shrink-0 rounded-control border-2 border-input outline-none focus-visible:ring-3 focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
+
+// "Edit item" (ITM-6): a bottom sheet on a phone, a centered dialog from `lg`.
+// No field takes the focus on opening, so the phone's keyboard stays down.
+export function EditItem({
+  listId,
+  item,
+  open,
+  onOpenChange,
+  onRemoved,
+  units,
+  catalog,
+}: {
+  listId: string;
+  item: ListItem;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onRemoved: (item: ListItem) => void;
+  units: CatalogUnit[];
+  catalog: Catalog;
+}) {
+  const desktop = useMediaQuery(desktopQuery);
+  const form = (
+    <EditForm
+      listId={listId}
+      item={item}
+      onOpenChange={onOpenChange}
+      onRemoved={onRemoved}
+      units={units}
+      catalog={catalog}
+    />
+  );
+  const close = <X aria-hidden="true" />;
+  const closeButton = (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="absolute top-2 right-2"
+      aria-label="Close"
+    />
+  );
+  const heading = "pr-12 text-lg font-bold";
+  const backdrop =
+    "fixed inset-0 z-50 bg-black/40 data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:transition-opacity motion-safe:duration-200";
+  if (desktop) {
+    return (
+      <Dialog.Root open={open} onOpenChange={onOpenChange}>
+        <Dialog.Portal>
+          <Dialog.Backdrop className={backdrop} />
+          <Dialog.Popup
+            initialFocus={false}
+            className="fixed top-1/2 left-1/2 z-50 max-h-[90dvh] w-full max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-surface bg-card p-4 text-card-foreground shadow-lg outline-none"
+          >
+            <Dialog.Title className={heading}>Edit item</Dialog.Title>
+            <Dialog.Close render={closeButton}>{close}</Dialog.Close>
+            {form}
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
+    );
+  }
+  return (
+    <Drawer.Root open={open} onOpenChange={onOpenChange} swipeDirection="down">
+      <Drawer.Portal>
+        <Drawer.Backdrop className={backdrop} />
+        <Drawer.Popup
+          initialFocus={false}
+          className="fixed inset-x-0 bottom-0 z-50 max-h-[90dvh] translate-y-(--drawer-swipe-movement-y) overflow-y-auto rounded-t-surface bg-card p-4 text-card-foreground shadow-lg outline-none data-ending-style:translate-y-full data-starting-style:translate-y-full motion-safe:transition-[translate] motion-safe:duration-200"
+        >
+          <Drawer.Title className={heading}>Edit item</Drawer.Title>
+          <Drawer.Close render={closeButton}>{close}</Drawer.Close>
+          {form}
+        </Drawer.Popup>
+      </Drawer.Portal>
+    </Drawer.Root>
+  );
+}
+
+function Field({
+  label,
+  htmlFor,
+  error,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  error?: string | undefined;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="min-w-0 flex-1">
+      <label htmlFor={htmlFor} className="mb-1 block text-sm font-semibold">
+        {label}
+      </label>
+      {children}
+      {error && (
+        <p
+          id={`${htmlFor}-error`}
+          role="alert"
+          className="mt-1 text-sm text-destructive"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function EditForm({
+  listId,
+  item,
+  onOpenChange,
+  onRemoved,
+  units,
+  catalog,
+}: {
+  listId: string;
+  item: ListItem;
+  onOpenChange: (open: boolean) => void;
+  onRemoved: (item: ListItem) => void;
+  units: CatalogUnit[];
+  catalog: Catalog;
+}) {
+  const update = useUpdateItem(listId, item.id);
+  const remove = useRemoveItem(listId, item.id);
+  const {
+    register,
+    handleSubmit,
+    control: formControl,
+    setValue,
+    formState,
+  } = useForm<ItemFormValues, unknown, UpdateItem>({
+    resolver: zodResolver(itemFormSchema),
+    defaultValues: toFormValues(item),
+    mode: "onBlur",
+  });
+  const { errors } = formState;
+  const [quantityText, priceText, categoryId] = useWatch({
+    control: formControl,
+    name: ["quantity", "price", "categoryId"],
+  });
+  const category = catalog.categories.find((c) => c.id === categoryId);
+
+  const quantity = parseAmount(quantityText, 3);
+  const price = parseAmount(priceText, 2);
+  const current = quantity.ok ? quantity.value : undefined;
+  const step = (by: number) => {
+    setValue("quantity", formatAmountInput((current ?? 0) + by, 3), {
+      shouldDirty: true,
+    });
+  };
+  const total =
+    quantity.ok && price.ok && price.value !== null
+      ? lineTotal({ price: price.value, quantity: quantity.value })
+      : null;
+
+  return (
+    <form
+      noValidate
+      className="mt-3 flex flex-col gap-4"
+      onSubmit={(event) => {
+        void handleSubmit((values) => {
+          update.mutate(values);
+          onOpenChange(false);
+        })(event);
+      }}
+    >
+      <Field label="Name" htmlFor="edit-name" error={errors.name?.message}>
+        <input
+          id="edit-name"
+          {...register("name")}
+          maxLength={itemLimits.name}
+          autoComplete="off"
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? "edit-name-error" : undefined}
+          className={control}
+        />
+      </Field>
+      <div className="flex gap-3">
+        <Field
+          label="Quantity"
+          htmlFor="edit-quantity"
+          error={errors.quantity?.message}
+        >
+          <div className="flex gap-1">
+            <button
+              type="button"
+              aria-label="Decrease quantity"
+              className={stepper}
+              disabled={
+                current === undefined || current === null || current <= 1000
+              }
+              onClick={() => {
+                step(-1000);
+              }}
+            >
+              <Minus aria-hidden="true" />
+            </button>
+            <input
+              id="edit-quantity"
+              {...register("quantity")}
+              inputMode="decimal"
+              autoComplete="off"
+              aria-invalid={!!errors.quantity}
+              aria-describedby={
+                errors.quantity ? "edit-quantity-error" : undefined
+              }
+              className={cn(control, "min-w-0 text-center")}
+            />
+            <button
+              type="button"
+              aria-label="Increase quantity"
+              className={stepper}
+              disabled={current === undefined}
+              onClick={() => {
+                step(1000);
+              }}
+            >
+              <Plus aria-hidden="true" />
+            </button>
+          </div>
+        </Field>
+        <Field label="Unit" htmlFor="edit-unit">
+          <select id="edit-unit" {...register("unitId")} className={control}>
+            <option value="">No unit</option>
+            {units.map((unit) => (
+              <option key={unit.id} value={unit.id}>
+                {unit.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+      <Field
+        label="Price per unit"
+        htmlFor="edit-price"
+        error={errors.price?.message}
+      >
+        <input
+          id="edit-price"
+          {...register("price")}
+          inputMode="decimal"
+          autoComplete="off"
+          aria-invalid={!!errors.price}
+          aria-describedby={errors.price ? "edit-price-error" : undefined}
+          className={control}
+        />
+        {total !== null && quantity.ok && price.ok && price.value !== null && (
+          <p className="mt-1 text-sm text-muted-foreground">
+            {quantity.value === null
+              ? ""
+              : `${formatQuantity(quantity.value)} × `}
+            {formatPrice(price.value)} = {formatPrice(total)}
+          </p>
+        )}
+      </Field>
+      {/* The picker comes with Task 7: until then the field shows the name. */}
+      <div>
+        <span className="mb-1 block text-sm font-semibold">Category</span>
+        <p className={cn("min-h-12 py-3", !category && "italic")}>
+          {category?.name ?? "No category"}
+        </p>
+      </div>
+      <Field label="Note" htmlFor="edit-note">
+        <textarea
+          id="edit-note"
+          {...register("note")}
+          maxLength={itemLimits.note}
+          rows={2}
+          className={cn(control, "field-sizing-content py-2")}
+        />
+      </Field>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          className="mr-auto min-h-12 text-destructive"
+          onClick={() => {
+            remove.mutate();
+            onRemoved(item);
+            onOpenChange(false);
+          }}
+        >
+          Remove
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-12"
+          onClick={() => {
+            onOpenChange(false);
+          }}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" className="min-h-12">
+          Save
+        </Button>
+      </div>
+    </form>
+  );
+}

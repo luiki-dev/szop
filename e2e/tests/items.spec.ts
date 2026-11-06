@@ -63,3 +63,42 @@ test("ITM-2.3, ITM-2.4: a guest adds items one after another with Enter, and the
     )
     .toBeCloseTo(700, 0);
 });
+
+test("ITM-6.1, APP-3.1: a guest edits an item in the sheet, removes it and undoes", async ({
+  page,
+}) => {
+  await page.goto("/lists/new");
+  const name = page.getByRole("textbox", { name: "List name" });
+  await name.fill("Weekend groceries");
+  await name.press("Enter");
+  const add = page.getByRole("textbox", {
+    name: "Add an item to Weekend groceries",
+  });
+  await add.fill("Bananas");
+  await add.press("Enter");
+
+  await page.getByRole("button", { name: /Bananas/ }).click();
+  const sheet = page.getByRole("dialog", { name: "Edit item" });
+  await sheet.getByRole("textbox", { name: "Quantity" }).fill("6");
+  await sheet.getByLabel("Price per unit").fill("0,33");
+  await sheet.getByLabel("Note").fill("ripe");
+  await expectAccessible(page);
+  await sheet.getByRole("button", { name: "Save" }).click();
+
+  const row = page.getByRole("button", { name: /Bananas/ });
+  await expect(row).toContainText("6");
+  await expect(row).toContainText("€1.98");
+  await expect(row).toContainText("ripe");
+
+  await row.click();
+  await page
+    .getByRole("dialog", { name: "Edit item" })
+    .getByRole("button", { name: "Remove" })
+    .click();
+  await expect(page.getByText("Removed Bananas")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Bananas/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Undo" }).click();
+  await expect(page.getByRole("button", { name: /Bananas/ })).toContainText(
+    "€1.98",
+  );
+});

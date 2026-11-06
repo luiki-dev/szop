@@ -23,9 +23,12 @@ function ToastList() {
       <Toast.Root
         key={toast.id}
         toast={toast}
-        className="rounded-lg bg-foreground px-4 py-3 text-sm text-background shadow-lg"
+        className="flex items-center justify-between gap-3 rounded-lg bg-foreground px-4 py-3 text-sm text-background shadow-lg"
       >
         <Toast.Description />
+        {toast.actionProps && (
+          <Toast.Action className="min-h-11 rounded-control px-3 font-semibold underline outline-none focus-visible:ring-3 focus-visible:ring-ring" />
+        )}
       </Toast.Root>
     ));
 }

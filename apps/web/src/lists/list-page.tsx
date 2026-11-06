@@ -1,5 +1,6 @@
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import type { ListItem } from "@szop/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import { itemCards, listSchema, orderCategories } from "@szop/shared";
 import { useNavigate, useParams } from "react-router";
@@ -15,7 +16,9 @@ import { ApiRequestError, notSaved } from "../api/client.ts";
 import { NotFound } from "../not-found/not-found.tsx";
 import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
 import { AddBar } from "./items/add-bar.tsx";
+import { EditItem } from "./items/edit-item.tsx";
 import { ItemCards, ItemCardsSkeleton } from "./items/item-cards.tsx";
+import { UndoRemove } from "./items/undo-remove.tsx";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
 import { useList, useRenameList } from "./use-lists.ts";
 
@@ -34,6 +37,11 @@ export function ListPage() {
   const queryClient = useQueryClient();
   const deleted = useRef(false);
   const askDelete = useRef(false);
+  const [editing, setEditing] = useState<ListItem | null>(null);
+  // The latest removed item holds the Undo toast; the count renews it when the same item goes twice.
+  const [removed, setRemoved] = useState<{ item: ListItem; n: number } | null>(
+    null,
+  );
 
   // A deleted list leaves the cache once this screen no longer observes it:
   // removed earlier, it would be refetched (a 404) before the navigation lands.
@@ -202,13 +210,31 @@ export function ListPage() {
           <ItemCards
             cards={cards}
             units={catalog.data.units}
-            // The edit sheet comes with Task 7.
-            onEdit={() => undefined}
+            onEdit={setEditing}
           />
         </>
       )}
       {/* The haul folds while the field has the focus: Task 8. */}
       <AddBar listId={id} listName={name} onFocusChange={() => undefined} />
+      {editing && catalog.data && (
+        <EditItem
+          key={editing.id}
+          listId={id}
+          item={editing}
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditing(null);
+          }}
+          onRemoved={(item) => {
+            setRemoved((last) => ({ item, n: (last?.n ?? 0) + 1 }));
+          }}
+          units={catalog.data.units}
+          catalog={catalog.data}
+        />
+      )}
+      {removed && (
+        <UndoRemove key={removed.n} listId={id} item={removed.item} />
+      )}
       <DeleteListsDialog
         lists={[{ id, name }]}
         open={deleting}
