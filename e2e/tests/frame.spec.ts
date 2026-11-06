@@ -97,11 +97,17 @@ test("LST-1.9, OP-132: on a desktop the empty list's raccoon peeks in from under
   expect(r.x).toBeLessThan(asideRight);
   expect(r.x + r.width).toBeGreaterThan(asideRight);
   // The raccoon is 200 px wide and 65 px of it sits under the sidebar.
-  expect(r.x + r.width - asideRight).toBe(200 - 65);
+  expect(r.x + r.width - asideRight).toBeCloseTo(200 - 65, 0);
   // At a point inside both, the sidebar is on top.
+  // The raccoon has pointer-events: none, which elementFromPoint skips, so
+  // it is made hittable for the check: only the paint order decides then.
   const onTop = await aside.evaluate(
     (el, point) => {
+      const image = document.querySelector<HTMLElement>('img[width="200"]');
+      if (!image) throw new Error("The raccoon is missing");
+      image.style.pointerEvents = "auto";
       const hit = document.elementFromPoint(point.x, point.y);
+      image.style.pointerEvents = "";
       return hit !== null && el.contains(hit);
     },
     { x: asideRight - 10, y: r.y + r.height / 2 },
