@@ -8,8 +8,8 @@ import { useAddItem } from "../use-items.ts";
 
 const formSchema = z.object({ name: itemNameSchema });
 
-// The add bar: a band in the page color, pinned to the bottom of the column
-// (ITM-2). The next item's ID is made up front and renewed after each add, so
+// The add bar: a band in the page color; the list page pins it, with the haul
+// under it, to the bottom of the column (ITM-2). The next item's ID is made up front and renewed after each add, so
 // every add is its own mutation scope. An empty name adds nothing, with no
 // message (LIM-2.2: the field's maxLength keeps the name short).
 export function AddBar({
@@ -37,7 +37,7 @@ export function AddBar({
       onSubmit={(event) => {
         void onSubmit(event);
       }}
-      className="sticky bottom-0 z-10 -mx-4 mt-auto -mb-6 flex gap-2 rounded-t-surface border-t border-border bg-background px-4 py-3 shadow-[0_-4px_12px_rgb(0_0_0/0.08)] md:-mx-6 md:px-6"
+      className="flex gap-2 rounded-t-surface border-t border-border bg-background px-4 py-3 shadow-[0_-4px_12px_rgb(0_0_0/0.08)] md:px-6"
     >
       <input
         {...register("name", {

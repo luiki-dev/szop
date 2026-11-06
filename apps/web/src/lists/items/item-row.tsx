@@ -7,7 +7,7 @@ import {
 } from "@szop/shared";
 
 // One item: the name, note, quantity and line total are a single button that
-// opens the edit; the checkbox (Task 8's `checkbox`) is its sibling, so it
+// opens the edit; the checkbox is its sibling, so it
 // only checks.
 export function ItemRow({
   item,

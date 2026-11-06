@@ -1,4 +1,5 @@
 import type { CatalogUnit, ItemCard, ListItem } from "@szop/shared";
+import { ItemCheckbox } from "./item-checkbox.tsx";
 import { ItemRow } from "./item-row.tsx";
 
 export function ItemCardsSkeleton() {
@@ -19,10 +20,12 @@ export function ItemCardsSkeleton() {
 // list that is not sorted (ORD-5.5). The card's header names the category and
 // counts what is left.
 export function ItemCards({
+  listId,
   cards,
   units,
   onEdit,
 }: {
+  listId: string;
   cards: ItemCard[];
   units: readonly CatalogUnit[];
   onEdit: (item: ListItem) => void;
@@ -60,6 +63,7 @@ export function ItemCards({
                 onEdit={() => {
                   onEdit(item);
                 }}
+                checkbox={<ItemCheckbox listId={listId} item={item} />}
               />
             ))}
           </ul>

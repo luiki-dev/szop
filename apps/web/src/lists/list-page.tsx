@@ -16,6 +16,7 @@ import { ApiRequestError, notSaved } from "../api/client.ts";
 import { NotFound } from "../not-found/not-found.tsx";
 import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
 import { AddBar } from "./items/add-bar.tsx";
+import { Haul } from "./items/haul.tsx";
 import { EditItem } from "./items/edit-item.tsx";
 import { ItemCards, ItemCardsSkeleton } from "./items/item-cards.tsx";
 import { UndoRemove } from "./items/undo-remove.tsx";
@@ -37,6 +38,7 @@ export function ListPage() {
   const queryClient = useQueryClient();
   const deleted = useRef(false);
   const askDelete = useRef(false);
+  const [barFocused, setBarFocused] = useState(false);
   const [editing, setEditing] = useState<ListItem | null>(null);
   // The latest removed item holds the Undo toast; the count renews it when the same item goes twice.
   const [removed, setRemoved] = useState<{ item: ListItem; n: number } | null>(
@@ -208,14 +210,25 @@ export function ListPage() {
             </p>
           )}
           <ItemCards
+            listId={id}
             cards={cards}
             units={catalog.data.units}
             onEdit={setEditing}
           />
         </>
       )}
-      {/* The haul folds while the field has the focus: Task 8. */}
-      <AddBar listId={id} listName={name} onFocusChange={() => undefined} />
+      {/* The add bar and the haul under it stay at the bottom of the column. */}
+      <div className="sticky bottom-0 z-10 -mx-4 mt-auto -mb-6 md:-mx-6">
+        <AddBar listId={id} listName={name} onFocusChange={setBarFocused} />
+        {query.data && catalog.data && (
+          <Haul
+            listId={id}
+            items={query.data.items}
+            units={catalog.data.units}
+            folded={barFocused}
+          />
+        )}
+      </div>
       {editing && catalog.data && (
         <EditItem
           key={editing.id}

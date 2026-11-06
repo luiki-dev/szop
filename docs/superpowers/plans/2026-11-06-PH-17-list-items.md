@@ -258,14 +258,14 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
 - Consumes: `haulItems`, `lineTotal`, `formatPrice`, `formatQuantity` (Task 1); `useUpdateItem` (Task 4); `AddBar`'s `onFocusChange` (Task 5).
 - Produces: `ItemCheckbox({ listId, item })`: a checkbox named after the item, sending `checked: true` or `false`. `fitChips(widths: readonly number[], available: number, moreWidth: number, gap: number): number`: how many chips fit in one row, leaving room for "+N more" when not all fit. `Haul({ listId, items, folded }: { listId: string; items: ListItem[]; folded: boolean })`: hidden when the list has no items; collapsed with the handle, "The haul", "*k* of *n* items", the progress bar (`role="progressbar"` with `aria-valuenow` and `aria-valuemax`), the chips (measured with a `ResizeObserver` and `fitChips`); `folded` shows only "The haul · *k* of *n* items"; the drawer (Base UI Drawer, 75% of the height, a dialog named "The haul").
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
   - `fit-chips.test.ts`: all fit → all, no "+N more"; one too many → leaves room for "+N more"; none fit → 0.
   - `haul.test.tsx`: `"ITM-7.1: checking moves the item to the haul"` (out of its card, its chip first); `"ORD-1.3: the chips are newest first"`; `"ORD-1.4: a chip puts its item back"` (`checked: false`, named "Put Bananas back"); a chip shows the name and line total, or the name alone; "Check items off to drop them here" before any check; `"ORD-1.5: the header counts k of n items"`; `"ORD-1.6: the header and +N more open the drawer, Esc closes it"`; `"ORD-1.7: the drawer's ↶ puts an item back"`; `"ORD-1.8: with the add bar focused the haul folds to one line"`; `"ORD-1.10: …"` the names of chips, "+N more", the dialog and the progress bar; `"ORD-2.5: the drawer lists newest first"`; `"ORD-1.2: a card disappears when its last item is checked"`; `"ORD-1.9: …"` "Check items off to drop them here" before any check.
   - `e2e/tests/items.spec.ts`: check two items, put one back from a chip and one from the drawer opened by dragging the handle up; on a desktop the haul and the drawer stay within the 720 px column (`"ORD-1.11: …"`).
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test src/lists/items`. Expected: FAIL.
-- [ ] **Step 3: Implement** to the spec's [Checking and the haul](../specs/2026-11-06-PH-17-list-items-design.md#checking-and-the-haul) and `haul-ph17.png`, without sums and "Put all back"; the move into the haul in 150 to 200 ms under `motion-safe:` (ORD-1.1); chips cut with "…" at about 12 characters (`max-w-[12ch] truncate`).
-- [ ] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(ordering): check items into the haul and put them back`.
+- [x] **Step 2: Run** `pnpm --filter @szop/web test src/lists/items`. Expected: FAIL.
+- [x] **Step 3: Implement** to the spec's [Checking and the haul](../specs/2026-11-06-PH-17-list-items-design.md#checking-and-the-haul) and `haul-ph17.png`, without sums and "Put all back"; the move into the haul in 150 to 200 ms under `motion-safe:` (ORD-1.1); chips cut with "…" at about 12 characters (`max-w-[12ch] truncate`).
+- [x] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
+- [x] **Step 5: Commit** `feat(ordering): check items into the haul and put them back`.
 
 ### Task 9: The sort setting and the checkboxes' side
 

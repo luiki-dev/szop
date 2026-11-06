@@ -144,3 +144,11 @@
 .base-ui-disable-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* A chip arrives in the haul (ORD-1.1); used under motion-safe: only. */
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.9);
+  }
+}

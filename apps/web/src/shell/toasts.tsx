@@ -34,11 +34,11 @@ function ToastList() {
 }
 
 // One toast at a time: a new one replaces the shown one. The viewport is a
-// polite live region, centered at 75% of the width, above the add bar.
+// polite live region, centered at 75% of the width, above the add bar and the haul.
 export function Toasts() {
   return (
     <Toast.Provider toastManager={toastManager} limit={1}>
-      <Toast.Viewport className="fixed bottom-24 left-1/2 z-50 w-3/4 -translate-x-1/2">
+      <Toast.Viewport className="fixed bottom-48 left-1/2 z-50 w-3/4 -translate-x-1/2">
         <ToastList />
       </Toast.Viewport>
     </Toast.Provider>
