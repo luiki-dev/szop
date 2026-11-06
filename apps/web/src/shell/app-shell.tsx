@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet.tsx";
 import type { RouteHandle } from "../routes.tsx";
 import { Menu } from "./menu.tsx";
+import { Toasts } from "./toasts.tsx";
 import { desktopQuery, useMediaQuery } from "./use-media-query.ts";
 
 function isRouteHandle(handle: unknown): handle is RouteHandle {
@@ -145,6 +146,7 @@ export function AppShell() {
       </main>
       {/* A new page starts at the top; Back and Forward restore the scroll. */}
       <ScrollRestoration />
+      <Toasts />
     </div>
   );
 }

@@ -176,17 +176,17 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
   - `useSortByCategory(listId: string)`: `mutate(value: boolean)`, scope `list-${listId}`; its failure says "Sorting wasn't saved. Check your connection and try again." (Claude's call: the setting has no item name; record it in ADR 0071's "Settled while building").
   - On success each writes the server's item into the cache.
 
-- [ ] **Step 1: Write the failing tests** in `use-items.test.tsx` (`renderHook` with a fresh `QueryClient`, MSW):
+- [x] **Step 1: Write the failing tests** in `use-items.test.tsx` (`renderHook` with a fresh `QueryClient`, MSW):
   - `"APP-7.1: an added item is in the list before the server answers"` (MSW `delay("infinite")`).
   - `"APP-7.2: a refused change goes back and says it wasn't saved"`: 500 on the update; the item shows its old name, the toast says "Bananas wasn't saved. Check your connection and try again.", the list is refetched.
   - Review Focus 1: two updates of one item, the first held; the second request is sent only after the first answer; the cache ends with the second's state.
   - Review Focus 2: item A's update fails while item B's is held; B keeps its optimistic state.
   - `deleteItem` treats 404 as done; `remember` keeps the items when a rename answers.
   - `toasts.test.tsx`: a second toast replaces the first; `showNotSaved`'s text; the region is polite (`aria-live="polite"`).
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test src/lists/use-items src/shell/toasts src/api`. Expected: FAIL.
-- [ ] **Step 3: Implement** the client functions, `toasts.tsx`, `use-items.ts`; add the two dependencies with `pnpm --filter @szop/web add react-hook-form @hookform/resolvers`.
-- [ ] **Step 4: Run** `pnpm check`. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(items): add optimistic item changes and the toast region`.
+- [x] **Step 2: Run** `pnpm --filter @szop/web test src/lists/use-items src/shell/toasts src/api`. Expected: FAIL.
+- [x] **Step 3: Implement** the client functions, `toasts.tsx`, `use-items.ts`; add the two dependencies with `pnpm --filter @szop/web add react-hook-form @hookform/resolvers`.
+- [x] **Step 4: Run** `pnpm check`. Expected: PASS.
+- [x] **Step 5: Commit** `feat(items): add optimistic item changes and the toast region`.
 
 ### Task 5: The list screen and the add bar
 

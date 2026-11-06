@@ -16,6 +16,7 @@ const list = {
   name: "Weekly shop",
   sortByCategory: true,
   createdAt: "2026-10-30T12:00:00.000Z",
+  items: [],
 };
 
 function setup() {

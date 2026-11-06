@@ -8,6 +8,7 @@ import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { server } from "../test/server.ts";
+import { bananas, listWith } from "../test/items.ts";
 import { threeLists } from "../test/lists.ts";
 import {
   useCreateList,
@@ -43,7 +44,7 @@ describe("the lists hooks", () => {
       }),
       http.get(`/api/lists/${id}`, () => {
         calls.list += 1;
-        return HttpResponse.json(party);
+        return HttpResponse.json(listWith());
       }),
       http.post("/api/lists", () =>
         HttpResponse.json({ ...party, name: "Fresh" }, { status: 201 }),
@@ -90,6 +91,30 @@ describe("the lists hooks", () => {
     await waitFor(() => {
       expect(client.getQueryData(["lists", id])).toMatchObject({
         name: "Renamed",
+      });
+    });
+  });
+
+  it("ITM-1.1: a rename keeps the items of the list on its screen", async () => {
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.patch(`/api/lists/${id}`, () =>
+        HttpResponse.json({ ...party, name: "Renamed" }),
+      ),
+      http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+    );
+    const client = new QueryClient();
+    client.setQueryData(["lists", id], listWith(bananas));
+    const { result } = renderHook(() => useRenameList(id), {
+      wrapper: wrapper(client),
+    });
+
+    result.current.mutate("Renamed");
+
+    await waitFor(() => {
+      expect(client.getQueryData(["lists", id])).toMatchObject({
+        name: "Renamed",
+        items: [bananas],
       });
     });
   });
