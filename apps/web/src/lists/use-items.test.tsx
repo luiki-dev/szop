@@ -459,7 +459,7 @@ describe("the item hooks, edge by edge", () => {
     },
   );
 
-  it("a refused restore names the item", async () => {
+  it("APP-7.2: a refused restore names the item", async () => {
     const shown = vi.spyOn(toasts.toastManager, "add");
     server.use(
       withSession,
@@ -586,6 +586,49 @@ describe("the item hooks, edge by edge", () => {
       expect(result.current.sort.isSuccess).toBe(true);
     });
     expect(client.getQueryData<ListWithItems>(key)?.sortByCategory).toBe(true);
+  });
+
+  it("ORD-1.1: a sort change in flight in one list does not hold back another list's", async () => {
+    const otherList = "other-list";
+    const held = gate();
+    const received: string[] = [];
+    server.use(
+      withSession,
+      http.patch(listPath, async () => {
+        received.push("first");
+        await held.opened;
+        return HttpResponse.json(listWith());
+      }),
+      http.patch(`/api/lists/${otherList}`, () => {
+        received.push("second");
+        return HttpResponse.json(listWith());
+      }),
+      http.get("/api/lists/:id", () => delay("infinite")),
+    );
+    const { client, wrapper } = setup(listWith());
+    client.setQueryData(["lists", otherList], listWith());
+    const { result } = renderHook(
+      () => ({
+        first: useSortByCategory(listId),
+        second: useSortByCategory(otherList),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.first.mutate(false);
+    });
+    await waitFor(() => {
+      expect(received).toEqual(["first"]);
+    });
+    act(() => {
+      result.current.second.mutate(false);
+    });
+
+    await waitFor(() => {
+      expect(received).toEqual(["first", "second"]);
+    });
+    held.open();
   });
 
   it("a change touches only its own list: other queries run on and the list is asked once", async () => {

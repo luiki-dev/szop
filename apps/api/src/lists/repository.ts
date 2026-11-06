@@ -72,9 +72,9 @@ export async function updateList(
         eq(lists.workspaceId, context.workspaceId),
         eq(lists.id, id),
         or(
-          // Stryker disable next-line ConditionalExpression: `ne(column, undefined)` is SQL NULL, which `or` ignores, so the condition is the same
+          // Stryker disable next-line ConditionalExpression: only the `false` variant survives (the `true` variant is killed): `ne(column, undefined)` is SQL NULL, which `or` ignores
           name === undefined ? undefined : ne(lists.name, name),
-          // Stryker disable next-line ConditionalExpression: same, a NULL condition changes nothing in `or`
+          // Stryker disable next-line ConditionalExpression: same, only the `false` variant survives
           sortByCategory === undefined
             ? undefined
             : ne(lists.sortByCategory, sortByCategory),

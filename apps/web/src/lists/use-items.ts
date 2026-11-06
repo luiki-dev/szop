@@ -173,10 +173,9 @@ export function useRestoreItem(listId: string, itemId: string) {
 
 export function useSortByCategory(listId: string) {
   const queryClient = useQueryClient();
-  // Stryker disable next-line StringLiteral: the scope only has to differ from every item ID, and `` does
   const scope = `list-${listId}`;
   const setSort = (value: boolean | undefined) => {
-    // Stryker disable next-line ConditionalExpression: undefined only comes with no cached list, where setQueryData's updater leaves the cache alone
+    // Stryker disable next-line ConditionalExpression: only `if (false)` survives (the `true` variant is killed): undefined comes only with no cached list, where setQueryData's updater leaves the cache alone
     if (value === undefined) return;
     queryClient.setQueryData<ListWithItems>(
       listKey(listId),

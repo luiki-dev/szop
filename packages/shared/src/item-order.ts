@@ -10,7 +10,7 @@ export type ItemCard =
 const byId = (a: ListItem, b: ListItem) => {
   // Stryker disable next-line EqualityOperator: IDs are unique, so `<=` differs only for an item against itself
   if (a.id < b.id) return -1;
-  // Stryker disable next-line ConditionalExpression,EqualityOperator: for the sort, a positive result and 0 both leave a pair in place, and IDs are unique
+  // Stryker disable next-line ConditionalExpression,EqualityOperator: `? 1 : 0` to `0` survives only because V8's sort treats any result >= 0 alike (engine-dependent), and IDs are unique, so `>=` and `<=` differ only for an item against itself
   return a.id > b.id ? 1 : 0;
 };
 const byName = (a: ListItem, b: ListItem) =>
