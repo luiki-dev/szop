@@ -338,7 +338,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-44 Leaner demo check](#ph-44-leaner-demo-check) | 🚧 In progress | [Spec](superpowers/specs/2026-11-03-PH-44-leaner-demo-check-design.md) | [Plan](superpowers/plans/2026-11-03-PH-44-leaner-demo-check.md) | [#378](https://github.com/luiki-dev/szop/pull/378) | [#376](https://github.com/luiki-dev/szop/issues/376) |
 | [PH-16c Managing lists](#ph-16c-managing-lists) | ✅ Done | [Spec](superpowers/specs/2026-11-04-PH-16c-managing-lists-design.md) | [Plan](superpowers/plans/2026-11-04-PH-16c-managing-lists.md) | [#384](https://github.com/luiki-dev/szop/pull/384) | [#315](https://github.com/luiki-dev/szop/issues/315) |
 | [PH-16d Resilient changes](#ph-16d-resilient-changes) | 🚧 In progress | [Spec](superpowers/specs/2026-11-05-PH-16d-resilient-changes-design.md) | [Plan](superpowers/plans/2026-11-05-PH-16d-resilient-changes.md) | [#396](https://github.com/luiki-dev/szop/pull/396) | [#382](https://github.com/luiki-dev/szop/issues/382) |
-| [PH-17 List items](#ph-17-list-items) | 🚧 In progress | — | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
+| [PH-17 List items](#ph-17-list-items) | 🚧 In progress | [Spec](superpowers/specs/2026-11-06-PH-17-list-items-design.md) | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
 | [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
 | [PH-39 Redis in the stack](#ph-39-redis-in-the-stack) | ⬜ Not started | — | — | — | [#235](https://github.com/luiki-dev/szop/issues/235) |
@@ -483,7 +483,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-17 List items
 
 - **Goal:** a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added. Checked items drop into the haul, a dark tray at the bottom of the list, as a row of chips with the most recent first; a tap on a chip puts the item back. The haul shows how many items are done, and its drawer shows every checked item.
-- **Delivers:** [ITM-1](requirements/ITM-list-items.md#itm-1), [ITM-6](requirements/ITM-list-items.md#itm-6), [ITM-7](requirements/ITM-list-items.md#itm-7), [ORD-1](requirements/ORD-list-display-and-ordering.md#ord-1), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2), [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.1 and APP-3.2, messages and undoing a removal), [APP-6](requirements/APP-app-wide-behavior.md#app-6), [APP-7](requirements/APP-app-wide-behavior.md#app-7), [LIM-2](requirements/LIM-limits.md#lim-2) (part: item names and notes), [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.5, a first change that refers to default data), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.10 for references between records, [ADR 0060](decisions/0060-workspace-from-default-data-phase-details.md#changes-to-the-roadmap)); optimistic updates; forms with React Hook Form; the haul with its chips and drawer ([ADR 0022](decisions/0022-ring-tail-redesign.md)).
+- **Delivers:** [ITM-1](requirements/ITM-list-items.md#itm-1) (part: ITM-1.1 and ITM-1.2; prices in a fixed €), [ITM-2](requirements/ITM-list-items.md#itm-2) (part: ITM-2.3 and ITM-2.4, adding a typed name), [ITM-6](requirements/ITM-list-items.md#itm-6), [ITM-7](requirements/ITM-list-items.md#itm-7), [ORD-1](requirements/ORD-list-display-and-ordering.md#ord-1) (all but the amounts of ORD-1.5 and ORD-1.8), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2), [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.1 and APP-3.2, messages and undoing a removal), [APP-6](requirements/APP-app-wide-behavior.md#app-6), [APP-7](requirements/APP-app-wide-behavior.md#app-7), [APR-2](requirements/APR-appearance.md#apr-2), [LIM-2](requirements/LIM-limits.md#lim-2) (part: item names and notes), [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.5, a first change that refers to default data), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.10 for references between records, [ADR 0060](decisions/0060-workspace-from-default-data-phase-details.md#changes-to-the-roadmap)); optimistic updates; forms with React Hook Form; the haul with its chips and drawer ([ADR 0022](decisions/0022-ring-tail-redesign.md)).
 - **Merged back from:** PH-17a List items and PH-17b The haul, split from PH-17 by [ADR 0051](decisions/0051-acceptance-criteria.md), decision 16. The owner merged them back as an experiment with one large phase, against [ADR 0014](decisions/0014-roadmap.md), decision 6; the rules and results are in the [context-size audit](audits/2026-11-06-ph-17-context-experiment.md).
 - **Depends on:** —
 - **Owner steps:** none.
@@ -529,7 +529,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-21 Shop in a store
 
 - **Goal:** in the store, a user checks items off into the haul and sees in it the spent and remaining totals; afterwards, "Put all back" resets the list for next week.
-- **Delivers:** [ITM-8](requirements/ITM-list-items.md#itm-8) (the amounts in the haul), [LST-5](requirements/LST-shopping-lists.md#lst-5); completes [UC-3](requirements/UC-use-cases.md#uc-3-shop-in-a-store) and [UC-4](requirements/UC-use-cases.md#uc-4-reuse-a-weekly-list).
+- **Delivers:** [ITM-8](requirements/ITM-list-items.md#itm-8) (the amounts in the haul), [ITM-1](requirements/ITM-list-items.md#itm-1) (the rest: ITM-1.3, the list owner's currency), [ORD-1](requirements/ORD-list-display-and-ordering.md#ord-1) (the rest: the amounts of ORD-1.5 and ORD-1.8, [ADR 0071](decisions/0071-list-items-phase-details.md#changes-to-the-roadmap)), [LST-5](requirements/LST-shopping-lists.md#lst-5); completes [UC-3](requirements/UC-use-cases.md#uc-3-shop-in-a-store) and [UC-4](requirements/UC-use-cases.md#uc-4-reuse-a-weekly-list).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -547,7 +547,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-23 Smart input
 
 - **Goal:** typing into a list's input suggests catalog products, and picking one adds it with its defaults. Enter adds the typed text as a one-off item, with an offer to save it to the catalog, and a duplicate offers to increase the existing item's quantity instead.
-- **Delivers:** [ITM-2](requirements/ITM-list-items.md#itm-2), [ITM-3](requirements/ITM-list-items.md#itm-3), [ITM-4](requirements/ITM-list-items.md#itm-4); completes [UC-1](requirements/UC-use-cases.md#uc-1-first-visit-as-a-guest).
+- **Delivers:** [ITM-2](requirements/ITM-list-items.md#itm-2) (the rest: ITM-2.1, ITM-2.2 and ITM-2.5; ITM-2.3 and ITM-2.4 came with [PH-17](#ph-17-list-items)), [ITM-3](requirements/ITM-list-items.md#itm-3), [ITM-4](requirements/ITM-list-items.md#itm-4); completes [UC-1](requirements/UC-use-cases.md#uc-1-first-visit-as-a-guest).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -556,7 +556,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-24 Catalog browser
 
 - **Goal:** from a list, a user browses the catalog's category tree, selects several products and adds them in one go.
-- **Delivers:** [ITM-5](requirements/ITM-list-items.md#itm-5); completes [UC-2](requirements/UC-use-cases.md#uc-2-plan-a-grocery-trip).
+- **Delivers:** [ITM-5](requirements/ITM-list-items.md#itm-5) (with ITM-5.3, moved from [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5).2 by [ADR 0071](decisions/0071-list-items-phase-details.md#changes-to-the-roadmap)); completes [UC-2](requirements/UC-use-cases.md#uc-2-plan-a-grocery-trip).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.

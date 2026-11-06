@@ -125,24 +125,24 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [ITM-1](ITM-list-items.md#itm-1) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
-| [ITM-2](ITM-list-items.md#itm-2) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [ITM-1](ITM-list-items.md#itm-1) | 🎯 MVP | 🚧 In progress | 0 of 3 | ✅ Finalized |
+| [ITM-2](ITM-list-items.md#itm-2) | 🎯 MVP | 🚧 In progress | 0 of 5 | ❔ Not finalized |
 | [ITM-3](ITM-list-items.md#itm-3) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
 | [ITM-4](ITM-list-items.md#itm-4) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
-| [ITM-5](ITM-list-items.md#itm-5) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
-| [ITM-6](ITM-list-items.md#itm-6) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
-| [ITM-7](ITM-list-items.md#itm-7) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [ITM-5](ITM-list-items.md#itm-5) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
+| [ITM-6](ITM-list-items.md#itm-6) | 🎯 MVP | 🚧 In progress | 0 of 3 | ✅ Finalized |
+| [ITM-7](ITM-list-items.md#itm-7) | 🎯 MVP | 🚧 In progress | 0 of 4 | ✅ Finalized |
 | [ITM-8](ITM-list-items.md#itm-8) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
 
 ### List display and ordering (ORD)
 
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
-| [ORD-1](ORD-list-display-and-ordering.md#ord-1) | 🎯 MVP | ❔ Draft | 0 of 11 | ❔ Not finalized |
-| [ORD-2](ORD-list-display-and-ordering.md#ord-2) | 🎯 MVP | 🚧 In progress | 0 of 5 | ❔ Not finalized |
-| [ORD-3](ORD-list-display-and-ordering.md#ord-3) | 🎯 MVP | 🚧 In progress | 0 of 1 | ❔ Not finalized |
+| [ORD-1](ORD-list-display-and-ordering.md#ord-1) | 🎯 MVP | 🚧 In progress | 0 of 11 | ❔ Not finalized |
+| [ORD-2](ORD-list-display-and-ordering.md#ord-2) | 🎯 MVP | 🚧 In progress | 0 of 5 | ✅ Finalized |
+| [ORD-3](ORD-list-display-and-ordering.md#ord-3) | 🎯 MVP | 🚧 In progress | 0 of 1 | ✅ Finalized |
 | [ORD-4](ORD-list-display-and-ordering.md#ord-4) | ✖️ Dropped | — | — | — |
-| [ORD-5](ORD-list-display-and-ordering.md#ord-5) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
+| [ORD-5](ORD-list-display-and-ordering.md#ord-5) | 🎯 MVP | 🚧 In progress | 0 of 5 | ✅ Finalized |
 
 ### Categories (CAT)
 
@@ -211,6 +211,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [APR-1](APR-appearance.md#apr-1) | 🎯 MVP | ✅ Done | 5 of 5 | ✅ Finalized |
+| [APR-2](APR-appearance.md#apr-2) | 🎯 MVP | 🚧 In progress | 0 of 3 | ✅ Finalized |
 
 ### Language (LNG)
 
@@ -227,8 +228,8 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 | [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | 🚧 In progress | 0 of 3 | ❔ Not finalized |
 | [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | 🚧 In progress | 3 of 3 | ❔ Not finalized |
 | [APP-5](APP-app-wide-behavior.md#app-5) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
-| [APP-6](APP-app-wide-behavior.md#app-6) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
-| [APP-7](APP-app-wide-behavior.md#app-7) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
+| [APP-6](APP-app-wide-behavior.md#app-6) | 🎯 MVP | 🚧 In progress | 0 of 2 | ✅ Finalized |
+| [APP-7](APP-app-wide-behavior.md#app-7) | 🎯 MVP | 🚧 In progress | 0 of 2 | ✅ Finalized |
 
 ### Non-functional requirements (NFR)
 

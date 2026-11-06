@@ -42,8 +42,8 @@ The app tells the user what happened and what to do, and asks for confirmation o
 
 | ID | Criterion | Status |
 |---|---|---|
-| APP-3.1 | Messages appear as toasts that say what happened and what to do; no message is a generic "Something went wrong". | ❔ Draft |
-| APP-3.2 | An action that can be reversed offers an undo instead of asking "Are you sure?". | ❔ Draft · [OP-051](https://github.com/luiki-dev/szop/issues/103) |
+| APP-3.1 | Messages appear as toasts that say what happened and what to do; no message is a generic "Something went wrong". | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
+| APP-3.2 | An action that can be reversed offers an Undo in a toast for about 5 seconds instead of asking "Are you sure?". | 🚧 [PH-17](../roadmap.md#ph-17-list-items) · [OP-051](https://github.com/luiki-dev/szop/issues/103) |
 | APP-3.3 | An action that cannot be undone, such as deleting a list or the account, asks for confirmation first; Cancel has the focus, and Esc cancels. When the action fails, the confirmation stays open and says so. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) · lists; the account in its phase |
 
 ## APP-4
@@ -71,22 +71,22 @@ An address that leads nowhere shows a page saying so.
 
 ## APP-6
 
-🎯 [MVP] · ❔ Draft (0 of 2) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (0 of 2) · ✅ Criteria finalized ([PH-17](../roadmap.md#ph-17-list-items))
 
 Forms are clear about what they ask and what is wrong.
 
 | ID | Criterion | Status |
 |---|---|---|
-| APP-6.1 | Every form field has a visible label. The list's add bar is the one exception: its placeholder is "+ Add item", its accessible name says which list it adds to, and its button says "Add". | ❔ Draft |
-| APP-6.2 | An error appears under its field, in words, when the user leaves the field and when the form is submitted. | ❔ Draft |
+| APP-6.1 | Every form field has a visible label. The list's add bar is the one exception: its placeholder is "+ Add item", its accessible name says which list it adds to, and its button says "Add". | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
+| APP-6.2 | An error appears under its field, in words, when the user leaves the field and when the form is submitted. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
 
 ## APP-7
 
-🎯 [MVP] · ❔ Draft (0 of 2) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (0 of 2) · ✅ Criteria finalized ([PH-17](../roadmap.md#ph-17-list-items))
 
 Changes show at once, and a change that fails is undone and explained.
 
 | ID | Criterion | Status |
 |---|---|---|
-| APP-7.1 | Checking, adding and editing show their result at once, with no spinner. | ❔ Draft |
-| APP-7.2 | When the server refuses or loses a change, the screen goes back to what the server holds and a message says the change was not saved. | ❔ Draft · [OP-040](https://github.com/luiki-dev/szop/issues/99) |
+| APP-7.1 | Checking, adding and editing show their result at once, with no spinner. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
+| APP-7.2 | When the server refuses or loses a change, the screen goes back to what the server holds and a message says the change was not saved. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) · [OP-040](https://github.com/luiki-dev/szop/issues/99) |
