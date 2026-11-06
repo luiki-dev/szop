@@ -51,7 +51,7 @@ The body's schema goes into `@szop/shared` next to the other lists schemas. Neit
 
 The SPA's API client learns `DELETE` and a `204` without a body; both new calls go through it. The limit of 100 is above any guest's lists for now; [PH-20](../../roadmap.md#ph-20-quotas-and-rate-limits)'s quotas will bound the lists themselves.
 
-Rows are deleted from `lists`; no soft delete. Items, when [PH-17a](../../roadmap.md#ph-17a-list-items) adds them, reference their list with `ON DELETE CASCADE`.
+Rows are deleted from `lists`; no soft delete. Items, when [PH-17a](../../roadmap.md#ph-17-list-items) adds them, reference their list with `ON DELETE CASCADE`.
 
 ### The confirmation dialog
 

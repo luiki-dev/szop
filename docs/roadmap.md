@@ -42,8 +42,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-44 Leaner demo check](#ph-44-leaner-demo-check)
   - [PH-16c Managing lists](#ph-16c-managing-lists)
   - [PH-16d Resilient changes](#ph-16d-resilient-changes)
-  - [PH-17a List items](#ph-17a-list-items)
-  - [PH-17b The haul](#ph-17b-the-haul)
+  - [PH-17 List items](#ph-17-list-items)
   - [PH-18 Registration and login](#ph-18-registration-and-login)
   - [PH-19 Guest data on login](#ph-19-guest-data-on-login)
   - [PH-39 Redis in the stack](#ph-39-redis-in-the-stack)
@@ -339,8 +338,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-44 Leaner demo check](#ph-44-leaner-demo-check) | 🚧 In progress | [Spec](superpowers/specs/2026-11-03-PH-44-leaner-demo-check-design.md) | [Plan](superpowers/plans/2026-11-03-PH-44-leaner-demo-check.md) | [#378](https://github.com/luiki-dev/szop/pull/378) | [#376](https://github.com/luiki-dev/szop/issues/376) |
 | [PH-16c Managing lists](#ph-16c-managing-lists) | ✅ Done | [Spec](superpowers/specs/2026-11-04-PH-16c-managing-lists-design.md) | [Plan](superpowers/plans/2026-11-04-PH-16c-managing-lists.md) | [#384](https://github.com/luiki-dev/szop/pull/384) | [#315](https://github.com/luiki-dev/szop/issues/315) |
 | [PH-16d Resilient changes](#ph-16d-resilient-changes) | 🚧 In progress | [Spec](superpowers/specs/2026-11-05-PH-16d-resilient-changes-design.md) | [Plan](superpowers/plans/2026-11-05-PH-16d-resilient-changes.md) | [#396](https://github.com/luiki-dev/szop/pull/396) | [#382](https://github.com/luiki-dev/szop/issues/382) |
-| [PH-17a List items](#ph-17a-list-items) | ⬜ Not started | — | — | — | [#290](https://github.com/luiki-dev/szop/issues/290) |
-| [PH-17b The haul](#ph-17b-the-haul) | ⬜ Not started | — | — | — | [#291](https://github.com/luiki-dev/szop/issues/291) |
+| [PH-17 List items](#ph-17-list-items) | 🚧 In progress | — | — | — | [#46](https://github.com/luiki-dev/szop/issues/46) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
 | [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
 | [PH-39 Redis in the stack](#ph-39-redis-in-the-stack) | ⬜ Not started | — | — | — | [#235](https://github.com/luiki-dev/szop/issues/235) |
@@ -380,7 +378,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-40 Acceptance criteria
 
 - **Goal:** every requirement has acceptance criteria with a status, so the requirements show what each one means in detail, what is delivered and what is left. The requirements live in one file per area, with an index that holds the status of every requirement.
-- **Delivers:** ADR 0051 (acceptance criteria and their status); `docs/requirements/` split into an index, one file per area and the use cases, with every link updated; acceptance criteria for every requirement, written from the decisions taken so far, ✅ where delivered and covered by a test whose title carries the criterion's ID; a new area, APP (app-wide behavior), and NFR-4 (security); tests for five delivered criteria that had none; PH-17 split into [PH-17a](#ph-17a-list-items) and [PH-17b](#ph-17b-the-haul), and the new requirements given to the phases that deliver them; the process documents updated ([ADR 0004](decisions/0004-implementation-process.md)'s table of sources, the [definition of done](development/definition-of-done.md), the PR template, [testing.md](development/testing.md), [project-tracking.md](development/project-tracking.md), `CLAUDE.md`); the roadmap changes the criteria call for ([ADR 0051](decisions/0051-acceptance-criteria.md)).
+- **Delivers:** ADR 0051 (acceptance criteria and their status); `docs/requirements/` split into an index, one file per area and the use cases, with every link updated; acceptance criteria for every requirement, written from the decisions taken so far, ✅ where delivered and covered by a test whose title carries the criterion's ID; a new area, APP (app-wide behavior), and NFR-4 (security); tests for five delivered criteria that had none; PH-17 split into [PH-17a](#ph-17-list-items) and [PH-17b](#ph-17-list-items), and the new requirements given to the phases that deliver them; the process documents updated ([ADR 0004](decisions/0004-implementation-process.md)'s table of sources, the [definition of done](development/definition-of-done.md), the PR template, [testing.md](development/testing.md), [project-tracking.md](development/project-tracking.md), `CLAUDE.md`); the roadmap changes the criteria call for ([ADR 0051](decisions/0051-acceptance-criteria.md)).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
@@ -482,25 +480,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#382](https://github.com/luiki-dev/szop/issues/382).
 
-### PH-17a List items
+### PH-17 List items
 
-- **Goal:** a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added. Checked items leave the list for a plain section of checked items, which the haul replaces in [PH-17b](#ph-17b-the-haul).
-- **Delivers:** [ITM-1](requirements/ITM-list-items.md#itm-1), [ITM-6](requirements/ITM-list-items.md#itm-6), [ITM-7](requirements/ITM-list-items.md#itm-7), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2) (part: the list's order, ORD-2.1 to ORD-2.4), [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5) (part: ORD-5.1, ORD-5.2 and ORD-5.4), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.1 and APP-3.2, messages and undoing a removal), [APP-6](requirements/APP-app-wide-behavior.md#app-6), [APP-7](requirements/APP-app-wide-behavior.md#app-7), [LIM-2](requirements/LIM-limits.md#lim-2) (part: item names and notes), [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.5, a first change that refers to default data), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.10 for references between records, [ADR 0060](decisions/0060-workspace-from-default-data-phase-details.md#changes-to-the-roadmap)); optimistic updates; forms with React Hook Form.
-- **Split from:** PH-17 List items, now retired: with the haul it held about 40 acceptance criteria and two new concepts, the list's items with their forms and optimistic updates, and the haul with its drawer ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0051](decisions/0051-acceptance-criteria.md), decision 16). The haul became PH-17b.
+- **Goal:** a user adds items to a list by name, edits any of their fields, checks, unchecks and removes them, and sees the list sorted by category order or in the order they were added. Checked items drop into the haul, a dark tray at the bottom of the list, as a row of chips with the most recent first; a tap on a chip puts the item back. The haul shows how many items are done, and its drawer shows every checked item.
+- **Delivers:** [ITM-1](requirements/ITM-list-items.md#itm-1), [ITM-6](requirements/ITM-list-items.md#itm-6), [ITM-7](requirements/ITM-list-items.md#itm-7), [ORD-1](requirements/ORD-list-display-and-ordering.md#ord-1), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2), [ORD-3](requirements/ORD-list-display-and-ordering.md#ord-3), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5), [APP-3](requirements/APP-app-wide-behavior.md#app-3) (part: APP-3.1 and APP-3.2, messages and undoing a removal), [APP-6](requirements/APP-app-wide-behavior.md#app-6), [APP-7](requirements/APP-app-wide-behavior.md#app-7), [LIM-2](requirements/LIM-limits.md#lim-2) (part: item names and notes), [ACC-1](requirements/ACC-accounts-and-guest-mode.md#acc-1) (part: ACC-1.5, a first change that refers to default data), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.10 for references between records, [ADR 0060](decisions/0060-workspace-from-default-data-phase-details.md#changes-to-the-roadmap)); optimistic updates; forms with React Hook Form; the haul with its chips and drawer ([ADR 0022](decisions/0022-ring-tail-redesign.md)).
+- **Merged back from:** PH-17a List items and PH-17b The haul, split from PH-17 by [ADR 0051](decisions/0051-acceptance-criteria.md), decision 16. The owner merged them back as an experiment with one large phase, against [ADR 0014](decisions/0014-roadmap.md), decision 6; the rules and results are in the [context-size audit](audits/2026-11-06-ph-17-context-experiment.md).
 - **Depends on:** —
 - **Owner steps:** none.
 - **Expected path:** full.
-- **Open points:** the sub-issues of [#290](https://github.com/luiki-dev/szop/issues/290).
-
-### PH-17b The haul
-
-- **Goal:** checked items drop into the haul, a dark tray at the bottom of the list, as a row of chips with the most recent first; a tap on a chip puts the item back. The haul shows how many items are done, and its drawer shows every checked item.
-- **Delivers:** [ORD-1](requirements/ORD-list-display-and-ordering.md#ord-1), [ORD-2](requirements/ORD-list-display-and-ordering.md#ord-2) (part: ORD-2.5, the haul's order), [ORD-5](requirements/ORD-list-display-and-ordering.md#ord-5) (part: ORD-5.3, checked items in the haul with the setting off); the haul with its chips and drawer ([ADR 0022](decisions/0022-ring-tail-redesign.md)).
-- **Split from:** PH-17 List items, now retired (see [PH-17a](#ph-17a-list-items)).
-- **Depends on:** —
-- **Owner steps:** none.
-- **Expected path:** full.
-- **Open points:** the sub-issues of [#291](https://github.com/luiki-dev/szop/issues/291).
+- **Open points:** the sub-issues of [#46](https://github.com/luiki-dev/szop/issues/46).
 
 ### PH-18 Registration and login
 

@@ -47,7 +47,7 @@ PH-15 is split into PH-15a Seed catalog, read-only and PH-15b Mutation testing. 
 - Every API error is `{ "error": { "code", "message" } }`. The codes: `invalid_input` (400), `forbidden_cross_site` (403), `not_found` (404), `unsupported_media_type` (415), any other 4xx as the snake-case status text, and `internal_error` (500, always "Internal server error"; the error's own text is only logged). A response that fails its schema is a 500.
 - A route that declares a response schema is serialized through it; a new route does the same, for each status it can return.
 - `compareNames` uses the collator's default sensitivity, so "milk" and "Milk" sort next to each other without being equal.
-- The category order rule and `compareNames` live in `packages/shared`, where the list of [PH-17a](../roadmap.md#ph-17a-list-items) will use them.
+- The category order rule and `compareNames` live in `packages/shared`, where the list of [PH-17a](../roadmap.md#ph-17-list-items) will use them.
 
 ## Settled while building
 

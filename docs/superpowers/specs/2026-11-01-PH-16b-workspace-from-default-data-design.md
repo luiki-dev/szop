@@ -105,7 +105,7 @@ The wording below is the reviewed one; the criteria are ✅ in this phase unless
 - [ACC-1](../../requirements/ACC-accounts-and-guest-mode.md#acc-1).6, whole: one workspace and one copy.
 - [ACC-1](../../requirements/ACC-accounts-and-guest-mode.md#acc-1).9, whole.
 - [UNT-1](../../requirements/UNT-units.md#unt-1).1, whole.
-- [ACC-1](../../requirements/ACC-accounts-and-guest-mode.md#acc-1).5 and [NFR-4](../../requirements/NFR-non-functional-requirements.md#nfr-4).10's references move to [PH-17a](../../roadmap.md#ph-17a-list-items) ([ADR 0060](../../decisions/0060-workspace-from-default-data-phase-details.md#changes-to-the-roadmap)); this phase gives them the kept IDs and the composite foreign keys.
+- [ACC-1](../../requirements/ACC-accounts-and-guest-mode.md#acc-1).5 and [NFR-4](../../requirements/NFR-non-functional-requirements.md#nfr-4).10's references move to [PH-17a](../../roadmap.md#ph-17-list-items) ([ADR 0060](../../decisions/0060-workspace-from-default-data-phase-details.md#changes-to-the-roadmap)); this phase gives them the kept IDs and the composite foreign keys.
 
 No requirement's list of criteria is finalized here: [ACC-1](../../requirements/ACC-accounts-and-guest-mode.md#acc-1) and [UNT-1](../../requirements/UNT-units.md#unt-1) have parts in later phases.
 
@@ -159,7 +159,7 @@ Checked at the demo: [ACC-1](../../requirements/ACC-accounts-and-guest-mode.md#a
 
 ## Out of scope
 
-- Adding a product to a list, and ACC-1.5's and NFR-4.10's references in requests ([PH-17a](../../roadmap.md#ph-17a-list-items)). Creating a list is this phase's only first change; a criterion is checked through behavior a user has, and a test-only route would check something no user can do.
+- Adding a product to a list, and ACC-1.5's and NFR-4.10's references in requests ([PH-17a](../../roadmap.md#ph-17-list-items)). Creating a list is this phase's only first change; a criterion is checked through behavior a user has, and a test-only route would check something no user can do.
 - Adding, renaming and deleting catalog products, categories and units, and uniqueness of names a user types ([PH-26](../../roadmap.md#ph-26-catalog-and-units) and the categories phase).
 - The new list's Create button, the session check before writes, the raccoon's position ([OP-115](https://github.com/luiki-dev/szop/issues/318), [OP-116](https://github.com/luiki-dev/szop/issues/319), [#323](https://github.com/luiki-dev/szop/issues/323), moved to [PH-16c](../../roadmap.md#ph-16c-managing-lists), which changes the lists screens and the SPA's writes anyway).
 - Moving a guest's workspace to an account (PH-18, PH-19).
