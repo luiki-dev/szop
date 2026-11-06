@@ -575,8 +575,9 @@ describe("ListsPage", () => {
       await waitFor(() => {
         expect(screen.queryByRole("alertdialog")).toBeNull();
         expect(reads).toBe(2);
+        // Leaving Select goes through the history, which settles a tick later.
+        expect(screen.queryByRole("checkbox")).toBeNull();
       });
-      expect(screen.queryByRole("checkbox")).toBeNull();
       expect(screen.queryByRole("link", { name: "Party" })).toBeNull();
       expect(screen.queryByRole("link", { name: "Hardware store" })).toBeNull();
       expect(

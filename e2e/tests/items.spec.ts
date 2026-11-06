@@ -314,3 +314,103 @@ test("ORD-5.1, ORD-5.2, ORD-5.3, APR-2.2, APR-2.3: a guest turns sorting off and
   await page.getByRole("radio", { name: "Right" }).click();
   expect(await box()).toBeCloseTo(right, 0);
 });
+
+for (const size of [
+  { name: "phone", width: 390, height: 700 },
+  { name: "desktop", width: 1280, height: 800 },
+]) {
+  test(`ITM-2.1, ITM-6.1, ITM-7.1, ITM-5.1, ORD-5.1, ORD-1.6: the list items journey on a ${size.name}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(size);
+    await page.goto("/lists/new");
+    const listName = page.getByRole("textbox", { name: "List name" });
+    await listName.fill("Weekend groceries");
+    await listName.press("Enter");
+    const add = page.getByRole("textbox", {
+      name: "Add an item to Weekend groceries",
+    });
+    for (const item of ["Bananas", "Milk", "Bread"]) {
+      await add.fill(item);
+      await add.press("Enter");
+    }
+    await expect(page.getByRole("main").getByRole("listitem")).toHaveCount(3);
+    await expectAccessible(page);
+
+    // Edit Bananas: quantity, price and category (the first subcategory of Bakery).
+    await page.getByRole("button", { name: /Bananas/ }).click();
+    const sheet = page.getByRole("dialog", { name: "Edit item" });
+    await sheet.getByRole("textbox", { name: "Quantity" }).fill("6");
+    await sheet.getByLabel("Price per unit").fill("0,33");
+    await expectAccessible(page);
+    await page.getByRole("button", { name: /^Category/ }).click();
+    const picker = page.getByRole("radiogroup", { name: "Category" });
+    await picker
+      .getByRole("button", { name: "Fruit & vegetables, subcategories" })
+      .click();
+    await expectAccessible(page);
+    await picker.getByRole("radio", { name: "Fresh fruit" }).click();
+    await sheet.getByRole("button", { name: "Save" }).click();
+    await expect(sheet).toBeHidden();
+    const bananas = page.getByRole("button", { name: /Bananas/ });
+    await expect(bananas).toContainText("6");
+    await expect(bananas).toContainText("€1.98");
+    await expect(
+      page.getByRole("heading", { name: /Fresh fruit/ }),
+    ).toBeVisible();
+
+    // Check two; put one back from its chip and one from the drawer.
+    await page.getByRole("checkbox", { name: "Bananas" }).click();
+    await page.getByRole("checkbox", { name: "Milk" }).click();
+    await expect(page.getByText("2 of 3 items")).toBeVisible();
+    await page.getByRole("button", { name: "Put Milk back" }).click();
+    await expect(page.getByRole("checkbox", { name: "Milk" })).toBeVisible();
+    await page.getByRole("button", { name: /^The haul/ }).click();
+    const drawer = page.getByRole("dialog", { name: "The haul" });
+    await expect(drawer).toBeVisible();
+    await expectAccessible(page);
+    await drawer.getByRole("button", { name: "Put Bananas back" }).click();
+    await page.keyboard.press("Escape");
+    await expect(drawer).toBeHidden();
+    await expect(page.getByText("0 of 3 items")).toBeVisible();
+
+    // Remove Milk and undo.
+    await page.getByRole("button", { name: /Milk/ }).click();
+    await sheet.getByRole("button", { name: "Remove" }).click();
+    await expect(page.getByText("Removed Milk")).toBeVisible();
+    await expect(page.getByRole("main").getByRole("listitem")).toHaveCount(2);
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(page.getByRole("main").getByRole("listitem")).toHaveCount(3);
+
+    // Bread in the haul, sorting off and on.
+    await page.getByRole("checkbox", { name: "Bread" }).click();
+    await expect(page.getByText("1 of 3 items")).toBeVisible();
+    const sortItem = async () => {
+      await page.getByRole("button", { name: "List actions" }).click();
+      return page.getByRole("menuitemcheckbox", { name: "Sort by category" });
+    };
+    await (await sortItem()).click();
+    await expect(
+      page.getByRole("heading", { name: /Fresh fruit/ }),
+    ).toBeHidden();
+    await (await sortItem()).click();
+    await expect(
+      page.getByRole("heading", { name: /Fresh fruit/ }),
+    ).toBeVisible();
+
+    // Everything is kept after a reload.
+    await page.reload();
+    await expect(page.getByText("1 of 3 items")).toBeVisible();
+    await expect(page.getByText("1 left")).toHaveCount(2);
+    await expect(
+      page.getByRole("button", { name: "Put Bread back" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /Bananas/ })).toContainText(
+      "€1.98",
+    );
+    await expect(
+      page.getByRole("heading", { name: /Fresh fruit/ }),
+    ).toBeVisible();
+    await expect(page.getByText("wasn't saved")).toHaveCount(0);
+  });
+}

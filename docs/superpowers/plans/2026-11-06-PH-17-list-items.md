@@ -300,11 +300,11 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
 **Files:**
 - Modify: `e2e/tests/items.spec.ts`, `e2e/prodlike/screens.spec.ts` (if the screens' shots are taken there), `docs/architecture/visual-design.md`, `docs/architecture/visual-design/` (the built screens), `docs/glossary.md` (only if a new term appeared)
 
-- [ ] **Step 1: Write the journey** of the spec's [Tests](../specs/2026-11-06-PH-17-list-items-design.md#tests), E2E item, on a phone-sized and a desktop-sized window, joining the earlier tasks' pieces into one test: add three, edit one's quantity, price and category, check two, put one back from a chip and one from the drawer, remove one and undo, sort off and on, reload and see it all kept. Add the axe check (`e2e/support/accessibility.ts`) of the list screen, the edit sheet, the picker and the open drawer.
-- [ ] **Step 2: Run** `pnpm test:e2e`. Expected: PASS (it builds on what Tasks 5 to 9 made; a failure is a bug to fix here).
-- [ ] **Step 3: Update** `visual-design.md` to the spec's [Documentation](../specs/2026-11-06-PH-17-list-items-design.md#documentation): the row right and left, the edit sheet, the picker, the toast, the sort setting, the haul without sums until PH-21, each with a screenshot of the built screen taken with the Chrome DevTools MCP browser, light and dark, into `docs/architecture/visual-design/`.
-- [ ] **Step 4: Run** `pnpm check`. Expected: PASS.
-- [ ] **Step 5: Commit** `test(e2e): add the list items journey and the built screens`.
+- [x] **Step 1: Write the journey** of the spec's [Tests](../specs/2026-11-06-PH-17-list-items-design.md#tests), E2E item, on a phone-sized and a desktop-sized window, joining the earlier tasks' pieces into one test: add three, edit one's quantity, price and category, check two, put one back from a chip and one from the drawer, remove one and undo, sort off and on, reload and see it all kept. Add the axe check (`e2e/support/accessibility.ts`) of the list screen, the edit sheet, the picker and the open drawer.
+- [x] **Step 2: Run** `pnpm test:e2e`. Expected: PASS (it builds on what Tasks 5 to 9 made; a failure is a bug to fix here).
+- [x] **Step 3: Update** `visual-design.md` to the spec's [Documentation](../specs/2026-11-06-PH-17-list-items-design.md#documentation): the row right and left, the edit sheet, the picker, the toast, the sort setting, the haul without sums until PH-21, each with a screenshot of the built screen taken with the Chrome DevTools MCP browser, light and dark, into `docs/architecture/visual-design/`.
+- [x] **Step 4: Run** `pnpm check`. Expected: PASS.
+- [x] **Step 5: Commit** `test(e2e): add the list items journey and the built screens`.
 
 ### Task 12: The mutation run
 
