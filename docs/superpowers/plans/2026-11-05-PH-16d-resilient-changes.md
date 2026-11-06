@@ -175,7 +175,7 @@
 **Files:**
 - Modify: whatever the owner's decisions touch (tests, `// Stryker disable next-line <Mutator>: <reason>` comments)
 
-- [ ] **Step 1: Run** `pnpm test:mutation --mutate` over `apps/web/src/api/client.ts`, `apps/web/src/shell/app-shell.tsx`, `apps/web/src/lists/{list-screen,use-lists,list-page,new-list-page,delete-lists-dialog,lists-page}.tsx`/`.ts`.
-- [ ] **Step 2: List the survivors** for the owner, each with a proposal: a test that kills it, or a disable comment with the reason. Stop until the owner decides.
-- [ ] **Step 3: Apply** the decisions; run `pnpm check`. Expected: PASS.
-- [ ] **Step 4: Commit**: `test(web): kill or accept the PH-16d mutants`.
+- [x] **Step 1: Run** `pnpm test:mutation --mutate` over `apps/web/src/api/client.ts`, `apps/web/src/shell/app-shell.tsx`, `apps/web/src/lists/{list-screen,use-lists,list-page,new-list-page,delete-lists-dialog,lists-page}.tsx`/`.ts`.
+- [x] **Step 2: List the survivors** for the owner, each with a proposal: a test that kills it, or a disable comment with the reason. Stop until the owner decides.
+- [x] **Step 3: Apply** the decisions; run `pnpm check`. Expected: PASS.
+- [x] **Step 4: Commit**: `test(web): kill or accept the PH-16d mutants`.

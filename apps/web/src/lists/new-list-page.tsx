@@ -17,11 +17,11 @@ export function NewListPage() {
   // Made on the first Enter and kept, so a retry after a failure sends the
   // same ID and cannot make a second list.
   const id = useRef<string>(undefined);
-  // Only lists fetched after the create was sent can tell whether it was applied.
+  // The ID is made here, so a list that holds it can only come from a fetch
+  // after the send: no freshness check is needed, unlike the delete's.
   const lists = useLists(create.isError);
   const applied =
     create.isError &&
-    lists.dataUpdatedAt > create.submittedAt &&
     lists.data?.some((list) => list.id === create.variables.id) === true;
 
   // The answer was lost but the list exists: go on as after a success. The

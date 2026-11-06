@@ -147,6 +147,25 @@ describe("DeleteListsDialog", () => {
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 
+  it("NET-1.7: a refused delete does not tell the person to check the connection", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.delete(`/api/lists/${one[0]?.id ?? ""}`, () =>
+        HttpResponse.json(
+          { error: { code: "forbidden", message: "Not your list" } },
+          { status: 403 },
+        ),
+      ),
+    );
+    setup();
+    await screen.findByRole("alertdialog");
+
+    await user.click(deleteButton());
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toBe("Couldn't delete the list.");
+  });
+
   it("APP-3.3: closing after a failed delete forgets the message", async () => {
     const user = userEvent.setup();
     server.use(

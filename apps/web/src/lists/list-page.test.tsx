@@ -7,6 +7,7 @@ import { RouterProvider } from "react-router/dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { timeoutMessage } from "../api/client.ts";
 import { routes } from "../routes.tsx";
+import { ListPage } from "./list-page.tsx";
 import { server } from "../test/server.ts";
 
 const id = "0198a000-0000-7000-8000-0000000000aa";
@@ -566,11 +567,31 @@ describe("ListPage", () => {
 
       await user.type(await field(), " 2{Enter}");
 
-      expect(await screen.findByRole("alert")).toHaveTextContent("Not saved.");
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Not saved. Try again",
+      );
       expect(requests).toHaveLength(1);
       window.dispatchEvent(new Event("online"));
       await new Promise((resolve) => setTimeout(resolve, 50));
       expect(requests).toHaveLength(1);
+    });
+
+    it("NET-1.5: a failed rename marks the lists stale and no other query", async () => {
+      const user = userEvent.setup();
+      const { queryClient } = setup();
+      failing();
+      queryClient.setQueryData(["lists"], []);
+      queryClient.setQueryData(["lists", "other"], list);
+      queryClient.setQueryData(["catalog"], {});
+      const stale = (key: string[]) =>
+        queryClient.getQueryState(key)?.isInvalidated;
+
+      await user.type(await field(), " 2{Enter}");
+      await screen.findByRole("alert");
+
+      expect(stale(["lists"])).toBe(true);
+      expect(stale(["lists", "other"])).toBe(false);
+      expect(stale(["catalog"])).toBe(false);
     });
 
     it("NET-1.4: a rename with no answer shows Not saved. after the limit", async () => {
@@ -702,6 +723,12 @@ describe("ListPage", () => {
       await router.navigate(-1);
 
       expect(router.state.location.pathname).toBe(`/lists/${id}`);
+      // A blocked navigation is dropped, not kept waiting for the change to end.
+      await waitFor(() => {
+        expect([...router.state.blockers.values()].map((b) => b.state)).toEqual(
+          ["unblocked"],
+        );
+      });
       expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
       expect(screen.getByText("Saving…")).toBeVisible();
 
@@ -755,6 +782,40 @@ describe("ListPage", () => {
       expect(await screen.findByRole("alert")).toHaveTextContent(
         "List not found",
       );
+    });
+
+    it("NET-1.8: the back link does not navigate while a rename is saved, without the shell's blocker", async () => {
+      const user = userEvent.setup();
+      // Only the page: nothing but the link itself can hold the screen.
+      const router = createMemoryRouter(
+        [
+          { path: "/", element: <p>Lists</p> },
+          { path: "/lists/:id", element: <ListPage /> },
+        ],
+        { initialEntries: [`/lists/${id}`] },
+      );
+      server.use(
+        http.get(`/api/lists/${id}`, () => HttpResponse.json(list)),
+        http.get("/api/auth/get-session", () =>
+          HttpResponse.json({ ok: true }),
+        ),
+      );
+      const { answer } = held();
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>,
+      );
+
+      await user.type(await field(), " 2{Enter}");
+      await screen.findByText("Saving…");
+      await user.click(screen.getByRole("link", { name: "Back to lists" }));
+
+      expect(router.state.location.pathname).toBe(`/lists/${id}`);
+      answer();
+      await waitFor(() => {
+        expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
+      });
     });
 
     it("NET-1.8: Enter twice, or Enter then Try again, sends one request", async () => {

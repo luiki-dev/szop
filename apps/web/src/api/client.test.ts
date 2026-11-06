@@ -259,6 +259,33 @@ describe("lists", () => {
       expect(calls).toEqual(["POST /api/auth/sign-in/anonymous"]);
     });
 
+    it("ACC-1.6: the sign-in lock is named szop-guest-sign-in and carries the signal", async () => {
+      const requests: { name: string; options: unknown }[] = [];
+      Object.defineProperty(navigator, "locks", {
+        configurable: true,
+        value: {
+          request: (
+            name: string,
+            options: unknown,
+            callback: () => Promise<unknown>,
+          ) => {
+            requests.push({ name, options });
+            return callback();
+          },
+        },
+      });
+      stubApi(null, [401, 201]);
+
+      await createList(newList);
+
+      expect(requests).toEqual([
+        {
+          name: "szop-guest-sign-in",
+          options: { signal: expect.any(AbortSignal) as AbortSignal },
+        },
+      ]);
+    });
+
     it("a failed sign-in releases the lock for the next change", async () => {
       let signIns = 0;
       server.use(
@@ -290,6 +317,7 @@ describe("lists", () => {
     });
     afterEach(() => {
       vi.useRealTimers();
+      Reflect.deleteProperty(navigator, "locks");
     });
 
     it("NET-1.4: a read with no answer fails after the limit", async () => {
@@ -301,6 +329,53 @@ describe("lists", () => {
       await vi.advanceTimersByTimeAsync(timeLimit - 1);
       expect(settled).toBe(false);
       await vi.advanceTimersByTimeAsync(1);
+
+      expect(await result).toEqual(new Error(timeoutMessage));
+    });
+
+    it.each([
+      ["getHealth", "/api/health", getHealth],
+      ["getCatalog", "/api/catalog", getCatalog],
+    ])(
+      "NET-1.4: %s with no answer fails after the limit",
+      async (_, path, read) => {
+        server.use(http.get(path, () => delay("infinite")));
+        const result = read().catch((error: unknown) => error);
+
+        await vi.advanceTimersByTimeAsync(timeLimit);
+
+        expect(await result).toEqual(new Error(timeoutMessage));
+      },
+    );
+
+    it("NET-1.4: the limit covers a session check with no answer", async () => {
+      const calls = stubApi(null, [401]);
+      server.use(http.get("/api/auth/get-session", () => delay("infinite")));
+      const result = createList(newList).catch((error: unknown) => error);
+
+      await vi.advanceTimersByTimeAsync(timeLimit);
+
+      expect(await result).toEqual(new Error(timeoutMessage));
+      expect(calls).toEqual(["POST /api/lists"]);
+    });
+
+    it("NET-1.4: the limit covers the wait for another tab's sign-in lock", async () => {
+      Object.defineProperty(navigator, "locks", {
+        configurable: true,
+        value: {
+          // Never grants the lock; gives up when the signal aborts, as the real one does.
+          request: (_name: string, options: { signal: AbortSignal }) =>
+            new Promise((_, reject) => {
+              options.signal.addEventListener("abort", () => {
+                reject(new Error(timeoutMessage));
+              });
+            }),
+        },
+      });
+      stubApi(null, [401]);
+      const result = createList(newList).catch((error: unknown) => error);
+
+      await vi.advanceTimersByTimeAsync(timeLimit);
 
       expect(await result).toEqual(new Error(timeoutMessage));
     });

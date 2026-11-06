@@ -14,11 +14,12 @@ import { describe, expect, it } from "vitest";
 import { routes } from "../routes.tsx";
 import { desktopQuery } from "../shell/use-media-query.ts";
 import { stubMatchMedia } from "../test/match-media.ts";
+import { threeLists } from "../test/lists.ts";
 import { server } from "../test/server.ts";
 
 // Starts on the lists page and goes to /lists/new, so "back" has somewhere
 // to land. Every request the page makes is recorded.
-function setup() {
+function setup(cachedLists: typeof threeLists = []) {
   const posts: { id: string; name: string }[] = [];
   let status = 201;
   server.use(
@@ -48,8 +49,10 @@ function setup() {
     initialEntries: ["/", "/lists/new"],
     initialIndex: 1,
   });
+  const queryClient = new QueryClient();
+  if (cachedLists.length > 0) queryClient.setQueryData(["lists"], cachedLists);
   render(
-    <QueryClientProvider client={new QueryClient()}>
+    <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
@@ -378,6 +381,32 @@ describe("NewListPage", () => {
         `/lists/${created?.id ?? ""}`,
       );
     });
+    // The address was replaced: Back skips the New list page.
+    await router.navigate(-1);
+    expect(router.state.location.pathname).toBe("/");
+  });
+
+  it("NET-1.5: a failed create stays on the page when the server does not hold the list", async () => {
+    const user = userEvent.setup();
+    const { router, field } = setup();
+    server.use(
+      http.post("/api/lists", () => HttpResponse.error()),
+      http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+    );
+
+    await user.type(field(), "Weekly shop{Enter}");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Not saved.");
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Create" })).toBeEnabled();
+    });
+    expect(router.state.location.pathname).toBe("/lists/new");
+  });
+
+  it("NET-1.5: the page opens with lists already in the cache", () => {
+    setup(threeLists);
+
+    expect(screen.getByRole("textbox", { name: "List name" })).toBeVisible();
   });
 
   it("LST-1.9: the field keeps its border when the focus leaves it", async () => {

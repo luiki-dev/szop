@@ -44,9 +44,11 @@ export function ListHeader({
         onClick={(event) => {
           if (busy) event.preventDefault();
         }}
-        // Stryker disable next-line ObjectLiteral,StringLiteral: class names only, no behavior
         className={cn(
+          // Stryker disable next-line ObjectLiteral: class names only, no behavior
+          // Stryker disable next-line StringLiteral: class names only, no behavior
           buttonVariants({ variant: "ghost", size: "icon" }),
+          // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS, so no test can tell the change apart
           "aria-disabled:opacity-50",
         )}
       >
