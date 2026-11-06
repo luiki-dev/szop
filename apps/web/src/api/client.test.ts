@@ -305,7 +305,9 @@ describe("lists", () => {
         ),
       );
 
-      await expect(createList(newList)).rejects.toThrow();
+      await expect(createList(newList)).rejects.toThrow(
+        "POST /api/auth/sign-in/anonymous answered 500",
+      );
       await expect(createList(newList)).resolves.toEqual(party);
     });
   });
@@ -367,7 +369,7 @@ describe("lists", () => {
           request: (_name: string, options: { signal: AbortSignal }) =>
             new Promise((_, reject) => {
               options.signal.addEventListener("abort", () => {
-                reject(new Error(timeoutMessage));
+                reject(options.signal.reason as Error);
               });
             }),
         },
@@ -403,9 +405,6 @@ describe("lists", () => {
   it("renames a list with a session", async () => {
     let body: unknown;
     server.use(
-      http.get("/api/auth/get-session", () =>
-        HttpResponse.json({ session: {} }),
-      ),
       http.patch(`/api/lists/${party?.id ?? ""}`, async ({ request }) => {
         body = await request.json();
         return HttpResponse.json({ ...party, name: "Bash" });

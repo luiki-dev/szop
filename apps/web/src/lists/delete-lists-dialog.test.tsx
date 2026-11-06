@@ -189,7 +189,7 @@ describe("DeleteListsDialog", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("APP-3.3: says lists in the plural, and sends one request with every ID", async () => {
+  it("NET-1.7: a failed delete of several lists says lists in the plural, and a retry sends one request with every ID", async () => {
     const user = userEvent.setup();
     let body: unknown;
     let fail = true;
@@ -267,6 +267,40 @@ describe("DeleteListsDialog", () => {
     });
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     expect(onDeleted).not.toHaveBeenCalled();
+  });
+
+  it("NET-1.5: lists stamped in the send's own millisecond do not prove the delete was applied", async () => {
+    // Only Date: the time stamps of the send and of the answer are then equal.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      const user = userEvent.setup();
+      let reads = 0;
+      server.use(
+        http.delete(`/api/lists/${one[0]?.id ?? ""}`, () =>
+          HttpResponse.error(),
+        ),
+      );
+      const { onDeleted } = setup();
+      server.use(
+        http.get("/api/lists", () => {
+          reads += 1;
+          return HttpResponse.json({ lists: [] });
+        }),
+      );
+      await screen.findByRole("alertdialog");
+
+      await user.click(deleteButton());
+      await screen.findByRole("alert");
+      await waitFor(() => {
+        expect(reads).toBe(1);
+      });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+      expect(onDeleted).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("APP-3.3: a 404 counts as deleted", async () => {

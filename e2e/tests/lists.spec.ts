@@ -156,6 +156,7 @@ test("OP-131: selecting lists does not move them", async ({ page }) => {
 
   const card = page.getByRole("listitem").filter({ hasText: "Party" });
   const before = (await card.boundingBox())?.y;
+  expect(typeof before).toBe("number");
   await page.getByRole("button", { name: "Select" }).click();
   await expect(page.getByText("0 selected")).toBeVisible();
   await expect(

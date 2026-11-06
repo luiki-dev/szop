@@ -80,15 +80,9 @@ export class ApiRequestError extends Error {
 // change; true for a timeout, no network, a 5xx, a second 401 and an
 // unreadable answer.
 export function notSaved(error: Error): boolean {
-  return !(
-    // Stryker disable next-line ConditionalExpression: any other Error has no status, so the next comparison is false the same way
-    // Stryker disable next-line LogicalOperator: for any other Error the rest is false (no status) the same way
-    error instanceof ApiRequestError &&
-    // Stryker disable next-line ConditionalExpression: an ApiRequestError is made only for a failed response, so its status is at least 400
-    error.status >= 400 &&
-    error.status < 500 &&
-    error.status !== 401
-  );
+  if (!(error instanceof ApiRequestError)) return true;
+  // An ApiRequestError is only made for a failed response (status 400 or more).
+  return error.status >= 500 || error.status === 401;
 }
 
 const json = { "content-type": "application/json" };

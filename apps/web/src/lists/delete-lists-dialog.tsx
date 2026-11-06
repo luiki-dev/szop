@@ -32,7 +32,6 @@ export function DeleteListsDialog({
   const fresh = useLists(remove.isError);
   const applied =
     remove.isError &&
-    // Stryker disable next-line EqualityOperator: a one-millisecond boundary; a fetch stamped in the send's own millisecond cannot be told apart from one after it
     fresh.dataUpdatedAt > remove.submittedAt &&
     // Stryker disable next-line ConditionalExpression: dataUpdatedAt above submittedAt is false until the data exists; the line narrows the type
     fresh.data !== undefined &&

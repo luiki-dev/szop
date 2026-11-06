@@ -389,9 +389,13 @@ describe("NewListPage", () => {
   it("NET-1.5: a failed create stays on the page when the server does not hold the list", async () => {
     const user = userEvent.setup();
     const { router, field } = setup();
+    let reads = 0;
     server.use(
       http.post("/api/lists", () => HttpResponse.error()),
-      http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+      http.get("/api/lists", () => {
+        reads += 1;
+        return HttpResponse.json({ lists: threeLists });
+      }),
     );
 
     await user.type(field(), "Weekly shop{Enter}");
@@ -400,10 +404,15 @@ describe("NewListPage", () => {
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Create" })).toBeEnabled();
     });
+    // The refetch must have answered before the page is checked.
+    await waitFor(() => {
+      expect(reads).toBe(1);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
     expect(router.state.location.pathname).toBe("/lists/new");
   });
 
-  it("NET-1.5: the page opens with lists already in the cache", () => {
+  it("NET-1.5: an idle New list page with lists in the cache renders and does not take them for an applied create", () => {
     setup(threeLists);
 
     expect(screen.getByRole("textbox", { name: "List name" })).toBeVisible();
