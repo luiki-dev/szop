@@ -282,7 +282,7 @@ There is no global client-state library (Redux, Zustand). One is added only when
 Checking, adding, editing and removing items, and the sort setting, update the TanStack Query cache at once (`onMutate` in `src/lists/use-items.ts`, on the key `["lists", listId]`, which holds the list with its items). The request then goes to the server.
 
 - **One scope per item.** Each item mutation has `scope: { id: itemId }`, so TanStack Query runs an item's changes one after the other, in the order made; the sort setting has the scope `list-<id>`. An answer writes the server's item into the cache only when no later change of that scope waits, so an earlier answer never puts an older state back over a later change.
-- **A refusal puts back only that item.** `onError` restores the item's previous version (or takes an added item out), shows a toast, "*name* wasn't saved. Check your connection and try again.", and refetches the list. Another item's change in flight keeps its optimistic state.
+- **A refusal puts back only that item.** `onError` restores the item's previous version (or takes an added item out), shows a toast, "*name* wasn't saved. Check your connection and try again." The list is refetched once its last change settles, success or failure, so a refetch never overwrites a change still in flight. Another item's change in flight keeps its optimistic state.
 - **The toast region.** `Toasts` in `src/shell/toasts.tsx` is Base UI's Toast provider (one toast at a time, a new one replaces the shown one) and a polite live region above the add bar. Hooks add toasts through `toastManager`, since they are not components.
 
 ### Offline (NET-1)

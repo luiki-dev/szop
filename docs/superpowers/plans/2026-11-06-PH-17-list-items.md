@@ -199,16 +199,16 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
 - Consumes: `itemCards`, `lineTotal`, `formatQuantity`, `formatPrice` (Task 1); `useAddItem` (Task 4); `useCatalog`, `orderCategories`.
 - Produces: `ItemRow({ item, unitName, onEdit }: { item: ListItem; unitName: string | null; onEdit: () => void })`: the row of the spec's [The list screen](../specs/2026-11-06-PH-17-list-items-design.md#the-list-screen), the name, note, quantity and line total one button opening the edit, and a slot for the checkbox that Task 8 fills; `ItemCards({ cards, units, onEdit })`; `AddBar({ listId, listName, onFocusChange }: { listId: string; listName: string; onFocusChange: (focused: boolean) => void })` with React Hook Form and `itemNameSchema`, the next item's ID kept in state (`uuidv7()`) and renewed after each add, so `useAddItem(listId, nextId)` scopes each add to its item.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
   - `add-bar.test.tsx`: `"ITM-2.3: Enter adds the typed name with nothing else"`; `"ITM-2.4: the field clears and keeps the focus"`; `"Add" adds too; whitespace adds nothing; `"LIM-2.2: the add bar takes no character past 100"` (`maxLength` is 100; typing 101 leaves 100, no message); the accessible name "Add an item to Weekend groceries".
   - `item-cards.test.tsx`: `"ORD-1.2: a card per category with N left, headed by its own name"` (ORD-2.3 too); the "No category" card in italics, last; `"ORD-5.5: …"` one card with only "N left"; a row is a button for the edit and the checkbox is not part of it (`"ITM-6.3: tapping the name opens the edit"`); an item with an unknown unit shows its quantity alone.
   - `list-page.test.tsx`: skeleton while loading; `"ORD-1.9: …"` "Nothing on this list yet" and no haul when empty, "Everything's in the haul" when every item is checked; the error card's "Try again".
   - `new-list-page.test.tsx` and `list-page.test.tsx`: `"LIM-2.2: the list name takes no character past 100"`, replacing the "At most 100 characters." tests.
   - `e2e/tests/items.spec.ts`: on a phone-sized window, add three items one after another with Enter and see them in "No category"; the add bar's band stays pinned while the list scrolls under it.
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test src/lists`. Expected: FAIL.
-- [ ] **Step 3: Implement** the components to the spec's [The list screen](../specs/2026-11-06-PH-17-list-items-design.md#the-list-screen) and [Adding an item](../specs/2026-11-06-PH-17-list-items-design.md#adding-an-item), the add bar's band as `addbar-ph17.png` (b): the page color, rounded top corners, a soft shadow above and a thin top edge, pinned within the 720 px column; the note's cut with `line-clamp-1`.
-- [ ] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(items): show a list's items and add them by name`.
+- [x] **Step 2: Run** `pnpm --filter @szop/web test src/lists`. Expected: FAIL.
+- [x] **Step 3: Implement** the components to the spec's [The list screen](../specs/2026-11-06-PH-17-list-items-design.md#the-list-screen) and [Adding an item](../specs/2026-11-06-PH-17-list-items-design.md#adding-an-item), the add bar's band as `addbar-ph17.png` (b): the page color, rounded top corners, a soft shadow above and a thin top edge, pinned within the 720 px column; the note's cut with `line-clamp-1`.
+- [x] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
+- [x] **Step 5: Commit** `feat(items): show a list's items and add them by name`.
 
 ### Task 6: Editing and removing an item
 

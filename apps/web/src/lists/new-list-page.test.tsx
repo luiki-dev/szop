@@ -47,6 +47,7 @@ function setup(cachedLists: typeof threeLists = []) {
         name: "Weekly shop",
         sortByCategory: true,
         createdAt: "2026-10-30T12:00:00.000Z",
+        items: [],
       }),
     ),
   );
@@ -139,28 +140,16 @@ describe("NewListPage", () => {
     expect(posts).toHaveLength(0);
   });
 
-  it("LIM-2.2: refuses a name over 100 characters before sending", async () => {
+  it("LIM-2.2: the list name takes no character past 100", async () => {
     const user = userEvent.setup();
-    const { posts } = setup();
+    const { posts, field } = setup();
 
-    await user.type(screen.getByRole("textbox"), `${"a".repeat(101)}{Enter}`);
+    await user.type(field(), "a".repeat(101));
 
-    expect(
-      await screen.findByText("Name is too long (at most 100 characters)"),
-    ).toBeVisible();
+    expect(field()).toHaveValue("a".repeat(100));
+    expect(field()).toHaveAttribute("maxlength", "100");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(posts).toHaveLength(0);
-  });
-
-  it("LST-1.9: shows the error of a too long name without Enter", async () => {
-    const user = userEvent.setup();
-    setup();
-
-    await user.type(screen.getByRole("textbox"), "a".repeat(101));
-
-    expect(
-      await screen.findByText("Name is too long (at most 100 characters)"),
-    ).toBeVisible();
-    expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
   });
 
   it("LST-1.9: shows the error of a name with a control character, and clearing the field removes it", async () => {
@@ -253,7 +242,7 @@ describe("NewListPage", () => {
     expect(posts[0]?.name).toBe("Weekly shop");
   });
 
-  it.each(["   ", "a".repeat(101)])(
+  it.each(["   "])(
     "LST-1.9: Create is disabled for the name %j",
     async (text) => {
       const user = userEvent.setup();

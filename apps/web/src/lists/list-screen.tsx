@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowDown, ArrowLeft } from "lucide-react";
 import { useRef, useState, type ReactNode, type RefObject } from "react";
 import { useIsMutating } from "@tanstack/react-query";
 import { Link } from "react-router";
@@ -148,6 +148,7 @@ export function TitleField({
       value={value}
       autoFocus={autoFocus}
       readOnly={pending}
+      maxLength={100}
       placeholder="List name"
       aria-label="List name"
       aria-invalid={message ? true : undefined}
@@ -229,6 +230,10 @@ export function EmptyList() {
       <p className="mt-16 text-center text-xl font-semibold text-muted-foreground">
         Nothing on this list yet
       </p>
+      <ArrowDown
+        aria-hidden="true"
+        className="mx-auto mt-3 size-6 text-muted-foreground"
+      />
       <img
         src={raccoon}
         alt=""

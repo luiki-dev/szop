@@ -1,7 +1,7 @@
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { listSchema } from "@szop/shared";
+import { itemCards, listSchema, orderCategories } from "@szop/shared";
 import { useNavigate, useParams } from "react-router";
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -10,9 +10,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
+import { useCatalog } from "../catalog/use-catalog.ts";
 import { ApiRequestError, notSaved } from "../api/client.ts";
 import { NotFound } from "../not-found/not-found.tsx";
 import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
+import { AddBar } from "./items/add-bar.tsx";
+import { ItemCards, ItemCardsSkeleton } from "./items/item-cards.tsx";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
 import { useList, useRenameList } from "./use-lists.ts";
 
@@ -24,6 +27,7 @@ export function ListPage() {
   // An address that is not a list ID never reaches the API.
   const valid = listSchema.shape.id.safeParse(id).success;
   const query = useList(id, valid);
+  const catalog = useCatalog();
   const rename = useRenameList(id);
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
@@ -64,18 +68,21 @@ export function ListPage() {
     );
   }
   // A failed refetch keeps the screen: the card is for a list never loaded.
-  if (query.isLoadingError) {
+  if (query.isLoadingError || (catalog.isError && !catalog.data)) {
     return (
       <>
         <ListHeader field={null} />
         <section className="mt-4 rounded-surface bg-card p-4 text-card-foreground">
           <h1 className="text-lg font-bold">The list could not be loaded.</h1>
-          <p className="mt-1 text-muted-foreground">{query.error.message}</p>
+          <p className="mt-1 text-muted-foreground">
+            {(query.error ?? catalog.error)?.message}
+          </p>
           <Button
             variant="outline"
             className="mt-4"
             onClick={() => {
               void query.refetch();
+              void catalog.refetch();
             }}
           >
             Try again
@@ -92,6 +99,15 @@ export function ListPage() {
       </>
     );
   }
+
+  const cards =
+    query.data && catalog.data
+      ? itemCards(
+          query.data.items,
+          orderCategories(catalog.data.categories),
+          query.data.sortByCategory,
+        )
+      : [];
 
   return (
     <>
@@ -172,7 +188,27 @@ export function ListPage() {
           </DropdownMenu>
         }
       />
-      <EmptyList />
+      {!query.data || !catalog.data ? (
+        <ItemCardsSkeleton />
+      ) : query.data.items.length === 0 ? (
+        <EmptyList />
+      ) : (
+        <>
+          {cards.length === 0 && (
+            <p className="mt-16 text-center text-xl font-semibold text-muted-foreground">
+              Everything&apos;s in the haul
+            </p>
+          )}
+          <ItemCards
+            cards={cards}
+            units={catalog.data.units}
+            // The edit sheet comes with Task 7.
+            onEdit={() => undefined}
+          />
+        </>
+      )}
+      {/* The haul folds while the field has the focus: Task 8. */}
+      <AddBar listId={id} listName={name} onFocusChange={() => undefined} />
       <DeleteListsDialog
         lists={[{ id, name }]}
         open={deleting}

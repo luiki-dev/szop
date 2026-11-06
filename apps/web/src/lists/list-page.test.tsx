@@ -6,6 +6,8 @@ import { createMemoryRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { timeoutMessage } from "../api/client.ts";
+import type { ListItem } from "@szop/shared";
+import { bananas, milk } from "../test/items.ts";
 import { routes } from "../routes.tsx";
 import { ListPage } from "./list-page.tsx";
 import { server } from "../test/server.ts";
@@ -19,10 +21,10 @@ const list = {
   items: [],
 };
 
-function setup() {
+function setup(items: ListItem[] = []) {
   const patches: { name: string }[] = [];
   server.use(
-    http.get(`/api/lists/${id}`, () => HttpResponse.json(list)),
+    http.get(`/api/lists/${id}`, () => HttpResponse.json({ ...list, items })),
     http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
     http.patch(`/api/lists/${id}`, async ({ request }) => {
       const body = (await request.json()) as { name: string };
@@ -70,7 +72,9 @@ describe("ListPage", () => {
     await user.type(await field(), "Party{Enter}");
 
     await waitFor(() => {
-      expect(screen.getByRole("textbox")).toHaveValue("PARTY");
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "PARTY",
+      );
     });
     expect(patches).toEqual([{ name: "Party" }]);
     expect(document.title).toBe("PARTY · Szop");
@@ -110,7 +114,9 @@ describe("ListPage", () => {
     await user.type(await field(), " 2{Escape}");
     await user.click(document.body);
 
-    expect(screen.getByRole("textbox")).toHaveValue("Weekly shop");
+    expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+      "Weekly shop",
+    );
     expect(patches).toHaveLength(0);
   });
 
@@ -122,7 +128,9 @@ describe("ListPage", () => {
     await user.click(document.body);
 
     await waitFor(() => {
-      expect(screen.getByRole("textbox")).toHaveValue("WEEKLY SHOP 2");
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "WEEKLY SHOP 2",
+      );
     });
     expect(patches).toHaveLength(1);
   });
@@ -134,7 +142,9 @@ describe("ListPage", () => {
     await user.clear(await field());
     await user.tab();
 
-    expect(screen.getByRole("textbox")).toHaveValue("Weekly shop");
+    expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+      "Weekly shop",
+    );
     expect(patches).toHaveLength(0);
   });
 
@@ -146,6 +156,34 @@ describe("ListPage", () => {
       "aria-hidden",
       "true",
     );
+  });
+
+  it("ORD-1.9: says everything is in the haul when every item is checked, and the add bar stays", async () => {
+    setup([{ ...bananas, checkedAt: "2026-11-06T10:00:00.000Z" }]);
+
+    expect(await screen.findByText("Everything's in the haul")).toBeVisible();
+    expect(
+      screen.queryByText("Nothing on this list yet"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Add an item to Weekly shop" }),
+    ).toBeVisible();
+  });
+
+  it("ITM-1.1: shows the items in cards, and an added item at once", async () => {
+    const user = userEvent.setup();
+    server.use(http.post(`/api/lists/${id}/items`, () => delay("infinite")));
+    setup([milk]);
+
+    expect(await screen.findByText("Milk")).toBeVisible();
+    expect(
+      screen.queryByText("Nothing on this list yet"),
+    ).not.toBeInTheDocument();
+    await user.type(
+      screen.getByRole("textbox", { name: "Add an item to Weekly shop" }),
+      "Bread{Enter}",
+    );
+    expect(await screen.findByText("Bread")).toBeVisible();
   });
 
   it("APP-5.2: says the list does not exist or was deleted on a 404, with a link to the lists page", async () => {
@@ -262,7 +300,9 @@ describe("ListPage", () => {
 
     await user.type(await field(), " 2{Escape}");
 
-    expect(screen.getByRole("textbox")).not.toHaveFocus();
+    expect(
+      screen.getByRole("textbox", { name: "List name" }),
+    ).not.toHaveFocus();
   });
 
   it("LST-1.2: a name of spaces is not saved and the old one returns", async () => {
@@ -270,42 +310,33 @@ describe("ListPage", () => {
     const { patches } = setup();
 
     await user.clear(await field());
-    await user.type(screen.getByRole("textbox"), "   ");
+    await user.type(screen.getByRole("textbox", { name: "List name" }), "   ");
     await user.tab();
 
-    expect(screen.getByRole("textbox")).toHaveValue("Weekly shop");
+    expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+      "Weekly shop",
+    );
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(patches).toHaveLength(0);
   });
 
-  it("LST-1.2: a name over 100 characters shows an invalid field that a valid name or Esc clears", async () => {
+  it("LIM-2.2: the list name takes no character past 100", async () => {
     const user = userEvent.setup();
     const { patches } = setup();
-    const long = "a".repeat(101);
 
     await user.clear(await field());
-    await user.type(screen.getByRole("textbox"), long);
-    await user.tab();
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Name is too long",
+    await user.type(
+      screen.getByRole("textbox", { name: "List name" }),
+      "a".repeat(101),
     );
-    expect(screen.getByRole("textbox")).toHaveAttribute("aria-invalid", "true");
-    expect(patches).toHaveLength(0);
 
-    await user.clear(screen.getByRole("textbox"));
-    await user.type(screen.getByRole("textbox"), "Short");
+    expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+      "a".repeat(100),
+    );
     await user.tab();
     await waitFor(() => {
-      expect(patches).toEqual([{ name: "Short" }]);
+      expect(patches).toEqual([{ name: "a".repeat(100) }]);
     });
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-
-    await user.clear(screen.getByRole("textbox"));
-    await user.type(screen.getByRole("textbox"), long);
-    await user.tab();
-    expect(await screen.findByRole("alert")).toBeVisible();
-    await user.click(screen.getByRole("textbox"));
-    await user.keyboard("{Escape}");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -314,8 +345,8 @@ describe("ListPage", () => {
     const { patches } = setup();
 
     await user.type(await field(), " 2{Escape}");
-    await user.click(screen.getByRole("textbox"));
-    await user.type(screen.getByRole("textbox"), " 3");
+    await user.click(screen.getByRole("textbox", { name: "List name" }));
+    await user.type(screen.getByRole("textbox", { name: "List name" }), " 3");
     await user.tab();
 
     await waitFor(() => {
@@ -611,7 +642,9 @@ describe("ListPage", () => {
       await vi.advanceTimersByTimeAsync(10_000);
 
       expect(await screen.findByRole("alert")).toHaveTextContent("Not saved.");
-      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "Weekly shop 2",
+      );
     });
 
     it("NET-1.4: a rename and its refetch with no answer: Not saved. comes at the limit, not after the refetch", async () => {
@@ -631,7 +664,9 @@ describe("ListPage", () => {
       expect(await screen.findByRole("alert")).toHaveTextContent(
         "Not saved. Try again",
       );
-      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "Weekly shop 2",
+      );
       expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "Back to lists" }),
@@ -653,7 +688,9 @@ describe("ListPage", () => {
       );
       await new Promise((resolve) => setTimeout(resolve, 50));
 
-      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "Weekly shop 2",
+      );
       expect(screen.getByRole("alert")).toHaveTextContent("Not saved.");
       expect(
         screen.queryByText("The list could not be loaded."),
@@ -696,7 +733,9 @@ describe("ListPage", () => {
         await screen.findByRole("heading", { name: "Weekly shop 2" }),
       ).toBeInTheDocument();
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "Weekly shop 2",
+      );
     });
 
     it("NET-1.7: Try again leaves the focus in the name field", async () => {
@@ -709,7 +748,7 @@ describe("ListPage", () => {
         await screen.findByRole("button", { name: "Try again" }),
       );
 
-      expect(screen.getByRole("textbox")).toHaveFocus();
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveFocus();
     });
 
     it("NET-1.7: after a failed rename the typed name stays and only a retry sends it", async () => {
@@ -719,7 +758,9 @@ describe("ListPage", () => {
 
       await user.type(await field(), " 2{Enter}");
       await screen.findByRole("alert");
-      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "Weekly shop 2",
+      );
       await user.tab();
       expect(requests).toHaveLength(1);
 
@@ -728,7 +769,7 @@ describe("ListPage", () => {
         expect(requests).toHaveLength(2);
       });
       await screen.findByRole("alert");
-      await user.click(screen.getByRole("textbox"));
+      await user.click(screen.getByRole("textbox", { name: "List name" }));
       await user.keyboard("{Enter}");
       await waitFor(() => {
         expect(requests).toHaveLength(3);
@@ -737,7 +778,9 @@ describe("ListPage", () => {
 
       await user.keyboard("{Escape}");
 
-      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop");
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "Weekly shop",
+      );
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
   });
@@ -794,7 +837,9 @@ describe("ListPage", () => {
           ["unblocked"],
         );
       });
-      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "Weekly shop 2",
+      );
       expect(screen.getByText("Saving…")).toBeVisible();
 
       answer();
