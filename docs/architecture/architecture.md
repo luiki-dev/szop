@@ -51,13 +51,13 @@ The development environment and tooling are decided in [ADR 0005](../decisions/0
                       └─────────────────────┘
 ```
 
-| Component | Responsibility |
-|---|---|
-| **React single-page application (SPA)** | Built by Vite into static files, styled with Tailwind CSS and built from shadcn/ui components. Renders everything in the browser. Talks to the API only over REST (and, later, a WebSocket). |
-| **Fastify API** | One Node.js process. Business logic, access control, persistence. Mounts Better Auth. Later hosts the WebSocket endpoint for live updates. |
-| **PostgreSQL** | The single source of truth for all data, including anonymous guests' workspaces. |
-| **Email service** | Sends verification and password-reset emails, over the Simple Mail Transfer Protocol (SMTP) or an HTTP API. Hidden behind an `EmailSender` interface. In AWS, Amazon Simple Email Service (SES). |
-| **`packages/shared`** | Code used by both sides: Zod schemas (the API contract), TypeScript types inferred from them, and pure domain rules such as item ordering ([ORD](../requirements/ORD-list-display-and-ordering.md)) and totals ([ITM-8](../requirements/ITM-list-items.md#itm-8)). |
+| Component                               | Responsibility                                                                                                                                                                                                                                                     |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **React single-page application (SPA)** | Built by Vite into static files, styled with Tailwind CSS and built from shadcn/ui components. Renders everything in the browser. Talks to the API only over REST (and, later, a WebSocket).                                                                       |
+| **Fastify API**                         | One Node.js process. Business logic, access control, persistence. Mounts Better Auth. Later hosts the WebSocket endpoint for live updates.                                                                                                                         |
+| **PostgreSQL**                          | The single source of truth for all data, including anonymous guests' workspaces.                                                                                                                                                                                   |
+| **Email service**                       | Sends verification and password-reset emails, over the Simple Mail Transfer Protocol (SMTP) or an HTTP API. Hidden behind an `EmailSender` interface. In AWS, Amazon Simple Email Service (SES).                                                                   |
+| **`packages/shared`**                   | Code used by both sides: Zod schemas (the API contract), TypeScript types inferred from them, and pure domain rules such as item ordering ([ORD](../requirements/ORD-list-display-and-ordering.md)) and totals ([ITM-8](../requirements/ITM-list-items.md#itm-8)). |
 
 **Same origin.** The SPA and the API are served under one domain (for example `example.com` and `example.com/api`). Session cookies are therefore first-party and no Cross-Origin Resource Sharing (CORS) setup is needed. The API achieves this by serving the built SPA's static files itself (see [Deployment](#5-deployment)). In development, the Vite dev server proxies `/api/*` to the API, so the same rules hold locally.
 
@@ -82,11 +82,11 @@ The packages and `e2e/` are pnpm workspaces. The packages are named `@szop/api`,
 
 Feature modules — `lists`, `items`, `categories`, `catalog`, `units`, `templates`, `account` (and `sharing` later) — each with three layers:
 
-| File | Layer | Knows about | Does not know about |
-|---|---|---|---|
-| `routes.ts` | HTTP | Fastify, shared Zod schemas | SQL, business rules |
-| `service.ts` | Business logic | rules, access checks, transactions | HTTP |
-| `repository.ts` | Persistence | Drizzle queries | business rules |
+| File            | Layer          | Knows about                        | Does not know about |
+| --------------- | -------------- | ---------------------------------- | ------------------- |
+| `routes.ts`     | HTTP           | Fastify, shared Zod schemas        | SQL, business rules |
+| `service.ts`    | Business logic | rules, access checks, transactions | HTTP                |
+| `repository.ts` | Persistence    | Drizzle queries                    | business rules      |
 
 Dependencies (database client, email sender, clock) are passed in explicitly when the app is assembled. There is no dependency-injection container. Tests pass fakes the same way.
 
@@ -158,6 +158,7 @@ A versioned data file in `apps/api` holds the default catalog, category tree and
   - imports the guest's lists and templates into the existing account's workspace, or discards them, according to the user's choice ([ACC-4](../requirements/ACC-accounts-and-guest-mode.md#acc-4)).
 
   How this maps onto Better Auth's anonymous plugin is not settled: by default the plugin links and deletes the anonymous user inside the sign-in request, before the [ACC-4](../requirements/ACC-accounts-and-guest-mode.md#acc-4) choice can be made ([OP-038](https://github.com/luiki-dev/szop/issues/97)).
+
 - **Activity tracking.** Each workspace has a `last_active_at` timestamp, updated by the auth hook at most once an hour to avoid a database write on every request.
 - **Cleanup.** A scheduled task inside the API process deletes ([ACC-7](../requirements/ACC-accounts-and-guest-mode.md#acc-7), [ACC-8](../requirements/ACC-accounts-and-guest-mode.md#acc-8)). Each run starts with a PostgreSQL try-lock (`pg_try_advisory_lock`), so with several tasks only one cleans up per round and the others skip it ([ADR 0036](../decisions/0036-scalability-and-isolation.md), decision 9):
   - anonymous users whose workspace's `last_active_at` is within 1 hour of creation, 3 days after creation;
@@ -192,25 +193,25 @@ The application's baseline, production grade even on the demo ([ADR 0012](../dec
 
 One JSON error shape: `{ "error": { "code": "...", "message": "..." } }`. Since [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) every error ends in one place ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 7): `setErrorHandler` for what a route, a hook or Fastify raises, and a not-found handler for paths under `/api/` (`setNotFoundHandler` in `src/web/routes.ts`, answering through `sendError` from `src/errors.ts`); the cross-site check and the JSON-only check answer in the same shape. The shared `apiErrorSchema` describes the body.
 
-| Code | Status | When |
-|---|---|---|
-| `invalid_input` | 400 | Zod validation of the path, query or body fails |
-| `forbidden_cross_site` | 403 | An unsafe request that does not come from the app |
-| `not_found` | 404 | No route, or no access |
-| `unsupported_media_type` | 415 | A body that is not JSON |
-| the status text in snake case | other 4xx | Any other client error Fastify raises |
-| `internal_error` | 500 | Anything unexpected: logged at level 50 with the error, answered with "Internal server error" and never the error's own text ([NFR-4](../requirements/NFR-non-functional-requirements.md#nfr-4).11); also a response that fails its schema |
+| Code                          | Status    | When                                                                                                                                                                                                                                       |
+| ----------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `invalid_input`               | 400       | Zod validation of the path, query or body fails                                                                                                                                                                                            |
+| `forbidden_cross_site`        | 403       | An unsafe request that does not come from the app                                                                                                                                                                                          |
+| `not_found`                   | 404       | No route, or no access                                                                                                                                                                                                                     |
+| `unsupported_media_type`      | 415       | A body that is not JSON                                                                                                                                                                                                                    |
+| the status text in snake case | other 4xx | Any other client error Fastify raises                                                                                                                                                                                                      |
+| `internal_error`              | 500       | Anything unexpected: logged at level 50 with the error, answered with "Internal server error" and never the error's own text ([NFR-4](../requirements/NFR-non-functional-requirements.md#nfr-4).11); also a response that fails its schema |
 
 The target for the whole API:
 
-| Situation | Status |
-|---|---|
-| Invalid input (Zod validation) | 400 |
-| No session, on a request that changes data | 401 |
-| Not found, or no access | 404 |
-| Conflict (e.g. editing an archived list), or a quota reached (`quota_exceeded`) | 409 |
-| Rate limit hit | 429 |
-| Anything unexpected | 500 — logged, no details sent to the browser |
+| Situation                                                                       | Status                                       |
+| ------------------------------------------------------------------------------- | -------------------------------------------- |
+| Invalid input (Zod validation)                                                  | 400                                          |
+| No session, on a request that changes data                                      | 401                                          |
+| Not found, or no access                                                         | 404                                          |
+| Conflict (e.g. editing an archived list), or a quota reached (`quota_exceeded`) | 409                                          |
+| Rate limit hit                                                                  | 429                                          |
+| Anything unexpected                                                             | 500 — logged, no details sent to the browser |
 
 ## 3. Frontend (`apps/web`)
 
@@ -237,20 +238,20 @@ Decided in [ADR 0013](../decisions/0013-visual-design.md) and [ADR 0022](../deci
 
 ### Routes (React Router)
 
-| Path | Page |
-|---|---|
-| `/` | Active lists (`src/lists/lists-page.tsx`) |
-| `/lists/new` | A new list (`src/lists/new-list-page.tsx`) |
-| `/lists/:id` | A list (`src/lists/list-page.tsx`) |
-| `/archive` | Archived lists |
-| `/templates`, `/templates/:id` | Templates, a template |
-| `/catalog` | Catalog |
-| `/categories` | Category tree |
-| `/units` | Units |
-| `/settings` | Profile and account settings |
-| `/login`, `/register`, `/verify-email`, `/reset-password` | Account flows |
-| `/shared` *(Later)* | Shared with me |
-| `/s/:token` *(Later)* | Opening a share link |
+| Path                                                      | Page                                       |
+| --------------------------------------------------------- | ------------------------------------------ |
+| `/`                                                       | Active lists (`src/lists/lists-page.tsx`)  |
+| `/lists/new`                                              | A new list (`src/lists/new-list-page.tsx`) |
+| `/lists/:id`                                              | A list (`src/lists/list-page.tsx`)         |
+| `/archive`                                                | Archived lists                             |
+| `/templates`, `/templates/:id`                            | Templates, a template                      |
+| `/catalog`                                                | Catalog                                    |
+| `/categories`                                             | Category tree                              |
+| `/units`                                                  | Units                                      |
+| `/settings`                                               | Profile and account settings               |
+| `/login`, `/register`, `/verify-email`, `/reset-password` | Account flows                              |
+| `/shared` _(Later)_                                       | Shared with me                             |
+| `/s/:token` _(Later)_                                     | Opening a share link                       |
 
 Only `/` (the lists), `/lists/new`, `/lists/:id`, `/catalog` and `/design` exist so far; the table above is the target. Any other path matches a catch-all route (`*`) last among the shell's children, which shows `NotFound` (`src/not-found/`): the trash can, "Nothing here", "This page doesn't exist." and a link to `/`, with the route title "Not found" ([ADR 0066](../decisions/0066-managing-lists-phase-details.md), decision 6). `/lists/:id` shows the same component with "This list doesn't exist or was deleted." when the ID is not a UUID (checked with `listSchema.shape.id`, and the query is then disabled so no request leaves) and when the API answers `404`. The API client also applies `encodeURIComponent` to every list ID it puts into a path.
 
@@ -264,12 +265,12 @@ The rate-limit (429) and quota (`quota_exceeded`) errors are shown as clear mess
 
 ### State
 
-| Kind | Examples | Owner |
-|---|---|---|
-| **Server state** | lists, items, catalog, categories | TanStack Query (fetching, caching, refreshing) |
-| **URL state** | which list is open; whether the lists page is selecting (the history entry's state, `{ selecting: true }`) | React Router |
-| **Local UI state** | an open dialog, text typed in an input | the component (`useState`) |
-| **Device preference** | none yet | `localStorage` |
+| Kind                  | Examples                                                                                                   | Owner                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **Server state**      | lists, items, catalog, categories                                                                          | TanStack Query (fetching, caching, refreshing) |
+| **URL state**         | which list is open; whether the lists page is selecting (the history entry's state, `{ selecting: true }`) | React Router                                   |
+| **Local UI state**    | an open dialog, text typed in an input                                                                     | the component (`useState`)                     |
+| **Device preference** | none yet                                                                                                   | `localStorage`                                 |
 
 **The selection mode** of the lists page ([LST-1](../requirements/LST-shopping-lists.md#lst-1).6) lives in the history entry's state: starting it pushes an entry, so Back stops it without leaving `/`, and every other way out (Cancel selection, Esc, a successful delete, the last deselect after a long-press start) runs `navigate(-1)` to remove that entry. The shell reads the same state to draw no header while the page shows its selection bar. The selected IDs live in the page's `useState` and are cleared when the mode ends; only the lists still returned by the query are counted.
 
@@ -285,11 +286,11 @@ The app watches the browser's online/offline events and failed requests. When of
 
 Every request of `src/api/client.ts` is given up after `timeLimit` (10 seconds) with `timeoutMessage` ("The server didn't answer in time."), so a weak connection ends in an error, not in a wait. A change's whole run (the write, the lock, the session check, the sign-in and the retried write) shares one deadline ([PH-16d](../roadmap.md#ph-16d-resilient-changes)).
 
-What is built for a rename, a create and a delete (the rename is described; the other two behave the same way):
+What is built for a rename, a create and a delete:
 
 - **In flight:** a create shows "Creating…" on its button and a delete "Deleting…" on the dialog's; the rename's name field shows "Saving…" under it and is read-only. `AppShell` holds the screen with `useBlocker(() => queryClient.isMutating() > 0)` and resets a blocked navigation at once, so Back and every in-app link do nothing; ← on the list's screen is `aria-disabled` while a change is in flight. The function is read at the moment of the navigation, so a change that just ended (and navigates from a `mutate()` per-call `onSuccess`, not from `useMutation`'s own, which runs while the mutation is still pending) is not blocked.
-- **Not saved:** a failed create shows "Not saved. Check your connection and create again." and a failed delete "Couldn't delete the list(s). Check your connection and try again."; both keep their screen or dialog and offer a retry. For the rename, `notSaved(error)` in `client.ts` is `false` only for a 4xx other than 401 (a refusal with its own message, shown as before, with no retry) and `true` for a timeout, no network, a 5xx, a second 401 or an unreadable answer. Then the field keeps the typed name and shows "Not saved." with "Try again", which sends it again, as does Enter; leaving the field sends nothing, and Esc puts the saved name back.
-- **A lost answer:** a failed rename, create or delete refetches what it touched, so a change the server did apply shows as saved and the alert goes.
+- **Not saved:** a failed create shows "Not saved. Check your connection and create again." and a failed delete "Couldn't delete the list(s). Check your connection and try again."; both keep their screen or dialog and offer a retry. `notSaved(error)` in `client.ts`, which all three use, is `false` only for a 4xx other than 401 (a refusal with its own message, shown as before, with no retry) and `true` for a timeout, no network, a 5xx, a second 401 or an unreadable answer. For the rename, the field then keeps the typed name and shows "Not saved." with "Try again", which sends it again, as does Enter; leaving the field sends nothing, and Esc puts the saved name back.
+- **A lost answer:** a failed rename, create or delete refetches what it touched, in the background (the change goes to its error state at once, not after the refetch), so a change the server did apply shows as saved and the alert goes. A refetch that fails changes nothing on screen: the error cards of the list and the lists page show only when nothing was loaded yet. A successful delete removes the lists from the cached lists first, so they do not flash back, and refetches in the background.
 - **Nothing is queued:** a change started offline is sent at once and, when it fails, waits for the user's retry; the `online` event sends nothing. PH-22 adds the banner and the disabled controls ([NET-1](../requirements/NET-connectivity.md#net-1)).
 
 ### Forms
