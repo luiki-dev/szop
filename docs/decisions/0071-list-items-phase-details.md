@@ -57,3 +57,5 @@ The [spec](../superpowers/specs/2026-11-06-PH-17-list-items-design.md) holds the
 - A migration that changes an existing table is tested with data from now on.
 
 ## Settled while building
+
+- ✏️ **The line total is a JS number, not a 32-bit integer.** At the maxima (price 9 999 999 cents, quantity 9 999 000 thousandths) the line total is 99 989 990 001, past 32 bits. It is computed as a JavaScript number, exact below 2^53, and never stored. This corrects the spec's note that a line total stays within a 32-bit integer.

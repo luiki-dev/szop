@@ -29,7 +29,11 @@ function setup(cachedLists: typeof threeLists = []) {
       posts.push(body);
       return status === 201
         ? HttpResponse.json(
-            { ...body, createdAt: "2026-10-30T12:00:00.000Z" },
+            {
+              ...body,
+              sortByCategory: true,
+              createdAt: "2026-10-30T12:00:00.000Z",
+            },
             { status: 201 },
           )
         : HttpResponse.json(
@@ -41,6 +45,7 @@ function setup(cachedLists: typeof threeLists = []) {
       HttpResponse.json({
         id: params.id,
         name: "Weekly shop",
+        sortByCategory: true,
         createdAt: "2026-10-30T12:00:00.000Z",
       }),
     ),
@@ -210,7 +215,11 @@ describe("NewListPage", () => {
         posts.push(body);
         await gate;
         return HttpResponse.json(
-          { ...body, createdAt: "2026-10-30T12:00:00.000Z" },
+          {
+            ...body,
+            sortByCategory: true,
+            createdAt: "2026-10-30T12:00:00.000Z",
+          },
           { status: 201 },
         );
       }),
@@ -268,7 +277,11 @@ describe("NewListPage", () => {
         posts.push((await request.json()) as { id: string; name: string });
         await gate;
         return HttpResponse.json(
-          { ...posts[0], createdAt: "2026-10-30T12:00:00.000Z" },
+          {
+            ...posts[0],
+            sortByCategory: true,
+            createdAt: "2026-10-30T12:00:00.000Z",
+          },
           { status: 201 },
         );
       }),
@@ -296,7 +309,11 @@ describe("NewListPage", () => {
         const body = (await request.json()) as { id: string; name: string };
         await gate;
         return HttpResponse.json(
-          { ...body, createdAt: "2026-10-30T12:00:00.000Z" },
+          {
+            ...body,
+            sortByCategory: true,
+            createdAt: "2026-10-30T12:00:00.000Z",
+          },
           { status: 201 },
         );
       }),
@@ -368,7 +385,13 @@ describe("NewListPage", () => {
       http.get("/api/lists", () =>
         HttpResponse.json({
           lists: created
-            ? [{ ...created, createdAt: "2026-10-30T12:00:00.000Z" }]
+            ? [
+                {
+                  ...created,
+                  sortByCategory: true,
+                  createdAt: "2026-10-30T12:00:00.000Z",
+                },
+              ]
             : [],
         }),
       ),

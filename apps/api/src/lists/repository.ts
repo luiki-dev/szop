@@ -7,6 +7,7 @@ function toList(row: typeof lists.$inferSelect): List {
   return {
     id: row.id,
     name: row.name,
+    sortByCategory: true, // Task 2 adds the column
     createdAt: row.createdAt.toISOString(),
   };
 }

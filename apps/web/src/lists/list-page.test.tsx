@@ -11,7 +11,12 @@ import { ListPage } from "./list-page.tsx";
 import { server } from "../test/server.ts";
 
 const id = "0198a000-0000-7000-8000-0000000000aa";
-const list = { id, name: "Weekly shop", createdAt: "2026-10-30T12:00:00.000Z" };
+const list = {
+  id,
+  name: "Weekly shop",
+  sortByCategory: true,
+  createdAt: "2026-10-30T12:00:00.000Z",
+};
 
 function setup() {
   const patches: { name: string }[] = [];

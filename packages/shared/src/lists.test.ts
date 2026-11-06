@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createListSchema,
+  updateListSchema,
   deleteListsSchema,
   listNameSchema,
 } from "./lists.ts";
@@ -86,5 +87,18 @@ describe("createListSchema", () => {
     expect(
       createListSchema.safeParse({ id: "not-a-uuid", name: "Weekly" }).success,
     ).toBe(false);
+  });
+});
+
+describe("updateListSchema", () => {
+  it("refuses an empty body", () => {
+    expect(updateListSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("takes a name or the sort setting alone", () => {
+    expect(updateListSchema.safeParse({ name: "Weekly" }).success).toBe(true);
+    expect(updateListSchema.safeParse({ sortByCategory: false }).success).toBe(
+      true,
+    );
   });
 });
