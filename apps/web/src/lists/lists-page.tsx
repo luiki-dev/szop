@@ -232,7 +232,7 @@ export function ListsPage() {
   return (
     <>
       {selecting && lists ? (
-        <div className="mt-2 flex items-center gap-1">
+        <div className="mt-4 flex min-h-12 items-center gap-1">
           <Button
             variant="ghost"
             size="icon"

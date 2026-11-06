@@ -4,7 +4,6 @@ import {
   Outlet,
   ScrollRestoration,
   useBlocker,
-  useLocation,
   useMatches,
 } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,7 +14,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet.tsx";
-import { isSelecting } from "../lists/lists-page.tsx";
 import type { RouteHandle } from "../routes.tsx";
 import { Menu } from "./menu.tsx";
 import { desktopQuery, useMediaQuery } from "./use-media-query.ts";
@@ -92,9 +90,6 @@ function PhoneHeader({ title }: { title: string | undefined }) {
 export function AppShell() {
   const desktop = useMediaQuery(desktopQuery);
   const { title, header, action } = useRouteHandle();
-  // Selecting lists replaces the header with the page's selection bar; the
-  // title stays for screen readers.
-  const selecting = isSelecting(useLocation().state);
 
   // While a change is in flight the screen cannot be left: Back and every
   // in-app link do nothing. A function, read at the moment of the navigation,
@@ -122,7 +117,7 @@ export function AppShell() {
           </nav>
         </aside>
       ) : (
-        !header && !selecting && <PhoneHeader title={title} />
+        !header && <PhoneHeader title={title} />
       )}
       <main
         className={
@@ -133,12 +128,7 @@ export function AppShell() {
               "mx-auto max-w-[720px] px-4 pb-6 md:px-6"
         }
       >
-        {selecting && (
-          <h1 tabIndex={-1} className="sr-only">
-            {title}
-          </h1>
-        )}
-        {desktop && !header && !selecting && (
+        {desktop && !header && (
           // The row is 48 px whether or not it holds an action, so the title sits
           // at the same height on every page.
           <div className="flex min-h-12 items-center justify-between gap-4">

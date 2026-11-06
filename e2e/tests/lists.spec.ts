@@ -149,6 +149,22 @@ test("LST-1.6, LST-1.7, LST-1.8: a guest selects lists with Select and deletes t
   await expect(page.getByRole("checkbox")).toHaveCount(0);
 });
 
+test("OP-131: selecting lists does not move them", async ({ page }) => {
+  await page.goto("/");
+  await createList(page, "Weekly shop");
+  await createList(page, "Party");
+
+  const card = page.getByRole("listitem").filter({ hasText: "Party" });
+  const before = (await card.boundingBox())?.y;
+  await page.getByRole("button", { name: "Select" }).click();
+  await expect(page.getByText("0 selected")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Lists" }),
+  ).toBeVisible();
+  const after = (await card.boundingBox())?.y;
+  expect(after).toBe(before);
+});
+
 test("LST-1.6, LST-1.7: on a phone a long press selects a list, and Back stops selecting", async ({
   page,
   isMobile,

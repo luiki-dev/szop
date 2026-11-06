@@ -208,6 +208,49 @@ describe("ListsPage", () => {
       expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled();
     });
 
+    it.each([false, true])(
+      "OP-131: selecting keeps the page's heading and puts the controls where Select was (desktop %s)",
+      async (desktop) => {
+        stubMatchMedia({ [desktopQuery]: desktop });
+        serveLists();
+        renderApp();
+        const selectButton = await screen.findByRole("button", {
+          name: "Select",
+        });
+        const rowOfSelect = selectButton.parentElement;
+        fireEvent.click(selectButton);
+
+        const heading = screen.getByRole("heading", {
+          level: 1,
+          name: "Lists",
+        });
+        expect(heading).not.toHaveClass("sr-only");
+        if (desktop) {
+          expect(
+            within(heading.parentElement as HTMLElement).getByRole("link", {
+              name: "New list",
+            }),
+          ).toBeVisible();
+        } else {
+          expect(
+            screen.getByRole("button", { name: "Open menu" }),
+          ).toBeVisible();
+        }
+        const bar = screen.getByRole("button", {
+          name: "Cancel selection",
+        }).parentElement;
+        expect(bar).toBe(rowOfSelect);
+        for (const name of ["Select all", "Delete"]) {
+          expect(
+            within(bar as HTMLElement).getByRole("button", { name }),
+          ).toBeVisible();
+        }
+        expect(
+          within(bar as HTMLElement).getByText("0 selected"),
+        ).toBeVisible();
+      },
+    );
+
     it("LST-1.6: Select is not shown with no lists", async () => {
       serveLists([]);
       renderApp();

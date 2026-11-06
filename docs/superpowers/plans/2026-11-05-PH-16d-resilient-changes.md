@@ -147,13 +147,13 @@
 **Interfaces:**
 - Produces: `AppShell` no longer reads the selection: the phone header and the desktop title row show while selecting, and the screen-reader-only `h1` for the selection goes. `ListsPage` renders the selection controls (✕, the count, Select all or Deselect all, Delete) in the same `mt-4` row where Select stands; the row keeps Select's height (48 px), so the cards do not move.
 
-- [ ] **Step 1: Write the failing test** in `lists-page.test.tsx`: `"OP-131: selecting keeps the page's heading and puts the controls where Select was"`: while selecting, the heading "Lists" (level 1) is visible (not `sr-only`), on a phone (☰ present) and on a desktop ("New list" link beside it); the controls are in the element that held Select. The focus moves to that `h1` after a delete from the selection, as before.
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test -- lists-page app-shell`. Expected: FAIL.
-- [ ] **Step 3: Implement** the Interfaces above, removing the `isSelecting` import from the shell if nothing else uses it.
-- [ ] **Step 4: Run** the tests again. Expected: PASS.
-- [ ] **Step 5: Write the E2E test** `"OP-131: selecting lists does not move them"`: with two lists, the first card's `boundingBox().y` is the same before and after Select, on the phone and the desktop projects.
-- [ ] **Step 6: Run** `pnpm test:e2e -- lists`, then `pnpm check`. Expected: PASS.
-- [ ] **Step 7: Update the docs** and commit: `fix(lists): keep the page's header and the lists in place while selecting`.
+- [x] **Step 1: Write the failing test** in `lists-page.test.tsx`: `"OP-131: selecting keeps the page's heading and puts the controls where Select was"`: while selecting, the heading "Lists" (level 1) is visible (not `sr-only`), on a phone (☰ present) and on a desktop ("New list" link beside it); the controls are in the element that held Select. The focus moves to that `h1` after a delete from the selection, as before.
+- [x] **Step 2: Run** `pnpm --filter @szop/web test -- lists-page app-shell`. Expected: FAIL.
+- [x] **Step 3: Implement** the Interfaces above, removing the `isSelecting` import from the shell if nothing else uses it.
+- [x] **Step 4: Run** the tests again. Expected: PASS.
+- [x] **Step 5: Write the E2E test** `"OP-131: selecting lists does not move them"`: with two lists, the first card's `boundingBox().y` is the same before and after Select, on the phone and the desktop projects.
+- [x] **Step 6: Run** `pnpm test:e2e -- lists`, then `pnpm check`. Expected: PASS.
+- [x] **Step 7: Update the docs** and commit: `fix(lists): keep the page's header and the lists in place while selecting`.
 
 ### Task 5: The raccoon under the sidebar
 
