@@ -13,6 +13,7 @@ export function parseAmount(text: string, decimals: 2 | 3): ParsedAmount {
   if (!match) return { ok: false };
   return {
     ok: true,
+    // Stryker disable next-line StringLiteral: the regex always sets group 1
     value: Number((match[1] ?? "") + (match[2] ?? "").padEnd(decimals, "0")),
   };
 }

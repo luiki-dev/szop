@@ -70,6 +70,7 @@ function useItemMutation<Variables, Answer extends ListItem | undefined>(
     onMutate: async (variables: Variables) => {
       await queryClient.cancelQueries({ queryKey: listKey(listId) });
       const items =
+        // Stryker disable next-line ArrayDeclaration: a stand-in item has another ID, so `find` misses it as it misses in `[]`
         queryClient.getQueryData<ListWithItems>(listKey(listId))?.items ?? [];
       const previous = items.find((item) => item.id === itemId);
       writeItems(queryClient, listId, (current) =>
@@ -84,6 +85,7 @@ function useItemMutation<Variables, Answer extends ListItem | undefined>(
       );
     },
     onError: (_, variables, context) => {
+      // Stryker disable next-line OptionalChaining: onMutate always returns a context; the `?` only guards a failed onMutate
       const previous = context?.previous;
       writeItems(queryClient, listId, (items) => {
         const rest = items.filter((item) => item.id !== itemId);
@@ -91,6 +93,7 @@ function useItemMutation<Variables, Answer extends ListItem | undefined>(
         // In place when still there; else by ID, which is the list's order.
         if (rest.length < items.length)
           return items.map((item) => (item.id === itemId ? previous : item));
+        // Stryker disable next-line EqualityOperator: `rest` never holds itemId, so `>=` finds the same place
         const at = rest.findIndex((item) => item.id > itemId);
         return rest.toSpliced(at < 0 ? rest.length : at, 0, previous);
       });
@@ -139,6 +142,8 @@ export function useUpdateItem(listId: string, itemId: string) {
             }
           : item,
       ),
+    // Stryker disable next-line StringLiteral: an update starts from an item shown in the list, so `previous` is never missing
+    // Stryker disable next-line OptionalChaining: same, `previous` is never missing
     name: (changes, previous) => changes.name ?? previous?.name ?? "",
   });
 }
@@ -151,6 +156,8 @@ export function useRemoveItem(listId: string, itemId: string) {
       return undefined;
     },
     apply: (items) => items.filter((item) => item.id !== itemId),
+    // Stryker disable next-line StringLiteral: a remove starts from an item shown in the list, so `previous` is never missing
+    // Stryker disable next-line OptionalChaining: same, `previous` is never missing
     name: (_, previous) => previous?.name ?? "",
   });
 }
@@ -166,8 +173,10 @@ export function useRestoreItem(listId: string, itemId: string) {
 
 export function useSortByCategory(listId: string) {
   const queryClient = useQueryClient();
+  // Stryker disable next-line StringLiteral: the scope only has to differ from every item ID, and `` does
   const scope = `list-${listId}`;
   const setSort = (value: boolean | undefined) => {
+    // Stryker disable next-line ConditionalExpression: undefined only comes with no cached list, where setQueryData's updater leaves the cache alone
     if (value === undefined) return;
     queryClient.setQueryData<ListWithItems>(
       listKey(listId),
@@ -183,6 +192,7 @@ export function useSortByCategory(listId: string) {
     mutationKey: listKey(listId),
     onMutate: async (value: boolean) => {
       await queryClient.cancelQueries({ queryKey: listKey(listId) });
+      // Stryker disable next-line OptionalChaining: the sort setting is changed from a list on the screen, so it is cached
       const previous = queryClient.getQueryData<ListWithItems>(
         listKey(listId),
       )?.sortByCategory;
@@ -193,6 +203,7 @@ export function useSortByCategory(listId: string) {
       if (!othersWait(queryClient, scope)) setSort(list.sortByCategory);
     },
     onError: (_, __, context) => {
+      // Stryker disable next-line OptionalChaining: onMutate always returns a context; the `?` only guards a failed onMutate
       setSort(context?.previous);
       showSortNotSaved();
     },

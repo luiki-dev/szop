@@ -14,4 +14,10 @@ describe("fitChips", () => {
   it("ORD-1.3: none fit when even one chip and +N more do not", () => {
     expect(fitChips([50, 50], 100, 60, 8)).toBe(0);
   });
+
+  it("ORD-1.3: a row that holds the chips and +N more to the pixel keeps them", () => {
+    // Two chips, the gap and "+1 more" need exactly 156.
+    expect(fitChips([50, 50, 50], 156, 40, 8)).toBe(2);
+    expect(fitChips([50, 50, 50], 155, 40, 8)).toBe(1);
+  });
 });

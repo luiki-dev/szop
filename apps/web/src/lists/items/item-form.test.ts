@@ -65,4 +65,24 @@ describe("the item form", () => {
       note: "ripe",
     });
   });
+
+  it("LIM-2.1: the smallest and the largest quantity and price are accepted", () => {
+    expect(parse({ quantity: "0,001", price: "0" }).data).toMatchObject({
+      quantity: 1,
+      price: 0,
+    });
+    expect(parse({ quantity: "9999", price: "99999,99" }).data).toMatchObject({
+      quantity: 9_999_000,
+      price: 9_999_999,
+    });
+  });
+
+  it("APP-6.2: a bad number is a custom issue", () => {
+    const result = parse({ quantity: "abc" });
+    expect(result.error?.issues[0]?.code).toBe("custom");
+  });
+
+  it("ITM-6.1: an item with no unit shows the empty choice", () => {
+    expect(toFormValues(bananas).unitId).toBe("");
+  });
 });

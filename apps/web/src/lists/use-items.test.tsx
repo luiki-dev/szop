@@ -1,4 +1,9 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { delay, http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
@@ -372,7 +377,281 @@ describe("the item hooks", () => {
   });
 });
 
-import { useQuery } from "@tanstack/react-query";
+describe("the item hooks, edge by edge", () => {
+  const noteSaved = " wasn't saved. Check your connection and try again.";
+  const refuse = () =>
+    HttpResponse.json({ error: { message: "x" } }, { status: 500 });
+  const description = (name: string): unknown =>
+    expect.objectContaining({ description: `${name}${noteSaved}` });
+
+  it("APP-7.2: a refused add leaves the list as it was and names the item", async () => {
+    const shown = vi.spyOn(toasts.toastManager, "add");
+    server.use(
+      withSession,
+      http.post(`${listPath}/items`, refuse),
+      http.get(listPath, () => delay("infinite")),
+    );
+    const { wrapper, items } = setup(listWith(milk));
+    const { result } = renderHook(() => useAddItem(listId, bananas.id), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.mutate("Bananas");
+    });
+
+    await waitFor(() => {
+      expect(shown).toHaveBeenCalledWith(description("Bananas"));
+    });
+    expect(items()).toEqual([milk]);
+    shown.mockRestore();
+  });
+
+  it("APP-7.2: a refused remove of the last item puts it back in its place, and names it", async () => {
+    const shown = vi.spyOn(toasts.toastManager, "add");
+    server.use(
+      withSession,
+      http.delete(itemPath(milk.id), refuse),
+      http.get(listPath, () => delay("infinite")),
+    );
+    const { wrapper, items } = setup(listWith(bananas, milk));
+    const { result } = renderHook(() => useRemoveItem(listId, milk.id), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.mutate();
+    });
+
+    await waitFor(() => {
+      expect(shown).toHaveBeenCalledWith(description("Milk"));
+    });
+    expect(items()).toEqual([bananas, milk]);
+    shown.mockRestore();
+  });
+
+  it.each([
+    ["in the order of the IDs", [bananas, milk]],
+    ["in another order", [milk, bananas]],
+  ])(
+    "APP-7.2: a refused update of one item restores that item, %s",
+    async (_, order) => {
+      const shown = vi.spyOn(toasts.toastManager, "add");
+      server.use(
+        withSession,
+        http.patch(itemPath(milk.id), refuse),
+        http.get(listPath, () => delay("infinite")),
+      );
+      const { wrapper, items } = setup(listWith(...order));
+      const { result } = renderHook(() => useUpdateItem(listId, milk.id), {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.mutate({ checked: true });
+      });
+
+      await waitFor(() => {
+        expect(shown).toHaveBeenCalledWith(description("Milk"));
+      });
+      expect(items()).toEqual(order);
+      shown.mockRestore();
+    },
+  );
+
+  it("a refused restore names the item", async () => {
+    const shown = vi.spyOn(toasts.toastManager, "add");
+    server.use(
+      withSession,
+      http.post(`${listPath}/items`, refuse),
+      http.get(listPath, () => delay("infinite")),
+    );
+    const { wrapper } = setup(listWith(milk));
+    const { result } = renderHook(() => useRestoreItem(listId, bananas.id), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.mutate(bananas);
+    });
+
+    await waitFor(() => {
+      expect(shown).toHaveBeenCalledWith(description("Bananas"));
+    });
+    shown.mockRestore();
+  });
+
+  it("ITM-7.4: a rename shows at once and keeps the item checked", async () => {
+    const checked = { ...bananas, checkedAt: "2026-01-02T03:04:05.000Z" };
+    server.use(
+      withSession,
+      http.patch(itemPath(bananas.id), () => delay("infinite")),
+    );
+    const { wrapper, items } = setup(listWith(checked));
+    const { result } = renderHook(() => useUpdateItem(listId, bananas.id), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.mutate({ name: "Plantains" });
+    });
+
+    await waitFor(() => {
+      expect(items()?.[0]?.name).toBe("Plantains");
+    });
+    expect(items()?.[0]?.checkedAt).toBe(checked.checkedAt);
+  });
+
+  it("ORD-1.1: two sort changes are sent in order, and the first answer does not undo the second", async () => {
+    const first = gate();
+    const second = gate();
+    const received: boolean[] = [];
+    server.use(
+      withSession,
+      http.patch(listPath, async ({ request }) => {
+        const body = (await request.json()) as { sortByCategory: boolean };
+        received.push(body.sortByCategory);
+        await (received.length === 1 ? first : second).opened;
+        return HttpResponse.json({
+          ...listWith(),
+          sortByCategory: body.sortByCategory,
+        });
+      }),
+      http.get(listPath, () => delay("infinite")),
+    );
+    const { client, wrapper } = setup(listWith(bananas));
+    const { result } = renderHook(() => useSortByCategory(listId), {
+      wrapper,
+    });
+    const sorted = () =>
+      client.getQueryData<ListWithItems>(key)?.sortByCategory;
+
+    act(() => {
+      result.current.mutate(false);
+    });
+    await waitFor(() => {
+      expect(received).toEqual([false]);
+    });
+    act(() => {
+      result.current.mutate(true);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(received).toEqual([false]);
+
+    first.open();
+    await waitFor(() => {
+      expect(received).toEqual([false, true]);
+    });
+    expect(sorted()).toBe(true);
+
+    second.open();
+    await waitFor(() => {
+      expect(client.isMutating()).toBe(0);
+    });
+    expect(sorted()).toBe(true);
+  });
+
+  it("ORD-1.1: the server's word on the sort setting wins, whatever else is in flight", async () => {
+    server.use(
+      withSession,
+      http.patch(listPath, () =>
+        HttpResponse.json({ ...listWith(), sortByCategory: true }),
+      ),
+      http.patch(itemPath(milk.id), () => delay("infinite")),
+      http.get(listPath, () => delay("infinite")),
+    );
+    const { client, wrapper } = setup(listWith(bananas, milk));
+    const { result } = renderHook(
+      () => ({
+        sort: useSortByCategory(listId),
+        update: useUpdateItem(listId, milk.id),
+        // A change with no scope and no key, like another screen's.
+        other: useMutation({ mutationFn: () => new Promise<void>(() => {}) }),
+      }),
+      { wrapper },
+    );
+    act(() => {
+      result.current.other.mutate();
+      result.current.update.mutate({ name: "Oat milk" });
+    });
+    await waitFor(() => {
+      expect(client.isMutating()).toBe(2);
+    });
+
+    act(() => {
+      result.current.sort.mutate(false);
+    });
+
+    await waitFor(() => {
+      expect(result.current.sort.isSuccess).toBe(true);
+    });
+    expect(client.getQueryData<ListWithItems>(key)?.sortByCategory).toBe(true);
+  });
+
+  it("a change touches only its own list: other queries run on and the list is asked once", async () => {
+    let listReads = 0;
+    let otherReads = 0;
+    let answeredReads = 0;
+    server.use(
+      withSession,
+      http.patch(itemPath(bananas.id), () => HttpResponse.json(bananas)),
+      http.patch(listPath, () => HttpResponse.json(listWith(bananas))),
+      http.get(listPath, () => {
+        listReads += 1;
+        return HttpResponse.json(listWith(bananas));
+      }),
+    );
+    const { client, wrapper } = setup(listWith(bananas));
+    const { result } = renderHook(
+      () => ({
+        update: useUpdateItem(listId, bananas.id),
+        sort: useSortByCategory(listId),
+        observed: useObservedList(),
+        // A query of another screen, still waiting for its answer.
+        elsewhere: useQuery({
+          queryKey: ["elsewhere"],
+          queryFn: () => {
+            otherReads += 1;
+            return new Promise<string>(() => {});
+          },
+        }),
+        // And one that has its answer.
+        answered: useQuery({
+          queryKey: ["answered"],
+          queryFn: () => {
+            answeredReads += 1;
+            return "x";
+          },
+          staleTime: Infinity,
+        }),
+        // A change with no scope and no key, in flight meanwhile.
+        other: useMutation({ mutationFn: () => new Promise<void>(() => {}) }),
+      }),
+      { wrapper },
+    );
+    act(() => {
+      result.current.other.mutate();
+    });
+
+    act(() => {
+      result.current.update.mutate({ name: "Plantains" });
+    });
+    await waitFor(() => {
+      expect(listReads).toBe(1);
+    });
+    act(() => {
+      result.current.sort.mutate(false);
+    });
+    await waitFor(() => {
+      expect(listReads).toBe(2);
+    });
+
+    expect(otherReads).toBe(1);
+    expect(answeredReads).toBe(1);
+    expect(client.getQueryState(["elsewhere"])?.fetchStatus).toBe("fetching");
+  });
+});
+
 import { getList } from "../api/client.ts";
 function useObservedList() {
   return useQuery({

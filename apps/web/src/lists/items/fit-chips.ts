@@ -10,6 +10,7 @@ export function fitChips(
     widths.slice(0, count).reduce((sum, w) => sum + w + gap, 0) - gap;
   if (used(widths.length) <= available) return widths.length;
   let fit = 0;
+  // Stryker disable next-line EqualityOperator,ConditionalExpression: the loop stops before `fit` reaches widths.length, since the all-fit case returned above
   while (fit < widths.length && used(fit + 1) + gap + moreWidth <= available)
     fit++;
   return fit;

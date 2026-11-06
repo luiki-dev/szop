@@ -92,7 +92,9 @@ describe("createListSchema", () => {
 
 describe("updateListSchema", () => {
   it("refuses an empty body", () => {
-    expect(updateListSchema.safeParse({}).success).toBe(false);
+    const result = updateListSchema.safeParse({});
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Send at least one field");
   });
 
   it("takes a name or the sort setting alone", () => {

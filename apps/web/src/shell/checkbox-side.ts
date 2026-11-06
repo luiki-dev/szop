@@ -39,7 +39,9 @@ export function storeCheckboxSide(side: CheckboxSide): void {
 
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
+  // Stryker disable next-line BlockStatement: a listener left behind after unmount is called and does nothing React can see
   return () => {
+    // Stryker disable next-line CallExpression: same, a leftover listener has no visible effect
     listeners.delete(listener);
   };
 }

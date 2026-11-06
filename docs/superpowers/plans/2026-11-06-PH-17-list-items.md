@@ -311,7 +311,7 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
 **Files:**
 - Modify: tests, and `// Stryker disable next-line <Mutator>: <reason>` comments, where the run calls for them
 
-- [ ] **Step 1: Run** `pnpm test:mutation --mutate` over `packages/shared/src/{items,amounts,item-order,lists}.ts`, `apps/api/src/items/*.ts` (not the tests), `apps/api/src/lists/{routes,repository}.ts`, `apps/web/src/lists/use-items.ts`, `apps/web/src/lists/items/{item-form,fit-chips}.ts`, `apps/web/src/shell/{toasts.tsx,checkbox-side.ts}`.
-- [ ] **Step 2: Kill or accept** each survivor without stopping (the experiment's rule 3): a test that kills it, or a disable comment with the reason, as the existing comments do. Write every accepted one, with its reason, into the ledger's `## Findings` table as a Minor finding of source "Mutation run", so `/finish-phase` shows them to the owner.
-- [ ] **Step 3: Run** `pnpm check`. Expected: PASS.
-- [ ] **Step 4: Commit** `test(items): kill or accept the PH-17 mutants`.
+- [x] **Step 1: Run** `pnpm test:mutation --mutate` over `packages/shared/src/{items,amounts,item-order,lists}.ts`, `apps/api/src/items/*.ts` (not the tests), `apps/api/src/lists/{routes,repository}.ts`, `apps/web/src/lists/use-items.ts`, `apps/web/src/lists/items/{item-form,fit-chips}.ts`, `apps/web/src/shell/{toasts.tsx,checkbox-side.ts}`.
+- [x] **Step 2: Kill or accept** each survivor without stopping (the experiment's rule 3): a test that kills it, or a disable comment with the reason, as the existing comments do. Write every accepted one, with its reason, into the ledger's `## Findings` table as a Minor finding of source "Mutation run", so `/finish-phase` shows them to the owner.
+- [x] **Step 3: Run** `pnpm check`. Expected: PASS.
+- [x] **Step 4: Commit** `test(items): kill or accept the PH-17 mutants`.

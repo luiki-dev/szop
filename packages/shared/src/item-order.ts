@@ -7,8 +7,12 @@ export type ItemCard =
   | { kind: "uncategorized"; items: ListItem[] }
   | { kind: "all"; items: ListItem[] };
 
-const byId = (a: ListItem, b: ListItem) =>
-  a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+const byId = (a: ListItem, b: ListItem) => {
+  // Stryker disable next-line EqualityOperator: IDs are unique, so `<=` differs only for an item against itself
+  if (a.id < b.id) return -1;
+  // Stryker disable next-line ConditionalExpression,EqualityOperator: for the sort, a positive result and 0 both leave a pair in place, and IDs are unique
+  return a.id > b.id ? 1 : 0;
+};
 const byName = (a: ListItem, b: ListItem) =>
   compareNames(a.name, b.name) || byId(a, b);
 
@@ -33,6 +37,7 @@ export function itemCards(
     }
   }
   const rest = open.filter(
+    // Stryker disable next-line ConditionalExpression: `known` never holds null, so the null check is only for the types
     (item) => item.categoryId === null || !known.has(item.categoryId),
   );
   if (rest.length)
@@ -46,6 +51,7 @@ export function haulItems(items: readonly ListItem[]): ListItem[] {
     .filter((item) => item.checkedAt !== null)
     .sort(
       (a, b) =>
+        // Stryker disable next-line StringLiteral: the filter above leaves only checked items
         (b.checkedAt ?? "").localeCompare(a.checkedAt ?? "") || byId(b, a),
     );
 }

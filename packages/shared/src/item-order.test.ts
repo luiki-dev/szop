@@ -114,3 +114,42 @@ describe("haulItems", () => {
     expect(names(haul)).toEqual(["New", "Tie a", "Old"]);
   });
 });
+
+describe("the order of equal names and times", () => {
+  it("ORD-2.2: items with the same name are in ID order, whatever order they came in", () => {
+    for (const input of [
+      ["1", "2", "3"],
+      ["3", "2", "1"],
+      ["2", "3", "1"],
+    ]) {
+      const [card] = itemCards(
+        input.map((id) => ({ ...item(id, "Milk", "veg") })),
+        categories,
+        true,
+      );
+      expect(card?.items.map((i) => i.id)).toEqual(["1", "2", "3"]);
+    }
+  });
+
+  it("ORD-5.5: with sorting off, oldest first whatever order they came in", () => {
+    const [card] = itemCards(
+      [item("3", "A", null), item("1", "C", null), item("2", "B", null)],
+      categories,
+      false,
+    );
+    expect(card?.items.map((i) => i.id)).toEqual(["1", "2", "3"]);
+  });
+
+  it("ORD-2.5: checked at the same time, the larger ID is first whatever order they came in", () => {
+    const at = "2026-01-01T00:00:00.000Z";
+    for (const input of [
+      ["1", "2", "3"],
+      ["3", "1", "2"],
+      ["2", "3", "1"],
+    ]) {
+      expect(
+        haulItems(input.map((id) => item(id, "X", null, at))).map((i) => i.id),
+      ).toEqual(["3", "2", "1"]);
+    }
+  });
+});
