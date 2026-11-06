@@ -186,18 +186,19 @@ test("ITM-7.1, ORD-1.4, ORD-1.6, ORD-1.7, ORD-1.11: a guest checks items into th
     name: "Add an item to Weekend groceries",
   });
   for (const item of ["Bananas", "Milk", "Bread"]) {
-    await add.pressSequentially(item);
+    await add.fill(item);
     await add.press("Enter");
   }
-  // Reloaded: after quick adds Chromium sometimes shows a row twice (a defect
-  // of the add flow, found in Task 8), which the checks below must not see.
-  await page.reload();
+  // Each add keeps its own ID, so the rows are not doubled and a check right
+  // after the adds reaches the right item (no "wasn't saved" toast).
+  await expect(page.getByRole("listitem")).toHaveCount(3);
   await expect(page.getByText("3 left")).toBeVisible();
   await expect(page.getByText("0 of 3 items")).toBeVisible();
 
   await page.getByRole("checkbox", { name: "Bananas" }).click();
   await page.getByRole("checkbox", { name: "Milk" }).click();
   await expect(page.getByText("2 of 3 items")).toBeVisible();
+  await expect(page.getByText("wasn't saved")).toHaveCount(0);
   await expect(page.getByText("1 left")).toBeVisible();
   await expectAccessible(page);
 
@@ -206,6 +207,25 @@ test("ITM-7.1, ORD-1.4, ORD-1.6, ORD-1.7, ORD-1.11: a guest checks items into th
   expect(
     await tray.evaluate((el) => el.getBoundingClientRect().bottom),
   ).toBeCloseTo(700, 0);
+
+  // A toast sits above the add bar while the haul shows chips.
+  await page.getByRole("button", { name: "Bread" }).click();
+  await page
+    .getByRole("dialog", { name: "Edit item" })
+    .getByRole("button", { name: "Remove" })
+    .click();
+  const toast = page.getByText("Removed Bread");
+  await expect(toast).toBeVisible();
+  const toastBottom = await toast.evaluate(
+    (el) => el.parentElement?.getBoundingClientRect().bottom ?? 0,
+  );
+  const barTop = await add.evaluate(
+    (el) => el.closest("form")?.getBoundingClientRect().top ?? 0,
+  );
+  expect(toastBottom).toBeLessThanOrEqual(barTop);
+  await page.getByRole("button", { name: "Undo" }).click();
+  await expect(page.getByRole("checkbox", { name: "Bread" })).toBeVisible();
+
   await page.getByRole("button", { name: "Put Milk back" }).click();
   await expect(page.getByRole("checkbox", { name: "Milk" })).toBeVisible();
 

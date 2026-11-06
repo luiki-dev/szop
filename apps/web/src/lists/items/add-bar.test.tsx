@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
-import { listId } from "../../test/items.ts";
+import type { ListWithItems } from "@szop/shared";
+import { listId, listWith } from "../../test/items.ts";
 import { server } from "../../test/server.ts";
 import { AddBar } from "./add-bar.tsx";
 
@@ -46,6 +47,37 @@ function setup() {
 }
 
 describe("AddBar", () => {
+  it("ITM-2.4: two fast adds are each sent with the ID of their own row", async () => {
+    const posts: { id: string; name: string }[] = [];
+    server.use(
+      http.post(`/api/lists/${listId}/items`, async ({ request }) => {
+        posts.push((await request.json()) as { id: string; name: string });
+        await delay(200);
+        return HttpResponse.json(posts.at(-1), { status: 201 });
+      }),
+    );
+    const client = new QueryClient();
+    client.setQueryData(["lists", listId], listWith());
+    render(
+      <QueryClientProvider client={client}>
+        <AddBar listId={listId} listName="L" onFocusChange={() => undefined} />
+      </QueryClientProvider>,
+    );
+    await userEvent.type(
+      screen.getByRole("textbox", { name: "Add an item to L" }),
+      "Milk{Enter}Eggs{Enter}",
+    );
+    const rows = () =>
+      client
+        .getQueryData<ListWithItems>(["lists", listId])
+        ?.items.map(({ id, name }) => ({ id, name }));
+    await waitFor(() => {
+      expect(posts).toHaveLength(2);
+    });
+    expect(posts.map((p) => p.id)).toEqual(rows()?.map((r) => r.id));
+    expect(new Set(posts.map((p) => p.id)).size).toBe(2);
+  });
+
   it("ITM-2.3: Enter adds the typed name with nothing else", async () => {
     const { posts, field } = setup();
 

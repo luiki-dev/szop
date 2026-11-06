@@ -186,13 +186,14 @@ export function Haul({
             onPointerDown={(event) => {
               // The release may land outside the handle: listen on the window.
               const from = event.clientY;
-              window.addEventListener(
-                "pointerup",
-                (up) => {
-                  if (from - up.clientY > 24) setOpen(true);
-                },
-                { once: true },
-              );
+              const end = (up: PointerEvent) => {
+                window.removeEventListener("pointerup", end);
+                window.removeEventListener("pointercancel", end);
+                if (up.type === "pointerup" && from - up.clientY > 24)
+                  setOpen(true);
+              };
+              window.addEventListener("pointerup", end);
+              window.addEventListener("pointercancel", end);
             }}
             className="block w-full touch-none py-2 text-left outline-none focus-visible:ring-3 focus-visible:ring-haul-accent"
           >

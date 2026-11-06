@@ -1,5 +1,5 @@
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ListItem } from "@szop/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import { itemCards, listSchema, orderCategories } from "@szop/shared";
@@ -25,6 +25,23 @@ import { useList, useRenameList } from "./use-lists.ts";
 
 // /lists/:id: the list's screen. The shell leaves its header and the tab's
 // title to this page.
+// The height of the bottom block (add bar and haul) goes to the toast region
+// as --toast-offset, so toasts sit just above it whatever the haul shows.
+function useToastOffset() {
+  return useCallback((block: HTMLElement | null) => {
+    if (!block || typeof ResizeObserver === "undefined") return;
+    const root = document.documentElement.style;
+    const observer = new ResizeObserver(() => {
+      root.setProperty("--toast-offset", `${String(block.offsetHeight)}px`);
+    });
+    observer.observe(block);
+    return () => {
+      observer.disconnect();
+      root.removeProperty("--toast-offset");
+    };
+  }, []);
+}
+
 export function ListPage() {
   // Stryker disable next-line StringLiteral: the route always supplies :id; the default only satisfies the type
   const { id = "" } = useParams();
@@ -38,6 +55,7 @@ export function ListPage() {
   const queryClient = useQueryClient();
   const deleted = useRef(false);
   const askDelete = useRef(false);
+  const bottomBlock = useToastOffset();
   const [barFocused, setBarFocused] = useState(false);
   const [editing, setEditing] = useState<ListItem | null>(null);
   // The latest removed item holds the Undo toast; the count renews it when the same item goes twice.
@@ -218,7 +236,10 @@ export function ListPage() {
         </>
       )}
       {/* The add bar and the haul under it stay at the bottom of the column. */}
-      <div className="sticky bottom-0 z-10 -mx-4 mt-auto -mb-6 md:-mx-6">
+      <div
+        ref={bottomBlock}
+        className="sticky bottom-0 z-10 -mx-4 mt-auto -mb-6 md:-mx-6"
+      >
         <AddBar listId={id} listName={name} onFocusChange={setBarFocused} />
         {query.data && catalog.data && (
           <Haul

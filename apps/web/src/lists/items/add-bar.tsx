@@ -9,8 +9,8 @@ import { useAddItem } from "../use-items.ts";
 const formSchema = z.object({ name: itemNameSchema });
 
 // The add bar: a band in the page color; the list page pins it, with the haul
-// under it, to the bottom of the column (ITM-2). The next item's ID is made up front and renewed after each add, so
-// every add is its own mutation scope. An empty name adds nothing, with no
+// under it, to the bottom of the column (ITM-2). The next item's ID is made up
+// front and renewed after each add, so every add is its own mutation scope. An empty name adds nothing, with no
 // message (LIM-2.2: the field's maxLength keeps the name short).
 export function AddBar({
   listId,
@@ -29,6 +29,9 @@ export function AddBar({
   });
   const onSubmit = handleSubmit(({ name }) => {
     add.mutate(name);
+    // Detach the pending add: the observer copies new options onto a mutation
+    // it still observes, which would send this add with the next add's ID.
+    add.reset();
     setNextId(uuidv7());
     reset();
   });

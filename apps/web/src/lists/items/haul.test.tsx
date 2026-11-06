@@ -6,7 +6,6 @@ import {
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { useState } from "react";
 import {
   itemCards,
   orderCategories,
@@ -41,7 +40,6 @@ function Screen({ focused = false }: { focused?: boolean }) {
     queryFn: () => Promise.reject(new Error("seeded")),
     staleTime: Infinity,
   });
-  const [count] = useState(0);
   if (!data) return null;
   return (
     <>
@@ -59,7 +57,7 @@ function Screen({ focused = false }: { focused?: boolean }) {
         listId={listId}
         items={data.items}
         units={smallCatalog.units}
-        folded={focused && count === 0}
+        folded={focused}
       />
     </>
   );

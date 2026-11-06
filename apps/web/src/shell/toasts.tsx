@@ -34,11 +34,11 @@ function ToastList() {
 }
 
 // One toast at a time: a new one replaces the shown one. The viewport is a
-// polite live region, centered at 75% of the width, above the add bar and the haul.
+// polite live region, centered at 75% of the width, above the add bar and the haul (the list page sets --toast-offset to their height).
 export function Toasts() {
   return (
     <Toast.Provider toastManager={toastManager} limit={1}>
-      <Toast.Viewport className="fixed bottom-48 left-1/2 z-50 w-3/4 -translate-x-1/2">
+      <Toast.Viewport className="fixed bottom-[calc(var(--toast-offset,5.25rem)+0.75rem)] left-1/2 z-50 w-3/4 -translate-x-1/2">
         <ToastList />
       </Toast.Viewport>
     </Toast.Provider>
