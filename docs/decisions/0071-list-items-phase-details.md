@@ -59,3 +59,5 @@ The [spec](../superpowers/specs/2026-11-06-PH-17-list-items-design.md) holds the
 ## Settled while building
 
 - ✏️ **The line total is a JS number, not a 32-bit integer.** At the maxima (price 9 999 999 cents, quantity 9 999 000 thousandths) the line total is 99 989 990 001, past 32 bits. It is computed as a JavaScript number, exact below 2^53, and never stored. This corrects the spec's note that a line total stays within a 32-bit integer.
+- ✏️ **`list_items` also has `list_items_workspace_id_fkey` to `workspaces`.** The spec's constraint list leaves it out, but the schema test that every workspace-owned table references `workspaces` directly (and `lists` does) requires it; it cascades like theirs.
+- ✏️ **`migratedDatabase` empties its database with `resetDatabase`, not `DROP DATABASE`.** The plan said to drop and create it; `DROP DATABASE` waits for a checkpoint and outlasts the hook timeout under load ([#317](https://github.com/luiki-dev/szop/issues/317)), which the testing guide already avoids.

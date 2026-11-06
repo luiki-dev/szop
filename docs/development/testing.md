@@ -14,6 +14,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
   - [Two guests with a workspace each](#two-guests-with-a-workspace-each)
   - [Testing the served SPA](#testing-the-served-spa)
 - [Writing a database test](#writing-a-database-test)
+- [Writing a migration test with data](#writing-a-migration-test-with-data)
 - [Writing a component test](#writing-a-component-test)
 - [Writing a unit test](#writing-a-unit-test)
 - [Writing a property test](#writing-a-property-test)
@@ -239,6 +240,15 @@ A database test runs against a real PostgreSQL, so a query, a migration or a cle
 - **A test that needs a database of its own** (one never migrated, or one whose `drizzle.__drizzle_migrations` it changes) calls `resetDatabase("szop_test_<name>_${VITEST_POOL_ID}")` (`apps/api/src/test/reset-database.ts`) in `beforeEach`, as `db/migration-check.test.ts` and `db/migration-lock.test.ts` do, after closing its pool in `afterEach`. It gives an empty database, creating it the first time and dropping its schemas after that, and never runs `DROP DATABASE` or the default `CREATE DATABASE`: each of those waits for a checkpoint, and under load (many workers, a busy CPU) the wait outlasts the 10-second hook timeout ([#317](https://github.com/luiki-dev/szop/issues/317)). Changing Drizzle's table in the worker's shared copy would break the next file's tests, and the truncation before each test leaves that table alone. The database stays after the run, like the others.
 - **Inspecting after a failure.** Nothing is dropped when a run ends, so the databases stay until the next run: `docker compose exec postgres psql -U szop -d szop_test_1`.
 - **The development database `szop` is never touched.** Tests only connect to `postgres` (to create the others) and to `szop_test_*`.
+
+## Writing a migration test with data
+
+A migration that changes a table that already holds rows is tested with rows in it: migrate to the previous migration, insert data, apply the migration, check the data ([OP-052](https://github.com/luiki-dev/szop/issues/93)). `migrationsFolder` is applied whole, so the helper `migratedDatabase(name, upTo)` (`apps/api/src/test/migrations.ts`) copies the journal's entries up to the tag `upTo` and their SQL files into a temporary folder, migrates a database of its own with them and returns it open.
+
+- **Call it in the test**, with a name of its own: ``migratedDatabase(testDatabaseName(`m${String(process.env.VITEST_POOL_ID)}`), "0002_tough_ultron")``. It empties the database through `resetDatabase`, so it never runs `DROP DATABASE` (see [Writing a database test](#writing-a-database-test)).
+- **Insert the old rows with raw SQL**, since the Drizzle schema describes the newest tables, then call `runMigrations(db)` (what production runs) and read the rows back.
+- **Close the database** with `db.$client.end()` in `finally`.
+- The example is `apps/api/src/db/migration-data.test.ts`: lists made before `0003` keep their rows and get `sort_by_category` true.
 
 ## Writing a component test
 
