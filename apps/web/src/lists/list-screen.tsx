@@ -202,6 +202,7 @@ export function TitleField({
             onClick={() => {
               commit();
               // The button goes away while the retry runs: keep the focus.
+              // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
               field.current?.focus();
             }}
           >
