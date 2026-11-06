@@ -189,8 +189,13 @@ describe("the item hooks", () => {
         HttpResponse.json({ error: { message: "x" } }, { status: 500 }),
       ),
       http.patch(itemPath(milk.id), () => delay("infinite")),
-      http.get(listPath, () => delay("infinite")),
+      // A refetch would answer the server's old milk.
+      http.get(listPath, () => {
+        refetched += 1;
+        return HttpResponse.json(listWith(bananas, milk));
+      }),
     );
+    let refetched = 0;
     const { wrapper, items } = setup(listWith(bananas, milk));
     const { result } = renderHook(
       () => ({
@@ -211,6 +216,8 @@ describe("the item hooks", () => {
     const byId = (id: string): ListItem | undefined =>
       items()?.find((item) => item.id === id);
     expect(byId(bananas.id)?.name).toBe("Bananas");
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(refetched).toBe(0);
     expect(byId(milk.id)?.name).toBe("Oat milk");
   });
 

@@ -28,6 +28,14 @@ function writeItems(queryClient: QueryClient, listId: string, change: Items) {
   );
 }
 
+// The failed change asks the server what it holds, but only when it is the
+// last change of the list in flight: a refetch earlier would answer without
+// the changes still on their way and wipe their optimistic state.
+function refetchIfLast(queryClient: QueryClient, listId: string) {
+  if (queryClient.isMutating({ mutationKey: listKey(listId) }) === 1)
+    void queryClient.invalidateQueries({ queryKey: listKey(listId) });
+}
+
 // True when more changes of this scope wait behind the one that just ended:
 // its answer must not put an older state back over theirs.
 function othersWait(queryClient: QueryClient, scope: string) {
@@ -57,16 +65,16 @@ function useItemMutation<Variables, Answer extends ListItem | undefined>(
     // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
     scope: { id: itemId },
+    mutationKey: listKey(listId),
     onMutate: async (variables: Variables) => {
       await queryClient.cancelQueries({ queryKey: listKey(listId) });
       const items =
         queryClient.getQueryData<ListWithItems>(listKey(listId))?.items ?? [];
-      const index = items.findIndex((item) => item.id === itemId);
-      const previous = items[index];
+      const previous = items.find((item) => item.id === itemId);
       writeItems(queryClient, listId, (current) =>
         change.apply(current, variables),
       );
-      return { previous, index };
+      return { previous };
     },
     onSuccess: (answer) => {
       if (!answer || othersWait(queryClient, itemId)) return;
@@ -75,16 +83,19 @@ function useItemMutation<Variables, Answer extends ListItem | undefined>(
       );
     },
     onError: (_, variables, context) => {
-      const { previous, index } = context ?? {};
+      const previous = context?.previous;
       writeItems(queryClient, listId, (items) => {
         const rest = items.filter((item) => item.id !== itemId);
-        return previous && index !== undefined
-          ? rest.toSpliced(index, 0, previous)
-          : rest;
+        if (!previous) return rest;
+        // In place when still there; else by ID, which is the list's order.
+        if (rest.length < items.length)
+          return items.map((item) => (item.id === itemId ? previous : item));
+        const at = rest.findIndex((item) => item.id > itemId);
+        return rest.toSpliced(at < 0 ? rest.length : at, 0, previous);
       });
       showNotSaved(change.name(variables, previous));
       // The answer may have been lost on its way: ask what the server holds.
-      void queryClient.invalidateQueries({ queryKey: listKey(listId) });
+      refetchIfLast(queryClient, listId);
     },
   });
 }
@@ -167,6 +178,7 @@ export function useSortByCategory(listId: string) {
     // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
     scope: { id: scope },
+    mutationKey: listKey(listId),
     onMutate: async (value: boolean) => {
       await queryClient.cancelQueries({ queryKey: listKey(listId) });
       const previous = queryClient.getQueryData<ListWithItems>(
@@ -181,7 +193,7 @@ export function useSortByCategory(listId: string) {
     onError: (_, __, context) => {
       setSort(context?.previous);
       showSortNotSaved();
-      void queryClient.invalidateQueries({ queryKey: listKey(listId) });
+      refetchIfLast(queryClient, listId);
     },
   });
 }
