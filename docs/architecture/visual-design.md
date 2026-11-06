@@ -233,7 +233,7 @@ A path that is not a page, and a list that cannot be opened, show one layout: th
 
 ### The peeking raccoon
 
-An empty list shows the grayscale raccoon (200 px, 55% opacity) peeking in, only the top of its head visible, up to just below the eyes. On a phone it comes from the left edge, halfway down, turned 90° to the right, so the add bar at the bottom does not cover it; from `lg` it comes from the right edge, turned 90° to the left, with no gap even though the page keeps its scrollbar gutter (the offset adds the gutter's width). It is decorative (`aria-hidden`) and sits behind the page.
+An empty list shows the grayscale raccoon (200 px, 55% opacity) peeking in, only the top of its head visible, up to just below the eyes. On a phone it comes from the left edge, halfway down, turned 90° to the right, so the add bar at the bottom does not cover it; from `lg` it comes from under the sidebar's right edge with the same rotation, offset, opacity and grey, and the sidebar paints over it. It is decorative (`aria-hidden`) and sits behind the page.
 
 ### Writing
 

@@ -164,11 +164,11 @@
 **Interfaces:**
 - Produces: `EmptyList`'s raccoon from `lg` keeps the phone's rotation (`rotate-90`), offset (`-left-[65px]`), opacity and grey, positioned from the sidebar's right edge (the sidebar is `w-64`, so `lg:left-[calc(16rem-65px)]`), behind the sidebar (the sidebar paints over it). The `lg:right-[…]`, `lg:left-auto` and `lg:-rotate-90` classes go; the comment above `EmptyList` says where it peeks in from.
 
-- [ ] **Step 1: Rewrite the E2E check** in `frame.spec.ts` as `"LST-1.9, OP-132: on a desktop the empty list's raccoon peeks in from under the sidebar"`: on a desktop project, the raccoon's `left` is less than the `aside`'s `right`, its `right` is greater than it, and `right - asideRight` is `200 - 65`; the `aside` is on top at a point inside both (`document.elementFromPoint` returns the aside or its child). The phone check stays.
-- [ ] **Step 2: Run** `pnpm test:e2e -- frame`. Expected: FAIL.
-- [ ] **Step 3: Implement** the Interfaces above. If the sidebar does not paint over the raccoon (it is `sticky` with no stacking context of its own above `-z-10`), give the `aside` `relative z-10`, not the raccoon a new z-index.
-- [ ] **Step 4: Run** the test again, then `pnpm check`. Expected: PASS. Look at it in light and dark on a desktop width (Playwright screenshot or the dev server) against `op132-desktop-2-proposed.png`.
-- [ ] **Step 5: Update the docs** and commit: `fix(lists): let the empty list's raccoon peek in from under the sidebar`.
+- [x] **Step 1: Rewrite the E2E check** in `frame.spec.ts` as `"LST-1.9, OP-132: on a desktop the empty list's raccoon peeks in from under the sidebar"`: on a desktop project, the raccoon's `left` is less than the `aside`'s `right`, its `right` is greater than it, and `right - asideRight` is `200 - 65`; the `aside` is on top at a point inside both (`document.elementFromPoint` returns the aside or its child). The phone check stays.
+- [x] **Step 2: Run** `pnpm test:e2e -- frame`. Expected: FAIL.
+- [x] **Step 3: Implement** the Interfaces above. If the sidebar does not paint over the raccoon (it is `sticky` with no stacking context of its own above `-z-10`), give the `aside` `relative z-10`, not the raccoon a new z-index.
+- [x] **Step 4: Run** the test again, then `pnpm check`. Expected: PASS. Look at it in light and dark on a desktop width (Playwright screenshot or the dev server) against `op132-desktop-2-proposed.png`.
+- [x] **Step 5: Update the docs** and commit: `fix(lists): let the empty list's raccoon peek in from under the sidebar`.
 
 ### Task 6: The mutation run
 

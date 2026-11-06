@@ -211,8 +211,9 @@ export function TitleField({
 }
 
 // The empty list's body. The raccoon peeks in from the left edge, halfway
-// down, so the add bar of a later phase does not cover it; from lg, from the
-// right edge. Only the top of its head shows, down to just below the eyes.
+// down, so the add bar of a later phase does not cover it; from lg, from under
+// the sidebar's right edge (the sidebar is w-64 and paints over it). Only the
+// top of its head shows, down to just below the eyes.
 export function EmptyList() {
   return (
     <>
@@ -225,7 +226,7 @@ export function EmptyList() {
         aria-hidden="true"
         width={200}
         height={200}
-        className="pointer-events-none fixed top-1/2 -left-[65px] -z-10 -translate-y-1/2 rotate-90 opacity-55 grayscale lg:right-[calc(-65px-(100vw-100%))] lg:left-auto lg:-rotate-90"
+        className="pointer-events-none fixed top-1/2 -left-[65px] -z-10 -translate-y-1/2 rotate-90 opacity-55 grayscale lg:left-[calc(16rem-65px)]"
       />
     </>
   );

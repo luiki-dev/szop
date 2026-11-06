@@ -80,21 +80,31 @@ test("APP-1.8: on a phone, New list fills a bar at the bottom of the screen", as
   expect(Math.round(link.width)).toBe(viewport.width - 32);
 });
 
-test("LST-1.9: on a desktop the empty list's raccoon peeks in with no gap to the window's edge", async ({
+test("LST-1.9, OP-132: on a desktop the empty list's raccoon peeks in from under the sidebar", async ({
   page,
   isMobile,
 }) => {
   test.skip(isMobile, "a phone shows the raccoon at the left edge");
   await page.goto("/lists/new");
   const raccoon = page.locator('img[width="200"]');
-  // The raccoon is 200 px wide and 65 px of it sits outside the window.
-  for (const height of [0, 3000]) {
-    await page.evaluate((min) => {
-      document.body.style.minHeight = `${String(min)}px`;
-    }, height);
-    const right = await raccoon.evaluate(
-      (image) => image.getBoundingClientRect().right - innerWidth,
-    );
-    expect(right, `page ${String(height)} px tall`).toBe(65);
-  }
+  const aside = page.locator("aside");
+  const [r, a] = await Promise.all([
+    raccoon.boundingBox(),
+    aside.boundingBox(),
+  ]);
+  if (!r || !a) throw new Error("The raccoon or the sidebar has no box");
+  const asideRight = a.x + a.width;
+  expect(r.x).toBeLessThan(asideRight);
+  expect(r.x + r.width).toBeGreaterThan(asideRight);
+  // The raccoon is 200 px wide and 65 px of it sits under the sidebar.
+  expect(r.x + r.width - asideRight).toBe(200 - 65);
+  // At a point inside both, the sidebar is on top.
+  const onTop = await aside.evaluate(
+    (el, point) => {
+      const hit = document.elementFromPoint(point.x, point.y);
+      return hit !== null && el.contains(hit);
+    },
+    { x: asideRight - 10, y: r.y + r.height / 2 },
+  );
+  expect(onTop).toBe(true);
 });
