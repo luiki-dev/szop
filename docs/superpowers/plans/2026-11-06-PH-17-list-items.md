@@ -141,7 +141,7 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
 - Produces, the routes: `GET /api/lists/:id` → `listWithItemsSchema` (the list read gains its items); `PATCH /api/lists/:id` with `updateListSchema` (name, `sortByCategory`, or both) → `listSchema`; `POST /api/lists/:listId/items` with `createItemSchema` → `201` created, `200` existing, `listItemSchema`; `PATCH /api/lists/:listId/items/:id` with `updateItemSchema` → `200` `listItemSchema`; `DELETE /api/lists/:listId/items/:id` → `204`. A malformed ID, a list, item, category or unit not in the session's workspace: `404 not_found`, as the lists' `notFound`.
 - Produces, in `lists/repository.ts`: `updateList(db, context, id, changes: UpdateList): Promise<List | null>` replacing `renameList` (still writes nothing when nothing changes).
 
-- [ ] **Step 1: Write the failing tests** in `items/routes.test.ts` (with `twoWorkspaces` and `useTestDatabase`, as `lists/routes.test.ts`):
+- [x] **Step 1: Write the failing tests** in `items/routes.test.ts` (with `twoWorkspaces` and `useTestDatabase`, as `lists/routes.test.ts`):
   - `"NET-1.6: creating twice with the same ID makes one item"` (201 then 200, the same body, one row).
   - `"ITM-2.3: an item made from a name has no category, quantity, unit, price or note"`.
   - `"ITM-6.1: …"` an update of each field, and of several at once; `"ITM-6.2: editing an item changes only that item"`.
@@ -152,10 +152,10 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
   - `"LIM-2.1: the API refuses a name over 100 and a note over 500"` (400).
   - `"ACC-1.5: a guest's item with a default category and unit is saved"`: a guest's first change creates a list, then an item with a seed category's and unit's IDs (from `seedNamespaces`/the catalog fixture) answers 201.
   - `GET /api/lists/:id` returns `sortByCategory` and the items; a 401 without a session for every write.
-- [ ] **Step 2: Run** `pnpm --filter @szop/api test src/items src/lists`. Expected: FAIL.
-- [ ] **Step 3: Implement** the repository and routes, following `lists/routes.ts` (session hook, typed routes, `z.uuid().safeParse` on path IDs, `requireListAccess` first) and its Stryker comments' style.
-- [ ] **Step 4: Run** `pnpm --filter @szop/api test`, then `pnpm check`. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(items): add the item routes and the list's sort setting`.
+- [x] **Step 2: Run** `pnpm --filter @szop/api test src/items src/lists`. Expected: FAIL.
+- [x] **Step 3: Implement** the repository and routes, following `lists/routes.ts` (session hook, typed routes, `z.uuid().safeParse` on path IDs, `requireListAccess` first) and its Stryker comments' style.
+- [x] **Step 4: Run** `pnpm --filter @szop/api test`, then `pnpm check`. Expected: PASS.
+- [x] **Step 5: Commit** `feat(items): add the item routes and the list's sort setting`.
 
 ### Task 4: Optimistic changes and the toast region
 

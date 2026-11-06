@@ -4,7 +4,8 @@ import {
   deleteListsSchema,
   listSchema,
   listsResponseSchema,
-  renameListSchema,
+  listWithItemsSchema,
+  updateListSchema,
 } from "@szop/shared";
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
@@ -23,8 +24,9 @@ import {
   deleteLists,
   insertList,
   listLists,
-  renameList,
+  updateList,
 } from "./repository.ts";
+import { listItemsOf } from "../items/repository.ts";
 
 export interface ListsRoutesOptions {
   db: Database;
@@ -81,15 +83,19 @@ export function listsRoutes(
       schema: {
         params: idParams,
         // Stryker disable next-line ObjectLiteral: the response schema documents and strips; the handler already returns exactly its fields, so `{}` behaves the same
-        response: { 200: listSchema },
+        response: { 200: listWithItemsSchema },
       },
     },
     async (request, reply) => {
       const id = z.uuid().safeParse(request.params.id);
       // Stryker disable next-line ConditionalExpression: an invalid ID would reach the access layer as undefined and end in the same 404; the guard keeps it from the query
       if (!id.success) return notFound(reply);
-      const { list } = await requireListAccess(db, request.user, id.data);
-      return list;
+      const { context, list } = await requireListAccess(
+        db,
+        request.user,
+        id.data,
+      );
+      return { ...list, items: await listItemsOf(db, context, id.data) };
     },
   );
 
@@ -98,7 +104,7 @@ export function listsRoutes(
     {
       schema: {
         params: idParams,
-        body: renameListSchema,
+        body: updateListSchema,
         // Stryker disable next-line ObjectLiteral: the response schema documents and strips; the handlers already return exactly its fields, so `{}` behaves the same
         response: { 200: listSchema },
       },
@@ -108,7 +114,7 @@ export function listsRoutes(
       // Stryker disable next-line ConditionalExpression: an invalid ID would reach the access layer as undefined and end in the same 404; the guard keeps it from the query
       if (!id.success) return notFound(reply);
       const { context } = await requireListAccess(db, request.user, id.data);
-      const list = await renameList(db, context, id.data, request.body.name);
+      const list = await updateList(db, context, id.data, request.body);
       return list ?? notFound(reply);
     },
   );

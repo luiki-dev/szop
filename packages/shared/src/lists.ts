@@ -22,8 +22,6 @@ export const createListSchema = z.object({
   name: listNameSchema,
 });
 
-export const renameListSchema = z.object({ name: listNameSchema });
-
 export const updateListSchema = z
   .object({
     name: listNameSchema.optional(),
@@ -46,6 +44,5 @@ export const deleteListsSchema = z.object({
 export type List = z.infer<typeof listSchema>;
 export type ListWithItems = z.infer<typeof listWithItemsSchema>;
 export type CreateList = z.infer<typeof createListSchema>;
-export type RenameList = z.infer<typeof renameListSchema>;
 export type UpdateList = z.infer<typeof updateListSchema>;
 export type DeleteLists = z.infer<typeof deleteListsSchema>;

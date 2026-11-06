@@ -19,7 +19,6 @@ export {
   listSchema,
   listsResponseSchema,
   createListSchema,
-  renameListSchema,
   updateListSchema,
   listWithItemsSchema,
   deleteListsSchema,
@@ -27,7 +26,6 @@ export {
   type ListWithItems,
   type UpdateList,
   type CreateList,
-  type RenameList,
   type DeleteLists,
 } from "./lists.ts";
 export {
