@@ -62,7 +62,7 @@ describe("AddBar", () => {
     );
     // Hold every add before it starts, so the second submit and the render
     // that renews the next ID both land while the first add is pending.
-    let release = () => undefined;
+    let release: () => void = () => undefined;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
     });
