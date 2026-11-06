@@ -7,8 +7,10 @@ import { useNavigate, useParams } from "react-router";
 import { Button } from "@/components/ui/button.tsx";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import { useCatalog } from "../catalog/use-catalog.ts";
@@ -21,6 +23,7 @@ import { EditItem } from "./items/edit-item.tsx";
 import { ItemCards, ItemCardsSkeleton } from "./items/item-cards.tsx";
 import { UndoRemove } from "./items/undo-remove.tsx";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
+import { useSortByCategory } from "./use-items.ts";
 import { useList, useRenameList } from "./use-lists.ts";
 
 // /lists/:id: the list's screen. The shell leaves its header and the tab's
@@ -50,6 +53,7 @@ export function ListPage() {
   const query = useList(id, valid);
   const catalog = useCatalog();
   const rename = useRenameList(id);
+  const sort = useSortByCategory(id);
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const queryClient = useQueryClient();
@@ -196,6 +200,15 @@ export function ListPage() {
                 return input.current;
               }}
             >
+              <DropdownMenuCheckboxItem
+                checked={query.data?.sortByCategory ?? true}
+                onCheckedChange={(checked) => {
+                  sort.mutate(checked);
+                }}
+              >
+                Sort by category
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
                   renaming.current = true;

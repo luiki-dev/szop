@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useCheckboxSide } from "../../shell/checkbox-side.ts";
 import {
   formatPrice,
   formatQuantity,
@@ -20,6 +21,7 @@ export function ItemRow({
   onEdit: () => void;
   checkbox?: ReactNode;
 }) {
+  const left = useCheckboxSide() === "left";
   const total = lineTotal(item);
   const quantity =
     item.quantity === null
@@ -27,6 +29,7 @@ export function ItemRow({
       : [formatQuantity(item.quantity), unitName].filter(Boolean).join(" ");
   return (
     <li className="flex min-h-14 items-center gap-2 border-t border-border first:border-t-0">
+      {left && checkbox}
       <button
         type="button"
         onClick={onEdit}
@@ -49,7 +52,7 @@ export function ItemRow({
           )}
         </span>
       </button>
-      {checkbox}
+      {!left && checkbox}
     </li>
   );
 }

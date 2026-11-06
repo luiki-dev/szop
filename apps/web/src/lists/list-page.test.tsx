@@ -945,4 +945,80 @@ describe("ListPage", () => {
       expect(requests).toEqual(["Weekly shop 2"]);
     });
   });
+
+  describe("the sort setting", () => {
+    function sortSetup(initial: ListItem[]) {
+      let items = initial;
+      const bodies: unknown[] = [];
+      let sortByCategory = true;
+      setup(items);
+      server.use(
+        http.get(`/api/lists/${id}`, () =>
+          HttpResponse.json({ ...list, sortByCategory, items }),
+        ),
+        http.patch(`/api/lists/${id}`, async ({ request }) => {
+          const body = (await request.json()) as { sortByCategory: boolean };
+          bodies.push(body);
+          sortByCategory = body.sortByCategory;
+          return HttpResponse.json({ ...list, ...body });
+        }),
+      );
+      return { bodies, setItems: (next: ListItem[]) => (items = next) };
+    }
+    const sortItem = () =>
+      screen.getByRole("menuitemcheckbox", { name: "Sort by category" });
+    const open = async (user: ReturnType<typeof userEvent.setup>) => {
+      await field();
+      await user.click(screen.getByRole("button", { name: "List actions" }));
+    };
+
+    it("ORD-5.1: Sort by category is the menu's first item, a check item, checked by default", async () => {
+      const user = userEvent.setup();
+      sortSetup([bananas]);
+      await open(user);
+
+      const items = await screen.findAllByRole("menuitemcheckbox");
+      expect(items).toHaveLength(1);
+      expect(sortItem()).toBeChecked();
+      expect(screen.getAllByRole("menuitem").map((i) => i.textContent)).toEqual(
+        ["Rename", "Delete"],
+      );
+    });
+
+    it("ORD-5.2, ORD-5.4: switching it re-orders the list at once, closes the menu and sends the setting", async () => {
+      const user = userEvent.setup();
+      const { bodies } = sortSetup([bananas]);
+      await screen.findByRole("heading", { name: "No category" });
+      await open(user);
+
+      await user.click(await screen.findByRole("menuitemcheckbox"));
+
+      expect(
+        screen.queryByRole("heading", { name: "No category" }),
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("1 left")).toBeInTheDocument();
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(bodies).toEqual([{ sortByCategory: false }]);
+      });
+    });
+
+    it("ORD-5.3: a checked item goes to the haul with sorting off", async () => {
+      const user = userEvent.setup();
+      const { setItems } = sortSetup([bananas]);
+      server.use(
+        http.patch(`/api/lists/${id}/items/${bananas.id}`, () => {
+          const checked = { ...bananas, checkedAt: "2026-11-06T12:00:00.000Z" };
+          setItems([checked]);
+          return HttpResponse.json(checked);
+        }),
+      );
+      await open(user);
+      await user.click(await screen.findByRole("menuitemcheckbox"));
+
+      await user.click(screen.getByRole("checkbox", { name: "Bananas" }));
+
+      expect(await screen.findByText("Everything's in the haul")).toBeVisible();
+    });
+  });
 });

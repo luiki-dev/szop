@@ -10,6 +10,7 @@ import {
   type ListItem,
 } from "@szop/shared";
 import { useUpdateItem } from "../use-items.ts";
+import { useCheckboxSide } from "../../shell/checkbox-side.ts";
 import { fitChips } from "./fit-chips.ts";
 
 const GAP = 8;
@@ -60,13 +61,25 @@ function DrawerRow({
   unitName: string | null;
 }) {
   const putBack = usePutBack(listId, item);
+  const left = useCheckboxSide() === "left";
   const total = lineTotal(item);
+  const undo = (
+    <button
+      type="button"
+      aria-label={`Put ${item.name} back`}
+      onClick={putBack}
+      className="flex size-12 shrink-0 items-center justify-center rounded-control border border-haul-muted outline-none focus-visible:ring-3 focus-visible:ring-haul-accent"
+    >
+      <Undo2 aria-hidden="true" />
+    </button>
+  );
   const quantity =
     item.quantity === null
       ? null
       : [formatQuantity(item.quantity), unitName].filter(Boolean).join(" ");
   return (
     <li className="flex min-h-14 items-center gap-3 border-t border-haul-chip">
+      {left && undo}
       <span className="min-w-0 flex-1 font-semibold break-words">
         {item.name}
       </span>
@@ -76,14 +89,7 @@ function DrawerRow({
           <span className="font-bold">{formatPrice(total)}</span>
         )}
       </span>
-      <button
-        type="button"
-        aria-label={`Put ${item.name} back`}
-        onClick={putBack}
-        className="flex size-12 shrink-0 items-center justify-center rounded-control border border-haul-muted outline-none focus-visible:ring-3 focus-visible:ring-haul-accent"
-      >
-        <Undo2 aria-hidden="true" />
-      </button>
+      {!left && undo}
     </li>
   );
 }

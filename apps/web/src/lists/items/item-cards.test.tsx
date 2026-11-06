@@ -1,11 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { itemCards, orderCategories, type ListItem } from "@szop/shared";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { smallCatalog } from "../../test/catalog.ts";
 import { bananas as bananasItem, milk as milkItem } from "../../test/items.ts";
+import { storeCheckboxSide } from "../../shell/checkbox-side.ts";
 import { ItemCards } from "./item-cards.tsx";
+import { ItemRow } from "./item-row.tsx";
 
 // Widened: the fixtures' literal types would pin every field to null.
 const bananas: ListItem = bananasItem;
@@ -98,5 +100,35 @@ describe("ItemCards", () => {
     ]);
 
     expect(screen.getByText("1.5")).toBeVisible();
+  });
+});
+
+describe("the checkboxes' side", () => {
+  afterEach(() => {
+    storeCheckboxSide("right");
+  });
+  const order = () =>
+    screen
+      .getAllByRole("listitem")
+      .map((row) => row.firstElementChild?.tagName);
+
+  it("APR-2.1, APR-2.2: the checkbox is after the name by default and before it with Left", () => {
+    render(
+      <ItemRow
+        item={bananas}
+        unitName={null}
+        onEdit={() => undefined}
+        checkbox={<input type="checkbox" aria-label="Bananas" />}
+      />,
+    );
+    expect(screen.getByRole("listitem").lastElementChild?.tagName).toBe(
+      "INPUT",
+    );
+
+    act(() => {
+      storeCheckboxSide("left");
+    });
+
+    expect(order()).toEqual(["INPUT"]);
   });
 });

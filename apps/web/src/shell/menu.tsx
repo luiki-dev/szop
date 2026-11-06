@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router";
 import logo from "@/brand/logo.svg";
 import { cn } from "@/lib/utils.ts";
 import { ApiStatus } from "./api-status.tsx";
+import { CheckboxSideControl } from "./checkbox-side-control.tsx";
 import { ColorSchemeControl } from "./color-scheme-control.tsx";
 
 function MenuLink({
@@ -88,6 +89,7 @@ export function Menu({ onNavigate }: { onNavigate?: () => void }) {
       <div className="mt-auto flex flex-col gap-4 border-t border-border px-3 pt-4">
         <ApiStatus />
         <ColorSchemeControl />
+        <CheckboxSideControl />
       </div>
     </div>
   );

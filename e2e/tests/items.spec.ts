@@ -261,3 +261,56 @@ test("ITM-7.1, ORD-1.4, ORD-1.6, ORD-1.7, ORD-1.11: a guest checks items into th
   const popup = await drawer.boundingBox();
   expect(popup?.width).toBeLessThanOrEqual(720);
 });
+
+test("ORD-5.1, ORD-5.2, ORD-5.3, APR-2.2, APR-2.3: a guest turns sorting off and on, keeps it after a reload, and moves the checkboxes", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/lists/new");
+  const name = page.getByRole("textbox", { name: "List name" });
+  await name.fill("Weekend groceries");
+  await name.press("Enter");
+  const add = page.getByRole("textbox", {
+    name: "Add an item to Weekend groceries",
+  });
+  await add.fill("Bananas");
+  await add.press("Enter");
+  await expect(
+    page.getByRole("heading", { name: "No category" }),
+  ).toBeVisible();
+
+  const sortItem = async () => {
+    await page.getByRole("button", { name: "List actions" }).click();
+    return page.getByRole("menuitemcheckbox", { name: "Sort by category" });
+  };
+  await (await sortItem()).click();
+  await expect(page.getByRole("menu")).toBeHidden();
+  await expect(page.getByRole("heading", { name: "No category" })).toBeHidden();
+  await page.reload();
+  await expect(page.getByText("1 left")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "No category" })).toBeHidden();
+  await expect(await sortItem()).not.toBeChecked();
+  await page.keyboard.press("Escape");
+
+  // Checked items go to the haul with sorting off too.
+  await page.getByRole("checkbox", { name: "Bananas" }).click();
+  await expect(page.getByText("Everything's in the haul")).toBeVisible();
+  await page.getByRole("button", { name: "Put Bananas back" }).click();
+
+  await (await sortItem()).click();
+  await expect(
+    page.getByRole("heading", { name: "No category" }),
+  ).toBeVisible();
+
+  // The checkboxes' side: Right by default, Left after the choice, kept on reload.
+  const box = async () =>
+    (await page.getByRole("checkbox", { name: "Bananas" }).boundingBox())?.x ??
+    0;
+  const right = await box();
+  await page.getByRole("radio", { name: "Left" }).click();
+  expect(await box()).toBeLessThan(right);
+  await page.reload();
+  await expect(page.getByRole("radio", { name: "Left" })).toBeChecked();
+  await page.getByRole("radio", { name: "Right" }).click();
+  expect(await box()).toBeCloseTo(right, 0);
+});

@@ -278,11 +278,11 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
 - Consumes: `useSortByCategory` (Task 4).
 - Produces, in `checkbox-side.ts`, after `color-scheme.ts`: `type CheckboxSide = "left" | "right"`, `checkboxSideKey = "szop-checkbox-side"`, `readCheckboxSide(): CheckboxSide` (Right unless "left" is stored; this visit's choice when the storage throws), `storeCheckboxSide(side: CheckboxSide): void` (Right removes the key), and `useCheckboxSide(): CheckboxSide` through `useSyncExternalStore`, so a change in the menu re-lays every row and the drawer at once. `CheckboxSideControl()`: the radio group "Checkboxes" with Left and Right, each with a small picture of a row, styled as `ColorSchemeControl`.
 
-- [ ] **Step 1: Write the failing tests:** `"ORD-5.1: Sort by category is the menu's first item, a check item"`; `"ORD-5.2: switching it re-orders the list at once and closes the menu"`; `"ORD-5.3: checked items go to the haul either way"`; `"ORD-5.4: …"` the setting is sent to the server; `"APR-2.1: the checkboxes are on the right by default"`; `"APR-2.2: Left moves the checkbox and ↶ to the left"`; `"APR-2.3: the choice is kept on the device and holds when the storage throws"`; the E2E switches the sort off and on and reloads to see it kept, and switches the checkboxes' side.
-- [ ] **Step 2: Run** `pnpm --filter @szop/web test src/shell src/lists`. Expected: FAIL.
-- [ ] **Step 3: Implement** to the spec's [The sort setting](../specs/2026-11-06-PH-17-list-items-design.md#the-sort-setting) and [The checkboxes' side](../specs/2026-11-06-PH-17-list-items-design.md#the-checkboxes-side), `sort-setting-v2.png` and `checkbox-side.png`.
-- [ ] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(ordering): add the sort setting and the checkboxes' side`.
+- [x] **Step 1: Write the failing tests:** `"ORD-5.1: Sort by category is the menu's first item, a check item"`; `"ORD-5.2: switching it re-orders the list at once and closes the menu"`; `"ORD-5.3: checked items go to the haul either way"`; `"ORD-5.4: …"` the setting is sent to the server; `"APR-2.1: the checkboxes are on the right by default"`; `"APR-2.2: Left moves the checkbox and ↶ to the left"`; `"APR-2.3: the choice is kept on the device and holds when the storage throws"`; the E2E switches the sort off and on and reloads to see it kept, and switches the checkboxes' side.
+- [x] **Step 2: Run** `pnpm --filter @szop/web test src/shell src/lists`. Expected: FAIL.
+- [x] **Step 3: Implement** to the spec's [The sort setting](../specs/2026-11-06-PH-17-list-items-design.md#the-sort-setting) and [The checkboxes' side](../specs/2026-11-06-PH-17-list-items-design.md#the-checkboxes-side), `sort-setting-v2.png` and `checkbox-side.png`.
+- [x] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS.
+- [x] **Step 5: Commit** `feat(ordering): add the sort setting and the checkboxes' side`.
 
 ### Task 10: The blink behind ✕
 
