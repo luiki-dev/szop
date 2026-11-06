@@ -289,11 +289,11 @@ The plan has 12 tasks, more than the 3 to 8 of [ADR 0014](../../decisions/0014-r
 **Files:**
 - Modify: `apps/web/src/lists/lists-page.tsx` (or `components/ui/button.tsx` if the cause is there), `e2e/tests/lists.spec.ts`
 
-- [ ] **Step 1: Find the cause** with `superpowers:systematic-debugging`: open the lists page in the Chrome DevTools MCP browser, start Select and record the ✕ button's computed `background-color` and `border-color` frame by frame (a performance trace or `requestAnimationFrame` sampling). Likely suspects: the ghost button's `transition-all` animating from a hover or focus look, the focus moving to ✕, or the pointer still over ✕'s place.
-- [ ] **Step 2: Write the failing E2E** `"#397: ✕ shows no background when Select starts"` in `lists.spec.ts`: after clicking Select, sample ✕'s computed background in the first frames; it is transparent throughout. Run `pnpm test:e2e`. Expected: FAIL.
-- [ ] **Step 3: Fix** the cause found, in the selection controls only unless the cause is the shared button.
-- [ ] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS. Check by eye on a phone-sized and a desktop-sized window, light and dark.
-- [ ] **Step 5: Commit** `fix(lists): show no background behind ✕ when Select starts`.
+- [x] **Step 1: Find the cause** with `superpowers:systematic-debugging`: open the lists page in the Chrome DevTools MCP browser, start Select and record the ✕ button's computed `background-color` and `border-color` frame by frame (a performance trace or `requestAnimationFrame` sampling). Likely suspects: the ghost button's `transition-all` animating from a hover or focus look, the focus moving to ✕, or the pointer still over ✕'s place.
+- [x] **Step 2: Write the failing E2E** `"#397: ✕ shows no background when Select starts"` in `lists.spec.ts`: after clicking Select, sample ✕'s computed background in the first frames; it is transparent throughout. Run `pnpm test:e2e`. Expected: FAIL.
+- [x] **Step 3: Fix** the cause found, in the selection controls only unless the cause is the shared button.
+- [x] **Step 4: Run** `pnpm check` and `pnpm test:e2e`. Expected: PASS. Check by eye on a phone-sized and a desktop-sized window, light and dark.
+- [x] **Step 5: Commit** `fix(lists): show no background behind ✕ when Select starts`.
 
 ### Task 11: The journey and the built screens
 
