@@ -159,7 +159,7 @@ From top to bottom, on a phone:
 
 **Checking an item**: its row leaves its card and its chip appears first in the haul, in 150 to 200 ms, without motion when the system asks for reduced motion. Putting an item back reverses it: the item returns to its place in its card.
 
-**Amounts.** The haul shows all three totals of [ITM-8](../requirements/ITM-list-items.md#itm-8):
+**Amounts.** Until [PH-21](../roadmap.md#ph-21-shop-in-a-store) the haul shows counts only; then it shows all three totals of [ITM-8](../requirements/ITM-list-items.md#itm-8):
 
 - **"€28.47"**: the checked items;
 - **"of €36.54"**: all items;
@@ -192,7 +192,7 @@ Items without a price are left out of all three. When no item has a price, the m
 
 Decided in [ADR 0071](../decisions/0071-list-items-phase-details.md) for [PH-17](../roadmap.md); the approved mockups are in [the spec's folder](../superpowers/specs/2026-11-06-PH-17-list-items/). The images below are the built screens, on a phone, light then dark. The haul's amounts above arrive with [PH-21](../roadmap.md); until then the haul shows counts only.
 
-- **The row.** The name, then the note under it in `muted-foreground`; the quantity and unit over the line total on the right. The checkbox is on the **right** by default and on the **left** by the "Checkboxes" setting under the color scheme ([APR-2](../requirements/APR-appearance.md#apr-2)); on a phone the setting is in the ☰ menu, from `lg` in the sidebar. The row has two targets: the checkbox checks, the rest opens the edit sheet.
+- **The row.** The name, then the note under it in `muted-foreground`; the quantity and unit over the line total on the right. The checkbox is on the **right** by default and on the **left** by the "Checkboxes" setting under the color scheme ([APR-2](../requirements/APR-appearance.md#apr-2)); on a phone the setting is in the lists home's ☰ menu (not reachable inside a list), from `lg` in the sidebar. The row has two targets: the checkbox checks, the rest opens the edit sheet.
 
   ![The list on a phone, light and dark, with the checkboxes on the right and then on the left](visual-design/items-row.png)
 

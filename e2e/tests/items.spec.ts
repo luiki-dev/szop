@@ -319,7 +319,7 @@ for (const size of [
   { name: "phone", width: 390, height: 700 },
   { name: "desktop", width: 1280, height: 800 },
 ]) {
-  test(`ITM-2.1, ITM-6.1, ITM-7.1, ITM-5.1, ORD-5.1, ORD-1.6: the list items journey on a ${size.name}`, async ({
+  test(`ITM-2.3, ITM-6.1, ITM-7.1, ITM-5.1, ORD-5.1, ORD-1.6: the list items journey on a ${size.name}`, async ({
     page,
   }) => {
     await page.setViewportSize(size);
