@@ -60,6 +60,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-30 Settings and account deletion](#ph-30-settings-and-account-deletion)
   - [PH-31 Automatic cleanup](#ph-31-automatic-cleanup)
 - [Stage 5: Later](#stage-5-later)
+  - [PH-45 Internationalization](#ph-45-internationalization)
   - [PH-32 Sharing](#ph-32-sharing)
   - [PH-33 Live updates](#ph-33-live-updates)
   - [PH-38 Autoscaling](#ph-38-autoscaling)
@@ -644,9 +645,19 @@ PH-32 and PH-33 are rough: each is split into smaller phases once the MVP is don
 
 | Phase | Status | Spec | Plan | PR | Issue |
 |---|---|---|---|---|---|
+| [PH-45 Internationalization](#ph-45-internationalization) | ⬜ Not started | — | — | — | [#394](https://github.com/luiki-dev/szop/issues/394) |
 | [PH-32 Sharing](#ph-32-sharing) | ⬜ Not started | — | — | — | [#61](https://github.com/luiki-dev/szop/issues/61) |
 | [PH-33 Live updates](#ph-33-live-updates) | ⬜ Not started | — | — | — | [#62](https://github.com/luiki-dev/szop/issues/62) |
 | [PH-38 Autoscaling](#ph-38-autoscaling) | ⬜ Not started | — | — | — | [#234](https://github.com/luiki-dev/szop/issues/234) |
+
+### PH-45 Internationalization
+
+- **Goal:** the user switches the app between English and Polish, and without a choice the app speaks the browser's language.
+- **Delivers:** [LNG-1](requirements/LNG-language.md#lng-1); every text of the web app moved out of the components into one list of texts per language, easy to translate, in a format and with a library the brainstorm picks; the Polish texts.
+- **Depends on:** —
+- **Owner steps:** check the Polish texts.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#394](https://github.com/luiki-dev/szop/issues/394).
 
 ### PH-32 Sharing
 

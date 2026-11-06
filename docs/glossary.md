@@ -49,6 +49,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **HCP** | HashiCorp Cloud Platform | HashiCorp's hosted services; HCP Terraform stores Terraform state and runs Terraform remotely. Szop keeps state in its own S3 bucket instead. |
 | **HSTS** | HTTP Strict Transport Security | An HTTP header telling the browser to use only HTTPS for a domain from then on, so the first plain-HTTP request cannot be intercepted. |
 | **HTTPS** | HTTP Secure | HTTP encrypted with TLS. |
+| **i18n** | Internationalization (18 letters between the i and the n) | Making an app's texts translatable and showing them in the user's language. Planned for Szop in [PH-45](roadmap.md#ph-45-internationalization), with English and Polish ([LNG-1](requirements/LNG-language.md#lng-1)). |
 | **IaC** | Infrastructure as Code | Describing servers, networks and databases in files kept in git, and letting a tool create them, instead of clicking in a console. Szop uses Terraform. |
 | **IAM** | Identity and Access Management | AWS's system of users, roles and permissions deciding who may do what. |
 | **ICANN** | Internet Corporation for Assigned Names and Numbers | The body that runs the domain name system's registries and accredits registrars. |
@@ -143,6 +144,7 @@ Used in the [functional requirements](requirements/functional-requirements.md), 
 | **[NET](requirements/NET-connectivity.md)** | Connectivity (network) |
 | **[LIM](requirements/LIM-limits.md)** | Limits (quotas and rate limits) |
 | **[APR](requirements/APR-appearance.md)** | Appearance (the color scheme) |
+| **[LNG](requirements/LNG-language.md)** | Language (English or Polish) |
 | **[APP](requirements/APP-app-wide-behavior.md)** | App-wide behavior (the menu, page titles, messages, loading and empty states, forms) |
 | **[NFR](requirements/NFR-non-functional-requirements.md)** | Non-functional requirements (browsers, accessibility, performance, security) |
 | **[UC](requirements/UC-use-cases.md)** | Use case |
