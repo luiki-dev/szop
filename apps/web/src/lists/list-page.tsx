@@ -63,7 +63,8 @@ export function ListPage() {
       </>
     );
   }
-  if (query.error) {
+  // A failed refetch keeps the screen: the card is for a list never loaded.
+  if (query.isLoadingError) {
     return (
       <>
         <ListHeader field={null} />

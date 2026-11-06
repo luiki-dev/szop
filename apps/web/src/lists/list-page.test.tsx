@@ -608,6 +608,60 @@ describe("ListPage", () => {
       expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
     });
 
+    it("NET-1.4: a rename and its refetch with no answer: Not saved. comes at the limit and a failed refetch keeps the screen", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      setup();
+      await field();
+      server.use(
+        http.patch(`/api/lists/${id}`, () => delay("infinite")),
+        http.get(`/api/lists/${id}`, () => delay("infinite")),
+      );
+
+      await user.type(await field(), " 2{Enter}");
+      expect(await screen.findByText("Saving…")).toBeVisible();
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Not saved. Try again",
+      );
+      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Back to lists" }),
+      ).not.toHaveAttribute("aria-disabled");
+
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.getByRole("alert")).toHaveTextContent("Not saved.");
+      expect(
+        screen.queryByText("The list could not be loaded."),
+      ).not.toBeInTheDocument();
+    });
+
+    it("NET-1.4: a rename and its refetch that both fail at once keep the screen and Not saved.", async () => {
+      const user = userEvent.setup();
+      setup();
+      await field();
+      server.use(
+        http.patch(`/api/lists/${id}`, () => HttpResponse.error()),
+        http.get(`/api/lists/${id}`, () => HttpResponse.error()),
+      );
+
+      await user.type(await field(), " 2{Enter}");
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Not saved. Try again",
+      );
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+      expect(screen.getByRole("alert")).toHaveTextContent("Not saved.");
+      expect(
+        screen.queryByText("The list could not be loaded."),
+      ).not.toBeInTheDocument();
+    });
+
     it("NET-1.4: a list read with no answer shows its error card", async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       setup();
@@ -645,6 +699,19 @@ describe("ListPage", () => {
       ).toBeInTheDocument();
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
       expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
+    });
+
+    it("NET-1.7: Try again leaves the focus in the name field", async () => {
+      const user = userEvent.setup();
+      setup();
+      failing();
+
+      await user.type(await field(), " 2{Enter}");
+      await user.click(
+        await screen.findByRole("button", { name: "Try again" }),
+      );
+
+      expect(screen.getByRole("textbox")).toHaveFocus();
     });
 
     it("NET-1.7: after a failed rename the typed name stays and only a retry sends it", async () => {
@@ -818,7 +885,7 @@ describe("ListPage", () => {
       });
     });
 
-    it("NET-1.8: Enter twice, or Enter then Try again, sends one request", async () => {
+    it("NET-1.8: Enter twice, or Enter and then leaving the field, while a rename is saved sends one request", async () => {
       const user = userEvent.setup();
       setup();
       const { answer, requests } = held();
@@ -826,6 +893,7 @@ describe("ListPage", () => {
       await user.type(await field(), " 2{Enter}{Enter}");
       await screen.findByText("Saving…");
       await user.keyboard("{Enter}");
+      await user.tab();
       answer();
 
       await waitFor(() => {

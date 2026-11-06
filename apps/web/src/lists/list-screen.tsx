@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import { useRef, useState, type ReactNode, type Ref } from "react";
+import { useRef, useState, type ReactNode, type RefObject } from "react";
 import { useIsMutating } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { listNameSchema } from "@szop/shared";
@@ -89,7 +89,7 @@ export function TitleField({
   autoFocus?: boolean;
   saveOnBlur?: boolean;
   create?: boolean;
-  inputRef?: Ref<HTMLInputElement>;
+  inputRef?: RefObject<HTMLInputElement | null>;
   pending: boolean;
   failed?: boolean;
   error?: string;
@@ -100,6 +100,8 @@ export function TitleField({
   const [seen, setSeen] = useState(initial);
   const [tooLong, setTooLong] = useState<string>();
   const desktop = useMediaQuery(desktopQuery);
+  const ownRef = useRef<HTMLInputElement>(null);
+  const field = inputRef ?? ownRef;
   // Stryker disable next-line BooleanLiteral: onFocus resets it before any blur can happen, so the initial value is never read
   const cancelled = useRef(false);
   // The server's answer replaces what the field shows.
@@ -142,7 +144,7 @@ export function TitleField({
   );
   const input = (
     <input
-      ref={inputRef}
+      ref={field}
       value={value}
       autoFocus={autoFocus}
       readOnly={pending}
@@ -197,7 +199,11 @@ export function TitleField({
           <button
             type="button"
             className="inline-flex min-h-12 items-center rounded-control px-1 underline outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            onClick={commit}
+            onClick={() => {
+              commit();
+              // The button goes away while the retry runs: keep the focus.
+              field.current?.focus();
+            }}
           >
             Try again
           </button>

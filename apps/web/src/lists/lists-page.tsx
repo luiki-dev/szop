@@ -190,7 +190,8 @@ export function ListsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selecting, asking]);
 
-  if (query.isError) {
+  // A failed refetch keeps the page: the card is for lists never loaded.
+  if (query.isLoadingError) {
     return (
       <>
         <section className="mt-4 rounded-surface bg-card p-4 text-card-foreground">

@@ -61,12 +61,12 @@ export function useRenameList(id: string) {
     // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
     onSuccess: (list) => remember(queryClient, list),
-    // The answer may have been lost on its way: ask what the server holds.
-    onError: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["lists", id] }),
-        queryClient.invalidateQueries({ queryKey: ["lists"], exact: true }),
-      ]),
+    // The answer may have been lost on its way: ask what the server holds, in
+    // the background (awaiting it would hold the mutation in "pending").
+    onError: () => {
+      void queryClient.invalidateQueries({ queryKey: ["lists", id] });
+      void queryClient.invalidateQueries({ queryKey: ["lists"], exact: true });
+    },
   });
 }
 
@@ -96,10 +96,13 @@ export function useDeleteLists() {
           queryKey: ["lists", id],
           type: "inactive",
         });
-      return queryClient.invalidateQueries({
-        queryKey: ["lists"],
-        exact: true,
-      });
+      // The deleted lists leave the cache at once, so they do not flash back;
+      // the refetch runs in the background (awaiting it would keep the dialog
+      // on "Deleting…").
+      queryClient.setQueryData<List[]>(["lists"], (lists) =>
+        lists?.filter((list) => !ids.includes(list.id)),
+      );
+      void queryClient.invalidateQueries({ queryKey: ["lists"], exact: true });
     },
   });
 }
