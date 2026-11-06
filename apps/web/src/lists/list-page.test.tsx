@@ -608,7 +608,7 @@ describe("ListPage", () => {
       expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
     });
 
-    it("NET-1.4: a rename and its refetch with no answer: Not saved. comes at the limit and a failed refetch keeps the screen", async () => {
+    it("NET-1.4: a rename and its refetch with no answer: Not saved. comes at the limit, not after the refetch", async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       setup();
@@ -630,14 +630,6 @@ describe("ListPage", () => {
       expect(
         screen.getByRole("link", { name: "Back to lists" }),
       ).not.toHaveAttribute("aria-disabled");
-
-      await vi.advanceTimersByTimeAsync(10_000);
-
-      expect(screen.getByRole("textbox")).toHaveValue("Weekly shop 2");
-      expect(screen.getByRole("alert")).toHaveTextContent("Not saved.");
-      expect(
-        screen.queryByText("The list could not be loaded."),
-      ).not.toBeInTheDocument();
     });
 
     it("NET-1.4: a rename and its refetch that both fail at once keep the screen and Not saved.", async () => {

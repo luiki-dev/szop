@@ -191,7 +191,7 @@ describe("ListsPage", () => {
       renderApp();
       await select();
 
-      expect(screen.getAllByRole("checkbox", { hidden: true })).toHaveLength(3);
+      expect(screen.getAllByRole("checkbox")).toHaveLength(3);
       expect(screen.getByText("0 selected")).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: "Cancel selection" }),
@@ -574,8 +574,8 @@ describe("ListsPage", () => {
 
       await waitFor(() => {
         expect(screen.queryByRole("alertdialog")).toBeNull();
+        expect(reads).toBe(2);
       });
-      expect(reads).toBe(2);
       expect(screen.queryByRole("checkbox")).toBeNull();
       expect(screen.queryByRole("link", { name: "Party" })).toBeNull();
       expect(screen.queryByRole("link", { name: "Hardware store" })).toBeNull();
