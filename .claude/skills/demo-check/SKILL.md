@@ -11,6 +11,8 @@ After [ADR 0059](../../../docs/decisions/0059-session-skills.md), decision 9, re
 
 2. **Sort each check into a bucket** by [the three buckets](../../../docs/superpowers/specs/2026-11-03-PH-44-leaner-demo-check-design.md#the-three-buckets): **AWS** when the diff changes what only AWS can show, **Local** when the production-like environment can show it, **Deferred** when the diff could affect AWS without changing it directly. The table's examples are a guide: give each check the reason the diff calls for it. A check that passed earlier on this PR is repeated only when a later commit changes what it covers (ADR 0064, decision 4).
 
+   **Firefox for Android:** when the diff changes what a phone's keyboard or touch gestures do (the add bar, the haul's drawer, a tap or drag on a list), add a Local row for the owner: those behaviors in Firefox for Android, steps written out, on a phone connected over USB with `adb reverse tcp:8443 tcp:8443`, at `https://localhost:8443` past the certificate warning. Playwright's phone emulation is Chromium only ([ADR 0073](../../../docs/decisions/0073-list-items-polish-phase-details.md), decision 2).
+
    **Count the phase PRs** for the deferred-checks issue when it has open lines (ADR 0064, decision 3): the merged PRs whose branch is a phase branch, closed on or after the date of the oldest open line, leaving out the PR that line came from (replace `BRANCH` with its head branch), plus this PR if it is a phase PR.
 
    ```bash
