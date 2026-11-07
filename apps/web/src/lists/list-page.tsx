@@ -277,6 +277,16 @@ export function ListPage() {
           />
         </>
       )}
+      {/* While the phone's keyboard is open for the add bar, the screen above
+          the bar is dimmed: a tap there only blurs the field, which closes the
+          keyboard, and a drag still scrolls the list (ITM-2.6). The add bar
+          unfolds the haul after the click, so the click lands here too. */}
+      <div
+        aria-hidden="true"
+        className={`fixed inset-0 z-5 bg-black/30 motion-safe:transition-opacity motion-safe:duration-150 ${
+          barFocused && keyboardOpen ? "" : "pointer-events-none opacity-0"
+        }`}
+      />
       {/* The add bar and the haul under it stay at the bottom of the column. */}
       <div
         ref={bottomBlock}

@@ -126,7 +126,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [ITM-1](ITM-list-items.md#itm-1) | 🎯 MVP | 🚧 In progress | 2 of 3 | ✅ Finalized |
-| [ITM-2](ITM-list-items.md#itm-2) | 🎯 MVP | 🚧 In progress | 2 of 5 | ❔ Not finalized |
+| [ITM-2](ITM-list-items.md#itm-2) | 🎯 MVP | 🚧 In progress | 2 of 6 | ❔ Not finalized |
 | [ITM-3](ITM-list-items.md#itm-3) | 🎯 MVP | ❔ Draft | 0 of 2 | ❔ Not finalized |
 | [ITM-4](ITM-list-items.md#itm-4) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |
 | [ITM-5](ITM-list-items.md#itm-5) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |

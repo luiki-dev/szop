@@ -347,19 +347,31 @@ test("ORD-1.8: the first tap after typing opens the drawer from the folded line"
   await expect(page.getByRole("dialog", { name: "The haul" })).toBeVisible();
 });
 
-test("ORD-1.8: the first tap after typing checks the item under the finger on a scrolled list", async ({
+test("ITM-2.6: with the keyboard open, a tap on the dimmed list only closes the keyboard, and the list still scrolls", async ({
   page,
 }) => {
-  await listWith(page, 16);
+  const add = await listWith(page, 16);
   await openKeyboard(page);
+  await page.mouse.move(195, 150);
+  await page.mouse.wheel(0, 2000);
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(0);
   await page.evaluate(() => {
     window.scrollTo(0, document.body.scrollHeight);
   });
-  await tap(page, page.getByRole("checkbox", { name: "Item 16" }));
+  const item = page.getByRole("checkbox", { name: "Item 16" });
+  await tap(page, item);
+  await expect(add).not.toBeFocused();
+  await expect(page.getByRole("region", { name: "The haul" })).toBeVisible();
+  await expect(page.getByText("0 of 16 items")).toBeVisible();
+  // The dimming is gone: the next tap checks the item, once the taller haul no
+  // longer covers it.
+  await page.evaluate(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+  await tap(page, item);
   await expect(page.getByText("1 of 16 items")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Put Item 16 back" }),
-  ).toBeVisible();
 });
 
 test("ORD-1.3: the collapsed haul keeps its height at the first check", async ({
@@ -553,21 +565,26 @@ test("ORD-1.8: by touch, the first tap after typing opens the drawer from the fo
   await expect(page.getByRole("dialog", { name: "The haul" })).toBeVisible();
 });
 
-test("ORD-1.8: by touch, the first tap after typing checks the item under the finger on a scrolled list", async ({
+test("ITM-2.6: by touch, with the keyboard open, a tap on the dimmed list only closes the keyboard", async ({
   page,
   hasTouch,
 }) => {
   test.skip(!hasTouch, "needs a touch screen");
-  await listWith(page, 16);
+  const add = await listWith(page, 16);
   await openKeyboard(page);
   await page.evaluate(() => {
     window.scrollTo(0, document.body.scrollHeight);
   });
-  await touchTap(page, page.getByRole("checkbox", { name: "Item 16" }));
+  const item = page.getByRole("checkbox", { name: "Item 16" });
+  await touchTap(page, item);
+  await expect(add).not.toBeFocused();
+  await expect(page.getByRole("region", { name: "The haul" })).toBeVisible();
+  await expect(page.getByText("0 of 16 items")).toBeVisible();
+  await page.evaluate(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+  await touchTap(page, item);
   await expect(page.getByText("1 of 16 items")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Put Item 16 back" }),
-  ).toBeVisible();
 });
 
 test("ORD-1.6: dragging the haul's drawer down closes it (#404)", async ({
