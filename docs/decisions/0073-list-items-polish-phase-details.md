@@ -37,3 +37,6 @@ The phase takes the bounded path: the design was agreed in the brainstorm, with 
 - A haul that folds only with the keyboard depends on the browser reporting its visual viewport; a browser that does not keeps the haul open.
 
 ## Settled while building
+
+- ✏️ **The list jumped for two reasons (#412, Task 1).** First, without `interactive-widget=resizes-content` in the viewport meta tag the keyboard covers the sticky add bar and the browser pans the page to show it; with it, the page is laid out again above the keyboard. Second, PH-17's `scroll-padding-bottom` (the bottom block's height, so a focused row stops above the block) also counts the add bar's own field as hidden under the block, and scrolling it into view sent the list to its end in Chromium; the padding is now 0 while the focus is inside the block (`html:has([data-bottom-block] :focus)`). The E2E tests show the keyboard by shortening the viewport at the same width and scrolling the focused field into view, as the phone does.
+- ✏️ **Keyboard open is measured against the tallest viewport at the same width (Task 1).** With `resizes-content` the window shrinks with the keyboard too, so the visual viewport cannot be compared with the window as the brainstorm had it; it is compared with the tallest height seen at its current width instead, which a turned phone or a zoom resets.

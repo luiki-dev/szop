@@ -4,7 +4,12 @@
     <meta charset="UTF-8" />
     <!-- First, before anything paints: the user's color scheme (ADR 0049). -->
     <script src="/color-scheme.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The phone's keyboard shrinks the page instead of covering it, so the
+         sticky add bar rises above it and the list stays put (#412). -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+    />
     <meta
       name="description"
       content="Szop is a shopping list app for groceries and everyday shopping."

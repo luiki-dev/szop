@@ -133,6 +133,11 @@
        its height; scrolling a focused row into view stops above it (APP-1.8). */
     scroll-padding-bottom: var(--toast-offset, 0px);
   }
+  /* A field inside the block itself would be "under" that padding, and the
+     browser would scroll the whole list away to reveal it (#412). */
+  html:has([data-bottom-block] :focus) {
+    scroll-padding-bottom: 0px;
+  }
   body {
     @apply bg-background font-sans text-foreground antialiased;
   }

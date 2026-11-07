@@ -41,3 +41,14 @@ export async function listWith(page: Page, count: number) {
   await expect(page.getByRole("main").getByRole("listitem")).toHaveCount(count);
   return add;
 }
+
+// The phone's keyboard as the browser shows it with interactive-widget=
+// resizes-content: the viewport loses its bottom part at the same width, and
+// the browser then scrolls the focused field into view.
+export async function openKeyboard(page: Page) {
+  const size = page.viewportSize() ?? { width: 390, height: 700 };
+  await page.setViewportSize({ width: size.width, height: size.height - 300 });
+  await page.evaluate(() => {
+    document.activeElement?.scrollIntoView({ block: "nearest" });
+  });
+}

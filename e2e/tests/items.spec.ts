@@ -1,5 +1,5 @@
 import { expectAccessible } from "../support/accessibility.ts";
-import { listWith, tap, touchTap } from "../support/list.ts";
+import { listWith, openKeyboard, tap, touchTap } from "../support/list.ts";
 import { expect, test } from "../support/test.ts";
 
 test.use({ viewport: { width: 390, height: 700 } });
@@ -300,11 +300,49 @@ test("ITM-7.1, ORD-1.4, ORD-1.6, ORD-1.7, ORD-1.11: a guest checks items into th
   );
 });
 
+test("APP-1.8: the list stays put when the keyboard opens for the add bar (#412)", async ({
+  page,
+}) => {
+  const add = await listWith(page, 16);
+  await add.blur();
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+  });
+  await tap(page, add);
+  await openKeyboard(page);
+  await expect(add).toBeFocused();
+  await expect(add).toBeInViewport();
+  await expect(
+    page.getByRole("checkbox", { name: "Item 1", exact: true }),
+  ).toBeInViewport();
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test("ORD-1.8: the haul folds only while the keyboard is open for the add bar (OP-138)", async ({
+  page,
+}) => {
+  const add = await listWith(page, 2);
+  const tray = page.getByRole("region", { name: "The haul" });
+  const folded = page.getByRole("button", { name: /^The haul · 0 of 2/ });
+  // Focused with the keyboard closed, as on a desktop: the haul stays open.
+  await expect(add).toBeFocused();
+  await expect(tray).toBeVisible();
+  await openKeyboard(page);
+  await expect(folded).toBeVisible();
+  // The keyboard closes and the field keeps the focus: the haul opens again.
+  await page.setViewportSize({ width: 390, height: 700 });
+  await expect(tray).toBeVisible();
+  await expect(folded).toHaveCount(0);
+  await expect(add).toBeFocused();
+});
+
 test("ORD-1.8: the first tap after typing opens the drawer from the folded line", async ({
   page,
 }) => {
   await listWith(page, 2);
-  // The add bar still has the focus, so the haul is folded to one line.
+  // The add bar still has the focus and the keyboard is open, so the haul is
+  // folded to one line.
+  await openKeyboard(page);
   await tap(page, page.getByRole("button", { name: /^The haul · 0 of 2/ }));
   await expect(page.getByRole("dialog", { name: "The haul" })).toBeVisible();
 });
@@ -313,6 +351,7 @@ test("ORD-1.8: the first tap after typing checks the item under the finger on a 
   page,
 }) => {
   await listWith(page, 16);
+  await openKeyboard(page);
   await page.evaluate(() => {
     window.scrollTo(0, document.body.scrollHeight);
   });
@@ -506,6 +545,7 @@ test("ORD-1.8: by touch, the first tap after typing opens the drawer from the fo
 }) => {
   test.skip(!hasTouch, "needs a touch screen");
   await listWith(page, 2);
+  await openKeyboard(page);
   await touchTap(
     page,
     page.getByRole("button", { name: /^The haul · 0 of 2/ }),
@@ -519,6 +559,7 @@ test("ORD-1.8: by touch, the first tap after typing checks the item under the fi
 }) => {
   test.skip(!hasTouch, "needs a touch screen");
   await listWith(page, 16);
+  await openKeyboard(page);
   await page.evaluate(() => {
     window.scrollTo(0, document.body.scrollHeight);
   });

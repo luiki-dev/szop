@@ -29,6 +29,7 @@ import { EditItem } from "./items/edit-item.tsx";
 import { ItemCards, ItemCardsSkeleton } from "./items/item-cards.tsx";
 import { UndoRemove } from "./items/undo-remove.tsx";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
+import { useKeyboardOpen } from "./items/use-keyboard-open.ts";
 import { useSortByCategory } from "./use-items.ts";
 import { useList, useRenameList } from "./use-lists.ts";
 
@@ -68,6 +69,7 @@ export function ListPage() {
   const askDelete = useRef(false);
   const bottomBlock = useToastOffset();
   const [barFocused, setBarFocused] = useState(false);
+  const keyboardOpen = useKeyboardOpen();
   const [editing, setEditing] = useState<ListItem | null>(null);
   // The latest removed item holds the Undo toast; the count renews it when the same item goes twice.
   const [removed, setRemoved] = useState<{ item: ListItem; n: number } | null>(
@@ -278,6 +280,7 @@ export function ListPage() {
       {/* The add bar and the haul under it stay at the bottom of the column. */}
       <div
         ref={bottomBlock}
+        data-bottom-block
         className="sticky bottom-0 z-10 -mx-4 mt-auto -mb-6 md:-mx-6"
       >
         <AddBar listId={id} listName={name} onFocusChange={setBarFocused} />
@@ -286,7 +289,7 @@ export function ListPage() {
             listId={id}
             items={query.data.items}
             units={catalog.data.units}
-            folded={barFocused}
+            folded={barFocused && keyboardOpen}
           />
         )}
       </div>
