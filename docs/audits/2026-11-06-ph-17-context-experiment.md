@@ -49,13 +49,32 @@ Filled in at `/finish-phase`. Sizes in thousands of tokens.
 
 | Element of the phase | Context before | Context after |
 |---|---|---|
-| Brainstorm | | |
-| Spec | | |
-| Session handoff 1 | | |
-| Plan | | |
-| Session handoff 2 | | |
-| Task 1 | | |
+| Brainstorm | 60 | 167, then 81 after `/compact` |
+| Spec | 100 | 153 |
+| Session handoff 1 | 153 | 55 in the plan's session |
+| Plan | 55 | 159, then 65 after `/compact`; 73 at the commit |
+| Session handoff 2 | 73 | 55 in the execution's session |
+| Task 1 | 55 | 129 |
+| Task 2 | 129 | 138 |
+| Task 3 | 138 | 147 |
+| Task 4 (2 fix rounds) | 147 | 170, then 69 after `/compact` |
+| Task 5 (1 fix round) | 69 | 84 |
+| Task 6 | 84 | 95 |
+| Task 7 (1 fix round) | 95 | 119 |
+| Task 8 (2 fix rounds) | 119 | 139 |
+| Task 9 (`/compact` while its implementer ran) | 139 | 145 before `/compact`, 69 after it, 75 at the end |
+| Task 10 | 75 | 82 |
+| Task 11 | 82 | 105 |
+| Task 12 (1 fix round) | 105 | 123 |
+| `/finish-phase` steps 1 to 4 | 123 | 140 |
+| Session handoff 3 | 140 | 81 in the finishing session |
+| `/finish-phase` step 5 (mockup, 2 fix rounds) to the PR | 81 | 139 |
 
 ## Findings
 
-Filled in at `/finish-phase`.
+- **The 150k stop fired three times:** at the end of the brainstorm (167k), of the plan's draft (159k) and of Task 4 (170k). Without it, the brainstorm, the plan and the execution would each have gone past 150k; the execution would have reached about 250k.
+- **A `/compact` or a handoff brings the context to 55k to 81k.** About 55k is the floor of a new session (system prompt, tools, `CLAUDE.md`, memory, skills); a `/compact` lands 10k to 25k above it, with the summary and the documents read again.
+- **A subagent-driven task costs the main agent 7k to 25k,** growing with its fix rounds: 7k to 11k for a task that passed its review at once, 20k to 30k for one with two fix rounds. Twelve tasks fit in one session with two `/compact`s.
+- **A `/compact` while an implementer runs did no harm** (Task 9): the controller had nothing uncommitted, and the implementer's work lives in its own context.
+- **The token-usage indicators moved as wanted except the cost:** median context per main-session call 112k (baseline 202k), share of main-session cost above 200k 0 % (baseline 66 %), peak 172k (baseline 396k), 7 main sessions. The phase cost 16.3M units against the 9.9M baseline, but PH-17 is two phases merged, so the cost per phase does not compare directly.
+- **The whole-branch review found what only real layout shows:** two Important findings (a tap lost after typing, the haul's drawer outside the column), both confirmed in a browser. The first fix needed a second round, because its E2E tests used a mouse and a touch tap orders its events differently.
