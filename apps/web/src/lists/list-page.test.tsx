@@ -680,6 +680,22 @@ describe("ListPage", () => {
       );
     });
 
+    it("NET-1.4: a rename that fails while the person types again leaves what they type", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      setup();
+      server.use(http.patch(`/api/lists/${id}`, () => delay("infinite")));
+
+      await user.type(await field(), " 2{Enter}");
+      await user.type(await field(), " and more");
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(await screen.findByRole("alert")).toBeInTheDocument();
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "Weekly shop 2 and more",
+      );
+    });
+
     it("NET-1.4: a rename and its refetch with no answer: the toast comes at the limit, not after the refetch", async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });

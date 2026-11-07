@@ -96,16 +96,19 @@ export function TitleField({
 }) {
   const [value, setValue] = useState(initial);
   const [seen, setSeen] = useState(initial);
+  const [focused, setFocused] = useState(false);
   const [tooLong, setTooLong] = useState<string>();
   const desktop = useMediaQuery(desktopQuery);
   const ownRef = useRef<HTMLInputElement>(null);
   const field = inputRef ?? ownRef;
   // Stryker disable next-line BooleanLiteral: onFocus resets it before any blur can happen, so the initial value is never read
   const cancelled = useRef(false);
-  // The server's answer replaces what the field shows.
+  // The server's answer replaces what the field shows, unless the person is
+  // typing in it: a rename is optimistic, so a failure arrives while the field
+  // is still editable.
   if (seen !== initial) {
     setSeen(initial);
-    setValue(initial);
+    if (!focused) setValue(initial);
   }
 
   function commit() {
@@ -162,6 +165,7 @@ export function TitleField({
         setValue(event.target.value);
       }}
       onFocus={() => {
+        setFocused(true);
         cancelled.current = false;
       }}
       onKeyDown={(event) => {
@@ -179,6 +183,7 @@ export function TitleField({
         }
       }}
       onBlur={() => {
+        setFocused(false);
         if (saveOnBlur && !cancelled.current) commit();
       }}
     />
