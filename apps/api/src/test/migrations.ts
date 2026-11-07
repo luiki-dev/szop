@@ -35,7 +35,12 @@ export async function migratedDatabase(
     }
     await resetDatabase(name);
     const db = createDatabase(testDatabaseSettings(name));
-    await migrate(db, { migrationsFolder: folder });
+    try {
+      await migrate(db, { migrationsFolder: folder });
+    } catch (error) {
+      await db.$client.end();
+      throw error;
+    }
     return db;
   } finally {
     rmSync(folder, { recursive: true });

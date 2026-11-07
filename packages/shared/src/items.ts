@@ -9,7 +9,7 @@ export const itemLimits = {
   price: { min: 0, max: 9_999_999 },
 } as const;
 
-export const itemNameSchema = nameSchema("Enter a name.");
+export const itemNameSchema = nameSchema("Enter a name.", itemLimits.name);
 
 export const itemNoteSchema = z
   .string()

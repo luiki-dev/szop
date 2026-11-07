@@ -113,6 +113,14 @@ describe("haulItems", () => {
     ]);
     expect(names(haul)).toEqual(["New", "Tie a", "Old"]);
   });
+
+  it("ORD-2.5: times of differing fractional precision compare as instants", () => {
+    const haul = haulItems([
+      item("1", "Whole", null, "2026-11-06T10:00:00Z"),
+      item("2", "Later", null, "2026-11-06T10:00:00.500Z"),
+    ]);
+    expect(names(haul)).toEqual(["Later", "Whole"]);
+  });
 });
 
 describe("the order of equal names and times", () => {

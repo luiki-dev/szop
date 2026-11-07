@@ -52,6 +52,7 @@ export function haulItems(items: readonly ListItem[]): ListItem[] {
     .sort(
       (a, b) =>
         // Stryker disable next-line StringLiteral: the filter above leaves only checked items
-        (b.checkedAt ?? "").localeCompare(a.checkedAt ?? "") || byId(b, a),
+        Date.parse(b.checkedAt ?? "") - Date.parse(a.checkedAt ?? "") ||
+        byId(b, a),
     );
 }

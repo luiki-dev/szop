@@ -24,5 +24,12 @@ export const milk = {
 
 // The Party list with its items, as `GET /api/lists/:id` answers.
 export function listWith(...items: ListItem[]): ListWithItems {
-  return { ...threeLists[0], sortByCategory: true, items } as ListWithItems;
+  return {
+    id: listId,
+    name: "",
+    createdAt: "",
+    ...threeLists[0],
+    sortByCategory: true,
+    items,
+  } satisfies ListWithItems;
 }

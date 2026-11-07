@@ -9,6 +9,7 @@ import { delay, http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { ListItem, ListWithItems } from "@szop/shared";
+import { getList } from "../api/client.ts";
 import { bananas, listId, listWith, milk } from "../test/items.ts";
 import { server } from "../test/server.ts";
 import * as toasts from "../shell/toasts.tsx";
@@ -695,7 +696,6 @@ describe("the item hooks, edge by edge", () => {
   });
 });
 
-import { getList } from "../api/client.ts";
 function useObservedList() {
   return useQuery({
     queryKey: key,

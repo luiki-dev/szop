@@ -356,7 +356,7 @@ describe("the schema", () => {
       ).toBeUndefined();
     });
 
-    it("refuses a quantity or price outside its range", async () => {
+    it("ITM-1.2: refuses a quantity or price outside its range", async () => {
       await workspaces();
       const insert = (quantity: number, price: number) =>
         code(sql`INSERT INTO list_items (workspace_id, id, list_id, name, quantity, price)

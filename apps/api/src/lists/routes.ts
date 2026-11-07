@@ -19,6 +19,7 @@ import type { Auth } from "../auth/auth.ts";
 import { sessionHook } from "../auth/session.ts";
 import type { Database } from "../db/database.ts";
 import { sendError } from "../errors.ts";
+import { listItemsOf } from "../items/repository.ts";
 import {
   deleteList,
   deleteLists,
@@ -26,7 +27,6 @@ import {
   listLists,
   updateList,
 } from "./repository.ts";
-import { listItemsOf } from "../items/repository.ts";
 
 export interface ListsRoutesOptions {
   db: Database;
