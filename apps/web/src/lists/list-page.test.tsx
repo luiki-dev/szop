@@ -24,13 +24,18 @@ const list = {
 
 function setup(items: ListItem[] = []) {
   const patches: { name: string }[] = [];
+  // The server keeps a rename, so a refetch after it answers the new name.
+  let name = list.name;
   server.use(
-    http.get(`/api/lists/${id}`, () => HttpResponse.json({ ...list, items })),
+    http.get(`/api/lists/${id}`, () =>
+      HttpResponse.json({ ...list, name, items }),
+    ),
     http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
     http.patch(`/api/lists/${id}`, async ({ request }) => {
       const body = (await request.json()) as { name: string };
       patches.push(body);
-      return HttpResponse.json({ ...list, name: body.name.toUpperCase() });
+      name = body.name.toUpperCase();
+      return HttpResponse.json({ ...list, name });
     }),
   );
   const router = createMemoryRouter(routes, {
@@ -83,6 +88,10 @@ describe("ListPage", () => {
     });
     expect(patches).toEqual([{ name: "Party" }]);
     expect(document.title).toBe("PARTY · Szop");
+    // Enter leaves the field (#416).
+    expect(
+      screen.getByRole("textbox", { name: "List name" }),
+    ).not.toHaveFocus();
   });
 
   it("LST-1.2: Rename in the list's menu focuses the title with its text selected", async () => {
@@ -392,13 +401,13 @@ describe("ListPage", () => {
     });
   });
 
-  it("LST-1.2: shows the server's message under the title when the rename fails", async () => {
+  it("LST-1.2: a refused rename puts the old name back and says it wasn't saved", async () => {
     const user = userEvent.setup();
     setup();
     server.use(
       http.patch(`/api/lists/${id}`, () =>
         HttpResponse.json(
-          { error: { code: "invalid", message: "Boom" } },
+          { error: { code: "invalid", message: "Not a good name" } },
           { status: 400 },
         ),
       ),
@@ -406,28 +415,9 @@ describe("ListPage", () => {
 
     await user.type(await field(), " 2{Enter}");
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Boom");
-  });
-
-  it("LST-1.2: Esc after a failed rename clears the server's message", async () => {
-    const user = userEvent.setup();
-    setup();
-    server.use(
-      http.patch(`/api/lists/${id}`, () =>
-        HttpResponse.json(
-          { error: { code: "invalid", message: "Boom" } },
-          { status: 400 },
-        ),
-      ),
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Weekly shop 2 wasn't saved. Check your connection and try again.",
     );
-
-    await user.type(await field(), " 2{Enter}");
-    await screen.findByRole("alert");
-    await user.keyboard("{Escape}");
-
-    await waitFor(() => {
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    });
     expect(await field()).toHaveValue("Weekly shop");
   });
 
@@ -643,7 +633,7 @@ describe("ListPage", () => {
       await user.type(await field(), " 2{Enter}");
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "Not saved. Try again",
+        "Weekly shop 2 wasn't saved. Check your connection and try again.",
       );
       expect(requests).toHaveLength(1);
       window.dispatchEvent(new Event("online"));
@@ -669,23 +659,28 @@ describe("ListPage", () => {
       expect(stale(["catalog"])).toBe(false);
     });
 
-    it("NET-1.4: a rename with no answer shows Not saved. after the limit", async () => {
+    it("NET-1.4: a rename with no answer shows the new name at once and puts the old one back at the limit", async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       setup();
       server.use(http.patch(`/api/lists/${id}`, () => delay("infinite")));
 
       await user.type(await field(), " 2{Enter}");
-      expect(await screen.findByText("Saving…")).toBeVisible();
-      await vi.advanceTimersByTimeAsync(10_000);
-
-      expect(await screen.findByRole("alert")).toHaveTextContent("Not saved.");
       expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
         "Weekly shop 2",
       );
+      expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Weekly shop 2 wasn't saved. Check your connection and try again.",
+      );
+      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
+        "Weekly shop",
+      );
     });
 
-    it("NET-1.4: a rename and its refetch with no answer: Not saved. comes at the limit, not after the refetch", async () => {
+    it("NET-1.4: a rename and its refetch with no answer: the toast comes at the limit, not after the refetch", async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true });
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       setup();
@@ -696,22 +691,20 @@ describe("ListPage", () => {
       );
 
       await user.type(await field(), " 2{Enter}");
-      expect(await screen.findByText("Saving…")).toBeVisible();
       await vi.advanceTimersByTimeAsync(10_000);
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "Not saved. Try again",
+        "Weekly shop 2 wasn't saved. Check your connection and try again.",
       );
       expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
-        "Weekly shop 2",
+        "Weekly shop",
       );
-      expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "Back to lists" }),
       ).not.toHaveAttribute("aria-disabled");
     });
 
-    it("NET-1.4: a rename and its refetch that both fail at once keep the screen and Not saved.", async () => {
+    it("NET-1.4: a rename and its refetch that both fail at once keep the screen and the old name", async () => {
       const user = userEvent.setup();
       setup();
       await field();
@@ -722,14 +715,13 @@ describe("ListPage", () => {
 
       await user.type(await field(), " 2{Enter}");
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "Not saved. Try again",
+        "Weekly shop 2 wasn't saved. Check your connection and try again.",
       );
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
-        "Weekly shop 2",
+        "Weekly shop",
       );
-      expect(screen.getByRole("alert")).toHaveTextContent("Not saved.");
       expect(
         screen.queryByText("The list could not be loaded."),
       ).not.toBeInTheDocument();
@@ -770,26 +762,12 @@ describe("ListPage", () => {
       expect(
         await screen.findByRole("heading", { name: "Weekly shop 2" }),
       ).toBeInTheDocument();
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
       expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
         "Weekly shop 2",
       );
     });
 
-    it("NET-1.7: Try again leaves the focus in the name field", async () => {
-      const user = userEvent.setup();
-      setup();
-      failing();
-
-      await user.type(await field(), " 2{Enter}");
-      await user.click(
-        await screen.findByRole("button", { name: "Try again" }),
-      );
-
-      expect(screen.getByRole("textbox", { name: "List name" })).toHaveFocus();
-    });
-
-    it("NET-1.7: after a failed rename the typed name stays and only a retry sends it", async () => {
+    it("NET-1.7: after a failed rename the old name is back and nothing is sent again", async () => {
       const user = userEvent.setup();
       setup();
       const requests = failing();
@@ -797,29 +775,13 @@ describe("ListPage", () => {
       await user.type(await field(), " 2{Enter}");
       await screen.findByRole("alert");
       expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
-        "Weekly shop 2",
-      );
-      await user.tab();
-      expect(requests).toHaveLength(1);
-
-      await user.click(screen.getByRole("button", { name: "Try again" }));
-      await waitFor(() => {
-        expect(requests).toHaveLength(2);
-      });
-      await screen.findByRole("alert");
-      await user.click(screen.getByRole("textbox", { name: "List name" }));
-      await user.keyboard("{Enter}");
-      await waitFor(() => {
-        expect(requests).toHaveLength(3);
-      });
-      await screen.findByRole("alert");
-
-      await user.keyboard("{Escape}");
-
-      expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
         "Weekly shop",
       );
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      await user.click(screen.getByRole("textbox", { name: "List name" }));
+      await user.tab();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(requests).toHaveLength(1);
     });
   });
 
@@ -861,9 +823,10 @@ describe("ListPage", () => {
       );
 
       await user.type(await field(), " 2{Enter}");
-      expect(await screen.findByText("Saving…")).toBeVisible();
       const back = screen.getByRole("link", { name: "Back to lists" });
-      expect(back).toHaveAttribute("aria-disabled", "true");
+      await waitFor(() => {
+        expect(back).toHaveAttribute("aria-disabled", "true");
+      });
       await user.click(back);
       await user.keyboard("{Escape}");
       await router.navigate(-1);
@@ -878,7 +841,6 @@ describe("ListPage", () => {
       expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
         "Weekly shop 2",
       );
-      expect(screen.getByText("Saving…")).toBeVisible();
 
       answer();
       await waitFor(() => {
@@ -888,48 +850,6 @@ describe("ListPage", () => {
       await waitFor(() => {
         expect(router.state.location.pathname).toBe("/");
       });
-    });
-
-    it("NET-1.7: a refusal shows its own message and no Try again", async () => {
-      const user = userEvent.setup();
-      setup();
-      server.use(
-        http.patch(`/api/lists/${id}`, () =>
-          HttpResponse.json(
-            { error: { code: "invalid", message: "Not a good name" } },
-            { status: 400 },
-          ),
-        ),
-      );
-
-      await user.type(await field(), " 2{Enter}");
-
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        "Not a good name",
-      );
-      expect(
-        screen.queryByRole("button", { name: "Try again" }),
-      ).not.toBeInTheDocument();
-      expect(screen.queryByText("Not saved.")).not.toBeInTheDocument();
-    });
-
-    it("NET-1.7: a 404 shows its message as before", async () => {
-      const user = userEvent.setup();
-      setup();
-      server.use(
-        http.patch(`/api/lists/${id}`, () =>
-          HttpResponse.json(
-            { error: { code: "not_found", message: "List not found" } },
-            { status: 404 },
-          ),
-        ),
-      );
-
-      await user.type(await field(), " 2{Enter}");
-
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        "List not found",
-      );
     });
 
     it("NET-1.8: the back link does not navigate while a rename is saved, without the shell's blocker", async () => {
@@ -956,13 +876,16 @@ describe("ListPage", () => {
       );
 
       await user.type(await field(), " 2{Enter}");
-      await screen.findByText("Saving…");
-      await user.click(screen.getByRole("link", { name: "Back to lists" }));
+      const back = screen.getByRole("link", { name: "Back to lists" });
+      await waitFor(() => {
+        expect(back).toHaveAttribute("aria-disabled", "true");
+      });
+      await user.click(back);
 
       expect(router.state.location.pathname).toBe(`/lists/${id}`);
       answer();
       await waitFor(() => {
-        expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
+        expect(back).not.toHaveAttribute("aria-disabled");
       });
     });
 
@@ -972,13 +895,16 @@ describe("ListPage", () => {
       const { answer, requests } = held();
 
       await user.type(await field(), " 2{Enter}{Enter}");
-      await screen.findByText("Saving…");
+      const back = screen.getByRole("link", { name: "Back to lists" });
+      await waitFor(() => {
+        expect(back).toHaveAttribute("aria-disabled", "true");
+      });
       await user.keyboard("{Enter}");
       await user.tab();
       answer();
 
       await waitFor(() => {
-        expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
+        expect(back).not.toHaveAttribute("aria-disabled");
       });
       expect(requests).toEqual(["Weekly shop 2"]);
     });

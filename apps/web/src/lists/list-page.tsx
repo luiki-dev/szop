@@ -20,7 +20,7 @@ import {
 import { storeCheckboxSide, useCheckboxSide } from "../shell/checkbox-side.ts";
 import { RowPicture } from "../shell/checkbox-side-control.tsx";
 import { useCatalog } from "../catalog/use-catalog.ts";
-import { ApiRequestError, notSaved } from "../api/client.ts";
+import { ApiRequestError } from "../api/client.ts";
 import { NotFound } from "../not-found/not-found.tsx";
 import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
 import { AddBar } from "./items/add-bar.tsx";
@@ -166,23 +166,17 @@ export function ListPage() {
       <ListHeader
         field={
           <TitleField
+            // A new field per rename: a failure that comes back before a
+            // render would leave initial looking unchanged and the typed name
+            // in place of the old one.
+            key={rename.submittedAt}
             initial={name}
             saveOnBlur
             inputRef={input}
-            pending={rename.isPending}
-            failed={
-              rename.isError &&
-              notSaved(rename.error) &&
-              rename.variables !== name
-            }
-            {...(rename.isError && !notSaved(rename.error)
-              ? { error: rename.error.message }
-              : {})}
             onSave={(next) => {
               rename.mutate(next);
             }}
             onCancel={() => {
-              rename.reset();
               // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
               input.current?.blur();
             }}

@@ -70,7 +70,7 @@ export function ListHeader({
 // The list's name: at rest it reads as the title, with a dotted underline as
 // the only hint that it can be edited; focused it becomes a field. Enter
 // saves, Esc puts the old name back, and, with saveOnBlur, so does leaving
-// the field. An empty name is never saved. With create, the list does not
+// the field; Enter also leaves it (#416). An empty name is never saved. With create, the list does not
 // exist yet: the field stays a bordered field, and a Create button does what
 // Enter does (pinned at the bottom on a phone, beside the field on a desktop).
 export function TitleField({
@@ -79,8 +79,7 @@ export function TitleField({
   saveOnBlur,
   create,
   inputRef,
-  pending,
-  failed,
+  pending = false,
   error,
   onSave,
   onCancel,
@@ -90,8 +89,7 @@ export function TitleField({
   saveOnBlur?: boolean;
   create?: boolean;
   inputRef?: RefObject<HTMLInputElement | null>;
-  pending: boolean;
-  failed?: boolean;
+  pending?: boolean;
   error?: string;
   onSave: (name: string) => void;
   onCancel: () => void;
@@ -167,7 +165,12 @@ export function TitleField({
         cancelled.current = false;
       }}
       onKeyDown={(event) => {
-        if (event.key === "Enter") commit();
+        // With saveOnBlur, leaving the field is what saves.
+        // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
+        if (event.key === "Enter") {
+          if (saveOnBlur) field.current?.blur();
+          else commit();
+        }
         if (event.key === "Escape" && !pending) {
           cancelled.current = true;
           setValue(initial);
@@ -176,7 +179,7 @@ export function TitleField({
         }
       }}
       onBlur={() => {
-        if (saveOnBlur && !cancelled.current && !failed) commit();
+        if (saveOnBlur && !cancelled.current) commit();
       }}
     />
   );
@@ -191,26 +194,6 @@ export function TitleField({
         input
       )}
       {create && !desktop && <BottomBar>{createButton}</BottomBar>}
-      {!create && pending && (
-        <p className="px-2 pt-1 text-sm text-muted-foreground">Saving…</p>
-      )}
-      {!create && failed && (
-        <p role="alert" className="px-2 pt-1 text-sm text-destructive">
-          Not saved.{" "}
-          <button
-            type="button"
-            className="inline-flex min-h-12 items-center rounded-control px-1 underline outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            onClick={() => {
-              commit();
-              // The button goes away while the retry runs: keep the focus.
-              // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
-              field.current?.focus();
-            }}
-          >
-            Try again
-          </button>
-        </p>
-      )}
       {message && (
         <p role="alert" className="px-2 pt-1 text-sm text-destructive">
           {message}
