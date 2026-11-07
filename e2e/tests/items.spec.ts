@@ -583,6 +583,38 @@ test("ITM-6.1: on a desktop, Tab after Enter opens Edit item stays in the dialog
   }
 });
 
+test("ITM-6.1, LST-1.3: on a desktop, the dialogs are centered on the list's column, not the screen (#406)", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await listWith(page, 1);
+  const center = async (locator: import("@playwright/test").Locator) => {
+    await locator.evaluate((el) =>
+      Promise.all(el.getAnimations().map((a) => a.finished)),
+    );
+    const box = (await locator.boundingBox()) ?? { x: 0, width: 0 };
+    return box.x + box.width / 2;
+  };
+  const column = await center(page.getByRole("main"));
+
+  await page.getByRole("button", { name: /Item 1/ }).click();
+  const edit = page.getByRole("dialog", { name: "Edit item" });
+  expect(await center(edit), "Edit item").toBeCloseTo(column, 0);
+  await page.getByRole("button", { name: /^Category/ }).click();
+  await expect(
+    page.getByRole("searchbox", { name: "Search categories" }),
+  ).toBeVisible();
+  expect(await center(edit), "the picker").toBeCloseTo(column, 0);
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "List actions" }).click();
+  await page.getByRole("menuitem", { name: "Delete" }).click();
+  const confirm = page.getByRole("alertdialog");
+  expect(await center(confirm), "Delete list").toBeCloseTo(column, 0);
+});
+
 test("ITM-6.1: the category picker keeps its height while searching (#406)", async ({
   page,
 }) => {
