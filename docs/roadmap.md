@@ -43,6 +43,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-16c Managing lists](#ph-16c-managing-lists)
   - [PH-16d Resilient changes](#ph-16d-resilient-changes)
   - [PH-17 List items](#ph-17-list-items)
+  - [PH-46 List items polish](#ph-46-list-items-polish)
   - [PH-18 Registration and login](#ph-18-registration-and-login)
   - [PH-19 Guest data on login](#ph-19-guest-data-on-login)
   - [PH-39 Redis in the stack](#ph-39-redis-in-the-stack)
@@ -339,6 +340,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-16c Managing lists](#ph-16c-managing-lists) | ✅ Done | [Spec](superpowers/specs/2026-11-04-PH-16c-managing-lists-design.md) | [Plan](superpowers/plans/2026-11-04-PH-16c-managing-lists.md) | [#384](https://github.com/luiki-dev/szop/pull/384) | [#315](https://github.com/luiki-dev/szop/issues/315) |
 | [PH-16d Resilient changes](#ph-16d-resilient-changes) | 🚧 In progress | [Spec](superpowers/specs/2026-11-05-PH-16d-resilient-changes-design.md) | [Plan](superpowers/plans/2026-11-05-PH-16d-resilient-changes.md) | [#396](https://github.com/luiki-dev/szop/pull/396) | [#382](https://github.com/luiki-dev/szop/issues/382) |
 | [PH-17 List items](#ph-17-list-items) | 🚧 In progress | [Spec](superpowers/specs/2026-11-06-PH-17-list-items-design.md) | [Plan](superpowers/plans/2026-11-06-PH-17-list-items.md) | [#403](https://github.com/luiki-dev/szop/pull/403) | [#46](https://github.com/luiki-dev/szop/issues/46) |
+| [PH-46 List items polish](#ph-46-list-items-polish) | ⬜ Not started | — | — | — | [#407](https://github.com/luiki-dev/szop/issues/407) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
 | [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
 | [PH-39 Redis in the stack](#ph-39-redis-in-the-stack) | ⬜ Not started | — | — | — | [#235](https://github.com/luiki-dev/szop/issues/235) |
@@ -489,6 +491,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** none.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#46](https://github.com/luiki-dev/szop/issues/46).
+
+### PH-46 List items polish
+
+- **Goal:** the list screen of PH-17 behaves as a phone and a desktop user expect: the list stays put when the keyboard opens, the haul's chips can be seen while adding, the edit form's fields line up, the toast sits over the haul, a closed form leaves no stray focus ring, and renaming a list ends with Enter.
+- **Delivers:** the fixes of the bugs found in PH-17's hand checks ([#412](https://github.com/luiki-dev/szop/issues/412), [#413](https://github.com/luiki-dev/szop/issues/413), [#414](https://github.com/luiki-dev/szop/issues/414), [#415](https://github.com/luiki-dev/szop/issues/415), [#416](https://github.com/luiki-dev/szop/issues/416)) and when the haul folds ([OP-138](https://github.com/luiki-dev/szop/issues/408)).
+- **Depends on:** [PH-17](#ph-17-list-items).
+- **Owner steps:** none.
+- **Expected path:** bounded.
+- **Open points:** the sub-issues of [#407](https://github.com/luiki-dev/szop/issues/407).
 
 ### PH-18 Registration and login
 
