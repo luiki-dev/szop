@@ -36,7 +36,7 @@ Every page names itself, in the page and in the browser's tab.
 
 ## APP-3
 
-🎯 [MVP] · 🚧 In progress (2 of 3) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (2 of 4) · ❔ Criteria not finalized
 
 The app tells the user what happened and what to do, and asks for confirmation only when an action cannot be undone.
 
@@ -45,6 +45,7 @@ The app tells the user what happened and what to do, and asks for confirmation o
 | APP-3.1 | Messages appear as toasts that say what happened and what to do; no message is a generic "Something went wrong". | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
 | APP-3.2 | An action that can be reversed offers an Undo in a toast for about 5 seconds instead of asking "Are you sure?". | ✅ [PH-17](../roadmap.md#ph-17-list-items) · [OP-051](https://github.com/luiki-dev/szop/issues/103) |
 | APP-3.3 | An action that cannot be undone, such as deleting a list or the account, asks for confirmation first; Cancel has the focus, and Esc cancels. When the action fails, the confirmation stays open and says so. | 🚧 [PH-16c](../roadmap.md#ph-16c-managing-lists) · lists; the account in its phase |
+| APP-3.4 | A message about a failure is told apart by its color and an icon and is announced at once; a message about a save's state never moves the content. | 🚧 [PH-46](../roadmap.md#ph-46-list-items-polish) |
 
 ## APP-4
 

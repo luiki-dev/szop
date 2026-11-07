@@ -225,7 +225,7 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 |---|---|---|---|---|
 | [APP-1](APP-app-wide-behavior.md#app-1) | 🎯 MVP | 🚧 In progress | 9 of 10 | ❔ Not finalized |
 | [APP-2](APP-app-wide-behavior.md#app-2) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
-| [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | 🚧 In progress | 2 of 3 | ❔ Not finalized |
+| [APP-3](APP-app-wide-behavior.md#app-3) | 🎯 MVP | 🚧 In progress | 2 of 4 | ❔ Not finalized |
 | [APP-4](APP-app-wide-behavior.md#app-4) | 🎯 MVP | 🚧 In progress | 3 of 3 | ❔ Not finalized |
 | [APP-5](APP-app-wide-behavior.md#app-5) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |
 | [APP-6](APP-app-wide-behavior.md#app-6) | 🎯 MVP | ✅ Done | 2 of 2 | ✅ Finalized |

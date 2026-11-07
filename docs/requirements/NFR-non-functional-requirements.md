@@ -6,7 +6,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 
 🎯 [MVP] · ✅ Done (1 of 1) · ✅ Criteria finalized ([PH-40](../roadmap.md#ph-40-acceptance-criteria))
 
-**Browsers:** Szop supports the current versions of Chrome, Edge and Firefox on the desktop, and Chrome on Android. Safari and iOS are not supported: Szop may work there, but it is not tested.
+**Browsers:** Szop supports the current versions of Chrome, Edge and Firefox on the desktop, and Chrome and Firefox on Android ([ADR 0073](../decisions/0073-list-items-polish-phase-details.md), decision 2). Safari and iOS are not supported: Szop may work there, but it is not tested.
 
 | ID | Criterion | Status |
 |---|---|---|
