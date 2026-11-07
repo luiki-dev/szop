@@ -320,7 +320,9 @@ test("APP-1.8: the list stays put when the keyboard opens for the add bar (#412)
 
 test("ORD-1.8: the haul folds only while the keyboard is open for the add bar (OP-138)", async ({
   page,
+  hasTouch,
 }) => {
+  test.skip(!hasTouch, "the keyboard is a touch screen's");
   const add = await listWith(page, 2);
   const tray = page.getByRole("region", { name: "The haul" });
   const folded = page.getByRole("button", { name: /^The haul · 0 of 2/ });
@@ -338,7 +340,9 @@ test("ORD-1.8: the haul folds only while the keyboard is open for the add bar (O
 
 test("ORD-1.8: the first tap after typing opens the drawer from the folded line", async ({
   page,
+  hasTouch,
 }) => {
+  test.skip(!hasTouch, "the keyboard is a touch screen's");
   await listWith(page, 2);
   // The add bar still has the focus and the keyboard is open, so the haul is
   // folded to one line.
@@ -349,7 +353,9 @@ test("ORD-1.8: the first tap after typing opens the drawer from the folded line"
 
 test("ITM-2.6: with the keyboard open, a tap on the dimmed list only closes the keyboard, and the list still scrolls", async ({
   page,
+  hasTouch,
 }) => {
+  test.skip(!hasTouch, "the keyboard is a touch screen's");
   const add = await listWith(page, 16);
   await openKeyboard(page);
   await page.mouse.move(195, 150);
@@ -670,6 +676,40 @@ test("ITM-6.1: closing Edit item gives the focus back to the item, with a ring o
   expect(await ring(), "opened from the keyboard").toBe(true);
 });
 
+test("ITM-6.1: when a category change moves the item to another card, closing Edit item still gives the focus back to the item (#415)", async ({
+  page,
+}) => {
+  await listWith(page, 2);
+  await page.getByRole("button", { name: /Item 1/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit item" });
+  await dialog.getByRole("button", { name: /^Category/ }).click();
+  await page
+    .getByRole("searchbox", { name: "Search categories" })
+    .fill("bread");
+  await page.getByRole("radio").first().click();
+  await dialog.getByRole("button", { name: "Save" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Item 1/ })).toBeFocused();
+});
+
+test("ITM-6.1: after Remove the focus goes to the page after a tap and to the add bar after the keyboard, never to the body (#415)", async ({
+  page,
+}) => {
+  const add = await listWith(page, 2);
+  const dialog = page.getByRole("dialog", { name: "Edit item" });
+  const focusedTag = () => page.evaluate(() => document.activeElement?.tagName);
+
+  await page.getByRole("button", { name: /Item 1/ }).click();
+  await dialog.getByRole("button", { name: "Remove" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect.poll(focusedTag, "after a tap").toBe("MAIN");
+
+  await page.getByRole("button", { name: /Item 2/ }).press("Enter");
+  await dialog.getByRole("button", { name: "Remove" }).press("Enter");
+  await expect(dialog).toHaveCount(0);
+  await expect(add, "after the keyboard").toBeFocused();
+});
+
 test("ITM-6.1: Quantity is as tall as the other fields (#413)", async ({
   page,
 }) => {
@@ -685,6 +725,13 @@ test("ITM-6.1: Quantity is as tall as the other fields (#413)", async ({
   expect(await height(quantity)).toBe(
     await height(dialog.getByRole("combobox", { name: "Unit" })),
   );
+  // NFR-2.3: the steppers are buttons too.
+  for (const name of ["Decrease quantity", "Increase quantity"]) {
+    expect(
+      await height(dialog.getByRole("button", { name })),
+      name,
+    ).toBeGreaterThanOrEqual(48);
+  }
 });
 
 test("ITM-6.1, LST-1.3: on a desktop, the dialogs are centered on the list's column, not the screen (#406)", async ({
