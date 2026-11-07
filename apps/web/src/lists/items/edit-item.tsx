@@ -30,7 +30,7 @@ import {
 const control =
   "min-h-12 w-full rounded-control border-2 border-input bg-card px-3 outline-none focus:ring-3 focus:ring-ring aria-invalid:border-destructive";
 const stepper =
-  "size-12 shrink-0 outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
+  "h-11 w-12 shrink-0 outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
 const handle = "mx-auto mb-3 block h-1 w-10 rounded-full bg-border";
 
 // "Edit item" (ITM-6): a bottom sheet on a phone, a centered dialog from `lg`.
@@ -284,7 +284,7 @@ function EditForm({
                   event.preventDefault();
                   if (by > 0 ? canIncrease : canDecrease) step(by);
                 }}
-                className="min-h-12 min-w-0 flex-1 border-x-2 border-input bg-transparent px-1 text-center outline-none aria-invalid:border-destructive"
+                className="min-h-11 min-w-0 flex-1 border-x-2 border-input bg-transparent px-1 text-center outline-none aria-invalid:border-destructive"
               />
               <button
                 type="button"

@@ -641,6 +641,23 @@ test("ITM-6.1: on a desktop, Tab after Enter opens Edit item stays in the dialog
   }
 });
 
+test("ITM-6.1: Quantity is as tall as the other fields (#413)", async ({
+  page,
+}) => {
+  await listWith(page, 1);
+  await page.getByRole("button", { name: /Item 1/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit item" });
+  // The bordered box around the stepper and the field.
+  const quantity = dialog
+    .getByRole("textbox", { name: "Quantity" })
+    .locator("..");
+  const height = async (locator: typeof quantity) =>
+    (await locator.boundingBox())?.height;
+  expect(await height(quantity)).toBe(
+    await height(dialog.getByRole("combobox", { name: "Unit" })),
+  );
+});
+
 test("ITM-6.1, LST-1.3: on a desktop, the dialogs are centered on the list's column, not the screen (#406)", async ({
   page,
 }) => {
