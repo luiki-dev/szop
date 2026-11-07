@@ -291,6 +291,7 @@ export function ListPage() {
       <div
         aria-hidden="true"
         className={`fixed inset-0 z-5 bg-black/40 motion-safe:transition-opacity motion-safe:duration-150 ${
+          // Stryker disable next-line StringLiteral: the shown state has no class, so any other string only adds a name that jsdom applies no CSS to; the hidden one is tested
           barFocused && keyboardOpen ? "" : "pointer-events-none opacity-0"
         }`}
       />

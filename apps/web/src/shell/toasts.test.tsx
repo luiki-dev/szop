@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { act } from "react";
 import { describe, expect, it } from "vitest";
-import { showNotSaved, Toasts } from "./toasts.tsx";
+import { showNotSaved, toastManager, Toasts } from "./toasts.tsx";
 
 describe("the toast region", () => {
   it("APP-7.2: says what was not saved, in a polite region, with no button", () => {
@@ -34,6 +34,24 @@ describe("the toast region", () => {
     expect(screen.getByRole("alertdialog", { hidden: true })).toHaveClass(
       "bg-destructive",
     );
+  });
+
+  it("APP-3.4: a failure has a warning icon, a plain toast has none and keeps the inverted colors", () => {
+    render(<Toasts />);
+
+    act(() => {
+      showNotSaved("Bananas");
+    });
+    const failure = screen.getByRole("alertdialog", { hidden: true });
+    expect(failure.querySelector("svg[aria-hidden='true']")).not.toBeNull();
+
+    act(() => {
+      toastManager.add({ description: "Bananas removed" });
+    });
+    const plain = screen.getByRole("dialog", { hidden: true });
+    expect(plain.querySelector("svg")).toBeNull();
+    expect(plain).toHaveClass("bg-foreground", "text-background");
+    expect(plain).not.toHaveClass("bg-destructive");
   });
 
   it("a new toast replaces the shown one", () => {

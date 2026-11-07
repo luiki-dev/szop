@@ -42,6 +42,22 @@ describe("useKeyboardOpen", () => {
     expect(result.current).toBe(false);
   });
 
+  it("ORD-1.8: measures at once, so the first resize can already be a keyboard", () => {
+    const resize = fakeViewport(390, 700);
+    const { result } = renderHook(() => useKeyboardOpen());
+    resize({ height: 500 });
+    expect(result.current).toBe(true);
+  });
+
+  it("ORD-1.8: stops listening to the viewport when its screen goes", () => {
+    fakeViewport(390, 700);
+    const viewport = window.visualViewport as unknown as EventTarget;
+    const remove = vi.spyOn(viewport, "removeEventListener");
+    const { unmount } = renderHook(() => useKeyboardOpen());
+    unmount();
+    expect(remove).toHaveBeenCalledWith("resize", expect.any(Function));
+  });
+
   it("ORD-1.8: starts over when the width changes, as when the phone turns", () => {
     const resize = fakeViewport(390, 700);
     const { result } = renderHook(() => useKeyboardOpen());

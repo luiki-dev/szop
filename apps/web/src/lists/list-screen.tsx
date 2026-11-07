@@ -170,8 +170,8 @@ export function TitleField({
       }}
       onKeyDown={(event) => {
         // With saveOnBlur, leaving the field is what saves.
-        // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
         if (event.key === "Enter") {
+          // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
           if (saveOnBlur) field.current?.blur();
           else commit();
         }

@@ -84,6 +84,16 @@ describe("ItemCards", () => {
     );
   });
 
+  it("ITM-6.3: Enter on the name opens the edit as a keyboard opening", async () => {
+    const onEdit = vi.fn();
+    show([bananas], true, onEdit);
+
+    screen.getByRole("button", { name: /Bananas/ }).focus();
+    await userEvent.keyboard("{Enter}");
+
+    expect(onEdit).toHaveBeenCalledWith(bananas, true, expect.any(HTMLElement));
+  });
+
   it("shows the quantity with its unit and the line total", () => {
     show([
       { ...bananas, quantity: 6000, unitId: "u1", price: 33, note: "ripe" },

@@ -10,6 +10,7 @@ const KEYBOARD_PX = 150;
 
 export function useKeyboardOpen() {
   const [open, setOpen] = useState(false);
+  // Stryker disable ArrayDeclaration: the dependency list of a run-once effect; a constant item behaves the same
   useEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return;
@@ -33,5 +34,6 @@ export function useKeyboardOpen() {
       viewport.removeEventListener("resize", measure);
     };
   }, []);
+  // Stryker restore ArrayDeclaration
   return open;
 }

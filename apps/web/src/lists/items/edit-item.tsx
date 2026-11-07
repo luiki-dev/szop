@@ -32,6 +32,7 @@ const control =
 // 48 px tall (NFR-2.3) inside the 48 px box: the negative margin lets the
 // button cover the box's 2 px border.
 const stepper =
+  // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS; the 48 px height is checked in E2E "ITM-6.1: Quantity is as tall as the other fields (#413)"
   "-my-0.5 h-12 w-12 shrink-0 outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
 const handle = "mx-auto mb-3 block h-1 w-10 rounded-full bg-border";
 
@@ -109,6 +110,7 @@ export function EditItem({
     requestAnimationFrame(() => {
       if (document.activeElement === document.body) refocus();
     });
+    // Stryker disable next-line BooleanLiteral: `true` lets Base UI move the focus itself; whether the ring shows is the browser's focus-visible rule, which jsdom lacks (E2E "ITM-6.1: closing Edit item gives the focus back to the item, with a ring only when it was opened from the keyboard (#415)")
     return false;
   };
 

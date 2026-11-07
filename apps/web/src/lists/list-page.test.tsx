@@ -1,13 +1,16 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
 import { createMemoryRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
+import { act } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { timeoutMessage } from "../api/client.ts";
 import type { ListItem } from "@szop/shared";
 import { bananas, milk } from "../test/items.ts";
+import { stubMatchMedia } from "../test/match-media.ts";
+import { coarseQuery } from "../shell/use-media-query.ts";
 import { routes } from "../routes.tsx";
 import { ListPage } from "./list-page.tsx";
 import { server } from "../test/server.ts";
@@ -114,7 +117,7 @@ describe("ListPage", () => {
     const { patches } = setup();
 
     await user.type(await field(), " 2");
-    await user.tab();
+    await user.click(document.body);
 
     await waitFor(() => {
       expect(patches).toEqual([{ name: "Weekly shop 2" }]);
@@ -154,7 +157,7 @@ describe("ListPage", () => {
     const { patches } = setup();
 
     await user.clear(await field());
-    await user.tab();
+    await user.click(document.body);
 
     expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
       "Weekly shop",
@@ -358,7 +361,7 @@ describe("ListPage", () => {
 
     await user.clear(await field());
     await user.type(screen.getByRole("textbox", { name: "List name" }), "   ");
-    await user.tab();
+    await user.click(document.body);
 
     expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
       "Weekly shop",
@@ -380,7 +383,7 @@ describe("ListPage", () => {
     expect(screen.getByRole("textbox", { name: "List name" })).toHaveValue(
       "a".repeat(100),
     );
-    await user.tab();
+    await user.click(document.body);
     await waitFor(() => {
       expect(patches).toEqual([{ name: "a".repeat(100) }]);
     });
@@ -394,7 +397,7 @@ describe("ListPage", () => {
     await user.type(await field(), " 2{Escape}");
     await user.click(screen.getByRole("textbox", { name: "List name" }));
     await user.type(screen.getByRole("textbox", { name: "List name" }), " 3");
-    await user.tab();
+    await user.click(document.body);
 
     await waitFor(() => {
       expect(patches).toEqual([{ name: "Weekly shop 3" }]);
@@ -794,7 +797,7 @@ describe("ListPage", () => {
         "Weekly shop",
       );
       await user.click(screen.getByRole("textbox", { name: "List name" }));
-      await user.tab();
+      await user.click(document.body);
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       expect(requests).toHaveLength(1);
@@ -916,7 +919,7 @@ describe("ListPage", () => {
         expect(back).toHaveAttribute("aria-disabled", "true");
       });
       await user.keyboard("{Enter}");
-      await user.tab();
+      await user.click(document.body);
       answer();
 
       await waitFor(() => {
@@ -999,6 +1002,127 @@ describe("ListPage", () => {
       await user.click(screen.getByRole("checkbox", { name: "Bananas" }));
 
       expect(await screen.findByText("Everything's in the haul")).toBeVisible();
+    });
+  });
+
+  it("ITM-6.3: tapping an item opens its edit sheet", async () => {
+    const user = userEvent.setup();
+    setup([milk]);
+
+    await user.click(await screen.findByRole("button", { name: /Milk/ }));
+
+    expect(
+      await screen.findByRole("dialog", { name: "Edit item" }),
+    ).toBeInTheDocument();
+  });
+
+  describe("while the phone's keyboard is open for the add bar", () => {
+    const checked = { ...bananas, checkedAt: "2026-10-30T12:00:00.000Z" };
+    const addBar = () =>
+      screen.findByRole("textbox", { name: "Add an item to Weekly shop" });
+    const haul = () => screen.queryByRole("region", { name: "The haul" });
+    const dimmer = () =>
+      document.querySelector<HTMLElement>("div[aria-hidden='true'].fixed");
+
+    // visualViewport as use-keyboard-open.test.ts stubs it.
+    function phone() {
+      stubMatchMedia({ [coarseQuery]: true });
+      const viewport = Object.assign(new EventTarget(), {
+        width: 390,
+        height: 700,
+      });
+      vi.stubGlobal("visualViewport", viewport);
+      return (height: number) => {
+        act(() => {
+          viewport.height = height;
+          viewport.dispatchEvent(new Event("resize"));
+        });
+      };
+    }
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it("ITM-2.6: the screen is dimmed and the haul folds only with both the add bar focused and the keyboard open", async () => {
+      const user = userEvent.setup();
+      const resize = phone();
+      setup([checked]);
+      const bar = await addBar();
+      await screen.findByRole("region", { name: "The haul" });
+      expect(dimmer()).toHaveClass("pointer-events-none", "opacity-0");
+
+      // The keyboard alone, from another field: nothing changes.
+      resize(500);
+      expect(haul()).toBeInTheDocument();
+      expect(dimmer()).toHaveClass("opacity-0");
+      resize(700);
+
+      // The focus alone, with no keyboard (a desktop or a hardware one).
+      await user.click(bar);
+      expect(haul()).toBeInTheDocument();
+      expect(dimmer()).toHaveClass("opacity-0");
+
+      resize(500);
+      expect(haul()).not.toBeInTheDocument();
+      expect(dimmer()).not.toHaveClass("opacity-0");
+      expect(dimmer()).not.toHaveClass("pointer-events-none");
+    });
+  });
+
+  describe("the toast region's place", () => {
+    const observers: { callback: () => void; targets: Element[] }[] = [];
+    const disconnect = vi.fn();
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+      observers.length = 0;
+      disconnect.mockClear();
+      document.documentElement.removeAttribute("style");
+    });
+
+    it("APP-3.4: follows the bottom block's size and place, and is cleared on leaving", async () => {
+      vi.stubGlobal(
+        "ResizeObserver",
+        class {
+          private readonly entry: { callback: () => void; targets: Element[] };
+          constructor(callback: () => void) {
+            this.entry = { callback, targets: [] };
+            observers.push(this.entry);
+          }
+          observe(target: Element) {
+            this.entry.targets.push(target);
+          }
+          disconnect = disconnect;
+        },
+      );
+      vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(
+        84,
+      );
+      vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+        left: 20,
+        width: 300,
+      } as DOMRect);
+      setup();
+      await field();
+
+      const block = document.querySelector("[data-bottom-block]");
+      const ours = observers.find((o) => o.targets.includes(block as Element));
+      expect(ours?.targets).toEqual([block, document.documentElement]);
+      act(() => {
+        ours?.callback();
+      });
+      const style = document.documentElement.style;
+      expect(style.getPropertyValue("--toast-offset")).toBe("84px");
+      expect(style.getPropertyValue("--haul-center")).toBe("170px");
+      expect(style.getPropertyValue("--haul-width")).toBe("300px");
+
+      cleanup();
+
+      expect(disconnect).toHaveBeenCalled();
+      for (const name of ["--toast-offset", "--haul-center", "--haul-width"])
+        expect(style.getPropertyValue(name)).toBe("");
     });
   });
 });

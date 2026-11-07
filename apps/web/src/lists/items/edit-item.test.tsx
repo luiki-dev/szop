@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ListItem } from "@szop/shared";
 import { bananas, listId, listWith } from "../../test/items.ts";
 import { smallCatalog } from "../../test/catalog.ts";
@@ -235,5 +236,139 @@ describe("EditItem", () => {
       screen.getByRole("dialog", { name: "Edit item" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Name")).toHaveValue("Bananas");
+  });
+});
+
+describe("EditItem, the focus after closing (#415)", () => {
+  function Harness({
+    opener,
+    ringOnClose = false,
+  }: {
+    opener: HTMLElement;
+    ringOnClose?: boolean;
+  }) {
+    const [open, setOpen] = useState(true);
+    const [client] = useState(() => new QueryClient());
+    return open ? (
+      <QueryClientProvider client={client}>
+        <EditItem
+          listId={listId}
+          item={bananas}
+          open
+          opener={opener}
+          ringOnClose={ringOnClose}
+          onOpenChange={(next) => {
+            setOpen(next);
+          }}
+          onRemoved={() => undefined}
+          units={smallCatalog.units}
+          catalog={smallCatalog}
+        />
+      </QueryClientProvider>
+    ) : null;
+  }
+
+  // The page behind the sheet: the row's button, an add bar and the main area.
+  function page() {
+    const row = document.createElement("button");
+    row.dataset["itemId"] = bananas.id;
+    const bar = document.createElement("input");
+    bar.dataset["addBar"] = "";
+    const main = document.createElement("main");
+    main.tabIndex = -1;
+    document.body.append(row, bar, main);
+    return { row, bar, main };
+  }
+
+  beforeEach(() => {
+    server.use(
+      http.delete(
+        `/api/lists/${listId}/items/${bananas.id}`,
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+    );
+  });
+
+  afterEach(async () => {
+    // A frame callback of this test must not find the next test's rows.
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    document.body.replaceChildren();
+    vi.restoreAllMocks();
+  });
+
+  async function cancel() {
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  }
+
+  it("ITM-6.3: Cancel gives the focus back to the item, with the ring only for a keyboard opening", async () => {
+    stubMatchMedia({ [desktopQuery]: false });
+    const { row } = page();
+    const focus = vi.spyOn(row, "focus");
+    render(<Harness opener={row} ringOnClose />);
+
+    await cancel();
+
+    expect(row).toHaveFocus();
+    expect(focus).toHaveBeenCalledWith({ focusVisible: true });
+  });
+
+  it("ITM-6.3: after a pointer opening the item gets the focus without the ring", async () => {
+    stubMatchMedia({ [desktopQuery]: false });
+    const { row } = page();
+    const focus = vi.spyOn(row, "focus");
+    let focused = 0;
+    row.addEventListener("focus", () => {
+      focused += 1;
+    });
+    render(<Harness opener={row} />);
+
+    await cancel();
+    // The frame after: the focus is held, so it is not asked again.
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(focused).toBe(1);
+
+    expect(focus).toHaveBeenCalledWith({ focusVisible: false });
+  });
+
+  it("ITM-6.3: Remove leaves the focus on the add bar after a keyboard opening, on the page after a pointer one", async () => {
+    stubMatchMedia({ [desktopQuery]: false });
+    const { row, bar } = page();
+    render(<Harness opener={row} ringOnClose />);
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }));
+    expect(bar).toHaveFocus();
+
+    document.body.replaceChildren();
+    const again = page();
+    render(<Harness opener={again.row} />);
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }));
+    expect(again.main).toHaveFocus();
+  });
+
+  it("ITM-6.3: with the opener gone, the focus goes to the item's new row, also when it is drawn a frame later", async () => {
+    stubMatchMedia({ [desktopQuery]: false });
+    const gone = document.createElement("button");
+    render(<Harness opener={gone} ringOnClose />);
+
+    await cancel();
+    expect(document.body).toHaveFocus();
+    const row = document.createElement("button");
+    row.dataset["itemId"] = bananas.id;
+    document.body.append(row);
+
+    await waitFor(() => {
+      expect(row).toHaveFocus();
+    });
+  });
+
+  it("ITM-6.3: a desktop dialog gives the focus back the same way", async () => {
+    stubMatchMedia({ [desktopQuery]: true });
+    const { row } = page();
+    render(<Harness opener={row} />);
+
+    await cancel();
+
+    expect(row).toHaveFocus();
   });
 });
