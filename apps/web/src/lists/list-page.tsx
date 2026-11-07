@@ -17,11 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
-import {
-  storeCheckboxSide,
-  useCheckboxSide,
-  type CheckboxSide,
-} from "../shell/checkbox-side.ts";
+import { storeCheckboxSide, useCheckboxSide } from "../shell/checkbox-side.ts";
 import { RowPicture } from "../shell/checkbox-side-control.tsx";
 import { useCatalog } from "../catalog/use-catalog.ts";
 import { ApiRequestError, notSaved } from "../api/client.ts";
@@ -224,8 +220,9 @@ export function ListPage() {
                 <DropdownMenuLabel>Checkboxes</DropdownMenuLabel>
                 <DropdownMenuRadioGroup
                   value={checkboxSide}
-                  onValueChange={(side) => {
-                    storeCheckboxSide(side as CheckboxSide);
+                  onValueChange={(side: unknown) => {
+                    if (side === "left" || side === "right")
+                      storeCheckboxSide(side);
                   }}
                 >
                   {(["left", "right"] as const).map((side) => (

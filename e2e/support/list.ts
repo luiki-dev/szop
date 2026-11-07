@@ -14,6 +14,18 @@ export async function tap(page: Page, target: Locator) {
   await page.mouse.up();
 }
 
+// A tap by touch: pointerdown and pointerup come first, then the compatibility
+// mouse events (where the focus changes), then the click.
+export async function touchTap(page: Page, target: Locator) {
+  const box = (await target.boundingBox()) ?? {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  };
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+}
+
 export async function listWith(page: Page, count: number) {
   await page.goto("/lists/new");
   const name = page.getByRole("textbox", { name: "List name" });

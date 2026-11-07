@@ -8,41 +8,61 @@ import { useAddItem } from "../use-items.ts";
 
 const formSchema = z.object({ name: itemNameSchema });
 
-// The blur fires at pointerdown. The haul must not unfold under the finger
-// before the tap ends, or the click lands elsewhere: wait for pointerup.
+// A tap on the page blurs the field before its click: on a mouse at
+// pointerdown, on a touch screen at the compatibility mousedown after
+// pointerup. The haul must not unfold under the finger before the click, or
+// the click lands elsewhere. So a blur right after a pointerdown unfolds after
+// the click instead. shortcut: a press held over 1 s unfolds mid-tap; the
+// fallback timer also covers a pointer that never clicks.
+const TAP_MS = 500;
+const GIVE_UP_MS = 1000;
+
 function useUnfoldAfterTap(onFocusChange: (focused: boolean) => void) {
-  const pressed = useRef(false);
+  const lastDown = useRef(-Infinity);
+  const cancel = useRef<(() => void) | null>(null);
   useEffect(() => {
     const down = () => {
-      pressed.current = true;
+      lastDown.current = performance.now();
     };
-    const up = () => {
-      pressed.current = false;
+    // A key (Tab) moving the focus is not a tap.
+    const key = () => {
+      lastDown.current = -Infinity;
     };
     window.addEventListener("pointerdown", down, true);
-    window.addEventListener("pointerup", up, true);
-    window.addEventListener("pointercancel", up, true);
+    window.addEventListener("keydown", key, true);
     return () => {
       window.removeEventListener("pointerdown", down, true);
-      window.removeEventListener("pointerup", up, true);
-      window.removeEventListener("pointercancel", up, true);
+      window.removeEventListener("keydown", key, true);
+      cancel.current?.();
     };
   }, []);
   return () => {
-    if (!pressed.current) {
+    cancel.current?.();
+    if (performance.now() - lastDown.current > TAP_MS) {
       onFocusChange(false);
       return;
     }
-    // The click follows pointerup in the same task: unfold after it.
-    const end = () => {
-      window.removeEventListener("pointerup", end);
-      window.removeEventListener("pointercancel", end);
-      setTimeout(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const stop = () => {
+      window.removeEventListener("click", done, true);
+      window.removeEventListener("pointercancel", done, true);
+      clearTimeout(timer);
+      cancel.current = null;
+    };
+    const done = () => {
+      stop();
+      // The click's own handlers run first; unfold after them.
+      timer = setTimeout(() => {
         onFocusChange(false);
       }, 0);
+      cancel.current = () => {
+        clearTimeout(timer);
+      };
     };
-    window.addEventListener("pointerup", end);
-    window.addEventListener("pointercancel", end);
+    window.addEventListener("click", done, true);
+    window.addEventListener("pointercancel", done, true);
+    timer = setTimeout(done, GIVE_UP_MS);
+    cancel.current = stop;
   };
 }
 

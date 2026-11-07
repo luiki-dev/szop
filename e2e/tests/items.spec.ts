@@ -1,5 +1,5 @@
 import { expectAccessible } from "../support/accessibility.ts";
-import { listWith, tap } from "../support/list.ts";
+import { listWith, tap, touchTap } from "../support/list.ts";
 import { expect, test } from "../support/test.ts";
 
 test.use({ viewport: { width: 390, height: 700 } });
@@ -468,3 +468,32 @@ for (const size of [
     await expect(page.getByText("wasn't saved")).toHaveCount(0);
   });
 }
+
+test("ORD-1.8: by touch, the first tap after typing opens the drawer from the folded line", async ({
+  page,
+  hasTouch,
+}) => {
+  test.skip(!hasTouch, "needs a touch screen");
+  await listWith(page, 2);
+  await touchTap(
+    page,
+    page.getByRole("button", { name: /^The haul · 0 of 2/ }),
+  );
+  await expect(page.getByRole("dialog", { name: "The haul" })).toBeVisible();
+});
+
+test("ORD-1.8: by touch, the first tap after typing checks the item under the finger on a scrolled list", async ({
+  page,
+  hasTouch,
+}) => {
+  test.skip(!hasTouch, "needs a touch screen");
+  await listWith(page, 16);
+  await page.evaluate(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+  await touchTap(page, page.getByRole("checkbox", { name: "Item 16" }));
+  await expect(page.getByText("1 of 16 items")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Put Item 16 back" }),
+  ).toBeVisible();
+});

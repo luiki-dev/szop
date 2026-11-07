@@ -3,7 +3,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
@@ -156,5 +156,16 @@ describe("AddBar", () => {
     await userEvent.tab();
 
     expect(onFocusChange.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it("ORD-1.8: a blur caused by a tap tells the haul only after the click", async () => {
+    const { field, onFocusChange } = setup();
+    await userEvent.click(field());
+    await userEvent.pointer({ keys: "[MouseLeft>]", target: document.body });
+    expect(onFocusChange.mock.calls).toEqual([[true]]);
+    fireEvent.click(document.body);
+    await waitFor(() => {
+      expect(onFocusChange.mock.calls).toEqual([[true], [false]]);
+    });
   });
 });
