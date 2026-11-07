@@ -16,6 +16,7 @@ describe("the schema", () => {
     expect(tables.map((r) => r.t).sort()).toEqual([
       "accounts",
       "categories",
+      "list_items",
       "lists",
       "products",
       "sessions",
@@ -250,6 +251,153 @@ describe("the schema", () => {
         await code(sql`INSERT INTO categories (workspace_id, id, position, name)
           VALUES (${ws(1)}, ${row(1)}, -1, 'C')`),
       ).toBe("23514");
+    });
+  });
+
+  describe("list_items", () => {
+    const user = "01900000-0000-7000-8000-000000000101";
+    const ws = (n: number) => "01900000-0000-7000-8000-00000000020" + String(n);
+    const id = (n: number) =>
+      "01900000-0000-7000-8000-0000000004" + String(n).padStart(2, "0");
+    const [list, cat, unit, item] = [1, 2, 3, 4].map(id) as [
+      string,
+      string,
+      string,
+      string,
+    ];
+
+    async function code(query: ReturnType<typeof sql>) {
+      try {
+        await database.db.execute(query);
+      } catch (error) {
+        const cause = (error as { cause?: { code?: string } }).cause;
+        return cause?.code ?? (error as { code?: string }).code;
+      }
+      return undefined;
+    }
+
+    // Workspace 1 with a list, a category and a unit; workspace 2 with the same.
+    async function workspaces() {
+      const { db } = database;
+      for (const n of [1, 2]) {
+        await db.execute(sql`
+          INSERT INTO users (id, name, email)
+          VALUES (${user.slice(0, -1) + String(n)}, 'U', ${"u" + String(n) + "@example.com"})`);
+        await db.execute(sql`
+          INSERT INTO workspaces (id, user_id) VALUES (${ws(n)}, ${user.slice(0, -1) + String(n)})`);
+        await db.execute(sql`
+          INSERT INTO lists (workspace_id, id, name) VALUES (${ws(n)}, ${list}, 'L')`);
+        await db.execute(sql`
+          INSERT INTO categories (workspace_id, id, position, name) VALUES (${ws(n)}, ${cat}, 0, 'C')`);
+        await db.execute(sql`
+          INSERT INTO units (workspace_id, id, name) VALUES (${ws(n)}, ${unit}, 'kg')`);
+      }
+    }
+
+    it("ITM-7: list_items_pkey covers (workspace_id, id)", async () => {
+      const result = await rows(sql`
+        SELECT a.attname AS c
+        FROM pg_constraint k
+        CROSS JOIN LATERAL unnest(k.conkey) WITH ORDINALITY AS u(attnum, ord)
+        JOIN pg_attribute a ON a.attrelid = k.conrelid AND a.attnum = u.attnum
+        WHERE k.conname = 'list_items_pkey'
+        ORDER BY u.ord`);
+      expect(result.map((r) => r.c)).toEqual(["workspace_id", "id"]);
+    });
+
+    it("deletes a list's items with the list", async () => {
+      await workspaces();
+      await database.db.execute(sql`
+        INSERT INTO list_items (workspace_id, id, list_id, name)
+        VALUES (${ws(1)}, ${item}, ${list}, 'Milk')`);
+
+      await database.db.execute(
+        sql`DELETE FROM lists WHERE workspace_id = ${ws(1)}`,
+      );
+
+      expect(await rows(sql`SELECT 1 FROM list_items`)).toEqual([]);
+    });
+
+    it("deleting a category or unit clears only that column of its items", async () => {
+      await workspaces();
+      const { db } = database;
+      await db.execute(sql`
+        INSERT INTO list_items (workspace_id, id, list_id, name, category_id, unit_id)
+        VALUES (${ws(1)}, ${item}, ${list}, 'Milk', ${cat}, ${unit})`);
+
+      await db.execute(
+        sql`DELETE FROM categories WHERE workspace_id = ${ws(1)}`,
+      );
+      expect(
+        await rows(
+          sql`SELECT workspace_id AS w, category_id AS c, unit_id AS u FROM list_items`,
+        ),
+      ).toEqual([{ w: ws(1), c: null, u: unit }]);
+
+      await db.execute(sql`DELETE FROM units WHERE workspace_id = ${ws(1)}`);
+      expect(
+        await rows(sql`SELECT workspace_id AS w, unit_id AS u FROM list_items`),
+      ).toEqual([{ w: ws(1), u: null }]);
+    });
+
+    it("LIM-2.1: the database refuses a name of 101 characters and a note of 501", async () => {
+      await workspaces();
+      expect(
+        await code(sql`INSERT INTO list_items (workspace_id, id, list_id, name)
+          VALUES (${ws(1)}, ${item}, ${list}, ${"x".repeat(101)})`),
+      ).toBe("23514");
+      expect(
+        await code(sql`INSERT INTO list_items (workspace_id, id, list_id, name, note)
+          VALUES (${ws(1)}, ${item}, ${list}, 'Milk', ${"x".repeat(501)})`),
+      ).toBe("23514");
+      expect(
+        await code(sql`INSERT INTO list_items (workspace_id, id, list_id, name, note)
+          VALUES (${ws(1)}, ${item}, ${list}, ${"x".repeat(100)}, ${"x".repeat(500)})`),
+      ).toBeUndefined();
+    });
+
+    it("ITM-1.2: refuses a quantity or price outside its range", async () => {
+      await workspaces();
+      const insert = (quantity: number, price: number) =>
+        code(sql`INSERT INTO list_items (workspace_id, id, list_id, name, quantity, price)
+          VALUES (${ws(1)}, ${item}, ${list}, 'Milk', ${quantity}, ${price})`);
+      expect(await insert(0, 0)).toBe("23514");
+      expect(await insert(9999001, 0)).toBe("23514");
+      expect(await insert(1, -1)).toBe("23514");
+      expect(await insert(1, 10000000)).toBe("23514");
+      expect(await insert(9999000, 9999999)).toBeUndefined();
+    });
+
+    it("NFR-4.10: an item cannot point at another workspace's list, category or unit", async () => {
+      await workspaces();
+      // Workspace 2's rows have the same IDs, so use IDs only workspace 2 has.
+      const { db } = database;
+      const [list2, cat2, unit2] = [5, 6, 7].map(id) as [
+        string,
+        string,
+        string,
+      ];
+      await db.execute(
+        sql`INSERT INTO lists (workspace_id, id, name) VALUES (${ws(2)}, ${list2}, 'L')`,
+      );
+      await db.execute(
+        sql`INSERT INTO categories (workspace_id, id, position, name) VALUES (${ws(2)}, ${cat2}, 0, 'C')`,
+      );
+      await db.execute(
+        sql`INSERT INTO units (workspace_id, id, name) VALUES (${ws(2)}, ${unit2}, 'kg')`,
+      );
+      expect(
+        await code(sql`INSERT INTO list_items (workspace_id, id, list_id, name)
+          VALUES (${ws(1)}, ${item}, ${list2}, 'Milk')`),
+      ).toBe("23503");
+      expect(
+        await code(sql`INSERT INTO list_items (workspace_id, id, list_id, name, category_id)
+          VALUES (${ws(1)}, ${item}, ${list}, 'Milk', ${cat2})`),
+      ).toBe("23503");
+      expect(
+        await code(sql`INSERT INTO list_items (workspace_id, id, list_id, name, unit_id)
+          VALUES (${ws(1)}, ${item}, ${list}, 'Milk', ${unit2})`),
+      ).toBe("23503");
     });
   });
 });

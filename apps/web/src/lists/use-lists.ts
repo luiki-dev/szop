@@ -4,7 +4,7 @@ import {
   useQueryClient,
   type QueryClient,
 } from "@tanstack/react-query";
-import type { List } from "@szop/shared";
+import type { List, ListWithItems } from "@szop/shared";
 import {
   ApiRequestError,
   createList,
@@ -36,9 +36,14 @@ export function useList(id: string, enabled = true) {
   });
 }
 
-// The list is known now: keep it for its screen, refresh the lists page.
+// The list is known now: keep it for its screen (its items stay; a new list
+// has none), refresh the lists page.
 function remember(queryClient: QueryClient, list: List) {
-  queryClient.setQueryData(["lists", list.id], list);
+  queryClient.setQueryData<ListWithItems>(["lists", list.id], (old) => ({
+    items: [],
+    ...old,
+    ...list,
+  }));
   return queryClient.invalidateQueries({ queryKey: ["lists"], exact: true });
 }
 

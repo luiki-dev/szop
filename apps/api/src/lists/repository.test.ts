@@ -8,6 +8,7 @@ import {
   deleteLists,
   insertList,
   listLists,
+  updateList,
 } from "./repository.ts";
 
 describe("the lists repository", () => {
@@ -65,5 +66,37 @@ describe("the lists repository", () => {
     ).rejects.toThrow("forced");
 
     expect(await listLists(database.db, context)).toHaveLength(2);
+  });
+
+  it("LST-1.2: updateList writes only when a field it was given changes", async () => {
+    const user = { id: "00000000-0000-4000-8000-000000000001" };
+    await database.db.execute(
+      sql`INSERT INTO users (id, name, email, email_verified) VALUES (${user.id}, 'g', 'g@x.test', false)`,
+    );
+    const context = await ownWorkspace(database.db, user, testCatalog);
+    const id = "00000000-0000-4000-8000-000000000002";
+    await insertList(database.db, context, { id, name: "A" });
+    const updatedAt = async () =>
+      (
+        await database.db.execute<{ u: string }>(
+          sql`SELECT extract(epoch FROM updated_at)::text AS u FROM lists`,
+        )
+      ).rows[0]?.u;
+    const start = await updatedAt();
+
+    // The same values change nothing, whichever field is given.
+    await updateList(database.db, context, id, { name: "A" });
+    await updateList(database.db, context, id, { sortByCategory: true });
+    expect(await updatedAt()).toBe(start);
+
+    // A new value in one field writes, though the other is not given.
+    const sorted = await updateList(database.db, context, id, {
+      sortByCategory: false,
+    });
+    expect(sorted?.sortByCategory).toBe(false);
+    const afterSort = await updatedAt();
+    expect(Number(afterSort)).toBeGreaterThan(Number(start));
+    await updateList(database.db, context, id, { name: "B" });
+    expect(Number(await updatedAt())).toBeGreaterThan(Number(afterSort));
   });
 });

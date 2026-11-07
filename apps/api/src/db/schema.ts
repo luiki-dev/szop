@@ -2,6 +2,7 @@
 // turns into migrations in ../../drizzle/. Conventions: ADR 0057, decision 14.
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   foreignKey,
   index,
@@ -50,6 +51,7 @@ export const lists = pgTable(
     workspaceId: uuid("workspace_id").notNull(),
     id: uuid("id").notNull(),
     name: text("name").notNull(),
+    sortByCategory: boolean("sort_by_category").default(true).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -185,5 +187,71 @@ export const products = pgTable(
       "products_name_check",
       sql`char_length(${table.name}) BETWEEN 1 AND 100`,
     ),
+  ],
+);
+
+// `id` has no default: the browser creates it (UUIDv7). The quantity is in
+// thousandths of the unit, the price in cents per unit. The ranges live once in
+// packages/shared and again here as checks. ADR 0071.
+export const listItems = pgTable(
+  "list_items",
+  {
+    workspaceId: uuid("workspace_id").notNull(),
+    id: uuid("id").notNull(),
+    listId: uuid("list_id").notNull(),
+    name: text("name").notNull(),
+    quantity: integer("quantity"),
+    unitId: uuid("unit_id"),
+    price: integer("price"),
+    categoryId: uuid("category_id"),
+    note: text("note"),
+    checkedAt: timestamp("checked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({
+      name: "list_items_pkey",
+      columns: [table.workspaceId, table.id],
+    }),
+    foreignKey({
+      name: "list_items_workspace_id_fkey",
+      columns: [table.workspaceId],
+      foreignColumns: [workspaces.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "list_items_workspace_id_list_id_fkey",
+      columns: [table.workspaceId, table.listId],
+      foreignColumns: [lists.workspaceId, lists.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "list_items_workspace_id_unit_id_fkey",
+      columns: [table.workspaceId, table.unitId],
+      foreignColumns: [units.workspaceId, units.id],
+    }).onDelete("set null"),
+    foreignKey({
+      name: "list_items_workspace_id_category_id_fkey",
+      columns: [table.workspaceId, table.categoryId],
+      foreignColumns: [categories.workspaceId, categories.id],
+    }).onDelete("set null"),
+    index("list_items_workspace_id_list_id_idx").on(
+      table.workspaceId,
+      table.listId,
+    ),
+    check(
+      "list_items_name_check",
+      sql`char_length(${table.name}) BETWEEN 1 AND 100`,
+    ),
+    check("list_items_note_check", sql`char_length(${table.note}) <= 500`),
+    check(
+      "list_items_quantity_check",
+      sql`${table.quantity} BETWEEN 1 AND 9999000`,
+    ),
+    check("list_items_price_check", sql`${table.price} BETWEEN 0 AND 9999999`),
   ],
 );

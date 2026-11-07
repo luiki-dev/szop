@@ -43,7 +43,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 
 ## NFR-4
 
-🎯 [MVP] · 🚧 In progress (10 of 13) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (11 of 13) · ❔ Criteria not finalized
 
 **Security:** other sites cannot act in a user's name or frame the app, nothing travels over plain HTTP, tokens do not leak through addresses or logs, users reach only their own data, and errors reveal nothing about the server ([ADR 0012](../decisions/0012-security-baseline.md), [ADR 0025](../decisions/0025-web-security-baseline-details.md), the [threat model](../architecture/threat-model.md)). The account rules (passwords, sessions, never revealing whether an account exists) are in [ACC](ACC-accounts-and-guest-mode.md).
 
@@ -58,7 +58,7 @@ The qualities every part of Szop must have. The reasoning and the alternatives a
 | NFR-4.7 | A forged `X-Forwarded-For` header does not change the client address that per-address limits and the log use. | ✅ [PH-06b](../roadmap.md#ph-06b-web-security-baseline) |
 | NFR-4.8 | Once the app has used a token from the address (verification, password reset, a share link), it removes the token from the address bar. | ❔ Draft · [OP-055](https://github.com/luiki-dev/szop/issues/109) |
 | NFR-4.9 | The session cookie is `HttpOnly`, `Secure` and `SameSite=Lax`, has no `Domain` attribute and carries the `__Host-` prefix (or `__Secure-` if the auth library does not allow it); a revoked session stops working at once. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) |
-| NFR-4.10 | A request that names a record of another workspace, anywhere in its path, query or body, gets the same 404 as a request for a record that does not exist. | 🚧 [PH-16a](../roadmap.md#ph-16a-guests-first-list) (lists; references between records in [PH-17a](../roadmap.md#ph-17a-list-items)) |
+| NFR-4.10 | A request that names a record of another workspace, anywhere in its path, query or body, gets the same 404 as a request for a record that does not exist. | ✅ [PH-16a](../roadmap.md#ph-16a-guests-first-list) (lists; references between records in [PH-17](../roadmap.md#ph-17-list-items)) |
 | NFR-4.11 | An unexpected error answers 500 with a generic message; the details go to the log, never to the browser. | ✅ [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) |
 | NFR-4.12 | Under `/api/auth/`, only the paths the app uses answer (guest sign-in, session, sign-out); any other gets 404. | ✅ [PH-42](../roadmap.md#ph-42-urgent-security-fixes) |
 | NFR-4.13 | A request whose body is larger than 16 KiB gets 413, on every route. | ✅ [PH-42](../roadmap.md#ph-42-urgent-security-fixes) |

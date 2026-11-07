@@ -8,13 +8,13 @@
 
 [PH-16b](../roadmap.md#ph-16b-workspace-from-the-default-data) makes a guest's workspace a copy of the default data: the seed catalog's categories and products, and its units. Until now a workspace held only lists, and `GET /api/catalog` served the seed from memory to everyone ([ADR 0050](0050-seed-catalog-phase-details.md), decision 2). The phase also finishes the access layer's first pattern ([OP-054](https://github.com/luiki-dev/szop/issues/102), [OP-118](https://github.com/luiki-dev/szop/issues/321)), and settles how a guest's first change survives the switch from the seed to their copy ([OP-048](https://github.com/luiki-dev/szop/issues/101)).
 
-In this phase the only change a guest can make is creating a list: adding a product to a list comes in [PH-17a](../roadmap.md#ph-17a-list-items), and editing the catalog in [PH-26](../roadmap.md#ph-26-catalog-and-units). So no request yet refers to a default record.
+In this phase the only change a guest can make is creating a list: adding a product to a list comes in [PH-17a](../roadmap.md#ph-17-list-items), and editing the catalog in [PH-26](../roadmap.md#ph-26-catalog-and-units). So no request yet refers to a default record.
 
 The [spec](../superpowers/specs/2026-11-01-PH-16b-workspace-from-default-data-design.md) holds the design in full; this ADR records the decisions and the alternatives. All were settled in the brainstorm.
 
 ## Changes to the roadmap
 
-- **[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1).5 and the reference part of [NFR-4](../requirements/NFR-non-functional-requirements.md#nfr-4).10 move to [PH-17a](../roadmap.md#ph-17a-list-items)**, the first phase whose requests carry references to default records; a criterion is checked through behavior a user has, not a test-only route.
+- **[ACC-1](../requirements/ACC-accounts-and-guest-mode.md#acc-1).5 and the reference part of [NFR-4](../requirements/NFR-non-functional-requirements.md#nfr-4).10 move to [PH-17a](../roadmap.md#ph-17-list-items)**, the first phase whose requests carry references to default records; a criterion is checked through behavior a user has, not a test-only route.
 - **[OP-115](https://github.com/luiki-dev/szop/issues/318), [OP-116](https://github.com/luiki-dev/szop/issues/319) and the bug [#323](https://github.com/luiki-dev/szop/issues/323) move to [PH-16c](../roadmap.md#ph-16c-managing-lists)**, which changes the lists screens and the SPA's writes anyway, so this phase keeps one concept ([ADR 0014](0014-roadmap.md), decision 6).
 
 ## Decisions

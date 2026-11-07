@@ -18,6 +18,7 @@ This page describes the design system, not the screens: each phase designs the s
 - [5. Layout and navigation](#5-layout-and-navigation)
   - [The page frame](#the-page-frame)
   - [The list and the haul](#the-list-and-the-haul)
+  - [Items on the list](#items-on-the-list)
   - [The tree](#the-tree)
 - [6. Interaction patterns](#6-interaction-patterns)
   - [Feedback](#feedback)
@@ -158,7 +159,7 @@ From top to bottom, on a phone:
 
 **Checking an item**: its row leaves its card and its chip appears first in the haul, in 150 to 200 ms, without motion when the system asks for reduced motion. Putting an item back reverses it: the item returns to its place in its card.
 
-**Amounts.** The haul shows all three totals of [ITM-8](../requirements/ITM-list-items.md#itm-8):
+**Amounts.** Until [PH-21](../roadmap.md#ph-21-shop-in-a-store) the haul shows counts only; then it shows all three totals of [ITM-8](../requirements/ITM-list-items.md#itm-8):
 
 - **"€28.47"**: the checked items;
 - **"of €36.54"**: all items;
@@ -186,6 +187,26 @@ Items without a price are left out of all three. When no item has a price, the m
 - The drawer is a modal dialog named "The haul": focus moves into it, is trapped, and returns to what opened it. Dragging is never the only way: the header and "+N more" open it, Esc and the dimmed list close it.
 - The progress bar is a `progressbar` with its value and maximum, labelled by the caption.
 - The handle is decoration: it shows the haul can be pulled up, but the header is the control, so it needs no 3:1 contrast.
+
+### Items on the list
+
+Decided in [ADR 0071](../decisions/0071-list-items-phase-details.md) for [PH-17](../roadmap.md); the approved mockups are in [the spec's folder](../superpowers/specs/2026-11-06-PH-17-list-items/). The images below are the built screens, on a phone, light then dark. The haul's amounts above arrive with [PH-21](../roadmap.md); until then the haul shows counts only.
+
+- **The row.** The name, then the note under it in `muted-foreground`; the quantity and unit over the line total on the right. The checkbox is on the **right** by default and on the **left** by the "Checkboxes" setting under the color scheme ([APR-2](../requirements/APR-appearance.md#apr-2)); on a phone the setting is in the lists home's ☰ menu (not reachable inside a list), from `lg` in the sidebar. The row has two targets: the checkbox checks, the rest opens the edit sheet.
+
+  ![The list on a phone, light and dark, with the checkboxes on the right and then on the left](visual-design/items-row.png)
+
+- **The edit sheet and the category picker.** A bottom sheet on a phone and a dialog from `lg`: name, quantity with − and +, unit, price per unit with the line total under it, category, note; Remove on the left, Cancel and Save on the right. The category field opens a second sheet with a search field and the category tree; a row's chevron opens its subcategories, the rest of the row picks it and returns to the sheet.
+
+  ![The edit sheet and the category picker on a phone, light and dark](visual-design/items-edit.png)
+
+- **The toast and the sort setting.** Removing an item shows "Removed *name*" with Undo above the add bar for about 5 seconds. "Sort by category" is a checkable item of the list's ⋮ menu; a separator and the "Checkboxes" group (Left or Right, the chosen one with a ✓, each with the small row picture, a tap picks it and closes the menu) follow, then a separator, Rename and Delete; with it off, the list is one card without category headings.
+
+  ![The toast after Remove and the list's ⋮ menu with the sort setting, light and dark](visual-design/items-toast-sort.png)
+
+- **The haul without sums.** The haul shows the count ("2 of 4 items"), the progress bar, chips with the name and the line total (the name alone without a price) and, in the drawer, rows with the name, the quantity and unit, the line total and the ↶ button ([ADR 0071](../decisions/0071-list-items-phase-details.md), decision 12).
+
+  ![The collapsed haul and the open drawer on a phone, light and dark](visual-design/items-haul.png)
 
 ### The tree
 

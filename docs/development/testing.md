@@ -14,10 +14,12 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
   - [Two guests with a workspace each](#two-guests-with-a-workspace-each)
   - [Testing the served SPA](#testing-the-served-spa)
 - [Writing a database test](#writing-a-database-test)
+- [Writing a migration test with data](#writing-a-migration-test-with-data)
 - [Writing a component test](#writing-a-component-test)
 - [Writing a unit test](#writing-a-unit-test)
 - [Writing a property test](#writing-a-property-test)
 - [Writing an E2E journey](#writing-an-e2e-journey)
+  - [Each test is its own client address](#each-test-is-its-own-client-address)
   - [The CSP guard](#the-csp-guard)
   - [The accessibility check](#the-accessibility-check)
   - [The token contrast test](#the-token-contrast-test)
@@ -240,6 +242,15 @@ A database test runs against a real PostgreSQL, so a query, a migration or a cle
 - **Inspecting after a failure.** Nothing is dropped when a run ends, so the databases stay until the next run: `docker compose exec postgres psql -U szop -d szop_test_1`.
 - **The development database `szop` is never touched.** Tests only connect to `postgres` (to create the others) and to `szop_test_*`.
 
+## Writing a migration test with data
+
+A migration that changes a table that already holds rows is tested with rows in it: migrate to the previous migration, insert data, apply the migration, check the data ([OP-052](https://github.com/luiki-dev/szop/issues/93)). `migrationsFolder` is applied whole, so the helper `migratedDatabase(name, upTo)` (`apps/api/src/test/migrations.ts`) copies the journal's entries up to the tag `upTo` and their SQL files into a temporary folder, migrates a database of its own with them and returns it open.
+
+- **Call it in the test**, with a name of its own: ``migratedDatabase(testDatabaseName(`m${String(process.env.VITEST_POOL_ID)}`), "0002_tough_ultron")``. It empties the database through `resetDatabase`, so it never runs `DROP DATABASE` (see [Writing a database test](#writing-a-database-test)).
+- **Insert the old rows with raw SQL**, since the Drizzle schema describes the newest tables, then call `runMigrations(db)` (what production runs) and read the rows back.
+- **Close the database** with `db.$client.end()` in `finally`.
+- The example is `apps/api/src/db/migration-data.test.ts`: lists made before `0003` keep their rows and get `sort_by_category` true.
+
 ## Writing a component test
 
 A component test renders a page, or one component, in a simulated browser and checks what the user would see. Only the network is faked: the real route table, data hook, API client and schema run. `apps/web/src/shell/shell.test.tsx` (the pages in the app shell) and `shell/api-status.test.tsx` (the API's status in the menu) are the pattern. The shell's setup helper, and the status's database-down case:
@@ -348,6 +359,10 @@ The catalog's journey, `e2e/tests/catalog.spec.ts`, is a second pattern: it read
 The lists journey, `e2e/tests/lists.spec.ts`, shows two more things. A browser context is a fresh guest: a new `browser.newContext({ baseURL })` has no session cookie, so the second test uses one as "another visitor" (it is outside the CSP guard) and `context.clearCookies()` turns the first guest into a stranger. And an element that is only for screen readers, such as the list's `h1`, is asserted by role (`getByRole("heading", { level: 1 })`), since it is not visible.
 
 The page frame's check, `e2e/tests/frame.spec.ts`, measures instead of reading: it compares, page by page, where the title row's first element and the title stand ([visual-design.md, "The page frame"](../architecture/visual-design.md#the-page-frame)). It waits for the network to settle first, since a long page's scrollbar appears only with its data, and rounds the boxes to whole pixels.
+
+### Each test is its own client address
+
+The anonymous sign-in route allows 30 an hour per address. A suite of more than 30 guests from one address would be refused at its end, so the E2E server trusts `127.0.0.1` as a proxy (`TRUSTED_PROXIES` in `e2e/start-server.ts`) and the `context` fixture of `e2e/support/test.ts` sends a random `X-Forwarded-For` for each test. Production's limit is untouched.
 
 ### The CSP guard
 

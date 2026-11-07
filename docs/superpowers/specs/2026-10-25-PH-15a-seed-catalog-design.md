@@ -169,7 +169,7 @@ Reviewed with the owner on 2026-10-27, after the merge of [PH-40](../../roadmap.
 | Requirement | Criteria | Task | Notes |
 |---|---|---|---|
 | [PRD-2](../../requirements/PRD-catalog.md#prd-2) | 2.1 to 2.12, the whole list, ✅ Criteria finalized ([decision 14](#decisions)) | 5 and 6 (2.6, 2.7, 2.10 to 2.12 in 6), 7 for E2E | Added at the review: 2.10 (case and accents), 2.11 (clearing restores the expansion), 2.12 (no match). 2.7 changed: a matching category stays collapsed. |
-| [ORD-2](../../requirements/ORD-list-display-and-ordering.md#ord-2) | 2.1, 2.2, 2.3 | 1 | The rule in `packages/shared`, tested here; the criteria stay 🚧 until the list uses it in [PH-17a](../../roadmap.md#ph-17a-list-items). 2.3 by [decision 13](#decisions). |
+| [ORD-2](../../requirements/ORD-list-display-and-ordering.md#ord-2) | 2.1, 2.2, 2.3 | 1 | The rule in `packages/shared`, tested here; the criteria stay 🚧 until the list uses it in [PH-17a](../../roadmap.md#ph-17-list-items). 2.3 by [decision 13](#decisions). |
 | [ORD-3](../../requirements/ORD-list-display-and-ordering.md#ord-3) | 3.1 | 1 | As for ORD-2: stays 🚧 until PH-17a. In the catalog, products also come before subcategories ([PRD-2](../../requirements/PRD-catalog.md#prd-2).5). |
 | [ACC-1](../../requirements/ACC-accounts-and-guest-mode.md#acc-1) | 1.2, 1.3 | 4 and 5 | 1.2: the seed catalog, read-only; stays 🚧 until [PH-16](../../roadmap.md#ph-16-guest-workspace-and-lists). 1.3: `GET /api/catalog` sets no cookie; ✅ as a general rule that later read routes keep true. |
 | [APP-1](../../requirements/APP-app-wide-behavior.md#app-1) | 1.9 | 5 | The Setup heading, with Catalog under it. ✅ as a general rule. |
