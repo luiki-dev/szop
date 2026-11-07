@@ -4,7 +4,7 @@ Rules for the session that writes a spec in this folder ([ADR 0054](../../decisi
 
 ## The phase ADR
 
-The phase ADR is created in the same commit as the spec, at ✅ Accepted. It holds the phase's decisions and the "Changes to the roadmap"; decisions settled while building are added to its "Settled while building".
+The phase ADR is created in the same commit as the spec, at ✅ Accepted. It holds the phase's decisions, the phase's approach chosen at the start of the brainstorm first among them (path, new concepts, tasks, the execution's rhythm; [ADR 0072](../../decisions/0072-phase-approach-per-phase.md), decision 1), and the "Changes to the roadmap"; decisions settled while building are added to its "Settled while building".
 
 ## A spec's sections
 

@@ -6,7 +6,8 @@ Rules for any session that executes a plan in this folder, whichever method the 
 
 ## After each task
 
-- **After each task:** commit it, `git push` the phase branch, then stop and summarize the task for the owner. Start the next task only when the owner says so.
+- **After each task:** commit it and `git push` the phase branch. Then follow the rhythm the plan's Global Constraints state ([ADR 0072](../../decisions/0072-phase-approach-per-phase.md), decision 2): at a stop, summarize the task for the owner and start the next only when the owner says so; with no stop, go on. A plan that states no rhythm stops after each task.
+- **At 150k:** when the context passes 150k at the end of a task, stop in any rhythm and remind the owner to run `/compact` or `/session-handoff` ([ADR 0072](../../decisions/0072-phase-approach-per-phase.md), decision 3).
 - **Tick the task's step boxes** (`- [ ]` → `- [x]`) in the plan, in the task's own commit, so the pushed plan shows progress.
 - **Never merge.** The PR opens after the last task, or when the owner asks.
 
@@ -22,6 +23,6 @@ Rules for any session that executes a plan in this folder, whichever method the 
 ## What a plan holds
 
 - **"Order of work"** at the top: the tasks in order, each linking its section.
-- **Global Constraints** with only this phase's constraints; the repo-wide rules above are not repeated.
+- **Global Constraints** with only this phase's constraints, the execution's rhythm chosen in the brainstorm among them; the repo-wide rules above are not repeated.
 - **The criteria and the docs to update** are linked from the spec, not listed again.
 - **A line telling implementers to read this file** before their task.
