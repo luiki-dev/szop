@@ -1,5 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { coarseQuery } from "../../shell/use-media-query.ts";
+import { stubMatchMedia } from "../../test/match-media.ts";
 import { useKeyboardOpen } from "./use-keyboard-open.ts";
 
 // A stand-in for window.visualViewport, which jsdom lacks.
@@ -15,6 +17,11 @@ function fakeViewport(width: number, height: number) {
 }
 
 describe("useKeyboardOpen", () => {
+  // A touch screen, unless a test says otherwise.
+  beforeEach(() => {
+    stubMatchMedia({ [coarseQuery]: true });
+  });
+
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -42,6 +49,14 @@ describe("useKeyboardOpen", () => {
     expect(result.current).toBe(false);
     resize({ width: 700, height: 200 });
     expect(result.current).toBe(true);
+  });
+
+  it("ORD-1.8: counts a shortened window closed on a fine pointer, as on a desktop", () => {
+    stubMatchMedia({ [coarseQuery]: false });
+    const resize = fakeViewport(1280, 800);
+    const { result } = renderHook(() => useKeyboardOpen());
+    resize({ height: 500 });
+    expect(result.current).toBe(false);
   });
 
   it("ORD-1.8: counts the keyboard closed without visualViewport", () => {

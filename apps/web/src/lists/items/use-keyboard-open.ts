@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { coarseQuery } from "../../shell/use-media-query.ts";
 
 // The phone's keyboard is open when the visual viewport is at least this much
 // shorter than the tallest it has been at the same width; a hiding address bar
-// is shorter than that (ADR 0073, decision 3). A desktop shows no keyboard, and
-// a browser without visualViewport counts as keyboard closed.
+// is shorter than that (ADR 0073, decision 3). Only a touch screen has one: a
+// shortened desktop window is not a keyboard. A browser without visualViewport
+// counts as keyboard closed.
 const KEYBOARD_PX = 150;
 
 export function useKeyboardOpen() {
@@ -20,7 +22,10 @@ export function useKeyboardOpen() {
         tallest = 0;
       }
       tallest = Math.max(tallest, viewport.height);
-      setOpen(tallest - viewport.height >= KEYBOARD_PX);
+      setOpen(
+        matchMedia(coarseQuery).matches &&
+          tallest - viewport.height >= KEYBOARD_PX,
+      );
     };
     measure();
     viewport.addEventListener("resize", measure);
