@@ -24,6 +24,6 @@ The user chooses on which side of an item's row its checkbox sits: left or right
 
 | ID | Criterion | Status |
 |---|---|---|
-| APR-2.1 | The bottom of the menu offers "Checkboxes", Left or Right, under the color scheme, each with a small picture of a row; Right is the default. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
+| APR-2.1 | The bottom of the menu, under the color scheme, and the ⋮ menu inside a list, after "Sort by category", offer "Checkboxes", Left or Right, each with a small picture of a row; Right is the default. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
 | APR-2.2 | With Right, the checkbox sits at the row's right edge, after the quantity and price; with Left, at its left edge; the haul drawer's ↶ buttons follow the same side. The choice applies to every list. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
 | APR-2.3 | The choice survives a reload; when the browser cannot store it, the control still switches the page for as long as it stays open. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |

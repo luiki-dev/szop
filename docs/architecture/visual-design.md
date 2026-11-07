@@ -200,11 +200,11 @@ Decided in [ADR 0071](../decisions/0071-list-items-phase-details.md) for [PH-17]
 
   ![The edit sheet and the category picker on a phone, light and dark](visual-design/items-edit.png)
 
-- **The toast and the sort setting.** Removing an item shows "Removed *name*" with Undo above the add bar for about 5 seconds. "Sort by category" is a checkable item of the list's ⋮ menu, with Rename and Delete; with it off, the list is one card without category headings.
+- **The toast and the sort setting.** Removing an item shows "Removed *name*" with Undo above the add bar for about 5 seconds. "Sort by category" is a checkable item of the list's ⋮ menu; a separator and the "Checkboxes" group (Left or Right, the chosen one with a ✓, each with the small row picture, a tap picks it and closes the menu) follow, then a separator, Rename and Delete; with it off, the list is one card without category headings.
 
   ![The toast after Remove and the list's ⋮ menu with the sort setting, light and dark](visual-design/items-toast-sort.png)
 
-- **The haul without sums.** The haul shows the count ("2 of 4 items"), the progress bar, chips with the name only and, in the drawer, the name and the ↶ button.
+- **The haul without sums.** The haul shows the count ("2 of 4 items"), the progress bar, chips with the name and the line total (the name alone without a price) and, in the drawer, rows with the name, the quantity and unit, the line total and the ↶ button ([ADR 0071](../decisions/0071-list-items-phase-details.md), decision 12).
 
   ![The collapsed haul and the open drawer on a phone, light and dark](visual-design/items-haul.png)
 

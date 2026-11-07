@@ -82,6 +82,61 @@ function DropdownMenuCheckboxItem({
   );
 }
 
+function DropdownMenuGroup(props: MenuPrimitive.Group.Props) {
+  return <MenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />;
+}
+
+function DropdownMenuLabel({
+  className,
+  ...props
+}: MenuPrimitive.GroupLabel.Props) {
+  return (
+    <MenuPrimitive.GroupLabel
+      data-slot="dropdown-menu-label"
+      className={cn(
+        "px-3 py-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+function DropdownMenuRadioGroup(props: MenuPrimitive.RadioGroup.Props) {
+  return (
+    <MenuPrimitive.RadioGroup
+      data-slot="dropdown-menu-radio-group"
+      {...props}
+    />
+  );
+}
+
+function DropdownMenuRadioItem({
+  className,
+  children,
+  ...props
+}: MenuPrimitive.RadioItem.Props) {
+  return (
+    <MenuPrimitive.RadioItem
+      data-slot="dropdown-menu-radio-item"
+      closeOnClick
+      className={cn(
+        "flex min-h-12 cursor-default items-center gap-2 rounded-control px-3 text-sm font-semibold outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+        className,
+      )}
+      {...props}
+    >
+      {/* The ✓ takes its space when off, so the labels line up. */}
+      <span className="flex size-4 shrink-0 items-center justify-center">
+        <MenuPrimitive.RadioItemIndicator>
+          <Check aria-hidden="true" />
+        </MenuPrimitive.RadioItemIndicator>
+      </span>
+      {children}
+    </MenuPrimitive.RadioItem>
+  );
+}
+
 function DropdownMenuSeparator({
   className,
   ...props
@@ -100,6 +155,10 @@ export {
   DropdownMenuCheckboxItem,
   DropdownMenuSeparator,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 };

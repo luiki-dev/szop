@@ -11,6 +11,7 @@ import { bananas, milk } from "../test/items.ts";
 import { routes } from "../routes.tsx";
 import { ListPage } from "./list-page.tsx";
 import { server } from "../test/server.ts";
+import { checkboxSideKey, storeCheckboxSide } from "../shell/checkbox-side.ts";
 
 const id = "0198a000-0000-7000-8000-0000000000aa";
 const list = {
@@ -43,6 +44,10 @@ function setup(items: ListItem[] = []) {
   );
   return { router, patches, queryClient };
 }
+
+afterEach(() => {
+  storeCheckboxSide("right");
+});
 
 const field = () => screen.findByRole("textbox", { name: "List name" });
 
@@ -292,6 +297,39 @@ describe("ListPage", () => {
     await waitFor(() => {
       expect(trigger).toHaveFocus();
     });
+  });
+
+  it("APR-2.1, APR-2.2, APR-2.3: the list's menu offers Checkboxes Left and Right; a tap picks the side, closes the menu and moves the rows", async () => {
+    const user = userEvent.setup();
+    setup([bananas]);
+    await field();
+    const trigger = screen.getByRole("button", { name: "List actions" });
+    const row = async () => {
+      const box = await screen.findByRole("checkbox", { name: "Bananas" });
+      const name = screen.getByText("Bananas");
+      return box.compareDocumentPosition(name) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+        ? "left"
+        : "right";
+    };
+    expect(await row()).toBe("right");
+
+    await user.click(trigger);
+    expect(
+      await screen.findByRole("group", { name: "Checkboxes" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("menuitemradio", { name: "Right" })).toBeChecked();
+    await user.click(screen.getByRole("menuitemradio", { name: "Left" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("menu")).toBeNull();
+    });
+    expect(localStorage.getItem(checkboxSideKey)).toBe("left");
+    expect(await row()).toBe("left");
+
+    await user.click(trigger);
+    expect(
+      await screen.findByRole("menuitemradio", { name: "Left" }),
+    ).toBeChecked();
   });
 
   it("LST-1.2: Esc in the title leaves the field", async () => {

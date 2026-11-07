@@ -9,10 +9,20 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
+import {
+  storeCheckboxSide,
+  useCheckboxSide,
+  type CheckboxSide,
+} from "../shell/checkbox-side.ts";
+import { RowPicture } from "../shell/checkbox-side-control.tsx";
 import { useCatalog } from "../catalog/use-catalog.ts";
 import { ApiRequestError, notSaved } from "../api/client.ts";
 import { NotFound } from "../not-found/not-found.tsx";
@@ -54,6 +64,7 @@ export function ListPage() {
   const catalog = useCatalog();
   const rename = useRenameList(id);
   const sort = useSortByCategory(id);
+  const checkboxSide = useCheckboxSide();
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const queryClient = useQueryClient();
@@ -208,6 +219,25 @@ export function ListPage() {
               >
                 Sort by category
               </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Checkboxes</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={checkboxSide}
+                  onValueChange={(side) => {
+                    storeCheckboxSide(side as CheckboxSide);
+                  }}
+                >
+                  {(["left", "right"] as const).map((side) => (
+                    <DropdownMenuRadioItem key={side} value={side}>
+                      {side === "left" ? "Left" : "Right"}
+                      <span className="ml-auto">
+                        <RowPicture side={side} />
+                      </span>
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {

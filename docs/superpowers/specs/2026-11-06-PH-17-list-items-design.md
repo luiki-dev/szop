@@ -158,7 +158,7 @@ The toast is the app's first ([APP-3](../../requirements/APP-app-wide-behavior.m
 
 ### The sort setting
 
-The list's ⋮ menu gains a first item, **"Sort by category"**, a check item (✓ when on, empty when off), then a separator, then Rename and Delete (`sort-setting-v2.png`; [ORD-5](../../requirements/ORD-list-display-and-ordering.md#ord-5).1). A tap switches it, closes the menu and re-orders the list at once; the change is saved on the server for the list. New lists have it on. Checked items go to the haul either way ([ORD-5](../../requirements/ORD-list-display-and-ordering.md#ord-5).3). It uses the same check as the rename: in PH-17 that is the workspace's owner; the list's editors gain it with sharing ([ORD-5](../../requirements/ORD-list-display-and-ordering.md#ord-5).4) _(Claude's call)_.
+The list's ⋮ menu gains a first item, **"Sort by category"**, a check item (✓ when on, empty when off), then a separator, the "Checkboxes" group (Left or Right, the chosen one with a ✓; see the checkboxes' setting below), another separator, then Rename and Delete (`sort-setting-v2.png`, `checkbox-side-menu.png`; [ORD-5](../../requirements/ORD-list-display-and-ordering.md#ord-5).1). A tap switches it, closes the menu and re-orders the list at once; the change is saved on the server for the list. New lists have it on. Checked items go to the haul either way ([ORD-5](../../requirements/ORD-list-display-and-ordering.md#ord-5).3). It uses the same check as the rename: in PH-17 that is the workspace's owner; the list's editors gain it with sharing ([ORD-5](../../requirements/ORD-list-display-and-ordering.md#ord-5).4) _(Claude's call)_.
 
 ### The checkboxes' side
 

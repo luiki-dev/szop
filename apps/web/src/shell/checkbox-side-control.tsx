@@ -8,7 +8,7 @@ import {
 } from "./checkbox-side.ts";
 
 // A small picture of a row: a circle (the checkbox) and a line (the name).
-function RowPicture({ side }: { side: CheckboxSide }) {
+export function RowPicture({ side }: { side: CheckboxSide }) {
   return (
     <span
       aria-hidden="true"
