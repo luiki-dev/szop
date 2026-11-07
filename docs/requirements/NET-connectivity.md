@@ -16,5 +16,5 @@ When the connection is lost, the app clearly shows an offline state and blocks c
 | NET-1.4 | A request that gets no answer within about 10 seconds, as on a weak connection, is given up, and the app shows the change was not saved. | ✅ [PH-16d](../roadmap.md#ph-16d-resilient-changes) |
 | NET-1.5 | After a failed change, the app reloads the data from the server, so a change the server did apply shows as saved. | ✅ [PH-16d](../roadmap.md#ph-16d-resilient-changes) |
 | NET-1.6 | A create sent twice, for example after a lost answer, creates one record. | ✅ [PH-16d](../roadmap.md#ph-16d-resilient-changes) |
-| NET-1.7 | After a failed change, what the person entered stays in place, and the change is sent again only when they retry it. | ✅ [PH-16d](../roadmap.md#ph-16d-resilient-changes) |
+| NET-1.7 | After a failed change, nothing is sent again until the person makes the change again; a form that waits for its answer (create, delete) keeps what was entered. | ✅ [PH-16d](../roadmap.md#ph-16d-resilient-changes) · reworded in [PH-46](../roadmap.md#ph-46-list-items-polish) |
 | NET-1.8 | While a change is being saved, the screen cannot be left from within the app. | ✅ [PH-16d](../roadmap.md#ph-16d-resilient-changes) |
