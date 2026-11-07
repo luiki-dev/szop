@@ -4,19 +4,19 @@ The items on a list: their fields, adding them, editing them, checking them off 
 
 ## ITM-1
 
-🎯 [MVP] · 🚧 In progress (0 of 3) · ✅ Criteria finalized ([PH-17](../roadmap.md#ph-17-list-items))
+🎯 [MVP] · 🚧 In progress (2 of 3) · ✅ Criteria finalized ([PH-17](../roadmap.md#ph-17-list-items))
 
 An item has a name (required) and an optional category, quantity, unit, note and price per unit.
 
 | ID | Criterion | Status |
 |---|---|---|
-| ITM-1.1 | An item has a name, which is required. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
-| ITM-1.2 | An item may have a category at any level of the tree, a quantity, a unit, a note and a price per unit. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-1.1 | An item has a name, which is required. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-1.2 | An item may have a category at any level of the tree, a quantity, a unit, a note and a price per unit. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
 | ITM-1.3 | Prices are shown in the list owner's currency. | ⬜ [PH-21](../roadmap.md#ph-21-shop-in-a-store) |
 
 ## ITM-2
 
-🎯 [MVP] · 🚧 In progress (0 of 5) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (2 of 5) · ❔ Criteria not finalized
 
 Smart add input: while typing, the app suggests catalog products whose names match. Picking a suggestion adds the product with its defaults (category, unit, price). Pressing enter adds the typed text as an ad-hoc item.
 
@@ -24,8 +24,8 @@ Smart add input: while typing, the app suggests catalog products whose names mat
 |---|---|---|
 | ITM-2.1 | While the user types in the list's add bar, it suggests catalog products whose names match. | ❔ Draft |
 | ITM-2.2 | Picking a suggestion adds the product with its default category, unit and price. | ❔ Draft |
-| ITM-2.3 | Pressing Enter adds the typed text as an item of its own, with no catalog product behind it. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
-| ITM-2.4 | After an item is added from the add bar, the field is cleared and keeps the focus, so the next item can be typed at once. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-2.3 | Pressing Enter adds the typed text as an item of its own, with no catalog product behind it. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-2.4 | After an item is added from the add bar, the field is cleared and keeps the focus, so the next item can be typed at once. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
 | ITM-2.5 | After a suggestion is picked, the focus moves to its quantity with a numeric keyboard; Enter adds the item and returns to the add bar. | ❔ Draft · [PH-23](../roadmap.md#ph-23-smart-input) |
 
 ## ITM-3
@@ -65,28 +65,28 @@ Catalog browser: navigate the category tree, select multiple products and add th
 
 ## ITM-6
 
-🎯 [MVP] · 🚧 In progress (0 of 3) · ✅ Criteria finalized ([PH-17](../roadmap.md#ph-17-list-items))
+🎯 [MVP] · ✅ Done (3 of 3) · ✅ Criteria finalized ([PH-17](../roadmap.md#ph-17-list-items))
 
 Edit any field of an item. Changes affect only that item, never the catalog.
 
 | ID | Criterion | Status |
 |---|---|---|
-| ITM-6.1 | The user edits any field of an item. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
-| ITM-6.2 | Editing an item changes only that item, never the catalog product it came from. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
-| ITM-6.3 | Tapping an item's name opens its edit; the checkbox only checks it. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-6.1 | The user edits any field of an item. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-6.2 | Editing an item changes only that item, never the catalog product it came from. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-6.3 | Tapping an item's name opens its edit; the checkbox only checks it. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
 
 ## ITM-7
 
-🎯 [MVP] · 🚧 In progress (0 of 4) · ✅ Criteria finalized ([PH-17](../roadmap.md#ph-17-list-items))
+🎯 [MVP] · ✅ Done (4 of 4) · ✅ Criteria finalized ([PH-17](../roadmap.md#ph-17-list-items))
 
 Check and uncheck an item. Remove an item.
 
 | ID | Criterion | Status |
 |---|---|---|
-| ITM-7.1 | The user checks an item and unchecks it. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
-| ITM-7.2 | Checking and unchecking send the state wanted, not a toggle, so a request repeated after a lost answer does no harm. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) · [OP-040](https://github.com/luiki-dev/szop/issues/99) |
-| ITM-7.3 | The user removes an item. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
-| ITM-7.4 | Checking an item stores the time of that check, also when it was checked before; unchecking clears it. | 🚧 [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-7.1 | The user checks an item and unchecks it. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-7.2 | Checking and unchecking send the state wanted, not a toggle, so a request repeated after a lost answer does no harm. | ✅ [PH-17](../roadmap.md#ph-17-list-items) · [OP-040](https://github.com/luiki-dev/szop/issues/99) |
+| ITM-7.3 | The user removes an item. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
+| ITM-7.4 | Checking an item stores the time of that check, also when it was checked before; unchecking clears it. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
 
 ## ITM-8
 
