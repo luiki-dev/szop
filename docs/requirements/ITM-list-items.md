@@ -16,7 +16,7 @@ An item has a name (required) and an optional category, quantity, unit, note and
 
 ## ITM-2
 
-🎯 [MVP] · 🚧 In progress (2 of 6) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (3 of 6) · ❔ Criteria not finalized
 
 Smart add input: while typing, the app suggests catalog products whose names match. Picking a suggestion adds the product with its defaults (category, unit, price). Pressing enter adds the typed text as an ad-hoc item.
 
@@ -27,7 +27,7 @@ Smart add input: while typing, the app suggests catalog products whose names mat
 | ITM-2.3 | Pressing Enter adds the typed text as an item of its own, with no catalog product behind it. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
 | ITM-2.4 | After an item is added from the add bar, the field is cleared and keeps the focus, so the next item can be typed at once. | ✅ [PH-17](../roadmap.md#ph-17-list-items) |
 | ITM-2.5 | After a suggestion is picked, the focus moves to its quantity with a numeric keyboard; Enter adds the item and returns to the add bar. | ❔ Draft · [PH-23](../roadmap.md#ph-23-smart-input) |
-| ITM-2.6 | While the phone's keyboard is open for the add bar, everything above the bar is dimmed; a tap on the dimmed part only closes the keyboard, opening or checking nothing, and a drag still scrolls the list. | 🚧 [PH-46](../roadmap.md#ph-46-list-items-polish) |
+| ITM-2.6 | While the phone's keyboard is open for the add bar, everything above the bar is dimmed; a tap on the dimmed part only closes the keyboard, opening or checking nothing, and a drag still scrolls the list. | ✅ [PH-46](../roadmap.md#ph-46-list-items-polish) |
 
 ## ITM-3
 
