@@ -283,7 +283,7 @@ export function ListPage() {
           unfolds the haul after the click, so the click lands here too. */}
       <div
         aria-hidden="true"
-        className={`fixed inset-0 z-5 bg-black/30 motion-safe:transition-opacity motion-safe:duration-150 ${
+        className={`fixed inset-0 z-5 bg-black/40 motion-safe:transition-opacity motion-safe:duration-150 ${
           barFocused && keyboardOpen ? "" : "pointer-events-none opacity-0"
         }`}
       />
