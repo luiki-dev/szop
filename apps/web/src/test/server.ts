@@ -1,6 +1,7 @@
 import type { Health } from "@szop/shared";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
+import { smallCatalog } from "./catalog.ts";
 
 export const healthyBody = {
   status: "ok",
@@ -15,4 +16,6 @@ export const server = setupServer(
   http.get("/api/health", () => HttpResponse.json(healthyBody)),
   // The home screen asks for the lists; a test that cares overrides this.
   http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+  // A list's screen asks for the catalog too.
+  http.get("/api/catalog", () => HttpResponse.json(smallCatalog)),
 );

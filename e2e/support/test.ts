@@ -20,6 +20,15 @@ export const test = base.extend<{ cspViolations: CspViolation[] }>({
   // The context, wrapped: Playwright creates page from it, so the listener is
   // in place before the first page opens, on every page and navigation.
   context: async ({ context, cspViolations }, use) => {
+    // Each test is its own client address, so the sign-in rate limit (30 an
+    // hour per address) counts per test, not once for the whole suite. The
+    // E2E server trusts 127.0.0.1 as a proxy (start-server.ts).
+    const octets = Array.from({ length: 3 }, () =>
+      Math.floor(Math.random() * 256),
+    );
+    await context.setExtraHTTPHeaders({
+      "X-Forwarded-For": `10.${octets.join(".")}`,
+    });
     await context.exposeBinding(
       "reportCspViolation",
       (_source, violation: CspViolation) => {

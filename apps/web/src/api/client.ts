@@ -2,12 +2,19 @@ import {
   apiErrorSchema,
   catalogSchema,
   healthSchema,
+  listItemSchema,
   listSchema,
   listsResponseSchema,
+  listWithItemsSchema,
   type Catalog,
+  type CreateItem,
   type CreateList,
   type Health,
   type List,
+  type ListItem,
+  type ListWithItems,
+  type UpdateItem,
+  type UpdateList,
 } from "@szop/shared";
 
 // What an unreadable JSON body becomes.
@@ -191,9 +198,17 @@ export async function getLists(): Promise<List[]> {
   return lists.data.lists;
 }
 
-export async function getList(id: string): Promise<List> {
+export async function getList(id: string): Promise<ListWithItems> {
   const path = `/api/lists/${encodeURIComponent(id)}`;
-  return readList("GET", path, await fetch(path, { signal: deadline() }));
+  const response = await fetch(path, { signal: deadline() });
+  if (!response.ok) throw await failure("GET", path, response);
+  const list = listWithItemsSchema.safeParse(
+    await response.json().catch(unreadable),
+  );
+  if (!list.success) {
+    throw new Error("The list came in a shape this page does not know");
+  }
+  return list.data;
 }
 
 export async function createList(body: CreateList): Promise<List> {
@@ -205,12 +220,62 @@ export async function createList(body: CreateList): Promise<List> {
   );
 }
 
-export async function renameList(id: string, name: string): Promise<List> {
+export async function updateList(
+  id: string,
+  changes: UpdateList,
+): Promise<List> {
   const path = `/api/lists/${encodeURIComponent(id)}`;
   return readList(
     "PATCH",
     path,
-    await withSession((signal) => send("PATCH", path, { name }, signal)),
+    await withSession((signal) => send("PATCH", path, changes, signal)),
+  );
+}
+
+export function renameList(id: string, name: string): Promise<List> {
+  return updateList(id, { name });
+}
+
+async function readItem(
+  method: string,
+  path: string,
+  response: Response,
+): Promise<ListItem> {
+  if (!response.ok) throw await failure(method, path, response);
+  const item = listItemSchema.safeParse(
+    await response.json().catch(unreadable),
+  );
+  if (!item.success) {
+    throw new Error("The item came in a shape this page does not know");
+  }
+  return item.data;
+}
+
+const itemsPath = (listId: string) =>
+  `/api/lists/${encodeURIComponent(listId)}/items`;
+
+export async function createItem(
+  listId: string,
+  body: CreateItem,
+): Promise<ListItem> {
+  const path = itemsPath(listId);
+  return readItem(
+    "POST",
+    path,
+    await withSession((signal) => send("POST", path, body, signal)),
+  );
+}
+
+export async function updateItem(
+  listId: string,
+  id: string,
+  changes: UpdateItem,
+): Promise<ListItem> {
+  const path = `${itemsPath(listId)}/${encodeURIComponent(id)}`;
+  return readItem(
+    "PATCH",
+    path,
+    await withSession((signal) => send("PATCH", path, changes, signal)),
   );
 }
 
@@ -239,4 +304,14 @@ export async function deleteLists(ids: string[]): Promise<void> {
     path,
     await withSession((signal) => send("POST", path, { ids }, signal)),
   );
+}
+
+// An item that is already gone (404) is what the user asked for.
+export async function deleteItem(listId: string, id: string): Promise<void> {
+  const path = `${itemsPath(listId)}/${encodeURIComponent(id)}`;
+  const response = await withSession((signal) =>
+    send("DELETE", path, undefined, signal),
+  );
+  if (response.status === 404) return;
+  await expectNoContent("DELETE", path, response);
 }

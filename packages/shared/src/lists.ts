@@ -1,29 +1,18 @@
 import { z } from "zod";
+import { listItemSchema } from "./items.ts";
+import { nameSchema } from "./names.ts";
 
-// A list name: trimmed, NFC-normalized, 1 to 100 Unicode code points (not
-// UTF-16 units, so one emoji counts once).
-export const listNameSchema = z
-  .string()
-  .transform((value) => value.trim().normalize("NFC"))
-  .refine((value) => Array.from(value).length >= 1, {
-    message: "Name is required",
-  })
-  .refine((value) => Array.from(value).length <= 100, {
-    message: "Name is too long (at most 100 characters)",
-  })
-  // Control and format characters, except the joiner and the tag characters
-  // that build emoji sequences (ZWJ families, flags of regions).
-  .refine(
-    (value) => !/(?![\u200D\u{E0020}-\u{E007F}])[\p{Cc}\p{Cf}]/u.test(value),
-    {
-      message: "Name can't contain control characters",
-    },
-  );
+export const listNameSchema = nameSchema("Name is required");
 
 export const listSchema = z.object({
   id: z.uuid(),
   name: z.string(),
+  sortByCategory: z.boolean(),
   createdAt: z.iso.datetime(),
+});
+
+export const listWithItemsSchema = listSchema.extend({
+  items: z.array(listItemSchema),
 });
 
 export const listsResponseSchema = z.object({ lists: z.array(listSchema) });
@@ -33,7 +22,14 @@ export const createListSchema = z.object({
   name: listNameSchema,
 });
 
-export const renameListSchema = z.object({ name: listNameSchema });
+export const updateListSchema = z
+  .object({
+    name: listNameSchema.optional(),
+    sortByCategory: z.boolean().optional(),
+  })
+  .refine((body) => Object.keys(body).length > 0, {
+    message: "Send at least one field",
+  });
 
 export const deleteListsSchema = z.object({
   ids: z
@@ -46,6 +42,7 @@ export const deleteListsSchema = z.object({
 });
 
 export type List = z.infer<typeof listSchema>;
+export type ListWithItems = z.infer<typeof listWithItemsSchema>;
 export type CreateList = z.infer<typeof createListSchema>;
-export type RenameList = z.infer<typeof renameListSchema>;
+export type UpdateList = z.infer<typeof updateListSchema>;
 export type DeleteLists = z.infer<typeof deleteListsSchema>;

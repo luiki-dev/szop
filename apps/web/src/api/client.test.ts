@@ -2,10 +2,13 @@ import { delay, http, HttpResponse, type JsonBodyType } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { smallCatalog } from "../test/catalog.ts";
 import { server } from "../test/server.ts";
+import { bananas, listId, listWith } from "../test/items.ts";
 import { threeLists } from "../test/lists.ts";
 import {
   ApiRequestError,
+  createItem,
   createList,
+  deleteItem,
   deleteList,
   deleteLists,
   getCatalog,
@@ -14,6 +17,8 @@ import {
   getLists,
   notSaved,
   renameList,
+  updateItem,
+  updateList,
   timeLimit,
   timeoutMessage,
 } from "./client.ts";
@@ -584,5 +589,92 @@ describe("notSaved", () => {
     ]) {
       expect(notSaved(error)).toBe(true);
     }
+  });
+});
+
+describe("the item requests", () => {
+  const withSession = http.get("/api/auth/get-session", () =>
+    HttpResponse.json({ ok: true }),
+  );
+
+  it("ITM-1.1: gets the list with its items", async () => {
+    server.use(
+      http.get(`/api/lists/${listId}`, () =>
+        HttpResponse.json(listWith(bananas)),
+      ),
+    );
+
+    await expect(getList(listId)).resolves.toEqual(listWith(bananas));
+  });
+
+  it("ITM-1.1: sends an item and each change as the API reads them", async () => {
+    const sent: string[] = [];
+    server.use(
+      withSession,
+      http.all(`/api/lists/${listId}/*`, async ({ request }) => {
+        const text = await request.text();
+        sent.push(`${request.method} ${new URL(request.url).pathname} ${text}`);
+        return request.method === "DELETE"
+          ? new HttpResponse(null, { status: 204 })
+          : HttpResponse.json(bananas, { status: 201 });
+      }),
+      http.patch(`/api/lists/${listId}`, async ({ request }) => {
+        sent.push(`PATCH list ${await request.text()}`);
+        return HttpResponse.json(listWith());
+      }),
+    );
+
+    await createItem(listId, { id: bananas.id, name: "Bananas" });
+    await updateItem(listId, bananas.id, { checked: true });
+    await deleteItem(listId, bananas.id);
+    await updateList(listId, { sortByCategory: false });
+
+    expect(sent).toEqual([
+      `POST /api/lists/${listId}/items {"id":"${bananas.id}","name":"Bananas"}`,
+      `PATCH /api/lists/${listId}/items/${bananas.id} {"checked":true}`,
+      `DELETE /api/lists/${listId}/items/${bananas.id} `,
+      'PATCH list {"sortByCategory":false}',
+    ]);
+  });
+
+  it("an item already gone (404) is a removed item", async () => {
+    server.use(
+      withSession,
+      http.delete(`/api/lists/${listId}/items/${bananas.id}`, () =>
+        HttpResponse.json(
+          { error: { code: "not_found", message: "Not found" } },
+          { status: 404 },
+        ),
+      ),
+    );
+
+    await expect(deleteItem(listId, bananas.id)).resolves.toBeUndefined();
+  });
+
+  it("any other refusal of a remove is an error", async () => {
+    server.use(
+      withSession,
+      http.delete(
+        `/api/lists/${listId}/items/${bananas.id}`,
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+
+    await expect(deleteItem(listId, bananas.id)).rejects.toThrow(
+      "answered 500",
+    );
+  });
+
+  it("says so when an item answer is not an item", async () => {
+    server.use(
+      withSession,
+      http.post(`/api/lists/${listId}/items`, () =>
+        HttpResponse.json({ nope: true }),
+      ),
+    );
+
+    await expect(
+      createItem(listId, { id: bananas.id, name: "Bananas" }),
+    ).rejects.toThrow("The item came in a shape this page does not know");
   });
 });

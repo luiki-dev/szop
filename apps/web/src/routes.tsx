@@ -1,12 +1,19 @@
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import type { RouteObject } from "react-router";
 import { CatalogPage } from "./catalog/catalog-page.tsx";
 import { DesignPage } from "./design/design-page.tsx";
-import { ListPage } from "./lists/list-page.tsx";
+import { ListHeader } from "./lists/list-screen.tsx";
 import { ListsPage, NewListLink } from "./lists/lists-page.tsx";
 import { NewListPage } from "./lists/new-list-page.tsx";
 import { NotFound } from "./not-found/not-found.tsx";
 import { AppShell } from "./shell/app-shell.tsx";
+
+// The list's screen is its own chunk (items, haul, edit sheet and their
+// libraries), which keeps the entry chunk within the NFR-3.1 budget. While it
+// loads, the page shows the same bare header as a list that is loading.
+const ListPage = lazy(async () => ({
+  default: (await import("./lists/list-page.tsx")).ListPage,
+}));
 
 // What a route tells the shell: the title of its page, shown as the h1 and
 // in the tab; an action, shown beside the h1 on a desktop; and, for a page
@@ -39,7 +46,18 @@ export const routes: RouteObject[] = [
       },
       {
         path: "lists/:id",
-        element: <ListPage />,
+        element: (
+          <Suspense
+            fallback={
+              <>
+                <h1 className="sr-only">List</h1>
+                <ListHeader field={null} />
+              </>
+            }
+          >
+            <ListPage />
+          </Suspense>
+        ),
         handle: { header: "list" } satisfies RouteHandle,
       },
       {

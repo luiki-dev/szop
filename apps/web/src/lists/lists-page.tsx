@@ -234,7 +234,10 @@ export function ListsPage() {
     <>
       {selecting && lists ? (
         <div className="mt-4 flex min-h-12 items-center gap-1">
+          {/* The key makes ✕ a new element: reused from the Select button, it
+              would fade from the outline look to the ghost one (#397). */}
           <Button
+            key="cancel"
             variant="ghost"
             size="icon"
             aria-label="Cancel selection"
@@ -269,6 +272,7 @@ export function ListsPage() {
       ) : lists && lists.length > 0 ? (
         <div className="mt-4 flex justify-end">
           <Button
+            key="select"
             variant="outline"
             onClick={() => {
               start();

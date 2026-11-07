@@ -1,5 +1,5 @@
-import type { List } from "@szop/shared";
-import { and, desc, eq, inArray, ne } from "drizzle-orm";
+import type { List, UpdateList } from "@szop/shared";
+import { and, desc, eq, inArray, ne, or } from "drizzle-orm";
 import type { Executor, WorkspaceContext } from "../access/workspace.ts";
 import { lists } from "../db/schema.ts";
 
@@ -7,6 +7,7 @@ function toList(row: typeof lists.$inferSelect): List {
   return {
     id: row.id,
     name: row.name,
+    sortByCategory: row.sortByCategory,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -56,21 +57,28 @@ export async function insertList(
   return { list, created: false };
 }
 
-// Writes nothing, so updated_at stays, when the name is unchanged.
-export async function renameList(
+// Writes nothing, so updated_at stays, when no field changes.
+export async function updateList(
   db: Executor,
   context: WorkspaceContext,
   id: string,
-  name: string,
+  { name, sortByCategory }: UpdateList,
 ): Promise<List | null> {
   const [row] = await db
     .update(lists)
-    .set({ name })
+    .set({ name, sortByCategory })
     .where(
       and(
         eq(lists.workspaceId, context.workspaceId),
         eq(lists.id, id),
-        ne(lists.name, name),
+        or(
+          // Stryker disable next-line ConditionalExpression: only the `false` variant survives (the `true` variant is killed): `ne(column, undefined)` is SQL NULL, which `or` ignores
+          name === undefined ? undefined : ne(lists.name, name),
+          // Stryker disable next-line ConditionalExpression: same, only the `false` variant survives
+          sortByCategory === undefined
+            ? undefined
+            : ne(lists.sortByCategory, sortByCategory),
+        ),
       ),
     )
     .returning();

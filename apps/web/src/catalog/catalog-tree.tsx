@@ -20,7 +20,7 @@ interface TreeProps {
   highlight?: string;
 }
 
-function Highlighted({ text, query }: { text: string; query?: string }) {
+export function Highlighted({ text, query }: { text: string; query?: string }) {
   const match = query === undefined ? null : findMatch(text, query);
   if (!match) return text;
   return (

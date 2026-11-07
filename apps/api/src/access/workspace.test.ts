@@ -73,6 +73,7 @@ describe("the access layer", () => {
     expect(access.list).toEqual({
       id: idOf(5),
       name: "Mine",
+      sortByCategory: true,
       createdAt: stored?.createdAt.toISOString(),
     });
     await ownWorkspace(database.db, other, testCatalog);

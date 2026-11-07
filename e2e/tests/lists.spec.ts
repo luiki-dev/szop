@@ -283,3 +283,35 @@ test("NET-1.7, NET-1.8: a rename on a held connection shows Saving…, cannot be
     "Saturday shop",
   );
 });
+
+test("#397: ✕ shows no background when Select starts", async ({ page }) => {
+  await page.goto("/");
+  await createList(page, "Weekly shop");
+
+  // Sample ✕'s paint every frame from the moment it exists.
+  await page.evaluate(() => {
+    const w = window as unknown as { samples: string[] };
+    w.samples = [];
+    const sample = () => {
+      const cancel = document.querySelector('[aria-label="Cancel selection"]');
+      if (cancel) {
+        const style = getComputedStyle(cancel);
+        w.samples.push(
+          `${style.backgroundColor}|${style.borderTopColor}|${style.boxShadow}`,
+        );
+      }
+      if (w.samples.length < 30) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+  await page.getByRole("button", { name: "Select" }).click();
+  await expect(page.getByText("0 selected")).toBeVisible();
+  await page.waitForTimeout(800);
+  const samples = await page.evaluate(
+    () => (window as unknown as { samples: string[] }).samples,
+  );
+  expect(samples.length).toBeGreaterThan(0);
+  for (const sample of samples) {
+    expect(sample.split("|")[0]).toBe("rgba(0, 0, 0, 0)");
+  }
+});
