@@ -68,7 +68,7 @@ Filled in at `/finish-phase`. Sizes in thousands of tokens.
 | Task 12 (1 fix round) | 105 | 123 |
 | `/finish-phase` steps 1 to 4 | 123 | 140 |
 | Session handoff 3 | 140 | 81 in the finishing session |
-| `/finish-phase` step 5 (mockup, 2 fix rounds) to the PR | 81 | 139 |
+| `/finish-phase` step 5 (mockup, 2 fix rounds, the APP-1.8 fix) to the PR | 81 | 190 |
 
 ## Findings
 
