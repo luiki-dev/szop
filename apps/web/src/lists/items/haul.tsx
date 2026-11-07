@@ -267,7 +267,9 @@ export function Haul({
         <Drawer.Backdrop className="fixed inset-0 z-50 bg-black/40 data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:transition-opacity motion-safe:duration-200" />
         {/* Without the viewport, Base UI handles no swipe (#404). */}
         <Drawer.Viewport>
-          <Drawer.Popup className="fixed inset-x-0 bottom-0 z-50 mx-auto flex h-[75dvh] max-w-[720px] translate-y-(--drawer-swipe-movement-y) flex-col rounded-t-surface bg-haul px-4 pt-3 text-haul-foreground outline-none data-ending-style:translate-y-full data-starting-style:translate-y-full motion-safe:transition-[translate] motion-safe:duration-200 md:px-6 lg:left-64">
+          {/* transform, not translate: Base UI's inline transform while
+              swiping replaces it rather than doubling it (#404). */}
+          <Drawer.Popup className="fixed inset-x-0 bottom-0 z-50 mx-auto flex h-[75dvh] max-w-[720px] [transform:translateY(var(--drawer-swipe-movement-y))] flex-col rounded-t-surface bg-haul px-4 pt-3 text-haul-foreground outline-none data-ending-style:[transform:translateY(100%)] data-starting-style:[transform:translateY(100%)] motion-safe:transition-[transform] motion-safe:duration-200 md:px-6 lg:left-64">
             <span className="mx-auto mb-2 block h-1 w-10 rounded-full bg-haul-chip" />
             <div className="flex items-baseline justify-between gap-2">
               <Drawer.Title className="text-lg font-bold">

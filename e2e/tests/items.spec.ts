@@ -551,11 +551,15 @@ test("ORD-1.6: dragging the haul's drawer down closes it (#404)", async ({
   await page.mouse.move(x, box.y + 10);
   await page.mouse.down();
   await page.mouse.move(x, box.y + 110, { steps: 10 });
-  // The drawer follows the pointer: without the swipe it stays put, and a
-  // release over the dimmed list would close it on its own.
+  // The drawer follows the pointer one to one: without the swipe it stays
+  // put, and a release over the dimmed list would close it on its own; at
+  // twice the pointer's distance it jumps back up on the release.
   await expect
-    .poll(async () => (await drawer.boundingBox())?.y ?? 0)
-    .toBeGreaterThan(box.y + 50);
+    .poll(async () => ((await drawer.boundingBox())?.y ?? 0) - box.y)
+    .toBeGreaterThan(50);
+  expect(((await drawer.boundingBox())?.y ?? 0) - box.y).toBeLessThanOrEqual(
+    101,
+  );
   // Past half its height, so it closes by the distance, whatever the speed.
   await page.mouse.move(x, box.y + 10 + box.height * 0.6, { steps: 10 });
   await page.mouse.up();
