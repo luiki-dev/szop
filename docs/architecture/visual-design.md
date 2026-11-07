@@ -200,7 +200,7 @@ Decided in [ADR 0071](../decisions/0071-list-items-phase-details.md) for [PH-17]
 
   ![The edit sheet and the category picker on a phone, light and dark](visual-design/items-edit.png)
 
-- **The toast and the sort setting.** Removing an item shows "Removed *name*" with Undo above the add bar for about 5 seconds. "Sort by category" is a checkable item of the list's ⋮ menu; a separator and the "Checkboxes" group (Left or Right, the chosen one with a ✓, each with the small row picture, a tap picks it and closes the menu) follow, then a separator, Rename and Delete; with it off, the list is one card without category headings.
+- **The toast and the sort setting.** Removing an item shows "Removed *name*" with Undo above the add bar for about 5 seconds. Every toast is centered on the haul, at 75 % of its width on a phone and 60 % from `lg` ([ADR 0073](../decisions/0073-list-items-polish-phase-details.md), decision 5). A failure ("*name* wasn't saved. …") takes the destructive color (`destructive` with `destructive-foreground`) and a warning icon first, so it is not told by color alone, and is announced at once ([APP-3](../requirements/APP-app-wide-behavior.md#app-3).4); the Undo toast keeps the `foreground` look. "Sort by category" is a checkable item of the list's ⋮ menu; a separator and the "Checkboxes" group (Left or Right, the chosen one with a ✓, each with the small row picture, a tap picks it and closes the menu) follow, then a separator, Rename and Delete; with it off, the list is one card without category headings.
 
   ![The toast after Remove and the list's ⋮ menu with the sort setting, light and dark](visual-design/items-toast-sort.png)
 

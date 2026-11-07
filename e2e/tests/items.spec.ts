@@ -690,6 +690,36 @@ test("ITM-6.1, LST-1.3: on a desktop, the dialogs are centered on the list's col
   expect(await center(confirm), "Delete list").toBeCloseTo(column, 0);
 });
 
+test("APP-3.1: the toast is centered on the haul, at 75 % of its width on a phone and 60 % on a desktop (#414)", async ({
+  page,
+}) => {
+  for (const [size, share] of [
+    [{ width: 390, height: 700 }, 0.75],
+    [{ width: 1280, height: 800 }, 0.6],
+  ] as const) {
+    await page.setViewportSize(size);
+    await listWith(page, 1);
+    await page.getByRole("button", { name: /Item 1/ }).click();
+    await page
+      .getByRole("dialog", { name: "Edit item" })
+      .getByRole("button", { name: "Remove" })
+      .click();
+    // The toast's root holds its description.
+    const toast = page.getByText("Removed Item 1").locator("..");
+    await expect(toast).toBeVisible();
+    const box = (await toast.boundingBox()) ?? { x: 0, width: 0 };
+    const haul = (await page.locator("[data-bottom-block]").boundingBox()) ?? {
+      x: 0,
+      width: 0,
+    };
+    expect(box.x + box.width / 2, "centered").toBeCloseTo(
+      haul.x + haul.width / 2,
+      0,
+    );
+    expect(box.width / haul.width, "width").toBeCloseTo(share, 2);
+  }
+});
+
 test("ITM-6.1: the category picker keeps its height while searching (#406)", async ({
   page,
 }) => {

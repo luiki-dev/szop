@@ -35,19 +35,26 @@ import { useList, useRenameList } from "./use-lists.ts";
 
 // /lists/:id: the list's screen. The shell leaves its header and the tab's
 // title to this page.
-// The height of the bottom block (add bar and haul) goes to the toast region
-// as --toast-offset, so toasts sit just above it whatever the haul shows.
+// The bottom block's (add bar and haul) height, center and width go to the
+// toast region, so toasts sit just above it, centered on the haul (#414).
+const toastVars = ["--toast-offset", "--haul-center", "--haul-width"];
+
 function useToastOffset() {
   return useCallback((block: HTMLElement | null) => {
     if (!block || typeof ResizeObserver === "undefined") return;
     const root = document.documentElement.style;
     const observer = new ResizeObserver(() => {
+      const { left, width } = block.getBoundingClientRect();
       root.setProperty("--toast-offset", `${String(block.offsetHeight)}px`);
+      root.setProperty("--haul-center", `${String(left + width / 2)}px`);
+      root.setProperty("--haul-width", `${String(width)}px`);
     });
     observer.observe(block);
+    // The block keeps its size while a wider window moves it sideways.
+    observer.observe(document.documentElement);
     return () => {
       observer.disconnect();
-      root.removeProperty("--toast-offset");
+      for (const name of toastVars) root.removeProperty(name);
     };
   }, []);
 }

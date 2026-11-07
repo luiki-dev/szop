@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { act } from "react";
 import { describe, expect, it } from "vitest";
 import { showNotSaved, Toasts } from "./toasts.tsx";
@@ -11,13 +11,29 @@ describe("the toast region", () => {
       showNotSaved("Bananas");
     });
 
+    const region = screen.getByRole("region");
     expect(
-      screen.getByText(
+      within(region).getByText(
         "Bananas wasn't saved. Check your connection and try again.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByRole("region")).toHaveAttribute("aria-live", "polite");
+    expect(region).toHaveAttribute("aria-live", "polite");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("APP-3.4: a failure is announced at once, in the destructive color", () => {
+    render(<Toasts />);
+
+    act(() => {
+      showNotSaved("Bananas");
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Bananas wasn't saved. Check your connection and try again.",
+    );
+    expect(screen.getByRole("alertdialog", { hidden: true })).toHaveClass(
+      "bg-destructive",
+    );
   });
 
   it("a new toast replaces the shown one", () => {
@@ -30,7 +46,10 @@ describe("the toast region", () => {
       showNotSaved("Milk");
     });
 
-    expect(screen.getByText(/^Milk wasn't saved/)).toBeInTheDocument();
-    expect(screen.queryByText(/^Bananas wasn't saved/)).not.toBeInTheDocument();
+    const region = screen.getByRole("region");
+    expect(within(region).getByText(/^Milk wasn't saved/)).toBeInTheDocument();
+    expect(
+      within(region).queryByText(/^Bananas wasn't saved/),
+    ).not.toBeInTheDocument();
   });
 });
