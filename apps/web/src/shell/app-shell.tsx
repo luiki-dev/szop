@@ -122,6 +122,9 @@ export function AppShell() {
         !header && <PhoneHeader title={title} />
       )}
       <main
+        // Focusable by script only: the place the focus falls back to when
+        // what held it is gone (Edit item, after Remove).
+        tabIndex={-1}
         // A page with its own header (a list's screen) fills the screen, so
         // its add bar can sit at the bottom of a short page.
         className={cn(

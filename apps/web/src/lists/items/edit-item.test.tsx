@@ -40,6 +40,7 @@ function setup(item: ListItem = bananas, desktop = false) {
         listId={listId}
         item={item}
         open
+        opener={document.body}
         ringOnClose={false}
         onOpenChange={onOpenChange}
         onRemoved={onRemoved}

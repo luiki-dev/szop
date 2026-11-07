@@ -29,8 +29,10 @@ import {
 
 const control =
   "min-h-12 w-full rounded-control border-2 border-input bg-card px-3 outline-none focus:ring-3 focus:ring-ring aria-invalid:border-destructive";
+// 48 px tall (NFR-2.3) inside the 48 px box: the negative margin lets the
+// button cover the box's 2 px border.
 const stepper =
-  "h-11 w-12 shrink-0 outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
+  "-my-0.5 h-12 w-12 shrink-0 outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
 const handle = "mx-auto mb-3 block h-1 w-10 rounded-full bg-border";
 
 // "Edit item" (ITM-6): a bottom sheet on a phone, a centered dialog from `lg`.
@@ -39,6 +41,7 @@ export function EditItem({
   listId,
   item,
   open,
+  opener,
   ringOnClose,
   onOpenChange,
   onRemoved,
@@ -48,6 +51,7 @@ export function EditItem({
   listId: string;
   item: ListItem;
   open: boolean;
+  opener: HTMLElement;
   ringOnClose: boolean;
   onOpenChange: (open: boolean) => void;
   onRemoved: (item: ListItem) => void;
@@ -58,12 +62,16 @@ export function EditItem({
   // The picker replaces the dialog's content on a desktop, so the heading
   // and ✕ of the edit form give way to its own.
   const [picking, setPicking] = useState(false);
+  const removed = useRef(false);
   const form = (
     <EditForm
       listId={listId}
       item={item}
       onOpenChange={onOpenChange}
-      onRemoved={onRemoved}
+      onRemoved={(item) => {
+        removed.current = true;
+        onRemoved(item);
+      }}
       units={units}
       catalog={catalog}
       desktop={desktop}
@@ -75,13 +83,32 @@ export function EditItem({
   const popup = useRef<HTMLDivElement>(null);
   // The focus goes back to the item, with its ring only when the item was
   // opened from the keyboard (#415); browsers show it after a field had focus.
-  const [opener] = useState(() => document.activeElement);
-  const finalFocus = () => {
-    if (!(opener instanceof HTMLElement)) return true;
+  const refocus = () => {
+    // A category change may move the item to another card and Remove takes it
+    // away, both once the list has been redrawn: look the row up again, and
+    // with none left take the add bar after the keyboard (no phone keyboard to
+    // raise), else the page, so a tap never opens one.
+    const row = removed.current
+      ? null
+      : opener.isConnected
+        ? opener
+        : document.querySelector<HTMLElement>(`[data-item-id="${item.id}"]`);
+    const target =
+      row ??
+      document.querySelector<HTMLElement>(
+        ringOnClose ? "[data-add-bar]" : "main",
+      );
     // The item may hold the focus already, and focusing it again would keep
     // its ring as it is.
-    opener.blur();
-    opener.focus({ focusVisible: ringOnClose });
+    target?.blur();
+    target?.focus({ focusVisible: ringOnClose });
+  };
+  const finalFocus = () => {
+    refocus();
+    // The list is drawn again after this: a row that held the focus is gone.
+    requestAnimationFrame(() => {
+      if (document.activeElement === document.body) refocus();
+    });
     return false;
   };
 

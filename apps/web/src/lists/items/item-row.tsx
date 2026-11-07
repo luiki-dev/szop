@@ -19,7 +19,7 @@ export function ItemRow({
   item: ListItem;
   unitName: string | null;
   // keyboard: opened by Enter or Space, whose click has no pointer (detail 0).
-  onEdit: (keyboard: boolean) => void;
+  onEdit: (keyboard: boolean, opener: HTMLElement) => void;
   checkbox?: ReactNode;
 }) {
   const left = useCheckboxSide() === "left";
@@ -33,8 +33,9 @@ export function ItemRow({
       {left && checkbox}
       <button
         type="button"
+        data-item-id={item.id}
         onClick={(event) => {
-          onEdit(event.detail === 0);
+          onEdit(event.detail === 0, event.currentTarget);
         }}
         className="flex min-h-14 min-w-0 flex-1 items-center gap-3 rounded-control px-3 py-2 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring"
       >

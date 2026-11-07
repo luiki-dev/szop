@@ -112,6 +112,7 @@ export function AddBar({
           onFocusChange(true);
         }}
         maxLength={itemLimits.name}
+        data-add-bar
         placeholder="+ Add item"
         aria-label={`Add an item to ${listName}`}
         autoComplete="off"
