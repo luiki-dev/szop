@@ -537,12 +537,27 @@ test("ORD-1.6: dragging the haul's drawer down closes it (#404)", async ({
   await page.getByRole("button", { name: /^The haul/ }).click();
   const drawer = page.getByRole("dialog", { name: "The haul" });
   await expect(drawer).toBeVisible();
-  const box = (await drawer.boundingBox()) ?? { x: 0, y: 0, width: 0 };
+  // Measured once it has slid in, not on the way.
+  await drawer.evaluate((el) =>
+    Promise.all(el.getAnimations().map((a) => a.finished)),
+  );
+  const box = (await drawer.boundingBox()) ?? {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  };
   const x = box.x + box.width / 2;
   await page.mouse.move(x, box.y + 10);
   await page.mouse.down();
-  // Released over the drawer, not the dimmed list, so only the swipe closes it.
-  await page.mouse.move(x, box.y + 150, { steps: 10 });
+  await page.mouse.move(x, box.y + 110, { steps: 10 });
+  // The drawer follows the pointer: without the swipe it stays put, and a
+  // release over the dimmed list would close it on its own.
+  await expect
+    .poll(async () => (await drawer.boundingBox())?.y ?? 0)
+    .toBeGreaterThan(box.y + 50);
+  // Past half its height, so it closes by the distance, whatever the speed.
+  await page.mouse.move(x, box.y + 10 + box.height * 0.6, { steps: 10 });
   await page.mouse.up();
   await expect(drawer).toBeHidden();
 });
