@@ -129,6 +129,9 @@
      shift the centered content sideways. */
   html {
     scrollbar-gutter: stable;
+    /* A list's sticky bottom block (add bar and haul) sets --toast-offset to
+       its height; scrolling a focused row into view stops above it (APP-1.8). */
+    scroll-padding-bottom: var(--toast-offset, 0px);
   }
   body {
     @apply bg-background font-sans text-foreground antialiased;

@@ -4,7 +4,38 @@ import { expect, test } from "../support/test.ts";
 
 test.use({ viewport: { width: 390, height: 700 } });
 
-test("ITM-2.3, ITM-2.4: a guest adds items one after another with Enter, and the add bar stays pinned", async ({
+test("APP-1.8: Tab never leaves the focused row under the add bar and the haul", async ({
+  page,
+  isMobile,
+}) => {
+  // Firefox ignores scroll-padding when it scrolls a focused element into
+  // view; the criterion is a phone's, and the phone project is Chromium.
+  test.skip(!isMobile, "APP-1.8 is a phone's criterion");
+  await listWith(page, 16);
+  await page.evaluate(() => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    window.scrollTo(0, 0);
+  });
+  await page
+    .getByRole("button", { name: /Item 1\b/ })
+    .first()
+    .focus();
+  for (let i = 0; i < 30; i++) {
+    await page.keyboard.press("Tab");
+    const covered = await page.evaluate(() => {
+      const focused = document.activeElement;
+      const block = document.querySelector("form")?.parentElement;
+      if (!focused || !block || block.contains(focused)) return false;
+      return (
+        focused.getBoundingClientRect().bottom >
+        block.getBoundingClientRect().top + 1
+      );
+    });
+    expect(covered, `Tab ${String(i + 1)}`).toBe(false);
+  }
+});
+
+test("ITM-2.3, ITM-2.4, APP-1.8: a guest adds items one after another with Enter, and the add bar stays pinned", async ({
   page,
 }) => {
   await page.goto("/lists/new");
