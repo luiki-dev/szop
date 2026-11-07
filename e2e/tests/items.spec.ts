@@ -1,4 +1,5 @@
 import { expectAccessible } from "../support/accessibility.ts";
+import { listWith, tap } from "../support/list.ts";
 import { expect, test } from "../support/test.ts";
 
 test.use({ viewport: { width: 390, height: 700 } });
@@ -203,7 +204,7 @@ test("ITM-7.1, ORD-1.4, ORD-1.6, ORD-1.7, ORD-1.11: a guest checks items into th
   await expectAccessible(page);
 
   // The haul sits under the add bar, at the bottom of the screen.
-  const tray = page.getByRole("region", { name: "Haul summary" });
+  const tray = page.getByRole("region", { name: "The haul" });
   expect(
     await tray.evaluate((el) => el.getBoundingClientRect().bottom),
   ).toBeCloseTo(700, 0);
@@ -257,9 +258,55 @@ test("ITM-7.1, ORD-1.4, ORD-1.6, ORD-1.7, ORD-1.11: a guest checks items into th
   });
   expect(wide.width).toBeLessThanOrEqual(720);
   expect(wide.bottom).toBeCloseTo(800, 0);
+  const block = await tray.boundingBox();
   await page.getByRole("button", { name: /^The haul/ }).click();
   const popup = await drawer.boundingBox();
   expect(popup?.width).toBeLessThanOrEqual(720);
+  // The drawer sits within the column, not the viewport: the bottom block's x range.
+  expect(popup?.x).toBeGreaterThanOrEqual((block?.x ?? 0) - 1);
+  expect((popup?.x ?? 0) + (popup?.width ?? 0)).toBeLessThanOrEqual(
+    (block?.x ?? 0) + (block?.width ?? 0) + 1,
+  );
+});
+
+test("ORD-1.8: the first tap after typing opens the drawer from the folded line", async ({
+  page,
+}) => {
+  await listWith(page, 2);
+  // The add bar still has the focus, so the haul is folded to one line.
+  await tap(page, page.getByRole("button", { name: /^The haul · 0 of 2/ }));
+  await expect(page.getByRole("dialog", { name: "The haul" })).toBeVisible();
+});
+
+test("ORD-1.8: the first tap after typing checks the item under the finger on a scrolled list", async ({
+  page,
+}) => {
+  await listWith(page, 16);
+  await page.evaluate(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+  await tap(page, page.getByRole("checkbox", { name: "Item 16" }));
+  await expect(page.getByText("1 of 16 items")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Put Item 16 back" }),
+  ).toBeVisible();
+});
+
+test("ORD-1.3: the collapsed haul keeps its height at the first check", async ({
+  page,
+}) => {
+  await listWith(page, 2);
+  await page
+    .getByRole("textbox", { name: "Add an item to Weekend groceries" })
+    .blur();
+  const tray = page.getByRole("region", { name: "The haul" });
+  const height = async () => (await tray.boundingBox())?.height ?? 0;
+  const before = await height();
+  await page.getByRole("checkbox", { name: "Item 1" }).click();
+  await expect(
+    page.getByRole("button", { name: "Put Item 1 back" }),
+  ).toBeVisible();
+  expect(await height()).toBe(before);
 });
 
 test("ORD-5.1, ORD-5.2, ORD-5.3, APR-2.2, APR-2.3: a guest turns sorting off and on, keeps it after a reload, and moves the checkboxes", async ({
@@ -313,6 +360,13 @@ test("ORD-5.1, ORD-5.2, ORD-5.3, APR-2.2, APR-2.3: a guest turns sorting off and
   await expect(page.getByRole("radio", { name: "Left" })).toBeChecked();
   await page.getByRole("radio", { name: "Right" }).click();
   expect(await box()).toBeCloseTo(right, 0);
+
+  // The list's ⋮ menu holds the same setting: a tap picks it and closes the menu.
+  await page.getByRole("button", { name: "List actions" }).click();
+  await page.getByRole("menuitemradio", { name: "Left" }).click();
+  await expect(page.getByRole("menu")).toBeHidden();
+  expect(await box()).toBeLessThan(right);
+  await expect(page.getByRole("radio", { name: "Left" })).toBeChecked();
 });
 
 for (const size of [

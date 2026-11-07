@@ -1,6 +1,6 @@
 import { Drawer } from "@base-ui/react/drawer";
 import { Undo2 } from "lucide-react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   formatPrice,
   formatQuantity,
@@ -37,14 +37,25 @@ function ChipContent({ item }: { item: ListItem }) {
   );
 }
 
-function Chip({ listId, item }: { listId: string; item: ListItem }) {
+// A chip enters with a short animation only when it is new: the ones already
+// in the tray do not replay it when the tray unfolds.
+function Chip({
+  listId,
+  item,
+  seen,
+}: {
+  listId: string;
+  item: ListItem;
+  seen: ReadonlySet<string>;
+}) {
   const putBack = usePutBack(listId, item);
+  const [animate] = useState(() => !seen.has(item.id));
   return (
     <button
       type="button"
       aria-label={`Put ${item.name} back`}
       onClick={putBack}
-      className={`${chipClass} outline-none focus-visible:ring-3 focus-visible:ring-haul-accent motion-safe:animate-[chip-in_180ms_ease-out]`}
+      className={`${chipClass} outline-none focus-visible:ring-3 focus-visible:ring-haul-accent ${animate ? "motion-safe:animate-[chip-in_180ms_ease-out]" : ""}`}
     >
       <ChipContent item={item} />
     </button>
@@ -98,7 +109,7 @@ function Progress({ k, n }: { k: number; n: number }) {
   return (
     <div
       role="progressbar"
-      aria-label="Items in the haul"
+      aria-label="The haul"
       aria-valuemin={0}
       aria-valuenow={k}
       aria-valuemax={n}
@@ -132,6 +143,10 @@ export function Haul({
   // How many chips fit; null until measured (then all are shown).
   const [fit, setFit] = useState<number | null>(null);
   const haul = haulItems(items);
+  const [seen] = useState(() => new Set(haul.map((item) => item.id)));
+  useEffect(() => {
+    haul.forEach((item) => seen.add(item.id));
+  });
   const n = items.length;
   const k = haul.length;
   const names = haul
@@ -183,7 +198,7 @@ export function Haul({
           The haul · {count}
         </button>
       ) : (
-        <section aria-label="Haul summary" className={`${tray} pb-3`}>
+        <section aria-label="The haul" className={`${tray} pb-3`}>
           <button
             type="button"
             onClick={() => {
@@ -211,13 +226,13 @@ export function Haul({
           </button>
           <Progress k={k} n={n} />
           {k === 0 ? (
-            <p className="mt-2 text-sm text-haul-muted">
+            <p className="mt-2 flex min-h-11 items-center text-sm text-haul-muted">
               Check items off to drop them here
             </p>
           ) : (
             <div ref={row} className="relative mt-2 flex gap-2 overflow-hidden">
               {haul.slice(0, shown).map((item) => (
-                <Chip key={item.id} listId={listId} item={item} />
+                <Chip key={item.id} listId={listId} item={item} seen={seen} />
               ))}
               {shown < k && (
                 <button
@@ -250,7 +265,7 @@ export function Haul({
       )}
       <Drawer.Portal>
         <Drawer.Backdrop className="fixed inset-0 z-50 bg-black/40 data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:transition-opacity motion-safe:duration-200" />
-        <Drawer.Popup className="fixed inset-x-0 bottom-0 z-50 mx-auto flex h-[75dvh] max-w-[720px] translate-y-(--drawer-swipe-movement-y) flex-col rounded-t-surface bg-haul px-4 pt-3 text-haul-foreground outline-none data-ending-style:translate-y-full data-starting-style:translate-y-full motion-safe:transition-[translate] motion-safe:duration-200 md:px-6">
+        <Drawer.Popup className="fixed inset-x-0 bottom-0 z-50 mx-auto flex h-[75dvh] max-w-[720px] translate-y-(--drawer-swipe-movement-y) flex-col rounded-t-surface bg-haul px-4 pt-3 text-haul-foreground outline-none data-ending-style:translate-y-full data-starting-style:translate-y-full motion-safe:transition-[translate] motion-safe:duration-200 md:px-6 lg:left-64">
           <span className="mx-auto mb-2 block h-1 w-10 rounded-full bg-haul-chip" />
           <div className="flex items-baseline justify-between gap-2">
             <Drawer.Title className="text-lg font-bold">The haul</Drawer.Title>

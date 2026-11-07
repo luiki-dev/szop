@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { itemLimits, itemNameSchema, uuidv7 } from "@szop/shared";
@@ -8,10 +8,49 @@ import { useAddItem } from "../use-items.ts";
 
 const formSchema = z.object({ name: itemNameSchema });
 
+// The blur fires at pointerdown. The haul must not unfold under the finger
+// before the tap ends, or the click lands elsewhere: wait for pointerup.
+function useUnfoldAfterTap(onFocusChange: (focused: boolean) => void) {
+  const pressed = useRef(false);
+  useEffect(() => {
+    const down = () => {
+      pressed.current = true;
+    };
+    const up = () => {
+      pressed.current = false;
+    };
+    window.addEventListener("pointerdown", down, true);
+    window.addEventListener("pointerup", up, true);
+    window.addEventListener("pointercancel", up, true);
+    return () => {
+      window.removeEventListener("pointerdown", down, true);
+      window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", up, true);
+    };
+  }, []);
+  return () => {
+    if (!pressed.current) {
+      onFocusChange(false);
+      return;
+    }
+    // The click follows pointerup in the same task: unfold after it.
+    const end = () => {
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+      setTimeout(() => {
+        onFocusChange(false);
+      }, 0);
+    };
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+  };
+}
+
 // The add bar: a band in the page color; the list page pins it, with the haul
 // under it, to the bottom of the column (ITM-2). The next item's ID is made up
-// front and renewed after each add, so every add is its own mutation scope. An empty name adds nothing, with no
-// message (LIM-2.2: the field's maxLength keeps the name short).
+// front and renewed after each add, so every add is its own mutation scope.
+// An empty name adds nothing, with no message (LIM-2.2: the field's maxLength
+// keeps the name short).
 export function AddBar({
   listId,
   listName,
@@ -23,6 +62,7 @@ export function AddBar({
 }) {
   const [nextId, setNextId] = useState(uuidv7);
   const add = useAddItem(listId, nextId);
+  const unfold = useUnfoldAfterTap(onFocusChange);
   const { register, handleSubmit, reset } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: { name: "" },
@@ -45,7 +85,7 @@ export function AddBar({
       <input
         {...register("name", {
           onBlur: () => {
-            onFocusChange(false);
+            unfold();
           },
         })}
         onFocus={() => {
@@ -57,7 +97,8 @@ export function AddBar({
         autoComplete="off"
         className="h-12 min-w-0 flex-1 rounded-control border-2 border-input bg-card px-3 outline-none focus:ring-3 focus:ring-ring"
       />
-      {/* Pressing Add must not take the focus from the field: on a phone the keyboard stays open. */}
+      {/* Pressing Add must not take the focus from the field: on a phone the
+          keyboard stays open. */}
       <Button
         type="submit"
         className="h-12 px-5"

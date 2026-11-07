@@ -3,7 +3,7 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import {
@@ -16,6 +16,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { smallCatalog } from "../../test/catalog.ts";
 import { bananas, listId, listWith, milk } from "../../test/items.ts";
 import { server } from "../../test/server.ts";
+import { storeCheckboxSide } from "../../shell/checkbox-side.ts";
 import { Haul } from "./haul.tsx";
 import { ItemCards } from "./item-cards.tsx";
 
@@ -93,6 +94,7 @@ function setup(items: ListItem[], focused = false) {
 }
 
 afterEach(() => {
+  storeCheckboxSide("right");
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -211,6 +213,26 @@ describe("Haul", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull();
     });
+  });
+
+  it("APR-2.2: the drawer's ↶ is after the name by default and before it with Left", async () => {
+    setup([{ ...bananas, checkedAt: at(1) }]);
+    const undoIsFirst = async () => {
+      await userEvent.click(screen.getByRole("button", { name: /The haul/ }));
+      const dialog = await screen.findByRole("dialog", { name: "The haul" });
+      const row = within(dialog).getByRole("listitem");
+      const first = row.firstElementChild;
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).toBeNull();
+      });
+      return first?.getAttribute("aria-label") === "Put Bananas back";
+    };
+    expect(await undoIsFirst()).toBe(false);
+    act(() => {
+      storeCheckboxSide("left");
+    });
+    expect(await undoIsFirst()).toBe(true);
   });
 
   it("ORD-1.3, ORD-1.6, ORD-1.10: chips that do not fit become +N more, which opens the drawer", async () => {
