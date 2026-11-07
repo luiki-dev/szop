@@ -152,6 +152,25 @@ describe("EditItem", () => {
     expect(screen.getByLabelText("Quantity")).toHaveValue("1");
   });
 
+  it("ITM-6.1: + is disabled at the largest quantity, and ArrowUp and ArrowDown step like + and −", async () => {
+    setup(six);
+    const quantity = screen.getByLabelText("Quantity");
+    await userEvent.type(quantity, "{ArrowUp}");
+    expect(quantity).toHaveValue("7");
+    await userEvent.type(quantity, "{ArrowDown}{ArrowDown}");
+    expect(quantity).toHaveValue("5");
+
+    await userEvent.clear(quantity);
+    await userEvent.type(quantity, "9999");
+    const plus = screen.getByRole("button", { name: "Increase quantity" });
+    expect(plus).toBeDisabled();
+    await userEvent.type(quantity, "{ArrowUp}");
+    expect(quantity).toHaveValue("9999");
+    await userEvent.type(quantity, "{ArrowDown}");
+    expect(quantity).toHaveValue("9998");
+    expect(plus).toBeEnabled();
+  });
+
   it("ITM-5.1: the line total shows under the price", () => {
     setup(six);
     expect(screen.getByText("6 × €0.33 = €1.98")).toBeInTheDocument();

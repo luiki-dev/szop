@@ -272,6 +272,10 @@ export function CategoryPicker({
       <Drawer.Portal>
         <Drawer.Backdrop className="fixed inset-0 z-60 bg-black/40" />
         <Drawer.Popup className="fixed inset-x-0 bottom-0 z-60 max-h-[90dvh] overflow-y-auto rounded-t-surface bg-card p-4 text-card-foreground shadow-lg outline-none">
+          <span
+            aria-hidden="true"
+            className="mx-auto mb-3 block h-1 w-10 rounded-full bg-border"
+          />
           {content}
         </Drawer.Popup>
       </Drawer.Portal>

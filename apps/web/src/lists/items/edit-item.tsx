@@ -30,7 +30,8 @@ import {
 const control =
   "min-h-12 w-full rounded-control border-2 border-input bg-card px-3 outline-none focus:ring-3 focus:ring-ring aria-invalid:border-destructive";
 const stepper =
-  "size-12 shrink-0 rounded-control border-2 border-input outline-none focus-visible:ring-3 focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
+  "size-12 shrink-0 outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
+const handle = "mx-auto mb-3 block h-1 w-10 rounded-full bg-border";
 
 // "Edit item" (ITM-6): a bottom sheet on a phone, a centered dialog from `lg`.
 // No field takes the focus on opening, so the phone's keyboard stays down.
@@ -110,6 +111,7 @@ export function EditItem({
           initialFocus={false}
           className="fixed inset-x-0 bottom-0 z-50 max-h-[90dvh] translate-y-(--drawer-swipe-movement-y) overflow-y-auto rounded-t-surface bg-card p-4 text-card-foreground shadow-lg outline-none data-ending-style:translate-y-full data-starting-style:translate-y-full motion-safe:transition-[translate] motion-safe:duration-200"
         >
+          <span aria-hidden="true" className={handle} />
           <Drawer.Title className={heading}>Edit item</Drawer.Title>
           <Drawer.Close render={closeButton}>{close}</Drawer.Close>
           {form}
@@ -200,6 +202,10 @@ function EditForm({
   const quantity = parseAmount(quantityText, 3);
   const price = parseAmount(priceText, 2);
   const current = quantity.ok ? quantity.value : undefined;
+  const canIncrease =
+    current !== undefined && (current ?? 0) + 1000 <= itemLimits.quantity.max;
+  const canDecrease =
+    current !== undefined && current !== null && current > 1000;
   const step = (by: number) => {
     setValue("quantity", formatAmountInput((current ?? 0) + by, 3), {
       shouldDirty: true,
@@ -242,14 +248,12 @@ function EditForm({
             htmlFor="edit-quantity"
             error={errors.quantity?.message}
           >
-            <div className="flex gap-1">
+            <div className="flex rounded-control border-2 border-input bg-card focus-within:ring-3 focus-within:ring-ring">
               <button
                 type="button"
                 aria-label="Decrease quantity"
                 className={stepper}
-                disabled={
-                  current === undefined || current === null || current <= 1000
-                }
+                disabled={!canDecrease}
                 onClick={() => {
                   step(-1000);
                 }}
@@ -265,13 +269,19 @@ function EditForm({
                 aria-describedby={
                   errors.quantity ? "edit-quantity-error" : undefined
                 }
-                className={cn(control, "min-w-0 text-center")}
+                onKeyDown={(event) => {
+                  const by = { ArrowUp: 1000, ArrowDown: -1000 }[event.key];
+                  if (by === undefined) return;
+                  event.preventDefault();
+                  if (by > 0 ? canIncrease : canDecrease) step(by);
+                }}
+                className="min-h-12 min-w-0 flex-1 border-x-2 border-input bg-transparent px-1 text-center outline-none aria-invalid:border-destructive"
               />
               <button
                 type="button"
                 aria-label="Increase quantity"
                 className={stepper}
-                disabled={current === undefined}
+                disabled={!canIncrease}
                 onClick={() => {
                   step(1000);
                 }}
@@ -296,15 +306,23 @@ function EditForm({
           htmlFor="edit-price"
           error={errors.price?.message}
         >
-          <input
-            id="edit-price"
-            {...register("price")}
-            inputMode="decimal"
-            autoComplete="off"
-            aria-invalid={!!errors.price}
-            aria-describedby={errors.price ? "edit-price-error" : undefined}
-            className={control}
-          />
+          <div className="relative">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground"
+            >
+              €
+            </span>
+            <input
+              id="edit-price"
+              {...register("price")}
+              inputMode="decimal"
+              autoComplete="off"
+              aria-invalid={!!errors.price}
+              aria-describedby={errors.price ? "edit-price-error" : undefined}
+              className={cn(control, "pl-8")}
+            />
+          </div>
           {total !== null &&
             quantity.ok &&
             price.ok &&
