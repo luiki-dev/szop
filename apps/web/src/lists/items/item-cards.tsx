@@ -28,7 +28,7 @@ export function ItemCards({
   listId: string;
   cards: ItemCard[];
   units: readonly CatalogUnit[];
-  onEdit: (item: ListItem) => void;
+  onEdit: (item: ListItem, keyboard: boolean) => void;
 }) {
   const unitNames = new Map(units.map((unit) => [unit.id, unit.name]));
   return (
@@ -60,8 +60,8 @@ export function ItemCards({
                     ? null
                     : (unitNames.get(item.unitId) ?? null)
                 }
-                onEdit={() => {
-                  onEdit(item);
+                onEdit={(keyboard) => {
+                  onEdit(item, keyboard);
                 }}
                 checkbox={<ItemCheckbox listId={listId} item={item} />}
               />

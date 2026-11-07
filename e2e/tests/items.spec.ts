@@ -641,6 +641,35 @@ test("ITM-6.1: on a desktop, Tab after Enter opens Edit item stays in the dialog
   }
 });
 
+test("ITM-6.1: closing Edit item gives the focus back to the item, with a ring only when it was opened from the keyboard (#415)", async ({
+  page,
+}) => {
+  await listWith(page, 1);
+  const row = page.getByRole("button", { name: /Item 1/ });
+  const ring = () => row.evaluate((el) => el.matches(":focus-visible"));
+  const dialog = page.getByRole("dialog", { name: "Edit item" });
+
+  await row.click();
+  await dialog.getByRole("textbox", { name: "Name" }).click();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(row).toBeFocused();
+  expect(await ring(), "opened by a click").toBe(false);
+
+  await row.click();
+  await dialog.getByRole("textbox", { name: "Name" }).press("Enter");
+  await expect(dialog).toHaveCount(0);
+  await expect(row).toBeFocused();
+  expect(await ring(), "saved with Enter, the phone's Go").toBe(false);
+
+  await row.press("Enter");
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(row).toBeFocused();
+  expect(await ring(), "opened from the keyboard").toBe(true);
+});
+
 test("ITM-6.1: Quantity is as tall as the other fields (#413)", async ({
   page,
 }) => {

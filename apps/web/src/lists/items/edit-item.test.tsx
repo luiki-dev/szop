@@ -40,6 +40,7 @@ function setup(item: ListItem = bananas, desktop = false) {
         listId={listId}
         item={item}
         open
+        ringOnClose={false}
         onOpenChange={onOpenChange}
         onRemoved={onRemoved}
         units={smallCatalog.units}

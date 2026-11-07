@@ -196,7 +196,7 @@ Decided in [ADR 0071](../decisions/0071-list-items-phase-details.md) for [PH-17]
 
   ![The list on a phone, light and dark, with the checkboxes on the right and then on the left](visual-design/items-row.png)
 
-- **The edit sheet and the category picker.** A bottom sheet on a phone and a dialog from `lg`: name, quantity with − and +, unit, price per unit with the line total under it, category, note; Remove on the left, Cancel and Save on the right. The category field opens a second sheet with a search field and the category tree; a row's chevron opens its subcategories, the rest of the row picks it and returns to the sheet.
+- **The edit sheet and the category picker.** A bottom sheet on a phone and a dialog from `lg`: name, quantity with − and +, unit, price per unit with the line total under it, category, note; Remove on the left, Cancel and Save on the right. The category field opens a second sheet with a search field and the category tree; a row's chevron opens its subcategories, the rest of the row picks it and returns to the sheet. When the sheet closes, the focus goes back to the item, with its ring only when the item was opened from the keyboard ([ADR 0073](../decisions/0073-list-items-polish-phase-details.md), decision 8).
 
   ![The edit sheet and the category picker on a phone, light and dark](visual-design/items-edit.png)
 

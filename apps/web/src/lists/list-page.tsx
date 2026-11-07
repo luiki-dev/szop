@@ -77,7 +77,10 @@ export function ListPage() {
   const bottomBlock = useToastOffset();
   const [barFocused, setBarFocused] = useState(false);
   const keyboardOpen = useKeyboardOpen();
-  const [editing, setEditing] = useState<ListItem | null>(null);
+  const [editing, setEditing] = useState<{
+    item: ListItem;
+    keyboard: boolean;
+  } | null>(null);
   // The latest removed item holds the Undo toast; the count renews it when the same item goes twice.
   const [removed, setRemoved] = useState<{ item: ListItem; n: number } | null>(
     null,
@@ -280,7 +283,9 @@ export function ListPage() {
             listId={id}
             cards={cards}
             units={catalog.data.units}
-            onEdit={setEditing}
+            onEdit={(item, keyboard) => {
+              setEditing({ item, keyboard });
+            }}
           />
         </>
       )}
@@ -312,9 +317,10 @@ export function ListPage() {
       </div>
       {editing && catalog.data && (
         <EditItem
-          key={editing.id}
+          key={editing.item.id}
           listId={id}
-          item={editing}
+          item={editing.item}
+          ringOnClose={editing.keyboard}
           open
           onOpenChange={(open) => {
             if (!open) setEditing(null);

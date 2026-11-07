@@ -39,6 +39,7 @@ export function EditItem({
   listId,
   item,
   open,
+  ringOnClose,
   onOpenChange,
   onRemoved,
   units,
@@ -47,6 +48,7 @@ export function EditItem({
   listId: string;
   item: ListItem;
   open: boolean;
+  ringOnClose: boolean;
   onOpenChange: (open: boolean) => void;
   onRemoved: (item: ListItem) => void;
   units: CatalogUnit[];
@@ -71,6 +73,18 @@ export function EditItem({
   );
   const hideEdit = desktop && picking;
   const popup = useRef<HTMLDivElement>(null);
+  // The focus goes back to the item, with its ring only when the item was
+  // opened from the keyboard (#415); browsers show it after a field had focus.
+  const [opener] = useState(() => document.activeElement);
+  const finalFocus = () => {
+    if (!(opener instanceof HTMLElement)) return true;
+    // The item may hold the focus already, and focusing it again would keep
+    // its ring as it is.
+    opener.blur();
+    opener.focus({ focusVisible: ringOnClose });
+    return false;
+  };
+
   const close = <X aria-hidden="true" />;
   const closeButton = (
     <Button
@@ -92,6 +106,7 @@ export function EditItem({
             // The dialog itself, not a field: the focus must leave the list
             // behind, or Tab walks through it first (#405).
             initialFocus={popup}
+            finalFocus={finalFocus}
             ref={popup}
             className={cn(
               // Centered on the column beside the 16rem sidebar (#406).
@@ -118,6 +133,7 @@ export function EditItem({
         <Drawer.Backdrop className={backdrop} />
         <Drawer.Popup
           initialFocus={false}
+          finalFocus={finalFocus}
           className="fixed inset-x-0 bottom-0 z-50 max-h-[90dvh] translate-y-(--drawer-swipe-movement-y) overflow-y-auto rounded-t-surface bg-card p-4 text-card-foreground shadow-lg outline-none data-ending-style:translate-y-full data-starting-style:translate-y-full motion-safe:transition-[translate] motion-safe:duration-200"
         >
           <span aria-hidden="true" className={handle} />

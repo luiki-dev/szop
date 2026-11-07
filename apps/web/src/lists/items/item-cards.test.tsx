@@ -77,7 +77,7 @@ describe("ItemCards", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /Bananas/ }));
 
-    expect(onEdit).toHaveBeenCalledWith(bananas);
+    expect(onEdit).toHaveBeenCalledWith(bananas, false);
   });
 
   it("shows the quantity with its unit and the line total", () => {
