@@ -775,3 +775,35 @@ test("ITM-6.1: the category picker keeps its height while searching (#406)", asy
     await expect(page.getByRole("dialog")).toHaveCount(0);
   }
 });
+
+test("ITM-6.1: in the category picker only the list of categories scrolls (#417)", async ({
+  page,
+}) => {
+  for (const size of [
+    { width: 390, height: 700 },
+    { width: 1280, height: 800 },
+  ]) {
+    await page.setViewportSize(size);
+    if (size.width === 390) await listWith(page, 1);
+    await page.getByRole("button", { name: /Item 1/ }).click();
+    await page.getByRole("button", { name: /^Category/ }).click();
+    const search = page.getByRole("searchbox", { name: "Search categories" });
+    const panel = page.getByRole("dialog").filter({ has: search }).last();
+    const list = page
+      .getByRole("radiogroup", { name: "Category" })
+      .locator("ul")
+      .first();
+    const label = size.width === 390 ? "phone" : "desktop";
+    const fits = (box: HTMLElement) => box.scrollHeight <= box.clientHeight;
+    expect(await panel.evaluate(fits), label).toBe(true);
+    expect(await list.evaluate(fits), label).toBe(false);
+
+    await list.evaluate((box) => {
+      box.scrollBy(0, 400);
+    });
+    await expect(search, label).toBeInViewport();
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  }
+});
