@@ -41,7 +41,7 @@ git pull
 git switch -c feat/shopping-lists
 ```
 
-Work happens in the main checkout, on a plain branch. Git worktrees (a second working directory for another branch) are possible for parallel work, but each needs its own `pnpm install`, `.env` and Docker Compose ports, so they are not the default.
+Work happens in the main checkout, on a plain branch, by default. A git worktree (a second working directory for another branch) is used when the owner asks for one or runs a second session at the same time, so the two do not share a checkout ([ADR 0072](../decisions/0072-phase-approach-per-phase.md), decision 4). Each needs its own `pnpm install`, `.env` and Docker Compose ports, which is why it is not the default.
 
 ## 2. Commit
 
