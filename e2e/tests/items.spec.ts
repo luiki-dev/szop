@@ -528,3 +528,65 @@ test("ORD-1.8: by touch, the first tap after typing checks the item under the fi
     page.getByRole("button", { name: "Put Item 16 back" }),
   ).toBeVisible();
 });
+
+test("ORD-1.6: dragging the haul's drawer down closes it (#404)", async ({
+  page,
+}) => {
+  await listWith(page, 2);
+  await page.getByRole("checkbox", { name: "Item 1" }).click();
+  await page.getByRole("button", { name: /^The haul/ }).click();
+  const drawer = page.getByRole("dialog", { name: "The haul" });
+  await expect(drawer).toBeVisible();
+  const box = (await drawer.boundingBox()) ?? { x: 0, y: 0, width: 0 };
+  const x = box.x + box.width / 2;
+  await page.mouse.move(x, box.y + 10);
+  await page.mouse.down();
+  // Released over the drawer, not the dimmed list, so only the swipe closes it.
+  await page.mouse.move(x, box.y + 150, { steps: 10 });
+  await page.mouse.up();
+  await expect(drawer).toBeHidden();
+});
+
+test("ITM-6.1: on a desktop, Tab after Enter opens Edit item stays in the dialog (#405)", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await listWith(page, 3);
+  await page.getByRole("button", { name: /Item 1/ }).press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Edit item" });
+  await expect(dialog).toBeVisible();
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.press("Tab");
+    const inside = await dialog.evaluate((el) =>
+      el.contains(document.activeElement),
+    );
+    expect(inside, `Tab ${String(i + 1)}`).toBe(true);
+  }
+});
+
+test("ITM-6.1: the category picker keeps its height while searching (#406)", async ({
+  page,
+}) => {
+  for (const size of [
+    { width: 390, height: 700 },
+    { width: 1280, height: 800 },
+  ]) {
+    await page.setViewportSize(size);
+    if (size.width === 390) await listWith(page, 1);
+    await page.getByRole("button", { name: /Item 1/ }).click();
+    await page.getByRole("button", { name: /^Category/ }).click();
+    const search = page.getByRole("searchbox", { name: "Search categories" });
+    const panel = page.getByRole("dialog").filter({ has: search }).last();
+    const before = (await panel.boundingBox())?.height ?? 0;
+    await search.fill("bread");
+    await expect(page.getByRole("radio")).not.toHaveCount(0);
+    const after = (await panel.boundingBox())?.height ?? 0;
+    expect(after, size.width === 390 ? "phone" : "desktop").toBeCloseTo(
+      before,
+      0,
+    );
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  }
+});

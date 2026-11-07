@@ -70,6 +70,7 @@ export function EditItem({
     />
   );
   const hideEdit = desktop && picking;
+  const popup = useRef<HTMLDivElement>(null);
   const close = <X aria-hidden="true" />;
   const closeButton = (
     <Button
@@ -88,8 +89,15 @@ export function EditItem({
         <Dialog.Portal>
           <Dialog.Backdrop className={backdrop} />
           <Dialog.Popup
-            initialFocus={false}
-            className="fixed top-1/2 left-1/2 z-50 max-h-[90dvh] w-full max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-surface bg-card p-4 text-card-foreground shadow-lg outline-none"
+            // The dialog itself, not a field: the focus must leave the list
+            // behind, or Tab walks through it first (#405).
+            initialFocus={popup}
+            ref={popup}
+            className={cn(
+              "fixed top-1/2 left-1/2 z-50 max-h-[90dvh] w-full max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-surface bg-card p-4 text-card-foreground shadow-lg outline-none",
+              // The picker keeps one height while its results change (#406).
+              hideEdit && "h-[90dvh]",
+            )}
           >
             <Dialog.Title className={hideEdit ? "sr-only" : heading}>
               Edit item
