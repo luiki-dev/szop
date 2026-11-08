@@ -12,7 +12,7 @@ Shutting Szop down for good is the reverse of this table: [Tearing down](#tearin
 
 Why each piece exists is in the [stack overview](../architecture/stack-overview.md#12-where-szop-runs); how Terraform works here is on the [Terraform page](../development/tools/terraform.md); what each module creates is drawn in [AWS resources](../architecture/aws-resources.md). The tools come from [setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli).
 
-**Every command in this runbook assumes `export AWS_PROFILE=szop`** in the terminal, and a current sign-in (`aws sso login`). Lines marked **⚠️ Don't** are mistakes that are hard to undo; read them before the step, not after.
+**Every command in this runbook assumes `export AWS_PROFILE=szop`** in the terminal, and a current sign-in (`aws sso login`), ended with `aws sso logout` when the work is done ([Signing in as the administrator](#signing-in-as-the-administrator)). Lines marked **⚠️ Don't** are mistakes that are hard to undo; read them before the step, not after.
 
 ## Contents
 
@@ -23,6 +23,11 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [4. IAM Identity Center](#4-iam-identity-center)
   - [5. Sign in from the CLI](#5-sign-in-from-the-cli)
   - [6. Remove every long-lived key](#6-remove-every-long-lived-key)
+- [Read-only access for Claude Code](#read-only-access-for-claude-code)
+  - [The permission set](#the-permission-set)
+  - [The user and its assignment](#the-user-and-its-assignment)
+  - [The profile](#the-profile)
+  - [Signing in as the administrator](#signing-in-as-the-administrator)
 - [Applying bootstrap](#applying-bootstrap)
   - [Part 1: the first apply, with local state](#part-1-the-first-apply-with-local-state)
   - [Part 2: moving the state into the bucket](#part-2-moving-the-state-into-the-bucket)
@@ -161,6 +166,175 @@ aws sts get-caller-identity --profile szop        # works: the assumed role, as 
 The first command failing is the point: a command that forgets the profile now stops, instead of quietly running as an old user with a key that never expires.
 
 ⚠️ **Don't:** delete the IAM user or its key before step 5's check passes; you would lose the CLI's way in until Identity Center works.
+
+## Read-only access for Claude Code
+
+Claude Code never works as the administrator. It is its own user in Identity Center, with a read-only permission set and nothing else assigned, because an SSO token can ask for any role assigned to its user ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decision 2). It can read the account's configuration, but not change anything, and not read a secret value, a log line or a Terraform state. Done once, in the console, by hand ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decision 5).
+
+### The permission set
+
+In *IAM Identity Center* (region **Frankfurt**): *Permission sets → Create permission set → Custom permission set → Next*.
+
+1. *AWS managed policies:* tick **ReadOnlyAccess**.
+2. *Inline policy:* paste the policy below. *Next*.
+3. *Permission set name:* `ClaudeReadOnly`. *Session duration:* **8 hours**. *Next → Create*.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenySecretValues",
+      "Effect": "Deny",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath",
+        "ssm:GetParameterHistory",
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyAllObjects",
+      "Effect": "Deny",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyLogContents",
+      "Effect": "Deny",
+      "Action": [
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents",
+        "logs:StartQuery",
+        "logs:StartLiveTail",
+        "logs:GetQueryResults",
+        "logs:GetLogRecord",
+        "logs:ListAnomalies"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyDataReads",
+      "Effect": "Deny",
+      "Action": [
+        "rds:DownloadDBLogFilePortion",
+        "rds:DownloadCompleteDBLogFile",
+        "pi:DescribeDimensionKeys",
+        "pi:GetDimensionKeyDetails",
+        "pi:GetResourceMetrics",
+        "dynamodb:GetItem",
+        "dynamodb:BatchGetItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:PartiQLSelect",
+        "dynamodb:GetRecords",
+        "dynamodb:ReadDataForReplication",
+        "dynamodb:SearchVectors"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyBillingAndCost",
+      "Effect": "Deny",
+      "Action": [
+        "ce:*",
+        "budgets:*",
+        "billing:*",
+        "aws-portal:*",
+        "cur:*",
+        "bcm-data-exports:*",
+        "invoicing:*",
+        "payments:*",
+        "freetier:*",
+        "consolidatedbilling:*",
+        "cost-optimization-hub:*",
+        "savingsplans:*",
+        "tax:*",
+        "purchase-orders:*",
+        "billingconductor:*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyPersonalData",
+      "Effect": "Deny",
+      "Action": [
+        "account:GetPrimaryEmail",
+        "account:GetContactInformation",
+        "account:GetAlternateContact",
+        "organizations:*",
+        "identitystore:*",
+        "sso-directory:*",
+        "cloudtrail:LookupEvents",
+        "ses:ListSuppressedDestinations",
+        "ses:GetSuppressedDestination"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+This is a copy of `ci_plan_denies` in [`infra/base/ci_roles.tf`](../../infra/base/ci_roles.tf), which explains each statement. It differs in one statement: `DenyAllObjects` also denies the Terraform states, which the plan role needs and Claude Code does not. **Nothing checks that the two stay alike:** when you change one, change the other (*Permission sets → ClaudeReadOnly → Inline policy → Edit*).
+
+### The user and its assignment
+
+1. *Users → Add user*. Username: `claude`. Email address: one you read, other than your own user's, because Identity Center wants each user's to be different. First and last name: `Claude Code`. *Next* through the group page (no groups), *Add user*.
+2. Open the invitation email **in a private window**, so that your own sign-in stays out of it. Set a password and register an MFA device for this user.
+3. *AWS accounts* → tick **your account** under Root → *Assign users or groups* → the *Users* tab → tick `claude` → *Next* → **ClaudeReadOnly** → *Next → Submit*.
+
+⚠️ **Don't:** assign `claude` anything else, or assign `ClaudeReadOnly` to your own user: the separation is the whole point.
+
+### The profile
+
+Add this to `~/.aws/config`, with the same account ID and portal URL as the `szop` profile. Its SSO session is its own: the two users' tokens must not overwrite each other. Your terminal keeps `AWS_PROFILE=szop`; Claude Code's settings choose this profile for its sessions.
+
+```ini
+[profile claude-readonly]
+sso_session = claude-readonly
+sso_account_id = <the account ID>
+sso_role_name = ClaudeReadOnly
+region = eu-central-1
+output = json
+
+[sso-session claude-readonly]
+sso_start_url = <the AWS access portal URL>
+sso_region = eu-central-1
+sso_registration_scopes = sso:account:access
+```
+
+Sign in, in your own terminal. The command prints a URL and a code: open the URL **in a private window** and sign in as `claude`. A normal window would approve the login as your own user, and the profile would then fail with `No access`.
+
+```bash
+aws sso login --profile claude-readonly --use-device-code --no-browser
+```
+
+**Check:**
+
+```bash
+aws sts get-caller-identity --profile claude-readonly
+#   Arn: arn:aws:sts::<account>:assumed-role/AWSReservedSSO_ClaudeReadOnly_…/claude
+aws ec2 describe-vpcs --profile claude-readonly --query 'length(Vpcs)'
+#   a number: reads work
+aws ec2 create-vpc --profile claude-readonly --cidr-block 10.99.0.0/16 --dry-run
+#   UnauthorizedOperation: writes fail (DryRunOperation would mean it was allowed)
+aws ssm get-parameter --profile claude-readonly --name /szop/check
+#   AccessDeniedException ... with an explicit deny
+aws s3api get-object --profile claude-readonly --bucket szop-tfstate-ntrtcr --key demo/terraform.tfstate /dev/null
+#   AccessDenied ... with an explicit deny
+```
+
+The login lasts up to 8 hours. When it has expired, a session's `aws` commands fail with `Token has expired`: run the `aws sso login` line above again, in your own terminal.
+
+### Signing in as the administrator
+
+The `szop` token sits next to Claude Code's in `~/.aws/sso/cache`, so while you are signed in as the administrator, a running session could use it. Only the deny rules in `.claude/settings.json` stand in the way, and they catch a mistake, not a determined command ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decisions 8 and 9). So keep that sign-in as short as the work:
+
+1. `aws sso login --profile szop`, in your own terminal, not with `!` in a session.
+2. Do the work.
+3. `aws sso logout`. It clears **every** profile's token, so sign in as `claude-readonly` again ([The profile](#the-profile)) before a session needs AWS.
 
 ## Applying bootstrap
 

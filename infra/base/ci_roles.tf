@@ -52,6 +52,8 @@ resource "aws_iam_role_policy_attachment" "ci_plan_read_only" {
 # ReadOnlyAccess is broader than a public plan log should show, so explicit
 # denies take back what must stay private (an explicit deny beats any allow).
 # Everything the plan job prints is public (ADR 0010, decision 16).
+# Copied by hand into the permission set ClaudeReadOnly: change that too
+# (runbook, "Read-only access for Claude Code"; ADR 0074, decision 5).
 data "aws_iam_policy_document" "ci_plan_denies" {
   # Secret values. ssm:DescribeParameters, which returns metadata only, stays
   # allowed through ReadOnlyAccess. The AWS provider calls GetParameter with
