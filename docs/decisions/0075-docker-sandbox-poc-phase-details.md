@@ -1,0 +1,40 @@
+# ADR 0075 — Docker Sandbox proof of concept phase details
+
+- **Status:** ✅ Accepted
+- **Date:** 2026-11-08
+
+## Context
+
+Claude Code works on Szop in WSL with no isolation. Nothing has gone wrong, but the owner would rather not wait for it after reading what can happen. Today `/mnt/c` exposes the Windows disk and the cloud folders synced to it, `~/.aws` holds the administrator profile `szop`, and `gh` acts as the owner, who is the repository's administrator. Only Claude's behaviour, the deny rules and the push hook stand in the way, and [ADR 0012](0012-security-baseline.md), decision 19, already calls those a seatbelt.
+
+The owner wants to try Claude Code in [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/), whose CLI is `sbx`, and to stay in it if it proves itself. An earlier analysis by the owner found that Claude Code's own Bash sandbox and Sandbox Runtime give too little against the problems that matter here: Docker, database clients and localhost.
+
+[PH-48](../roadmap.md#ph-48-docker-sandbox-proof-of-concept) answers whether this can work. It takes the bounded path: the design was agreed in the brainstorm and this ADR holds it, while the steps and their results are in the [proof of concept's record](../audits/2026-11-08-docker-sandbox-poc.md).
+
+## Changes to the roadmap
+
+- **PH-48 and PH-49 are added** to Stage 4, after [PH-47](../roadmap.md#ph-47-read-only-aws-access-for-claude-code).
+
+## Decisions
+
+| # | Decision | Options considered | Outcome |
+|---|---|---|---|
+| 1 | The phase's approach | The full path; bounded with about five tasks. | **Bounded; one new concept, Docker Sandboxes; six tasks; a stop after each, since each can end in a NO-GO; a limit of two to three evenings.** Past the limit, the outcome is a NO-GO or the owner's explicit decision to extend. Claude's recommendation; the owner chose it. |
+| 2 | How the work is split | The owner's plan of a proof of concept, an analysis and a setup, with two gates; one phase for everything; a proof of concept and a setup, with one gate. | **A proof of concept with the only gate, then a reproducible setup in its own phase, then an evaluation.** Most of the analysis's questions can only be answered by trying them, so the analysis folds into the proof of concept. A separate phase keeps a NO-GO from leaving half-built setup behind. Claude's recommendation; the owner chose it. |
+| 3 | What the isolation must protect | Isolation as a general good; a stated list. | **After a malicious package or a prompt injection, these must not happen: Windows infected, the owner's cloud files reached, the AWS or GitHub account taken over. Losing the sandbox is acceptable.** Every condition in decision 8 follows from this list. The owner's choice. |
+| 4 | Where the repository lives | A clone on Windows mounted directly, the owner's first idea; clone mode (`--clone`), a private clone made from a Windows copy; no mount, with `git clone` from GitHub inside. | **No mount, and `git clone` inside the sandbox.** A direct mount lets the agent plant what later runs on the host: git hooks, `package.json` scripts, `.vscode/tasks.json`, `.claude/settings.json`, as [Docker's docs](https://docs.docker.com/ai/sandboxes/security/isolation/) warn. Clone mode closes that but still needs a Windows copy and lets the agent read its git-ignored files. The price: `sbx rm` and `sbx prune` delete what was not pushed. The direct mount is not tested, since decision 8 rules it out. Claude's recommendation; the owner chose it. |
+| 5 | Where Claude's code runs | Anywhere, as today; only in the sandbox. | **Only in the sandbox.** Windows keeps the browsers, `adb` and VS Code connecting over SSH. Code run outside the sandbox bypasses the isolation, so a branch is not run on WSL before its PR is reviewed, even while WSL is the fallback. Claude's recommendation; the owner chose it. |
+| 6 | The GitHub identity in the sandbox | The owner's token through the sandbox's proxy, the owner's fallback; a fine-grained token; a machine account with a classic token. | **A machine account; the owner's token never enters a sandbox.** The proxy hides a token but does not limit it, and with the owner's administrator rights a sandbox could remove the reviewer from the `demo` environment and reach AWS through the deploy role. [GitHub's docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) list fine-grained tokens on a collaborator's repository and on a user's project as gaps, and [its terms](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service) allow one free machine account besides a personal one. The proof of concept tries this on a test repository; Szop itself changes only after a GO. Claude's recommendation; the owner chose it. |
+| 7 | AWS in the sandbox | The administrator profile; `claude-readonly`. | **Only `claude-readonly` ([ADR 0074](0074-read-only-aws-access-phase-details.md)).** The proxy swaps request headers, while AWS requests are signed with a secret, so these credentials probably have to enter the sandbox. That is acceptable for a read-only role. Claude's recommendation; the owner chose it. |
+| 8 | The conditions for a GO | Weighing the results as a whole; conditions that each must hold. | **Each must hold, or it is a NO-GO: (1) the sandbox sees neither Windows nor the cloud files and reaches neither the host nor its Docker; (2) only `claude-readonly` is present and it can change nothing on AWS; (3) the machine account works on a GitHub project but cannot merge a PR, change an environment's protection or approve a deployment; (4) tests, end-to-end journeys, StrykerJS, Compose and `docker build` work with no change to the production Dockerfile; (5) Szop opens in Firefox and Chrome on Windows and in Firefox on Android; (6) the workflow works: plugins, deny rules, the push hook and Claude Code's updates.** Claude's proposal; the owner approved it. |
+| 9 | How friction is judged | Numeric thresholds (time against WSL, hosts allowed per day); the owner's judgment. | **The owner's judgment, with no numbers for now.** Times and blocked hosts are recorded so the judgment has facts to rest on, and they cannot cause a NO-GO on their own. Claude proposed thresholds; the owner chose to go without them. |
+| 10 | Who runs the proof of concept | Claude driving `sbx.exe` from WSL; the owner, from a list of steps. | **The owner, by hand, from the list; Claude helps when asked.** Learning is a goal of the project, the logins need the owner anyway, and a session with full access to the machine is the wrong place to test isolation from. Claude's recommendation; the owner chose it. |
+| 11 | How the evaluation runs | A calendar week, the owner's first idea; a full phase. | **A full phase worked in the sandbox, from brainstorm to finishing, with WSL as a working fallback until the decision.** A quiet week would show little, while a phase passes through every stage. It does not hold a phase's PR open. Claude's recommendation; the owner chose it. |
+
+## Consequences
+
+- The proof of concept changes nothing in Szop's code or infrastructure. A test repository and a test project hold the GitHub checks.
+- After a GO, the setup phase builds the environment from source, with a kit or an environment file rather than a saved template, since a template keeps credentials written to its filesystem. `sbx` is at `0.x` and some releases require sandboxes to be recreated, so being able to rebuild is a precondition of working this way.
+- After a NO-GO, the setup phase is dropped. The machine account is still worth deciding, since WSL has the same problem.
+- Claude Code's user-level configuration does not reach a sandbox, so the proof of concept has to show how plugins, the global `CLAUDE.md` and the memory get there.
+- What stays open even after a GO: an escape from the hypervisor; the sandbox can write to the Windows clipboard, so a pasted command could be planted, and the docs show no switch for it; and anything stored inside the sandbox could be stolen, `claude-readonly`'s credentials among them.
