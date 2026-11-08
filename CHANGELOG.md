@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.3.0 (2026-11-08)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+* fix(api): let the landing page receive the health answer by @luiki-dev in https://github.com/luiki-dev/szop/pull/274
+* feat(landing): add a copyright line under the Szop link by @luiki-dev in https://github.com/luiki-dev/szop/pull/279
+* feat(web): add the design system with its tokens and a /design page by @luiki-dev in https://github.com/luiki-dev/szop/pull/282
+* feat(web): add the app shell with its menu, the raccoon logo and the color scheme choice by @luiki-dev in https://github.com/luiki-dev/szop/pull/285
+* feat: browse and search a seed catalog of categories and products (PH-15a) by @luiki-dev in https://github.com/luiki-dev/szop/pull/306
+* test: add StrykerJS mutation testing by @luiki-dev in https://github.com/luiki-dev/szop/pull/310
+* feat: let a guest create, open and rename lists (PH-16a) by @luiki-dev in https://github.com/luiki-dev/szop/pull/322
+* feat(api): create a guest's workspace from the default data by @luiki-dev in https://github.com/luiki-dev/szop/pull/330
+* fix: urgent security fixes (PH-42) by @luiki-dev in https://github.com/luiki-dev/szop/pull/369
+* fix: close the minor findings of the security audit by @luiki-dev in https://github.com/luiki-dev/szop/pull/381
+* feat(lists): delete and select lists, and show not-found pages by @luiki-dev in https://github.com/luiki-dev/szop/pull/384
+* feat(connectivity): give up hung changes, retry failed ones and send each once by @luiki-dev in https://github.com/luiki-dev/szop/pull/396
+* feat(items): add items to a list, check them into the haul and sort by category by @luiki-dev in https://github.com/luiki-dev/szop/pull/403
+* fix(items): polish the list screen for the phone's keyboard, toasts and focus by @luiki-dev in https://github.com/luiki-dev/szop/pull/420
+
+
+**Full Changelog**: https://github.com/luiki-dev/szop/compare/v0.2.0...v0.3.0
+
 ## 0.2.0 (2026-10-23)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
