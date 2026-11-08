@@ -40,4 +40,7 @@ Checking a failed `demo-down` by hand showed why a session needs to read AWS at 
 
 ## Settled while building
 
-Nothing yet.
+- **Checked on AWS, 2026-11-08, with the login of `claude-readonly`:** the identity is the role `ClaudeReadOnly` of the user `claude`; reads work; `ec2 create-vpc --dry-run` answers `UnauthorizedOperation`; SSM, Secrets Manager, S3 objects, log lines and Cost Explorer answer with an explicit deny.
+- **Checked in a new headless session:** `env.AWS_PROFILE` overrides an inherited `AWS_PROFILE`, and both deny rules refuse a command. A session that started before the settings changed keeps the inherited value.
+- **The deny rules match the command's text, not what it does:** they also refuse a harmless command that holds those words, such as a commit message or `gh pr create --body`. Such text goes in a file (`--body-file`), or is reworded.
+- **`/demo-check` tells Claude to ask the owner for CloudWatch's log lines** on a failed demo, since decision 3 hides them from it. `gh run` logs stay readable.
