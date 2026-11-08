@@ -25,6 +25,10 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
   - [The token contrast test](#the-token-contrast-test)
   - [Reading a failed run](#reading-a-failed-run)
 - [Mutation testing](#mutation-testing)
+- [Checking on a phone over USB](#checking-on-a-phone-over-usb)
+  - [Once per computer and phone](#once-per-computer-and-phone)
+  - [Each check](#each-check)
+  - [When it does not connect](#when-it-does-not-connect)
 - [Rules](#rules)
 - [Coverage](#coverage)
 
@@ -451,6 +455,40 @@ Mutation testing judges the tests, not the code: a **mutant** is a small change 
     - *Tailwind class names:* jsdom applies no CSS, so a mutant of a class-name string is equivalent for every test. It is accepted line by line with `// Stryker disable next-line StringLiteral: <reason>` (the same rule, one mutator on one line), never for a whole file: strings that carry behaviour (the document title, a message, a label) stay mutated and tested ([ADR 0055](../decisions/0055-mutation-testing-phase-details.md), "Settled while building").
   - *Record it as an open point:* when the fix is larger than a small test change.
 - **The PR states the score and what was done;** the reasons live in the code, so the next run shows only new survivors.
+
+## Checking on a phone over USB
+
+Playwright's phone emulation is Chromium only and has no real keyboard, so the keyboard and touch gestures are checked by hand in Firefox for Android ([ADR 0073](../decisions/0073-list-items-polish-phase-details.md), decision 2), against the production-like environment. The phone reaches it through `adb reverse`, the Android Debug Bridge's (adb) tunnel: on the phone, `localhost:8443` then means the computer's. That keeps the address `localhost`, so the app's `__Host-` cookie works as it does over real HTTPS, and nothing is opened on the local network.
+
+Run adb in **PowerShell on Windows, not in WSL**: WSL2 does not see USB devices without extra tooling (usbipd), while Windows has the USB connection and already forwards its `localhost` to WSL. The path is phone → USB → adb on Windows → `127.0.0.1:8443` on Windows → WSL.
+
+### Once per computer and phone
+
+1. **Install adb**, in PowerShell: `winget install --id Google.PlatformTools`. Open a new PowerShell window, so it sees the new `PATH`, and check it with `adb version`.
+2. **Turn on the phone's developer options:** Settings → About phone → tap Build number seven times. The place differs between makers; on some phones it is under Software information.
+3. **Turn on USB debugging:** Settings → Developer options → USB debugging.
+4. **Install Firefox** on the phone, if it is not there.
+
+### Each check
+
+1. **Start the environment**, in WSL: `pnpm check:prodlike --keep`.
+2. **Connect the phone** with a USB cable that carries data (a charge-only one is not seen). Unlock the phone.
+3. **List the devices**, in PowerShell: `adb devices`. The first time, the phone asks "Allow USB debugging?": tick Always allow from this computer and accept. The phone's line must end with `device`.
+4. **Open the tunnel:** `adb reverse tcp:8443 tcp:8443`. `adb reverse --list` shows it.
+5. **Open `https://localhost:8443` in Firefox** on the phone. The certificate is a throwaway one, so Firefox warns once: Advanced → Accept the Risk and Continue.
+6. **Afterwards:** `adb reverse --remove-all` in PowerShell, unplug the phone, and `pnpm check:prodlike --down` in WSL when the checks are over.
+
+Unplugging the phone or restarting adb closes the tunnel; repeat step 4 after either.
+
+### When it does not connect
+
+| What you see | What to do |
+|---|---|
+| `adb` is not recognized | Open a new PowerShell window after the install. |
+| `adb devices` lists nothing | Try another cable or USB port; set the phone's USB mode to File transfer; on Windows, install the USB driver from the phone's maker. |
+| The line ends with `unauthorized` | Unlock the phone and accept the prompt. If none shows: Developer options → Revoke USB debugging authorizations, then reconnect. |
+| The line ends with `offline` | `adb kill-server`, `adb devices`, and open the tunnel again. |
+| Firefox cannot connect | Check the tunnel with `adb reverse --list`. Then, in PowerShell, `curl.exe -k https://127.0.0.1:8443/api/health`: if that fails too, the environment is down or WSL is not forwarding `localhost`, and the phone is not the problem. |
 
 ## Rules
 
