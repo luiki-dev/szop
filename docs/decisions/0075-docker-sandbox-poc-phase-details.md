@@ -31,10 +31,14 @@ The owner wants to try Claude Code in [Docker Sandboxes](https://docs.docker.com
 | 10 | Who runs the proof of concept | Claude driving `sbx.exe` from WSL; the owner, from a list of steps. | **The owner, by hand, from the list; Claude helps when asked.** Learning is a goal of the project, the logins need the owner anyway, and a session with full access to the machine is the wrong place to test isolation from. Claude's recommendation; the owner chose it. |
 | 11 | How the evaluation runs | A calendar week, the owner's first idea; a full phase. | **A full phase worked in the sandbox, from brainstorm to finishing, with WSL as a working fallback until the decision.** A quiet week would show little, while a phase passes through every stage. It does not hold a phase's PR open. Claude's recommendation; the owner chose it. |
 
+## Settled while building
+
+- **Never approve `localhost`, `host.docker.internal` or a private address in `sbx`'s approval queue** (Task 2). Reaching the host is blocked by the network policy's default deny, not by a separate boundary: `curl` to `host.docker.internal:2375` left a pending `localhost:2375` request that `sbx policy approval respond` could allow with one command, and an approved host stays as a rule of that sandbox. Condition 1 of decision 8 therefore holds only while the owner refuses such requests, including when Claude or a script asks for one so that something passes. The owner's decision.
+
 ## Consequences
 
 - The proof of concept changes nothing in Szop's code or infrastructure. A test repository and a test project hold the GitHub checks.
 - After a GO, the setup phase builds the environment from source, with a kit or an environment file rather than a saved template, since a template keeps credentials written to its filesystem. `sbx` is at `0.x` and some releases require sandboxes to be recreated, so being able to rebuild is a precondition of working this way.
 - After a NO-GO, the setup phase is dropped. The machine account is still worth deciding, since WSL has the same problem.
 - Claude Code's user-level configuration does not reach a sandbox, so the proof of concept has to show how plugins, the global `CLAUDE.md` and the memory get there.
-- What stays open even after a GO: an escape from the hypervisor; the sandbox can write to the Windows clipboard, so a pasted command could be planted, and the docs show no switch for it; and anything stored inside the sandbox could be stolen, `claude-readonly`'s credentials among them.
+- What stays open even after a GO: an escape from the hypervisor; the sandbox can write to the Windows clipboard, so a pasted command could be planted (OSC 52 got through in Task 2 with the setting `clipboard.textCopy` at its default of `false`, and the owner accepts this); and anything stored inside the sandbox could be stolen, `claude-readonly`'s credentials among them.
