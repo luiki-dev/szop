@@ -148,10 +148,11 @@ jobs:
       # Terraform only destroys what its state knows. Anything still tagged
       # group = demo (a resource created outside the state) would go on costing
       # money, so the run fails and lists it (PH-42, SEC-18). The tagging API
-      # can list a just-deleted resource for minutes, so it retries for 10.
-      # Inactive task definition revisions stay listed for good, and a deleted
-      # ECS cluster stays listed as INACTIVE for hours: both cost nothing and
-      # cannot start a task (runbook, "Checking that nothing is left").
+      # can list a deleted resource for hours, so it retries for 10 minutes and
+      # asks a listed resource's own service whether it is gone (ADR 0074,
+      # decision 10). Inactive task definition revisions stay listed for good:
+      # they cost nothing and cannot start a task. A denied call, an API error
+      # or any other type counts as left (runbook, "Checking that nothing is left").
       - id: leftovers
         run: |
           deadline=$((SECONDS + 600))
@@ -160,10 +161,30 @@ jobs:
               --query "ResourceTagMappingList[?!contains(ResourceARN, ':task-definition/')].ResourceARN" --output text)
             found=""
             for arn in $listed; do
-              if [[ "$arn" == arn:aws:ecs:*:cluster/* ]] \
-                && [ "$(aws ecs describe-clusters --clusters "$arn" --query 'clusters[0].status' --output text)" = INACTIVE ]; then
-                continue
-              fi
+              cluster=${arn#*/}
+              cluster=${cluster%%/*}
+              case "$arn" in
+                arn:aws:ecs:*:cluster/*)
+                  state=$(aws ecs describe-clusters --clusters "$arn" --query 'clusters[0].status' --output text) || true
+                  [ "$state" = INACTIVE ] && continue
+                  ;;
+                arn:aws:ecs:*:service/*)
+                  state=$(aws ecs describe-services --cluster "$cluster" --services "$arn" \
+                    --query 'services[0].status || failures[0].reason' --output text) || true
+                  [[ "$state" == INACTIVE || "$state" == MISSING ]] && continue
+                  ;;
+                arn:aws:ecs:*:task/*)
+                  state=$(aws ecs describe-tasks --cluster "$cluster" --tasks "$arn" \
+                    --query 'tasks[0].lastStatus || failures[0].reason' --output text) || true
+                  [[ "$state" == STOPPED || "$state" == MISSING ]] && continue
+                  ;;
+                arn:aws:ec2:*:security-group-rule/*)
+                  state=$(aws ec2 describe-security-group-rules --security-group-rule-ids "${arn##*/}" \
+                    --query 'length(SecurityGroupRules)' --output text 2>&1) || true
+                  [[ "$state" == *InvalidSecurityGroupRuleId.NotFound* ]] && continue
+                  echo "$state"
+                  ;;
+              esac
               found="$found $arn"
             done
             found=${found# }
