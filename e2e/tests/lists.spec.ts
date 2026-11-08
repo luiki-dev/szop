@@ -248,7 +248,7 @@ test("ACC-1.6: two fresh tabs that create a list at the same moment share one wo
   }
 });
 
-test("NET-1.7, NET-1.8: a rename on a held connection shows Saving…, cannot be left, then Not saved.", async ({
+test("NET-1.8, OP-139: a rename on a held connection shows the new name at once, cannot be left, then puts the old name back", async ({
   page,
 }) => {
   // Back must lead to a page of the app, so the journey starts on the lists.
@@ -266,19 +266,31 @@ test("NET-1.7, NET-1.8: a rename on a held connection shows Saving…, cannot be
   });
   await field.fill("Saturday shop");
   await field.press("Enter");
-  await expect(page.getByText("Saving…")).toBeVisible();
+  await expect(field).not.toBeFocused();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Saturday shop",
+  );
+  await expect(page.getByText("Saving…")).toHaveCount(0);
 
   await page.goBack();
   await expect(page).toHaveURL(url);
 
   // After the limit (10 s) the change is given up.
-  await expect(page.getByRole("alert")).toContainText("Not saved.", {
-    timeout: 15_000,
-  });
-  await expect(field).toHaveValue("Saturday shop");
+  await expect(page.getByRole("alert")).toHaveText(
+    "Saturday shop wasn't saved. Check your connection and try again.",
+    { timeout: 15_000 },
+  );
+  await expect(field).toHaveValue("Weekly shop");
 
   await page.unroute("**/api/lists/*");
-  await page.getByRole("button", { name: "Try again" }).click();
+  await field.fill("Saturday shop");
+  const saved = page.waitForResponse(
+    (response) => response.request().method() === "PATCH",
+  );
+  await field.press("Enter");
+  await saved;
+  // The server's word: the name survives a reload.
+  await page.reload();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Saturday shop",
   );

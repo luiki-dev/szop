@@ -29,8 +29,11 @@ import {
 
 const control =
   "min-h-12 w-full rounded-control border-2 border-input bg-card px-3 outline-none focus:ring-3 focus:ring-ring aria-invalid:border-destructive";
+// 48 px tall (NFR-2.3) inside the 48 px box: the negative margin lets the
+// button cover the box's 2 px border.
 const stepper =
-  "size-12 shrink-0 outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
+  // Stryker disable next-line StringLiteral: Tailwind class name: jsdom applies no CSS; the 48 px height is checked in E2E "ITM-6.1: Quantity is as tall as the other fields (#413)"
+  "-my-0.5 h-12 w-12 shrink-0 outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-40 inline-flex items-center justify-center";
 const handle = "mx-auto mb-3 block h-1 w-10 rounded-full bg-border";
 
 // "Edit item" (ITM-6): a bottom sheet on a phone, a centered dialog from `lg`.
@@ -39,6 +42,8 @@ export function EditItem({
   listId,
   item,
   open,
+  opener,
+  ringOnClose,
   onOpenChange,
   onRemoved,
   units,
@@ -47,6 +52,8 @@ export function EditItem({
   listId: string;
   item: ListItem;
   open: boolean;
+  opener: HTMLElement;
+  ringOnClose: boolean;
   onOpenChange: (open: boolean) => void;
   onRemoved: (item: ListItem) => void;
   units: CatalogUnit[];
@@ -56,12 +63,16 @@ export function EditItem({
   // The picker replaces the dialog's content on a desktop, so the heading
   // and ✕ of the edit form give way to its own.
   const [picking, setPicking] = useState(false);
+  const removed = useRef(false);
   const form = (
     <EditForm
       listId={listId}
       item={item}
       onOpenChange={onOpenChange}
-      onRemoved={onRemoved}
+      onRemoved={(item) => {
+        removed.current = true;
+        onRemoved(item);
+      }}
       units={units}
       catalog={catalog}
       desktop={desktop}
@@ -71,6 +82,38 @@ export function EditItem({
   );
   const hideEdit = desktop && picking;
   const popup = useRef<HTMLDivElement>(null);
+  // The focus goes back to the item, with its ring only when the item was
+  // opened from the keyboard (#415); browsers show it after a field had focus.
+  const refocus = () => {
+    // A category change may move the item to another card and Remove takes it
+    // away, both once the list has been redrawn: look the row up again, and
+    // with none left take the add bar after the keyboard (no phone keyboard to
+    // raise), else the page, so a tap never opens one.
+    const row = removed.current
+      ? null
+      : opener.isConnected
+        ? opener
+        : document.querySelector<HTMLElement>(`[data-item-id="${item.id}"]`);
+    const target =
+      row ??
+      document.querySelector<HTMLElement>(
+        ringOnClose ? "[data-add-bar]" : "main",
+      );
+    // The item may hold the focus already, and focusing it again would keep
+    // its ring as it is.
+    target?.blur();
+    target?.focus({ focusVisible: ringOnClose });
+  };
+  const finalFocus = () => {
+    refocus();
+    // The list is drawn again after this: a row that held the focus is gone.
+    requestAnimationFrame(() => {
+      if (document.activeElement === document.body) refocus();
+    });
+    // Stryker disable next-line BooleanLiteral: `true` lets Base UI move the focus itself; whether the ring shows is the browser's focus-visible rule, which jsdom lacks (E2E "ITM-6.1: closing Edit item gives the focus back to the item, with a ring only when it was opened from the keyboard (#415)")
+    return false;
+  };
+
   const close = <X aria-hidden="true" />;
   const closeButton = (
     <Button
@@ -92,6 +135,7 @@ export function EditItem({
             // The dialog itself, not a field: the focus must leave the list
             // behind, or Tab walks through it first (#405).
             initialFocus={popup}
+            finalFocus={finalFocus}
             ref={popup}
             className={cn(
               // Centered on the column beside the 16rem sidebar (#406).
@@ -118,6 +162,7 @@ export function EditItem({
         <Drawer.Backdrop className={backdrop} />
         <Drawer.Popup
           initialFocus={false}
+          finalFocus={finalFocus}
           className="fixed inset-x-0 bottom-0 z-50 max-h-[90dvh] translate-y-(--drawer-swipe-movement-y) overflow-y-auto rounded-t-surface bg-card p-4 text-card-foreground shadow-lg outline-none data-ending-style:translate-y-full data-starting-style:translate-y-full motion-safe:transition-[translate] motion-safe:duration-200"
         >
           <span aria-hidden="true" className={handle} />
@@ -284,7 +329,7 @@ function EditForm({
                   event.preventDefault();
                   if (by > 0 ? canIncrease : canDecrease) step(by);
                 }}
-                className="min-h-12 min-w-0 flex-1 border-x-2 border-input bg-transparent px-1 text-center outline-none aria-invalid:border-destructive"
+                className="min-h-11 min-w-0 flex-1 border-x-2 border-input bg-transparent px-1 text-center outline-none aria-invalid:border-destructive"
               />
               <button
                 type="button"

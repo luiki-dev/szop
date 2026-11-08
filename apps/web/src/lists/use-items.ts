@@ -32,14 +32,14 @@ function writeItems(queryClient: QueryClient, listId: string, change: Items) {
 // what it holds: a refetch earlier would answer without the changes still on
 // their way and wipe their optimistic state, and a lost answer or a rollback
 // next to a queued change is only settled by the server's word.
-function refetchIfLast(queryClient: QueryClient, listId: string) {
+export function refetchIfLast(queryClient: QueryClient, listId: string) {
   if (queryClient.isMutating({ mutationKey: listKey(listId) }) === 1)
     void queryClient.invalidateQueries({ queryKey: listKey(listId) });
 }
 
 // True when more changes of this scope wait behind the one that just ended:
 // its answer must not put an older state back over theirs.
-function othersWait(queryClient: QueryClient, scope: string) {
+export function othersWait(queryClient: QueryClient, scope: string) {
   return (
     queryClient.isMutating({
       predicate: (mutation) => mutation.options.scope?.id === scope,

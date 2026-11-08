@@ -20,7 +20,7 @@ import {
 import { storeCheckboxSide, useCheckboxSide } from "../shell/checkbox-side.ts";
 import { RowPicture } from "../shell/checkbox-side-control.tsx";
 import { useCatalog } from "../catalog/use-catalog.ts";
-import { ApiRequestError, notSaved } from "../api/client.ts";
+import { ApiRequestError } from "../api/client.ts";
 import { NotFound } from "../not-found/not-found.tsx";
 import { DeleteListsDialog } from "./delete-lists-dialog.tsx";
 import { AddBar } from "./items/add-bar.tsx";
@@ -29,24 +29,32 @@ import { EditItem } from "./items/edit-item.tsx";
 import { ItemCards, ItemCardsSkeleton } from "./items/item-cards.tsx";
 import { UndoRemove } from "./items/undo-remove.tsx";
 import { EmptyList, ListHeader, TitleField } from "./list-screen.tsx";
+import { useKeyboardOpen } from "./items/use-keyboard-open.ts";
 import { useSortByCategory } from "./use-items.ts";
 import { useList, useRenameList } from "./use-lists.ts";
 
 // /lists/:id: the list's screen. The shell leaves its header and the tab's
 // title to this page.
-// The height of the bottom block (add bar and haul) goes to the toast region
-// as --toast-offset, so toasts sit just above it whatever the haul shows.
+// The bottom block's (add bar and haul) height, center and width go to the
+// toast region, so toasts sit just above it, centered on the haul (#414).
+const toastVars = ["--toast-offset", "--haul-center", "--haul-width"];
+
 function useToastOffset() {
   return useCallback((block: HTMLElement | null) => {
     if (!block || typeof ResizeObserver === "undefined") return;
     const root = document.documentElement.style;
     const observer = new ResizeObserver(() => {
+      const { left, width } = block.getBoundingClientRect();
       root.setProperty("--toast-offset", `${String(block.offsetHeight)}px`);
+      root.setProperty("--haul-center", `${String(left + width / 2)}px`);
+      root.setProperty("--haul-width", `${String(width)}px`);
     });
     observer.observe(block);
+    // The block keeps its size while a wider window moves it sideways.
+    observer.observe(document.documentElement);
     return () => {
       observer.disconnect();
-      root.removeProperty("--toast-offset");
+      for (const name of toastVars) root.removeProperty(name);
     };
   }, []);
 }
@@ -68,7 +76,12 @@ export function ListPage() {
   const askDelete = useRef(false);
   const bottomBlock = useToastOffset();
   const [barFocused, setBarFocused] = useState(false);
-  const [editing, setEditing] = useState<ListItem | null>(null);
+  const keyboardOpen = useKeyboardOpen();
+  const [editing, setEditing] = useState<{
+    item: ListItem;
+    keyboard: boolean;
+    opener: HTMLElement;
+  } | null>(null);
   // The latest removed item holds the Undo toast; the count renews it when the same item goes twice.
   const [removed, setRemoved] = useState<{ item: ListItem; n: number } | null>(
     null,
@@ -154,23 +167,17 @@ export function ListPage() {
       <ListHeader
         field={
           <TitleField
+            // A new field per rename: a failure that comes back before a
+            // render would leave initial looking unchanged and the typed name
+            // in place of the old one.
+            key={rename.submittedAt}
             initial={name}
             saveOnBlur
             inputRef={input}
-            pending={rename.isPending}
-            failed={
-              rename.isError &&
-              notSaved(rename.error) &&
-              rename.variables !== name
-            }
-            {...(rename.isError && !notSaved(rename.error)
-              ? { error: rename.error.message }
-              : {})}
             onSave={(next) => {
               rename.mutate(next);
             }}
             onCancel={() => {
-              rename.reset();
               // Stryker disable next-line OptionalChaining: the ref is set while the field is mounted
               input.current?.blur();
             }}
@@ -271,13 +278,27 @@ export function ListPage() {
             listId={id}
             cards={cards}
             units={catalog.data.units}
-            onEdit={setEditing}
+            onEdit={(item, keyboard, opener) => {
+              setEditing({ item, keyboard, opener });
+            }}
           />
         </>
       )}
+      {/* While the phone's keyboard is open for the add bar, the screen above
+          the bar is dimmed: a tap there only blurs the field, which closes the
+          keyboard, and a drag still scrolls the list (ITM-2.6). The add bar
+          unfolds the haul after the click, so the click lands here too. */}
+      <div
+        aria-hidden="true"
+        className={`fixed inset-0 z-5 bg-black/40 motion-safe:transition-opacity motion-safe:duration-150 ${
+          // Stryker disable next-line StringLiteral: the shown state has no class, so any other string only adds a name that jsdom applies no CSS to; the hidden one is tested
+          barFocused && keyboardOpen ? "" : "pointer-events-none opacity-0"
+        }`}
+      />
       {/* The add bar and the haul under it stay at the bottom of the column. */}
       <div
         ref={bottomBlock}
+        data-bottom-block
         className="sticky bottom-0 z-10 -mx-4 mt-auto -mb-6 md:-mx-6"
       >
         <AddBar listId={id} listName={name} onFocusChange={setBarFocused} />
@@ -286,15 +307,17 @@ export function ListPage() {
             listId={id}
             items={query.data.items}
             units={catalog.data.units}
-            folded={barFocused}
+            folded={barFocused && keyboardOpen}
           />
         )}
       </div>
       {editing && catalog.data && (
         <EditItem
-          key={editing.id}
+          key={editing.item.id}
           listId={id}
-          item={editing}
+          item={editing.item}
+          opener={editing.opener}
+          ringOnClose={editing.keyboard}
           open
           onOpenChange={(open) => {
             if (!open) setEditing(null);

@@ -14,6 +14,8 @@ import {
   getLists,
   renameList,
 } from "../api/client.ts";
+import { showNotSaved } from "../shell/toasts.tsx";
+import { othersWait, refetchIfLast } from "./use-items.ts";
 
 // No retries: the error card's "Try again" is the retry. A failed create or
 // delete passes its isError as `enabled`: turning the observer on refetches
@@ -59,18 +61,46 @@ export function useCreateList() {
   });
 }
 
+// Optimistic, as an item's change (ADR 0073, decision 4): the new name shows
+// at once; a failure puts the old name back and shows the error toast. Renames
+// run one after the other, and only the last answer writes the list.
 export function useRenameList(id: string) {
   const queryClient = useQueryClient();
+  const key = ["lists", id];
+  const scope = `name-${id}`;
+  const setName = (name: string | undefined) => {
+    // Stryker disable next-line ConditionalExpression: undefined comes only with no cached list, where setQueryData's updater leaves the cache alone
+    if (name === undefined) return;
+    queryClient.setQueryData<ListWithItems>(
+      key,
+      (list) => list && { ...list, name },
+    );
+  };
   return useMutation({
     mutationFn: (name: string) => renameList(id, name),
     // Stryker disable next-line StringLiteral: any value but "online" behaves as "always", so `""` is the same
     networkMode: "always",
-    onSuccess: (list) => remember(queryClient, list),
-    // The answer may have been lost on its way: ask what the server holds, in
-    // the background (awaiting it would hold the mutation in "pending").
-    onError: () => {
-      void queryClient.invalidateQueries({ queryKey: ["lists", id] });
+    scope: { id: scope },
+    mutationKey: key,
+    onMutate: async (name: string) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<ListWithItems>(key)?.name;
+      setName(name);
+      return { previous };
+    },
+    onSuccess: (list) => {
+      if (!othersWait(queryClient, scope)) return remember(queryClient, list);
+    },
+    // The answer may have been lost on its way: the refetches ask what the
+    // server holds (NET-1.5).
+    onError: (_, name, context) => {
+      // Stryker disable next-line OptionalChaining: onMutate always returns a context; the `?` only guards a failed onMutate
+      setName(context?.previous);
+      showNotSaved(name);
       void queryClient.invalidateQueries({ queryKey: ["lists"], exact: true });
+    },
+    onSettled: () => {
+      refetchIfLast(queryClient, id);
     },
   });
 }

@@ -1,5 +1,5 @@
 import { expectAccessible } from "../support/accessibility.ts";
-import { listWith, tap, touchTap } from "../support/list.ts";
+import { listWith, openKeyboard, tap, touchTap } from "../support/list.ts";
 import { expect, test } from "../support/test.ts";
 
 test.use({ viewport: { width: 390, height: 700 } });
@@ -300,27 +300,84 @@ test("ITM-7.1, ORD-1.4, ORD-1.6, ORD-1.7, ORD-1.11: a guest checks items into th
   );
 });
 
-test("ORD-1.8: the first tap after typing opens the drawer from the folded line", async ({
+test("APP-1.8: the list stays put when the keyboard opens for the add bar (#412)", async ({
   page,
 }) => {
+  const add = await listWith(page, 16);
+  await add.blur();
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+  });
+  await tap(page, add);
+  await openKeyboard(page);
+  await expect(add).toBeFocused();
+  await expect(add).toBeInViewport();
+  await expect(
+    page.getByRole("checkbox", { name: "Item 1", exact: true }),
+  ).toBeInViewport();
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test("ORD-1.8: the haul folds only while the keyboard is open for the add bar (OP-138)", async ({
+  page,
+  hasTouch,
+}) => {
+  test.skip(!hasTouch, "the keyboard is a touch screen's");
+  const add = await listWith(page, 2);
+  const tray = page.getByRole("region", { name: "The haul" });
+  const folded = page.getByRole("button", { name: /^The haul · 0 of 2/ });
+  // Focused with the keyboard closed, as on a desktop: the haul stays open.
+  await expect(add).toBeFocused();
+  await expect(tray).toBeVisible();
+  await openKeyboard(page);
+  await expect(folded).toBeVisible();
+  // The keyboard closes and the field keeps the focus: the haul opens again.
+  await page.setViewportSize({ width: 390, height: 700 });
+  await expect(tray).toBeVisible();
+  await expect(folded).toHaveCount(0);
+  await expect(add).toBeFocused();
+});
+
+test("ORD-1.8: the first tap after typing opens the drawer from the folded line", async ({
+  page,
+  hasTouch,
+}) => {
+  test.skip(!hasTouch, "the keyboard is a touch screen's");
   await listWith(page, 2);
-  // The add bar still has the focus, so the haul is folded to one line.
+  // The add bar still has the focus and the keyboard is open, so the haul is
+  // folded to one line.
+  await openKeyboard(page);
   await tap(page, page.getByRole("button", { name: /^The haul · 0 of 2/ }));
   await expect(page.getByRole("dialog", { name: "The haul" })).toBeVisible();
 });
 
-test("ORD-1.8: the first tap after typing checks the item under the finger on a scrolled list", async ({
+test("ITM-2.6: with the keyboard open, a tap on the dimmed list only closes the keyboard, and the list still scrolls", async ({
   page,
+  hasTouch,
 }) => {
-  await listWith(page, 16);
+  test.skip(!hasTouch, "the keyboard is a touch screen's");
+  const add = await listWith(page, 16);
+  await openKeyboard(page);
+  await page.mouse.move(195, 150);
+  await page.mouse.wheel(0, 2000);
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(0);
   await page.evaluate(() => {
     window.scrollTo(0, document.body.scrollHeight);
   });
-  await tap(page, page.getByRole("checkbox", { name: "Item 16" }));
+  const item = page.getByRole("checkbox", { name: "Item 16" });
+  await tap(page, item);
+  await expect(add).not.toBeFocused();
+  await expect(page.getByRole("region", { name: "The haul" })).toBeVisible();
+  await expect(page.getByText("0 of 16 items")).toBeVisible();
+  // The dimming is gone: the next tap checks the item, once the taller haul no
+  // longer covers it.
+  await page.evaluate(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+  await tap(page, item);
   await expect(page.getByText("1 of 16 items")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Put Item 16 back" }),
-  ).toBeVisible();
 });
 
 test("ORD-1.3: the collapsed haul keeps its height at the first check", async ({
@@ -506,6 +563,7 @@ test("ORD-1.8: by touch, the first tap after typing opens the drawer from the fo
 }) => {
   test.skip(!hasTouch, "needs a touch screen");
   await listWith(page, 2);
+  await openKeyboard(page);
   await touchTap(
     page,
     page.getByRole("button", { name: /^The haul · 0 of 2/ }),
@@ -513,20 +571,26 @@ test("ORD-1.8: by touch, the first tap after typing opens the drawer from the fo
   await expect(page.getByRole("dialog", { name: "The haul" })).toBeVisible();
 });
 
-test("ORD-1.8: by touch, the first tap after typing checks the item under the finger on a scrolled list", async ({
+test("ITM-2.6: by touch, with the keyboard open, a tap on the dimmed list only closes the keyboard", async ({
   page,
   hasTouch,
 }) => {
   test.skip(!hasTouch, "needs a touch screen");
-  await listWith(page, 16);
+  const add = await listWith(page, 16);
+  await openKeyboard(page);
   await page.evaluate(() => {
     window.scrollTo(0, document.body.scrollHeight);
   });
-  await touchTap(page, page.getByRole("checkbox", { name: "Item 16" }));
+  const item = page.getByRole("checkbox", { name: "Item 16" });
+  await touchTap(page, item);
+  await expect(add).not.toBeFocused();
+  await expect(page.getByRole("region", { name: "The haul" })).toBeVisible();
+  await expect(page.getByText("0 of 16 items")).toBeVisible();
+  await page.evaluate(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+  await touchTap(page, item);
   await expect(page.getByText("1 of 16 items")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Put Item 16 back" }),
-  ).toBeVisible();
 });
 
 test("ORD-1.6: dragging the haul's drawer down closes it (#404)", async ({
@@ -583,6 +647,93 @@ test("ITM-6.1: on a desktop, Tab after Enter opens Edit item stays in the dialog
   }
 });
 
+test("ITM-6.1: closing Edit item gives the focus back to the item, with a ring only when it was opened from the keyboard (#415)", async ({
+  page,
+}) => {
+  await listWith(page, 1);
+  const row = page.getByRole("button", { name: /Item 1/ });
+  const ring = () => row.evaluate((el) => el.matches(":focus-visible"));
+  const dialog = page.getByRole("dialog", { name: "Edit item" });
+
+  await row.click();
+  await dialog.getByRole("textbox", { name: "Name" }).click();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(row).toBeFocused();
+  expect(await ring(), "opened by a click").toBe(false);
+
+  await row.click();
+  await dialog.getByRole("textbox", { name: "Name" }).press("Enter");
+  await expect(dialog).toHaveCount(0);
+  await expect(row).toBeFocused();
+  expect(await ring(), "saved with Enter, the phone's Go").toBe(false);
+
+  await row.press("Enter");
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(row).toBeFocused();
+  expect(await ring(), "opened from the keyboard").toBe(true);
+});
+
+test("ITM-6.1: when a category change moves the item to another card, closing Edit item still gives the focus back to the item (#415)", async ({
+  page,
+}) => {
+  await listWith(page, 2);
+  await page.getByRole("button", { name: /Item 1/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit item" });
+  await dialog.getByRole("button", { name: /^Category/ }).click();
+  await page
+    .getByRole("searchbox", { name: "Search categories" })
+    .fill("bread");
+  await page.getByRole("radio").first().click();
+  await dialog.getByRole("button", { name: "Save" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Item 1/ })).toBeFocused();
+});
+
+test("ITM-6.1: after Remove the focus goes to the page after a tap and to the add bar after the keyboard, never to the body (#415)", async ({
+  page,
+}) => {
+  const add = await listWith(page, 2);
+  const dialog = page.getByRole("dialog", { name: "Edit item" });
+  const focusedTag = () => page.evaluate(() => document.activeElement?.tagName);
+
+  await page.getByRole("button", { name: /Item 1/ }).click();
+  await dialog.getByRole("button", { name: "Remove" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect.poll(focusedTag, "after a tap").toBe("MAIN");
+
+  await page.getByRole("button", { name: /Item 2/ }).press("Enter");
+  await dialog.getByRole("button", { name: "Remove" }).press("Enter");
+  await expect(dialog).toHaveCount(0);
+  await expect(add, "after the keyboard").toBeFocused();
+});
+
+test("ITM-6.1: Quantity is as tall as the other fields (#413)", async ({
+  page,
+}) => {
+  await listWith(page, 1);
+  await page.getByRole("button", { name: /Item 1/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit item" });
+  // The bordered box around the stepper and the field.
+  const quantity = dialog
+    .getByRole("textbox", { name: "Quantity" })
+    .locator("..");
+  const height = async (locator: typeof quantity) =>
+    (await locator.boundingBox())?.height;
+  expect(await height(quantity)).toBe(
+    await height(dialog.getByRole("combobox", { name: "Unit" })),
+  );
+  // NFR-2.3: the steppers are buttons too.
+  for (const name of ["Decrease quantity", "Increase quantity"]) {
+    expect(
+      await height(dialog.getByRole("button", { name })),
+      name,
+    ).toBeGreaterThanOrEqual(48);
+  }
+});
+
 test("ITM-6.1, LST-1.3: on a desktop, the dialogs are centered on the list's column, not the screen (#406)", async ({
   page,
 }) => {
@@ -615,6 +766,36 @@ test("ITM-6.1, LST-1.3: on a desktop, the dialogs are centered on the list's col
   expect(await center(confirm), "Delete list").toBeCloseTo(column, 0);
 });
 
+test("APP-3.1: the toast is centered on the haul, at 75 % of its width on a phone and 60 % on a desktop (#414)", async ({
+  page,
+}) => {
+  for (const [size, share] of [
+    [{ width: 390, height: 700 }, 0.75],
+    [{ width: 1280, height: 800 }, 0.6],
+  ] as const) {
+    await page.setViewportSize(size);
+    await listWith(page, 1);
+    await page.getByRole("button", { name: /Item 1/ }).click();
+    await page
+      .getByRole("dialog", { name: "Edit item" })
+      .getByRole("button", { name: "Remove" })
+      .click();
+    // The toast's root holds its description.
+    const toast = page.getByText("Removed Item 1").locator("..");
+    await expect(toast).toBeVisible();
+    const box = (await toast.boundingBox()) ?? { x: 0, width: 0 };
+    const haul = (await page.locator("[data-bottom-block]").boundingBox()) ?? {
+      x: 0,
+      width: 0,
+    };
+    expect(box.x + box.width / 2, "centered").toBeCloseTo(
+      haul.x + haul.width / 2,
+      0,
+    );
+    expect(box.width / haul.width, "width").toBeCloseTo(share, 2);
+  }
+});
+
 test("ITM-6.1: the category picker keeps its height while searching (#406)", async ({
   page,
 }) => {
@@ -636,6 +817,38 @@ test("ITM-6.1: the category picker keeps its height while searching (#406)", asy
       before,
       0,
     );
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  }
+});
+
+test("ITM-6.1: in the category picker only the list of categories scrolls (#417)", async ({
+  page,
+}) => {
+  for (const size of [
+    { width: 390, height: 700 },
+    { width: 1280, height: 800 },
+  ]) {
+    await page.setViewportSize(size);
+    if (size.width === 390) await listWith(page, 1);
+    await page.getByRole("button", { name: /Item 1/ }).click();
+    await page.getByRole("button", { name: /^Category/ }).click();
+    const search = page.getByRole("searchbox", { name: "Search categories" });
+    const panel = page.getByRole("dialog").filter({ has: search }).last();
+    const list = page
+      .getByRole("radiogroup", { name: "Category" })
+      .locator("ul")
+      .first();
+    const label = size.width === 390 ? "phone" : "desktop";
+    const fits = (box: HTMLElement) => box.scrollHeight <= box.clientHeight;
+    expect(await panel.evaluate(fits), label).toBe(true);
+    expect(await list.evaluate(fits), label).toBe(false);
+
+    await list.evaluate((box) => {
+      box.scrollBy(0, 400);
+    });
+    await expect(search, label).toBeInViewport();
     await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toHaveCount(0);

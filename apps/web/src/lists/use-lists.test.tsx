@@ -3,7 +3,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it } from "vitest";
@@ -92,6 +92,152 @@ describe("the lists hooks", () => {
       expect(client.getQueryData(["lists", id])).toMatchObject({
         name: "Renamed",
       });
+    });
+  });
+
+  it("NET-1.4: renames of one list run one after the other, and an answer with more waiting does not overwrite them", async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let releaseSecond: () => void = () => undefined;
+    const secondGate = new Promise<void>((resolve) => {
+      releaseSecond = resolve;
+    });
+    const sent: string[] = [];
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.patch(`/api/lists/${id}`, async ({ request }) => {
+        const { name } = (await request.json()) as { name: string };
+        sent.push(name);
+        await (name === "First" ? gate : secondGate);
+        return HttpResponse.json({ ...party, name: `Server ${name}` });
+      }),
+      http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+      http.get(`/api/lists/${id}`, () => new Promise(() => undefined)),
+    );
+    const client = new QueryClient();
+    client.setQueryData(["lists", id], listWith());
+    const { result } = renderHook(() => useRenameList(id), {
+      wrapper: wrapper(client),
+    });
+
+    act(() => {
+      result.current.mutate("First");
+      result.current.mutate("Second");
+    });
+    await waitFor(() => {
+      expect(sent).toEqual(["First"]);
+    });
+    expect(client.getQueryData(["lists", id])).toMatchObject({
+      name: "Second",
+    });
+
+    release();
+    await waitFor(() => {
+      expect(sent).toEqual(["First", "Second"]);
+    });
+    expect(client.getQueryData(["lists", id])).toMatchObject({
+      name: "Second",
+    });
+
+    releaseSecond();
+    await waitFor(() => {
+      expect(client.getQueryData(["lists", id])).toMatchObject({
+        name: "Server Second",
+      });
+    });
+  });
+
+  it("NET-1.4: the answer of the last rename is kept, also when it differs from the name sent", async () => {
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.patch(`/api/lists/${id}`, () =>
+        HttpResponse.json({ ...party, name: "From the server" }),
+      ),
+      http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+    );
+    const client = new QueryClient();
+    const { result } = renderHook(() => useRenameList(id), {
+      wrapper: wrapper(client),
+    });
+
+    result.current.mutate("Sent");
+
+    await waitFor(() => {
+      expect(client.getQueryData(["lists", id])).toMatchObject({
+        name: "From the server",
+      });
+    });
+  });
+
+  it("NET-1.4: a rename waits for no rename of another list", async () => {
+    const other = threeLists[1]?.id ?? "";
+    const gate = new Promise<void>(() => undefined);
+    const sent: string[] = [];
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.patch(`/api/lists/${id}`, async () => {
+        sent.push(id);
+        await gate;
+        return HttpResponse.json(party);
+      }),
+      http.patch(`/api/lists/${other}`, () => {
+        sent.push(other);
+        return HttpResponse.json(threeLists[1]);
+      }),
+      http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+    );
+    const client = new QueryClient();
+    const { result } = renderHook(
+      () => ({ one: useRenameList(id), two: useRenameList(other) }),
+      { wrapper: wrapper(client) },
+    );
+
+    act(() => {
+      result.current.one.mutate("A");
+      result.current.two.mutate("B");
+    });
+
+    await waitFor(() => {
+      expect(sent).toEqual([id, other]);
+    });
+  });
+
+  it("NET-1.4: a rename cancels the reads of its own list only", async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    server.use(
+      http.get("/api/auth/get-session", () => HttpResponse.json({ ok: true })),
+      http.patch(`/api/lists/${id}`, () =>
+        HttpResponse.json({ ...party, name: "Renamed" }),
+      ),
+      http.get("/api/lists", () => HttpResponse.json({ lists: threeLists })),
+    );
+    const client = new QueryClient();
+    void client.query({
+      queryKey: ["lists"],
+      queryFn: async () => {
+        await gate;
+        return "the lists";
+      },
+    });
+    const { result } = renderHook(() => useRenameList(id), {
+      wrapper: wrapper(client),
+    });
+
+    result.current.mutate("Renamed");
+    await waitFor(() => {
+      expect(client.getQueryData(["lists", id])).toMatchObject({
+        name: "Renamed",
+      });
+    });
+    release();
+
+    await waitFor(() => {
+      expect(client.getQueryData(["lists"])).toBe("the lists");
     });
   });
 

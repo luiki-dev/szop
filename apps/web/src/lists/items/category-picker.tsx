@@ -230,8 +230,13 @@ export function CategoryPicker({
         }}
         className="mt-3 min-h-12 w-full rounded-control border-2 border-input bg-card px-3 outline-none focus:ring-3 focus:ring-ring"
       />
-      <div role="radiogroup" aria-label="Category" className="mt-3">
-        <ul className="overflow-hidden rounded-surface border border-border bg-card">
+      {/* Only the list scrolls, its thin bar inside the border (#417). */}
+      <div
+        role="radiogroup"
+        aria-label="Category"
+        className="mt-3 flex min-h-0 flex-col"
+      >
+        <ul className="[scrollbar-width:thin] overflow-y-auto rounded-surface border border-border bg-card">
           <li className="flex border-b border-border">
             <span className="w-11 shrink-0" />
             <Radio
@@ -260,7 +265,7 @@ export function CategoryPicker({
     </>
   );
 
-  if (desktop) return <div>{content}</div>;
+  if (desktop) return <div className="flex h-full flex-col">{content}</div>;
   return (
     <Drawer.Root
       open
@@ -271,7 +276,7 @@ export function CategoryPicker({
     >
       <Drawer.Portal>
         <Drawer.Backdrop className="fixed inset-0 z-60 bg-black/40" />
-        <Drawer.Popup className="fixed inset-x-0 bottom-0 z-60 h-[90dvh] overflow-y-auto rounded-t-surface bg-card p-4 text-card-foreground shadow-lg outline-none">
+        <Drawer.Popup className="fixed inset-x-0 bottom-0 z-60 flex h-[90dvh] flex-col rounded-t-surface bg-card p-4 text-card-foreground shadow-lg outline-none">
           <span
             aria-hidden="true"
             className="mx-auto mb-3 block h-1 w-10 rounded-full bg-border"

@@ -77,7 +77,21 @@ describe("ItemCards", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /Bananas/ }));
 
-    expect(onEdit).toHaveBeenCalledWith(bananas);
+    expect(onEdit).toHaveBeenCalledWith(
+      bananas,
+      false,
+      expect.any(HTMLElement),
+    );
+  });
+
+  it("ITM-6.3: Enter on the name opens the edit as a keyboard opening", async () => {
+    const onEdit = vi.fn();
+    show([bananas], true, onEdit);
+
+    screen.getByRole("button", { name: /Bananas/ }).focus();
+    await userEvent.keyboard("{Enter}");
+
+    expect(onEdit).toHaveBeenCalledWith(bananas, true, expect.any(HTMLElement));
   });
 
   it("shows the quantity with its unit and the line total", () => {

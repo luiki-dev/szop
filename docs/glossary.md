@@ -8,6 +8,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 |---|---|---|
 | **ACL** | Access Control List | A list of rules saying who may do what to a resource. In S3, per-object ACLs are switched off (`BucketOwnerEnforced`) and policies decide instead; in AWS WAF, a *web ACL* is the container of a firewall's rules. |
 | **ACM** | AWS Certificate Manager | Issues free TLS certificates for domains you control, for use on AWS load balancers. |
+| **adb** | Android Debug Bridge | Google's command-line tool for working with an Android phone from a computer. Its `adb reverse` lets the phone reach a port on the computer over USB, for hand checks in Firefox for Android (see the [testing guide](development/testing.md#checking-on-a-phone-over-usb)). |
 | **ADR** | Architecture Decision Record | A short document recording one significant decision: its context, the options considered, the choice and its consequences. Ours live in `docs/decisions/`. |
 | **ALB** | Application Load Balancer | AWS's HTTP(S) load balancer: it decrypts HTTPS and forwards requests to healthy targets. Fronts Szop's demo. |
 | **ARN** | Amazon Resource Name | The unique identifier of an AWS resource, such as `arn:aws:ssm:eu-central-1:…:parameter/…`. |

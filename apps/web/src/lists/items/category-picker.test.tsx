@@ -11,8 +11,12 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function setup(value: string | null = null, catalog: Catalog = smallCatalog) {
-  stubMatchMedia({ [desktopQuery]: true });
+function setup(
+  value: string | null = null,
+  catalog: Catalog = smallCatalog,
+  desktop = true,
+) {
+  stubMatchMedia({ [desktopQuery]: desktop });
   const onPick = vi.fn();
   const onBack = vi.fn();
   render(
@@ -29,6 +33,19 @@ function setup(value: string | null = null, catalog: Catalog = smallCatalog) {
 const radio = (name: string) => screen.getByRole("radio", { name });
 
 describe("CategoryPicker", () => {
+  it("ITM-6.1: on a phone it is a sheet with a Close button, on a desktop it fills the dialog with a Back button", () => {
+    setup(null, smallCatalog, false);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Back" })).toBeNull();
+  });
+
+  it("ITM-6.1: on a desktop it is no sheet of its own", () => {
+    setup();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
+  });
+
   it("ITM-6.1: No category comes first, and picking it clears the category", async () => {
     const { onPick } = setup("c5");
     expect(screen.getAllByRole("radio")[0]).toHaveAccessibleName("No category");
