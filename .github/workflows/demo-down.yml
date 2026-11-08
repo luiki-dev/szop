@@ -152,7 +152,8 @@ jobs:
       # asks a listed resource's own service whether it is gone (ADR 0074,
       # decision 10). Inactive task definition revisions stay listed for good:
       # they cost nothing and cannot start a task. A denied call, an API error
-      # or any other type counts as left (runbook, "Checking that nothing is left").
+      # or a type outside the ones asked about counts as left (runbook,
+      # "Checking that nothing is left").
       - id: leftovers
         run: |
           deadline=$((SECONDS + 600))
@@ -163,28 +164,40 @@ jobs:
             for arn in $listed; do
               cluster=${arn#*/}
               cluster=${cluster%%/*}
+              state="type not checked"
               case "$arn" in
                 arn:aws:ecs:*:cluster/*)
-                  state=$(aws ecs describe-clusters --clusters "$arn" --query 'clusters[0].status' --output text) || true
-                  [ "$state" = INACTIVE ] && continue
+                  state=$(aws ecs describe-clusters --clusters "$arn" \
+                    --query 'clusters[0].status || failures[0].reason' --output text 2>&1) || true
+                  [[ "$state" == INACTIVE || "$state" == MISSING ]] && continue
                   ;;
                 arn:aws:ecs:*:service/*)
                   state=$(aws ecs describe-services --cluster "$cluster" --services "$arn" \
-                    --query 'services[0].status || failures[0].reason' --output text) || true
-                  [[ "$state" == INACTIVE || "$state" == MISSING ]] && continue
+                    --query 'services[0].status || failures[0].reason' --output text 2>&1) || true
+                  [[ "$state" == INACTIVE || "$state" == MISSING || "$state" == *ClusterNotFoundException* ]] && continue
                   ;;
                 arn:aws:ecs:*:task/*)
                   state=$(aws ecs describe-tasks --cluster "$cluster" --tasks "$arn" \
-                    --query 'tasks[0].lastStatus || failures[0].reason' --output text) || true
-                  [[ "$state" == STOPPED || "$state" == MISSING ]] && continue
+                    --query 'tasks[0].lastStatus || failures[0].reason' --output text 2>&1) || true
+                  [[ "$state" == STOPPED || "$state" == MISSING || "$state" == *ClusterNotFoundException* ]] && continue
                   ;;
-                arn:aws:ec2:*:security-group-rule/*)
-                  state=$(aws ec2 describe-security-group-rules --security-group-rule-ids "${arn##*/}" \
-                    --query 'length(SecurityGroupRules)' --output text 2>&1) || true
-                  [[ "$state" == *InvalidSecurityGroupRuleId.NotFound* ]] && continue
-                  echo "$state"
+                arn:aws:ec2:*)
+                  case "${arn##*:}" in
+                    security-group-rule/*) describe=(describe-security-group-rules --security-group-rule-ids) ;;
+                    security-group/*) describe=(describe-security-groups --group-ids) ;;
+                    subnet/*) describe=(describe-subnets --subnet-ids) ;;
+                    vpc/*) describe=(describe-vpcs --vpc-ids) ;;
+                    internet-gateway/*) describe=(describe-internet-gateways --internet-gateway-ids) ;;
+                    route-table/*) describe=(describe-route-tables --route-table-ids) ;;
+                    *) describe=() ;;
+                  esac
+                  if (( ${#describe[@]} )); then
+                    state=$(aws ec2 "${describe[@]}" "${arn##*/}" --query 'length(*[])' --output text 2>&1) || true
+                    [[ "$state" == *.NotFound* ]] && continue
+                  fi
                   ;;
               esac
+              echo "$arn: $state"
               found="$found $arn"
             done
             found=${found# }

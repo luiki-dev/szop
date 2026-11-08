@@ -331,8 +331,8 @@ resource "aws_iam_role_policy" "ci_deploy_state" {
 # security groups with their rules: the load balancer's, and from PH-12c the
 # task's and the database's (EC2).
 data "aws_iam_policy_document" "ci_deploy_demo_network" {
-  # Refresh and the provider's waits. EC2's Describe actions support no
-  # resource scoping.
+  # Refresh and the provider's waits, and demo-down's leftovers check. EC2's
+  # Describe actions support no resource scoping.
   statement {
     sid       = "ReadNetwork"
     actions   = ["ec2:Describe*"]
@@ -1084,7 +1084,8 @@ resource "aws_iam_role_policy_attachment" "ci_deploy_demo_database" {
 # roles to ECS (IAM), and what demo-up does after the apply: run db-setup and
 # scale the service.
 data "aws_iam_policy_document" "ci_deploy_demo_service" {
-  # Refresh, the provider's waits, and demo-up's describe-tasks and waits.
+  # Refresh, the provider's waits, demo-up's describe-tasks and waits, and
+  # demo-down's leftovers check.
   # ECS's reads return configuration and task states, never a secret value.
   statement {
     sid       = "ReadEcs"
