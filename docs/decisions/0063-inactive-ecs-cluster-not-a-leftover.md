@@ -14,7 +14,7 @@ On 2026-11-03 the nightly run failed with nothing of the demo left ([#373](https
 
 | # | Decision | Options considered | Outcome |
 |---|---|---|---|
-| 1 | What the leftovers check does with a listed ECS cluster | Count it, as now; skip every cluster ARN, like task definitions; ask ECS for its status and skip only an `INACTIVE` one | **The check asks ECS (`describe-clusters`) for the status of each listed ECS cluster and skips an `INACTIVE` one.** An active cluster, or one whose status cannot be read, is still reported, so the check fails safe. Skipping every cluster would hide a cluster left outside the state, which could hold services. The deploy role already allows `ecs:Describe*`. Chosen by the owner, 2026-11-03. |
+| 1 | What the leftovers check does with a listed ECS cluster | Count it, as now; skip every cluster ARN, like task definitions; ask ECS for its status and skip only an `INACTIVE` one | **The check asks ECS (`describe-clusters`) for the status of each listed ECS cluster and skips an `INACTIVE` one.** An active cluster, or one whose status cannot be read, is still reported, so the check fails safe. Skipping every cluster would hide a cluster left outside the state, which could hold services. The deploy role already allows `ecs:Describe*`. Chosen by the owner, 2026-11-03. <br>✏️ **Refined by [ADR 0074](0074-read-only-aws-access-phase-details.md), decision 10:** the check also asks about a listed ECS service, ECS task and security group rule. |
 
 ## Consequences
 

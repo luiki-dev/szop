@@ -60,6 +60,7 @@ Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `
 - **Restart or `/compact` above 150–200k of context**, never in the middle of an uncommitted edit ([Reading the status line](docs/development/working-with-claude.md#reading-the-status-line)).
 - **Before a break longer than an hour, finish the stage:** the prompt cache lives one hour, and the first call after it writes the whole context again ([Breaks and the cache](docs/development/working-with-claude.md#breaks-and-the-cache)).
 - **Implementers on Sonnet, the default; the whole-branch review on Opus, named explicitly** (`model: opus`) ([Choosing models](docs/development/working-with-claude.md#choosing-models)).
+- **On AWS, only the profile `claude-readonly`, never the administrator's** ([ADR 0074](docs/decisions/0074-read-only-aws-access-phase-details.md)). When it has no valid login, or the denies hide what is needed (log lines, secret values, Terraform states), ask the owner; don't reach for another profile or a token in `~/.aws/sso/cache`.
 
 ## Documentation
 

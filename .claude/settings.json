@@ -32,7 +32,10 @@
       "Bash(git push -d*)",
       "Bash(git push * -d*)",
       "Bash(git push --tags*)",
-      "Bash(git push * --tags*)"
+      "Bash(git push * --tags*)",
+      "Bash(*--profile szop*)",
+      "Bash(*--profile=szop*)",
+      "Bash(*AWS_PROFILE=szop*)"
     ]
   },
   "hooks": {
@@ -69,6 +72,7 @@
     ]
   },
   "env": {
+    "AWS_PROFILE": "claude-readonly",
     "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
   }
 }

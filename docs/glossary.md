@@ -268,7 +268,7 @@ Used in the [functional requirements](requirements/functional-requirements.md), 
 | **k-anonymity** | Sending only part of a secret's hash, so that the answer covers many possible secrets and the server cannot tell which one was meant. Have I Been Pwned's password check works this way: only the first 5 characters of a SHA-1 hash leave the server. |
 | **Let's Encrypt** | A free certificate authority that issues certificates automatically. GitHub Pages gets the landing page's certificate from it, so the CAA record on `dzwoniec.com` has to allow `letsencrypt.org`. |
 | **Lazy creation** | Creating something only when it is first needed. Szop creates a guest's workspace on their first change, not on their first visit. |
-| **Least privilege** | Giving every identity only the permissions it needs, so a leak or bug can do little harm. Szop's app role may only accept ECS Exec sessions today (and send email from PH-18). |
+| **Least privilege** | Giving every identity only the permissions it needs, so a leak or bug can do little harm. Szop's app role may only accept ECS Exec sessions today (and send email from PH-18), and Claude Code's AWS user may only read configuration (ADR 0074). |
 | **Lighthouse** | Google's tool, built into Chrome, that loads a page while simulating a slow phone and reports performance, accessibility and other scores. |
 | **lint-staged** | A tool that runs commands (here ESLint and Prettier) only on the files staged for a commit. |
 | **Linter** | A tool that analyzes code for bugs and bad patterns without running it. Szop uses ESLint. |

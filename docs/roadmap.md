@@ -44,6 +44,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-16d Resilient changes](#ph-16d-resilient-changes)
   - [PH-17 List items](#ph-17-list-items)
   - [PH-46 List items polish](#ph-46-list-items-polish)
+  - [PH-47 Read-only AWS access for Claude Code](#ph-47-read-only-aws-access-for-claude-code)
   - [PH-18 Registration and login](#ph-18-registration-and-login)
   - [PH-19 Guest data on login](#ph-19-guest-data-on-login)
   - [PH-39 Redis in the stack](#ph-39-redis-in-the-stack)
@@ -341,6 +342,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-16d Resilient changes](#ph-16d-resilient-changes) | 🚧 In progress | [Spec](superpowers/specs/2026-11-05-PH-16d-resilient-changes-design.md) | [Plan](superpowers/plans/2026-11-05-PH-16d-resilient-changes.md) | [#396](https://github.com/luiki-dev/szop/pull/396) | [#382](https://github.com/luiki-dev/szop/issues/382) |
 | [PH-17 List items](#ph-17-list-items) | 🚧 In progress | [Spec](superpowers/specs/2026-11-06-PH-17-list-items-design.md) | [Plan](superpowers/plans/2026-11-06-PH-17-list-items.md) | [#403](https://github.com/luiki-dev/szop/pull/403) | [#46](https://github.com/luiki-dev/szop/issues/46) |
 | [PH-46 List items polish](#ph-46-list-items-polish) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#420](https://github.com/luiki-dev/szop/pull/420) | [#407](https://github.com/luiki-dev/szop/issues/407) |
+| [PH-47 Read-only AWS access for Claude Code](#ph-47-read-only-aws-access-for-claude-code) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#425](https://github.com/luiki-dev/szop/pull/425) | [#423](https://github.com/luiki-dev/szop/issues/423) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
 | [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
 | [PH-39 Redis in the stack](#ph-39-redis-in-the-stack) | ⬜ Not started | — | — | — | [#235](https://github.com/luiki-dev/szop/issues/235) |
@@ -500,6 +502,15 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Owner steps:** none.
 - **Expected path:** bounded.
 - **Open points:** the sub-issues of [#407](https://github.com/luiki-dev/szop/issues/407).
+
+### PH-47 Read-only AWS access for Claude Code
+
+- **Goal:** a Claude Code session reads AWS through its own user and cannot change anything, read a secret value, a log line or a Terraform state; and `demo-down` no longer fails on resources the tagging API lists after they are deleted.
+- **Delivers:** the separate read-only profile ([OP-142](https://github.com/luiki-dev/szop/issues/422)) and the fix of the leftovers check ([#421](https://github.com/luiki-dev/szop/issues/421)); the details are in [ADR 0074](decisions/0074-read-only-aws-access-phase-details.md).
+- **Depends on:** —
+- **Owner steps:** in the console, create the `claude` user, the permission set `ClaudeReadOnly` and the assignment; add the `claude-readonly` profile and sign in ([runbook](operations/demo-environment.md#read-only-access-for-claude-code)).
+- **Expected path:** bounded.
+- **Open points:** the sub-issues of [#423](https://github.com/luiki-dev/szop/issues/423).
 
 ### PH-18 Registration and login
 

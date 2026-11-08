@@ -10,7 +10,7 @@ The AWS Command Line Interface (CLI) runs AWS commands from a terminal: `aws s3 
 
 ## Configuration
 
-**`~/.aws/config`** holds named **profiles**. Szop uses one, `szop`, written by `aws configure sso` during the [one-time account setup](../../operations/demo-environment.md#one-time-account-setup):
+**`~/.aws/config`** holds named **profiles**. Szop uses two: `claude-readonly`, Claude Code's own read-only user ([Read-only access for Claude Code](../../operations/demo-environment.md#read-only-access-for-claude-code)), and the owner's `szop`, written by `aws configure sso` during the [one-time account setup](../../operations/demo-environment.md#one-time-account-setup):
 
 ```ini
 [profile szop]
@@ -44,6 +44,7 @@ aws sts get-caller-identity          # who am I: an assumed role named AWSReserv
 - **`Error when retrieving token from sso: Token has expired`** or **`The SSO session associated with this profile has expired`**: run `aws sso login` again.
 - **`Unable to locate credentials`**: `AWS_PROFILE` is not set in this terminal.
 - Terraform reads the same profile through `AWS_PROFILE`; the profile is not written into the Terraform code, because CI authenticates without profiles ([Terraform](terraform.md#everyday-use)).
+- **Claude Code gets `claude-readonly`, whatever the terminal exports, where the checkout holds these settings:** `env.AWS_PROFILE` in `.claude/settings.json` sets it, and deny rules refuse a command that names `szop` ([ADR 0074](../../decisions/0074-read-only-aws-access-phase-details.md)). A session started in a checkout or on a branch without them keeps the terminal's `AWS_PROFILE`, which may be the administrator's (this happened on 2026-11-08 to a session started on `main`), so start the session on a checkout that has them and check with `printenv AWS_PROFILE`. The deny rules match the command's text, so they also refuse a harmless command that holds those words, such as a commit message or `gh pr create --body`; such text goes in a file (`--body-file`), or is reworded. When the work as `szop` is done, run `aws sso logout` ([Signing in as the administrator](../../operations/demo-environment.md#signing-in-as-the-administrator)).
 
 ## Updating
 

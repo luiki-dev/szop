@@ -12,7 +12,7 @@ Shutting Szop down for good is the reverse of this table: [Tearing down](#tearin
 
 Why each piece exists is in the [stack overview](../architecture/stack-overview.md#12-where-szop-runs); how Terraform works here is on the [Terraform page](../development/tools/terraform.md); what each module creates is drawn in [AWS resources](../architecture/aws-resources.md). The tools come from [setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli).
 
-**Every command in this runbook assumes `export AWS_PROFILE=szop`** in the terminal, and a current sign-in (`aws sso login`). Lines marked **⚠️ Don't** are mistakes that are hard to undo; read them before the step, not after.
+**Every command in this runbook assumes `export AWS_PROFILE=szop`** in the terminal, and a current sign-in (`aws sso login`), ended with `aws sso logout` when the work is done ([Signing in as the administrator](#signing-in-as-the-administrator)). Lines marked **⚠️ Don't** are mistakes that are hard to undo; read them before the step, not after.
 
 ## Contents
 
@@ -23,6 +23,11 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [4. IAM Identity Center](#4-iam-identity-center)
   - [5. Sign in from the CLI](#5-sign-in-from-the-cli)
   - [6. Remove every long-lived key](#6-remove-every-long-lived-key)
+- [Read-only access for Claude Code](#read-only-access-for-claude-code)
+  - [The permission set](#the-permission-set)
+  - [The user and its assignment](#the-user-and-its-assignment)
+  - [The profile](#the-profile)
+  - [Signing in as the administrator](#signing-in-as-the-administrator)
 - [Applying bootstrap](#applying-bootstrap)
   - [Part 1: the first apply, with local state](#part-1-the-first-apply-with-local-state)
   - [Part 2: moving the state into the bucket](#part-2-moving-the-state-into-the-bucket)
@@ -161,6 +166,175 @@ aws sts get-caller-identity --profile szop        # works: the assumed role, as 
 The first command failing is the point: a command that forgets the profile now stops, instead of quietly running as an old user with a key that never expires.
 
 ⚠️ **Don't:** delete the IAM user or its key before step 5's check passes; you would lose the CLI's way in until Identity Center works.
+
+## Read-only access for Claude Code
+
+Claude Code never works as the administrator. It is its own user in Identity Center, with a read-only permission set and nothing else assigned, because an SSO token can ask for any role assigned to its user ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decision 2). It can read the account's configuration, but not change anything, and not read a secret value, a log line or a Terraform state. Done once, in the console, by hand ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decision 5).
+
+### The permission set
+
+In *IAM Identity Center* (region **Frankfurt**): *Permission sets → Create permission set → Custom permission set → Next*.
+
+1. *AWS managed policies:* tick **ReadOnlyAccess**.
+2. *Inline policy:* paste the policy below. *Next*.
+3. *Permission set name:* `ClaudeReadOnly`. *Session duration:* **8 hours**. *Next → Create*.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenySecretValues",
+      "Effect": "Deny",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath",
+        "ssm:GetParameterHistory",
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyAllObjects",
+      "Effect": "Deny",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyLogContents",
+      "Effect": "Deny",
+      "Action": [
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents",
+        "logs:StartQuery",
+        "logs:StartLiveTail",
+        "logs:GetQueryResults",
+        "logs:GetLogRecord",
+        "logs:ListAnomalies"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyDataReads",
+      "Effect": "Deny",
+      "Action": [
+        "rds:DownloadDBLogFilePortion",
+        "rds:DownloadCompleteDBLogFile",
+        "pi:DescribeDimensionKeys",
+        "pi:GetDimensionKeyDetails",
+        "pi:GetResourceMetrics",
+        "dynamodb:GetItem",
+        "dynamodb:BatchGetItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:PartiQLSelect",
+        "dynamodb:GetRecords",
+        "dynamodb:ReadDataForReplication",
+        "dynamodb:SearchVectors"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyBillingAndCost",
+      "Effect": "Deny",
+      "Action": [
+        "ce:*",
+        "budgets:*",
+        "billing:*",
+        "aws-portal:*",
+        "cur:*",
+        "bcm-data-exports:*",
+        "invoicing:*",
+        "payments:*",
+        "freetier:*",
+        "consolidatedbilling:*",
+        "cost-optimization-hub:*",
+        "savingsplans:*",
+        "tax:*",
+        "purchase-orders:*",
+        "billingconductor:*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyPersonalData",
+      "Effect": "Deny",
+      "Action": [
+        "account:GetPrimaryEmail",
+        "account:GetContactInformation",
+        "account:GetAlternateContact",
+        "organizations:*",
+        "identitystore:*",
+        "sso-directory:*",
+        "cloudtrail:LookupEvents",
+        "ses:ListSuppressedDestinations",
+        "ses:GetSuppressedDestination"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+This is a copy of `ci_plan_denies` in [`infra/base/ci_roles.tf`](../../infra/base/ci_roles.tf), which explains each statement. It differs in one statement: `DenyAllObjects` also denies the Terraform states, which the plan role needs and Claude Code does not. **Nothing checks that the two stay alike:** when you change one, change the other (*Permission sets → ClaudeReadOnly → Inline policy → Edit*).
+
+### The user and its assignment
+
+1. *Users → Add user*. Username: `claude`. Email address: one you read, other than your own user's, because Identity Center wants each user's to be different. First and last name: `Claude Code`. *Next* through the group page (no groups), *Add user*.
+2. Open the invitation email **in a private window**, so that your own sign-in stays out of it. Set a password and register an MFA device for this user.
+3. *AWS accounts* → tick **your account** under Root → *Assign users or groups* → the *Users* tab → tick `claude` → *Next* → **ClaudeReadOnly** → *Next → Submit*.
+
+⚠️ **Don't:** assign `claude` anything else, or assign `ClaudeReadOnly` to your own user: the separation is the whole point.
+
+### The profile
+
+Add this to `~/.aws/config`, with the same account ID and portal URL as the `szop` profile. Its SSO session is its own: the two users' tokens must not overwrite each other. Your terminal keeps `AWS_PROFILE=szop`; Claude Code's settings choose this profile for its sessions.
+
+```ini
+[profile claude-readonly]
+sso_session = claude-readonly
+sso_account_id = <the account ID>
+sso_role_name = ClaudeReadOnly
+region = eu-central-1
+output = json
+
+[sso-session claude-readonly]
+sso_start_url = <the AWS access portal URL>
+sso_region = eu-central-1
+sso_registration_scopes = sso:account:access
+```
+
+Sign in, in your own terminal. The command prints a URL and a code: open the URL **in a private window** and sign in as `claude`. A normal window would approve the login as your own user, and the profile would then fail with `No access`.
+
+```bash
+aws sso login --profile claude-readonly --use-device-code --no-browser
+```
+
+**Check:**
+
+```bash
+aws sts get-caller-identity --profile claude-readonly
+#   Arn: arn:aws:sts::<account>:assumed-role/AWSReservedSSO_ClaudeReadOnly_…/claude
+aws ec2 describe-vpcs --profile claude-readonly --query 'length(Vpcs)'
+#   a number: reads work
+aws ec2 create-vpc --profile claude-readonly --cidr-block 10.99.0.0/16 --dry-run
+#   UnauthorizedOperation: writes fail (DryRunOperation would mean it was allowed)
+aws ssm get-parameter --profile claude-readonly --name /szop/check
+#   AccessDeniedException ... with an explicit deny
+aws s3api get-object --profile claude-readonly --bucket szop-tfstate-ntrtcr --key demo/terraform.tfstate /dev/null
+#   AccessDenied ... with an explicit deny
+```
+
+The login lasts up to 8 hours. When it has expired, a session's `aws` commands fail with `Token has expired`: run the `aws sso login` line above again, in your own terminal.
+
+### Signing in as the administrator
+
+The `szop` token sits next to Claude Code's in `~/.aws/sso/cache`, so while you are signed in as the administrator, a running session could use it. Only the deny rules in `.claude/settings.json` stand in the way, and they catch a mistake, not a determined command ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decisions 8 and 9). So keep that sign-in as short as the work:
+
+1. `aws sso login --profile szop`, in your own terminal, not with `!` in a session.
+2. Do the work.
+3. `aws sso logout`. It clears **every** profile's token, so sign in as `claude-readonly` again ([The profile](#the-profile)) before a session needs AWS.
 
 ## Applying bootstrap
 
@@ -887,17 +1061,17 @@ If two runs overlap, the second waits: `demo-down` runs one at a time and never 
 
 A destroy that reports success is the proof, and this is the second look, which also finds what a half-failed apply left behind. Two checks, because AWS has two kinds of resource here:
 
-1. **Everything that carries tags.** *Resource Groups & Tag Editor → Tag Editor*: **Regions: eu-central-1** (the Tag Editor searches only the regions you select, and every taggable resource of the demo lives in Frankfurt), *Resource types: All supported resource types*, tag key `group`, value `demo`, *Search resources*. It must list nothing but inactive task definition revisions and, for hours after a destroy, the `INACTIVE` cluster `szop-demo`. The same from a terminal:
+1. **Everything that carries tags.** *Resource Groups & Tag Editor → Tag Editor*: **Regions: eu-central-1** (the Tag Editor searches only the regions you select, and every taggable resource of the demo lives in Frankfurt), *Resource types: All supported resource types*, tag key `group`, value `demo`, *Search resources*. It must list nothing but inactive task definition revisions and, for hours after a destroy, resources that are already gone: the `INACTIVE` cluster `szop-demo`, its service and tasks, and EC2 resources such as security group rules and subnets. The same from a terminal:
 
    ```bash
    aws resourcegroupstaggingapi get-resources --region eu-central-1 --tag-filters Key=group,Values=demo \
      --query 'ResourceTagMappingList[].ResourceARN'
-   #   []   (or only the inactive task definition revisions and the INACTIVE cluster, below)
+   #   []   (or only the inactive task definition revisions and the resources already gone, below)
    ```
 
-   Right after a destroy, the list can still name resources that are already gone: the index behind the Tag Editor lags behind deletions, by minutes or longer. On the first real destroy it still listed the two security group rules (`security-group-rule/sgr-…`) after EC2 reported them deleted; after PH-12c's first destroy it still listed the subnets, the rules, the service and its stopped tasks, and the cluster, which ECS keeps as `INACTIVE` for a while (`aws ecs describe-clusters --clusters szop-demo --query 'clusters[].status'`): on 2026-11-03 it was still listed more than 11 hours after the destroy ([#373](https://github.com/luiki-dev/szop/issues/373)). An `INACTIVE` cluster costs nothing and runs nothing, so `demo-down`'s check skips it. Check such a leftover in its own service before acting on it, for example `aws ec2 describe-security-group-rules --region eu-central-1 --security-group-rule-ids <id>`, which answers `InvalidSecurityGroupRuleId.NotFound` for a rule that is gone.
+   Right after a destroy, the list can still name resources that are already gone: the index behind the Tag Editor lags behind deletions, by minutes or longer. On the first real destroy it still listed the two security group rules (`security-group-rule/sgr-…`) after EC2 reported them deleted; after PH-12c's first destroy it still listed the subnets, the rules, the service and its stopped tasks, and the cluster, which ECS keeps as `INACTIVE` for a while (`aws ecs describe-clusters --clusters szop-demo --query 'clusters[].status'`): on 2026-11-03 it was still listed more than 11 hours after the destroy ([#373](https://github.com/luiki-dev/szop/issues/373)), and on 2026-11-07 the service about 8 hours after ([#421](https://github.com/luiki-dev/szop/issues/421)). So `demo-down`'s check asks each resource's own service, and skips a cluster `INACTIVE` or `MISSING`, a service `INACTIVE` or `MISSING`, a task `STOPPED` or `MISSING`, a service or task whose cluster answers `ClusterNotFoundException`, and a security group rule, security group, subnet, VPC, internet gateway or route table that answers a `*.NotFound*` error ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decision 10). Check any other leftover in its own service before acting on it, for example `aws elbv2 describe-load-balancers --region eu-central-1 --load-balancer-arns <arn>`, which answers `LoadBalancerNotFound` for a load balancer that is gone.
 
-   **Inactive task definition revisions may remain, and are expected.** Terraform deregisters each revision of `szop-demo-app` and `szop-demo-db-setup` when it destroys them, which leaves it `INACTIVE`: it costs nothing, cannot start a task and keeps its tags, so the Tag Editor still lists it as `task-definition/szop-demo-app:<n>`. Check one: `aws ecs describe-task-definition --task-definition szop-demo-app:1 --query taskDefinition.status --output text` prints `INACTIVE`. Anything else in the list, apart from the `INACTIVE` cluster above, is a leftover. The database's master secret is not in the list: RDS deletes it with the instance, and `aws secretsmanager list-secrets --query "SecretList[?starts_with(Name, 'rds!db-')].Name"` prints `[]`.
+   **Inactive task definition revisions may remain, and are expected.** Terraform deregisters each revision of `szop-demo-app` and `szop-demo-db-setup` when it destroys them, which leaves it `INACTIVE`: it costs nothing, cannot start a task and keeps its tags, so the Tag Editor still lists it as `task-definition/szop-demo-app:<n>`. Check one: `aws ecs describe-task-definition --task-definition szop-demo-app:1 --query taskDefinition.status --output text` prints `INACTIVE`. Anything else in the list, apart from the resources already gone above, is a leftover. The database's master secret is not in the list: RDS deletes it with the instance, and `aws secretsmanager list-secrets --query "SecretList[?starts_with(Name, 'rds!db-')].Name"` prints `[]`.
 
    Global services (Route 53, IAM, Budgets) show up in the Tag Editor only under *Regions: us-east-1*, and **IAM roles never show up there at all**: the API behind it does not return them. The demo creates no role, and the roles the app uses are base's.
 
@@ -922,7 +1096,7 @@ If something is left, find which resource it is and delete it in the console, ne
 - **`terraform init` or `destroy` says `Error acquiring the state lock`** after 15 minutes: another run holds it, usually a `demo-up` still working. Wait for it, then re-run (*Re-run failed jobs*). If no run is going and the lock is stale, `terraform force-unlock <lock-id>` from your machine (the ID is in the error) removes it.
 - **`Cannot fetch the recorded commit`:** the demo was deployed from a commit GitHub no longer serves, and the job refuses to destroy with other code. Destroy by hand, from your machine ([From your machine](#from-your-machine)). If the commit is missing on your machine too (`git cat-file -e <commit>` fails after `git fetch origin`), destroy with `main`'s code, then [check that nothing is left](#checking-that-nothing-is-left) (the Tag Editor with *Regions* set to eu-central-1 and tag `group` = `demo`); a resource that `main`'s code does not know has to be deleted by hand.
 - **`No branch of this repository holds the recorded commit`**, or **`locks other providers than main does`:** the demo was deployed from a commit that no branch here holds (a fork's, or a deleted branch's), or from a branch whose `infra/demo/.terraform.lock.hcl` differs from `main`'s, typically an unmerged provider update of Dependabot. The job destroys nothing and has no override: its Terraform code and providers would run with the deploy role ([ADR 0062](../decisions/0062-urgent-security-fixes.md)). Merge the branch, which also fixes a Dependabot case, then re-run; or [destroy by hand](#from-your-machine) with that commit, which you can read in the run's summary and in the log. A `demo-up` from a branch that is later deleted unmerged hits the same.
-- **`Resources tagged group=demo are left after the destroy`:** the destroy succeeded but the tagging API still lists these ARNs after 10 minutes (the run's summary lists them). Check each in its own service as in [Checking that nothing is left](#checking-that-nothing-is-left); delete a real leftover by hand, then re-run the workflow: it fails the same way as long as the ARN stays listed, so a false alarm of the lagging index goes away by itself, usually within the hour. Inactive task definition revisions and an `INACTIVE` cluster are not counted.
+- **`Resources tagged group=demo are left after the destroy`:** the destroy succeeded but the tagging API still lists these ARNs after 10 minutes (the run's summary lists them). Check each in its own service as in [Checking that nothing is left](#checking-that-nothing-is-left); delete a real leftover by hand, then re-run the workflow. A resource that is gone but of a type the check does not ask about, such as a load balancer, keeps failing the run for as long as the ARN stays listed, which can take hours. Inactive task definition revisions and the resources the check found gone are not counted. A denied call to the service counts as left: the reason is in the step's log.
 - **A destroy error from AWS** (a resource that is in use, a dependency): the log names the resource. Re-run once; if it fails again, destroy by hand and read the error there. A destroy that fails halfway removes the `deployed_commit` output from the state, so a re-run (or the next nightly run) destroys with `main`'s code and its summary says that no commit is recorded. Before re-running, note the commit from the failed run's summary (*Code used*), and destroy by hand with that commit ([From your machine](#from-your-machine)): `git switch --detach <commit>`.
 - **A network error or a GitHub outage:** *Re-run failed jobs*.
 
