@@ -34,6 +34,7 @@
       "Bash(git push --tags*)",
       "Bash(git push * --tags*)",
       "Bash(*--profile szop*)",
+      "Bash(*--profile=szop*)",
       "Bash(*AWS_PROFILE=szop*)"
     ]
   },
