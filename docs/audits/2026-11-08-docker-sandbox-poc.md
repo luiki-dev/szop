@@ -89,7 +89,7 @@ pnpm install
 
 | Check | Expected | WSL | Sandbox | Result |
 |---|---|---|---|---|
-| **GO** The push hook again, once Node 24 is installed and with no credentials yet: ask Claude to run `git push origin :refs/heads/poc` | `Blocked by .claude/hooks/guard-git-push.ts` | ➖ N/A | ➖ N/A | ⬜ |
+| **GO** The push hook again, once Node 24 is installed and with no credentials yet: ask Claude to run `git push origin :refs/heads/poc` | `Blocked by .claude/hooks/guard-git-push.ts` | ➖ N/A | ➖ N/A | ✅ Blocked with the hook's message, but only with Claude started by hand in `~/workspace/szop` after `unset NPM_CONFIG_PREFIX` and `nvm use`. Started by `sbx run`, Claude opens in `~/workspace`, so the project's settings, deny rules and hooks don't load at all; and the kit sets `NPM_CONFIG_PREFIX`, which stops nvm in `.bashrc`, so neither the hooks nor Claude's Bash tool find `node` |
 | **GO** `pnpm install` | Works | | | ⬜ |
 | **GO** `pnpm check` | Passes | | | ⬜ |
 | **GO** `pnpm db:up` | The database starts in the sandbox's Docker | ➖ N/A | ➖ N/A | ⬜ |
