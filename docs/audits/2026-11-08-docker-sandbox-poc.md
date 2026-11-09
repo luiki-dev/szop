@@ -89,25 +89,25 @@ pnpm install
 
 | Check | Expected | WSL | Sandbox | Result |
 |---|---|---|---|---|
-| **GO** The push hook again, once Node 24 is installed and with no credentials yet: ask Claude to run `git push origin :refs/heads/poc` | `Blocked by .claude/hooks/guard-git-push.ts` | ➖ N/A | ➖ N/A | ✅ Blocked with the hook's message, but only with Claude started by hand in `~/workspace/szop` after `unset NPM_CONFIG_PREFIX` and `nvm use`. Started by `sbx run`, Claude opens in `~/workspace`, so the project's settings, deny rules and hooks don't load at all; and the kit sets `NPM_CONFIG_PREFIX`, which stops nvm in `.bashrc`, so neither the hooks nor Claude's Bash tool find `node` |
-| **GO** `pnpm install` | Works | | | ⬜ |
-| **GO** `pnpm check` | Passes | | | ⬜ |
-| **GO** `pnpm db:up` | The database starts in the sandbox's Docker | ➖ N/A | ➖ N/A | ⬜ |
-| **GO** `pnpm test:e2e` (the browsers: setup.md) | Passes | | | ⬜ |
-| **GO** `pnpm test:mutation` | Finishes; note the score against WSL's | | | ⬜ |
-| **GO** `pnpm check:image`, with **no change to the Dockerfile** ([certificates](https://docs.docker.com/ai/sandboxes/troubleshooting/) may break downloads in a build) | Passes | | | ⬜ |
-| **GO** `pnpm check:prodlike` | Passes | | | ⬜ |
-| `pnpm check:workflows`, `pnpm check:infra`, `pnpm check:scan` | Note what is missing | | | ⬜ |
+| **GO** The push hook again, once Node 24 is installed and with no credentials yet: ask Claude to run `git push origin :refs/heads/poc` | `Blocked by .claude/hooks/guard-git-push.ts` | ➖ N/A | ➖ N/A | ✅ Blocked with the hook's message, but only with Claude started by hand in `~/workspace/szop` after `unset NPM_CONFIG_PREFIX` and `nvm use`. Started by a plain `sbx run`, Claude opens in `~/workspace`, so the project's settings, deny rules and hooks don't load at all: `sbx run --name szop-poc -w szop` (relative to `~/workspace`, or absolute) opens it in the repository; and the kit sets `NPM_CONFIG_PREFIX`, which stops nvm in `.bashrc`, so neither the hooks nor Claude's Bash tool find `node` |
+| **GO** `pnpm install` | Works | 0.017 s | 0.026 s | ✅ Needs `unset NPM_CONFIG_PREFIX` and `nvm use` first; the second run has nothing to do, so the times show only that |
+| **GO** `pnpm check` | Passes | 51.3 s | 48.1 s | ✅ Once `apps/api/.env` is copied and the database is up (setup.md, steps 6 and 7); without them Vitest crashes while printing the real error (`code.charCodeAt is not a function`) |
+| **GO** `pnpm db:up` | The database starts in the sandbox's Docker | ➖ N/A | ➖ N/A | ✅ `postgres:18.6` pulled with no host to approve; `szop-postgres-1 Healthy` |
+| **GO** `pnpm test:e2e` (the browsers: setup.md) | Passes | 98.5 s | 87.9 s | ✅ 136 passed, 17 skipped in both. `playwright install --with-deps` needed `playwright.download.prss.microsoft.com` approved; `apt` ran through `sudo` with no password asked |
+| **GO** `pnpm test:mutation` | Finishes; note the score against WSL's | 39 min 21 s; score 87.37 (covered 90.83), 327 survived, 8 timeouts | 28 min 47 s; score 88.96 (covered 92.48), 268 survived, 3 timeouts | ✅ Finishes. The scores differ on the same code and the same `.env` keys, run one after the other, so something in the run is not deterministic; not caused by the sandbox as far as these numbers show. Comparing the two reports could tell which mutants differ (Task 4 opens a report from the sandbox on Windows) |
+| **GO** `pnpm check:image`, with **no change to the Dockerfile** ([certificates](https://docs.docker.com/ai/sandboxes/troubleshooting/) may break downloads in a build) | Passes | 6.2 s | 4.0 s | ✅ Passes with the Dockerfile unchanged and no host to approve; the proxy's TLS did not break the build's downloads. The times are of a second run, from the layer cache |
+| **GO** `pnpm check:prodlike` | Passes | 22.5 s | 19.7 s | ✅ Passes with nothing installed: `openssl` is in the kit's image |
+| `pnpm check:workflows`, `pnpm check:infra`, `pnpm check:scan` | Note what is missing | ➖ N/A | ➖ N/A | ✅ Noted, none installed: `actionlint` (and so probably `zizmor` and `uv` after it), `terraform` (`check:infra` stops at `terraform fmt`, so `tflint` is unchecked) and `trivy`; setup.md, steps 8 and 9 |
 
 Also note:
 
 | What | Value |
 |---|---|
-| The sandbox's CPU and memory (`nproc`, `free -h`), and how to change them | |
-| `df -h` in the sandbox against the defaults of 20 GB and 10 GB for Docker | |
-| The real size of `%LOCALAPPDATA%\DockerSandboxes` on Windows | |
-| The same with a second sandbox created, then stopped | |
-| The hosts this task needed, from `sbx policy log` | |
+| The sandbox's CPU and memory (`nproc`, `free -h`), and how to change them | 16 CPUs (all the host's), 15 GiB of memory, no swap. `sbx create --cpus <n> --memory <8g>`; the memory defaults to half the host's, clamped to 512 MiB–32 GiB |
+| `df -h` in the sandbox against the defaults of 20 GB and 10 GB for Docker | `/`: 20 GB, 3.1 GB used after Task 3. `docker system df`: 1.4 GB of images, 1.2 GB of volumes, 2.4 GB of build cache (1.8 GB reclaimable) |
+| The real size of `%LOCALAPPDATA%\DockerSandboxes` on Windows | 31.9 GB, the files' sum by `Get-ChildItem` (their apparent size: if the disk images are sparse, less is used on disk; not checked) |
+| The same with a second sandbox created, then stopped | 63.3 GB, the same way, so about 31 GB for an empty sandbox. The second sandbox's Claude was logged in with no `/login`, and `/usage` showed the same subscription: the global `anthropic` secret reaches every sandbox |
+| The hosts this task needed, from `sbx policy log` | Allowed by hand: `playwright.download.prss.microsoft.com`. Asked for and dismissed: `mcp.context7.com` (the repository's `.mcp.json`) and `http-intake.logs.us5.datadoghq.com` (probably Claude Code's telemetry or error reports, not confirmed). The rest, `postgres:18.6` included, was on `balanced`'s list |
 
 ## Task 4: Access from the host
 
@@ -189,3 +189,19 @@ Run these in a shell in the sandbox rather than through Claude, so that GitHub i
 **The decision:** ⬜ GO or NO-GO, recorded in ADR 0075's "Settled while building".
 
 **What the setup phase must bring** (from every note above):
+
+- Node 24 on the PATH of the process that starts Claude, before it starts: the hooks run `node`, and without it the push hook lets everything through (Task 3). The kit sets `NPM_CONFIG_PREFIX`, which stops nvm, so either reconcile the two or bring Node another way.
+- Claude started in the repository (`sbx run -w szop`), or the project's settings, deny rules and hooks don't load.
+- `apps/api/.env` and the database up before the first `pnpm check`, as on WSL.
+- A pager: the image has no `less`, so `git log` fails until `GIT_PAGER=cat` or `core.pager` is set.
+- The tools `pnpm check:workflows`, `check:infra` and `check:scan` need: `actionlint`, `zizmor`, `uv`, `terraform`, `tflint`, `trivy`; and Playwright's browsers, which need `playwright.download.prss.microsoft.com` allowed.
+- A decision on `mcp.context7.com` (the repository's `.mcp.json`) and on Claude Code's telemetry host `http-intake.logs.us5.datadoghq.com`, both dismissed in Task 3.
+- Consider narrowing the allow list: `balanced` has 195 rules in 6 removable groups, broad ones among them, so it does not stop data leaving.
+- Settings to decide: `model.server.enabled` is true and nothing needs it; `env.rememberHostCommands` stays false, since environments can run commands on the host; `sandbox.fuse` true and `kit.requireSignature` false.
+- The agent has `sudo` with no password: acceptable in a VM whose loss is accepted, but note it.
+- The global `anthropic` secret reaches every sandbox (Task 3, a second sandbox).
+- Disk: about 31 GB per sandbox by the files' apparent size; check what a sandbox really takes on disk before keeping more than one.
+- The machine account's `user.name` and `user.email` for commits: `.gitconfig` has neither.
+- Read the kit's own `~/.claude/CLAUDE.md` (about 20 KB) and `settings.json` before copying the global `CLAUDE.md` over them.
+- Under `--dangerously-skip-permissions`, Claude ran reads and a `git push --dry-run` beyond what it was asked: only the deny rules and hooks set the limit.
+- A guide to `sbx` for daily use: the commands, approvals, ports, recreating a sandbox (the owner's request in Task 3).
