@@ -119,14 +119,14 @@ Keep the host's port the same as the sandbox's, so that the app's origins don't 
 
 | Check | Expected | Result |
 |---|---|---|
-| **GO** The dev server with `--host 0.0.0.0` in Firefox and Chrome on Windows | Szop opens and works | ⬜ |
-| **GO** Firefox on Android: `adb reverse tcp:5173 tcp:5173` on Windows | Szop opens and works | ⬜ |
-| **GO** The prodlike environment (`pnpm check:prodlike --keep`) in a Windows browser | Szop opens over HTTPS | ⬜ |
-| The prodlike environment on Android | Note what it takes | ⬜ |
-| VS Code: `sbx setup ssh`, then Remote-SSH to `szop-poc.sbx` (needs the OpenSSH client) | Opens the clone, with a terminal | ⬜ |
-| The hosts VS Code's server needed | Note them | ⬜ |
-| Chrome DevTools MCP in the sandbox: a headless screenshot of Szop | Works **in the VM**; a stdio server through sbx's gateway would run on the host, which is not wanted | ⬜ |
-| A Playwright report or a Stryker report in a Windows browser | Note how | ⬜ |
+| **GO** The dev server with `--host 0.0.0.0` in Firefox and Chrome on Windows | Szop opens and works | ✅ Opens and works in both, with no host to approve. `sbx ports` publishes on the host's `127.0.0.1` only. The flag goes without `--`: `pnpm --filter @szop/web dev --host 0.0.0.0`; with `-- --host` pnpm passes the `--` on and Vite ignores the flag (`Network: use --host to expose`), so nothing reaches the port |
+| **GO** Firefox on Android: `adb reverse tcp:5173 tcp:5173` on Windows | Szop opens and works | ✅ Opens and works: the phone's `localhost:5173` reaches Windows' through `adb reverse`, and `sbx ports` takes it on to the sandbox |
+| **GO** The prodlike environment (`pnpm check:prodlike --keep`) in a Windows browser | Szop opens over HTTPS | ✅ Opens and works at `https://localhost:8443` after the certificate warning, with `compose.yaml` unchanged and no host to approve. Compose publishes on the sandbox's `127.0.0.1`, so `socat TCP-LISTEN:8443,bind=172.17.0.1,fork,reuseaddr TCP:127.0.0.1:8443` in the sandbox forwards from the address `sbx ports` reaches, then `sbx ports szop-poc --publish 8443:8443` on Windows |
+| The prodlike environment on Android | Note what it takes | ✅ Opens and works: `adb reverse tcp:8443 tcp:8443` on Windows, on top of the forwarder and the published port above, then the certificate warning accepted once in Firefox |
+| VS Code: `sbx setup ssh`, then Remote-SSH to `szop-poc.sbx` (needs the OpenSSH client) | Opens the clone, with a terminal | ✅ Opens `/home/agent/workspace/szop` as `agent`, with a terminal, once `~/.ssh/config` is fixed by hand: `sbx setup ssh` wrote its `Include` with both paths in one pair of quotes, so OpenSSH skipped it and `szop-poc.sbx` did not resolve. The included `Host *.sbx` runs `sbx.exe ssh proxy %n` with `IdentityAgent none` and `IdentityFile /dev/null`: no key or agent of Windows reaches the sandbox. It warns that Claude Desktop needs `sh` on the PATH; not needed for VS Code |
+| The hosts VS Code's server needed | Note them | ✅ None: connecting and installing an extension worked with every request dismissed; the extension came through VS Code's fallback of downloading on Windows (`remote.downloadExtensionsLocally`). Asked for and dismissed: telemetry (`mobile.events.data.microsoft.com`, `default.exp-tas.com`, `westus-0.in.applicationinsights.azure.com`, `http-intake.logs.us5.datadoghq.com`), `main.vscode-cdn.net`, the Marketplace (`ms-ossdata.gallery.vsassets.io`, `ms-ossdata.gallerycdn.vsassets.io`), `mcp.context7.com`, and the cloud metadata service (`169.254.169.254`, `metadata.google.internal`), which is never approved. `sbx policy approval respond` takes one ID; a PowerShell loop over `sbx policy approval ls` dismisses them all |
+| Chrome DevTools MCP in the sandbox: a headless screenshot of Szop | Works **in the VM**; a stdio server through sbx's gateway would run on the host, which is not wanted | ✅ Works in the VM: `claude mcp add chrome-devtools --scope local -- npx -y chrome-devtools-mcp@latest --headless --isolated --executablePath <Playwright's Chromium>`, with Claude started by hand after `nvm use`; the screenshot of the dev server, checked in VS Code, shows Szop with the API and the database up. Chromium asked for `clients2.google.com`, `accounts.google.com` and `edgedl.me.gvt1.com`, all dismissed with no effect on the screenshot |
+| A Playwright report or a Stryker report in a Windows browser | Note how | ✅ Stryker's report opens at `http://localhost:9000/mutation.html`: `python3 -m http.server 9000 --bind 0.0.0.0 -d reports/mutation` in the sandbox, `sbx ports szop-poc --publish 9000:9000` on Windows, no host to approve. Playwright writes no HTML report in this repository. The two runs' reports were not compared, the owner's choice, so why Task 3's scores differ stays open |
 
 ## Task 5: Credentials and the workflow
 
@@ -169,6 +169,7 @@ Run these in a shell in the sandbox rather than through Claude, so that GitHub i
 | The memory: which directory the new path uses, and copying it | Claude reads it | ⬜ |
 | The status line | Note what it takes | ⬜ |
 | **GO** A small real job from brainstorm to a commit, say the fix of [#424](https://github.com/luiki-dev/szop/issues/424), not pushed to Szop | Skills, hooks and the graph work | ⬜ |
+| superpowers' visual companion (the brainstorm's mockups) in a Windows browser: its server started with `--host 0.0.0.0 --url-host localhost` and a fixed `BRAINSTORM_PORT`, published by `sbx ports` | The mockup opens from the URL with its key | ⬜ |
 | `python3 scripts/token-usage.py` on that session | Reads the sandbox's transcripts | ⬜ |
 | `sbx stop`, `sbx run --name szop-poc`, then `claude -c` | The session comes back | ⬜ |
 | The number of hosts allowed by hand in that job, and how it felt | Note it; this is judged, not measured against a limit | ⬜ |
@@ -204,4 +205,11 @@ Run these in a shell in the sandbox rather than through Claude, so that GitHub i
 - The machine account's `user.name` and `user.email` for commits: `.gitconfig` has neither.
 - Read the kit's own `~/.claude/CLAUDE.md` (about 20 KB) and `settings.json` before copying the global `CLAUDE.md` over them.
 - Under `--dangerously-skip-permissions`, Claude ran reads and a `git push --dry-run` beyond what it was asked: only the deny rules and hooks set the limit.
+- The dev server started with `--host 0.0.0.0` (without `--` after the script's name), or `sbx ports` has nothing to forward (Task 4).
+- A way to reach Compose's ports, which publish on `127.0.0.1`, such as the `socat` forwarder bound to the sandbox's `172.17.0.1` (Task 4).
+- `sbx setup ssh` writes a broken `Include` into `~/.ssh/config`: fix it by hand, and check it again after every `sbx setup ssh` (Task 4).
+- VS Code needs no host allowed: keep it so, with `remote.downloadExtensionsLocally` set to `true` if the fallback ever stops (Task 4).
+- The visual companion's server bound to `0.0.0.0` on a fixed port (`BRAINSTORM_PORT`), that port published once, and both told to Claude in the global `CLAUDE.md`: by default it binds `127.0.0.1` on a random port, and `xdg-open` only prints the URL (Task 4).
+- Chrome DevTools MCP pinned to a version and pointed at a Chromium in the VM; the PoC used `@latest` and Playwright's (Task 4).
+- Telemetry requests come back after being dismissed (`http-intake.logs.us5.datadoghq.com`, `mobile.events.data.microsoft.com` with the same IDs through Task 4): decide a deny rule or turning the telemetry off, so the queue shows only what matters (Task 4).
 - A guide to `sbx` for daily use: the commands, approvals, ports, recreating a sandbox (the owner's request in Task 3).
