@@ -34,6 +34,7 @@ The owner wants to try Claude Code in [Docker Sandboxes](https://docs.docker.com
 ## Settled while building
 
 - **Never approve `localhost`, `host.docker.internal` or a private address in `sbx`'s approval queue** (Task 2). Reaching the host is blocked by the network policy's default deny, not by a separate boundary: `curl` to `host.docker.internal:2375` left a pending `localhost:2375` request that `sbx policy approval respond` could allow with one command, and an approved host stays as a rule of that sandbox. Condition 1 of decision 8 therefore holds only while the owner refuses such requests, including when Claude or a script asks for one so that something passes. The owner's decision.
+- **✅ GO** (Task 6). All six conditions of decision 8 hold, as recorded in the [audit](../audits/2026-11-08-docker-sandbox-poc.md#task-6-the-decision); the weakest is the sixth, since the hooks and the project's settings hold only with Claude started by hand in the repository. On one condition: nothing made for the sandbox may break the workflow on WSL, which stays the fallback if the sandbox does not work out. What the setup phase must bring is listed in the audit. The owner's decision.
 
 ## Consequences
 
