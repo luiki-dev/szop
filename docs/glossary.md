@@ -78,6 +78,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **OKLCH** | Oklab Lightness, Chroma, Hue | A way of writing colors as lightness, colorfulness and hue, in a color space built so that equal steps look equally different to the eye. Tailwind CSS v4 writes its palette in it; Szop's contrast test lets the browser convert it to sRGB (see ADR 0048). |
 | **OpenSSF** | Open Source Security Foundation | A Linux Foundation project for open-source security. Its **Scorecard** rates a repository's security practices. Not used yet (see ADR 0010). |
 | **ORM** | Object-Relational Mapper | A library that maps database tables to objects or types in code and builds queries. Drizzle is ours. |
+| **OSC 52** | Operating System Command 52 | A terminal escape sequence that lets a program in the terminal write to the clipboard. A program in the Docker Sandbox can use it to write to the Windows clipboard (see ADR 0075). |
 | **OSS** | Open-Source Software | Software whose source anyone may read, change and share. In "Redis OSS", AWS's name for the open-source Redis engine on ElastiCache, next to Valkey, its open-source fork. |
 | **PaaS** | Platform as a Service | A hosting service where you hand over the app and the platform runs it (Render, Railway, Fly.io, Heroku). Considered, not used (see ADR 0008). |
 | **PAT** | Personal Access Token | A GitHub token that acts as the person who created it, with the permissions they chose. Considered for release-please, not used: Szop uses a GitHub App (see ADR 0010). |
