@@ -130,7 +130,7 @@ Keep the host's port the same as the sandbox's, so that the app's origins don't 
 
 ## Task 5: Credentials and the workflow
 
-**GitHub.** Prepare with the owner's account outside the sandbox: a machine account ([one free one is allowed](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)) and its classic token (`repo`, `project`, `workflow`); a test repository owned by the owner, the account as a collaborator, a ruleset on `main` as Szop's plus a required approval, and an environment with the owner as its reviewer; and a test project under the owner, with the account as a collaborator.
+**GitHub.** Prepare with the owner's account outside the sandbox: a machine account ([one free one is allowed](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)) and its classic token (`repo`, `project`, `workflow`, and `read:org`, which `gh project` needs to resolve a user's project); a test repository owned by the owner, the account as a collaborator, a ruleset on `main` as Szop's plus a required approval, and an environment with the owner as its reviewer; and a test project under the owner, with the account as a collaborator.
 
 ```powershell
 sbx secret set github    # paste the machine account's token
@@ -140,33 +140,33 @@ Run these in a shell in the sandbox rather than through Claude, so that GitHub i
 
 | Check | Expected | Result |
 |---|---|---|
-| `env \| grep -i -E 'gh\|github\|token'` | A placeholder at most, never the token | ⬜ |
-| `gh issue create`, `gh pr create`, `git push` on a branch | Work | ⬜ |
-| **GO** `gh project item-edit` on the test project | Works; this is what stopped the earlier token | ⬜ |
-| **GO** `gh pr merge` on a green PR of its own | Refused by GitHub | ⬜ |
-| **GO** Change the environment's protection, or a ruleset | Refused by GitHub | ⬜ |
-| **GO** Approve a waiting deployment | Refused by GitHub | ⬜ |
-| The owner approves and merges the same PR | Works; note the extra step | ⬜ |
-| A workflow on a branch, naming the protected environment | Waits for the reviewer and gets no secret | ⬜ |
-| What a branch or PR workflow could still reach, against Szop's roles (`szop-ci-plan` reads the Terraform states) | Note it for the machine account's open point | ⬜ |
+| `env \| grep -i -E 'gh\|github\|token'` | A placeholder at most, never the token | ✅ Only `GH_TOKEN=gho_sbxproxymanaged000…`, a placeholder. The secret is scoped to the sandbox (`sbx secret set github --sandbox szop-poc`; secrets are global by default). `gh api user` answers `luiki-dev-claude`, and `gh auth status` shows the scopes `project`, `repo`, `workflow`, with a warning that `read:org` is missing |
+| `gh issue create`, `gh pr create`, `git push` on a branch | Work | ✅ All work through the proxy on the test repository, with `gh auth setup-git` as git's credential helper and the account's `user.name` and noreply `user.email` set in the clone. A direct `git push origin HEAD:main` is refused by the ruleset |
+| **GO** `gh project item-edit` on the test project | Works; this is what stopped the earlier token | ✅ `item-add` and `item-edit` set Status to Done on the test project. Every `gh project` command first failed with `unknown owner type`: without the scope `read:org`, `gh` cannot tell whether the owner is a user or an organisation. A direct `gh api graphql` query of `user(login: "luiki-dev") { projectV2(number: 4) }` worked without it, so the token's access was never the problem; `read:org` was added to the token, whose value stays the same |
+| **GO** `gh pr merge` on a green PR of its own | Refused by GitHub | ✅ Refused: `gh pr review --approve` on its own PR, `gh pr merge --merge` (the ruleset's required approval) and `gh pr merge --merge --admin`; the PR stays open |
+| **GO** Change the environment's protection, or a ruleset | Refused by GitHub | ✅ Refused: `PUT` of the `demo` environment with no reviewers, `DELETE` of the environment and `DELETE` of the ruleset; both stay unchanged in the browser |
+| **GO** Approve a waiting deployment | Refused by GitHub | ✅ Refused: with the `inside` job waiting, `pending_deployments` lists `demo` with `current_user_can_approve: false`, and the `POST` approving it answers `422 No pending deployment requests to approve or reject`, a misleading message for a non-reviewer; the job keeps waiting until the owner rejects it |
+| The owner approves and merges the same PR | Works; note the extra step | ✅ Works. The extra step is a review: Files changed → Submit review → Approve → Submit review, then the merge |
+| A workflow on a branch, naming the protected environment | Waits for the reviewer and gets no secret | ✅ A workflow pushed by the account on a branch (`on: push`) runs; its job in `demo` waits for the owner, and a job outside the environment sees `POC_SECRET` as empty (`false`). Pushing a workflow file needs the scope `workflow`. A plain `run: echo "… : ${{ … }}"` breaks the YAML; `run: \|` fixed it |
+| What a branch or PR workflow could still reach, against Szop's roles (`szop-ci-plan` reads the Terraform states) | Note it for the machine account's open point | ✅ Read from `infra/base/ci_roles.tf` and [GitHub's settings](../development/github-settings.md#environments), not tried on Szop. **`szop-ci-plan` stays reachable with no review:** its trust matches any `pull_request` run of the repository, so an account with Write can push a branch with its own workflow, open a PR, and read the infrastructure and the Terraform states. `szop-ci-deploy` through `demo` needs the owner's approval of the run, which the account cannot give (above); `demo-teardown` and `release` are pinned to `main`, which takes an approved PR. Szop keeps no repository secrets, only the roles' ARNs as variables, and *Allow GitHub Actions to create and approve pull requests* is off, so a workflow's `GITHUB_TOKEN` cannot approve the account's PR either. The same holds today for any session with the owner's token |
 
 **AWS.** Copy only the `claude-readonly` profile to `~/.aws/config` in the sandbox, then `aws sso login --profile claude-readonly --no-browser`.
 
 | Check | Expected | Result |
 |---|---|---|
-| The login, and the hosts it needed | Works | ⬜ |
-| **GO** `grep profile ~/.aws/config` | Only `claude-readonly` | ⬜ |
-| `aws sts get-caller-identity` | The read-only role | ⬜ |
-| **GO** `aws s3 mb s3://szop-poc-must-fail` | Access denied | ⬜ |
-| **GO** `aws ssm get-parameter --name <any> --with-decryption` | Access denied | ⬜ |
+| The login, and the hosts it needed | Works | ✅ `aws sso login --use-device-code`, the code approved in a Windows browser as Claude's user; no host to approve. The AWS CLI was installed from `awscli.amazonaws.com`, on `balanced`'s list. The CLI's attempt to open the browser was blocked (`browser-open` to the portal's host in `sbx policy log`) and did not matter. The SSO cache in `~/.aws/sso/cache` holds two files (`600`), the tokens ADR 0075 expects in the sandbox |
+| **GO** `grep profile ~/.aws/config` | Only `claude-readonly` | ✅ Only `[profile claude-readonly]`, written from the runbook's block |
+| `aws sts get-caller-identity` | The read-only role | ✅ `assumed-role/AWSReservedSSO_ClaudeReadOnly_…/claude` |
+| **GO** `aws s3 mb s3://szop-poc-must-fail` | Access denied | ✅ `AccessDenied`: no identity-based policy allows `s3:CreateBucket` |
+| **GO** `aws ssm get-parameter --name <any> --with-decryption` | Access denied | ✅ `AccessDeniedException` with an explicit deny, on an existing parameter (`/szop/better-auth-secret`, found by `describe-parameters`, which the role may list) |
 
 **The workflow.**
 
 | Check | Expected | Result |
 |---|---|---|
-| **GO** Install the plugins in the sandbox (superpowers first) | They load | ⬜ |
-| The global `CLAUDE.md` copied in (the current one is an `@` link to `/mnt/c`) | Claude reads it | ⬜ |
-| The memory: which directory the new path uses, and copying it | Claude reads it | ⬜ |
+| **GO** Install the plugins in the sandbox (superpowers first) | They load | ✅ `claude plugin install` of `superpowers` and `typescript-lsp` (`claude-plugins-official`) and `ponytail` (its own marketplace): all enabled in `/plugin`. Plugins synced from claude.ai arrive by themselves with the subscription's login: `andrej-karpathy-skills@synced` loads in the sandbox though it is disabled on WSL, and `superpowers@synced` gives way to the installed one of the same name |
+| The global `CLAUDE.md` copied in (the current one is an `@` link to `/mnt/c`) | Claude reads it | ✅ The kit's own `~/.claude/CLAUDE.md` kept; the owner's file pasted into `~/.claude/owner-CLAUDE.md` without the WSL section, and imported by a line `@~/.claude/owner-CLAUDE.md` appended to the kit's. Claude names its rules |
+| The memory: which directory the new path uses, and copying it | Claude reads it | ✅ `~/.claude/projects/-home-agent-workspace-szop/memory`, from the clone's path; the 14 files dragged from `\\wsl$` in VS Code's explorer over Remote-SSH. Claude answers from them |
 | The status line | Note what it takes | ⬜ |
 | **GO** A small real job from brainstorm to a commit, say the fix of [#424](https://github.com/luiki-dev/szop/issues/424), not pushed to Szop | Skills, hooks and the graph work | ⬜ |
 | superpowers' visual companion (the brainstorm's mockups) in a Windows browser: its server started with `--host 0.0.0.0 --url-host localhost` and a fixed `BRAINSTORM_PORT`, published by `sbx ports` | The mockup opens from the URL with its key | ⬜ |
@@ -203,6 +203,10 @@ Run these in a shell in the sandbox rather than through Claude, so that GitHub i
 - The global `anthropic` secret reaches every sandbox (Task 3, a second sandbox).
 - Disk: about 31 GB per sandbox by the files' apparent size; check what a sandbox really takes on disk before keeping more than one.
 - The machine account's `user.name` and `user.email` for commits: `.gitconfig` has neither.
+- The repository's `.mcp.json` brings context7, which in the sandbox asks to sign in and needs `mcp.context7.com` allowed: decide both together (Task 5).
+- Which plugins come synced from claude.ai: they reach every sandbox with the login, whatever is enabled on WSL (Task 5).
+- The AWS CLI and the `claude-readonly` block in `~/.aws/config`, from the runbook, with `aws sso login --use-device-code` as Claude's user: the CLI cannot open a Windows browser (Task 5).
+- The machine account's classic token with `read:org` besides `repo`, `project` and `workflow`, or every `gh project` command fails with `unknown owner type`; and `gh auth setup-git` so that `git push` goes through the proxy (Task 5).
 - Read the kit's own `~/.claude/CLAUDE.md` (about 20 KB) and `settings.json` before copying the global `CLAUDE.md` over them.
 - Under `--dangerously-skip-permissions`, Claude ran reads and a `git push --dry-run` beyond what it was asked: only the deny rules and hooks set the limit.
 - The dev server started with `--host 0.0.0.0` (without `--` after the script's name), or `sbx ports` has nothing to forward (Task 4).
