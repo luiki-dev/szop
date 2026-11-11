@@ -345,7 +345,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-17 List items](#ph-17-list-items) | 🚧 In progress | [Spec](superpowers/specs/2026-11-06-PH-17-list-items-design.md) | [Plan](superpowers/plans/2026-11-06-PH-17-list-items.md) | [#403](https://github.com/luiki-dev/szop/pull/403) | [#46](https://github.com/luiki-dev/szop/issues/46) |
 | [PH-46 List items polish](#ph-46-list-items-polish) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#420](https://github.com/luiki-dev/szop/pull/420) | [#407](https://github.com/luiki-dev/szop/issues/407) |
 | [PH-47 Read-only AWS access for Claude Code](#ph-47-read-only-aws-access-for-claude-code) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#425](https://github.com/luiki-dev/szop/pull/425) | [#423](https://github.com/luiki-dev/szop/issues/423) |
-| [PH-48 Docker Sandbox proof of concept](#ph-48-docker-sandbox-proof-of-concept) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | — | [#427](https://github.com/luiki-dev/szop/issues/427) |
+| [PH-48 Docker Sandbox proof of concept](#ph-48-docker-sandbox-proof-of-concept) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#436](https://github.com/luiki-dev/szop/pull/436) | [#427](https://github.com/luiki-dev/szop/issues/427) |
 | [PH-49 Reproducible Docker Sandbox setup](#ph-49-reproducible-docker-sandbox-setup) | ⬜ Not started | — | — | — | [#429](https://github.com/luiki-dev/szop/issues/429) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
 | [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
