@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 (2026-11-11)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+
+
+**Full Changelog**: https://github.com/luiki-dev/szop/compare/v0.3.0...v0.4.0
+
 ## 0.3.0 (2026-11-08)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
