@@ -346,7 +346,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-46 List items polish](#ph-46-list-items-polish) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#420](https://github.com/luiki-dev/szop/pull/420) | [#407](https://github.com/luiki-dev/szop/issues/407) |
 | [PH-47 Read-only AWS access for Claude Code](#ph-47-read-only-aws-access-for-claude-code) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#425](https://github.com/luiki-dev/szop/pull/425) | [#423](https://github.com/luiki-dev/szop/issues/423) |
 | [PH-48 Docker Sandbox proof of concept](#ph-48-docker-sandbox-proof-of-concept) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#436](https://github.com/luiki-dev/szop/pull/436) | [#427](https://github.com/luiki-dev/szop/issues/427) |
-| [PH-49 Reproducible Docker Sandbox setup](#ph-49-reproducible-docker-sandbox-setup) | ⬜ Not started | — | — | — | [#429](https://github.com/luiki-dev/szop/issues/429) |
+| [PH-49 Reproducible Docker Sandbox setup](#ph-49-reproducible-docker-sandbox-setup) | 🚧 In progress | [Spec](superpowers/specs/2026-11-12-PH-49-docker-sandbox-setup-design.md) | — | — | [#429](https://github.com/luiki-dev/szop/issues/429) |
 | [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
 | [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
 | [PH-39 Redis in the stack](#ph-39-redis-in-the-stack) | ⬜ Not started | — | — | — | [#235](https://github.com/luiki-dev/szop/issues/235) |
@@ -530,7 +530,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Goal:** rebuild the whole working environment in a sandbox from what is in the repository, after a lost sandbox or a lost machine.
 - **Delivers:** the environment defined in source (runtimes, tools, Docker, plugins, allowed hosts); the machine account on Szop's repository and project; a tested rebuild from nothing. The evaluation over a full phase follows it ([OP-144](https://github.com/luiki-dev/szop/issues/430)).
 - **Depends on:** a GO from [PH-48](#ph-48-docker-sandbox-proof-of-concept).
-- **Owner steps:** apply the machine account's settings on GitHub; the logins a rebuild needs.
+- **Owner steps:** apply the machine account's settings on Szop's repository; create the private configuration repository; run the host's `sbx` settings and decide the network policy's groups; the logins a rebuild needs; the rebuild of a lost sandbox; read the lost machine runbook through.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#429](https://github.com/luiki-dev/szop/issues/429).
 
