@@ -8,5 +8,12 @@
     "checkJs": true,
     "types": ["node"]
   },
-  "include": ["*.js", "*.mjs", "*.ts", ".claude/hooks/**/*.ts"]
+  "include": [
+    "*.js",
+    "*.mjs",
+    "*.ts",
+    ".claude/hooks/**/*.ts",
+    "scripts/**/*.ts",
+    "sandbox/**/*.ts"
+  ]
 }

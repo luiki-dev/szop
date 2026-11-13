@@ -48,6 +48,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
 | The production-like check | `scripts/check-prodlike.sh` and `e2e/prodlike/*.spec.ts` | The image behind nginx with TLS and a TLS-only PostgreSQL (the `prodlike` profile) serves the commit over HTTPS, redirects HTTP, sends HSTS and the CSP, reaches the database over TLS only, sets a `__Host-` session cookie and logs nothing on any screen: what the demo checked until PH-44. Run by hand when `/demo-check` proposes it, never in CI ([ADR 0064](../decisions/0064-leaner-demo-check-phase-details.md), decisions 2 and 7) | ➖ N/A: a bash script and a Playwright project |
 | The landing page | `apps/landing/check-demo.test.js` | `checkDemo`, the function behind the footer's dot, says up when the demo answers (whatever the answer), and down when the request fails or outlives its timeout, with a fake `fetch`. The page itself has no browser test: it is checked by hand on `dzwoniec.com` ([PH-34 spec](../superpowers/specs/2026-10-23-PH-34-landing-page-and-demo-status-design.md), decision 9) | `landing` |
 | The push hook | `.claude/hooks/guard-git-push.test.ts` | The hook that guards `git push` blocks what it must and allows the rest ([ADR 0015](../decisions/0015-git-push-guard-hook.md)) | `hooks` |
+| The scripts | `scripts/*.test.ts` and `sandbox/**/*.test.ts`, for example `sandbox/base/files/strip-transcripts.test.ts` | Python and shell scripts run as a user runs them, in temporary folders: `token-usage.py` finds its transcripts and reports the same on a stripped copy, and the sandbox's scripts copy what they must and nothing else ([ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md)) | `scripts` |
 | Mutation testing | `stryker.config.mjs`, run by `pnpm test:mutation`; not part of `pnpm test` or CI | Whether the tests check anything: StrykerJS changes the application code one small way at a time and counts the changes no test notices ([StrykerJS](tools/stryker.md), [ADR 0055](../decisions/0055-mutation-testing-phase-details.md)) | ➖ N/A: runs the projects above |
 
 ## Running the tests
@@ -57,7 +58,7 @@ All commands run from the repository root. PostgreSQL must be running first for 
 ```bash
 pnpm test                       # every project once, the same tests CI runs (CI adds `--coverage`)
 pnpm test:watch                 # stays running and re-runs the tests a change affects, on every save
-pnpm test --project api         # one project only: api, web, shared, landing or hooks
+pnpm test --project api         # one project only: api, web, shared, landing, hooks or scripts
 pnpm test --project web         # for example, only the component tests
 pnpm test health                # only the files whose path contains "health"
 pnpm test:coverage              # every project, plus a coverage report

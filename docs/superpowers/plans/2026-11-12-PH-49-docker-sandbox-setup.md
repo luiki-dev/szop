@@ -103,20 +103,20 @@ Claude only; no stop.
 **Interfaces:**
 - Produces: `python3 strip-transcripts.py SRC DEST` — mirrors every `*.jsonl` and `*.meta.json` under `SRC` to the same relative path under `DEST`; exit 0; used by Task 3's hook as `strip-transcripts.py ~/.claude/projects "$REPO/transcripts/$ENV"`.
 
-- [ ] **Step 1: the fixture.** Lines of each kind `load_calls` meets: `assistant` lines with `type`, `timestamp`, `requestId`, `gitBranch`, `message.id`, `message.model`, `message.usage` (every `USAGE_KEYS` key), and message `content` holding the marker `FIXTURE-SECRET-TEXT`; a `user` line with the marker in its content; a duplicated `requestId`; a `<synthetic>` model line; in the main session a cut last line (`{"type":"assistant","timest`). The `.meta.json` has `description` and another field holding the marker.
-- [ ] **Step 2: the failing tests** (the `scripts` Vitest project; spawn `python3`; `DEST` in a temp directory):
+- [x] **Step 1: the fixture.** Lines of each kind `load_calls` meets: `assistant` lines with `type`, `timestamp`, `requestId`, `gitBranch`, `message.id`, `message.model`, `message.usage` (every `USAGE_KEYS` key), and message `content` holding the marker `FIXTURE-SECRET-TEXT`; a `user` line with the marker in its content; a duplicated `requestId`; a `<synthetic>` model line; in the main session a cut last line (`{"type":"assistant","timest`). The `.meta.json` has `description` and another field holding the marker.
+- [x] **Step 2: the failing tests** (the `scripts` Vitest project; spawn `python3`; `DEST` in a temp directory):
   - `token-usage.py gives the same report on the copy as on the original`: run `scripts/token-usage.py --projects <fixture>` and `--projects <copy>`, both with `--usage-log /nonexistent`; stdout equal, after replacing each path with a placeholder.
   - `the copy holds none of the message text`: no file under the copy contains `FIXTURE-SECRET-TEXT`.
   - `the copy keeps the folders and file names`: the same relative paths as the fixture.
   - `a cut last line is skipped`: exit 0, the copy has one line fewer than the source.
   - `an unchanged source is not rewritten`: run twice; the copy's mtime is unchanged on the second run; after touching the source with new content, it changes.
   - In `scripts/token-usage.test.ts`, `the default --projects comes from the repository's root`: `HOME` set to a temp directory holding the fixture at `.claude/projects/<the repository root with every non-alphanumeric character replaced by "-">/`; run with no `--projects`, `cwd` the repository; exit 0 and the report names the fixture's session.
-- [ ] **Step 3: run them; they fail** (`pnpm vitest run --project scripts`): no strip script, and the default is still WSL's folder.
-- [ ] **Step 4: `strip-transcripts.py`.** Per line: parse, or skip on `ValueError`; write a JSON object with only `type`, `timestamp`, `requestId`, `gitBranch`, and `message` with only `id`, `model`, `usage`, each only when present. `.meta.json` keeps only `description`. A copy is written (to a temp file, then `os.replace`) only when the source's mtime is newer than the copy's; the copy's mtime is set to the source's. A docstring line says the kept fields are those `token-usage.py`'s `load_calls` reads, and a new field there must be kept here.
-- [ ] **Step 5: `token-usage.py`'s default.** `--projects` defaults to `~/.claude/projects/` plus `re.sub(r'[^A-Za-z0-9]', '-', <git rev-parse --show-toplevel>)`; outside a git repository it `fail`s with a message naming `--projects`. The usage line at the top says so.
-- [ ] **Step 6: run the tests; they pass**, then `pnpm check`.
-- [ ] **Step 7: docs.** `testing.md`: the `scripts` project. `working-with-claude.md`, the measuring section: the default `--projects`, and `--projects ~/claude-config/transcripts` for both environments.
-- [ ] **Step 8: commit and push.** `feat(sandbox): add the transcript strip script and derive token-usage's folder`.
+- [x] **Step 3: run them; they fail** (`pnpm vitest run --project scripts`): no strip script, and the default is still WSL's folder.
+- [x] **Step 4: `strip-transcripts.py`.** Per line: parse, or skip on `ValueError`; write a JSON object with only `type`, `timestamp`, `requestId`, `gitBranch`, and `message` with only `id`, `model`, `usage`, each only when present. `.meta.json` keeps only `description`. A copy is written (to a temp file, then `os.replace`) only when the source's mtime is newer than the copy's; the copy's mtime is set to the source's. A docstring line says the kept fields are those `token-usage.py`'s `load_calls` reads, and a new field there must be kept here.
+- [x] **Step 5: `token-usage.py`'s default.** `--projects` defaults to `~/.claude/projects/` plus `re.sub(r'[^A-Za-z0-9]', '-', <git rev-parse --show-toplevel>)`; outside a git repository it `fail`s with a message naming `--projects`. The usage line at the top says so.
+- [x] **Step 6: run the tests; they pass**, then `pnpm check`.
+- [x] **Step 7: docs.** `testing.md`: the `scripts` project. `working-with-claude.md`, the measuring section: the default `--projects`, and `--projects ~/claude-config/transcripts` for both environments.
+- [x] **Step 8: commit and push.** `feat(sandbox): add the transcript strip script and derive token-usage's folder`.
 
 ### Task 3: The backup hook
 

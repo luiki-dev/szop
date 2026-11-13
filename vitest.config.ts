@@ -1,7 +1,7 @@
 import { defineConfig } from "vitest/config";
 
-// One project per package, plus the landing page's and the push hook's tests
-// (ADR 0007, decision 8).
+// One project per package, plus the landing page's, the push hook's and the
+// scripts' tests (ADR 0007, decision 8; ADR 0076).
 export default defineConfig({
   test: {
     projects: [
@@ -20,6 +20,13 @@ export default defineConfig({
           name: "hooks",
           environment: "node",
           include: [".claude/hooks/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
+          name: "scripts",
+          environment: "node",
+          include: ["scripts/**/*.test.ts", "sandbox/**/*.test.ts"],
         },
       },
     ],

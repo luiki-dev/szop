@@ -215,7 +215,7 @@ The timestamp is in Coordinated Universal Time (UTC). The 5-hour and weekly perc
 
 ### The report script
 
-`scripts/token-usage.py` reads the transcripts in `~/.claude/projects/-home-lemekk-workspace-szop/` (the subagents' too) and the usage log, and prints a Markdown report. It needs only `python3`.
+`scripts/token-usage.py` reads the transcripts of the repository it runs in, `~/.claude/projects/` plus the repository's root with every character other than a letter or digit replaced by `-` (`-home-lemekk-workspace-szop` on WSL; the subagents' too) and the usage log, and prints a Markdown report. It needs only `python3`.
 
 | Run | Reports |
 |---|---|
@@ -225,7 +225,7 @@ The timestamp is in Coordinated Universal Time (UTC). The 5-hour and weekly perc
 | `python3 scripts/token-usage.py --by-phase` | one row per phase: cost, main sessions, peak context, first and last call |
 | `python3 scripts/token-usage.py` | everything in the transcripts |
 
-`--projects` and `--usage-log` point it at another transcript directory or log. A main session belongs to the phase whose `ph-NN` branch it was on most often, and its subagents go with it; a session on no phase branch counts in the totals but in no phase. Sessions in a worktree, on another machine or in the cloud are not in these transcripts, so a phase worked there is under-counted.
+`--projects` and `--usage-log` point it at another transcript directory or log. `--projects ~/claude-config/transcripts` reads the stripped copies the backup hook keeps for WSL and the sandbox together, the same report on fewer bytes ([ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md), decision 10). A call found in two transcripts, as after a resumed session, counts once, for the transcript first in path order. A main session belongs to the phase whose `ph-NN` branch it was on most often, and its subagents go with it; a session on no phase branch counts in the totals but in no phase. Sessions in a worktree, on another machine or in the cloud are not in these transcripts, so a phase worked there is under-counted.
 
 An example, for [PH-37](../roadmap.md#ph-37-two-tasks):
 

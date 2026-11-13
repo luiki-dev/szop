@@ -9,6 +9,10 @@ docs/superpowers/specs/2026-10-26-working-with-claude-design.md. Standard librar
         [--since DATE] [--until DATE] [--by-phase]
         [--projects DIR] [--usage-log FILE]
 
+--projects defaults to Claude Code's folder for the git repository the script runs in:
+~/.claude/projects/ plus the repository's root with every non-alphanumeric character
+replaced by "-".
+
 Cost units are Opus input-token equivalents (input 1, cache write 1.25, cache read 0.1,
 output 5; Sonnet 0.6x, Haiku 0.2x).
 """
@@ -20,6 +24,7 @@ import json
 import os
 import re
 import statistics
+import subprocess
 import sys
 from datetime import datetime
 
@@ -67,10 +72,19 @@ def fail(message, code):
     sys.exit(code)
 
 
+def default_projects():
+    """Claude Code's transcript folder for the git repository in the working directory."""
+    git = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True)
+    if git.returncode != 0:
+        fail('not in a git repository; name the transcripts folder with --projects DIR', 2)
+    return os.path.join('~/.claude/projects', re.sub(r'[^A-Za-z0-9]', '-', git.stdout.strip()))
+
+
 def load_calls(root):
-    """Every assistant call under root, deduplicated across files (first record kept)."""
+    """Every assistant call under root, deduplicated across files (first record kept, files in path order)."""
     rows, seen = [], set()
-    for path in glob.glob(os.path.join(root, '**/*.jsonl'), recursive=True):
+    # Sorted, so the first record kept does not depend on the order of files on disk.
+    for path in sorted(glob.glob(os.path.join(root, '**/*.jsonl'), recursive=True)):
         is_sub = '/subagents/' in path
         desc = ''
         if is_sub:
@@ -296,10 +310,10 @@ def main():
     ap.add_argument('--since', metavar='DATE')
     ap.add_argument('--until', metavar='DATE')
     ap.add_argument('--by-phase', action='store_true')
-    ap.add_argument('--projects', default='~/.claude/projects/-home-lemekk-workspace-szop/')
+    ap.add_argument('--projects', metavar='DIR')
     ap.add_argument('--usage-log', default='~/.claude/usage-log.csv')
     args = ap.parse_args()
-    args.projects = os.path.expanduser(args.projects)
+    args.projects = os.path.expanduser(args.projects or default_projects())
     args.usage_log = os.path.expanduser(args.usage_log)
     since, until = (v.rstrip('Z') if v else v for v in (args.since, args.until))
 
