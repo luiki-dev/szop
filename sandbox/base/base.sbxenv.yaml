@@ -1,0 +1,12 @@
+# The base environment (ADR 0076, decisions 4 and 14). Run from the host's
+# checkout of main, base first, then the project's file:
+#   sbx env create sandbox/base/base.sbxenv.yaml sandbox/szop/szop.sbxenv.yaml
+# lifecycle commands, when any are added, run on the host with the owner's rights.
+schemaVersion: "1"
+agent: sbx-kit-claude
+kits:
+  - docker/sbx-kit-claude:2.1.316
+  - .
+sandboxOptions:
+  cpus: 8
+  memory: "8g"

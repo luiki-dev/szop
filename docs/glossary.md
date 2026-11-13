@@ -155,6 +155,10 @@ Used in the [functional requirements](requirements/functional-requirements.md), 
 ## Terms
 
 | Term | Meaning |
+| **Environment file (sbx)** | A YAML file (`*.sbxenv.yaml`) that describes one Docker Sandbox: its kits, size, secrets, ports and host-side lifecycle commands, which run on the host with the owner's rights. Several files merge in order, later ones winning; Szop has `sandbox/base/base.sbxenv.yaml` and `sandbox/szop/szop.sbxenv.yaml` (see ADR 0076). |
+| **Kit (sbx)** | A package that Docker Sandboxes builds a sandbox from: a YAML descriptor of what it needs (network hosts, credentials, setup hooks) and the files it adds, published as an image or built from a local directory. A kit is a workload or a mixin (see ADR 0076). |
+| **Mixin (sbx)** | A kit that adds tools, files, setup hooks or network hosts on top of a workload. Szop's `sandbox/base` and `sandbox/szop` are mixins on Docker's Claude Code workload. |
+| **Workload (sbx)** | The one kit of a sandbox that gives its base system and the agent it launches, such as Docker's Claude Code workload, `docker/sbx-kit-claude`. |
 |---|---|
 | **Acceptance criterion** | A short, checkable statement of what must be true for a requirement to be met, such as "System is the default and follows the device's setting". Each Szop requirement lists its criteria with an ID (`APR-1.2`) and a status; a test that covers one starts its name with that ID. Written out, never abbreviated (see [ADR 0051](decisions/0051-acceptance-criteria.md)). |
 | **Access Analyzer (IAM)** | An AWS service that checks IAM policy documents against AWS's own rules and reports errors, security warnings, warnings and suggestions, for example a trust policy that could name a branch. Szop runs it on every IAM policy in the plan of a PR that changes `infra/`, and an error or a security warning blocks the PR (see ADR 0032, decision 4, and ADR 0041). |

@@ -73,6 +73,7 @@ body:
         - deps-dev
         - main
         - claude
+        - sandbox
     validations:
       required: true
   - type: textarea
