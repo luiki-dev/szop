@@ -130,7 +130,7 @@ Claude only; no stop.
 - Consumes: `strip-transcripts.py SRC DEST` (Task 2), found next to the hook (`$(dirname "$0")`).
 - Produces: `claude-backup.sh start|end`, always exit 0. Environment: `CLAUDE_CONFIG_REPO` (default `~/claude-config`), `CLAUDE_BACKUP_ENV` (`wsl` by default; the base layer sets `sandbox`), `CLAUDE_KIT_SETTINGS` (the kit's own settings saved at creation, `~/.claude/kit-settings.json`; Task 6 writes it). Wired as user hooks `SessionStart` → `start`, `SessionEnd` → `end`, `timeout` 120.
 
-- [ ] **Step 1: the failing tests** (spawn `bash`; each test has a temp `HOME` with `.claude/projects/` from Task 2's fixture, `.claude/usage-log.csv`, `.claude/.credentials.json`, `.claude/settings.json`; a bare repository as the remote, cloned to `$HOME/claude-config`):
+- [x] **Step 1: the failing tests** (spawn `bash`; each test has a temp `HOME` with `.claude/projects/` from Task 2's fixture, `.claude/usage-log.csv`, `.claude/.credentials.json`, `.claude/settings.json`; a bare repository as the remote, cloned to `$HOME/claude-config`):
   - `start pulls memory written in the other environment`: a second clone pushes `memory/szop/a.md`; after `start` it is in the first.
   - `end pushes the stripped transcripts and the usage log`: the bare repository's `main` has `transcripts/wsl/-home-x-szop/…` and `usage-log/wsl.csv`.
   - `end on WSL never writes user/`.
@@ -140,11 +140,11 @@ Claude only; no stop.
   - `a backup that failed earlier is pushed by the next`: `end` with no network, then the remote restored, then `end`: both commits on the bare `main`.
   - `a conflict keeps both versions`: both clones change `memory/szop/MEMORY.md` differently; the second `end` exits 0 with one line naming the conflict; the bare repository's `main` holds the first version and a branch `conflict/<env>-<UTC timestamp>` the second; the clone is back on a clean `main`, not mid-rebase.
   - `a second backup running at once exits`: with the hook's lock held by the test (`flock` on `$CLAUDE_CONFIG_REPO/.git/claude-backup.lock`), `end` exits 0 with one line saying a backup is running.
-- [ ] **Step 2: run them; they fail** (`pnpm vitest run --project scripts`).
-- [ ] **Step 3: `claude-backup.sh`.** `set -uo pipefail`, no `-e`; every failure goes through one function that prints `claude-backup: <what> did not happen: <why>` and exits 0. `flock -n` on the lock. `start`: `git pull --rebase --quiet`. `end`: strip into `transcripts/$CLAUDE_BACKUP_ENV/`; copy `~/.claude/usage-log.csv` to `usage-log/$CLAUDE_BACKUP_ENV.csv`; in the sandbox only, `user/settings.json` as every top-level key of `~/.claude/settings.json` whose value differs from `$CLAUDE_KIT_SETTINGS`'s, `hooks` excluded (`jq`), plus the two files; `git add -A memory transcripts usage-log user`; commit only if something is staged (`backup(<env>): <UTC timestamp>`); `pull --rebase`; on a conflict, `rebase --abort`, push `HEAD` to `conflict/<env>-<timestamp>`, `reset --hard origin/main`, and print the line; then `push`. Git output stays quiet; only the one line is printed.
-- [ ] **Step 4: run the tests; they pass**, then `pnpm check` (ShellCheck through lint, if the repository runs it on `*.sh`).
-- [ ] **Step 5: docs.** The tool page: the hook, what it copies and never copies, the conflict branch and how the owner resolves it.
-- [ ] **Step 6: commit and push.** `feat(sandbox): add the backup hook for Claude's configuration`.
+- [x] **Step 2: run them; they fail** (`pnpm vitest run --project scripts`).
+- [x] **Step 3: `claude-backup.sh`.** `set -uo pipefail`, no `-e`; every failure goes through one function that prints `claude-backup: <what> did not happen: <why>` and exits 0. `flock -n` on the lock. `start`: `git pull --rebase --quiet`. `end`: strip into `transcripts/$CLAUDE_BACKUP_ENV/`; copy `~/.claude/usage-log.csv` to `usage-log/$CLAUDE_BACKUP_ENV.csv`; in the sandbox only, `user/settings.json` as every top-level key of `~/.claude/settings.json` whose value differs from `$CLAUDE_KIT_SETTINGS`'s, `hooks` excluded (`jq`), plus the two files; `git add -A memory transcripts usage-log user`; commit only if something is staged (`backup(<env>): <UTC timestamp>`); `pull --rebase`; on a conflict, `rebase --abort`, push `HEAD` to `conflict/<env>-<timestamp>`, `reset --hard origin/main`, and print the line; then `push`. Git output stays quiet; only the one line is printed.
+- [x] **Step 4: run the tests; they pass**, then `pnpm check` (ShellCheck through lint, if the repository runs it on `*.sh`).
+- [x] **Step 5: docs.** The tool page: the hook, what it copies and never copies, the conflict branch and how the owner resolves it.
+- [x] **Step 6: commit and push.** `feat(sandbox): add the backup hook for Claude's configuration`.
 
 ### Task 4: The configuration repository and WSL's memory
 

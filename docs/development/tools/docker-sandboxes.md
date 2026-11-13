@@ -9,6 +9,7 @@ Docker Sandboxes (`sbx`) runs an AI agent, here Claude Code, in a small virtual 
 - [The files in `sandbox/`](#the-files-in-sandbox)
 - [The host's settings](#the-hosts-settings)
 - [The network policy](#the-network-policy)
+- [The backup hook](#the-backup-hook)
 - [Claude's `sbx` calls](#claudes-sbx-calls)
 - [Installing and updating `sbx`](#installing-and-updating-sbx)
 
@@ -38,6 +39,8 @@ Two rules of the format shape Szop's layers:
 | `sandbox/base/base.yaml` | The base layer's descriptor: a mixin on Docker's Claude Code workload that names nothing of Szop |
 | `sandbox/base/base.dockerfile` | The base layer's overlay: copies `sandbox/base/files/` to `/usr/local/share/claude-base/` |
 | `sandbox/base/base.sbxenv.yaml` | The base environment file: the workload `docker/sbx-kit-claude`, its version pinned, the base layer, 8 CPUs and `8g` of memory |
+| `sandbox/base/files/strip-transcripts.py` | Copies Claude Code's transcripts with only the fields `scripts/token-usage.py` reads ([below](#the-backup-hook)) |
+| `sandbox/base/files/claude-backup.sh` | The backup hook, run at every session's start and end, on WSL and in the sandbox ([below](#the-backup-hook)) |
 
 ## The host's settings
 
@@ -69,6 +72,30 @@ Two rules of the format shape Szop's layers:
 | `default-cert-validation` | 30 | Certificate revocation checks (OCSP and CRL) of Let's Encrypt, DigiCert, Sectigo, Google, Amazon, Microsoft, GlobalSign | Every HTTPS client that checks revocation |
 
 Every group holds something Szop uses, and the broad entries (`**.amazonaws.com`, `**.blob.core.windows.net`, `github.com`) are in groups Szop cannot drop, so removing a group narrows little: all six are kept ([ADR 0076](../../decisions/0076-docker-sandbox-setup-phase-details.md), "Settled while building"). Narrowing host by host waits for [OP-144](https://github.com/luiki-dev/szop/issues/430), which collects `sbx policy log` over a whole phase.
+
+## The backup hook
+
+`claude-backup.sh` keeps Claude Code's configuration in a clone of the private configuration repository, `~/claude-config`, on WSL and in the sandbox ([ADR 0076](../../decisions/0076-docker-sandbox-setup-phase-details.md), decisions 5, 10 and 11). It runs as two user hooks: `SessionStart` runs `claude-backup.sh start`, which pulls what the other environment pushed, and `SessionEnd` runs `claude-backup.sh end`, which copies, commits and pushes this environment's part.
+
+| Copied to the clone | Where in the clone | From |
+|---|---|---|
+| The memory | `memory/` | Nothing is copied: `autoMemoryDirectory` points into the clone |
+| The transcripts, stripped by `strip-transcripts.py` | `transcripts/wsl/` or `transcripts/sandbox/` | `~/.claude/projects/` |
+| The usage log | `usage-log/wsl.csv` or `usage-log/sandbox.csv` | `~/.claude/usage-log.csv` |
+| In the sandbox only: the owner's settings, without the kit's own keys and without `hooks` | `user/settings.json` | `~/.claude/settings.json`, compared with `~/.claude/kit-settings.json` |
+| In the sandbox only: the global `CLAUDE.md` and the status line | `user/CLAUDE.md`, `user/statusline-command.sh` | `~/.claude/owner-CLAUDE.md`, `~/.claude/statusline-command.sh` |
+
+**Never copied:** anything not in the table, such as `~/.claude/.credentials.json`, an `.env` file or a whole transcript. The hook copies named paths and stages only `memory`, `transcripts`, `usage-log` and `user`. A stripped transcript keeps, per line, only `type`, `timestamp`, `requestId`, `gitBranch` and the message's `id`, `model` and `usage`, and of a subagent's `.meta.json` only `description`; a line still being written is skipped, and a transcript is copied again only when it changed. On WSL the hook never writes `user/`: the sandbox owns it, and WSL takes it only by the owner's copy after reading the diff.
+
+**It never fails a session.** It always exits 0 and prints at most one line, starting `claude-backup:`. With no network, the line names what did not happen, and the commit stays in the clone until the next run pushes it. If another session's backup holds the lock (`.git/claude-backup.lock`), the second one says so and does nothing.
+
+**A conflict** happens when both environments changed the same lines, in practice the same memory file, since each environment writes its own transcripts and usage log. The hook then keeps both: the remote's `main` stays as it is, this side's commit is pushed to a branch `conflict/<env>-<UTC timestamp>` named in the line it prints, and the clone goes back to `main`. To resolve it, merge the branch in the clone and delete it:
+
+```bash
+cd ~/claude-config
+git fetch && git merge origin/conflict/wsl-20261113T120000Z   # fix the files git names, then git commit
+git push && git push origin --delete conflict/wsl-20261113T120000Z
+```
 
 ## Claude's `sbx` calls
 
