@@ -1,4 +1,5 @@
 {
+  "autoMemoryDirectory": "~/claude-config/memory/szop",
   "permissions": {
     "allow": [
       "Bash(gh issue close *)",

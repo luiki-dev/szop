@@ -27,7 +27,8 @@ How to get from a clean Windows machine to a Szop checkout whose checks pass. It
   - [At the start of every session](#at-the-start-of-every-session)
   - [What a cloud session cannot do](#what-a-cloud-session-cannot-do)
   - [Keeping the script in step](#keeping-the-script-in-step)
-- [14. Coming later](#14-coming-later)
+- [14. Claude Code's configuration backup](#14-claude-codes-configuration-backup)
+- [15. Coming later](#15-coming-later)
 
 ## 1. Windows: WSL and Ubuntu
 
@@ -484,7 +485,28 @@ The script is pasted into the environment's settings, so this page is its master
 | zizmor `1.30.1` | `ci.yml` (the `version:` of its step), section 9 | the same |
 | Terraform, the AWS ruleset, pnpm | `.terraform-version`, `infra/.tflint.hcl`, `packageManager` | nothing: the script reads them |
 
-## 14. Coming later
+## 14. Claude Code's configuration backup
+
+Claude Code's memory, its user settings and the statistics of past sessions are kept in the private repository `luiki-dev/claude-config`, so a lost machine or sandbox loses none of them ([ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md), decisions 5 and 10). On WSL:
+
+```bash
+git clone https://github.com/luiki-dev/claude-config.git ~/claude-config
+mkdir -p ~/.claude/hooks
+cp ~/workspace/szop/sandbox/base/files/claude-backup.sh ~/workspace/szop/sandbox/base/files/strip-transcripts.py ~/.claude/hooks/
+```
+
+Then add two hooks to `~/.claude/settings.json`, next to any already there:
+
+```json
+"hooks": {
+  "SessionStart": [{ "hooks": [{ "type": "command", "command": "bash ~/.claude/hooks/claude-backup.sh start", "timeout": 120 }] }],
+  "SessionEnd": [{ "hooks": [{ "type": "command", "command": "bash ~/.claude/hooks/claude-backup.sh end", "timeout": 120 }] }]
+}
+```
+
+Szop's `.claude/settings.json` points the memory into the clone (`autoMemoryDirectory`), so nothing else is needed. Run `~/.claude/hooks/claude-backup.sh end` once by hand: the first run copies every transcript, the next ones only the changed. The hook scripts are copied again by hand when they change in `sandbox/base/files/`, never taken from the configuration repository. What the hook copies, and how to resolve a conflict: [Docker Sandboxes, the backup hook](tools/docker-sandboxes.md#the-backup-hook).
+
+## 15. Coming later
 
 - **Spinning the demo up and down** with the buttons, in [PH-11](../roadmap.md#ph-11-ci-access-to-aws-and-the-teardown-safety-net) and [PH-12b](../roadmap.md#ph-12b-network-and-the-demo-up-button), through the [runbook](../operations/demo-environment.md).
 

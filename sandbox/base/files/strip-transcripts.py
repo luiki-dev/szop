@@ -6,7 +6,8 @@
 Mirrors every *.jsonl and *.meta.json under SRC to the same path under DEST. A transcript
 line keeps only the fields scripts/token-usage.py's load_calls reads; a field added there
 must be kept here too. A line that does not parse (one still being written) is skipped.
-A copy is rewritten only when its source is newer. Standard library only.
+A file that is gone (a dangling link) is skipped. A copy is rewritten only when its source
+is newer. Standard library only.
 """
 import json
 import os
@@ -60,7 +61,10 @@ def main(src, dest):
             else:
                 continue
             path = os.path.join(folder, name)
-            copy(path, os.path.join(dest, os.path.relpath(path, src)), strip)
+            try:
+                copy(path, os.path.join(dest, os.path.relpath(path, src)), strip)
+            except FileNotFoundError:
+                pass  # a dangling link, or a transcript removed while this runs
 
 
 if __name__ == '__main__':

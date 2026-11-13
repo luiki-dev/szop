@@ -12,6 +12,7 @@ What Szop protects, who can act on it and through which path, and what guards ea
 - [Who can act, and through which path](#who-can-act-and-through-which-path)
 - [Who can reach which secret](#who-can-reach-which-secret)
 - [Entry points, checked against STRIDE](#entry-points-checked-against-stride)
+- [Claude Code's configuration repository](#claude-codes-configuration-repository)
 - [Risks accepted on purpose](#risks-accepted-on-purpose)
 
 ## What we protect
@@ -85,8 +86,24 @@ STRIDE names six kinds of threat: **S**poofing (pretending to be someone else), 
 | **`db-setup`** (a one-off ECS task, run by `demo-up`) | started by the deploy role's `ecs:RunTask`, on the task definition `szop-demo-db-setup` in the cluster `szop-demo` only | the master password, for the seconds it runs; it creates or updates `szop_app` and makes it the database's owner | its log stream in `/szop/app`; it prints the role's name, never a password | the same image as the app, so it holds only public code; its log has no secret | the deploy role's `ecs:StopTask` is allowed only on tasks tagged `Name` = `szop-demo-db-setup` in the cluster `szop-demo` (the tag comes from the task definition), so it cannot stop the running app; `demo-up` stops a `db-setup` that outlives its 10-minute deadline | the deploy role registers task definitions and could register this family with any image it pushed and pass it the execution role that reads the master secret, so the `RunTask` condition limits which family runs, not what code runs with the secret: accepted as part of trusting the deploy role ([Risks accepted](#risks-accepted-on-purpose)) |
 | **CloudWatch Logs** | — | — | — | secrets redacted; tokens stripped (decision 9); 7-day retention; the plan role cannot read them, neither the log events nor a Logs Insights query's results, a single record or an anomaly's sample lines (decision 17; [OP-102](https://github.com/luiki-dev/szop/issues/248)) | — | — |
 
+## Claude Code's configuration repository
+
+The private repository `luiki-dev/claude-config` holds Claude Code's memory, the stripped transcripts, the usage log and, in `user/`, the owner's user settings (with the `autoMode` text that describes the owner's AWS and GitHub setup), the global `CLAUDE.md` and the status line ([ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md), decisions 5, 10, 11 and 12). No credential, token, `.env` file or whole transcript enters it: the backup hook copies only named paths. The sandbox and WSL push to it with no review, so what each side takes from it is limited:
+
+| From → to | What | How |
+|---|---|---|
+| sandbox → repository | memory, transcripts, usage log, `user/` | the hook; the sandbox is where the configuration changes, so it owns `user/` |
+| WSL → repository | memory, transcripts, usage log | the hook; never `user/` |
+| repository → sandbox | memory, `user/` | at creation; memory at every session start |
+| repository → WSL | memory | at every session start |
+| repository → WSL | `user/` | only by the owner, after reading the diff |
+
+`user/` never holds hooks, and hook scripts never come from the repository: in the sandbox the kit installs them, on WSL the owner copies them from `sandbox/base/files/`. Two paths stay open and are accepted below: the memory, read on WSL at every session, and `user/`, which survives a rebuild of the sandbox.
+
 ## Risks accepted on purpose
 
+- **Memory from the sandbox is read on WSL unreviewed.** A compromised sandbox can write instructions into the memory, and the next Claude session on WSL reads them. The memory is plain text the repository's history shows, Claude's deny rules and the push hook still apply on WSL, and Claude is not started on WSL while the sandbox is in use ([ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md), decisions 11 and 13).
+- **A setting planted in `user/` survives a rebuild of the sandbox.** A compromised sandbox can change `user/settings.json`, and the next sandbox takes it at creation, inside the VM only; hooks are not taken from it, and Szop's own deny rules and push hook live in Szop's repository behind review (ADR 0076, decision 11).
 - **The deny rules are the only guard** ([ADR 0062](../decisions/0062-urgent-security-fixes.md), decision 5; [ADR 0064](../decisions/0064-leaner-demo-check-phase-details.md), decision 11). The fine-grained token of [#360](https://github.com/luiki-dev/szop/issues/360) was withdrawn: sessions use the owner's own `gh auth login`. A shell command can be written in a form a deny pattern or the push hook does not match, so a session with the owner's credentials can still do what the owner can.
 - **Sign-in limits are per task until PH-20/PH-39.** Two tasks allow up to 60 guest sign-ins an hour per address, and an attacker with many addresses is not slowed (decision 3).
 - **`demo-down` trusts the providers `main` locks.** The recorded commit must be on a branch here and lock the same providers as `main`; code on a branch of this repository still runs with the deploy role, so review of the PR is the gate. A commit on no branch, or with other providers, destroys nothing and needs the owner (decision 8).

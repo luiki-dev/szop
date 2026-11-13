@@ -8,6 +8,7 @@ import {
   utimesSync,
   writeFileSync,
   cpSync,
+  symlinkSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -93,4 +94,16 @@ test("an unchanged source is not rewritten", () => {
   );
   expect(run(src, dest).status).toBe(0);
   expect(statSync(copy).mtimeMs).not.toBe(1_000_000_000);
+});
+
+test("a transcript that is gone, such as a dangling link, is skipped", () => {
+  const src = join(mkdtempSync(join(tmpdir(), "strip-src-")), "projects");
+  cpSync(fixture, src, { recursive: true });
+  symlinkSync(join(src, "nowhere.jsonl"), join(src, "-home-x-szop/gone.jsonl"));
+  const dest = join(mkdtempSync(join(tmpdir(), "strip-")), "copy");
+
+  const result = run(src, dest);
+  expect(result.stderr).toBe("");
+  expect(result.status).toBe(0);
+  expect(files(dest)).toEqual(files(fixture));
 });

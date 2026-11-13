@@ -91,7 +91,7 @@ A stage ends when its document or commits are on the branch, never in the middle
 
 ### Opening prompts
 
-A new session needs only a short prompt naming the stage and its document. CLAUDE.md, the memory and the skills load by themselves.
+A new session needs only a short prompt naming the stage and its document. CLAUDE.md, the memory and the skills load by themselves. The memory lives in `~/claude-config/memory/szop/`, a clone of the private configuration repository that `.claude/settings.json` names in `autoMemoryDirectory`, the same path on WSL and in the sandbox; the backup hook pulls it at a session's start and pushes it at its end ([Docker Sandboxes, the backup hook](tools/docker-sandboxes.md#the-backup-hook)).
 
 | Stage | Opening prompt | What the session reads first |
 |---|---|---|
