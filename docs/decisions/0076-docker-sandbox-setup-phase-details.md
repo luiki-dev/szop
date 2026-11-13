@@ -42,6 +42,12 @@
 
 ## Settled while building
 
+- **`sbx` is installed with winget, and an update can be undone** (Task 1). `sbx.exe` 0.51.0 came from winget's `Docker.sbx`; winget keeps the older versions, so `winget install --id Docker.sbx --exact --version <v> --force` goes back. The release notes are on GitHub, [docker/sbx-releases](https://github.com/docker/sbx-releases/releases), whose host `github.com` is already in `balanced`.
+- **All six groups of `balanced` are kept** (Task 1). Each holds something Szop uses, and the broad entries are in groups Szop cannot drop; `REMOVED_GROUPS` stays empty. Narrowing waits for [OP-144](https://github.com/luiki-dev/szop/issues/430). The owner chose it.
+- **`sbx.exe` reads the environment files and builds a local kit from a WSL path** (Task 1). The probe, `sbx.exe env create` of `\\wsl.localhost\…\sandbox\base\base.sbxenv.yaml`, built the base layer's overlay in 7 seconds and copied its files. So the host's copy stays the WSL checkout (decision 14); neither a clone on the Windows disk nor `git+https://` kits are needed.
+- **A kit's `network-policy@1` hosts add to `balanced` for its own sandbox** (Task 1). `sbx policy ls` showed the probe's kit hosts as a separate policy, `source: kit`, applied to `sandbox:szop-probe` only, beside the global `local-policy`, and `mcp.context7.com` was reached. Each layer's hosts stay in its descriptor, not in `settings.sh`.
+- **apt packages go in a `lifecycle@1` install hook, and the start command in the environment file** (Task 1). A mixin's overlay is laid over a workload it has never seen, so it cannot carry apt packages, and it cannot set `ENTRYPOINT` or `CMD` (kit format v3). The probe's hook ran `apt-get update` at create; `less` was already in the workload `docker/sbx-kit-claude:2.1.316`, so installing a new package is first proven by Task 6. The workload's version is pinned at `2.1.316`, the highest tag on 2026-11-13.
+
 ## Consequences
 
 - Rebuilding a sandbox is a few commands and the owner's logins, so a release of `sbx` that requires a new sandbox costs minutes, and [OP-144](https://github.com/luiki-dev/szop/issues/430) can start on a sandbox built this way.

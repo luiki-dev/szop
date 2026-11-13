@@ -68,7 +68,7 @@ Two rules of the format shape Szop's layers:
 | `default-os-packages` | 16 | Ubuntu, Debian, Arch, Alpine, CentOS, Fedora, LLVM's apt and `packagecloud.io` | Debian's packages, which the base layer installs at create |
 | `default-cert-validation` | 30 | Certificate revocation checks (OCSP and CRL) of Let's Encrypt, DigiCert, Sectigo, Google, Amazon, Microsoft, GlobalSign | Every HTTPS client that checks revocation |
 
-Every group holds something Szop uses, and the broad entries (`**.amazonaws.com`, `**.blob.core.windows.net`, `github.com`) are in groups Szop cannot drop, so removing a group narrows little. Narrowing host by host waits for [OP-144](https://github.com/luiki-dev/szop/issues/430), which collects `sbx policy log` over a whole phase.
+Every group holds something Szop uses, and the broad entries (`**.amazonaws.com`, `**.blob.core.windows.net`, `github.com`) are in groups Szop cannot drop, so removing a group narrows little: all six are kept ([ADR 0076](../../decisions/0076-docker-sandbox-setup-phase-details.md), "Settled while building"). Narrowing host by host waits for [OP-144](https://github.com/luiki-dev/szop/issues/430), which collects `sbx policy log` over a whole phase.
 
 ## Claude's `sbx` calls
 
