@@ -173,9 +173,9 @@ Claude only; no stop.
 **Files:**
 - Modify: `docs/development/github-settings.md`, `docs/architecture/threat-model.md`, `docs/roadmap.md` (PH-49's owner steps, if they differ)
 
-- [ ] **Step 1 (the owner)**, per [OP-143](https://github.com/luiki-dev/szop/issues/428) as settled in PH-48: the machine account a collaborator with write access on `luiki-dev/szop` and `luiki-dev/claude-config`; its classic token with `repo`, `project`, `workflow`, `read:org`, kept in the password manager; the `main` ruleset requires the owner's approval; the `demo` environment's reviewer stays the owner. Claude cannot read rulesets (a deny rule); the owner confirms each item.
-- [ ] **Step 2 (Claude): docs.** `github-settings.md`: every setting above with where it lives and why. `threat-model.md`: the machine account as an actor, its reach to `szop-ci-plan` through a workflow in a PR accepted (decision 7).
-- [ ] **Step 3: `/phase-tracking`** for OP-143 (settled here), then commit and push. `docs(claude): record the machine account's access to Szop`.
+- [x] **Step 1 (the owner)**, per [OP-143](https://github.com/luiki-dev/szop/issues/428) as settled in PH-48: the machine account a collaborator with write access on `luiki-dev/szop` and `luiki-dev/claude-config`; its classic token with `repo`, `project`, `workflow`, `read:org`, kept in the password manager; the `main` ruleset requires the owner's approval; the `demo` environment's reviewer stays the owner. Claude cannot read rulesets (a deny rule); the owner confirms each item.
+- [x] **Step 2 (Claude): docs.** `github-settings.md`: every setting above with where it lives and why. `threat-model.md`: the machine account as an actor, its reach to `szop-ci-plan` through a workflow in a PR accepted (decision 7).
+- [x] **Step 3: `/phase-tracking`** for OP-143 (settled here), then commit and push. `docs(claude): record the machine account's access to Szop`.
 
 ### Task 6: The base layer and the kits' CI job
 
