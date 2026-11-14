@@ -121,6 +121,7 @@ test("end in the sandbox writes user/ without the kit's keys or hooks", () => {
   );
   write(join(home, ".claude/owner-CLAUDE.md"), "# mine\n");
   write(join(home, ".claude/statusline-command.sh"), "echo hi\n");
+  write(join(home, ".claude/themes/mine.json"), "{}\n");
 
   expect(
     backup("end", { CLAUDE_BACKUP_ENV: "sandbox", CLAUDE_KIT_SETTINGS: kit }),
@@ -128,6 +129,7 @@ test("end in the sandbox writes user/ without the kit's keys or hooks", () => {
   expect(JSON.parse(onMain("user/settings.json"))).toEqual({ model: "x" });
   expect(onMain("user/CLAUDE.md")).toBe("# mine\n");
   expect(onMain("user/statusline-command.sh")).toBe("echo hi\n");
+  expect(onMain("user/themes/mine.json")).toBe("{}\n");
   expect(filesOnMain()).toContain(
     "transcripts/sandbox/-home-x-szop/11111111-1111-4111-8111-111111111111.jsonl",
   );

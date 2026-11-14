@@ -8,7 +8,7 @@
 #
 # `end` copies only named paths: the stripped transcripts, the usage log and, in
 # the sandbox only, user/ (the owner's settings without the kit's, the global
-# CLAUDE.md and the status line). The memory is already in the clone
+# CLAUDE.md, the status line and the custom themes). The memory is already in the clone
 # (autoMemoryDirectory). It never fails a session: it exits 0 and prints at most
 # one line, `claude-backup: …`. A conflict leaves this side's commit on a branch
 # conflict/<env>-<UTC timestamp> and the clone on the remote's main.
@@ -64,6 +64,8 @@ copy_user() {
     fail "the copy of user/settings.json" "jq failed"
   [[ -f "$claude/owner-CLAUDE.md" ]] && cp "$claude/owner-CLAUDE.md" "$repo/user/CLAUDE.md"
   [[ -f "$claude/statusline-command.sh" ]] && cp "$claude/statusline-command.sh" "$repo/user/"
+  # shortcut: a theme deleted in the sandbox stays in user/themes; delete it there by hand.
+  [[ -d "$claude/themes" ]] && mkdir -p "$repo/user/themes" && cp -r "$claude/themes/." "$repo/user/themes/"
 }
 
 end() {

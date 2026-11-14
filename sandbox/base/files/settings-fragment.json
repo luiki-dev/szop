@@ -1,5 +1,8 @@
 {
-  "permissions": { "defaultMode": "auto" },
+  "permissions": {
+    "defaultMode": "auto",
+    "additionalDirectories": ["/home/agent/claude-config"]
+  },
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline-command.sh"

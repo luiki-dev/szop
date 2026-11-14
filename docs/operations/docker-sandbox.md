@@ -308,6 +308,7 @@ When `sbx` breaks and cannot be rolled back, or the sandbox is given up ([ADR 00
    diff user/settings.json ~/.claude/settings.json
    diff user/CLAUDE.md /mnt/c/Users/<windows user>/CLAUDE.md
    diff user/statusline-command.sh ~/.claude/statusline-command.sh
+   diff -r user/themes ~/.claude/themes
    ```
 
    Copy what you accept by hand. Keep WSL's own `hooks` in `settings.json` (`user/` holds none), and WSL's `~/.claude/CLAUDE.md`, which imports the file on the Windows disk.

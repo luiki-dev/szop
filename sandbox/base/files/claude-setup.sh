@@ -29,6 +29,10 @@ step "the owner's files from user/"
 mkdir -p "$claude" "$HOME/.aws"
 cp "$repo/user/CLAUDE.md" "$claude/owner-CLAUDE.md"
 cp "$repo/user/statusline-command.sh" "$claude/statusline-command.sh"
+if [[ -d "$repo/user/themes" ]]; then
+  mkdir -p "$claude/themes"
+  cp -r "$repo/user/themes/." "$claude/themes/"
+fi
 if [[ -f "$repo/user/aws-config" ]]; then
   install -m 0600 "$repo/user/aws-config" "$HOME/.aws/config"
 fi
