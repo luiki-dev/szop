@@ -1,0 +1,19 @@
+# Szop's environment (ADR 0076, decisions 4 and 14), merged after the base one:
+#   sbx env create sandbox/base/base.sbxenv.yaml sandbox/szop/szop.sbxenv.yaml
+# Lists append and mappings combine by key, so this file only adds.
+schemaVersion: "1"
+kits:
+  - source: .
+env:
+  # Where claude-start opens Claude, and where szop-setup clones the repository.
+  SANDBOX_PROJECT_DIR: /home/agent/workspace/szop
+ports:
+  # The dev server (`pnpm --filter @szop/web dev --host 0.0.0.0`).
+  - sandbox: 5173
+    host: 5173
+  # The production-like environment through compose.sandbox.yaml: HTTPS and
+  # the redirect from HTTP, the same ports as compose.yaml's.
+  - sandbox: 8443
+    host: 8443
+  - sandbox: 8082
+    host: 8082

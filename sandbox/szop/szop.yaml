@@ -1,0 +1,19 @@
+# syntax=docker/sandbox-kit:3
+# Szop's layer (ADR 0076, decision 4), a mixin laid over the base layer on
+# Docker's Claude Code workload. The tools of `pnpm check:*` are in the
+# overlay; the repository's clone and what follows it run from claude-setup
+# (files/szop-setup.sh), once the owner has given the token.
+schemaVersion: "3"
+kind: mixin
+displayName: Szop
+description: The tools and the repository for working on Szop
+sourceUrl: https://github.com/luiki-dev/szop/tree/main/sandbox/szop
+version: "0.1.0"
+
+capabilities:
+  - type: com.docker.sandbox/network-policy@1
+    config:
+      runtime:
+        allow:
+          # Playwright's browsers; its other CDNs are in balanced.
+          - playwright.download.prss.microsoft.com:443

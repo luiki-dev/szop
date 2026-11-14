@@ -54,4 +54,12 @@ for p in superpowers@claude-plugins-official typescript-lsp@claude-plugins-offic
   claude plugin install "$p"
 done
 
+# A project's layer adds its own setup here (Szop's clones its repository):
+# run last, with the token, the network and Docker all there.
+for hook in /usr/local/share/claude-setup.d/*.sh; do
+  [[ -e "$hook" ]] || continue
+  step "running $(basename "$hook")"
+  bash "$hook"
+done
+
 step "done; start Claude with: claude"
