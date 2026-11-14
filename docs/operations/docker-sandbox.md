@@ -138,7 +138,21 @@ PowerShell:
 sbx setup ssh
 ```
 
-**Then check the `Include` line** it wrote at the top of `%USERPROFILE%\.ssh\config`. In PH-48 it wrote two paths inside one pair of quotes, `Include "<path 1> <path 2>"`, and OpenSSH skipped it, so `szop.sbx` did not resolve. Fix it by hand so that each path has its own quotes: `Include "<path 1>" "<path 2>"`. Check it after every `sbx setup ssh`.
+**Then check the `Include` line** it wrote at the top of Windows' SSH configuration, the file `C:\Users\<windows user>\.ssh\config`. Open it:
+
+WSL:
+
+```bash
+nano "/mnt/c/Users/<windows user>/.ssh/config"
+```
+
+PowerShell:
+
+```powershell
+notepad $env:USERPROFILE\.ssh\config
+```
+
+In PH-48 the line held two paths inside one pair of quotes, `Include "<path 1> <path 2>"`, and OpenSSH skipped it, so `szop.sbx` did not resolve. Fix it by hand so that each path has its own quotes, `Include "<path 1>" "<path 2>"`, and save. Check it after every `sbx setup ssh`.
 
 Then in VS Code: **Remote-SSH: Connect to Host…** → `szop.sbx` → **Open Folder** `/home/agent/workspace/szop`, and open a terminal (`` Ctrl+` ``).
 
