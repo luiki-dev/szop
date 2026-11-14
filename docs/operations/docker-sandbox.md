@@ -334,7 +334,11 @@ PH-48 measured about 31 GB in `%LOCALAPPDATA%\DockerSandboxes` per sandbox, by t
 
 From a clean Windows machine to [the rebuild](#the-lost-sandbox-the-rebuild). Read through once, not carried out ([ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md), decision 9).
 
-1. **WSL and the repository:** the [setup guide](../development/setup.md), sections 1 to 6: WSL and Ubuntu, git, Node, pnpm, VS Code, and Szop cloned to `~/workspace/szop`, on `main`. The other sections are for working on WSL and are needed only for the fallback.
+1. **WSL and the repository:** the [setup guide](../development/setup.md), sections 1, 2 and 5 (WSL and Ubuntu, git, VS Code), then Szop cloned to `~/workspace/szop`, on `main`. The host only reads the checkout (the environment files and `settings.sh`) and commits nothing, so it needs no Node, `pnpm install` or git hooks:
+
+   ```bash
+   mkdir -p ~/workspace && cd ~/workspace && git clone https://github.com/luiki-dev/szop.git
+   ```
 2. **`sbx`**, in PowerShell, and the Docker sign-in it asks for:
 
    ```powershell
@@ -346,4 +350,4 @@ From a clean Windows machine to [the rebuild](#the-lost-sandbox-the-rebuild). Re
 3. **VS Code's remote:** the OpenSSH client (Windows' optional feature, in PowerShell as administrator: `Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0`), the Remote-SSH extension (`ms-vscode-remote.remote-ssh`), and `"remote.downloadExtensionsLocally": true` in VS Code's user settings.
 4. **The logins** come at the rebuild: the Claude login when `sbx env create` asks, and the machine account's token from the password manager.
 5. **[The rebuild](#the-lost-sandbox-the-rebuild)**, from step 3.
-6. **For the fallback on WSL**, only if needed: the configuration repository cloned and the hook copied ([setup guide, section 14](../development/setup.md#14-claude-codes-configuration-backup)), then `user/` reviewed and copied as in [Going back to WSL](#going-back-to-wsl), step 2.
+6. **For the fallback on WSL**, only if needed: the setup guide's other sections, from [3](../development/setup.md#3-nvm-and-node) (Node, pnpm, the rest of section 6, the database and the tools), the configuration repository cloned and the hook copied ([setup guide, section 14](../development/setup.md#14-claude-codes-configuration-backup)), then `user/` reviewed and copied as in [Going back to WSL](#going-back-to-wsl), step 2.
