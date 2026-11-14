@@ -7,6 +7,7 @@ Docker Sandboxes (`sbx`) runs an AI agent, here Claude Code, in a small virtual 
 - [Why Szop uses it](#why-szop-uses-it)
 - [Kits and environment files](#kits-and-environment-files)
 - [The files in `sandbox/`](#the-files-in-sandbox)
+- [The base layer](#the-base-layer)
 - [The host's settings](#the-hosts-settings)
 - [The network policy](#the-network-policy)
 - [The backup hook](#the-backup-hook)
@@ -27,7 +28,7 @@ Docker Sandboxes (`sbx`) runs an AI agent, here Claude Code, in a small virtual 
 
 Two rules of the format shape Szop's layers:
 
-- **A mixin's Dockerfile builds an overlay** (`FROM scratch`), laid over a workload it has never seen. apt packages cannot travel in one, since they need the base's package database, so they are installed by a `lifecycle@1` install hook at create, as root.
+- **A mixin's Dockerfile builds an overlay** (`FROM scratch`), laid over a workload it has never seen. apt packages cannot travel in one, since they need the base's package database; they would have to be installed by a `lifecycle@1` install hook at create, as root. The base layer avoids apt altogether: each tool it adds is a self-contained release, downloaded and checked in a build stage and copied into the overlay.
 - **A mixin cannot set the start command** (`ENTRYPOINT`, `CMD`); the workload owns it. The environment file's `entrypoint` and `cmd` can replace it.
 
 ## The files in `sandbox/`
@@ -36,11 +37,31 @@ Two rules of the format shape Szop's layers:
 |---|---|
 | `sandbox/README.md` | What is in `sandbox/`, and a pointer to the runbook |
 | `sandbox/host/settings.sh` | The host's `sbx` settings and global network policy; run by the owner from WSL ([below](#the-hosts-settings)) |
-| `sandbox/base/base.yaml` | The base layer's descriptor: a mixin on Docker's Claude Code workload that names nothing of Szop |
-| `sandbox/base/base.dockerfile` | The base layer's overlay: copies `sandbox/base/files/` to `/usr/local/share/claude-base/` |
-| `sandbox/base/base.sbxenv.yaml` | The base environment file: the workload `docker/sbx-kit-claude`, its version pinned, the base layer, 8 CPUs and `8g` of memory |
+| `sandbox/base/base.yaml` | The base layer's descriptor: a mixin on Docker's Claude Code workload that names nothing of Szop. Its args (`gitName`, `gitEmail`, `configRepo`), the hosts every project needs (GitHub's, the npm registry, `mcp.context7.com`), an install hook that writes the args to `/etc/claude-base.env` and the `claude` alias to `/etc/bash.bashrc`, and the VS Code server's `telemetry.telemetryLevel` `off` ([below](#the-base-layer)) |
+| `sandbox/base/base.dockerfile` | The base layer's overlay: Node 24, the AWS CLI and jq as self-contained releases, their versions pinned and Node's and jq's checksums checked; the scripts of `sandbox/base/files/` in `/usr/local/share/claude-base/`, with `claude-setup`, `claude-start` and `check-sandbox` linked in `/usr/local/bin`; `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` and `BRAINSTORM_PORT=61935` |
+| `sandbox/base/base.sbxenv.yaml` | The base environment file: the workload `docker/sbx-kit-claude`, its version pinned, the base layer with its args (the machine account's name and noreply address, `luiki-dev/claude-config`), `claude-start` as the entrypoint, port 61935 published, 8 CPUs and `8g` of memory |
+| `sandbox/base/files/claude-setup.sh` | `claude-setup`: the one-time setup the owner runs after giving the GitHub token ([below](#the-base-layer)) |
+| `sandbox/base/files/claude-start.sh` | `claude-start`: the one way Claude starts, through the entrypoint and the `claude` alias ([below](#the-base-layer)) |
+| `sandbox/base/files/settings-fragment.json` | What the base layer adds to Claude's settings: auto mode, the owner's status line, the `Stop` hook that prints the time of each reply, and the backup hook at `SessionStart` and `SessionEnd` |
+| `sandbox/base/files/sandbox-notes.md` | What Claude must know in a sandbox (the visual companion's port, the proxy, the placeholders, AWS, the checks), imported into the kit's `CLAUDE.md` |
+| `sandbox/base/files/check-sandbox.sh` | `check-sandbox`: the isolation checks, run after a rebuild and after an update of `sbx`; prints each result and exits non-zero naming the checks that failed |
 | `sandbox/base/files/strip-transcripts.py` | Copies Claude Code's transcripts with only the fields `scripts/token-usage.py` reads ([below](#the-backup-hook)) |
 | `sandbox/base/files/claude-backup.sh` | The backup hook, run at every session's start and end, on WSL and in the sandbox ([below](#the-backup-hook)) |
+
+## The base layer
+
+The base layer gives any project worked on with Claude Code in a sandbox what it needs ([ADR 0076](../../decisions/0076-docker-sandbox-setup-phase-details.md), decision 4, and "Settled while building"). It is set up in two steps, since the machine account's token reaches the sandbox only after it is created (`sbx secret set github --sandbox <name>`):
+
+1. **At create**, the kit builds the overlay, the install hook writes `/etc/claude-base.env` (git's identity and the configuration repository, from the environment file's args) and the `claude` alias, and the VS Code server's settings file is written.
+2. **`claude-setup`**, run once by the owner after the token, and safe to run again: sets git's identity and `gh auth setup-git`, clones the configuration repository to `~/claude-config`, copies `user/CLAUDE.md` to `~/.claude/owner-CLAUDE.md`, `user/statusline-command.sh` to `~/.claude/` and `user/aws-config` to `~/.aws/config` (the `claude-readonly` profile only), merges the settings and installs the plugins (`superpowers` and `typescript-lsp` from `claude-plugins-official`, `ponytail` from its marketplace).
+
+**The settings** are merged with `jq` in three layers, later ones winning: the kit's own `~/.claude/settings.json` (kept the first time as `~/.claude/kit-settings.json`, so a second run starts from the same file), then the owner's `user/settings.json` without `hooks`, then `settings-fragment.json` without `hooks`. The fragment's hooks are appended to the kit's, never replacing them; `user/` holds no hooks (decision 11).
+
+**What `user/settings.json` may hold from the base layer.** The backup hook writes back every top-level key that differs from the kit's, whole, so `user/settings.json` can gain keys the owner never set by hand: `permissions.defaultMode` `auto` from the fragment, carried with the owner's `permissions` allow list, and `extraKnownMarketplaces` written by `claude plugin marketplace add`. Both are what the next sandbox would set anyway, so they are kept as written rather than filtered out.
+
+**`claude-start`** is the entrypoint and the `claude` alias: it refuses to start before `claude-setup` has cloned the configuration repository, puts back the two `@` imports at the end of the kit's `CLAUDE.md` (`~/.claude/owner-CLAUDE.md` and `sandbox-notes.md`), since the kit may write that file again, then starts Claude in `$SANDBOX_PROJECT_DIR` in auto mode with `/usr/local/bin` first on the `PATH`. Bypass mode is never used.
+
+**`check-sandbox`** checks: no Windows disk (`/mnt/c`), the host's and the LAN's ports unreachable (`host.docker.internal` and the default gateway), no SSH agent, the GitHub token and the Claude login only placeholders, AWS with only `claude-readonly`, Node 24 on the `PATH` of a login and a non-login shell, and Claude Code's nonessential traffic off. With no Claude login injected the login check passes because there is no credentials file to read, so the Anthropic login is given at `sbx env create`.
 
 ## The host's settings
 
@@ -68,7 +89,7 @@ Two rules of the format shape Szop's layers:
 | `default-package-managers` | 56 | npm, Node.js and NodeSource, PyPI and `astral.sh`, and the registries of Rust, Go, Java, PHP, Ruby, .NET, Dart, Elixir, Perl, Haskell, Swift, Zig; sigstore | npm (pnpm, Claude Code's plugins), Node.js, PyPI and `astral.sh` (`uv`, graphify) |
 | `default-code-and-containers` | 34 | GitHub (`github.com`, `**.github.com`, `**.githubusercontent.com`), GitLab, Bitbucket, Docker Hub and other registries (`ghcr.io`, `gcr.io`, `mcr.microsoft.com`, `quay.io`, `public.ecr.aws`), VS Code's downloads | GitHub (`git`, `gh`, release downloads of the tools), Docker Hub (the database and app images), VS Code's server |
 | `default-cloud-infrastructure` | 36 | `**.amazonaws.com`, `**.googleapis.com`, Azure, `**.blob.core.windows.net`, HashiCorp, Vercel, Cloudflare, `unpkg.com`, `jsdelivr.net`, Playwright's CDNs, Google's other hosts, Prisma, Supabase, Clerk, Figma | AWS (`claude-readonly`), HashiCorp (Terraform and its providers), Playwright's browsers |
-| `default-os-packages` | 16 | Ubuntu, Debian, Arch, Alpine, CentOS, Fedora, LLVM's apt and `packagecloud.io` | Debian's packages, which the base layer installs at create |
+| `default-os-packages` | 16 | Ubuntu, Debian, Arch, Alpine, CentOS, Fedora, LLVM's apt and `packagecloud.io` | Nothing today: the base layer installs no apt package. Kept for a later layer that does (`apt-get` in an install hook) |
 | `default-cert-validation` | 30 | Certificate revocation checks (OCSP and CRL) of Let's Encrypt, DigiCert, Sectigo, Google, Amazon, Microsoft, GlobalSign | Every HTTPS client that checks revocation |
 
 Every group holds something Szop uses, and the broad entries (`**.amazonaws.com`, `**.blob.core.windows.net`, `github.com`) are in groups Szop cannot drop, so removing a group narrows little: all six are kept ([ADR 0076](../../decisions/0076-docker-sandbox-setup-phase-details.md), "Settled while building"). Narrowing host by host waits for [OP-144](https://github.com/luiki-dev/szop/issues/430), which collects `sbx policy log` over a whole phase.

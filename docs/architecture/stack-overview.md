@@ -36,6 +36,7 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
 - [21. Running several instances](#21-running-several-instances)
 - [22. Scanning for vulnerabilities and misconfigurations](#22-scanning-for-vulnerabilities-and-misconfigurations)
 - [23. Releases: versions, release PRs and tags](#23-releases-versions-release-prs-and-tags)
+- [24. Claude Code in a Docker Sandbox](#24-claude-code-in-a-docker-sandbox)
 
 ## 1. The big picture
 
@@ -482,3 +483,13 @@ A **release** gives a state of the code a name that people can talk about, `v0.1
 - **Tags and GitHub Releases.** Merging the release PR puts a **git tag**, `v0.1.0`, on its commit: a name for that commit that a ruleset keeps from ever moving. A **GitHub Release** is the page for that tag, with its notes. Szop's container image of the same commit gets the version as a second tag, `szop:0.1.0`, so the code and the image share one name.
 - **Release notes per pull request.** The notes can list commits or pull requests. Szop merges with merge commits, so every task commit of a phase reaches `main`; listing commits would show each phase several times. Its notes list pull requests, one line each, as GitHub generates them.
 - **A bot with its own identity.** The release PR is opened by a GitHub App, `szop-release`, rather than by the workflow's own token, because GitHub does not run other workflows for changes made with that token, and the release PR needs its checks. An App is a separate identity with exactly the permissions it was given, and its token lasts an hour.
+
+## 24. Claude Code in a Docker Sandbox
+
+Claude Code writes much of Szop, and on WSL it runs with the owner's rights, next to the owner's files and credentials. [PH-48](../roadmap.md#ph-48-docker-sandbox-proof-of-concept) proved it can work in a Docker Sandbox instead, and [PH-49](../roadmap.md#ph-49-reproducible-docker-sandbox-setup) builds that sandbox from files in `sandbox/` ([ADR 0075](../decisions/0075-docker-sandbox-poc-phase-details.md), [ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md); the tool is [Docker Sandboxes](../development/tools/docker-sandboxes.md)). This section explains the concepts.
+
+- **A virtual machine, not a container.** A container shares the host's kernel ([Container images](#20-container-images)); a sandbox is a small virtual machine with a kernel of its own, so a flaw in the agent's tools reaches only that machine. Inside it, the agent may be root (`sudo` needs no password): the machine can be thrown away and rebuilt, so what it holds is not worth guarding from its own user.
+- **A proxy in front of the network.** Every connection leaves through a proxy that allows a list of hosts and refuses the rest with `403`. Credentials never enter the machine: the agent sees a placeholder, and the proxy puts the real token into requests to the hosts it belongs to. A stolen placeholder is worth nothing outside the sandbox.
+- **Built from source in layers.** A **workload** kit gives the base system and the agent (Docker's Claude Code image); **mixins** add to it. Szop has two: `sandbox/base`, which any project could use (Node, the AWS CLI, Claude's setup from the owner's private configuration repository, the backup of Claude's memory and statistics), and Szop's own layer. An **environment file** names the kits, the size and the ports, and several files merge in order, so a project's file adds to the base one. Because every layer is a file in the repository, a lost sandbox is rebuilt in minutes, and adding a tool is a reviewed change, not a hand-made one.
+- **An overlay laid on an unknown base.** A mixin's Dockerfile builds only the files it adds (`FROM scratch`), which are laid over a workload it has never seen. It cannot install Debian packages, which need the base's package database, so the base layer brings self-contained releases instead, each pinned to a version and, where the publisher gives one, checked against a checksum.
+- **What runs on the host.** The kits run inside the virtual machine, but an environment file's lifecycle commands run on the owner's computer, with the owner's rights. That is why the environment files are read from a checkout of reviewed `main`, and why the owner's review of a change to them is a security boundary.
