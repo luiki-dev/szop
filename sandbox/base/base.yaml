@@ -9,7 +9,7 @@ kind: mixin
 displayName: Claude Code base
 description: The generic setup for working with Claude Code in a Docker Sandbox
 sourceUrl: https://github.com/luiki-dev/szop/tree/main/sandbox/base
-version: "0.2.0"
+version: "0.3.0"
 
 args:
   gitName:
@@ -54,8 +54,10 @@ capabilities:
             } > /etc/claude-base.env
             grep -q '^alias claude=' /etc/bash.bashrc ||
               echo 'alias claude=claude-start' >> /etc/bash.bashrc
+            grep -q '^alias ll=' /etc/bash.bashrc ||
+              echo 'alias ll="ls -la"' >> /etc/bash.bashrc
           user: "0"
-          description: Write the base layer's settings and the claude alias
+          description: Write the base layer's settings and the shell's aliases
       files:
         - path: /home/agent/.vscode-server/data/Machine/settings.json
           content: '{ "telemetry.telemetryLevel": "off" }'

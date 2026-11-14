@@ -8,7 +8,7 @@ kind: mixin
 displayName: Szop
 description: The tools and the repository for working on Szop
 sourceUrl: https://github.com/luiki-dev/szop/tree/main/sandbox/szop
-version: "0.1.0"
+version: "0.2.0"
 
 capabilities:
   - type: com.docker.sandbox/network-policy@1
@@ -17,3 +17,14 @@ capabilities:
         allow:
           # Playwright's browsers; its other CDNs are in balanced.
           - playwright.download.prss.microsoft.com:443
+
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      install:
+        # Playwright's --with-deps installs the browsers' libraries with apt;
+        # balanced allows **.debian.org on 443 only, so apt goes over HTTPS.
+        - command: |
+            find /etc/apt \( -name '*.list' -o -name '*.sources' \) \
+              -exec sed -i 's|http://deb\.debian\.org/|https://deb.debian.org/|g' {} +
+          user: "0"
+          description: Fetch Debian's packages over HTTPS
