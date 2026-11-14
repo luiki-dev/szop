@@ -107,3 +107,24 @@ test("a transcript that is gone, such as a dangling link, is skipped", () => {
   expect(result.status).toBe(0);
   expect(files(dest)).toEqual(files(fixture));
 });
+
+test("a file cut inside a multi-byte character or still being written does not stop the run", () => {
+  const src = join(mkdtempSync(join(tmpdir(), "strip-src-")), "projects");
+  cpSync(fixture, src, { recursive: true });
+  const folder = join(src, "-home-x-szop");
+  const line = Buffer.from('{"type":"assistant","note":"zażółć"}\n');
+  const cut = Buffer.concat([line, line.subarray(0, line.indexOf("ż") + 1)]);
+  writeFileSync(join(folder, "cut.jsonl"), cut);
+  writeFileSync(join(folder, "x.meta.json"), '{"description": "ab');
+  const dest = join(mkdtempSync(join(tmpdir(), "strip-")), "copy");
+
+  const result = run(src, dest);
+  expect(result.status).toBe(0);
+  expect(readFileSync(join(dest, "-home-x-szop/cut.jsonl"), "utf8")).toBe(
+    '{"type": "assistant"}\n',
+  );
+  const copied = files(dest);
+  expect(copied).toContain(mainSession);
+  expect(copied.filter((f) => f.endsWith(".tmp"))).toEqual([]);
+  expect(copied).not.toContain("-home-x-szop/x.meta.json");
+});

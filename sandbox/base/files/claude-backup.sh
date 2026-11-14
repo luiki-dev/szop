@@ -60,8 +60,9 @@ copy_user() {
   [[ -f "$kit_settings" ]] && kit="$(cat "$kit_settings")"
   jq --argjson kit "$kit" \
     'with_entries(select(.key != "hooks" and .value != $kit[.key]))' \
-    "$claude/settings.json" >"$repo/user/settings.json" ||
-    fail "the copy of user/settings.json" "jq failed"
+    "$claude/settings.json" >"$repo/user/settings.json.new" ||
+    { rm -f "$repo/user/settings.json.new"; fail "the copy of user/settings.json" "jq failed"; }
+  mv "$repo/user/settings.json.new" "$repo/user/settings.json"
   [[ -f "$claude/owner-CLAUDE.md" ]] && cp "$claude/owner-CLAUDE.md" "$repo/user/CLAUDE.md"
   [[ -f "$claude/statusline-command.sh" ]] && cp "$claude/statusline-command.sh" "$repo/user/"
   # shortcut: a theme deleted in the sandbox stays in user/themes; delete it there by hand.

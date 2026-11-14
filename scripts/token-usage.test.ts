@@ -1,6 +1,6 @@
 // Tests for token-usage.py's default --projects (PH-49, ADR 0076). Run with: pnpm test --project scripts
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdtempSync, writeFileSync } from "node:fs";
+import { cpSync, mkdtempSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -74,4 +74,17 @@ test("a call in two transcripts goes to the same session whatever the order on d
   });
   expect(reports[0]).toContain("| PH-01 |");
   expect(reports[1]).toBe(reports[0]);
+});
+
+test("a dangling link in the projects folder is skipped", () => {
+  const projects = mkdtempSync(join(tmpdir(), "token-usage-"));
+  cpSync(fixture, join(projects, "p"), { recursive: true });
+  symlinkSync(join(projects, "nowhere.jsonl"), join(projects, "p/gone.jsonl"));
+  const result = spawnSync(
+    "python3",
+    [script, "--projects", projects, "--usage-log", "/nonexistent"],
+    { encoding: "utf8" },
+  );
+  expect(result.stderr).toBe("");
+  expect(result.status).toBe(0);
 });

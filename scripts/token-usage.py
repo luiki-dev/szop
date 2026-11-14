@@ -93,7 +93,11 @@ def load_calls(root):
                 with open(meta) as fh:
                     desc = json.load(fh).get('description', '')
         session = path.split('/')[-3] if is_sub else os.path.basename(path)[:-len('.jsonl')]
-        with open(path) as fh:
+        try:
+            fh = open(path)
+        except FileNotFoundError:
+            continue  # a dangling link, or a transcript removed while this runs
+        with fh:
             for n, line in enumerate(fh, 1):
                 try:
                     d = json.loads(line)

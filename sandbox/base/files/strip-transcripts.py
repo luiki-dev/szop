@@ -6,7 +6,8 @@
 Mirrors every *.jsonl and *.meta.json under SRC to the same path under DEST. A transcript
 line keeps only the fields scripts/token-usage.py's load_calls reads; a field added there
 must be kept here too. A line that does not parse (one still being written) is skipped.
-A file that is gone (a dangling link) is skipped. A copy is rewritten only when its source
+A file that is gone (a dangling link) or cannot be read or parsed (a `.meta.json` still being
+written) is skipped, whole, and leaves no `.tmp`. A copy is rewritten only when its source
 is newer. Standard library only.
 """
 import json
@@ -45,10 +46,14 @@ def copy(src, dest, strip):
         return
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     tmp = dest + '.tmp'
-    with open(src) as fin, open(tmp, 'w') as fout:
-        fout.writelines(strip(fin))
-    os.utime(tmp, ns=(mtime, mtime))
-    os.replace(tmp, dest)
+    try:
+        with open(src, encoding='utf-8', errors='replace') as fin, open(tmp, 'w') as fout:
+            fout.writelines(strip(fin))
+        os.utime(tmp, ns=(mtime, mtime))
+        os.replace(tmp, dest)
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
 
 
 def main(src, dest):
@@ -63,8 +68,8 @@ def main(src, dest):
             path = os.path.join(folder, name)
             try:
                 copy(path, os.path.join(dest, os.path.relpath(path, src)), strip)
-            except FileNotFoundError:
-                pass  # a dangling link, or a transcript removed while this runs
+            except (OSError, ValueError):
+                pass  # a dangling link, a file removed or still being written: skip it
 
 
 if __name__ == '__main__':

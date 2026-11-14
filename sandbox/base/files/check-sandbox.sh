@@ -32,7 +32,7 @@ anthropic_placeholder() {
   [[ ! -f "$f" ]] || placeholder "$(jq -r '.claudeAiOauth.accessToken // ""' "$f")"
 }
 only_readonly_profile() {
-  [[ "$(grep -E '^\[profile ' "$HOME/.aws/config")" == "[profile claude-readonly]" ]]
+  [[ "$(grep -E '^\[(profile |default)' "$HOME/.aws/config")" == "[profile claude-readonly]" ]]
 }
 
 check "no Windows disk (/mnt/c absent)" test ! -e /mnt/c

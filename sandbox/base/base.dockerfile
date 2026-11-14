@@ -14,9 +14,11 @@ WORKDIR /tmp/dl
 RUN set -eux; \
     case "$TARGETARCH" in \
       amd64) node=x64; aws=x86_64; \
+             aws_sum=4770c06c4ecfc8ba94b60d89e6c7018ab7ea2cf5341b1ef05f6f93c5d6e8b705; \
              node_sum=4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb; \
              jq_sum=b1c22172dd303f3be49e935aa56aa48a8b7a46e0bc838b4997d3bb451495870f ;; \
       arm64) node=arm64; aws=aarch64; \
+             aws_sum=4c5f080c6c294eb0da77734c4520f5b5089cf45a4ee757ca34ddf7f9e512e66a; \
              node_sum=6e51a2ada00f0011cc266f65d98922b403d7ad88f809ca2aa615a5fe1ce6e86c; \
              jq_sum=8b85c817833814ddca00a144c33705546355afccf0cf39b188f3cdb48b852309 ;; \
       *) echo "unsupported TARGETARCH: $TARGETARCH" >&2; exit 1 ;; \
@@ -29,6 +31,7 @@ RUN set -eux; \
       "node-v${NODE_VERSION}-linux-${node}/bin" "node-v${NODE_VERSION}-linux-${node}/lib"; \
     # The AWS CLI installs with a bundled Python under /usr/local/aws-cli.
     curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-${aws}-${AWSCLI_VERSION}.zip" -o aws.zip; \
+    echo "${aws_sum}  aws.zip" | sha256sum -c -; \
     unzip -q aws.zip; \
     ./aws/install -i /usr/local/aws-cli -b /usr/local/bin; \
     /usr/local/bin/aws --version | grep -q "aws-cli/${AWSCLI_VERSION} "; \
