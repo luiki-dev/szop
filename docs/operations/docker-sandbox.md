@@ -165,7 +165,7 @@ In VS Code's terminal in the sandbox:
 | `check-sandbox` | It prints `all passed`: no Windows disk, the host's and the LAN's ports blocked, no SSH agent, only placeholders for the credentials, Node 24 on the `PATH`, the libraries VS Code's server needs, git's pager |
 | `check-szop` | It prints `all passed`: the push hook blocks a branch deletion and `pnpm check` passes |
 | `pnpm test:e2e` | The end-to-end journeys pass |
-| `claude` | Claude starts in `~/workspace/szop` in auto mode, with the owner's status line; `/memory` shows `~/claude-config/memory/szop` |
+| `claude` | Claude starts in `~/workspace/szop` in auto mode, with the owner's status line; asked *which directory is your auto-memory in?*, it names `/home/agent/claude-config/memory/szop` (`/memory` does not show the path, and its *Open auto-memory folder* opens nothing without a desktop) |
 | In Claude: *run `git push origin :refs/heads/x`* | Blocked by `.claude/hooks/guard-git-push.ts` |
 | `gh auth status` | Logged in as `luiki-dev-claude` |
 | `aws sts get-caller-identity --profile claude-readonly` | An `AWSReservedSSO_ClaudeReadOnly_…` role |
