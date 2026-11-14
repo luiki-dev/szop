@@ -1,36 +1,63 @@
 # syntax=docker/sandbox-kit:3
 # The generic layer for any project worked on with Claude Code in a sandbox
 # (ADR 0076, decision 4): names nothing of Szop. A mixin on Docker's Claude
-# Code workload, which base.sbxenv.yaml pins.
+# Code workload, which base.sbxenv.yaml pins. What needs the GitHub token (the
+# configuration repository's clone, the plugins) is done by claude-setup, which
+# the owner runs once after the logins: the token is given after create.
 schemaVersion: "3"
 kind: mixin
 displayName: Claude Code base
 description: The generic setup for working with Claude Code in a Docker Sandbox
 sourceUrl: https://github.com/luiki-dev/szop/tree/main/sandbox/base
-version: "0.1.0"
+version: "0.2.0"
+
+args:
+  gitName:
+    required: true
+    pattern: "^[A-Za-z0-9._ -]+$"
+    description: git's user.name in the sandbox (the machine account)
+  gitEmail:
+    required: true
+    pattern: "^[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+$"
+    description: git's user.email in the sandbox (the machine account's noreply address)
+  configRepo:
+    required: true
+    pattern: "^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$"
+    description: The private configuration repository on GitHub, owner/name
 
 capabilities:
   - type: com.docker.sandbox/network-policy@1
     config:
-      install:
-        allow: [deb.debian.org:443, deb.debian.org:80]
       runtime:
-        allow: [mcp.context7.com:443]
+        allow:
+          # GitHub: git, gh, the plugins' marketplaces and release downloads.
+          - github.com:443
+          - api.github.com:443
+          - uploads.github.com:443
+          - codeload.github.com:443
+          - raw.githubusercontent.com:443
+          - objects.githubusercontent.com:443
+          - registry.npmjs.org:443
+          - mcp.context7.com:443
 
   - type: com.docker.sandbox/lifecycle@1
     config:
       install:
-        # apt packages cannot travel in an overlay (they need the base's dpkg
-        # database), so they are installed at create.
-        - command: >-
-            apt-get update -qq &&
-            apt-get install -y -qq --no-install-recommends less
+        # The args are written where claude-setup reads them; their patterns
+        # admit no quote, so the values are safe inside single quotes.
+        - command: |
+            set -e
+            {
+              echo "GIT_USER_NAME='${{ kit.args.gitName }}'"
+              echo "GIT_USER_EMAIL='${{ kit.args.gitEmail }}'"
+              echo "CLAUDE_CONFIG_REMOTE='${{ kit.args.configRepo }}'"
+            } > /etc/claude-base.env
+            grep -q '^alias claude=' /etc/bash.bashrc ||
+              echo 'alias claude=claude-start' >> /etc/bash.bashrc
           user: "0"
-          env:
-            - HTTP_PROXY
-            - HTTPS_PROXY
-            - http_proxy
-            - https_proxy
-            - NO_PROXY
-            - no_proxy
-          description: Install a pager
+          description: Write the base layer's settings and the claude alias
+      files:
+        - path: /home/agent/.vscode-server/data/Machine/settings.json
+          content: '{ "telemetry.telemetryLevel": "off" }'
+          overwrite: false
+          description: Turn off the VS Code server's telemetry

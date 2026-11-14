@@ -1,0 +1,41 @@
+{
+  "permissions": { "defaultMode": "auto" },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '{\"systemMessage\":\"\\\\n\\\\n┌────╱┐  ──────────────\\\\n│╲  ╱ │  REPLIED: %s\\\\n└─╲╱──┘  ──────────────\"}' \"$(date +%k:%M)\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_BACKUP_ENV=sandbox bash /usr/local/share/claude-base/claude-backup.sh start",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_BACKUP_ENV=sandbox bash /usr/local/share/claude-base/claude-backup.sh end",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

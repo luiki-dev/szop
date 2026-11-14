@@ -51,6 +51,7 @@ jobs:
       code: ${{ steps.detect.outputs.code }}
       workflows: ${{ steps.detect.outputs.workflows }}
       infra: ${{ steps.detect.outputs.infra }}
+      sandbox: ${{ steps.detect.outputs.sandbox }}
     steps:
       # On a PR, the checkout is GitHub's test merge of the branch into main:
       # HEAD^1 is main, so the diff is exactly what the PR changes.
@@ -68,6 +69,7 @@ jobs:
             code=true
             workflows=true
             infra=true
+            sandbox=true
           else
             # --no-renames lists both names of a renamed file.
             files=$(git diff --name-only --no-renames HEAD^1 HEAD)
@@ -78,13 +80,15 @@ jobs:
             if grep -qv '\.md$' <<<"$files"; then code=true; else code=false; fi
             if grep -qE '^\.github/(workflows/|actions/|dependabot\.ya?ml$|zizmor\.ya?ml$)' <<<"$files"; then workflows=true; else workflows=false; fi
             if grep -qE '^(infra/|\.terraform-version$|scripts/check-infra\.sh$|\.github/workflows/ci\.yml$)' <<<"$files"; then infra=true; else infra=false; fi
+            if grep -qE '^(sandbox/|\.github/workflows/ci\.yml$)' <<<"$files"; then sandbox=true; else sandbox=false; fi
           fi
           {
             echo "code=$code"
             echo "workflows=$workflows"
             echo "infra=$infra"
+            echo "sandbox=$sandbox"
           } >> "$GITHUB_OUTPUT"
-          echo "code=$code, workflows=$workflows, infra=$infra"
+          echo "code=$code, workflows=$workflows, infra=$infra, sandbox=$sandbox"
 
   lint:
     name: lint
@@ -278,6 +282,24 @@ jobs:
           path: ${{ runner.temp }}/szop.tar
           retention-days: 1
           if-no-files-found: error
+
+  # Builds the sandbox's kits as Docker's kit docs build them (PH-49 spec, The
+  # kits in CI): the descriptor's first line selects the kit build frontend.
+  # It proves the Dockerfiles and descriptors build, not that a sandbox starts.
+  kits:
+    name: kits
+    needs: changes
+    if: needs.changes.outputs.sandbox == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - run: docker buildx build -f sandbox/base/base.yaml sandbox/base/
 
   infra:
     name: infra
@@ -791,6 +813,7 @@ jobs:
         build,
         e2e,
         docker,
+        kits,
         infra,
         scan-config,
         scan-image,

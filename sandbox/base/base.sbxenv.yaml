@@ -4,9 +4,20 @@
 # lifecycle commands, when any are added, run on the host with the owner's rights.
 schemaVersion: "1"
 agent: sbx-kit-claude
+# The safe start: in the project, in auto mode, with node on the PATH; never
+# the workload's --dangerously-skip-permissions.
+entrypoint: [claude-start]
 kits:
   - docker/sbx-kit-claude:2.1.316
-  - .
+  - source: .
+    args:
+      gitName: luiki-dev-claude
+      gitEmail: 355098596+luiki-dev-claude@users.noreply.github.com
+      configRepo: luiki-dev/claude-config
+ports:
+  # superpowers' visual companion (BRAINSTORM_PORT in base.dockerfile).
+  - sandbox: 61935
+    host: 61935
 sandboxOptions:
   cpus: 8
   memory: "8g"
