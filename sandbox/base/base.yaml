@@ -9,7 +9,7 @@ kind: mixin
 displayName: Claude Code base
 description: The generic setup for working with Claude Code in a Docker Sandbox
 sourceUrl: https://github.com/luiki-dev/szop/tree/main/sandbox/base
-version: "0.5.0"
+version: "0.6.0"
 
 args:
   gitName:
@@ -58,11 +58,14 @@ capabilities:
               echo 'alias claude=claude-start' >> /etc/bash.bashrc
             grep -q '^alias ll=' /etc/bash.bashrc ||
               echo 'alias ll="ls -la"' >> /etc/bash.bashrc
+            # bash as agent's login shell, so an SSH session (VS Code's terminal
+            # among them) reads /etc/bash.bashrc and its aliases, not sh.
+            sed -i -E 's#^(agent:([^:]*:){5})[^:]*$#\1/bin/bash#' /etc/passwd
             # The hardened workload ships no /etc/ld.so.cache, and VS Code's
             # server finds libstdc++ through `ldconfig -p`, so it refused to start.
             ldconfig
           user: "0"
-          description: Write the base layer's settings and the shell's aliases, and the loader's cache
+          description: Write the base layer's settings and the shell's aliases, make bash the login shell, and build the loader's cache
       files:
         - path: /home/agent/.vscode-server/data/Machine/settings.json
           content: '{ "telemetry.telemetryLevel": "off" }'

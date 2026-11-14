@@ -162,7 +162,7 @@ In VS Code's terminal in the sandbox:
 
 | Check | Passes when |
 |---|---|
-| `check-sandbox` | It prints `all passed`: no Windows disk, the host's and the LAN's ports blocked, no SSH agent, only placeholders for the credentials, Node 24 on the `PATH`, the libraries VS Code's server needs, git's pager |
+| `check-sandbox` | It prints `all passed`: no Windows disk, the host's and the LAN's ports blocked, no SSH agent, only placeholders for the credentials, Node 24 on the `PATH`, the libraries VS Code's server needs, bash as the login shell, git's pager |
 | `check-szop` | It prints `all passed`: the push hook blocks a branch deletion and `pnpm check` passes |
 | `pnpm test:e2e` | The end-to-end journeys pass |
 | `claude` | Claude starts in `~/workspace/szop` in auto mode, with the owner's status line; asked *which directory is your auto-memory in?*, it names `/home/agent/claude-config/memory/szop` (`/memory` does not show the path, and its *Open auto-memory folder* opens nothing without a desktop) |
