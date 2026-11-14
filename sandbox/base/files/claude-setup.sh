@@ -16,9 +16,8 @@ step "git's identity and the proxy's credential helper"
 git config --global user.name "$GIT_USER_NAME"
 git config --global user.email "$GIT_USER_EMAIL"
 gh auth setup-git
-# The proxy admits GitHub over HTTPS only; git over SSH (Claude Code tries it
-# for plugin marketplaces) would wait in the approval queue.
-git config --global url."https://github.com/".insteadOf git@github.com:
+# git's default pager, `pager`, is not in the hardened workload; `less` is.
+git config --global core.pager less
 
 if [[ ! -d "$repo/.git" ]]; then
   step "cloning $CLAUDE_CONFIG_REMOTE"

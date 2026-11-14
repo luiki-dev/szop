@@ -45,6 +45,8 @@ check "AWS has only the claude-readonly profile" only_readonly_profile
 check "node on the PATH of a login shell" bash -lc 'node --version | grep -q ^v24'
 check "node on the PATH of a non-login shell" bash -c 'node --version | grep -q ^v24'
 check "the loader's cache lists libstdc++ (VS Code's server needs it)" bash -c 'ldconfig -p | grep -q libstdc++'
+# shellcheck disable=SC2016 # expanded by the inner bash
+check "git's pager exists" bash -c 'command -v "$(git var GIT_PAGER)"'
 check "Claude Code's nonessential traffic off" test "${CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC:-}" = 1
 
 if ((${#failed[@]})); then

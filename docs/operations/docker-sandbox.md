@@ -162,7 +162,7 @@ In VS Code's terminal in the sandbox:
 
 | Check | Passes when |
 |---|---|
-| `check-sandbox` | It prints `all passed`: no Windows disk, the host's and the LAN's ports blocked, no SSH agent, only placeholders for the credentials, Node 24 on the `PATH` |
+| `check-sandbox` | It prints `all passed`: no Windows disk, the host's and the LAN's ports blocked, no SSH agent, only placeholders for the credentials, Node 24 on the `PATH`, the libraries VS Code's server needs, git's pager |
 | `check-szop` | It prints `all passed`: the push hook blocks a branch deletion and `pnpm check` passes |
 | `pnpm test:e2e` | The end-to-end journeys pass |
 | `claude` | Claude starts in `~/workspace/szop` in auto mode, with the owner's status line; `/memory` shows `~/claude-config/memory/szop` |
@@ -200,7 +200,7 @@ sbx env run --name szop sandbox\base\base.sbxenv.yaml sandbox\szop\szop.sbxenv.y
 
 Leaving Claude (`/exit`) leaves the sandbox running.
 
-**2. VS Code, then Claude in its terminal.** The usual way: VS Code's Remote-SSH connects to `szop.sbx` ([step 5](#5-vs-code)), and `claude` typed in its terminal is an alias of `claude-start`. No environment file is needed. If the sandbox is stopped and VS Code cannot connect, start it first with WSL `sbx.exe exec szop true` or PowerShell `sbx exec szop true`, or with `sbx env run --detach` and the paths of way 1, which starts it without opening Claude. _Which of these starts a stopped sandbox is checked at PH-49's rebuild._
+**2. VS Code, then Claude in its terminal.** The usual way: VS Code's Remote-SSH connects to `szop.sbx` ([step 5](#5-vs-code)), and `claude` typed in its terminal is an alias of `claude-start`. No environment file is needed. A stopped sandbox needs nothing first: connecting to `szop.sbx` starts it (checked at PH-49's rebuild).
 
 **3. A shell, then Claude.** A bash in the sandbox, in the Windows terminal, for work without VS Code:
 
@@ -245,6 +245,7 @@ Another port for a while, such as a report's server: WSL `sbx.exe ports szop --p
 
 A host outside the policy is refused and waits in the approval queue. WSL `sbx.exe policy approval ls`, PowerShell `sbx policy approval ls`; `sbx policy log` shows what was allowed and denied.
 
+- **Dismiss, don't allow, these known requests:** `140.82.121.*:22`, git over SSH to GitHub, which Claude Code tries during `claude-setup` and at its start before it goes over HTTPS, which works; `main.vscode-cdn.net` and Microsoft's telemetry, from VS Code's server, which works without them; `d-…awsapps.com`, the browser opening of `aws sso login`, whose link opens on Windows anyway.
 - **⚠️ Don't** approve `localhost`, `host.docker.internal`, a private (`10.*`, `172.16–31.*`, `192.168.*`), link-local or metadata address (`169.254.169.254`, `metadata.google.internal`): the network policy is what keeps the host and the LAN out of the sandbox.
 - A host a layer needs for good goes in that layer's descriptor (`network-policy@1` in `sandbox/<layer>/<layer>.yaml`) through a PR, not an approval.
 
