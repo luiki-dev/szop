@@ -178,31 +178,55 @@ If one fails: fix it on a branch, merge, and rebuild from [step 1](#1-before).
 
 ### Starting and stopping
 
-From the host's checkout. WSL:
+**Which sandboxes exist and run:** WSL `sbx.exe ls`, PowerShell `sbx ls`.
+
+There are three ways to start working. Each ends with Claude started by `claude-start`, in `~/workspace/szop`, in auto mode, with the project's settings, deny rules and hooks loaded.
+
+**1. Straight into Claude, in a Windows terminal.** `sbx env run` starts the sandbox if it is stopped and opens Claude in the terminal it was run from. It reads the start command from the environment files, so it needs their paths, from the host's checkout:
+
+WSL:
 
 ```bash
-sbx.exe ls                                   # which sandboxes exist and run
-sbx.exe env run --detach --name szop "$(wslpath -w sandbox/base/base.sbxenv.yaml)" "$(wslpath -w sandbox/szop/szop.sbxenv.yaml)"
-sbx.exe stop szop
+cd ~/workspace/szop
+sbx.exe env run --name szop "$(wslpath -w sandbox/base/base.sbxenv.yaml)" "$(wslpath -w sandbox/szop/szop.sbxenv.yaml)"
 ```
 
 PowerShell:
 
 ```powershell
-sbx ls
-sbx env run --detach --name szop sandbox\base\base.sbxenv.yaml sandbox\szop\szop.sbxenv.yaml
-sbx stop szop
+Set-Location \\wsl.localhost\Ubuntu\home\<user>\workspace\szop
+sbx env run --name szop sandbox\base\base.sbxenv.yaml sandbox\szop\szop.sbxenv.yaml
 ```
 
-- `sbx env run --detach` starts the sandbox without opening Claude in the terminal; work goes on in VS Code. Without `--detach` it attaches to Claude, started by `claude-start`.
-- **⚠️ Don't** start it with `sbx run --name szop`: a plain `sbx run` ignores the environment file's entrypoint, so Claude starts outside the repository, without the project's settings, deny rules and hooks ([ADR 0075](../decisions/0075-docker-sandbox-poc-phase-details.md), "Settled while building").
-- The database comes back with the sandbox (`restart: unless-stopped`).
-- Before `sbx stop`, end Claude's session so the backup is pushed.
+Leaving Claude (`/exit`) leaves the sandbox running.
+
+**2. VS Code, then Claude in its terminal.** The usual way: VS Code's Remote-SSH connects to `szop.sbx` ([step 5](#5-vs-code)), and `claude` typed in its terminal is an alias of `claude-start`. No environment file is needed. If the sandbox is stopped and VS Code cannot connect, start it first with WSL `sbx.exe exec szop true` or PowerShell `sbx exec szop true`, or with `sbx env run --detach` and the paths of way 1, which starts it without opening Claude. _Which of these starts a stopped sandbox is checked at PH-49's rebuild._
+
+**3. A shell, then Claude.** A bash in the sandbox, in the Windows terminal, for work without VS Code:
+
+WSL:
+
+```bash
+sbx.exe exec -it szop bash
+```
+
+PowerShell:
+
+```powershell
+sbx exec -it szop bash
+```
+
+Then `claude` in it, as in way 2.
+
+In ways 2 and 3, `claude -c` continues the last session.
+
+**⚠️ Don't** start it with `sbx run --name szop`: a plain `sbx run` ignores the environment file's start command, so Claude starts outside the repository, without the project's settings, deny rules and hooks ([ADR 0075](../decisions/0075-docker-sandbox-poc-phase-details.md), "Settled while building").
+
+**Stopping.** End Claude's session first (`/exit`), so the backup is pushed, then WSL `sbx.exe stop szop`, PowerShell `sbx stop szop`. The database comes back with the sandbox (`restart: unless-stopped`).
 
 ### VS Code and Claude
 
-- VS Code connects to `szop.sbx` over Remote-SSH ([step 5](#5-vs-code)). In VS Code's user settings on Windows, `remote.downloadExtensionsLocally` is `true`: extensions are downloaded on Windows, so the sandbox needs no host for VS Code.
-- `claude` in the terminal is an alias of `claude-start`: it opens Claude in `~/workspace/szop`, in auto mode. `claude -c` continues the last session.
+- In VS Code's user settings on Windows, `remote.downloadExtensionsLocally` is `true`: extensions are downloaded on Windows, so the sandbox needs no host for VS Code.
 - Push every branch before anything that could break the sandbox, an update of `sbx` among them.
 
 ### Ports
