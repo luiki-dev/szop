@@ -295,7 +295,7 @@ A tool tried by hand in a sandbox is lost with it. To keep one:
 
 | `sbx` | Date | What proved it |
 |---|---|---|
-| _to be recorded by PH-49's rebuild_ | | |
+| 0.51.0 | 2026-11-14 | PH-49's rebuild from this runbook: steps 2 to 5 in 7 minutes, and every check in [The checks](#6-the-checks) passed |
 
 ## Going back to WSL
 
