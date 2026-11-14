@@ -170,6 +170,7 @@ In VS Code's terminal in the sandbox:
 | `gh auth status` | Logged in as `luiki-dev-claude` |
 | `aws sts get-caller-identity --profile claude-readonly` | An `AWSReservedSSO_ClaudeReadOnly_…` role |
 | End Claude's session (`/exit`) | A `backup(sandbox)` commit in `luiki-dev/claude-config` |
+| On Windows: `sbx stop szop`, then VS Code connects to `szop.sbx` again; if it cannot, `sbx exec szop true` first | The sandbox starts without the environment files, and `claude` in VS Code's terminal starts as above |
 
 If one fails: fix it on a branch, merge, and rebuild from [step 1](#1-before).
 
