@@ -1,6 +1,6 @@
 # Docker Sandboxes
 
-Docker Sandboxes (`sbx`) runs an AI agent, here Claude Code, in a small virtual machine of its own, with a proxy between it and the network: the agent sees neither the Windows disk nor the owner's credentials, only placeholders the proxy swaps for the real values on the hosts allowed. [PH-48](../../roadmap.md#ph-48-docker-sandbox-proof-of-concept) proved Szop can be worked on that way ([ADR 0075](../../decisions/0075-docker-sandbox-poc-phase-details.md)); [PH-49](../../roadmap.md#ph-49-reproducible-docker-sandbox-setup) builds the sandbox from files in `sandbox/`, so it can be rebuilt in minutes ([ADR 0076](../../decisions/0076-docker-sandbox-setup-phase-details.md)).
+Docker Sandboxes (`sbx`) runs an AI agent, here Claude Code, in a small virtual machine of its own, with a proxy between it and the network: the agent sees neither the Windows disk nor the owner's credentials, only placeholders the proxy swaps for the real values on the hosts allowed. [PH-48](../../roadmap.md#ph-48-docker-sandbox-proof-of-concept) proved Szop can be worked on that way ([ADR 0075](../../decisions/0075-docker-sandbox-poc-phase-details.md)); [PH-49](../../roadmap.md#ph-49-reproducible-docker-sandbox-setup) builds the sandbox from files in `sandbox/`, so it can be rebuilt in minutes ([ADR 0076](../../decisions/0076-docker-sandbox-setup-phase-details.md)). The steps to rebuild, use, update and give it up are in the [runbook](../../operations/docker-sandbox.md).
 
 ## Contents
 

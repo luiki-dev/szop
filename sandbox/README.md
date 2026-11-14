@@ -6,4 +6,4 @@ The Docker Sandbox Claude Code works on Szop in, described in files so it can be
 - `szop/`: Szop's layer, laid over the base one: the tools of `pnpm check:*`, the repository's setup and `check-szop`, and its environment file. `compose.sandbox.yaml`, at the repository's root, publishes the production-like environment for `sbx ports`.
 - `host/settings.sh`: the host's `sbx` settings and network policy, run by the owner from WSL.
 
-What each file does and why: [Docker Sandboxes](../docs/development/tools/docker-sandboxes.md). How to rebuild, update and go back to WSL: the runbook, `docs/operations/docker-sandbox.md`.
+What each file does and why: [Docker Sandboxes](../docs/development/tools/docker-sandboxes.md). How to rebuild, update and go back to WSL: the [runbook](../docs/operations/docker-sandbox.md).

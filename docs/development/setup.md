@@ -504,7 +504,7 @@ Then add two hooks to `~/.claude/settings.json`, next to any already there:
 }
 ```
 
-Szop's `.claude/settings.json` points the memory into the clone (`autoMemoryDirectory`), so nothing else is needed. Run `~/.claude/hooks/claude-backup.sh end` once by hand: the first run copies every transcript, the next ones only the changed. The hook scripts are copied again by hand when they change in `sandbox/base/files/`, never taken from the configuration repository. What the hook copies, and how to resolve a conflict: [Docker Sandboxes, the backup hook](tools/docker-sandboxes.md#the-backup-hook).
+Szop's `.claude/settings.json` points the memory into the clone (`autoMemoryDirectory`), so nothing else is needed. Run `~/.claude/hooks/claude-backup.sh end` once by hand: the first run copies every transcript, the next ones only the changed. The hook scripts are copied again by hand when they change in `sandbox/base/files/`, never taken from the configuration repository. What the hook copies, and how to resolve a conflict: [Docker Sandboxes, the backup hook](tools/docker-sandboxes.md#the-backup-hook). Building the sandbox Claude works in, and going back to WSL from it: the [Docker Sandbox runbook](../operations/docker-sandbox.md).
 
 ## 15. Coming later
 
