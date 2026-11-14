@@ -16,8 +16,11 @@ check() {
   fi
 }
 
-# The proxy answers a blocked request with 403, so --fail turns it into an error.
-unreachable() { ! curl --fail --silent --max-time 5 --output /dev/null "$1"; }
+# Blocked only when the proxy itself answers 403: a refused connection would also
+# fail a plain curl, and would hide an address the policy let through.
+unreachable() {
+  [[ "$(curl --silent --max-time 5 --output /dev/null --write-out '%{http_code}' "$1")" == 403 ]]
+}
 
 # The default route's gateway, from the kernel's table (little-endian hex).
 gateway() {
