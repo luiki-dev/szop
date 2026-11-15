@@ -9,7 +9,7 @@ kind: mixin
 displayName: Claude Code base
 description: The generic setup for working with Claude Code in a Docker Sandbox
 sourceUrl: https://github.com/luiki-dev/szop/tree/main/sandbox/base
-version: "0.6.0"
+version: "0.7.0"
 
 args:
   gitName:
@@ -24,6 +24,10 @@ args:
     required: true
     pattern: "^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$"
     description: The private configuration repository on GitHub, owner/name
+  timeZone:
+    required: true
+    pattern: "^[A-Za-z0-9_+-]+(/[A-Za-z0-9_+-]+)*$"
+    description: The sandbox's time zone, an IANA name such as Europe/Warsaw
 
 capabilities:
   - type: com.docker.sandbox/network-policy@1
@@ -64,8 +68,13 @@ capabilities:
             # The hardened workload ships no /etc/ld.so.cache, and VS Code's
             # server finds libstdc++ through `ldconfig -p`, so it refused to start.
             ldconfig
+            # The time zone: sbx passes none from the host. glibc and Node
+            # both read /etc/localtime, so no TZ is needed.
+            test -f "/usr/share/zoneinfo/${{ kit.args.timeZone }}"
+            ln -sf "/usr/share/zoneinfo/${{ kit.args.timeZone }}" /etc/localtime
+            echo '${{ kit.args.timeZone }}' > /etc/timezone
           user: "0"
-          description: Write the base layer's settings and the shell's aliases, make bash the login shell, and build the loader's cache
+          description: Write the base layer's settings and the shell's aliases, make bash the login shell, build the loader's cache and set the time zone
       files:
         - path: /home/agent/.vscode-server/data/Machine/settings.json
           content: '{ "telemetry.telemetryLevel": "off" }'

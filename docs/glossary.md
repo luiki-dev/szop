@@ -51,6 +51,7 @@ Acronyms and terms used across Szop's documentation. Common ones (API, UI, HTTP,
 | **HSTS** | HTTP Strict Transport Security | An HTTP header telling the browser to use only HTTPS for a domain from then on, so the first plain-HTTP request cannot be intercepted. |
 | **HTTPS** | HTTP Secure | HTTP encrypted with TLS. |
 | **i18n** | Internationalization (18 letters between the i and the n) | Making an app's texts translatable and showing them in the user's language. Planned for Szop in [PH-45](roadmap.md#ph-45-internationalization), with English and Polish ([LNG-1](requirements/LNG-language.md#lng-1)). |
+| **IANA** | Internet Assigned Numbers Authority | The body that keeps the internet's shared registries, among them the time zone database, whose names (`Europe/Warsaw`) the sandbox's `timeZone` arg takes. |
 | **IaC** | Infrastructure as Code | Describing servers, networks and databases in files kept in git, and letting a tool create them, instead of clicking in a console. Szop uses Terraform. |
 | **IAM** | Identity and Access Management | AWS's system of users, roles and permissions deciding who may do what. |
 | **ICANN** | Internet Corporation for Assigned Names and Numbers | The body that runs the domain name system's registries and accredits registrars. |
