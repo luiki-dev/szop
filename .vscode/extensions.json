@@ -5,6 +5,11 @@
     "vitest.explorer",
     "ms-playwright.playwright",
     "ms-azuretools.vscode-containers",
-    "bradlc.vscode-tailwindcss"
+    "bradlc.vscode-tailwindcss",
+    "bierner.markdown-checkbox",
+    "redhat.vscode-yaml",
+    "ms-ossdata.vscode-pgsql",
+    "ms-azuretools.vscode-docker",
+    "hashicorp.terraform"
   ]
 }
