@@ -62,6 +62,12 @@ capabilities:
               echo 'alias claude=claude-start' >> /etc/bash.bashrc
             grep -q '^alias ll=' /etc/bash.bashrc ||
               echo 'alias ll="ls -la"' >> /etc/bash.bashrc
+            grep -q '^alias gitll=' /etc/bash.bashrc ||
+              echo 'alias gitll="git log --oneline --decorate --graph --all"' >> /etc/bash.bashrc
+            grep -q '^alias gits=' /etc/bash.bashrc ||
+              echo 'alias gits="git status"' >> /etc/bash.bashrc
+            grep -q '^alias gitb=' /etc/bash.bashrc ||
+              echo 'alias gitb="git branch"' >> /etc/bash.bashrc
             # bash as agent's login shell, so an SSH session (VS Code's terminal
             # among them) reads /etc/bash.bashrc and its aliases, not sh.
             sed -i -E 's#^(agent:([^:]*:){5})[^:]*$#\1/bin/bash#' /etc/passwd
