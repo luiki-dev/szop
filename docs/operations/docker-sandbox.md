@@ -20,7 +20,9 @@ How to build, use, update and give up the Docker Sandbox that Claude Code works 
   - [VS Code and Claude](#vs-code-and-claude)
   - [Ports](#ports)
   - [Network approvals](#network-approvals)
-- [Adding a tool](#adding-a-tool)
+- [Changing the sandbox's definition](#changing-the-sandboxs-definition)
+  - [What goes where](#what-goes-where)
+  - [The procedure](#the-procedure)
 - [Updating sbx](#updating-sbx)
   - [Last version proven](#last-version-proven)
 - [Going back to WSL](#going-back-to-wsl)
@@ -172,7 +174,7 @@ In VS Code's terminal in the sandbox:
 | End Claude's session (`/exit`) | A `backup(sandbox)` commit in `luiki-dev/claude-config` |
 | On Windows: `sbx stop szop`, then VS Code connects to `szop.sbx` again; if it cannot, `sbx exec szop true` first | The sandbox starts without the environment files, and `claude` in VS Code's terminal starts as above |
 
-If one fails: fix it on a branch, merge, and rebuild from [step 1](#1-before).
+If one fails: fix it on a branch as in [Changing the sandbox's definition](#changing-the-sandboxs-definition), merge, and rebuild from [step 1](#1-before).
 
 ## Working in the sandbox
 
@@ -249,13 +251,91 @@ A host outside the policy is refused and waits in the approval queue. WSL `sbx.e
 - **⚠️ Don't** approve `localhost`, `host.docker.internal`, a private (`10.*`, `172.16–31.*`, `192.168.*`), link-local or metadata address (`169.254.169.254`, `metadata.google.internal`): the network policy is what keeps the host and the LAN out of the sandbox.
 - A host a layer needs for good goes in that layer's descriptor (`network-policy@1` in `sandbox/<layer>/<layer>.yaml`) through a PR, not an approval.
 
-## Adding a tool
+## Changing the sandbox's definition
 
-A tool tried by hand in a sandbox is lost with it. To keep one:
+A change made by hand in a sandbox is lost with it. To keep one, change the files in `sandbox/` on a branch and prove it on a separate test sandbox, `szop-try`, built from that branch. The everyday sandbox `szop` stays as it is until the merge.
 
-1. On a branch, add it to the right layer: `sandbox/base/` if any project needs it, `sandbox/szop/` if only Szop does. A tool is a self-contained release downloaded in the Dockerfile's build stage, its version pinned and its checksum checked, as the others there; a setup step that needs the token, the network or Docker goes in the layer's setup script (`sandbox/szop/files/szop-setup.sh`). The tool page's [base layer](../development/tools/docker-sandboxes.md#the-base-layer) section has the rules.
-2. Its download hosts, if not in `balanced`, go in the layer's descriptor.
-3. The PR's `kits` job builds the layers; after the merge, `git pull` on the host and [rebuild](#the-lost-sandbox-the-rebuild).
+### What goes where
+
+Put each change in the right layer: `sandbox/base/` if any project needs it, `sandbox/szop/` if only Szop does. The tool page's [base layer](../development/tools/docker-sandboxes.md#the-base-layer) section has the rules.
+
+| Change | Where |
+|---|---|
+| A new tool | The layer's Dockerfile, in the build stage: a self-contained release, its version pinned and its checksum checked, as the others there. Its download hosts, if not in `balanced`, go in the layer's descriptor |
+| A port published for good | `ports` in the layer's environment file (`sandbox/<layer>/<layer>.sbxenv.yaml`). For a while only, `sbx ports` ([Ports](#ports)) needs no change |
+| A network host the layer needs | `network-policy@1` in the layer's descriptor (`sandbox/<layer>/<layer>.yaml`) |
+| A setting the kit already sets | Claude's settings and hooks of the base layer: `sandbox/base/files/settings-fragment.json`; a system file (`/etc/bash.bashrc`, apt's sources): the descriptor's install hook; git's configuration and the plugins: `claude-setup.sh` |
+| A new step or script | A file in `sandbox/<layer>/files/`, copied in by the layer's Dockerfile; a step that needs the token, the network or Docker in the layer's setup script (`claude-setup.sh`, `szop-setup.sh`) |
+| A new check | `check-sandbox.sh` if it holds for any project, `check-szop.sh` if only for Szop, and a row in [The checks](#6-the-checks) if it is checked by hand |
+
+Raise the layer's `version` in its descriptor with every change. The owner's own settings, `CLAUDE.md`, status line and themes are not in the kit: they live in `luiki-dev/claude-config`'s `user/`, change in the sandbox and travel with the backup, with no rebuild.
+
+### The procedure
+
+1. **The branch.** Make the change on a branch, push it, and open the PR. Its `kits` job builds the layers. Trying it by hand in `szop` first is fine; it is lost at the next rebuild.
+2. **Free the host for the test sandbox.** Both sandboxes publish the same ports on Windows' `localhost` (61935, 5173, 8443, 8082), and each takes 8 CPUs and `8g` of memory. In `szop`: push every branch, end Claude's session (`/exit`) so its backup is pushed, then stop it:
+
+   WSL:
+
+   ```bash
+   sbx.exe stop szop
+   ```
+
+   PowerShell:
+
+   ```powershell
+   sbx stop szop
+   ```
+
+   Check the disk too: a sandbox takes up to about 31 GB ([A second sandbox and the disk](#a-second-sandbox-and-the-disk)).
+3. **The branch's files on the host.** The host's checkout stays on `main`; the branch goes in a second folder beside it, a git worktree that commits nothing:
+
+   ```bash
+   cd ~/workspace/szop && git fetch
+   git worktree add --detach ~/workspace/szop-try origin/<branch>
+   ```
+
+   After a fix on the branch: `cd ~/workspace/szop-try && git fetch && git checkout --detach origin/<branch>`.
+4. **Create the test sandbox** from that folder, as in [step 3 of the rebuild](#3-create-the-sandbox) but named `szop-try`:
+
+   WSL:
+
+   ```bash
+   cd ~/workspace/szop-try
+   sbx.exe env create --name szop-try "$(wslpath -w sandbox/base/base.sbxenv.yaml)" "$(wslpath -w sandbox/szop/szop.sbxenv.yaml)"
+   ```
+
+   PowerShell:
+
+   ```powershell
+   Set-Location \\wsl.localhost\Ubuntu\home\<user>\workspace\szop-try
+   sbx env create --name szop-try sandbox\base\base.sbxenv.yaml sandbox\szop\szop.sbxenv.yaml
+   ```
+
+   Read the plan it shows: the host commands must be the ones the branch's diff adds, and no others.
+5. **The token and the setup**, as in [step 4 of the rebuild](#4-the-logins-and-the-setup), with `szop-try` in place of `szop`: `sbx secret set github --sandbox szop-try`, then `sbx exec -it szop-try bash` and `claude-setup` in it. `claude-setup` clones Szop's `main`; when the change touches files in Szop's repository too (such as `compose.sandbox.yaml`), `git switch <branch>` in `~/workspace/szop` inside the sandbox. The AWS and context7 logins only if a check below needs them.
+6. **The checks**, from [The checks](#6-the-checks): always `check-sandbox` and `check-szop`, then the rows the change touches; after a change to the lifecycle hooks, the settings or `claude-setup`, all of them. A row that needs VS Code needs `sbx setup ssh` first, the `Include` line checked as in [step 5 of the rebuild](#5-vs-code), and the host `szop-try.sbx`. The test sandbox's sessions are backed up and counted like `szop`'s: a short Claude session for the checks is fine, real work is not.
+7. **If one fails:** fix it on the branch and push. Then remove the test sandbox (step 8's first command) and go back to step 3, so the proof is a sandbox built from the branch, not one patched by hand.
+8. **When all pass:** remove the test sandbox and the worktree:
+
+   WSL:
+
+   ```bash
+   sbx.exe rm szop-try
+   cd ~/workspace/szop && git worktree remove ~/workspace/szop-try
+   ```
+
+   PowerShell:
+
+   ```powershell
+   sbx rm szop-try
+   wsl.exe bash -c "cd ~/workspace/szop && git worktree remove ~/workspace/szop-try"
+   ```
+
+   `szop` starts again when VS Code connects to `szop.sbx` ([Starting and stopping](#starting-and-stopping)).
+9. **After the merge:** `git pull` on the host's checkout, then bring `szop` to the new definition in one of two ways:
+   - **[Rebuild](#the-lost-sandbox-the-rebuild)**, the default.
+   - **By hand, when the change is small** (a port: `sbx ports szop --publish`; a file or a line of a script: the same edit in the sandbox, with `sudo` where it is the system's). The test sandbox has proved the definition, and the next rebuild takes it anyway. A change to the workload's version, the network policy or the lifecycle hooks always means a rebuild.
 
 ## Updating sbx
 
