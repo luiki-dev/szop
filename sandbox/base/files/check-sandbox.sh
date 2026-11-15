@@ -52,6 +52,13 @@ check "bash is the login shell (SSH reads /etc/bash.bashrc)" \
   test "$(awk -F: -v u="$(id -un)" '$1 == u { print $7 }' /etc/passwd)" = /bin/bash
 # shellcheck disable=SC2016 # expanded by the inner bash
 check "git's pager exists" bash -c 'command -v "$(git var GIT_PAGER)"'
+# shortcut: Node reports some names in a canonical form (Etc/UTC as UTC), so
+# such a zone fails here; compare canonical names if one is ever used. TZ is
+# unset, since sbx exec sets one (a fixed offset such as CET-1) that wins.
+# shellcheck disable=SC2016 # expanded by the inner bash
+check "the time zone is set, as glibc and Node see it" \
+  env -u TZ bash -c 'z="$(cat /etc/timezone)" && test /etc/localtime -ef "/usr/share/zoneinfo/$z" &&
+    test "$(node -p "Intl.DateTimeFormat().resolvedOptions().timeZone")" = "$z"'
 check "Claude Code's nonessential traffic off" test "${CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC:-}" = 1
 
 if ((${#failed[@]})); then

@@ -2,14 +2,15 @@
 # The base layer's overlay (ADR 0076, decision 4). A mixin lands on a workload
 # it has never seen, so every tool is staged under /out in a build stage and
 # copied into scratch. Node, the AWS CLI and jq are self-contained releases,
-# so they travel; nothing here is an apt package.
+# so they travel; nothing here is an apt package. The zone files are data
+# copied from tzdata, not the package, so they travel too.
 FROM debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2 AS build
 ARG TARGETARCH
 ARG NODE_VERSION=24.22.3
 ARG AWSCLI_VERSION=2.40.3
 ARG JQ_VERSION=1.8.2
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ca-certificates curl unzip xz-utils
+ && apt-get install -y --no-install-recommends ca-certificates curl unzip xz-utils tzdata
 WORKDIR /tmp/dl
 RUN set -eux; \
     case "$TARGETARCH" in \
@@ -43,6 +44,9 @@ RUN set -eux; \
     for s in claude-setup claude-start check-sandbox; do \
       ln -s "/usr/local/share/claude-base/$s.sh" "/out/usr/local/bin/$s"; \
     done; \
+    # The time zones: the workload has none, so the sandbox ran on UTC.
+    mkdir -p /out/usr/share; \
+    cp -a /usr/share/zoneinfo /out/usr/share/; \
     chown -R 0:0 /out
 
 FROM scratch

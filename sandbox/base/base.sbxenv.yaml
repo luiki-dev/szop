@@ -14,6 +14,8 @@ kits:
       gitName: luiki-dev-claude
       gitEmail: 355098596+luiki-dev-claude@users.noreply.github.com
       configRepo: luiki-dev/claude-config
+      # The owner's time zone; sbx does not follow the host's (change it and rebuild).
+      timeZone: Europe/Warsaw
 ports:
   # superpowers' visual companion (BRAINSTORM_PORT in base.dockerfile).
   - sandbox: 61935
