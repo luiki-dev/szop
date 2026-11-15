@@ -288,27 +288,26 @@ Raise the layer's `version` in its descriptor with every change. The owner's own
    ```
 
    Check the disk too: a sandbox takes up to about 31 GB ([A second sandbox and the disk](#a-second-sandbox-and-the-disk)).
-3. **The branch's files on the host.** The host's checkout stays on `main`; the branch goes in a second folder beside it, a git worktree that commits nothing:
+3. **The branch's files on the host.** Switch the host's checkout to the branch for the test; step 8 brings it back to `main`, which every rebuild and `sbx env run` read:
 
    ```bash
-   cd ~/workspace/szop && git fetch
-   git worktree add --detach ~/workspace/szop-try origin/<branch>
+   cd ~/workspace/szop && git fetch && git switch <branch>
    ```
 
-   After a fix on the branch: `cd ~/workspace/szop-try && git fetch && git checkout --detach origin/<branch>`.
-4. **Create the test sandbox** from that folder, as in [step 3 of the rebuild](#3-create-the-sandbox) but named `szop-try`:
+   After a fix on the branch: `git pull`. When the checkout is busy (a Claude session on WSL works in it), take a second folder instead, a git worktree, and use `~/workspace/szop-try` in place of `~/workspace/szop` up to step 8: `git worktree add --detach ~/workspace/szop-try origin/<branch>`; after a fix, `git fetch && git checkout --detach origin/<branch>` in it; at the end, `git worktree remove ~/workspace/szop-try` from `~/workspace/szop`.
+4. **Create the test sandbox** from the checkout, as in [step 3 of the rebuild](#3-create-the-sandbox) but named `szop-try`:
 
    WSL:
 
    ```bash
-   cd ~/workspace/szop-try
+   cd ~/workspace/szop
    sbx.exe env create --name szop-try "$(wslpath -w sandbox/base/base.sbxenv.yaml)" "$(wslpath -w sandbox/szop/szop.sbxenv.yaml)"
    ```
 
    PowerShell:
 
    ```powershell
-   Set-Location \\wsl.localhost\Ubuntu\home\<user>\workspace\szop-try
+   Set-Location \\wsl.localhost\Ubuntu\home\<user>\workspace\szop
    sbx env create --name szop-try sandbox\base\base.sbxenv.yaml sandbox\szop\szop.sbxenv.yaml
    ```
 
@@ -316,20 +315,20 @@ Raise the layer's `version` in its descriptor with every change. The owner's own
 5. **The token and the setup**, as in [step 4 of the rebuild](#4-the-logins-and-the-setup), with `szop-try` in place of `szop`: `sbx secret set github --sandbox szop-try`, then `sbx exec -it szop-try bash` and `claude-setup` in it. `claude-setup` clones Szop's `main`; when the change touches files in Szop's repository too (such as `compose.sandbox.yaml`), `git switch <branch>` in `~/workspace/szop` inside the sandbox. The AWS and context7 logins only if a check below needs them.
 6. **The checks**, from [The checks](#6-the-checks): always `check-sandbox` and `check-szop`, then the rows the change touches; after a change to the lifecycle hooks, the settings or `claude-setup`, all of them. A row that needs VS Code needs `sbx setup ssh` first, the `Include` line checked as in [step 5 of the rebuild](#5-vs-code), and the host `szop-try.sbx`. The test sandbox's sessions are backed up and counted like `szop`'s: a short Claude session for the checks is fine, real work is not.
 7. **If one fails:** fix it on the branch and push. Then remove the test sandbox (step 8's first command) and go back to step 3, so the proof is a sandbox built from the branch, not one patched by hand.
-8. **When all pass:** remove the test sandbox and the worktree:
+8. **When all pass:** remove the test sandbox and bring the host's checkout back to `main`:
 
    WSL:
 
    ```bash
    sbx.exe rm szop-try
-   cd ~/workspace/szop && git worktree remove ~/workspace/szop-try
+   cd ~/workspace/szop && git switch main
    ```
 
    PowerShell:
 
    ```powershell
    sbx rm szop-try
-   wsl.exe bash -c "cd ~/workspace/szop && git worktree remove ~/workspace/szop-try"
+   wsl.exe bash -c "cd ~/workspace/szop && git switch main"
    ```
 
    `szop` starts again when VS Code connects to `szop.sbx` ([Starting and stopping](#starting-and-stopping)).
