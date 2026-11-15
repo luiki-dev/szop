@@ -14,6 +14,7 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
 - [Pages](#pages)
 - [Variables](#variables)
 - [Ruleset for `main`](#ruleset-for-main)
+- [Ruleset for merging into `main`](#ruleset-for-merging-into-main)
 - [Ruleset for version tags](#ruleset-for-version-tags)
 - [The release App](#the-release-app)
 - [The machine account](#the-machine-account)
@@ -44,7 +45,8 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
    3. The variable `AWS_RELEASE_ROLE_ARN` (see [Variables](#variables)), after `infra/base` is applied from the PR's branch.
 8. The Pages settings, around the [PH-34](../roadmap.md#ph-34-landing-page-and-demo-status) PR ([ADR 0044](../decisions/0044-landing-page-details.md)): the domain verified for the account, `infra/base` applied with the records, then the [Pages settings](#pages) and the `github-pages` environment's branch rule, so the certificate is issued while the rest of the phase is built.
 9. The [machine account](#the-machine-account)'s access and the required approval on `main`, in [PH-49](../roadmap.md#ph-49-reproducible-docker-sandbox-setup), before Claude first works in the sandbox ([ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md)).
-10. Check the result (see [Checking the settings](#checking-the-settings)).
+10. The [ruleset for merging into `main`](#ruleset-for-merging-into-main), with [ADR 0077](../decisions/0077-only-the-owner-merges-into-main.md), while its PR is open, then tested on the machine account's next PR (decision 5).
+11. Check the result (see [Checking the settings](#checking-the-settings)).
 
 ## Visibility
 
@@ -139,7 +141,7 @@ They are variables, not secrets: an ARN is a name, not a credential, and what pr
 | **Restrict deletions** | On (default) | `main` can never be deleted. |
 | **Block force pushes** | On (default) | `main`'s history can never be rewritten. |
 | **Require a pull request before merging** | On | Every change reaches `main` through a PR. ADR 0009, decision 2. |
-| ↳ Required approvals | **1** | Since [PH-49](../roadmap.md#ph-49-reproducible-docker-sandbox-setup), Claude opens PRs as the [machine account](#the-machine-account), which has Write and could otherwise merge its own PR; the owner's approval stops it. GitHub does not let an author approve their own PR, so a PR the owner's account opens (a session on WSL) is approved by the owner signed in as the machine account, and the release and Dependabot PRs take the owner's approval before the merge. It was **0** while every PR was the owner's, and the owner's merge was the approval. ADR 0009, decision 7; [ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md), decision 7 and "Settled while building". |
+| ↳ Required approvals | **1** | Since [PH-49](../roadmap.md#ph-49-reproducible-docker-sandbox-setup), Claude opens PRs as the [machine account](#the-machine-account), which has Write and could otherwise merge its own PR; the owner's approval stops it, and since [ADR 0077](../decisions/0077-only-the-owner-merges-into-main.md) the [ruleset for merging into `main`](#ruleset-for-merging-into-main) keeps it from merging any PR. GitHub does not let an author approve their own PR, so a PR the owner's account opens (a session on WSL) is approved by the owner signed in as the machine account, and the release and Dependabot PRs take the owner's approval before the merge. It was **0** while every PR was the owner's, and the owner's merge was the approval. ADR 0009, decision 7; [ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md), decision 7 and "Settled while building". |
 | ↳ Dismiss stale pull request approvals when new commits are pushed | On | A commit the machine account pushes after the owner's approval takes the approval away, so the merged code is the approved code. ADR 0076, "Settled while building". |
 | ↳ Require conversation resolution before merging | On | No review comment can be skipped by accident. ADR 0009, decision 13. |
 | ↳ Allowed merge methods | **Merge** only | Matches the repository setting above. ADR 0009, decision 6. |
@@ -150,6 +152,21 @@ They are variables, not secrets: an ARN is a name, not a credential, and what pr
 | **Require code scanning results** | Tool **CodeQL**, security alerts **High or higher**, alerts **Errors** (the default) | A PR that adds a high or critical alert cannot be merged. Added last, after CodeQL has succeeded on `main` (see [Order of applying](#order-of-applying)). ADR 0010, decision 21; ADR 0018, decision 9. |
 | **Require linear history** | Off | It forbids merge commits. ADR 0009, decision 18. |
 | **Require signed commits** | Off | One person pushes from one machine. ADR 0009, decision 18. |
+
+Leave every other rule off.
+
+## Ruleset for merging into `main`
+
+*Settings → Code and automation → Rules → Rulesets* → **New ruleset** → **New branch ruleset**. A ruleset of its own, so its bypass reaches only this rule and the [ruleset for `main`](#ruleset-for-main) still binds the owner ([ADR 0077](../decisions/0077-only-the-owner-merges-into-main.md), decision 1).
+
+| Field or rule | Value | Why |
+|---|---|---|
+| Ruleset name | `main-merge` | — |
+| Enforcement status | **Active** | — |
+| Bypass list | **Only the role Repository admin** (*Add bypass* → *Roles* → **Repository admin**), mode **For pull requests only** (the menu next to *Always allow*) | The admin role is the owner's account alone, so only the owner merges a PR; the [machine account](#the-machine-account), with Write, cannot, whoever approved the PR. For pull requests only: the bypass never allows a direct push. The owner uses it by ticking *Merge without waiting for requirements to be met (bypass rules)* at each merge. ADR 0077, decisions 1 and 2, and "Settled while building". |
+| Target branches | *Add target* → **Include default branch** | The same branch as the `main` ruleset. |
+| **Restrict updates** | On | Only the actors on the bypass list update `main`, and a PR's merge is an update. ADR 0077, decision 1. |
+| **Restrict deletions**, **Block force pushes** | **Off** (both on by default) | The `main` ruleset has them; keeping them out of this ruleset keeps its bypass away from them. |
 
 Leave every other rule off.
 
@@ -190,7 +207,7 @@ Then add the App to the [version tags ruleset](#ruleset-for-version-tags)'s bypa
 
 | Setting | Where | Value | Why |
 |---|---|---|---|
-| Collaborator on `luiki-dev/szop` | *Settings → Access → Collaborators* → **Add people**; the account accepts the invitation | **Write** (a personal repository has no other role) | Pushes branches and opens PRs. It cannot merge one: the [ruleset for `main`](#ruleset-for-main) requires an approval it cannot give itself. It cannot change a ruleset or an environment, or approve a waiting deployment (tried in PH-48). |
+| Collaborator on `luiki-dev/szop` | *Settings → Access → Collaborators* → **Add people**; the account accepts the invitation | **Write** (a personal repository has no other role) | Pushes branches and opens PRs. It cannot merge any: the [ruleset for merging into `main`](#ruleset-for-merging-into-main) lets only the admin role update `main`, and the [ruleset for `main`](#ruleset-for-main) requires an approval it cannot give its own PR. Before [ADR 0077](../decisions/0077-only-the-owner-merges-into-main.md), it could approve and merge a PR someone else opened (the owner's account, Dependabot, release-please). It cannot change a ruleset or an environment, or approve a waiting deployment (tried in PH-48). |
 | Collaborator on `luiki-dev/claude-config` | The same, on that repository | **Write** | The backup hook in the sandbox pushes Claude's memory, the stripped transcripts, the usage log and `user/` there (ADR 0076, decisions 5 and 11). |
 | Collaborator on the [project](#project) | The project's **⋯ → Settings → Manage access** → **Invite collaborators** | **Write** | `/phase-tracking` edits the items' fields; the token's `project` scope alone does not give access to a user's project. |
 | Classic personal access token | The machine account's *Settings → Developer settings → Personal access tokens → Tokens (classic)* | Scopes `repo`, `workflow`, `project` and `read:org`, with an expiry; kept in the owner's password manager, and given to one sandbox with `sbx secret set github --sandbox <name>` | Fine-grained tokens do not cover a repository where the user is a collaborator or a user's project. `workflow` lets it push changes to `.github/workflows/`; `read:org` is needed by every `gh project` command (without it, `unknown owner type`). |
@@ -275,6 +292,10 @@ gh variable list --repo luiki-dev/szop
 gh variable list --repo luiki-dev/szop --env release
 gh secret list --repo luiki-dev/szop --env release
 
+# The bypass list of the main-merge ruleset: only the admin role
+gh api repos/luiki-dev/szop/rulesets --jq '.[] | select(.name=="main-merge") | .id' \
+  | xargs -I{} gh api repos/luiki-dev/szop/rulesets/{} --jq '{bypass_actors, rules}'
+
 # The bypass list of the version tags ruleset: it must name the release App
 gh api repos/luiki-dev/szop/rulesets --jq '.[] | select(.name=="version-tags") | .id' \
   | xargs -I{} gh api repos/luiki-dev/szop/rulesets/{} --jq '.bypass_actors'
@@ -291,7 +312,8 @@ gh project view 3 --owner luiki-dev
 
 Expected:
 
-- `visibility` is `PUBLIC`, only `mergeCommitAllowed` and `deleteBranchOnMerge` are `true`, and two active rulesets exist.
+- `visibility` is `PUBLIC`, only `mergeCommitAllowed` and `deleteBranchOnMerge` are `true`, and three active rulesets exist.
+- The `main-merge` ruleset's `bypass_actors` holds one entry, `actor_type` `RepositoryRole`, `actor_id` `5` (admin), `bypass_mode` `pull_request`, and its `rules` hold only `update`.
 - The `pull_request` rule for `main` has `required_approving_review_count` `1` and `dismiss_stale_reviews_on_push` `true`.
 - Both repositories list `luiki-dev` as `admin` and `luiki-dev-claude` as `write`, and no one else.
 - The rules for `main` include `required_status_checks` (with `ci-ok` and `pr-title`, and `strict_required_status_checks_policy: true`) and `code_scanning`.
