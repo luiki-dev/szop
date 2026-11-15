@@ -52,6 +52,8 @@ check "bash is the login shell (SSH reads /etc/bash.bashrc)" \
   test "$(awk -F: -v u="$(id -un)" '$1 == u { print $7 }' /etc/passwd)" = /bin/bash
 # shellcheck disable=SC2016 # expanded by the inner bash
 check "git's pager exists" bash -c 'command -v "$(git var GIT_PAGER)"'
+# shortcut: Node reports some names in a canonical form (Etc/UTC as UTC), so
+# such a zone fails here; compare canonical names if one is ever used.
 # shellcheck disable=SC2016 # expanded by the inner bash
 check "the time zone is set, as glibc and Node see it" \
   bash -c 'z="$(cat /etc/timezone)" && test /etc/localtime -ef "/usr/share/zoneinfo/$z" &&
