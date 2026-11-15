@@ -18,6 +18,10 @@ Visual Studio Code (VS Code) is the editor Szop is developed in. The repository 
 - `ms-playwright.playwright`: Playwright Test, which lists the end-to-end tests in the Testing view and runs one from the arrow beside it; ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 21); see [Playwright](playwright.md#editor).
 - `ms-azuretools.vscode-containers`: Container Tools, for working with Docker containers and images from the editor (Docker arrives with the database in PH-04 and the container image in PH-08).
 - `bradlc.vscode-tailwindcss`: Tailwind CSS IntelliSense, which completes class names as you type them in `className`, shows the CSS behind a class on hover, and flags a class that does not exist. It reads `apps/web/src/index.css`, so it knows Szop's own colors and roles ([ADR 0013](../../decisions/0013-visual-design.md), decision 19); see [Tailwind CSS](tailwind-css.md).
+- `bierner.markdown-checkbox`: Markdown Checkbox, which shows `- [ ]` and `- [x]` as checkboxes in the Markdown preview, as in the plans' steps and the PR template.
+- `redhat.vscode-yaml`: YAML, which validates and completes YAML files against their schemas, such as the GitHub Actions workflows in `.github/workflows/` and `compose.yaml`.
+- `ms-ossdata.vscode-pgsql`: PostgreSQL, for connecting to the local database, browsing its tables and running queries from the editor.
+- `hashicorp.terraform`: HashiCorp Terraform, which highlights, completes and validates the configurations in `infra/`; see [Terraform](terraform.md).
 
 The WSL extension is installed on the Windows side and is not in the list: it is needed before the repository can be opened at all.
 
