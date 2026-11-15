@@ -28,3 +28,10 @@ GitHub's documentation says "Restrict updates" lets only actors with bypass perm
 - The [threat model](../architecture/threat-model.md) lists the new ruleset among the guards on the machine account.
 - An admin bypass on a ruleset is new to Szop's rulesets: until now, only the release App bypassed one (the version tags'). The owner is kept off that one because Claude on WSL pushes with the owner's credentials; here the owner's bypass gives no more than the owner already had, since the other ruleset still binds the merge.
 - If the test fails at (c), Restrict updates does not cover a PR's merge, and this ADR is revisited before its PR is merged. If it fails at (a), the bypass reaches across rulesets, and the bypass mode or the approach is revisited.
+- Every merge takes one more click: the owner ticks *Merge without waiting for requirements to be met (bypass rules)* (see "Settled while building").
+
+## Settled while building
+
+- **The test of decision 5, on [#442](https://github.com/luiki-dev/szop/pull/442).** (c) ✅ With the owner's approval and every check green, the machine account's `gh pr merge 442 --merge` was refused: `the base branch policy prohibits the merge`. (d) ✅ The owner merged it. (a) was not run on #442, since the PR was already approved; it runs on this ADR's PR before the owner approves it.
+- **The owner's bypass is not automatic.** With the PR approved and green, GitHub showed the owner too *Merging is blocked: Cannot update this protected ref*, and a box *Merge without waiting for requirements to be met (bypass rules)*; the owner ticks it at every merge. Step (a) shows whether the box reaches only the `main-merge` ruleset, as decision 1 expects: before the approval, with the box ticked, the merge button must stay disabled.
+

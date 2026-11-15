@@ -163,7 +163,7 @@ Leave every other rule off.
 |---|---|---|
 | Ruleset name | `main-merge` | — |
 | Enforcement status | **Active** | — |
-| Bypass list | **Only the role Repository admin** (*Add bypass* → *Roles* → **Repository admin**), mode **For pull requests only** (the menu next to *Always allow*) | The admin role is the owner's account alone, so only the owner merges a PR; the [machine account](#the-machine-account), with Write, cannot, whoever approved the PR. For pull requests only: the bypass never allows a direct push. ADR 0077, decisions 1 and 2. |
+| Bypass list | **Only the role Repository admin** (*Add bypass* → *Roles* → **Repository admin**), mode **For pull requests only** (the menu next to *Always allow*) | The admin role is the owner's account alone, so only the owner merges a PR; the [machine account](#the-machine-account), with Write, cannot, whoever approved the PR. For pull requests only: the bypass never allows a direct push. The owner uses it by ticking *Merge without waiting for requirements to be met (bypass rules)* at each merge. ADR 0077, decisions 1 and 2, and "Settled while building". |
 | Target branches | *Add target* → **Include default branch** | The same branch as the `main` ruleset. |
 | **Restrict updates** | On | Only the actors on the bypass list update `main`, and a PR's merge is an update. ADR 0077, decision 1. |
 | **Restrict deletions**, **Block force pushes** | **Off** (both on by default) | The `main` ruleset has them; keeping them out of this ruleset keeps its bypass away from them. |
