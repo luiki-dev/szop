@@ -137,7 +137,7 @@ GitHub requires the branch to be up to date before merging (the `main` ruleset, 
 
 ## 6. Merge
 
-**Only the owner merges; the merge is the approval.** GitHub does not let an author approve their own PR, and every PR is authored by the owner's account, so there is no formal approving review.
+**Only the owner merges, after approving the PR.** Since [PH-49](../roadmap.md#ph-49-reproducible-docker-sandbox-setup), the `main` ruleset requires one approval, since Claude in the sandbox opens PRs as the [machine account](github-settings.md#the-machine-account), which has Write. The owner approves the machine account's, release-please's and Dependabot's PRs and then merges. GitHub does not let an author approve their own PR, so a PR opened from the owner's account (a session on WSL) is approved by the owner signed in as the machine account. A new commit after the approval dismisses it.
 
 A PR is merged when the [definition of done](definition-of-done.md) is met on the branch. For a phase, that includes the checks `/demo-check` proposes from the diff ([definition of done](definition-of-done.md#the-checks)), covering the PR's final head; a demo on AWS (`demo-up`, [ADR 0010](../decisions/0010-ci-cd.md)) only when the diff changes what only AWS can show ([ADR 0064](../decisions/0064-leaner-demo-check-phase-details.md), decision 1).
 

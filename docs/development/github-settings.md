@@ -16,6 +16,7 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
 - [Ruleset for `main`](#ruleset-for-main)
 - [Ruleset for version tags](#ruleset-for-version-tags)
 - [The release App](#the-release-app)
+- [The machine account](#the-machine-account)
 - [Security](#security)
 - [Features](#features)
 - [Labels](#labels)
@@ -42,7 +43,8 @@ All paths start on the repository page (`github.com/luiki-dev/szop`) with the **
    2. The [release App](#the-release-app): created, installed, its client ID and private key stored in `release`, and put on the [version tags ruleset](#ruleset-for-version-tags)'s bypass list.
    3. The variable `AWS_RELEASE_ROLE_ARN` (see [Variables](#variables)), after `infra/base` is applied from the PR's branch.
 8. The Pages settings, around the [PH-34](../roadmap.md#ph-34-landing-page-and-demo-status) PR ([ADR 0044](../decisions/0044-landing-page-details.md)): the domain verified for the account, `infra/base` applied with the records, then the [Pages settings](#pages) and the `github-pages` environment's branch rule, so the certificate is issued while the rest of the phase is built.
-9. Check the result (see [Checking the settings](#checking-the-settings)).
+9. The [machine account](#the-machine-account)'s access and the required approval on `main`, in [PH-49](../roadmap.md#ph-49-reproducible-docker-sandbox-setup), before Claude first works in the sandbox ([ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md)).
+10. Check the result (see [Checking the settings](#checking-the-settings)).
 
 ## Visibility
 
@@ -137,7 +139,8 @@ They are variables, not secrets: an ARN is a name, not a credential, and what pr
 | **Restrict deletions** | On (default) | `main` can never be deleted. |
 | **Block force pushes** | On (default) | `main`'s history can never be rewritten. |
 | **Require a pull request before merging** | On | Every change reaches `main` through a PR. ADR 0009, decision 2. |
-| ↳ Required approvals | **0** | GitHub does not let an author approve their own PR, and every PR is authored by the owner's account. The owner's merge is the approval. ADR 0009, decision 7. |
+| ↳ Required approvals | **1** | Since [PH-49](../roadmap.md#ph-49-reproducible-docker-sandbox-setup), Claude opens PRs as the [machine account](#the-machine-account), which has Write and could otherwise merge its own PR; the owner's approval stops it. GitHub does not let an author approve their own PR, so a PR the owner's account opens (a session on WSL) is approved by the owner signed in as the machine account, and the release and Dependabot PRs take the owner's approval before the merge. It was **0** while every PR was the owner's, and the owner's merge was the approval. ADR 0009, decision 7; [ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md), decision 7 and "Settled while building". |
+| ↳ Dismiss stale pull request approvals when new commits are pushed | On | A commit the machine account pushes after the owner's approval takes the approval away, so the merged code is the approved code. ADR 0076, "Settled while building". |
 | ↳ Require conversation resolution before merging | On | No review comment can be skipped by accident. ADR 0009, decision 13. |
 | ↳ Allowed merge methods | **Merge** only | Matches the repository setting above. ADR 0009, decision 6. |
 | ↳ Require an additional approval for unattributed Copilot pull requests | On (GitHub's default) | Applies only to PRs that Copilot opens under its own app identity, not on behalf of a person; those need one approval more than configured. Szop's PRs are opened by the owner's account, so it never applies, and if Copilot ever opened a PR by itself, the owner's approval would be asked for. The API calls it `require_extra_approval_for_unattributed_changes`. |
@@ -181,6 +184,19 @@ Leave every other rule off.
 
 Then add the App to the [version tags ruleset](#ruleset-for-version-tags)'s bypass list, and **check that it was saved** (the command is under [Checking the settings](#checking-the-settings)). The first release failed because the bypass list was empty, though the owner had added the App: the first run of `release-please.yml` on `main` was refused with `Cannot create ref due to creations being restricted` and tagged nothing ([ADR 0043](../decisions/0043-cloud-session-setup.md)). **Rotating the key:** generate a new one in the App's settings, replace the secret, then delete the old key there.
 
+## The machine account
+
+`luiki-dev-claude`, a second GitHub account that Claude Code uses in the Docker Sandbox in place of the owner's ([OP-143](https://github.com/luiki-dev/szop/issues/428), settled in [PH-48](../roadmap.md#ph-48-docker-sandbox-proof-of-concept) on a test repository; applied in [PH-49](../roadmap.md#ph-49-reproducible-docker-sandbox-setup), [ADR 0076](../decisions/0076-docker-sandbox-setup-phase-details.md)). GitHub's terms allow one free machine account beside a personal one. The account, not the sandbox's proxy, is the boundary: the proxy hides the token but the sandbox can use all of its power.
+
+| Setting | Where | Value | Why |
+|---|---|---|---|
+| Collaborator on `luiki-dev/szop` | *Settings → Access → Collaborators* → **Add people**; the account accepts the invitation | **Write** (a personal repository has no other role) | Pushes branches and opens PRs. It cannot merge one: the [ruleset for `main`](#ruleset-for-main) requires an approval it cannot give itself. It cannot change a ruleset or an environment, or approve a waiting deployment (tried in PH-48). |
+| Collaborator on `luiki-dev/claude-config` | The same, on that repository | **Write** | The backup hook in the sandbox pushes Claude's memory, the stripped transcripts, the usage log and `user/` there (ADR 0076, decisions 5 and 11). |
+| Collaborator on the [project](#project) | The project's **⋯ → Settings → Manage access** → **Invite collaborators** | **Write** | `/phase-tracking` edits the items' fields; the token's `project` scope alone does not give access to a user's project. |
+| Classic personal access token | The machine account's *Settings → Developer settings → Personal access tokens → Tokens (classic)* | Scopes `repo`, `workflow`, `project` and `read:org`, with an expiry; kept in the owner's password manager, and given to one sandbox with `sbx secret set github --sandbox <name>` | Fine-grained tokens do not cover a repository where the user is a collaborator or a user's project. `workflow` lets it push changes to `.github/workflows/`; `read:org` is needed by every `gh project` command (without it, `unknown owner type`). |
+
+Not changed for it: the `demo` environment's only reviewer stays the owner, so the account can start `demo-up` but not approve its run, and *Allow GitHub Actions to create and approve pull requests* stays off, so a workflow it pushes cannot approve its PR. A workflow it pushes in a PR can assume `szop-ci-plan`, as any same-repository PR can; that reach is accepted ([threat model](../architecture/threat-model.md#risks-accepted-on-purpose); ADR 0076, decision 7). **Rotating the token:** generate a new one before the old expires, set it again with `sbx secret set`, then delete the old one.
+
 ## Security
 
 *Settings → Security and quality → Advanced Security*.
@@ -218,6 +234,7 @@ The [Szop project](https://github.com/users/luiki-dev/projects/3), owned by the 
 | **Fields** | Status (six options), Order, Path, Spec, Plan, Started, Finished | See [project tracking](project-tracking.md#fields). ADR 0024, decisions 7 and 8. |
 | **Workflows** | On: Item added → ⬜ Backlog; Item closed → ✅ Done; Item reopened → 📌 Todo; auto-add `is:issue label:phase,open-point,adr,owner`; auto-add sub-issues. Off: Auto-close issue, Pull request linked to issue, Pull request merged | See [project tracking](project-tracking.md#workflows). |
 | **Views** | Timeline, Backlog, Board, Open Points, Next Up, Owner Steps | See [project tracking](project-tracking.md#views). |
+| **Manage access** | The [machine account](#the-machine-account) with **Write** | Claude in the sandbox edits the items' fields. |
 
 ## Checking the settings
 
@@ -262,6 +279,10 @@ gh secret list --repo luiki-dev/szop --env release
 gh api repos/luiki-dev/szop/rulesets --jq '.[] | select(.name=="version-tags") | .id' \
   | xargs -I{} gh api repos/luiki-dev/szop/rulesets/{} --jq '.bypass_actors'
 
+# Collaborators: the owner (admin) and the machine account (write)
+gh api repos/luiki-dev/szop/collaborators --jq '.[] | [.login, .role_name]'
+gh api repos/luiki-dev/claude-config/collaborators --jq '.[] | [.login, .role_name]'
+
 # Labels, milestones and the project
 gh label list --repo luiki-dev/szop
 gh api "repos/luiki-dev/szop/milestones?state=all"
@@ -271,6 +292,8 @@ gh project view 3 --owner luiki-dev
 Expected:
 
 - `visibility` is `PUBLIC`, only `mergeCommitAllowed` and `deleteBranchOnMerge` are `true`, and two active rulesets exist.
+- The `pull_request` rule for `main` has `required_approving_review_count` `1` and `dismiss_stale_reviews_on_push` `true`.
+- Both repositories list `luiki-dev` as `admin` and `luiki-dev-claude` as `write`, and no one else.
 - The rules for `main` include `required_status_checks` (with `ci-ok` and `pr-title`, and `strict_required_status_checks_policy: true`) and `code_scanning`.
 - `sha_pinning_required` is `true`.
 - `default_workflow_permissions` is `read` and `can_approve_pull_request_reviews` is `false`.

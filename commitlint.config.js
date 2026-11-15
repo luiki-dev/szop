@@ -62,6 +62,8 @@ export default {
         "deps-dev",
         "main",
         "claude",
+        // The Docker Sandbox setup in sandbox/ (PH-49).
+        "sandbox",
       ],
     ],
   },

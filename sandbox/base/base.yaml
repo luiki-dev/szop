@@ -1,0 +1,73 @@
+# syntax=docker/sandbox-kit:3
+# The generic layer for any project worked on with Claude Code in a sandbox
+# (ADR 0076, decision 4): names nothing of Szop. A mixin on Docker's Claude
+# Code workload, which base.sbxenv.yaml pins. What needs the GitHub token (the
+# configuration repository's clone, the plugins) is done by claude-setup, which
+# the owner runs once after the logins: the token is given after create.
+schemaVersion: "3"
+kind: mixin
+displayName: Claude Code base
+description: The generic setup for working with Claude Code in a Docker Sandbox
+sourceUrl: https://github.com/luiki-dev/szop/tree/main/sandbox/base
+version: "0.6.0"
+
+args:
+  gitName:
+    required: true
+    pattern: "^[A-Za-z0-9._ -]+$"
+    description: git's user.name in the sandbox (the machine account)
+  gitEmail:
+    required: true
+    pattern: "^[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+$"
+    description: git's user.email in the sandbox (the machine account's noreply address)
+  configRepo:
+    required: true
+    pattern: "^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$"
+    description: The private configuration repository on GitHub, owner/name
+
+capabilities:
+  - type: com.docker.sandbox/network-policy@1
+    config:
+      runtime:
+        allow:
+          # GitHub: git, gh, the plugins' marketplaces and release downloads.
+          - github.com:443
+          - api.github.com:443
+          - uploads.github.com:443
+          - codeload.github.com:443
+          - raw.githubusercontent.com:443
+          - objects.githubusercontent.com:443
+          - registry.npmjs.org:443
+          - mcp.context7.com:443
+          # context7's sign-in: OAuth client registration and tokens (Clerk).
+          - clerk.context7.com:443
+
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      install:
+        # The args are written where claude-setup reads them; their patterns
+        # admit no quote, so the values are safe inside single quotes.
+        - command: |
+            set -e
+            {
+              echo "GIT_USER_NAME='${{ kit.args.gitName }}'"
+              echo "GIT_USER_EMAIL='${{ kit.args.gitEmail }}'"
+              echo "CLAUDE_CONFIG_REMOTE='${{ kit.args.configRepo }}'"
+            } > /etc/claude-base.env
+            grep -q '^alias claude=' /etc/bash.bashrc ||
+              echo 'alias claude=claude-start' >> /etc/bash.bashrc
+            grep -q '^alias ll=' /etc/bash.bashrc ||
+              echo 'alias ll="ls -la"' >> /etc/bash.bashrc
+            # bash as agent's login shell, so an SSH session (VS Code's terminal
+            # among them) reads /etc/bash.bashrc and its aliases, not sh.
+            sed -i -E 's#^(agent:([^:]*:){5})[^:]*$#\1/bin/bash#' /etc/passwd
+            # The hardened workload ships no /etc/ld.so.cache, and VS Code's
+            # server finds libstdc++ through `ldconfig -p`, so it refused to start.
+            ldconfig
+          user: "0"
+          description: Write the base layer's settings and the shell's aliases, make bash the login shell, and build the loader's cache
+      files:
+        - path: /home/agent/.vscode-server/data/Machine/settings.json
+          content: '{ "telemetry.telemetryLevel": "off" }'
+          overwrite: false
+          description: Turn off the VS Code server's telemetry

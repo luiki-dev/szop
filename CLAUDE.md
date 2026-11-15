@@ -77,6 +77,7 @@ Follow [ADR 0052](docs/decisions/0052-working-with-claude.md) and the guide in `
 - `docs/development/git-workflow.md` — the day-to-day git workflow: branches, commits, PRs, review, merging and releases.
 - `docs/development/ci-cd.md` — how CI checks every PR: the workflows and jobs, `ci-ok` and the required checks, change detection, reading a failed run, Dependabot and the rules for every workflow. Keep it updated when a workflow changes.
 - `docs/operations/demo-environment.md` — the runbook for Szop's environment on AWS: the one-time account setup, applying and destroying `infra/bootstrap`, and later applying base and spinning the demo up and down. Keep it updated when an infrastructure step changes.
+- `docs/operations/docker-sandbox.md` — the runbook for the Docker Sandbox Claude Code works in: the rebuild, daily use, adding a tool, updating `sbx` with the last version proven, going back to WSL and the lost machine. Keep it updated when a step in `sandbox/` changes.
 - `docs/development/testing.md` — how Szop is tested: the layers, running the suites, writing each kind of test, and the rules. Read it before writing or changing tests, and keep it updated when a test layer or tool changes.
 - `docs/development/definition-of-done.md` — the one definition of done: every item, what it means, which PRs need it, and when a check must be repeated. The PR template mirrors it.
 - `docs/development/phase-walkthrough.md` — one example phase end to end: commits, PRs, CI, demo, release-please and version tags, in order.

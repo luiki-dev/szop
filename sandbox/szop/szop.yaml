@@ -1,0 +1,30 @@
+# syntax=docker/sandbox-kit:3
+# Szop's layer (ADR 0076, decision 4), a mixin laid over the base layer on
+# Docker's Claude Code workload. The tools of `pnpm check:*` are in the
+# overlay; the repository's clone and what follows it run from claude-setup
+# (files/szop-setup.sh), once the owner has given the token.
+schemaVersion: "3"
+kind: mixin
+displayName: Szop
+description: The tools and the repository for working on Szop
+sourceUrl: https://github.com/luiki-dev/szop/tree/main/sandbox/szop
+version: "0.2.0"
+
+capabilities:
+  - type: com.docker.sandbox/network-policy@1
+    config:
+      runtime:
+        allow:
+          # Playwright's browsers; its other CDNs are in balanced.
+          - playwright.download.prss.microsoft.com:443
+
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      install:
+        # Playwright's --with-deps installs the browsers' libraries with apt;
+        # balanced allows **.debian.org on 443 only, so apt goes over HTTPS.
+        - command: |
+            find /etc/apt \( -name '*.list' -o -name '*.sources' \) \
+              -exec sed -i 's|http://deb\.debian\.org/|https://deb.debian.org/|g' {} +
+          user: "0"
+          description: Fetch Debian's packages over HTTPS
