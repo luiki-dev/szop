@@ -21,7 +21,6 @@ Visual Studio Code (VS Code) is the editor Szop is developed in. The repository 
 - `bierner.markdown-checkbox`: Markdown Checkbox, which shows `- [ ]` and `- [x]` as checkboxes in the Markdown preview, as in the plans' steps and the PR template.
 - `redhat.vscode-yaml`: YAML, which validates and completes YAML files against their schemas, such as the GitHub Actions workflows in `.github/workflows/` and `compose.yaml`.
 - `ms-ossdata.vscode-pgsql`: PostgreSQL, for connecting to the local database, browsing its tables and running queries from the editor.
-- `ms-azuretools.vscode-docker`: Docker, the Docker-specific part on top of Container Tools; see [Docker](docker.md).
 - `hashicorp.terraform`: HashiCorp Terraform, which highlights, completes and validates the configurations in `infra/`; see [Terraform](terraform.md).
 
 The WSL extension is installed on the Windows side and is not in the list: it is needed before the repository can be opened at all.

@@ -9,7 +9,6 @@
     "bierner.markdown-checkbox",
     "redhat.vscode-yaml",
     "ms-ossdata.vscode-pgsql",
-    "ms-azuretools.vscode-docker",
     "hashicorp.terraform"
   ]
 }
