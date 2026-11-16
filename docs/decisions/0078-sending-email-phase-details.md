@@ -1,0 +1,41 @@
+# ADR 0078 — Sending email phase details
+
+- **Status:** ✅ Accepted
+- **Date:** 2026-11-16
+- **Completes:** [ADR 0007](0007-testing-strategy.md), decision 15 (how E2E tests read emails, see decision 3); [ADR 0008](0008-hosting.md), decisions 23 and 24 (the task role's SES permission and the SES `EmailSender`, see decisions 6 to 8); [ADR 0030](0030-domain-and-base-infrastructure-details.md), decision 7 (the sender address, see decision 6)
+
+## Context
+
+PH-18 Registration and login was the next phase. Its brainstorm found two new concepts in it, transactional email and email-and-password authentication with verification, and about 12 to 14 tasks, past the size [ADR 0014](0014-roadmap.md), decision 6, and [ADR 0072](0072-phase-approach-per-phase.md), decision 1, aim for. The roadmap already marked it as a candidate for a split.
+
+What exists: `infra/base` registers `dzwoniec.com` as SES's sender identity with Easy DKIM, publishes DMARC `p=reject`, SPF `-all` and a null MX on the apex ([ADR 0030](0030-domain-and-base-infrastructure-details.md), decisions 7 and 8). SES stays in its sandbox, which delivers only to verified addresses. The task role `szop-app-task` holds only ECS Exec's actions. The API has no `EmailSender` and sends nothing.
+
+[PH-18a](../roadmap.md#ph-18a-sending-email) gives the API a way to send email, locally, in CI and on the demo, and proves it, so [PH-18b](../roadmap.md#ph-18b-registration-and-login) can build registration on it.
+
+## Changes to the roadmap
+
+- **PH-18 is split** into PH-18a Sending email and PH-18b Registration and login, and its ID is retired. Its open points moved to the two new phases.
+
+## Decisions
+
+| # | Decision | Options considered | Outcome |
+|---|---|---|---|
+| 1 | The phase's approach | — | **Full path; one new concept, transactional email; about six tasks; a stop after the infrastructure task**, where the owner applies `infra/base` and verifies the addresses SES's sandbox will deliver to. Claude's recommendation; the owner chose it. |
+| 2 | How PH-18 is split | One phase; email first, then the authentication flows; the authentication flows first, with email only local. | **Email first (PH-18a), then registration and login (PH-18b).** Registration without a working sender would not work on the demo; this order gives PH-18b a sender proven on AWS. PH-18a shows the user nothing, which is its price. Claude's recommendation; the owner chose it. |
+| 3 | How development and E2E tests read emails | Mailpit with nodemailer's SMTP and SES transports; the console and a file "outbox"; the console and a sender written on the SES SDK. | **Mailpit, and nodemailer with two transports.** Mailpit is a small container that accepts mail over the Simple Mail Transfer Protocol (SMTP), shows it in a web UI and serves it through an HTTP API that tests read. nodemailer builds the message once and sends it over SMTP locally and in CI, or through its SES transport (`@aws-sdk/client-sesv2`, as the task role, with no key) on AWS. A file outbox shows no real email and makes the API and the tests share a disk; a sender on the bare SDK means building the MIME message by hand. Claude's recommendation; the owner chose it. |
+| 4 | How the demo's path is proven | A script in the image run through ECS Exec; no check until PH-18b; a temporary HTTP endpoint. | **A script in the image, `node src/send-test-email.ts <address>`, run by the owner through ECS Exec.** It sends through the same sender, transport, role and address as the app. Without a check, an IAM, DKIM or sender mistake would surface in the middle of PH-18b; an endpoint would be a public gateway for mail from the domain. Claude's recommendation; the owner chose it. |
+| 5 | What a failed send does | Send in the background and only log a failure; wait for the send and only log a failure; wait and show the failure. | **`send()` rejects on a failure, and its callers do not wait for it: they start it and log a rejection.** The log line is an `error` with the email's kind and the provider's error code or name, never the recipient's address. The user's answer never depends on the send, as [ACC-2](../requirements/ACC-accounts-and-guest-mode.md#acc-2) and [ACC-3](../requirements/ACC-accounts-and-guest-mode.md#acc-3) require, and its timing does not either, as Better Auth's documentation advises; a lost email is sent again by the resend of [ACC-3](../requirements/ACC-accounts-and-guest-mode.md#acc-3).5. Waiting changes the response time with the send; showing the failure tells whether something was sent. An email in flight when a task stops is lost, which the resend covers. PH-18b builds what the user sees. Claude's recommendation; the owner chose it. |
+| 6 | The sender address | `noreply@dzwoniec.com`; `noreply@szop.dzwoniec.com`. | **`Szop <noreply@szop.dzwoniec.com>`.** The apex publishes a null MX, and [RFC 7505](https://www.rfc-editor.org/rfc/rfc7505) lets receivers refuse mail whose From domain has one. DKIM's `d=dzwoniec.com` aligns with the subdomain under DMARC's relaxed alignment. No custom MAIL FROM domain ([ADR 0030](0030-domain-and-base-infrastructure-details.md), decision 8). Claude's call. |
+| 7 | The task role's SES permission | `ses:SendEmail` on `*`; on the identity; on the identity and limited to the sender address. | **`ses:SendEmail` on the `dzwoniec.com` identity's ARN, with a condition on `ses:FromAddress` that allows only `noreply@szop.dzwoniec.com`, with or without its display name.** nodemailer's SES transport calls SES API v2's `SendEmail` only. A compromised app could then send only as Szop's address, not as any address on the domain. Claude's call. |
+| 8 | The sender's settings | One `EMAIL_TRANSPORT` setting with the transport's own settings; inferring the transport from which settings are set. | **`EMAIL_TRANSPORT` (`smtp` or `ses`) and `EMAIL_FROM`, always; `SMTP_HOST` and `SMTP_PORT` when the transport is `smtp`.** Like every other setting in `config.ts`, a missing one stops the start. SES's region comes from the AWS SDK's environment. Claude's call. |
+| 9 | What this phase builds into the sender | Only the transport and its contract; templates and an E2E helper as well. | **Only the transport, the contract and the failure log.** The email templates and the E2E helper that reads Mailpit come with PH-18b's first email, which is their first real use ([ADR 0014](0014-roadmap.md), decision 7). Claude's call. |
+| 10 | The brainstorm's decisions file ([OP-134](https://github.com/luiki-dev/szop/issues/399)) | A note in the process docs; a change to a session skill. | **A section in [working-with-claude.md](../development/working-with-claude.md)**: during a brainstorm, each approved decision is appended at once to a git-ignored file in `.superpowers/brainstorm/`, which the spec is written from. Claude's call. |
+
+## Settled while building
+
+## Consequences
+
+- Development and CI run Mailpit next to PostgreSQL from `compose.yaml`; every place that starts the API sets the new settings: `apps/api/.env.example`, the Compose profiles, the E2E server and the demo's task definition.
+- The `EmailSender` has no caller in the app until PH-18b; the test script and the tests are its only users.
+- The owner verifies the addresses the demo sends to while SES stays in its sandbox, and applies `infra/base` for the task role's new statement before the next `demo-up`.
+- Mail from Szop is limited to one address by IAM; another app on the domain needs its own statement ([ADR 0036](0036-scalability-and-isolation.md)).
