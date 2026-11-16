@@ -47,7 +47,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-47 Read-only AWS access for Claude Code](#ph-47-read-only-aws-access-for-claude-code)
   - [PH-48 Docker Sandbox proof of concept](#ph-48-docker-sandbox-proof-of-concept)
   - [PH-49 Reproducible Docker Sandbox setup](#ph-49-reproducible-docker-sandbox-setup)
-  - [PH-18 Registration and login](#ph-18-registration-and-login)
+  - [PH-18a Sending email](#ph-18a-sending-email)
+  - [PH-18b Registration and login](#ph-18b-registration-and-login)
   - [PH-19 Guest data on login](#ph-19-guest-data-on-login)
   - [PH-39 Redis in the stack](#ph-39-redis-in-the-stack)
   - [PH-20 Quotas and rate limits](#ph-20-quotas-and-rate-limits)
@@ -347,7 +348,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-47 Read-only AWS access for Claude Code](#ph-47-read-only-aws-access-for-claude-code) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#425](https://github.com/luiki-dev/szop/pull/425) | [#423](https://github.com/luiki-dev/szop/issues/423) |
 | [PH-48 Docker Sandbox proof of concept](#ph-48-docker-sandbox-proof-of-concept) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#436](https://github.com/luiki-dev/szop/pull/436) | [#427](https://github.com/luiki-dev/szop/issues/427) |
 | [PH-49 Reproducible Docker Sandbox setup](#ph-49-reproducible-docker-sandbox-setup) | 🚧 In progress | [Spec](superpowers/specs/2026-11-12-PH-49-docker-sandbox-setup-design.md) | [Plan](superpowers/plans/2026-11-12-PH-49-docker-sandbox-setup.md) | [#439](https://github.com/luiki-dev/szop/pull/439) | [#429](https://github.com/luiki-dev/szop/issues/429) |
-| [PH-18 Registration and login](#ph-18-registration-and-login) | ⬜ Not started | — | — | — | [#47](https://github.com/luiki-dev/szop/issues/47) |
+| [PH-18a Sending email](#ph-18a-sending-email) | 🚧 In progress | — | — | — | [#446](https://github.com/luiki-dev/szop/issues/446) |
+| [PH-18b Registration and login](#ph-18b-registration-and-login) | ⬜ Not started | — | — | — | [#447](https://github.com/luiki-dev/szop/issues/447) |
 | [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
 | [PH-39 Redis in the stack](#ph-39-redis-in-the-stack) | ⬜ Not started | — | — | — | [#235](https://github.com/luiki-dev/szop/issues/235) |
 | [PH-20 Quotas and rate limits](#ph-20-quotas-and-rate-limits) | ⬜ Not started | — | — | — | [#49](https://github.com/luiki-dev/szop/issues/49) |
@@ -534,14 +536,25 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#429](https://github.com/luiki-dev/szop/issues/429).
 
-### PH-18 Registration and login
+### PH-18a Sending email
+
+- **Goal:** the API can send email: through Mailpit locally and in CI, through Amazon SES on the demo, from `noreply@szop.dzwoniec.com`. A test script run through ECS Exec proves the demo's path.
+- **Delivers:** the `EmailSender` with nodemailer's SMTP and SES transports, its settings and its failure contract; Mailpit in `compose.yaml`; the task role's `ses:SendEmail`, limited to the sender address; the test script and its runbook steps; the brainstorm's decisions file in the process docs. The details are in [ADR 0078](decisions/0078-sending-email-phase-details.md).
+- **Split from:** PH-18 Registration and login, now retired: it held two new concepts, transactional email and email-and-password authentication with verification, and about 12 to 14 tasks ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0078](decisions/0078-sending-email-phase-details.md)). The authentication flows became [PH-18b](#ph-18b-registration-and-login).
+- **Depends on:** —
+- **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; verify the email addresses the demo will send to, while SES is in its sandbox; press `demo-up` on the branch, run the test script through ECS Exec and check that the email arrives with `dkim=pass`, then press `demo-down`.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#446](https://github.com/luiki-dev/szop/issues/446).
+
+### PH-18b Registration and login
 
 - **Goal:** a guest registers with email and password, verifies the address and keeps their workspace as the account's. They log in and out, on any device.
-- **Delivers:** [ACC-2](requirements/ACC-accounts-and-guest-mode.md#acc-2), [ACC-3](requirements/ACC-accounts-and-guest-mode.md#acc-3) (part: logging in and out), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.8, tokens in the address bar); the SES email sender, and a way for development and E2E tests to read the emails; completes [UC-8](requirements/UC-use-cases.md#uc-8-guest-becomes-a-user).
-- **Depends on:** —
-- **Owner steps:** verify the email addresses the demo will send to, while SES is in its sandbox.
-- **Expected path:** full; a candidate for a split into the authentication flows and sending email.
-- **Open points:** the sub-issues of [#47](https://github.com/luiki-dev/szop/issues/47).
+- **Delivers:** [ACC-2](requirements/ACC-accounts-and-guest-mode.md#acc-2), [ACC-3](requirements/ACC-accounts-and-guest-mode.md#acc-3) (part: logging in and out), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.8, tokens in the address bar); the email helper of the E2E tests; completes [UC-8](requirements/UC-use-cases.md#uc-8-guest-becomes-a-user).
+- **Split from:** PH-18 Registration and login, now retired (see [PH-18a](#ph-18a-sending-email)).
+- **Depends on:** [PH-18a](#ph-18a-sending-email).
+- **Owner steps:** none known yet.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#447](https://github.com/luiki-dev/szop/issues/447).
 
 ### PH-19 Guest data on login
 
