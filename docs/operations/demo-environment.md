@@ -586,7 +586,7 @@ The PR's comment shows IAM Access Analyzer's findings for the new and changed po
 
 ### Sending email through SES
 
-[PH-18a](../roadmap.md#ph-18a-sending-email) lets the app send email from the demo ([ADR 0078](../decisions/0078-sending-email-phase-details.md)). The task definition sets `EMAIL_TRANSPORT=ses` and `EMAIL_FROM=Szop <noreply@szop.dzwoniec.com>`, and the app calls SES's API as the task role, with no key. The role's statement `SendEmail` allows `ses:SendEmail` only when the sender is `noreply@szop.dzwoniec.com`, with or without its display name. Its resources are the `dzwoniec.com` identity and every other identity of the account, because in SES's sandbox the permission is checked on each verified recipient's identity too.
+[PH-18a](../roadmap.md#ph-18a-sending-email) lets the app send email from the demo ([ADR 0078](../decisions/0078-sending-email-phase-details.md)). The task definition sets `EMAIL_TRANSPORT=ses` and `EMAIL_FROM=Szop <noreply@szop.dzwoniec.com>`, and the app calls SES's API as the task role, with no key. The role's statement `SendEmail` allows `ses:SendEmail` only when the sender is `noreply@szop.dzwoniec.com` or exactly `Szop <noreply@szop.dzwoniec.com>`. Its resources are the `dzwoniec.com` identity and every other identity of the account, because in SES's sandbox the permission is checked on each verified recipient's identity too.
 
 **Apply `infra/base` from the PR's branch before the next `demo-up`**, then from `main` after the merge. The plan shows one change, the task role's inline policy, renamed from `ecs-exec` to `app-task`. Check it:
 
@@ -928,11 +928,11 @@ aws ecs execute-command --cluster szop-demo --task <task id> --container app \
 
 ### Sending a test email
 
-`src/send-test-email.ts` sends one email through the app's own sender, transport, role and address, to prove the path end to end ([ADR 0078](../decisions/0078-sending-email-phase-details.md), decision 4). Run it in a running task, to an address verified in SES ([Sending email through SES](#sending-email-through-ses)); the container's working directory is `/app/apps/api`:
+`src/send-test-email.ts` sends one email through the app's own sender, transport, role and address, to prove the path end to end ([ADR 0078](../decisions/0078-sending-email-phase-details.md), decision 4). Run it in a running task, to an address verified in SES ([Sending email through SES](#sending-email-through-ses)); the absolute path works whatever directory the ECS Exec session starts in:
 
 ```bash
 aws ecs execute-command --cluster szop-demo --task <task id> --container app \
-  --interactive --command "node src/send-test-email.ts <address>"
+  --interactive --command "node /app/apps/api/src/send-test-email.ts <address>"
 #   {"msg":"test email sent"}
 ```
 

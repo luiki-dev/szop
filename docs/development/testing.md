@@ -55,7 +55,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
 
 ## Running the tests
 
-All commands run from the repository root. PostgreSQL and Mailpit must be running first for the API tests (`pnpm db:up`, which runs `docker compose up -d --wait` and starts both; see [Docker Compose and PostgreSQL](tools/docker-compose.md); the `web` project itself needs no database); otherwise the run stops at once with `Cannot reach PostgreSQL … Start it with docker compose up -d.` The tests read the server's address and password from `apps/api/.env`.
+All commands run from the repository root. PostgreSQL and Mailpit must be running first for the API tests (`pnpm db:up`, which runs `docker compose up -d --wait` and starts both; see [Docker Compose and PostgreSQL](tools/docker-compose.md); the `web` project itself needs no database); otherwise the run stops at once with `Cannot reach PostgreSQL … Start it with docker compose up -d.` With only Mailpit down the run does not stop: only `sender.test.ts` fails, with `ECONNREFUSED` ([Mailpit](tools/mailpit.md#everyday-use)). The tests read the server's address and password from `apps/api/.env`.
 
 ```bash
 pnpm test                       # every project once, the same tests CI runs (CI adds `--coverage`)
