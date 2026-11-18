@@ -12,6 +12,7 @@ How to coordinate Claude Code so that one Pro subscription lasts the week: how a
   - [Cost units](#cost-units)
 - [A phase in sessions](#a-phase-in-sessions)
   - [The stages](#the-stages)
+  - [The brainstorm's decisions file](#the-brainstorms-decisions-file)
   - [Opening prompts](#opening-prompts)
   - [Restart or compact](#restart-or-compact)
   - [Why 150–200k](#why-150200k)
@@ -88,6 +89,14 @@ A phase on the full path runs as one session per stage ([ADR 0052](../decisions/
 | Finishing | the branch | tracking done, the PR opened with its token usage section | a new session, or the end of the last execution session when its context is still small |
 
 A stage ends when its document or commits are on the branch, never in the middle of a task. The brainstorm and the spec stay in one session, because the reasoning behind the spec exists only in that conversation.
+
+### The brainstorm's decisions file
+
+A brainstorm takes many decisions over a long conversation, and a `/compact` or a lost session would leave them only in a summary ([ADR 0078](../decisions/0078-sending-email-phase-details.md), decision 10). So during a brainstorm Claude keeps a decisions file, `.superpowers/brainstorm/<session>/<phase>-decisions.md`, git-ignored like the rest of `.superpowers/`:
+
+- **Each decision the owner approves is appended at once,** when it is taken, not at the end; each line says whether it is the owner's choice or Claude's call.
+- **The spec is written from it,** and the phase ADR's decisions table with it.
+- **Before a `/compact` or a `/session-handoff`,** Claude points to it, so the next context reads the decisions from the file instead of the summary.
 
 ### Opening prompts
 

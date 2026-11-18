@@ -239,7 +239,10 @@ In ways 2 and 3, `claude -c` continues the last session.
 pnpm --filter @szop/api dev                         # terminal 1
 pnpm --filter @szop/web dev --host 0.0.0.0          # terminal 2, then http://localhost:5173 on Windows
 COMPOSE_FILE=compose.yaml:compose.sandbox.yaml pnpm check:prodlike --keep    # then https://localhost:8443
+COMPOSE_FILE=compose.yaml:compose.sandbox.yaml pnpm db:up    # Mailpit's UI on 0.0.0.0:8025
 ```
+
+Mailpit's UI is not among the environment files' ports: publish it once with WSL `sbx.exe ports szop --publish 8025:8025`, PowerShell `sbx ports szop --publish 8025:8025`, then open <http://localhost:8025> on Windows ([Mailpit](../development/tools/mailpit.md)).
 
 Another port for a while, such as a report's server: WSL `sbx.exe ports szop --publish 9000:9000`, PowerShell `sbx ports szop --publish 9000:9000`; `--unpublish 9000:9000` takes it away, `sbx ports szop` lists them. A service in the sandbox must listen on `0.0.0.0` for its port to reach Windows.
 

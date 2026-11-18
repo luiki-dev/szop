@@ -354,7 +354,7 @@ The role's comment says it holds ECS Exec's channel and sending as Szop's addres
 
 `locals.tf` gains `email_from = "Szop <noreply@${local.app_hostname}>"` with a comment that the IAM statement in `infra/base` allows only this address. The app container's `environment` in `service.tf` gains `{ name = "EMAIL_TRANSPORT", value = "ses" }` and `{ name = "EMAIL_FROM", value = local.email_from }`. `db_setup` does not change.
 
-- [ ] **Step 3: Check**
+- [x] **Step 3: Check**
 
 Run, in each of `infra/base` and `infra/demo`: `terraform fmt -check && terraform validate && tflint` — Expected: no output, `Success!`, no findings. Then `pnpm check`. CI's plan shows the change; `infra/base`'s plan shows one policy replaced (the rename) and no other change.
 
@@ -366,7 +366,7 @@ git commit -m "feat(infra): let the app's task send email as Szop through SES"
 git push
 ```
 
-- [ ] **Step 5: 🛑 Stop for the owner**
+- [x] **Step 5: 🛑 Stop for the owner**
 
 Summarize the task and the plan's expected change. The owner applies `infra/base` from this branch (#448) and verifies the addresses the demo sends to in SES's sandbox (#155). Go on only when the owner says so.
 
@@ -376,7 +376,7 @@ Summarize the task and the plan's expected change. The owner applies `infra/base
 
 **Files:** every file in the spec's [Documentation](../specs/2026-11-16-PH-18a-sending-email-design.md#documentation), created or modified as it says, including the decisions-file section in `working-with-claude.md` and the two new tool pages, `docs/development/tools/mailpit.md` and `nodemailer.md`, in the style of the other tool pages.
 
-- [ ] **Step 1: Write the changes**
+- [x] **Step 1: Write the changes**
 
 Beyond what the spec lists, the docs say:
 - `setup.md`: **an existing `apps/api/.env` needs the four new lines** from `.env.example`, or the API refuses to start naming them.
@@ -384,7 +384,7 @@ Beyond what the spec lists, the docs say:
 - Every status gets its icon, every requirement mention its link, and each new acronym (SMTP, MIME) its glossary entry and expansion on first use (root `CLAUDE.md`, "Writing style").
 - A long document whose headings change has its `## Contents` updated.
 
-- [ ] **Step 2: Check and commit**
+- [x] **Step 2: Check and commit**
 
 Run: `pnpm check` — Expected: passes (markdown lint, links).
 

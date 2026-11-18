@@ -38,6 +38,7 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [Checks](#checks)
   - [Rotating the Better Auth secret](#rotating-the-better-auth-secret)
   - [The app's roles and database password](#the-apps-roles-and-database-password)
+  - [Sending email through SES](#sending-email-through-ses)
   - [CI's roles and variables](#cis-roles-and-variables)
   - [Cost allocation tags](#cost-allocation-tags)
 - [The landing page](#the-landing-page)
@@ -53,6 +54,7 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [The app's log](#the-apps-log)
   - [Finding the task](#finding-the-task)
   - [A shell in the task](#a-shell-in-the-task)
+  - [Sending a test email](#sending-a-test-email)
   - [Querying the database](#querying-the-database)
   - [Checking the client address](#checking-the-client-address)
   - [Reading a failed db-setup](#reading-a-failed-db-setup)
@@ -552,7 +554,7 @@ In `secrets.tf`, raise `value_wo_version` by one, commit it on a branch, and app
 
 [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) adds to base what the app on ECS needs before a demo can run it ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md)):
 
-- the two roles `szop-app-task-execution` and `szop-app-task`, each trusted by `ecs-tasks.amazonaws.com` for tasks of this account only. The **task execution role** is what ECS uses to start a task: it pulls the image from the registry `szop`, writes to the log group `/szop/app` and fetches the secrets into the container's environment (`/szop/db-app-password`, `/szop/better-auth-secret` for the app only since PH-16a, and the master password RDS keeps in Secrets Manager, which only `db-setup`'s task definition names). The code in the container never holds it. The **task role** is what the code in the container may call: today only the four `ssmmessages:` actions that ECS Exec needs;
+- the two roles `szop-app-task-execution` and `szop-app-task`, each trusted by `ecs-tasks.amazonaws.com` for tasks of this account only. The **task execution role** is what ECS uses to start a task: it pulls the image from the registry `szop`, writes to the log group `/szop/app` and fetches the secrets into the container's environment (`/szop/db-app-password`, `/szop/better-auth-secret` for the app only since PH-16a, and the master password RDS keeps in Secrets Manager, which only `db-setup`'s task definition names). The code in the container never holds it. The **task role** is what the code in the container may call, in its inline policy `app-task`: the four `ssmmessages:` actions that ECS Exec needs and, since [PH-18a](../roadmap.md#ph-18a-sending-email), sending email through SES ([Sending email through SES](#sending-email-through-ses));
 - the SSM parameter `/szop/db-app-password`, the password of the database role `szop_app` that the app connects as. Terraform generates it (64 letters and digits) and sends it through a write-only argument, as for the Better Auth secret, so it never enters the state. It lives in base because the database is recreated for every session, and the role with it, but the password need not change: `db-setup` creates the role with it at each `demo-up`;
 - the deploy role's three new managed policies, `szop-ci-deploy-demo-database`, `szop-ci-deploy-demo-service` and `szop-ci-deploy-image`, with the extra egress rules in `szop-ci-deploy-demo-network`, and the plan role's `DenyDataReads` statement.
 
@@ -581,6 +583,27 @@ The PR's comment shows IAM Access Analyzer's findings for the new and changed po
 
 - put `szop_app`'s password, or the master password, anywhere by hand: a `value` argument, a `data "aws_ssm_parameter"` or a `data "aws_secretsmanager_secret_version"` would write it into the state;
 - set the parameter in the console: the next rotation overwrites it, and the role's password and the parameter would disagree until `db-setup` runs.
+
+### Sending email through SES
+
+[PH-18a](../roadmap.md#ph-18a-sending-email) lets the app send email from the demo ([ADR 0078](../decisions/0078-sending-email-phase-details.md)). The task definition sets `EMAIL_TRANSPORT=ses` and `EMAIL_FROM=Szop <noreply@szop.dzwoniec.com>`, and the app calls SES's API as the task role, with no key. The role's statement `SendEmail` allows `ses:SendEmail` only when the sender is `noreply@szop.dzwoniec.com`, with or without its display name. Its resources are the `dzwoniec.com` identity and every other identity of the account, because in SES's sandbox the permission is checked on each verified recipient's identity too.
+
+**Apply `infra/base` from the PR's branch before the next `demo-up`**, then from `main` after the merge. The plan shows one change, the task role's inline policy, renamed from `ecs-exec` to `app-task`. Check it:
+
+```bash
+aws iam get-role-policy --role-name szop-app-task --policy-name app-task \
+  --query 'PolicyDocument.Statement[].Sid'
+#   the ECS Exec statement and "SendEmail"
+```
+
+**SES's sandbox.** Every AWS account starts SES in a sandbox, in each region on its own, and Szop's stays in it: SES delivers only to addresses verified in the account, at most 200 emails a day. Outside users get no email from the demo: SES refuses the send with `MessageRejected`, and the app logs it. To verify an address you can read: *SES → Configuration → Identities → Create identity → Email address*, enter it, and click the link SES sends to it within 24 hours. Check:
+
+```bash
+aws sesv2 get-email-identity --email-identity <address> --query VerifiedForSendingStatus
+#   true
+```
+
+Leaving the sandbox is a request to AWS, *SES → Account dashboard → Request production access*, describing what the emails are and how bounces and complaints are handled. AWS answers in about a day and may refuse; afterwards only the daily quota limits sending. It is needed only once strangers register on the demo, and the `SendEmail` statement can then go back to the domain's identity alone.
 
 ### CI's roles and variables
 
@@ -902,6 +925,21 @@ aws ecs execute-command --cluster szop-demo --task <task id> --container app \
 `Starting session with SessionId: ecs-execute-command-…` and a prompt mean it works; `exit` ends the session. The shell runs inside the container, so it has the app's environment variables, `DATABASE_PASSWORD` among them, as the first real demo showed. The image has no `psql` and no `curl`. An ECS Exec session needs a writable root filesystem, which is why the task's is writable ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md)).
 
 `TargetNotConnectedException` means the task's ECS Exec agent is not connected yet (wait a minute after the task starts) or the task role lacks the four `ssmmessages:` actions. A task started before the service allowed ECS Exec cannot be entered: use a task the current service started.
+
+### Sending a test email
+
+`src/send-test-email.ts` sends one email through the app's own sender, transport, role and address, to prove the path end to end ([ADR 0078](../decisions/0078-sending-email-phase-details.md), decision 4). Run it in a running task, to an address verified in SES ([Sending email through SES](#sending-email-through-ses)); the container's working directory is `/app/apps/api`:
+
+```bash
+aws ecs execute-command --cluster szop-demo --task <task id> --container app \
+  --interactive --command "node src/send-test-email.ts <address>"
+#   {"msg":"test email sent"}
+```
+
+The email, "Szop test email" from `Szop <noreply@szop.dzwoniec.com>`, arrives within a minute; look in the spam folder too. Open its headers (*Show original* or *View source* in most mail programs) and find `Authentication-Results`: it must show `dkim=pass` with `header.d=dzwoniec.com` and `dmarc=pass`. A failure prints `{"msg":"test email not sent","errorName":…,"errorCode":…}`, and the script exits with 1:
+
+- `MessageRejected` (`Email address is not verified`): the recipient is not verified, and SES is in its sandbox. Verify the address, or send to one that is.
+- `AccessDenied`: the task role's `SendEmail` statement is missing, because `infra/base` was not applied from the branch, or it does not match the sender, because `EMAIL_FROM` and the statement's address differ.
 
 ### Querying the database
 
