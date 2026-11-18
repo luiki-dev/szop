@@ -186,6 +186,7 @@ Dependabot ([tool page](tools/dependabot.md)) opens update PRs every Monday:
 - **Cooldown:** a version is proposed only once it is at least 7 days old; security updates skip the wait.
 - **Commit messages:** `build(deps): …` for a dependency, `build(deps-dev): …` for a devDependency, `ci(deps): …` for an action. They pass commitlint like any commit.
 - **`@types/node`'s major updates are ignored**, since its major version follows Node's, which changes on purpose together with `.nvmrc`.
+- **`@playwright/test` 1.65.x is ignored** for now: its Firefox build crashes the page when axe runs before `getByLabel` ([microsoft/playwright#43967](https://github.com/microsoft/playwright/issues/43967)). The entry goes once 1.66 is in.
 - **PostgreSQL's major updates are ignored** the same way: the major version changes on purpose, together with RDS and `compose.yaml`.
 - **Node's major updates in the `Dockerfile` are ignored** too: the major changes on purpose, together with `.nvmrc` and `engines`.
 - **The AWS provider's major updates are not ignored:** each comes as its own PR, to be read against the provider's upgrade guide. Terraform itself, tflint and its AWS ruleset are not something Dependabot sees; their tool pages say how to update them.

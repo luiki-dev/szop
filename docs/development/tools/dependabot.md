@@ -20,7 +20,7 @@ Dependabot is GitHub's built-in bot for dependencies: every Monday it looks for 
 - `cooldown: default-days: 7`: propose a version only once it is at least 7 days old, so a malicious release is usually found and removed before it is offered. Security updates skip the wait.
 - `groups`: `npm`, `actions`, `docker-compose`, `docker` and `terraform`, each with `update-types: [minor, patch]`, put all minor and patch updates of an ecosystem in one PR. A major update matches no group, so it gets a PR of its own.
 - `commit-message`: `prefix: build` and `prefix-development: build` with `include: scope` give `build(deps): …` for a dependency and `build(deps-dev): …` for a devDependency; for actions, `prefix: ci` gives `ci(deps): …`. Both scopes are on [commitlint](commitlint.md)'s list.
-- `ignore`: major updates of `@types/node` are skipped. Its major version follows Node's, which changes on purpose, together with `.nvmrc` and `engines`.
+- `ignore`: major updates of `@types/node` are skipped. Its major version follows Node's, which changes on purpose, together with `.nvmrc` and `engines`. Versions 1.65.x of `@playwright/test` are skipped too: their Firefox build crashes the page when axe runs before `getByLabel` ([microsoft/playwright#43967](https://github.com/microsoft/playwright/issues/43967)); the entry goes once 1.66 is in.
 
 **Alerts and security updates** are not in this file: Dependabot alerts (a warning when a dependency has a known vulnerability) and Dependabot security updates (a PR fixing it, without waiting for Monday or the cooldown) are switched on in the repository settings, listed in [GitHub settings](../github-settings.md#security).
 
