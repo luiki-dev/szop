@@ -332,11 +332,13 @@ The login lasts up to 8 hours. When it has expired, a session's `aws` commands f
 
 ### Signing in as the administrator
 
-The `szop` token sits next to Claude Code's in `~/.aws/sso/cache`, so while you are signed in as the administrator, a running session could use it. Only the deny rules in `.claude/settings.json` stand in the way, and they catch a mistake, not a determined command ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decisions 8 and 9). So keep that sign-in as short as the work:
+Keep that sign-in as short as the work ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decision 9):
 
-1. `aws sso login --profile szop`, in your own terminal, not with `!` in a session.
+1. `aws sso login --profile szop`, in your own terminal on WSL, not with `!` in a session.
 2. Do the work.
-3. `aws sso logout`. It clears **every** profile's token, so sign in as `claude-readonly` again ([The profile](#the-profile)) before a session needs AWS.
+3. `aws sso logout` on WSL.
+
+Claude Code's sessions run in the Docker Sandbox (sbx), which has its own `~/.aws`: the `szop` token on WSL is out of their reach, and the logout on WSL leaves the sandbox's `claude-readonly` login as it is ([The logins and the setup](docker-sandbox.md#4-the-logins-and-the-setup)). When Claude Code runs on WSL again ([Going back to WSL](docker-sandbox.md#going-back-to-wsl)), the two tokens share `~/.aws/sso/cache`: while you are signed in as the administrator, a running session could use it, and only the deny rules in `.claude/settings.json` stand in the way, which catch a mistake, not a determined command (ADR 0074, decision 8). There, `aws sso logout` clears **every** profile's token, so sign in as `claude-readonly` again ([The profile](#the-profile)) before a session needs AWS.
 
 ## Applying bootstrap
 

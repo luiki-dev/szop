@@ -51,7 +51,7 @@ After [ADR 0059](../../../docs/decisions/0059-session-skills.md), decision 9, re
    |---|---|---|---|---|
    | 1 | Owner | Terminal: `aws sso login --profile szop` ([Sign in from the CLI](../../../docs/operations/demo-environment.md#5-sign-in-from-the-cli)) | Signed in | — |
    | 2 | Owner | `infra/base` from the branch ([Applying base](../../../docs/operations/demo-environment.md#applying-base)), only if the diff changes it | Applied | — |
-   | 2b | Owner | Terminal: `aws sso logout`, then sign in as `claude-readonly` again ([Signing in as the administrator](../../../docs/operations/demo-environment.md#signing-in-as-the-administrator)) | Administrator signed out | — |
+   | 2b | Owner | Terminal on WSL: `aws sso logout`; the sandbox's `claude-readonly` login stays ([Signing in as the administrator](../../../docs/operations/demo-environment.md#signing-in-as-the-administrator)) | Administrator signed out | — |
    | 3 | Owner | GitHub → Actions → demo-up → Run workflow → branch `<branch>`, then approve the `demo` environment ([Pressing the button](../../../docs/operations/demo-environment.md#pressing-the-button)) | Run started | "demo is up" after the run is green |
    | 4 | Claude | `curl https://szop.dzwoniec.com/api/health` | `ok`, commit `<head>` | — |
    | 4b | Claude | The redirect from `http://`, the browser console on `/` and the phase's screens (Chrome DevTools MCP), and every open line of #377 Claude can check | No message, each line as written | — |
