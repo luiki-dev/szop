@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0 (2026-11-18)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+* build(deps-dev): bump jsdom from 30.1.3 to 31.0.0 by @luiki-dev-claude in https://github.com/luiki-dev/szop/pull/455
+* feat: send email through Mailpit locally and Amazon SES on the demo by @luiki-dev-claude in https://github.com/luiki-dev/szop/pull/457
+
+## New Contributors
+* @luiki-dev-claude made their first contribution in https://github.com/luiki-dev/szop/pull/442
+
+**Full Changelog**: https://github.com/luiki-dev/szop/compare/v0.3.0...v0.4.0
+
 ## 0.3.0 (2026-11-08)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
