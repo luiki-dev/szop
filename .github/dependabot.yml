@@ -22,6 +22,10 @@ updates:
       # Its major follows Node's, which changes on purpose with .nvmrc (audit m13).
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # 1.65's Firefox build crashes the page when axe runs before getByLabel;
+      # fixed in a later build (microsoft/playwright#43967). Drop with 1.66.
+      - dependency-name: "@playwright/test"
+        versions: ["1.65.x"]
 
   - package-ecosystem: github-actions
     # The workflows, and the composite action, which is not scanned by default.
