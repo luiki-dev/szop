@@ -52,53 +52,89 @@ const appOrigin = z
   }, "must be an http or https origin with no path")
   .transform((value) => new URL(value).origin);
 
+// The sender: a bare address, or "Display Name <address>".
+const emailAddress = z.email();
+const emailFrom = z.string().refine((value) => {
+  const match = /^(?:[^<>]*<([^<>]+)>|([^<>\s]+))$/.exec(value);
+  const address = match?.[1] ?? match?.[2];
+  return address !== undefined && emailAddress.safeParse(address).success;
+}, 'must be an email address, optionally as "Name <address>"');
+
+// SMTP_HOST and SMTP_PORT are required unless the transport is ses. `when`
+// runs the check even when another setting failed, so a start with nothing set
+// lists them too.
+function requiredForSmtp(name: "SMTP_HOST" | "SMTP_PORT") {
+  return {
+    check: (data: Record<string, unknown>) =>
+      data.EMAIL_TRANSPORT === "ses" || data[name] !== undefined,
+    params: { path: [name], message: "required with smtp", when: () => true },
+  };
+}
+const smtpHost = requiredForSmtp("SMTP_HOST");
+const smtpPort = requiredForSmtp("SMTP_PORT");
+
 // Every setting is required: a missing one stops startup instead of
 // falling back to a default (ADR 0019, decision 2).
-const envSchema = z.object({
-  HOST: z.string().min(1),
-  PORT: port,
-  LOG_LEVEL: z.enum([
-    "fatal",
-    "error",
-    "warn",
-    "info",
-    "debug",
-    "trace",
-    "silent",
-  ]),
-  // Separate settings, so ECS can inject the password alone from the
-  // RDS-managed secret (ADR 0020, decision 3).
-  DATABASE_HOST: z.string().min(1),
-  DATABASE_PORT: port,
-  DATABASE_NAME: z.string().min(1),
-  DATABASE_USER: z.string().min(1),
-  DATABASE_PASSWORD: z.string().min(1),
-  // TLS to the database: "verify-full" checks RDS's certificate and name
-  // (on AWS from PH-12c), "none" for the local container, which has no TLS
-  // (ADR 0033, decision 5).
-  DATABASE_TLS: z.enum(["none", "verify-full"]),
-  // The certificate authority verify-full checks against; the RDS bundle when
-  // unset (ADR 0064, decision 8).
-  DATABASE_CA_FILE: z.string().min(1).optional(),
-  // The built SPA (ADR 0023, decision 2). A folder that does not exist yet,
-  // as in pnpm dev, is not an error: the API logs a warning and serves its
-  // own routes only.
-  WEB_ROOT: z.string().min(1),
-  // In AWS, the load balancer's subnets; "none" locally.
-  TRUSTED_PROXIES: trustedProxies,
-  // The commit this code was built from: the image build bakes it in, and
-  // outside the image it is "unknown". /api/health and the startup log report
-  // it, so a redeploy shows which version answers (PH-12d spec, decision 3).
-  GIT_COMMIT: z
-    .string()
-    .regex(
-      /^([0-9a-f]{40}|unknown)$/,
-      'must be a full commit hash or "unknown"',
-    ),
-  // Signs the session cookies (ADR 0057). Secret: never logged.
-  BETTER_AUTH_SECRET: z.string().min(32, "must be at least 32 characters"),
-  APP_ORIGIN: appOrigin,
-});
+const envSchema = z
+  .object({
+    HOST: z.string().min(1),
+    PORT: port,
+    LOG_LEVEL: z.enum([
+      "fatal",
+      "error",
+      "warn",
+      "info",
+      "debug",
+      "trace",
+      "silent",
+    ]),
+    // Separate settings, so ECS can inject the password alone from the
+    // RDS-managed secret (ADR 0020, decision 3).
+    DATABASE_HOST: z.string().min(1),
+    DATABASE_PORT: port,
+    DATABASE_NAME: z.string().min(1),
+    DATABASE_USER: z.string().min(1),
+    DATABASE_PASSWORD: z.string().min(1),
+    // TLS to the database: "verify-full" checks RDS's certificate and name
+    // (on AWS from PH-12c), "none" for the local container, which has no TLS
+    // (ADR 0033, decision 5).
+    DATABASE_TLS: z.enum(["none", "verify-full"]),
+    // The certificate authority verify-full checks against; the RDS bundle when
+    // unset (ADR 0064, decision 8).
+    DATABASE_CA_FILE: z.string().min(1).optional(),
+    // The built SPA (ADR 0023, decision 2). A folder that does not exist yet,
+    // as in pnpm dev, is not an error: the API logs a warning and serves its
+    // own routes only.
+    WEB_ROOT: z.string().min(1),
+    // In AWS, the load balancer's subnets; "none" locally.
+    TRUSTED_PROXIES: trustedProxies,
+    // The commit this code was built from: the image build bakes it in, and
+    // outside the image it is "unknown". /api/health and the startup log report
+    // it, so a redeploy shows which version answers (PH-12d spec, decision 3).
+    GIT_COMMIT: z
+      .string()
+      .regex(
+        /^([0-9a-f]{40}|unknown)$/,
+        'must be a full commit hash or "unknown"',
+      ),
+    // Signs the session cookies (ADR 0057). Secret: never logged.
+    BETTER_AUTH_SECRET: z.string().min(32, "must be at least 32 characters"),
+    APP_ORIGIN: appOrigin,
+    // How the API sends email: "smtp" to Mailpit locally and in CI, "ses" on
+    // AWS, where the region and credentials come from the task's environment
+    // (ADR 0078, decision 8).
+    EMAIL_TRANSPORT: z.enum(["smtp", "ses"]),
+    EMAIL_FROM: emailFrom,
+    SMTP_HOST: z.string().min(1).optional(),
+    SMTP_PORT: port.optional(),
+  })
+  .refine(smtpHost.check, smtpHost.params)
+  .refine(smtpPort.check, smtpPort.params);
+
+export type EmailSettings = { from: string } & (
+  | { transport: "smtp"; smtpHost: string; smtpPort: number }
+  | { transport: "ses" }
+);
 
 export interface DatabaseSettings {
   host: string;
@@ -126,6 +162,7 @@ export interface Config {
   betterAuthSecret: string;
   // Normalized: scheme, host and port only.
   appOrigin: string;
+  email: EmailSettings;
 }
 
 export function loadConfig(env: Record<string, string | undefined>): Config {
@@ -159,5 +196,15 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     commit: data.GIT_COMMIT,
     betterAuthSecret: data.BETTER_AUTH_SECRET,
     appOrigin: data.APP_ORIGIN,
+    email:
+      data.EMAIL_TRANSPORT === "ses"
+        ? { transport: "ses", from: data.EMAIL_FROM }
+        : {
+            transport: "smtp",
+            from: data.EMAIL_FROM,
+            // Stryker disable next-line StringLiteral,ConditionalExpression: the refinements above make both set with smtp
+            smtpHost: data.SMTP_HOST ?? "",
+            smtpPort: data.SMTP_PORT ?? 0,
+          },
   };
 }

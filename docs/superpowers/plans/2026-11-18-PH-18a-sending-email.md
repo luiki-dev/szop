@@ -80,7 +80,7 @@
   email: EmailSettings;
   ```
 
-- [ ] **Step 1: Write the failing tests in `config.test.ts`**
+- [x] **Step 1: Write the failing tests in `config.test.ts`**
 
 Add `EMAIL_TRANSPORT: "smtp"`, `EMAIL_FROM: "Szop <noreply@szop.dzwoniec.com>"`, `SMTP_HOST: "localhost"`, `SMTP_PORT: "1025"` to `valid`; the existing "returns the typed config" test expects `email: { transport: "smtp", from: "Szop <noreply@szop.dzwoniec.com>", smtpHost: "localhost", smtpPort: 1025 }`. Then, in a `describe("email settings")`:
 
@@ -116,32 +116,32 @@ it("refuses an unknown transport", () => {
 });
 ```
 
-- [ ] **Step 2: Run them to see them fail**
+- [x] **Step 2: Run them to see them fail**
 
 Run: `pnpm vitest run --project api src/config.test.ts`
 Expected: FAIL; `email` is missing from the config.
 
-- [ ] **Step 3: Implement the settings in `config.ts`**
+- [x] **Step 3: Implement the settings in `config.ts`**
 
 - `EMAIL_TRANSPORT: z.enum(["smtp", "ses"])`.
 - `EMAIL_FROM`: a bare address, or `Display Name <address>`; the address part checked with `z.email()`. Parse with `/^(?:[^<>]*<([^<>]+)>|([^<>\s]+))$/` and check the captured address; the message says `must be an email address, optionally as "Name <address>"`.
 - `SMTP_HOST: z.string().min(1).optional()`, `SMTP_PORT: port.optional()`, and a `superRefine` on the object that adds an issue with `path: ["SMTP_HOST"]` (or `SMTP_PORT`) when `EMAIL_TRANSPORT` is `smtp` and it is unset, so `loadConfig`'s existing mapping prints `SMTP_HOST: missing`. A comment over the email settings cites ADR 0078, decision 8.
 - `loadConfig` returns `email` built from the parsed data; with `ses` the SMTP settings are dropped.
 
-- [ ] **Step 4: Run them to see them pass**
+- [x] **Step 4: Run them to see them pass**
 
 Run: `pnpm vitest run --project api src/config.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: `testConfig()` and `.env.example`**
+- [x] **Step 5: `testConfig()` and `.env.example`**
 
 `testConfig()` gains `email: { transport: "smtp", from: "Szop <noreply@szop.dzwoniec.com>", smtpHost: "localhost", smtpPort: 1025 }`, with a comment: Mailpit from `compose.yaml`, like PostgreSQL. `.env.example` gains, after `APP_ORIGIN`, the four settings (`smtp`, `Szop <noreply@szop.dzwoniec.com>`, `localhost`, `1025`) with comments in the file's style: what each is, `smtp` for Mailpit locally and `ses` on the demo, Mailpit's UI at `http://localhost:8025`, ADR 0078. `EMAIL_FROM`'s value is quoted if `node --env-file` needs it for the space and angle brackets (check by running `pnpm --filter api start` against a running PostgreSQL, or `node --env-file=.env -e "console.log(process.env.EMAIL_FROM)"` from `apps/api`).
 
-- [ ] **Step 6: ADR 0078, deviation 2**
+- [x] **Step 6: ADR 0078, deviation 2**
 
 Add to "Settled while building": `e2e/start-server.ts` sets none of the email settings; it spreads `apps/api/.env`, so they come from there (CI copies `.env.example`).
 
-- [ ] **Step 7: Check and commit**
+- [x] **Step 7: Check and commit**
 
 Run: `pnpm check` — Expected: passes. Copy the four lines into your own `apps/api/.env` first, or the E2E start fails.
 

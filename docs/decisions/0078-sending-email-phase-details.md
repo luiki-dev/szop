@@ -33,6 +33,9 @@ What exists: `infra/base` registers `dzwoniec.com` as SES's sender identity with
 
 ## Settled while building
 
+- **`e2e/start-server.ts` sets none of the email settings** (Task 1). It spreads `apps/api/.env`, which CI copies from `.env.example`, so they come from there. A developer's existing `.env` needs the four new lines, or the API refuses to start naming them.
+- **`SMTP_HOST` and `SMTP_PORT` are required unless `EMAIL_TRANSPORT` is `ses`** (Task 1), also when the transport is missing, so a start with nothing set names all four settings at once. Locally `SMTP_HOST` is `127.0.0.1`, like `DATABASE_HOST`, since Mailpit's ports listen on IPv4 only.
+
 ## Consequences
 
 - Development and CI run Mailpit next to PostgreSQL from `compose.yaml`; every place that starts the API sets the new settings: `apps/api/.env.example`, the Compose profiles, the E2E server and the demo's task definition.
