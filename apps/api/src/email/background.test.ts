@@ -62,6 +62,23 @@ describe("sendInBackground", () => {
     );
   });
 
+  it.each([null, undefined])("logs a rejection with %s", async (reason) => {
+    sendInBackground(
+      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- the case under test
+      { send: () => Promise.reject(reason) },
+      email,
+      "test",
+      log,
+    );
+    await vi.waitFor(() => {
+      expect(log.error).toHaveBeenCalledTimes(1);
+    });
+    expect(log.error).toHaveBeenCalledWith(
+      { emailKind: "test", errorName: undefined, errorCode: undefined },
+      "email not sent",
+    );
+  });
+
   it("logs nothing when the send succeeds", async () => {
     sendInBackground({ send: () => Promise.resolve() }, email, "test", log);
     await new Promise((resolve) => setImmediate(resolve));
