@@ -145,9 +145,9 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
-      # The same PostgreSQL as locally, from compose.yaml, so there is one
-      # version pin (ADR 0020, decision 6). The tests read the server from
-      # apps/api/.env, as a developer's do.
+      # The same PostgreSQL and Mailpit as locally, from compose.yaml, so there
+      # is one version pin (ADR 0020, decision 6; ADR 0078, decision 3). The
+      # tests read the server from apps/api/.env, as a developer's do.
       - run: cp apps/api/.env.example apps/api/.env
       - run: docker compose up -d --wait
       # Vitest adds its own test report to the job summary when it runs in
@@ -197,8 +197,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
-      # The same PostgreSQL as the test job, from compose.yaml (ADR 0020,
-      # decision 6). start-server.ts reads the server from apps/api/.env and
+      # The same PostgreSQL and Mailpit as the test job, from compose.yaml
+      # (ADR 0020, decision 6). start-server.ts reads the server from apps/api/.env and
       # creates szop_e2e itself.
       - run: cp apps/api/.env.example apps/api/.env
       - run: docker compose up -d --wait

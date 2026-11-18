@@ -35,6 +35,10 @@ What exists: `infra/base` registers `dzwoniec.com` as SES's sender identity with
 
 - **`e2e/start-server.ts` sets none of the email settings** (Task 1). It spreads `apps/api/.env`, which CI copies from `.env.example`, so they come from there. A developer's existing `.env` needs the four new lines, or the API refuses to start naming them.
 - **`SMTP_HOST` and `SMTP_PORT` are required unless `EMAIL_TRANSPORT` is `ses`** (Task 1), also when the transport is missing, so a start with nothing set names all four settings at once. Locally `SMTP_HOST` is `127.0.0.1`, like `DATABASE_HOST`, since Mailpit's ports listen on IPv4 only.
+- **`AppDeps` does not gain `email`, and `server.ts` builds no sender yet** (Task 2). Nothing in this phase calls it, and a required field would change 36 `buildApp` calls in 14 test files; PH-18b adds both with the first caller.
+- **Mailpit is pinned by its tag, `axllent/mailpit:v1.34.0`, without a digest** (Task 2), like the file's other images; the spec's "and its digest" was wrong.
+- **`@types/nodemailer` is not added** (Task 2): nodemailer 10 ships its own types. Its SES transport puts the `From:` header with the display name into the raw message, which the test reads.
+- **CI and `check-prodlike.sh` needed no change** (Task 2): `docker compose up -d --wait` starts Mailpit with PostgreSQL, and `app-prodlike` reaches it over the prodlike network.
 
 ## Consequences
 

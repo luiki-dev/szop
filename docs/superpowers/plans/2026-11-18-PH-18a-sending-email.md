@@ -179,7 +179,7 @@ git commit -m "feat(api): add the email settings"
   ): void;
   ```
 
-- [ ] **Step 1: Mailpit in `compose.yaml`**
+- [x] **Step 1: Mailpit in `compose.yaml`**
 
 A `mailpit` service, in the default profile, with a comment in the file's style (what it is, ADR 0078, decision 3):
 - `image: axllent/mailpit:<latest v1 release>`, pinned by tag like `postgres:18.6` (the file pins no digest; the spec's "and its digest" was wrong, note it in the ADR);
@@ -192,11 +192,11 @@ In `x-app`: `depends_on` gains `mailpit: { condition: service_healthy }`; `envir
 
 Run: `docker compose up -d --wait` — Expected: `postgres` and `mailpit` healthy; `curl -sf http://localhost:8025/api/v1/messages` answers JSON.
 
-- [ ] **Step 2: Add the dependencies**
+- [x] **Step 2: Add the dependencies**
 
 Run: `pnpm --filter @szop/api add nodemailer @aws-sdk/client-sesv2 && pnpm --filter @szop/api add -D @types/nodemailer`
 
-- [ ] **Step 3: Write the failing tests**
+- [x] **Step 3: Write the failing tests**
 
 `background.test.ts` (unit; a fake sender and a fake `log` whose `error` records its arguments):
 
@@ -254,25 +254,25 @@ it("sends through SES with the From address", async () => {
 
 The search may be retried briefly (`vi.waitFor`) in case Mailpit stores the message just after the SMTP reply.
 
-- [ ] **Step 4: Run them to see them fail**
+- [x] **Step 4: Run them to see them fail**
 
 Run: `pnpm vitest run --project api src/email`
 Expected: FAIL; the modules do not exist.
 
-- [ ] **Step 5: Implement `sender.ts` and `background.ts`**
+- [x] **Step 5: Implement `sender.ts` and `background.ts`**
 
 `createEmailSender`: `smtp` → `nodemailer.createTransport({ host, port, secure: false })`; `ses` → `nodemailer.createTransport({ SES: { sesClient, SendEmailCommand } })`; `send` calls `transporter.sendMail({ from: settings.from, ...email })` and resolves to `void`. `sendInBackground`: `void sender.send(email).catch(...)` with the line from the Global Constraints, reading `name` and `code` only when the reason is an object. A one-line comment on each cites ADR 0078, decisions 3 and 5.
 
-- [ ] **Step 6: Run them to see them pass**
+- [x] **Step 6: Run them to see them pass**
 
 Run: `pnpm vitest run --project api src/email`
 Expected: PASS.
 
-- [ ] **Step 7: The production-like environment**
+- [x] **Step 7: The production-like environment**
 
 Run `pnpm check:prodlike`. If it fails because of `mailpit` (the network, its start), change `scripts/check-prodlike.sh` as little as it needs. Expected: passes.
 
-- [ ] **Step 8: ADR 0078 and commit**
+- [x] **Step 8: ADR 0078 and commit**
 
 Add to "Settled while building": deviation 1 (`AppDeps.email` and the sender in `server.ts` come with PH-18b's first caller, because nothing uses them now and a required field changes 36 `buildApp` calls), and Mailpit's pinned tag without a digest, like the file's other images.
 
