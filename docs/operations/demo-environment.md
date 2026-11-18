@@ -38,6 +38,7 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [Checks](#checks)
   - [Rotating the Better Auth secret](#rotating-the-better-auth-secret)
   - [The app's roles and database password](#the-apps-roles-and-database-password)
+  - [Sending email through SES](#sending-email-through-ses)
   - [CI's roles and variables](#cis-roles-and-variables)
   - [Cost allocation tags](#cost-allocation-tags)
 - [The landing page](#the-landing-page)
@@ -53,6 +54,7 @@ Why each piece exists is in the [stack overview](../architecture/stack-overview.
   - [The app's log](#the-apps-log)
   - [Finding the task](#finding-the-task)
   - [A shell in the task](#a-shell-in-the-task)
+  - [Sending a test email](#sending-a-test-email)
   - [Querying the database](#querying-the-database)
   - [Checking the client address](#checking-the-client-address)
   - [Reading a failed db-setup](#reading-a-failed-db-setup)
@@ -330,11 +332,13 @@ The login lasts up to 8 hours. When it has expired, a session's `aws` commands f
 
 ### Signing in as the administrator
 
-The `szop` token sits next to Claude Code's in `~/.aws/sso/cache`, so while you are signed in as the administrator, a running session could use it. Only the deny rules in `.claude/settings.json` stand in the way, and they catch a mistake, not a determined command ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decisions 8 and 9). So keep that sign-in as short as the work:
+Keep that sign-in as short as the work ([ADR 0074](../decisions/0074-read-only-aws-access-phase-details.md), decision 9):
 
-1. `aws sso login --profile szop`, in your own terminal, not with `!` in a session.
+1. `aws sso login --profile szop`, in your own terminal on WSL, not with `!` in a session.
 2. Do the work.
-3. `aws sso logout`. It clears **every** profile's token, so sign in as `claude-readonly` again ([The profile](#the-profile)) before a session needs AWS.
+3. `aws sso logout` on WSL.
+
+Claude Code's sessions run in the Docker Sandbox (sbx), which has its own `~/.aws`: the `szop` token on WSL is out of their reach, and the logout on WSL leaves the sandbox's `claude-readonly` login as it is ([The logins and the setup](docker-sandbox.md#4-the-logins-and-the-setup)). When Claude Code runs on WSL again ([Going back to WSL](docker-sandbox.md#going-back-to-wsl)), the two tokens share `~/.aws/sso/cache`: while you are signed in as the administrator, a running session could use it, and only the deny rules in `.claude/settings.json` stand in the way, which catch a mistake, not a determined command (ADR 0074, decision 8). There, `aws sso logout` clears **every** profile's token, so sign in as `claude-readonly` again ([The profile](#the-profile)) before a session needs AWS.
 
 ## Applying bootstrap
 
@@ -552,7 +556,7 @@ In `secrets.tf`, raise `value_wo_version` by one, commit it on a branch, and app
 
 [PH-12c](../roadmap.md#ph-12c-app-on-ecs-and-rds) adds to base what the app on ECS needs before a demo can run it ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md)):
 
-- the two roles `szop-app-task-execution` and `szop-app-task`, each trusted by `ecs-tasks.amazonaws.com` for tasks of this account only. The **task execution role** is what ECS uses to start a task: it pulls the image from the registry `szop`, writes to the log group `/szop/app` and fetches the secrets into the container's environment (`/szop/db-app-password`, `/szop/better-auth-secret` for the app only since PH-16a, and the master password RDS keeps in Secrets Manager, which only `db-setup`'s task definition names). The code in the container never holds it. The **task role** is what the code in the container may call: today only the four `ssmmessages:` actions that ECS Exec needs;
+- the two roles `szop-app-task-execution` and `szop-app-task`, each trusted by `ecs-tasks.amazonaws.com` for tasks of this account only. The **task execution role** is what ECS uses to start a task: it pulls the image from the registry `szop`, writes to the log group `/szop/app` and fetches the secrets into the container's environment (`/szop/db-app-password`, `/szop/better-auth-secret` for the app only since PH-16a, and the master password RDS keeps in Secrets Manager, which only `db-setup`'s task definition names). The code in the container never holds it. The **task role** is what the code in the container may call, in its inline policy `app-task`: the four `ssmmessages:` actions that ECS Exec needs and, since [PH-18a](../roadmap.md#ph-18a-sending-email), sending email through SES ([Sending email through SES](#sending-email-through-ses));
 - the SSM parameter `/szop/db-app-password`, the password of the database role `szop_app` that the app connects as. Terraform generates it (64 letters and digits) and sends it through a write-only argument, as for the Better Auth secret, so it never enters the state. It lives in base because the database is recreated for every session, and the role with it, but the password need not change: `db-setup` creates the role with it at each `demo-up`;
 - the deploy role's three new managed policies, `szop-ci-deploy-demo-database`, `szop-ci-deploy-demo-service` and `szop-ci-deploy-image`, with the extra egress rules in `szop-ci-deploy-demo-network`, and the plan role's `DenyDataReads` statement.
 
@@ -581,6 +585,27 @@ The PR's comment shows IAM Access Analyzer's findings for the new and changed po
 
 - put `szop_app`'s password, or the master password, anywhere by hand: a `value` argument, a `data "aws_ssm_parameter"` or a `data "aws_secretsmanager_secret_version"` would write it into the state;
 - set the parameter in the console: the next rotation overwrites it, and the role's password and the parameter would disagree until `db-setup` runs.
+
+### Sending email through SES
+
+[PH-18a](../roadmap.md#ph-18a-sending-email) lets the app send email from the demo ([ADR 0078](../decisions/0078-sending-email-phase-details.md)). The task definition sets `EMAIL_TRANSPORT=ses` and `EMAIL_FROM=Szop <noreply@szop.dzwoniec.com>`, and the app calls SES's API as the task role, with no key. The role's statement `SendEmail` allows `ses:SendRawEmail` only when the sender is `noreply@szop.dzwoniec.com` or exactly `Szop <noreply@szop.dzwoniec.com>`. Its resources are the `dzwoniec.com` identity and every other identity of the account, because in SES's sandbox the permission is checked on each verified recipient's identity too. The app calls SES API v2's `SendEmail` with a raw MIME message, which IAM checks as `ses:SendRawEmail`, not `ses:SendEmail`.
+
+The statement lives in `infra/base`, so a change to it reaches AWS only when you apply base ([Applying base](#applying-base)), from the PR's branch before its `demo-up` and from `main` after the merge. To see what AWS holds now, in your terminal on WSL, signed in as the administrator ([Signing in as the administrator](#signing-in-as-the-administrator)):
+
+```bash
+aws iam get-role-policy --role-name szop-app-task --policy-name app-task \
+  --query 'PolicyDocument.Statement[?Sid==`SendEmail`].Condition'
+#   StringEquals on ses:FromAddress: "noreply@szop.dzwoniec.com" and "Szop <noreply@szop.dzwoniec.com>"
+```
+
+**SES's sandbox.** Every AWS account starts SES in a sandbox, in each region on its own, and Szop's stays in it: SES delivers only to addresses verified in the account, at most 200 emails a day. Outside users get no email from the demo: SES refuses the send with `MessageRejected`, and the app logs it. To verify an address you can read: in the AWS console, signed in as the administrator, in the region `eu-central-1` (Europe (Frankfurt)), *SES → Configuration → Identities → Create identity → Email address*, enter it, and click the link SES sends to it within 24 hours. Check, in your terminal on WSL:
+
+```bash
+aws sesv2 get-email-identity --email-identity <address> --query VerifiedForSendingStatus
+#   true
+```
+
+Leaving the sandbox is a request to AWS, *SES → Account dashboard → Request production access*, describing what the emails are and how bounces and complaints are handled. AWS answers in about a day and may refuse; afterwards only the daily quota limits sending. It is needed only once strangers register on the demo, and the `SendEmail` statement can then go back to the domain's identity alone.
 
 ### CI's roles and variables
 
@@ -902,6 +927,61 @@ aws ecs execute-command --cluster szop-demo --task <task id> --container app \
 `Starting session with SessionId: ecs-execute-command-…` and a prompt mean it works; `exit` ends the session. The shell runs inside the container, so it has the app's environment variables, `DATABASE_PASSWORD` among them, as the first real demo showed. The image has no `psql` and no `curl`. An ECS Exec session needs a writable root filesystem, which is why the task's is writable ([ADR 0038](../decisions/0038-app-on-ecs-and-rds-details.md)).
 
 `TargetNotConnectedException` means the task's ECS Exec agent is not connected yet (wait a minute after the task starts) or the task role lacks the four `ssmmessages:` actions. A task started before the service allowed ECS Exec cannot be entered: use a task the current service started.
+
+### Sending a test email
+
+`src/send-test-email.ts`, in the image, sends one email through the app's own sender, transport, role and address, to prove the whole path on AWS ([ADR 0078](../decisions/0078-sending-email-phase-details.md), decision 4). You run it inside a running app task through ECS Exec, from your terminal on WSL, as the administrator: the read-only profile cannot open an ECS Exec session.
+
+**Before you start:**
+
+- the demo is up: `demo-up` is green and `https://szop.dzwoniec.com/api/health` answers `ok`;
+- `infra/base` was applied from the same branch, if the PR changes it;
+- the address you send to is verified in SES ([Sending email through SES](#sending-email-through-ses)), and you can read its mailbox;
+- the Session Manager plugin is installed on WSL ([setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli)).
+
+**1. Sign in and find a task**, in your terminal on WSL, anywhere (no checkout needed):
+
+```bash
+export AWS_PROFILE=szop
+aws sso login
+TASK=$(aws ecs list-tasks --cluster szop-demo --service-name szop-demo-app \
+  --query 'taskArns[0]' --output text | awk -F/ '{print $NF}')
+echo "$TASK"
+#   a 32-character id; "None" means no task is running ([Finding the task](#finding-the-task))
+```
+
+**2. Send to the verified address:**
+
+```bash
+aws ecs execute-command --cluster szop-demo --task "$TASK" --container app \
+  --interactive --command "node /app/apps/api/src/send-test-email.ts <verified address>"
+#   Starting session with SessionId: ecs-execute-command-…
+#   {"msg":"test email sent"}
+#   Exiting session with sessionId: ecs-execute-command-…
+```
+
+The command runs in the container and the session ends with it. The path is absolute, because an ECS Exec session does not necessarily start in the image's working directory. `TargetNotConnectedException`: see [A shell in the task](#a-shell-in-the-task).
+
+**3. Read the email.** "Szop test email" from `Szop <noreply@szop.dzwoniec.com>` arrives within a minute; look in the spam folder too. Open its headers (*Show original* in Gmail, *View source* or *View headers* in most other mail programs) and find `Authentication-Results`. It must show:
+
+- `dkim=pass` with `header.d=dzwoniec.com` (or `header.i=@dzwoniec.com`): SES signed it with the domain's key;
+- `dmarc=pass`: the signature's domain aligns with the sender's.
+
+**4. Send to an address that is not verified**, such as `nobody@example.com`, with the command of step 2. SES's sandbox must refuse it:
+
+```bash
+#   {"msg":"test email not sent","errorName":"MessageRejected",…}
+```
+
+The script exits with 1, but `execute-command` does not pass the exit code on: read the line. Any other outcome means the sandbox or the permission is not what this runbook says.
+
+**5. Sign out:** `aws sso logout` ([Signing in as the administrator](#signing-in-as-the-administrator)).
+
+**When it fails**, the line `test email not sent` names the error:
+
+- `MessageRejected` (`Email address is not verified`) on the verified address: its verification has not finished, or it was made in another region than `eu-central-1`.
+- `AccessDeniedException` (`errorCode` `ESES`): the task role's `SendEmail` statement, which allows `ses:SendRawEmail`, is missing, because `infra/base` was not applied from the branch, or it does not match the sender, because the task's `EMAIL_FROM` and the statement's addresses differ. Compare them with the check in [Sending email through SES](#sending-email-through-ses).
+- Nothing arrives, but the script printed `test email sent`: SES accepted it, so look in the spam folder, then at the domain's DKIM status (the `aws sesv2 get-email-identity --email-identity dzwoniec.com` check in [Applying base](#checks)).
 
 ### Querying the database
 

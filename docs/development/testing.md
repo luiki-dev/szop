@@ -15,6 +15,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
   - [Testing the served SPA](#testing-the-served-spa)
 - [Writing a database test](#writing-a-database-test)
 - [Writing a migration test with data](#writing-a-migration-test-with-data)
+- [Writing an email test](#writing-an-email-test)
 - [Writing a component test](#writing-a-component-test)
 - [Writing a unit test](#writing-a-unit-test)
 - [Writing a property test](#writing-a-property-test)
@@ -38,6 +39,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
 |---|---|---|---|
 | API tests | `apps/api/src/**/*.test.ts`, for example `health/routes.test.ts` | A request through the real app gets the right status, headers and body: they go through `buildApp` and `inject()` | `api` |
 | Database tests | `apps/api/src/**/*.test.ts` that call `useTestDatabase()`, for example `test/database.test.ts` | Queries, migrations and cleanup work against the real PostgreSQL | `api` |
+| Email tests | `apps/api/src/email/sender.test.ts` | The sender hands a real email over SMTP to Mailpit, found through Mailpit's API with the expected sender, subject, text and HTML ([Writing an email test](#writing-an-email-test)) | `api` |
 | Component tests | `apps/web/src/**/*.test.tsx`, for example `shell/shell.test.tsx` | A page works as a user sees it: the real route table, hook, API client and schema run in a simulated browser ([jsdom](tools/vitest.md#jsdom)) with only the network faked by MSW | `web` |
 | Unit tests | next to the code, for example `apps/api/src/config.test.ts` | One function does its job for each kind of input, with no server involved | `api` |
 | Seed data tests | `apps/api/src/catalog/seed.test.ts` | The real `seed.yaml` passes every check the API makes at startup (limits, unique names, declared units), and `parseSeed` refuses each kind of broken file with a message naming the entry. They run in `pnpm test`, so a bad edit of the file fails CI before a deploy ([ADR 0050](../decisions/0050-seed-catalog-phase-details.md), decision 3) | `api` |
@@ -53,7 +55,7 @@ How Szop is tested **now**: the layers, how to run them, how to write each kind 
 
 ## Running the tests
 
-All commands run from the repository root. PostgreSQL must be running first for the API tests (`pnpm db:up`, which runs `docker compose up -d --wait`; see [Docker Compose and PostgreSQL](tools/docker-compose.md); the `web` project itself needs no database); otherwise the run stops at once with `Cannot reach PostgreSQL … Start it with docker compose up -d.` The tests read the server's address and password from `apps/api/.env`.
+All commands run from the repository root. PostgreSQL and Mailpit must be running first for the API tests (`pnpm db:up`, which runs `docker compose up -d --wait` and starts both; see [Docker Compose and PostgreSQL](tools/docker-compose.md); the `web` project itself needs no database); otherwise the run stops at once with `Cannot reach PostgreSQL … Start it with docker compose up -d.` With only Mailpit down the run does not stop: only `sender.test.ts` fails, with `ECONNREFUSED` ([Mailpit](tools/mailpit.md#everyday-use)). The tests read the server's address and password from `apps/api/.env`.
 
 ```bash
 pnpm test                       # every project once, the same tests CI runs (CI adds `--coverage`)
@@ -255,6 +257,16 @@ A migration that changes a table that already holds rows is tested with rows in 
 - **Insert the old rows with raw SQL**, since the Drizzle schema describes the newest tables, then call `runMigrations(db)` (what production runs) and read the rows back.
 - **Close the database** with `db.$client.end()` in `finally`.
 - The example is `apps/api/src/db/migration-data.test.ts`: lists made before `0003` keep their rows and get `sort_by_category` true.
+
+## Writing an email test
+
+An email test sends a real email over SMTP to Mailpit, which runs from `compose.yaml` next to PostgreSQL, and reads it back through Mailpit's HTTP API ([Mailpit](tools/mailpit.md); [ADR 0078](../decisions/0078-sending-email-phase-details.md), decision 3). `email/sender.test.ts` is the example.
+
+- **A unique address per test,** such as `` `test-${randomUUID()}@example.com` ``. Mailpit keeps every email until it restarts and is shared by every worker and every run, so a test finds its own email by its address (`GET http://localhost:8025/api/v1/search?query=to:<address>`) and never clears Mailpit, as the database tests isolate themselves by their own databases.
+- **Wait for the email** with `vi.waitFor`: Mailpit may store it just after its SMTP reply.
+- **Mailpit at fixed addresses,** like PostgreSQL's: SMTP at `127.0.0.1:1025` in `testConfig()`, its API at `http://localhost:8025`.
+- **SES is never called.** A test of the SES transport passes `createEmailSender` a fake `SESv2Client` and reads the raw message it was given.
+- **Code that sends email does not wait for it** but calls `sendInBackground`; its test (`email/background.test.ts`) passes a logger with `vi.fn()` and checks the one `error` line holds neither the address nor the subject.
 
 ## Writing a component test
 

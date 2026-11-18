@@ -17,6 +17,10 @@ const valid = {
   GIT_COMMIT: "0123456789abcdef0123456789abcdef01234567",
   BETTER_AUTH_SECRET: "0123456789abcdef0123456789abcdef",
   APP_ORIGIN: "http://localhost:5173",
+  EMAIL_TRANSPORT: "smtp",
+  EMAIL_FROM: "Szop <noreply@szop.dzwoniec.com>",
+  SMTP_HOST: "localhost",
+  SMTP_PORT: "1025",
 };
 
 const names = Object.keys(valid);
@@ -50,6 +54,12 @@ describe("loadConfig", () => {
       commit: "0123456789abcdef0123456789abcdef01234567",
       betterAuthSecret: "0123456789abcdef0123456789abcdef",
       appOrigin: "http://localhost:5173",
+      email: {
+        transport: "smtp",
+        from: "Szop <noreply@szop.dzwoniec.com>",
+        smtpHost: "localhost",
+        smtpPort: 1025,
+      },
     });
   });
 
@@ -239,5 +249,50 @@ describe("loadConfig", () => {
     // The newline and indent make this line PORT's own, not DATABASE_PORT's.
     expect(message).toContain("\n  PORT:");
     expect(message).not.toContain(secret);
+  });
+});
+
+describe("email settings", () => {
+  it("refuses a start without EMAIL_TRANSPORT or EMAIL_FROM, naming each", () => {
+    const message = errorFor({
+      ...valid,
+      EMAIL_TRANSPORT: undefined,
+      EMAIL_FROM: undefined,
+    });
+    expect(message).toContain("EMAIL_TRANSPORT: missing");
+    expect(message).toContain("EMAIL_FROM: missing");
+  });
+
+  it.each(["SMTP_HOST", "SMTP_PORT"])("requires %s with smtp", (name) => {
+    expect(errorFor({ ...valid, [name]: undefined })).toContain(
+      `${name}: missing`,
+    );
+  });
+
+  it("ignores the SMTP settings with ses", () => {
+    expect(
+      loadConfig({ ...valid, EMAIL_TRANSPORT: "ses", SMTP_PORT: undefined })
+        .email,
+    ).toEqual({ transport: "ses", from: "Szop <noreply@szop.dzwoniec.com>" });
+  });
+
+  it.each(["noreply@szop.dzwoniec.com", "Szop <noreply@szop.dzwoniec.com>"])(
+    "accepts EMAIL_FROM %s",
+    (from) => {
+      expect(loadConfig({ ...valid, EMAIL_FROM: from }).email.from).toBe(from);
+    },
+  );
+
+  it.each(["noreply", "Szop <noreply>", "Szop noreply@szop.dzwoniec.com", ""])(
+    "refuses EMAIL_FROM %j",
+    (from) => {
+      expect(errorFor({ ...valid, EMAIL_FROM: from })).toContain("EMAIL_FROM:");
+    },
+  );
+
+  it("refuses an unknown transport", () => {
+    expect(errorFor({ ...valid, EMAIL_TRANSPORT: "sendmail" })).toContain(
+      "EMAIL_TRANSPORT:",
+    );
   });
 });

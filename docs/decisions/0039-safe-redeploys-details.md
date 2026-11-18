@@ -56,7 +56,7 @@ Facts the plan did not have, found while building and in the owner's demo runs, 
 ## Consequences
 
 - [PH-37](../roadmap.md#ph-37-two-tasks) weighs the grace period against the migration lock's wait: the grace period sets how long two versions overlap (decision 8). [OP-103](https://github.com/luiki-dev/szop/issues/249) is decided there too, since with two tasks replaced one at a time a page load can mix two versions of the SPA for minutes (decision 15).
-- A migration must work with the code of the release before it (decision 14): during a deploy the old version runs on the new schema for about a minute, and a failed deploy is fixed forward, so a migration that breaks the old code means another migration. [PH-16](../roadmap.md#ph-16-guest-workspace-and-lists)'s first table is the first to be written under the rule.
+- A migration must work with the code of the release before it (decision 14): during a deploy the old version runs on the new schema for about a minute, and a failed deploy is fixed forward, so a migration that breaks the old code means another migration. [PH-16a](../roadmap.md#ph-16a-guests-first-list)'s first table is the first to be written under the rule.
 - A database outage no longer replaces healthy tasks: the load balancer checks `/api/live`, so the tasks keep serving the SPA while `/api/health` answers `503` and `demo-up` and the watch script see it (decisions 5 and 6).
 - The commit is public on `/api/health` (decision 4), and the deploy role gains `ecs:StopTask` on `db-setup`'s tasks, both recorded in the threat model.
 - A failed deploy stops `demo-up` at *Start the app* within minutes and leaves the old task serving (decisions 7 and 10); the runbook says to fix forward and press again.

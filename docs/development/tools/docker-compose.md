@@ -1,6 +1,6 @@
 # Docker Compose and PostgreSQL
 
-Docker Compose starts the services a project needs from one file. Szop's everyday service is PostgreSQL, the database the API uses in development and the tests use, locally and in CI; a second service, `app`, runs [the container image](docker.md) next to it when asked for.
+Docker Compose starts the services a project needs from one file. Szop's everyday services are PostgreSQL, the database the API uses in development and the tests use, locally and in CI, and [Mailpit](mailpit.md), which catches the email the API sends; a second service, `app`, runs [the container image](docker.md) next to it when asked for.
 
 ## Why Szop uses it
 
@@ -19,13 +19,14 @@ Docker Compose starts the services a project needs from one file. Szop's everyda
 - `ports: "127.0.0.1:5432:5432"`: bound to the loopback address, so only this machine can connect; Docker would otherwise publish the port on every network interface.
 - `volumes: postgres-data:/var/lib/postgresql`: a named volume. PostgreSQL 18 keeps its data in `18/docker` below that folder, so the volume is mounted one level up. It lives inside Docker Desktop's virtual machine, not in WSL or Windows, which gives PostgreSQL a real Linux file system; a bind mount to a Windows path would fail on permissions and be slow.
 - `healthcheck`: runs `pg_isready` every 2 seconds; the container is `healthy` when it passes, and turns `unhealthy` after 15 failures in a row. It probes over TCP (`-h 127.0.0.1`), not the default Unix socket: while the image initialises an empty volume, it first runs a temporary server that listens on the socket only, so a socket probe could report healthy before the real server is up. Every CI run starts from an empty volume, so it would meet this every time. It is what `docker compose up --wait` waits for.
+- **`mailpit`** ([ADR 0078](../../decisions/0078-sending-email-phase-details.md), decision 3): `image: axllent/mailpit:v1.34.0`, pinned by its tag like the other images; `ports` `127.0.0.1:1025:1025` (SMTP) and `127.0.0.1:8025:8025` (the web UI and the HTTP API), on the loopback address like PostgreSQL's; `networks: [default, prodlike]`, so the `prodlike` profile's app reaches the same Mailpit and one UI shows every profile's email; a `healthcheck` with Mailpit's own `/mailpit readyz`, which `--wait` waits for; no volume, so a restart empties it. In the default profile, so `pnpm db:up` and CI start it with PostgreSQL.
 - **`x-app`**, a block every container of the image shares: the `app` service's and the `scale` profile's two. Compose ignores top-level keys that start with `x-`; YAML's anchor (`&app`) and merge key (`<<: *app`) copy the block into each service, which then adds or overrides its own keys. The environment has an anchor of its own (`&app-environment`), so a service can change one setting and keep the rest.
 - **The `app` service** ([ADR 0028](../../decisions/0028-container-image-details.md)), the container image:
   - `profiles: [app]`: a **profile** marks a service that starts only when asked for with `--profile app`, so `docker compose up` still starts PostgreSQL alone.
   - `build: context: .` and `image: szop:local`: built from the root `Dockerfile` and tagged `szop:local`; with `--no-build`, Compose uses an image of that name already built, as CI does.
   - `build: args: GIT_COMMIT: "${GIT_COMMIT:-unknown}"`: the build argument with the commit the image reports in `/api/health` ([Docker](docker.md#the-dockerfile-stage-by-stage)). `pnpm check:image` and CI set `GIT_COMMIT` to the real commit; a bare `docker compose build` leaves it `unknown`, the Dockerfile's default.
-  - `depends_on: postgres: condition: service_healthy`: PostgreSQL is started first, and the app only once its health check passes.
-  - `environment`: every setting the image does not set itself. `HOST: 0.0.0.0`, because inside the container the API must listen on every interface for Docker's port mapping to reach it; `DATABASE_HOST: postgres`, the service's name on the network Compose creates for the project; the rest as in `apps/api/.env.example`.
+  - `depends_on`: `postgres` and `mailpit`, each with `condition: service_healthy`: they are started first, and the app only once their health checks pass.
+  - `environment`: every setting the image does not set itself. `HOST: 0.0.0.0`, because inside the container the API must listen on every interface for Docker's port mapping to reach it; `DATABASE_HOST: postgres` and `SMTP_HOST: mailpit`, the services' names on the network Compose creates for the project; the rest as in `apps/api/.env.example`.
   - `ports: "127.0.0.1:8080:3000"`: the API listens on 3000 inside the container and is reached on 8080 on this machine, so `pnpm dev` and `pnpm start` keep 3000.
   - `read_only: true`: the container's root filesystem is read-only, which proves the API writes nothing to disk. On ECS the root filesystem is writable instead, because ECS Exec needs it ([ADR 0038](../../decisions/0038-app-on-ecs-and-rds-details.md)).
   - `healthcheck`: `node -e` with `fetch` on `/api/health`, since the slim image has no `curl`; `docker compose up --wait` waits for it.
@@ -40,6 +41,7 @@ pnpm db:up                                   # start it, and wait until it is he
 docker compose ps                            # is it running?
 pnpm db:down                                 # stop it; pnpm db:up brings it back (docker compose stop)
 docker compose logs postgres                 # the server's log
+docker compose logs mailpit                  # Mailpit's log; its UI is http://localhost:8025
 docker compose exec postgres psql -U szop    # a SQL prompt
 docker compose down                          # remove the container, keep the data
 docker compose down -v                       # remove the data too
@@ -59,4 +61,5 @@ docker compose down -v                       # remove the data too
 - Compose file reference: <https://docs.docker.com/reference/compose-file/>
 - `docker compose up`: <https://docs.docker.com/reference/cli/docker/compose/up/>
 - The PostgreSQL image: <https://hub.docker.com/_/postgres>
+- The Mailpit image: <https://hub.docker.com/r/axllent/mailpit>
 - Docker Desktop's WSL integration: <https://docs.docker.com/desktop/features/wsl/>

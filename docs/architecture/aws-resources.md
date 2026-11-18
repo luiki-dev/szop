@@ -80,7 +80,7 @@ flowchart LR
         polImage["Managed policy<br/><b>szop-ci-deploy-image</b><br/><i>base</i>"]
         ciRelease["Role<br/><b>szop-ci-release</b><br/>inline image<br/><i>base</i>"]
         execRole["Role<br/><b>szop-app-task-execution</b><br/>inline task-execution<br/><i>base</i>"]
-        taskRole["Role<br/><b>szop-app-task</b><br/>inline ecs-exec<br/><i>base</i>"]
+        taskRole["Role<br/><b>szop-app-task</b><br/>inline app-task: ECS Exec,<br/>SendEmail as noreply@szop.dzwoniec.com<br/><i>base</i>"]
     end
 
     subgraph route53["Route 53"]
@@ -131,6 +131,7 @@ flowchart LR
     execRole -->|can write to| logGroup
     execRole -->|can read| dbPass
     execRole -->|can read| authSecret
+    taskRole -->|can send as| identity
     caa -->|in| zone
     caaApp -->|in| zone
     pagesA -->|in| zone
@@ -147,7 +148,7 @@ flowchart LR
     class zone,caa,caaApp,pagesA,pagesWww,pagesChallenge,mx,spf,dmarc,dkim,identity,repo,logGroup,authSecret,dbPass base
 ```
 
-The managed policies attached to `szop-ci-deploy` reach demo's resources by their tags and ARN patterns, not by reference, so the diagram draws no arrows from them into demo. The overview shows that link. The same goes for the task execution role's grant on the master password secret RDS creates in demo.
+The managed policies attached to `szop-ci-deploy` reach demo's resources by their tags and ARN patterns, not by reference, so the diagram draws no arrows from them into demo. The overview shows that link. The same goes for the task execution role's grant on the master password secret RDS creates in demo. The task role's `SendEmail` statement names the `dzwoniec.com` identity by reference (the arrow) and every other identity of the account by an ARN pattern, which SES's sandbox needs for the verified recipients ([ADR 0078](../decisions/0078-sending-email-phase-details.md), settled while building).
 
 | Box | Terraform resources |
 |---|---|

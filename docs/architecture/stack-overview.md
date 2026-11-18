@@ -37,6 +37,7 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
 - [22. Scanning for vulnerabilities and misconfigurations](#22-scanning-for-vulnerabilities-and-misconfigurations)
 - [23. Releases: versions, release PRs and tags](#23-releases-versions-release-prs-and-tags)
 - [24. Claude Code in a Docker Sandbox](#24-claude-code-in-a-docker-sandbox)
+- [25. Sending email](#25-sending-email)
 
 ## 1. The big picture
 
@@ -66,6 +67,7 @@ The frontend never touches the database. The backend never draws screens. The sh
 | **[Node.js](https://nodejs.org/)** | [API](https://nodejs.org/docs/latest/api/) | server | Running JavaScript outside the browser: network, files, timers | Routing, validation — frameworks add those |
 | **[Fastify](https://fastify.dev/)** | [Docs](https://fastify.dev/docs/latest/) | server | Receiving HTTP requests, routing them to handlers, running hooks, validating and serializing via schemas, plugins | Business rules — our services hold those |
 | **[Better Auth](https://www.better-auth.com/)** | [Docs](https://www.better-auth.com/docs/introduction) | server | Users, password hashing, sessions, cookies, email verification and reset flows, anonymous users | What a user may do with a list — our access control |
+| **[nodemailer](https://nodemailer.com/)** | [Docs](https://nodemailer.com/usage/) | server | Building an email message and handing it to a transport: SMTP locally, SES on AWS | Deciding when to send, or what — our code does |
 | **[Drizzle](https://orm.drizzle.team/)** | [Docs](https://orm.drizzle.team/docs/overview) | server | Describing tables in TypeScript, building type-safe SQL queries, migrations | Business rules |
 | **[PostgreSQL](https://www.postgresql.org/)** | [Docs](https://www.postgresql.org/docs/current/) | database server | Storing data durably, enforcing constraints, running queries, transactions | Anything about HTTP or users' sessions in the browser |
 
@@ -77,7 +79,7 @@ Browser (React SPA)
    ▼
 Fastify API ── SQL (via Drizzle) ──► PostgreSQL
    │
-   └── AWS SDK ──► Amazon SES (verification, password reset)
+   └── nodemailer ──► Amazon SES on AWS, Mailpit locally (verification, password reset)
 
 Later: Fastify API ── WebSocket push ──► Browser ("list 42 changed")
 ```
@@ -276,7 +278,7 @@ How the pieces connect, resource by resource, is drawn in [AWS resources](aws-re
 | **RDS** | Relational Database Service: a managed database server. AWS installs, patches and runs PostgreSQL; you connect to it like any other. | The smallest PostgreSQL instance, empty at every spin-up, in the private subnets. |
 | **IAM, roles** | Identity and Access Management (IAM) decides who may do what in AWS. A **role** is a set of permissions that a person or a service *assumes* temporarily, instead of holding permanent keys. | ECS's **task execution role** pulls the image and reads secrets; the app's **task role** may only accept ECS Exec sessions today (sending email joins in PH-18). People log in through IAM Identity Center with short-lived credentials. |
 | **Parameter Store, Secrets Manager** | Encrypted stores for configuration values and secrets, readable only with the right IAM permissions. | The Better Auth secret and the app's database password, in Parameter Store; the master password, which RDS generates and keeps in Secrets Manager itself. ECS injects them as environment variables when a task starts. |
-| **SES** | Simple Email Service: sends email. New accounts are in a *sandbox* that delivers only to verified addresses. | Verification and password-reset emails, signed with DKIM for `dzwoniec.com`. |
+| **SES** | Simple Email Service: sends email. New accounts are in a *sandbox* that delivers only to verified addresses. | Verification and password-reset emails, signed with DKIM for `dzwoniec.com` ([Sending email](#25-sending-email)). |
 | **CloudWatch** | Logs and metrics. | The app's JSON log lines, kept for 7 days. |
 
 ### The demo's network and load balancer
@@ -493,3 +495,14 @@ Claude Code writes much of Szop, and on WSL it runs with the owner's rights, nex
 - **Built from source in layers.** A **workload** kit gives the base system and the agent (Docker's Claude Code image); **mixins** add to it. Szop has two: `sandbox/base`, which any project could use (Node, the AWS CLI, Claude's setup from the owner's private configuration repository, the backup of Claude's memory and statistics), and Szop's own layer. An **environment file** names the kits, the size and the ports, and several files merge in order, so a project's file adds to the base one. Because every layer is a file in the repository, a lost sandbox is rebuilt in minutes, and adding a tool is a reviewed change, not a hand-made one.
 - **An overlay laid on an unknown base.** A mixin's Dockerfile builds only the files it adds (`FROM scratch`), which are laid over a workload it has never seen. It cannot install Debian packages, which need the base's package database, so the base layer brings self-contained releases instead, each pinned to a version and, where the publisher gives one, checked against a checksum.
 - **What runs on the host.** The kits run inside the virtual machine, but an environment file's lifecycle commands run on the owner's computer, with the owner's rights. That is why the environment files are read from a checkout of reviewed `main`, and why the owner's review of a change to them is a security boundary.
+
+## 25. Sending email
+
+Szop sends **transactional email**: messages one user's action triggers and only that user receives, such as a link to verify an address or reset a password, as opposed to newsletters or marketing. [PH-18a](../roadmap.md#ph-18a-sending-email) builds the way to send it, and [PH-18b](../roadmap.md#ph-18b-registration-and-login) its first real emails ([ADR 0078](../decisions/0078-sending-email-phase-details.md)).
+
+- **SMTP** (Simple Mail Transfer Protocol) is the protocol mail servers hand messages to each other with: the client connects, names the sender and the recipients (the *envelope*), and sends the message. The message itself is **MIME** (Multipurpose Internet Mail Extensions): headers such as `From`, `To` and `Subject`, and a body that can hold several parts, here a plain-text one and an HTML one, so every mail program shows one of them.
+- **nodemailer** builds that MIME message from an object (`from`, `to`, `subject`, `text`, `html`) and hands it to a **transport**. Szop uses two: SMTP, to Mailpit, locally and in CI; and SES, which sends the same finished message through SES's HTTP API with the AWS SDK. The app's code is the same in both; only the settings (`EMAIL_TRANSPORT`) pick the transport.
+- **Mailpit** is a small mail server for development: it accepts every message over SMTP and delivers none, shows them in a web UI (`http://localhost:8025`), and serves them through an HTTP API that tests read. It runs from `compose.yaml` next to PostgreSQL, so development and CI send real SMTP without any message leaving the machine.
+- **SES's sandbox.** Every new AWS account starts SES in a *sandbox*, in each region on its own: it delivers only to addresses and domains verified in the account, and at most 200 messages a day. Leaving it is a request to AWS (*Request production access* in SES's console) describing the use and how bounces and complaints are handled; AWS answers in about a day and may refuse. Szop's demo stays in the sandbox, so it sends only to addresses the owner verified, and a send to any other is refused with `MessageRejected`.
+- **No key in the app.** On AWS the SES transport signs its requests with the task role's temporary credentials, which ECS gives the container. The role may send raw email (`ses:SendRawEmail`) only with `noreply@szop.dzwoniec.com` as the sender, so even a compromised app cannot send as another address on the domain. SES signs every message with DKIM for `dzwoniec.com` ([Domains, DNS and email authentication](#domains-dns-and-email-authentication)), which aligns with the `szop.` subdomain under DMARC's relaxed alignment.
+- **Sending without waiting.** A send can take seconds or fail, and its timing would tell an attacker whether an address has an account. So the app never waits for it: it starts the send in the background and only logs a failure, without the address, and a lost email is sent again by the user's resend.

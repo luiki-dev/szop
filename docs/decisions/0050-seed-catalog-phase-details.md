@@ -10,7 +10,7 @@
 
 ## Changes to the roadmap
 
-PH-15 is split into PH-15a Seed catalog, read-only and PH-15b Mutation testing. With StrykerJS and `mutation.yml`, the phase held about ten tasks and two new concepts, which [ADR 0014](0014-roadmap.md), decision 6, does not allow. This refines decision 7 of the same ADR: fast-check arrives in PH-15a, StrykerJS and `mutation.yml` in PH-15b, which follows at once and mutates the order rule and the seed checks written here. The check that migrations match the schema ([OP-076](https://github.com/luiki-dev/szop/issues/95)) moves to [PH-16](../roadmap.md#ph-16-guest-workspace-and-lists), since this phase adds no table.
+PH-15 is split into PH-15a Seed catalog, read-only and PH-15b Mutation testing. With StrykerJS and `mutation.yml`, the phase held about ten tasks and two new concepts, which [ADR 0014](0014-roadmap.md), decision 6, does not allow. This refines decision 7 of the same ADR: fast-check arrives in PH-15a, StrykerJS and `mutation.yml` in PH-15b, which follows at once and mutates the order rule and the seed checks written here. The check that migrations match the schema ([OP-076](https://github.com/luiki-dev/szop/issues/95)) moves to [PH-16a](../roadmap.md#ph-16a-guests-first-list), since this phase adds no table.
 
 ## Decisions
 

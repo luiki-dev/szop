@@ -109,6 +109,8 @@ resource "aws_ecs_task_definition" "app" {
         { name = "DATABASE_USER", value = "szop_app" },
         { name = "TRUSTED_PROXIES", value = local.trusted_proxies },
         { name = "APP_ORIGIN", value = "https://${local.app_hostname}" },
+        { name = "EMAIL_TRANSPORT", value = "ses" },
+        { name = "EMAIL_FROM", value = local.email_from },
       ])
 
       # ECS fetches the value when the task starts; the task definition holds

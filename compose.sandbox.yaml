@@ -1,10 +1,18 @@
 # Used only in a Docker Sandbox (PH-49, ADR 0076): `sbx ports` reaches a port
 # published on every interface, not on 127.0.0.1, so the production-like
-# environment's nginx is published on 0.0.0.0 here. The sandbox's VM is
-# reachable only through `sbx ports`. compose.yaml stays as it is.
+# environment's nginx and Mailpit's UI are published on 0.0.0.0 here. The
+# sandbox's VM is reachable only through `sbx ports`. compose.yaml stays as it
+# is.
 #   COMPOSE_FILE=compose.yaml:compose.sandbox.yaml pnpm check:prodlike --keep
+#   COMPOSE_FILE=compose.yaml:compose.sandbox.yaml pnpm db:up
 services:
   nginx-prodlike:
     ports: !override
       - "0.0.0.0:8443:8443"
       - "0.0.0.0:8082:8080"
+  # Mailpit's UI, for `sbx ports szop --publish 8025:8025`. SMTP stays on
+  # 127.0.0.1.
+  mailpit:
+    ports: !override
+      - "127.0.0.1:1025:1025"
+      - "0.0.0.0:8025:8025"

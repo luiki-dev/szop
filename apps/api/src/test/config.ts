@@ -23,6 +23,13 @@ export function testConfig(overrides: Partial<Config> = {}): Config {
     commit: "unknown",
     betterAuthSecret: "test-secret-".padEnd(32, "x"),
     appOrigin: "http://localhost",
+    // Mailpit from compose.yaml, like PostgreSQL.
+    email: {
+      transport: "smtp",
+      from: "Szop <noreply@szop.dzwoniec.com>",
+      smtpHost: "127.0.0.1",
+      smtpPort: 1025,
+    },
     ...overrides,
   };
 }

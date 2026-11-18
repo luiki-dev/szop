@@ -11,6 +11,10 @@ locals {
   image_repository        = "szop"
   log_group               = "/szop/app"
 
+  # The app's sender. The task role's SendEmail statement in infra/base allows
+  # only this address (ADR 0078, decisions 6 and 7).
+  email_from = "Szop <noreply@${local.app_hostname}>"
+
   # The parameter's ARN is built from the account and the name, not looked up:
   # data "aws_ssm_parameter" would read the password into the state (ADR 0008,
   # decision 22). The name starts with a slash, so none follows "parameter".

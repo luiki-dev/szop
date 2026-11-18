@@ -1,4 +1,4 @@
-# PostgreSQL for local development and CI (ADR 0005, decision 4; ADR 0020), the container image under the app profile (ADR 0028), two of it behind nginx under the scale profile (ADR 0036, decision 14), and a production-like copy under the prodlike profile (ADR 0064, decision 7).
+# PostgreSQL and Mailpit for local development and CI (ADR 0005, decision 4; ADR 0020; ADR 0078), the container image under the app profile (ADR 0028), two of it behind nginx under the scale profile (ADR 0036, decision 14), and a production-like copy under the prodlike profile (ADR 0064, decision 7).
 name: szop
 # The settings every container of the image shares: the app profile's one
 # and the scale profile's two. Compose ignores top-level keys starting with x-.
@@ -6,6 +6,8 @@ x-app: &app
   image: szop:local
   depends_on:
     postgres:
+      condition: service_healthy
+    mailpit:
       condition: service_healthy
   # Every setting the image does not set itself (it sets WEB_ROOT and
   # NODE_ENV). Inside the container the API listens on every interface, so
@@ -26,6 +28,11 @@ x-app: &app
     # The address the browser opens: the app profile's published port; the
     # scale profile sets its own below.
     APP_ORIGIN: http://localhost:8080
+    # Email goes to Mailpit, below (ADR 0078, decision 3).
+    EMAIL_TRANSPORT: smtp
+    EMAIL_FROM: Szop <noreply@szop.dzwoniec.com>
+    SMTP_HOST: mailpit
+    SMTP_PORT: "1025"
   # Proves the API writes nothing to disk (logs go to stdout). On ECS the
   # root filesystem stays writable, for ECS Exec.
   read_only: true
@@ -66,6 +73,22 @@ services:
     # socket only, and a socket probe would report healthy too early.
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "szop", "-d", "szop"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+  # Catches every email the API sends locally and in CI: SMTP on 1025, a web
+  # UI and the HTTP API tests read on http://localhost:8025 (ADR 0078,
+  # decision 3). Nothing is kept: a restart empties it. On the prodlike
+  # network too, so app-prodlike reaches it.
+  mailpit:
+    image: axllent/mailpit:v1.34.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    networks: [default, prodlike]
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
       interval: 2s
       timeout: 2s
       retries: 15
@@ -204,6 +227,8 @@ services:
     depends_on:
       db-setup-prodlike:
         condition: service_completed_successfully
+      mailpit:
+        condition: service_healthy
     environment:
       <<: *app-environment
       DATABASE_HOST: postgres-tls
