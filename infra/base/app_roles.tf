@@ -134,7 +134,8 @@ data "aws_iam_policy_document" "app_task" {
 
   # Sending as one address only: a compromised app cannot send as any other
   # address on the domain (ADR 0078, decision 7). SES may report the sender
-  # with or without its display name, hence both forms. While SES is in its
+  # with or without its display name, hence both forms; the display name is
+  # fixed too. While SES is in its
   # sandbox it also checks the permission on each recipient's verified
   # identity, hence every identity of the account; the condition still fixes
   # the sender.
@@ -147,9 +148,9 @@ data "aws_iam_policy_document" "app_task" {
     ]
 
     condition {
-      test     = "StringLike"
+      test     = "StringEquals"
       variable = "ses:FromAddress"
-      values   = ["noreply@szop.${local.domain}", "*<noreply@szop.${local.domain}>"]
+      values   = ["noreply@szop.${local.domain}", "Szop <noreply@szop.${local.domain}>"]
     }
   }
 }
