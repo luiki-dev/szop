@@ -293,7 +293,7 @@ git commit -m "feat(api): send email through nodemailer, with Mailpit locally"
 **Interfaces:**
 - Consumes: `loadConfig` (Task 1), `createEmailSender` (Task 2), `instanceId` from `instance.ts`.
 
-- [ ] **Step 1: Write `send-test-email.ts`**
+- [x] **Step 1: Write `send-test-email.ts`**
 
 An entry point like `db-setup.ts`: first line `// Stryker disable all: entry point, checked by hand (testing.md, Rules): it only wires the sender, which sender.test.ts tests`; a comment that it is the third file reading `process.env` and how to run it (`node src/send-test-email.ts <address>`, through ECS Exec on the demo, ADR 0078, decision 4).
 - No argument, or more than one: print `Usage: node src/send-test-email.ts <address>` to stderr, exit `1`.
@@ -301,7 +301,7 @@ An entry point like `db-setup.ts`: first line `// Stryker disable all: entry poi
 - Send: subject `Szop test email`; text `Sent by Szop's test script at <ISO time> from instance <instanceId>.`; the same sentence in a `<p>` as HTML.
 - Wait for it. On success print `{"msg":"test email sent"}` and exit `0`; on failure print `{"msg":"test email not sent","errorName":…,"errorCode":…}` and exit `1`. The address is not printed (the person running it typed it).
 
-- [ ] **Step 2: Check it by hand, locally**
+- [x] **Step 2: Check it by hand, locally**
 
 From `apps/api`, with Mailpit running:
 
@@ -309,11 +309,11 @@ Run: `node --env-file=.env src/send-test-email.ts check-${RANDOM}@example.com; e
 Run: `node --env-file=.env src/send-test-email.ts; echo $?` — Expected: the usage line, `1`.
 Run: `SMTP_PORT=1 node --env-file=.env src/send-test-email.ts x@example.com; echo $?` — Expected: `test email not sent` with a code, `1`. (`--env-file` does not override a variable already set.)
 
-- [ ] **Step 3: Check it in the image**
+- [x] **Step 3: Check it in the image**
 
 Run: `pnpm check:prodlike` to build and start the production-like environment (or start its profile), then `docker compose --profile prodlike exec app-prodlike node src/send-test-email.ts prodlike@example.com` — Expected: `0`, and the email in Mailpit. This is the spec's local demo check; record the result in the commit message body.
 
-- [ ] **Step 4: Check and commit**
+- [x] **Step 4: Check and commit**
 
 Run: `pnpm check` — Expected: passes.
 
