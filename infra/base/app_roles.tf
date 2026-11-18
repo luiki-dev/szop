@@ -110,9 +110,9 @@ resource "aws_iam_role_policy" "app_task_execution" {
   policy = data.aws_iam_policy_document.app_task_execution.json
 }
 
-# The task role: what the code in the container may call. Today that is only
-# ECS Exec's channel (ADR 0008, decision 20); sending email through SES joins
-# in PH-18.
+# The task role: what the code in the container may call: ECS Exec's channel
+# (ADR 0008, decision 20) and sending email as Szop's address through SES
+# (ADR 0078, decision 7).
 resource "aws_iam_role" "app_task" {
   name               = "szop-app-task"
   assume_role_policy = data.aws_iam_policy_document.app_task_trust.json
@@ -131,10 +131,31 @@ data "aws_iam_policy_document" "app_task" {
     ]
     resources = ["*"]
   }
+
+  # Sending as one address only: a compromised app cannot send as any other
+  # address on the domain (ADR 0078, decision 7). SES may report the sender
+  # with or without its display name, hence both forms. While SES is in its
+  # sandbox it also checks the permission on each recipient's verified
+  # identity, hence every identity of the account; the condition still fixes
+  # the sender.
+  statement {
+    sid     = "SendEmail"
+    actions = ["ses:SendEmail"]
+    resources = [
+      aws_sesv2_email_identity.domain.arn,
+      "arn:aws:ses:eu-central-1:${var.account_id}:identity/*",
+    ]
+
+    condition {
+      test     = "StringLike"
+      variable = "ses:FromAddress"
+      values   = ["noreply@szop.${local.domain}", "*<noreply@szop.${local.domain}>"]
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "app_task" {
-  name   = "ecs-exec"
+  name   = "app-task"
   role   = aws_iam_role.app_task.id
   policy = data.aws_iam_policy_document.app_task.json
 }

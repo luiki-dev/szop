@@ -39,6 +39,7 @@ What exists: `infra/base` registers `dzwoniec.com` as SES's sender identity with
 - **Mailpit is pinned by its tag, `axllent/mailpit:v1.34.0`, without a digest** (Task 2), like the file's other images; the spec's "and its digest" was wrong.
 - **`@types/nodemailer` is not added** (Task 2): nodemailer 10 ships its own types. Its SES transport puts the `From:` header with the display name into the raw message, which the test reads.
 - **CI and `check-prodlike.sh` needed no change** (Task 2): `docker compose up -d --wait` starts Mailpit with PostgreSQL, and `app-prodlike` reaches it over the prodlike network.
+- **The `SendEmail` statement also covers every SES identity of the account** (Task 4), not only `dzwoniec.com`: while SES is in its sandbox it checks the permission on each recipient's verified identity as well, so the domain alone would refuse every demo send with `AccessDenied`. The `ses:FromAddress` condition still allows only `noreply@szop.dzwoniec.com`, so decision 7's limit holds. Once SES leaves its sandbox, the statement can go back to the domain alone.
 
 ## Consequences
 

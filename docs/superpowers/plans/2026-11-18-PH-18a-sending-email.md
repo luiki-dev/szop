@@ -330,7 +330,7 @@ git commit -m "feat(api): add the test email script"
 - Modify: `infra/base/app_roles.tf`
 - Modify: `infra/demo/locals.tf`, `infra/demo/service.tf`
 
-- [ ] **Step 1: The statement in `infra/base/app_roles.tf`**
+- [x] **Step 1: The statement in `infra/base/app_roles.tf`**
 
 In `data "aws_iam_policy_document" "app_task"`, after `EcsExec`, a statement with a comment (one sender address, ADR 0078, decision 7; `StringLike` with both forms because SES may report the address with or without its display name):
 
@@ -350,7 +350,7 @@ statement {
 
 The role's comment says it holds ECS Exec's channel and sending as Szop's address; `aws_iam_role_policy.app_task`'s `name` becomes `app-task`.
 
-- [ ] **Step 2: The task definition in `infra/demo`**
+- [x] **Step 2: The task definition in `infra/demo`**
 
 `locals.tf` gains `email_from = "Szop <noreply@${local.app_hostname}>"` with a comment that the IAM statement in `infra/base` allows only this address. The app container's `environment` in `service.tf` gains `{ name = "EMAIL_TRANSPORT", value = "ses" }` and `{ name = "EMAIL_FROM", value = local.email_from }`. `db_setup` does not change.
 
@@ -358,7 +358,7 @@ The role's comment says it holds ECS Exec's channel and sending as Szop's addres
 
 Run, in each of `infra/base` and `infra/demo`: `terraform fmt -check && terraform validate && tflint` — Expected: no output, `Success!`, no findings. Then `pnpm check`. CI's plan shows the change; `infra/base`'s plan shows one policy replaced (the rename) and no other change.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 ```bash
 git add infra/base/app_roles.tf infra/demo/locals.tf infra/demo/service.tf
