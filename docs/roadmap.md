@@ -539,7 +539,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-18a Sending email
 
 - **Goal:** the API can send email: through Mailpit locally and in CI, through Amazon SES on the demo, from `noreply@szop.dzwoniec.com`. A test script run through ECS Exec proves the demo's path.
-- **Delivers:** the `EmailSender` with nodemailer's SMTP and SES transports, its settings and its failure contract; Mailpit in `compose.yaml`; the task role's `ses:SendEmail`, limited to the sender address; the test script and its runbook steps; the brainstorm's decisions file in the process docs. The details are in [ADR 0078](decisions/0078-sending-email-phase-details.md).
+- **Delivers:** the `EmailSender` with nodemailer's SMTP and SES transports, its settings and its failure contract; Mailpit in `compose.yaml`; the task role's `ses:SendRawEmail`, limited to the sender address; the test script and its runbook steps; the brainstorm's decisions file in the process docs. The details are in [ADR 0078](decisions/0078-sending-email-phase-details.md).
 - **Split from:** PH-18 Registration and login, now retired: it held two new concepts, transactional email and email-and-password authentication with verification, and about 12 to 14 tasks ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0078](decisions/0078-sending-email-phase-details.md)). The authentication flows became [PH-18b](#ph-18b-registration-and-login).
 - **Depends on:** —
 - **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; verify the email addresses the demo will send to, while SES is in its sandbox; press `demo-up` on the branch, run the test script through ECS Exec and check that the email arrives with `dkim=pass`, then press `demo-down`.

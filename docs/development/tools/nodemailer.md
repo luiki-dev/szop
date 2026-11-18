@@ -12,7 +12,7 @@ nodemailer is a Node.js library that builds an email message and hands it to a *
 `apps/api/src/email/sender.ts` builds one transporter from the settings `config.ts` reads ([architecture](../../architecture/architecture.md)):
 
 - **`EMAIL_TRANSPORT=smtp`:** `nodemailer.createTransport({ host, port, secure: false })` with `SMTP_HOST` and `SMTP_PORT`, no login and no TLS, which Mailpit needs none of.
-- **`EMAIL_TRANSPORT=ses`:** `nodemailer.createTransport({ SES: { sesClient, SendEmailCommand } })`, with `SESv2Client` and `SendEmailCommand` from `@aws-sdk/client-sesv2`. The client takes its region and credentials from the task's environment. It calls SES API v2's `SendEmail` only, the one action the task role allows.
+- **`EMAIL_TRANSPORT=ses`:** `nodemailer.createTransport({ SES: { sesClient, SendEmailCommand } })`, with `SESv2Client` and `SendEmailCommand` from `@aws-sdk/client-sesv2`. The client takes its region and credentials from the task's environment. It calls SES API v2's `SendEmail` only, always with the raw MIME message nodemailer built (`Content.Raw`), which IAM checks as `ses:SendRawEmail`: the one action the task role allows.
 - **`EMAIL_FROM`** is every email's `From`, `Szop <noreply@szop.dzwoniec.com>` everywhere.
 
 nodemailer ships its own types, so no `@types/nodemailer` is installed.

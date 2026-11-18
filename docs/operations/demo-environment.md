@@ -588,7 +588,7 @@ The PR's comment shows IAM Access Analyzer's findings for the new and changed po
 
 ### Sending email through SES
 
-[PH-18a](../roadmap.md#ph-18a-sending-email) lets the app send email from the demo ([ADR 0078](../decisions/0078-sending-email-phase-details.md)). The task definition sets `EMAIL_TRANSPORT=ses` and `EMAIL_FROM=Szop <noreply@szop.dzwoniec.com>`, and the app calls SES's API as the task role, with no key. The role's statement `SendEmail` allows `ses:SendEmail` only when the sender is `noreply@szop.dzwoniec.com` or exactly `Szop <noreply@szop.dzwoniec.com>`. Its resources are the `dzwoniec.com` identity and every other identity of the account, because in SES's sandbox the permission is checked on each verified recipient's identity too.
+[PH-18a](../roadmap.md#ph-18a-sending-email) lets the app send email from the demo ([ADR 0078](../decisions/0078-sending-email-phase-details.md)). The task definition sets `EMAIL_TRANSPORT=ses` and `EMAIL_FROM=Szop <noreply@szop.dzwoniec.com>`, and the app calls SES's API as the task role, with no key. The role's statement `SendEmail` allows `ses:SendRawEmail` only when the sender is `noreply@szop.dzwoniec.com` or exactly `Szop <noreply@szop.dzwoniec.com>`. Its resources are the `dzwoniec.com` identity and every other identity of the account, because in SES's sandbox the permission is checked on each verified recipient's identity too. The app calls SES API v2's `SendEmail` with a raw MIME message, which IAM checks as `ses:SendRawEmail`, not `ses:SendEmail`.
 
 The statement lives in `infra/base`, so a change to it reaches AWS only when you apply base ([Applying base](#applying-base)), from the PR's branch before its `demo-up` and from `main` after the merge. To see what AWS holds now, in your terminal on WSL, signed in as the administrator ([Signing in as the administrator](#signing-in-as-the-administrator)):
 
@@ -980,7 +980,7 @@ The script exits with 1, but `execute-command` does not pass the exit code on: r
 **When it fails**, the line `test email not sent` names the error:
 
 - `MessageRejected` (`Email address is not verified`) on the verified address: its verification has not finished, or it was made in another region than `eu-central-1`.
-- `AccessDenied`: the task role's `SendEmail` statement is missing, because `infra/base` was not applied from the branch, or it does not match the sender, because the task's `EMAIL_FROM` and the statement's addresses differ. Compare them with the check in [Sending email through SES](#sending-email-through-ses).
+- `AccessDeniedException` (`errorCode` `ESES`): the task role's `SendEmail` statement, which allows `ses:SendRawEmail`, is missing, because `infra/base` was not applied from the branch, or it does not match the sender, because the task's `EMAIL_FROM` and the statement's addresses differ. Compare them with the check in [Sending email through SES](#sending-email-through-ses).
 - Nothing arrives, but the script printed `test email sent`: SES accepted it, so look in the spam folder, then at the domain's DKIM status (the `aws sesv2 get-email-identity --email-identity dzwoniec.com` check in [Applying base](#checks)).
 
 ### Querying the database

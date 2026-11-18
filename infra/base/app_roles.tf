@@ -137,10 +137,11 @@ data "aws_iam_policy_document" "app_task" {
   # with or without its display name, hence both forms; the display name is
   # fixed too. While SES is in its sandbox it also checks the permission on
   # each recipient's verified identity, hence every identity of the account;
-  # the condition still fixes the sender.
+  # the condition still fixes the sender. nodemailer sends a raw MIME message,
+  # and IAM checks SES API v2's SendEmail with raw content as ses:SendRawEmail.
   statement {
     sid     = "SendEmail"
-    actions = ["ses:SendEmail"]
+    actions = ["ses:SendRawEmail"]
     resources = [
       aws_sesv2_email_identity.domain.arn,
       "arn:aws:ses:eu-central-1:${var.account_id}:identity/*",
