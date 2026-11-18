@@ -590,15 +590,15 @@ The PR's comment shows IAM Access Analyzer's findings for the new and changed po
 
 [PH-18a](../roadmap.md#ph-18a-sending-email) lets the app send email from the demo ([ADR 0078](../decisions/0078-sending-email-phase-details.md)). The task definition sets `EMAIL_TRANSPORT=ses` and `EMAIL_FROM=Szop <noreply@szop.dzwoniec.com>`, and the app calls SES's API as the task role, with no key. The role's statement `SendEmail` allows `ses:SendEmail` only when the sender is `noreply@szop.dzwoniec.com` or exactly `Szop <noreply@szop.dzwoniec.com>`. Its resources are the `dzwoniec.com` identity and every other identity of the account, because in SES's sandbox the permission is checked on each verified recipient's identity too.
 
-**Apply `infra/base` from the PR's branch before the next `demo-up`**, then from `main` after the merge. The plan shows one change, the task role's inline policy, renamed from `ecs-exec` to `app-task`. Check it:
+The statement lives in `infra/base`, so a change to it reaches AWS only when you apply base ([Applying base](#applying-base)), from the PR's branch before its `demo-up` and from `main` after the merge. To see what AWS holds now, in your terminal on WSL, signed in as the administrator ([Signing in as the administrator](#signing-in-as-the-administrator)):
 
 ```bash
 aws iam get-role-policy --role-name szop-app-task --policy-name app-task \
-  --query 'PolicyDocument.Statement[].Sid'
-#   the ECS Exec statement and "SendEmail"
+  --query 'PolicyDocument.Statement[?Sid==`SendEmail`].Condition'
+#   StringEquals on ses:FromAddress: "noreply@szop.dzwoniec.com" and "Szop <noreply@szop.dzwoniec.com>"
 ```
 
-**SES's sandbox.** Every AWS account starts SES in a sandbox, in each region on its own, and Szop's stays in it: SES delivers only to addresses verified in the account, at most 200 emails a day. Outside users get no email from the demo: SES refuses the send with `MessageRejected`, and the app logs it. To verify an address you can read: *SES → Configuration → Identities → Create identity → Email address*, enter it, and click the link SES sends to it within 24 hours. Check:
+**SES's sandbox.** Every AWS account starts SES in a sandbox, in each region on its own, and Szop's stays in it: SES delivers only to addresses verified in the account, at most 200 emails a day. Outside users get no email from the demo: SES refuses the send with `MessageRejected`, and the app logs it. To verify an address you can read: in the AWS console, signed in as the administrator, in the region `eu-central-1` (Europe (Frankfurt)), *SES → Configuration → Identities → Create identity → Email address*, enter it, and click the link SES sends to it within 24 hours. Check, in your terminal on WSL:
 
 ```bash
 aws sesv2 get-email-identity --email-identity <address> --query VerifiedForSendingStatus
@@ -930,18 +930,58 @@ aws ecs execute-command --cluster szop-demo --task <task id> --container app \
 
 ### Sending a test email
 
-`src/send-test-email.ts` sends one email through the app's own sender, transport, role and address, to prove the path end to end ([ADR 0078](../decisions/0078-sending-email-phase-details.md), decision 4). Run it in a running task, to an address verified in SES ([Sending email through SES](#sending-email-through-ses)); the absolute path works whatever directory the ECS Exec session starts in:
+`src/send-test-email.ts`, in the image, sends one email through the app's own sender, transport, role and address, to prove the whole path on AWS ([ADR 0078](../decisions/0078-sending-email-phase-details.md), decision 4). You run it inside a running app task through ECS Exec, from your terminal on WSL, as the administrator: the read-only profile cannot open an ECS Exec session.
+
+**Before you start:**
+
+- the demo is up: `demo-up` is green and `https://szop.dzwoniec.com/api/health` answers `ok`;
+- `infra/base` was applied from the same branch, if the PR changes it;
+- the address you send to is verified in SES ([Sending email through SES](#sending-email-through-ses)), and you can read its mailbox;
+- the Session Manager plugin is installed on WSL ([setup guide, section 8](../development/setup.md#8-terraform-tflint-and-the-aws-cli)).
+
+**1. Sign in and find a task**, in your terminal on WSL, anywhere (no checkout needed):
 
 ```bash
-aws ecs execute-command --cluster szop-demo --task <task id> --container app \
-  --interactive --command "node /app/apps/api/src/send-test-email.ts <address>"
-#   {"msg":"test email sent"}
+export AWS_PROFILE=szop
+aws sso login
+TASK=$(aws ecs list-tasks --cluster szop-demo --service-name szop-demo-app \
+  --query 'taskArns[0]' --output text | awk -F/ '{print $NF}')
+echo "$TASK"
+#   a 32-character id; "None" means no task is running ([Finding the task](#finding-the-task))
 ```
 
-The email, "Szop test email" from `Szop <noreply@szop.dzwoniec.com>`, arrives within a minute; look in the spam folder too. Open its headers (*Show original* or *View source* in most mail programs) and find `Authentication-Results`: it must show `dkim=pass` with `header.d=dzwoniec.com` and `dmarc=pass`. A failure prints `{"msg":"test email not sent","errorName":…,"errorCode":…}`, and the script exits with 1:
+**2. Send to the verified address:**
 
-- `MessageRejected` (`Email address is not verified`): the recipient is not verified, and SES is in its sandbox. Verify the address, or send to one that is.
-- `AccessDenied`: the task role's `SendEmail` statement is missing, because `infra/base` was not applied from the branch, or it does not match the sender, because `EMAIL_FROM` and the statement's address differ.
+```bash
+aws ecs execute-command --cluster szop-demo --task "$TASK" --container app \
+  --interactive --command "node /app/apps/api/src/send-test-email.ts <verified address>"
+#   Starting session with SessionId: ecs-execute-command-…
+#   {"msg":"test email sent"}
+#   Exiting session with sessionId: ecs-execute-command-…
+```
+
+The command runs in the container and the session ends with it. The path is absolute, because an ECS Exec session does not necessarily start in the image's working directory. `TargetNotConnectedException`: see [A shell in the task](#a-shell-in-the-task).
+
+**3. Read the email.** "Szop test email" from `Szop <noreply@szop.dzwoniec.com>` arrives within a minute; look in the spam folder too. Open its headers (*Show original* in Gmail, *View source* or *View headers* in most other mail programs) and find `Authentication-Results`. It must show:
+
+- `dkim=pass` with `header.d=dzwoniec.com` (or `header.i=@dzwoniec.com`): SES signed it with the domain's key;
+- `dmarc=pass`: the signature's domain aligns with the sender's.
+
+**4. Send to an address that is not verified**, such as `nobody@example.com`, with the command of step 2. SES's sandbox must refuse it:
+
+```bash
+#   {"msg":"test email not sent","errorName":"MessageRejected",…}
+```
+
+The script exits with 1, but `execute-command` does not pass the exit code on: read the line. Any other outcome means the sandbox or the permission is not what this runbook says.
+
+**5. Sign out:** `aws sso logout` ([Signing in as the administrator](#signing-in-as-the-administrator)).
+
+**When it fails**, the line `test email not sent` names the error:
+
+- `MessageRejected` (`Email address is not verified`) on the verified address: its verification has not finished, or it was made in another region than `eu-central-1`.
+- `AccessDenied`: the task role's `SendEmail` statement is missing, because `infra/base` was not applied from the branch, or it does not match the sender, because the task's `EMAIL_FROM` and the statement's addresses differ. Compare them with the check in [Sending email through SES](#sending-email-through-ses).
+- Nothing arrives, but the script printed `test email sent`: SES accepted it, so look in the spam folder, then at the domain's DKIM status (the `aws sesv2 get-email-identity --email-identity dzwoniec.com` check in [Applying base](#checks)).
 
 ### Querying the database
 
