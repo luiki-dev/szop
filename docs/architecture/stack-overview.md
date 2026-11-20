@@ -498,7 +498,7 @@ Claude Code writes much of Szop, and on WSL it runs with the owner's rights, nex
 
 ## 25. Sending email
 
-Szop sends **transactional email**: messages one user's action triggers and only that user receives, such as a link to verify an address or reset a password, as opposed to newsletters or marketing. [PH-18a](../roadmap.md#ph-18a-sending-email) builds the way to send it, and [PH-18b](../roadmap.md#ph-18b-registration-and-login) its first real emails ([ADR 0078](../decisions/0078-sending-email-phase-details.md)).
+Szop sends **transactional email**: messages one user's action triggers and only that user receives, such as a link to verify an address or reset a password, as opposed to newsletters or marketing. [PH-18a](../roadmap.md#ph-18a-sending-email) builds the way to send it, and [PH-18b](../roadmap.md#ph-18b-registration) its first real emails ([ADR 0078](../decisions/0078-sending-email-phase-details.md)).
 
 - **SMTP** (Simple Mail Transfer Protocol) is the protocol mail servers hand messages to each other with: the client connects, names the sender and the recipients (the *envelope*), and sends the message. The message itself is **MIME** (Multipurpose Internet Mail Extensions): headers such as `From`, `To` and `Subject`, and a body that can hold several parts, here a plain-text one and an HTML one, so every mail program shows one of them.
 - **nodemailer** builds that MIME message from an object (`from`, `to`, `subject`, `text`, `html`) and hands it to a **transport**. Szop uses two: SMTP, to Mailpit, locally and in CI; and SES, which sends the same finished message through SES's HTTP API with the AWS SDK. The app's code is the same in both; only the settings (`EMAIL_TRANSPORT`) pick the transport.

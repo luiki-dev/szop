@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>PH-18b · screens and journey v1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --fur: #cbd0d6;
+        --fg: #1f2937;
+        --card: #fff;
+        --muted: #f9fafb;
+        --mfg: #4b5563;
+        --border: #e5e7eb;
+        --input: #6b7280;
+        --primary: #3f7357;
+        --accent: #e3eee7;
+        --link: #2f5a43;
+        --destr: #dc2626;
+        --warn: #fef3c7;
+        --warnfg: #78350f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 24px 32px 64px;
+        background: #e5e7eb;
+        font-family: Gabarito, system-ui, sans-serif;
+        color: var(--fg);
+      }
+      h1 {
+        font-size: 26px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        color: var(--mfg);
+        margin: 0 0 24px;
+        max-width: 900px;
+      }
+      h2 {
+        font-size: 20px;
+        margin: 40px 0 4px;
+      }
+      .flowsub {
+        color: var(--mfg);
+        margin: 0 0 16px;
+        max-width: 1000px;
+        font-size: 15px;
+      }
+      .flow {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .arrow {
+        align-self: center;
+        font-size: 13px;
+        color: var(--mfg);
+        width: 110px;
+        text-align: center;
+        line-height: 1.3;
+      }
+      .arrow b {
+        display: block;
+        font-size: 22px;
+        color: var(--fg);
+      }
+      .shot {
+        width: 280px;
+      }
+      .addr {
+        font-size: 12px;
+        font-family: ui-monospace, monospace;
+        color: var(--mfg);
+        margin: 0 0 6px;
+        padding-left: 4px;
+      }
+      .phone {
+        width: 280px;
+        min-height: 540px;
+        background: var(--fur);
+        border-radius: 28px;
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow: hidden;
+        position: relative;
+      }
+      .note {
+        font-size: 13px;
+        color: var(--mfg);
+        margin: 8px 4px 0;
+        line-height: 1.35;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 6px;
+        background: #dbeafe;
+        color: #1e3a8a;
+        margin-left: 4px;
+        vertical-align: 1px;
+      }
+      .titlerow {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-weight: 800;
+        font-size: 19px;
+      }
+      .titlerow .ham {
+        font-size: 20px;
+        font-weight: 400;
+      }
+      .cardp {
+        background: var(--card);
+        border-radius: 18px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      label {
+        font-size: 13px;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 3px;
+      }
+      .inp {
+        height: 40px;
+        border: 1.5px solid var(--input);
+        border-radius: 12px;
+        background: #fff;
+        padding: 0 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        color: var(--fg);
+      }
+      .inp.err {
+        border-color: var(--destr);
+      }
+      .inp .eye {
+        font-size: 12px;
+        color: var(--link);
+        font-weight: 600;
+      }
+      .hint {
+        font-size: 12px;
+        color: var(--mfg);
+        margin-top: 3px;
+      }
+      .errt {
+        font-size: 12px;
+        color: var(--destr);
+        margin-top: 3px;
+        font-weight: 600;
+      }
+      .btn {
+        height: 44px;
+        border-radius: 12px;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+      }
+      .btn.sec {
+        background: #fff;
+        color: var(--link);
+        border: 1.5px solid var(--border);
+      }
+      .lnk {
+        color: var(--link);
+        font-weight: 600;
+        text-decoration: underline;
+        font-size: 14px;
+      }
+      .center {
+        text-align: center;
+        font-size: 14px;
+      }
+      .banner {
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+      .banner.err {
+        background: #fee2e2;
+        color: #7f1d1d;
+      }
+      .banner.info {
+        background: var(--accent);
+        color: var(--link);
+      }
+      .banner.warn {
+        background: var(--warn);
+        color: var(--warnfg);
+      }
+      .big {
+        font-size: 40px;
+        text-align: center;
+        margin-top: 6px;
+      }
+      .listc {
+        background: #fff;
+        border-radius: 18px;
+        padding: 12px 14px;
+      }
+      .listc b {
+        display: block;
+        font-size: 15px;
+      }
+      .listc span {
+        font-size: 12px;
+        color: var(--mfg);
+      }
+      .toast {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 14px;
+        background: #1f2937;
+        color: #fff;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+      .menu {
+        background: #fff;
+        width: 230px;
+        flex: 1;
+        margin: -10px 0 -10px -12px;
+        padding: 14px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        border-radius: 0 18px 18px 0;
+      }
+      .menu .logo {
+        font-weight: 700;
+        font-size: 20px;
+        color: var(--link);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .menu .logo i {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: #5f9273;
+        display: inline-block;
+      }
+      .mi {
+        padding: 9px 10px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+      .mi.on {
+        background: var(--accent);
+        color: var(--link);
+        font-weight: 600;
+      }
+      .msec {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: var(--mfg);
+        padding: 4px 10px 0;
+      }
+      .mbottom {
+        margin-top: auto;
+        border-top: 1px solid var(--border);
+        padding-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--mfg);
+      }
+      .acct {
+        background: var(--muted);
+        border-radius: 12px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .acct .n {
+        font-weight: 700;
+        color: var(--fg);
+        font-size: 14px;
+      }
+      .acct .e {
+        font-size: 12px;
+        color: var(--mfg);
+      }
+      .dim {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        left: 230px;
+      }
+      .mail {
+        width: 330px;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 14px;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      .mail .h {
+        font-size: 11px;
+        color: var(--mfg);
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 6px;
+        margin-bottom: 8px;
+      }
+      .mail .mbtn {
+        display: inline-block;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 8px 14px;
+        margin: 6px 0;
+      }
+      .legend {
+        font-size: 13px;
+        color: var(--mfg);
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        max-width: 1000px;
+      }
+      .desk {
+        width: 640px;
+        height: 360px;
+        background: var(--fur);
+        border-radius: 18px;
+        display: flex;
+        overflow: hidden;
+      }
+      .desk .side {
+        width: 170px;
+        background: #fff;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 13px;
+      }
+      .desk .main {
+        flex: 1;
+        padding: 16px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .desk .main .cardp {
+        width: 340px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>PH-18b · Screens and journey of registration and login (v5)</h1>
+    <p class="sub">
+      <b>v5:</b> "Link not valid" explains both cases, Send a new link is the
+      main action · new /register/resend page (PH-18c).
+    </p>
+    <p class="sub">
+      A static mockup per state; the arrows say what moves you on. Everything is
+      a page inside the app shell (decision A), phone shown, desktop at the end.
+      <span class="tag">PH-18c</span> marks what PH-18c builds from this same
+      design; the rest is PH-18b. Wording is a draft.
+    </p>
+
+    <div class="legend">
+      <b>Fixed in the brainstorm so far:</b> separate pages in the shell ·
+      password twice · display name (not unique) · link opened in another
+      browser → the registering browser asks to log in (option 2) · a new
+      sign-up replaces an unverified account with the same address (option 1) ·
+      the user's answer never depends on whether the address has an account.
+    </div>
+
+    <!-- ============ 1 ============ -->
+    <h2>1. Entry: the menu</h2>
+    <p class="flowsub">
+      Guest: an account box at the bottom of the menu, above the API status and
+      the color scheme. Logged in: the name, the email under it, and Log out.
+      Log out needs no confirmation and turns this browser into a new, empty
+      guest on Lists.
+    </p>
+    <div class="flow">
+      <div class="shot">
+        <p class="addr">menu · guest</p>
+        <div class="phone">
+          <div class="menu">
+            <div class="logo"><i></i>szop</div>
+            <div class="mi on">Lists</div>
+            <div class="msec">SETUP</div>
+            <div class="mi">Catalog</div>
+            <div class="mbottom">
+              <div class="acct">
+                <span>Keep your lists on every device.</span>
+                <div class="btn" style="height: 38px">Log in</div>
+                <div class="center" style="margin-top: 14px; font-size: 13px">
+                  No account? <span class="lnk">Create account</span>
+                </div>
+              </div>
+              <div>● API ok</div>
+              <div>Color scheme · System</div>
+            </div>
+          </div>
+          <div class="dim"></div>
+        </div>
+      </div>
+      <div class="arrow"><b>·</b>while on /login or /register</div>
+      <div class="shot">
+        <p class="addr">menu · on /login</p>
+        <div class="phone">
+          <div class="menu">
+            <div class="logo"><i></i>szop</div>
+            <div class="mi">Lists</div>
+            <div class="msec">SETUP</div>
+            <div class="mi">Catalog</div>
+            <div class="mbottom">
+              <div class="acct">
+                <span>Keep your lists on every device.</span>
+                <div
+                  class="btn"
+                  style="
+                    height: 38px;
+                    background: var(--accent);
+                    color: var(--link);
+                  "
+                >
+                  Log in
+                </div>
+                <div class="center" style="margin-top: 14px; font-size: 13px">
+                  No account? <span class="lnk">Create account</span>
+                </div>
+              </div>
+              <div>● API ok</div>
+              <div>Color scheme · System</div>
+            </div>
+          </div>
+          <div class="dim"></div>
+        </div>
+        <p class="note">
+          The current page's entry looks like the menu's current page (Lists
+          above, in accent) and is marked <code>aria-current="page"</code>: no
+          longer a button to press. On /register the same goes for "Create
+          account", and Log in stays a normal button, since switching is useful.
+        </p>
+      </div>
+      <div class="arrow"><b>⇄</b>after confirming or logging in</div>
+      <div class="shot">
+        <p class="addr">menu · logged in</p>
+        <div class="phone">
+          <div class="menu">
+            <div class="logo"><i></i>szop</div>
+            <div class="mi on">Lists</div>
+            <div class="msec">SETUP</div>
+            <div class="mi">Catalog</div>
+            <div class="mbottom">
+              <div class="acct">
+                <span class="n">Ania</span
+                ><span class="e">ania@example.com</span>
+                <div class="btn sec" style="height: 38px">Log out</div>
+              </div>
+              <div>● API ok</div>
+              <div>Color scheme · System</div>
+            </div>
+          </div>
+          <div class="dim"></div>
+        </div>
+        <p class="note">
+          Log out <span class="tag">PH-18c</span>. In PH-18b the box shows only
+          the name and email.
+        </p>
+      </div>
+    </div>
+
+    <!-- ============ 2 ============ -->
+    <h2>2. Create account</h2>
+    <p class="flowsub">
+      Errors under their field, checked when leaving the field and on submit
+      (the design system's rule). The breached-password check happens on submit,
+      on the server. The answer never says whether the address is taken: an
+      existing, verified address gets the email of section 5 instead, and the
+      screen is the same.
+    </p>
+    <div class="flow">
+      <div class="shot">
+        <p class="addr">/register</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Create account</div>
+          <div class="cardp">
+            <div>
+              <label>Your name</label>
+              <div class="inp">Ania</div>
+              <div class="hint">Shown to people you share lists with.</div>
+            </div>
+            <div>
+              <label>Email</label>
+              <div class="inp">ania@example.com</div>
+            </div>
+            <div>
+              <label>Password</label>
+              <div class="inp">
+                •••••••••••••••••<span class="eye">Show</span>
+              </div>
+              <div class="hint">15 to 128 characters. A phrase works well.</div>
+            </div>
+            <div>
+              <label>Repeat password</label>
+              <div class="inp">
+                •••••••••••••••••<span class="eye">Show</span>
+              </div>
+            </div>
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                font-size: 13px;
+                align-items: flex-start;
+              "
+            >
+              <span
+                style="
+                  width: 20px;
+                  height: 20px;
+                  border-radius: 6px;
+                  background: var(--primary);
+                  color: #fff;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  flex: none;
+                "
+                >✓</span
+              ><span
+                ><b>Keep this browser's lists</b><br /><span
+                  style="color: var(--mfg)"
+                  >3 lists and your catalog move into the account. Untick to
+                  start fresh.</span
+                ></span
+              >
+            </div>
+            <div class="btn">Create account</div>
+            <div class="btn sec">Cancel</div>
+          </div>
+          <div class="center">
+            Already have an account? <span class="lnk">Log in</span>
+          </div>
+        </div>
+        <p class="note">
+          The checkbox shows only when this browser's guest has a workspace;
+          ticked by default. Cancel goes back to the page you came from (Lists
+          if none). On a phone the form scrolls.
+        </p>
+      </div>
+      <div class="arrow"><b>✗</b>field errors</div>
+      <div class="shot">
+        <p class="addr">/register · errors</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Create account</div>
+          <div class="cardp">
+            <div>
+              <label>Your name</label>
+              <div class="inp">Ania</div>
+            </div>
+            <div>
+              <label>Email</label>
+              <div class="inp">ania@example.com</div>
+            </div>
+            <div>
+              <label>Password</label>
+              <div class="inp err">
+                ••••••••••••••••••<span class="eye">Show</span>
+              </div>
+              <div class="errt">
+                This password appears in known data leaks. Choose another.
+              </div>
+            </div>
+            <div>
+              <label>Repeat password</label>
+              <div class="inp err">
+                •••••••••••<span class="eye">Show</span>
+              </div>
+              <div class="errt">The passwords don't match.</div>
+            </div>
+            <div class="btn">Create account</div>
+            <div class="btn sec">Cancel</div>
+          </div>
+          <div class="center">
+            Already have an account? <span class="lnk">Log in</span>
+          </div>
+        </div>
+        <p class="note">
+          Other messages: "Use at least 15 characters." · "Enter an email
+          address." · "Enter your name." If the leak service is down, the
+          password is accepted.
+        </p>
+      </div>
+      <div class="arrow"><b>→</b>valid, submitted</div>
+      <div class="shot">
+        <p class="addr">/register/sent</p>
+        <div class="phone">
+          <div class="titlerow">
+            <span class="ham">☰</span>Check your inbox
+          </div>
+          <div class="cardp">
+            <div class="big">✉️</div>
+            <div class="center">
+              We sent a link to<br /><b>ania@example.com</b>.<br />Open it to
+              confirm your address.
+            </div>
+            <div class="hint center">
+              Until then you stay a guest, and your lists stay in this browser.
+            </div>
+            <div class="btn">Back to my lists</div>
+            <div class="center">
+              <span class="lnk">Wrong address? Start again</span>
+            </div>
+          </div>
+          <div class="center" style="font-size: 13px">
+            Nothing arrived? <span class="lnk">Send the link again</span>
+            <span class="tag">PH-18c</span>
+          </div>
+        </div>
+        <p class="note">
+          "Start again" returns to /register with the name filled in. The
+          address shown comes from this browser, not from the server.
+        </p>
+      </div>
+    </div>
+
+    <!-- ============ 3 ============ -->
+    <h2>3. The link from the email</h2>
+    <p class="flowsub">
+      The link is <code>/verify?token=…</code>. The page uses the token, then
+      removes it from the address bar (NFR-4.8). It signs in the browser that
+      opened it and moves the registering guest's workspace to the account,
+      wherever the link is opened.
+    </p>
+    <div class="flow">
+      <div class="shot">
+        <p class="addr">/verify?token=… (for a moment)</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Confirming…</div>
+          <div class="cardp">
+            <div class="big">⏳</div>
+            <div class="center">Confirming your address…</div>
+          </div>
+        </div>
+      </div>
+      <div class="arrow"><b>→</b>confirmed</div>
+      <div class="shot">
+        <p class="addr">/ (Lists) · logged in</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Lists</div>
+          <div class="listc">
+            <b>Weekly shop</b><span>8 of 11 · €8.07 to go</span>
+          </div>
+          <div class="listc"><b>Hardware store</b><span>0 of 5</span></div>
+          <div class="listc"><b>Birthday party</b><span>2 of 12</span></div>
+          <div class="toast">
+            Address confirmed. Welcome, Ania! Your lists are in your account
+            now.
+          </div>
+        </div>
+        <p class="note">
+          The lists are the guest's from the browser that registered, here or on
+          another device.
+        </p>
+      </div>
+      <div class="arrow"><b>✗</b>expired, used or unknown</div>
+      <div class="shot">
+        <p class="addr">/verify (token removed)</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Link not valid</div>
+          <div class="cardp">
+            <div class="big">🔗</div>
+            <div class="center">
+              <b>This link no longer works.</b><br />It may have expired, or you
+              may have used it already.
+            </div>
+            <div class="btn">Send a new link</div>
+            <div class="center" style="font-size: 13px; margin-top: 6px">
+              Already confirmed your address? <span class="lnk">Log in</span>
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          One screen for every failure (used, expired, replaced by a newer
+          sign-up), so it reveals nothing. Both actions
+          <span class="tag">PH-18c</span>.
+        </p>
+      </div>
+      <div class="arrow"><b>→</b>Send a new link</div>
+      <div class="shot">
+        <p class="addr">/register/resend <span class="tag">PH-18c</span></p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Send a new link</div>
+          <div class="cardp">
+            <div class="hint">
+              Enter the address you registered with. If it has an account
+              waiting for confirmation, we'll send it a new link.
+            </div>
+            <div>
+              <label>Email</label>
+              <div class="inp"></div>
+            </div>
+            <div class="btn">Send link</div>
+            <div class="btn sec">Cancel</div>
+          </div>
+        </div>
+        <p class="note">
+          → "Check your inbox" (/register/sent) with the address entered,
+          whatever happened. "Send the link again" on /register/sent and on
+          "Confirm your address first" sends at once, without this page.
+        </p>
+      </div>
+    </div>
+
+    <h2>3b. Meanwhile, in the browser that registered (option 2)</h2>
+    <p class="flowsub">
+      The link was opened on the phone. The laptop's guest session stopped
+      working when its workspace moved. At its next request the app shows the
+      login page with a notice, the email filled in.
+    </p>
+    <div class="flow">
+      <div class="shot">
+        <p class="addr">/login?confirmed</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Log in</div>
+          <div class="banner info">
+            Your address was confirmed in another browser. Log in here to see
+            your lists.
+          </div>
+          <div class="cardp">
+            <div>
+              <label>Email</label>
+              <div class="inp">ania@example.com</div>
+            </div>
+            <div>
+              <label>Password</label>
+              <div class="inp">
+                <span style="color: #9ca3af"></span
+                ><span class="eye">Show</span>
+              </div>
+            </div>
+            <div class="btn">Log in</div>
+            <div class="btn sec">Cancel</div>
+          </div>
+        </div>
+        <p class="note">
+          Logging in itself <span class="tag">PH-18c</span>. Until PH-18c is
+          merged, this screen exists without a working form (the gap you
+          accepted).
+        </p>
+      </div>
+    </div>
+
+    <!-- ============ 4 ============ -->
+    <h2>4. Log in <span class="tag">PH-18c</span></h2>
+    <p class="flowsub">
+      The same card, fields and messages style as Create account. A wrong email
+      and a wrong password get one message, above the form, since the app can't
+      say which. The email stays filled; the password is cleared.
+    </p>
+    <div class="flow">
+      <div class="shot">
+        <p class="addr">/login</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Log in</div>
+          <div class="cardp">
+            <div>
+              <label>Email</label>
+              <div class="inp">ania@example.com</div>
+            </div>
+            <div>
+              <label>Password</label>
+              <div class="inp">
+                •••••••••••••••••<span class="eye">Show</span>
+              </div>
+            </div>
+            <div class="btn">Log in</div>
+            <div class="btn sec">Cancel</div>
+            <div class="center" style="font-size: 13px; color: #9ca3af">
+              Forgot your password? (PH-29)
+            </div>
+          </div>
+          <div class="center">
+            No account yet? <span class="lnk">Create account</span>
+          </div>
+        </div>
+      </div>
+      <div class="arrow"><b>✗</b>wrong email or password</div>
+      <div class="shot">
+        <p class="addr">/login · failed</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Log in</div>
+          <div class="banner err">Wrong email or password.</div>
+          <div class="cardp">
+            <div>
+              <label>Email</label>
+              <div class="inp">ania@example.com</div>
+            </div>
+            <div>
+              <label>Password</label>
+              <div class="inp"><span></span><span class="eye">Show</span></div>
+            </div>
+            <div class="btn">Log in</div>
+            <div class="btn sec">Cancel</div>
+          </div>
+          <div class="center">
+            No account yet? <span class="lnk">Create account</span>
+          </div>
+        </div>
+      </div>
+      <div class="arrow"><b>!</b>right password, address not confirmed</div>
+      <div class="shot">
+        <p class="addr">/login · not confirmed</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Log in</div>
+          <div class="banner warn">
+            Confirm your address first. Open the link we sent to
+            ania@example.com.
+          </div>
+          <div class="cardp">
+            <div class="btn sec">Send the link again</div>
+            <div class="btn sec">Cancel</div>
+          </div>
+        </div>
+        <p class="note">
+          Only after the right password, so it reveals nothing to someone who
+          doesn't know it.
+        </p>
+      </div>
+      <div class="arrow"><b>→</b>logged in</div>
+      <div class="shot">
+        <p class="addr">/ (Lists)</p>
+        <div class="phone">
+          <div class="titlerow"><span class="ham">☰</span>Lists</div>
+          <div class="listc">
+            <b>Weekly shop</b><span>8 of 11 · €8.07 to go</span>
+          </div>
+          <div class="listc"><b>Hardware store</b><span>0 of 5</span></div>
+        </div>
+        <p class="note">
+          Straight here when this browser's guest has no lists. Until PH-19,
+          always straight here; the guest's data stays with the guest, unseen.
+        </p>
+      </div>
+    </div>
+
+    <h2>
+      4b. This browser's lists, after logging in <span class="tag">PH-19</span>
+    </h2>
+    <p class="flowsub">
+      Only when this browser's guest has lists. Now both sides are known, so the
+      page shows them and any limit before the choice. A page in the shell like
+      the others; leaving it without choosing is settled by PH-19.
+    </p>
+    <div class="flow">
+      <div class="arrow"><b>→</b>logged in, guest has lists</div>
+      <div class="shot">
+        <p class="addr">/import</p>
+        <div class="phone">
+          <div class="titlerow">
+            <span class="ham">☰</span>Lists in this browser
+          </div>
+          <div class="cardp">
+            <div class="center">
+              <b>This browser has 2 lists from before you logged in.</b>
+            </div>
+            <div class="listc" style="background: var(--muted)">
+              <b>Weekly shop</b><span>3 items</span>
+            </div>
+            <div class="listc" style="background: var(--muted)">
+              <b>Party</b><span>7 items</span>
+            </div>
+            <div class="hint">
+              Your account has 5 lists. Importing adds these 2 next to them;
+              names stay as they are.
+            </div>
+            <div class="btn">Import 2 lists</div>
+            <div class="btn sec">Discard them</div>
+          </div>
+        </div>
+        <p class="note">
+          Import → Lists, toast "2 lists imported". Discard → Lists; the guest's
+          data is deleted (ACC-4.4).
+        </p>
+      </div>
+      <div class="arrow"><b>!</b>would pass a limit</div>
+      <div class="shot">
+        <p class="addr">/import · over a limit</p>
+        <div class="phone">
+          <div class="titlerow">
+            <span class="ham">☰</span>Lists in this browser
+          </div>
+          <div class="cardp">
+            <div class="center">
+              <b>This browser has 2 lists from before you logged in.</b>
+            </div>
+            <div class="banner warn">
+              Your account can hold 50 lists and has 49, so these 2 can't be
+              imported. Delete a list from your account first, or discard these.
+            </div>
+            <div class="btn sec">Discard them</div>
+            <div class="center"><span class="lnk">Go to my lists</span></div>
+          </div>
+        </div>
+        <p class="note">
+          The limit's numbers come from PH-20's quotas; the wording is a draft.
+        </p>
+      </div>
+    </div>
+
+    <!-- ============ 5 ============ -->
+    <h2>5. The emails</h2>
+    <p class="flowsub">
+      Plain, short, from Szop's address, text and HTML. Neither says anything
+      the screen didn't.
+    </p>
+    <div class="flow">
+      <div class="mail">
+        <div class="h">
+          To: ania@example.com · Subject: Confirm your email for Szop
+        </div>
+        Hi Ania,<br />confirm your address to finish creating your Szop
+        account:<br />
+        <span class="mbtn">Confirm my address</span><br />
+        The link works once, for 24 hours. If you didn't create an account,
+        ignore this email; nothing happens.
+      </div>
+      <div class="mail">
+        <div class="h">
+          To: ania@example.com · Subject: You already have a Szop account
+        </div>
+        Hi,<br />someone, maybe you, tried to create a Szop account with this
+        address. It already has one.<br />
+        <span class="mbtn">Log in</span><br />
+        Forgot your password? Reset it from the login page.
+        <i>(the reset link joins with PH-29)</i><br />
+        If it wasn't you, ignore this email.
+      </div>
+    </div>
+
+    <!-- ============ 6 ============ -->
+    <h2>6. On a desktop</h2>
+    <p class="flowsub">
+      The same card, 400 px wide at most, at the top of the content column next
+      to the sidebar.
+    </p>
+    <div class="desk">
+      <div class="side">
+        <div
+          class="menu"
+          style="
+            all: unset;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            height: 100%;
+          "
+        >
+          <div
+            class="logo"
+            style="font-weight: 700; color: var(--link); font-size: 18px"
+          >
+            szop
+          </div>
+          <div class="mi">Lists</div>
+          <div class="mi">Catalog</div>
+          <div class="mbottom">
+            <div class="acct">
+              <div class="btn" style="height: 32px; font-size: 13px">
+                Log in
+              </div>
+              <div
+                style="
+                  margin-top: 8px;
+                  font-size: 12px;
+                  text-align: center;
+                  background: var(--accent);
+                  color: var(--link);
+                  border-radius: 8px;
+                  padding: 4px;
+                "
+              >
+                Create account
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="main">
+        <div class="titlerow" style="font-size: 22px">Create account</div>
+        <div class="cardp">
+          <div>
+            <label>Your name</label>
+            <div class="inp"></div>
+          </div>
+          <div>
+            <label>Email</label>
+            <div class="inp"></div>
+          </div>
+          <div class="btn">Create account</div>
+          <div class="btn sec">Cancel</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
