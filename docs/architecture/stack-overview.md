@@ -200,6 +200,7 @@ Since [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) Zod does three more 
 - The browser attaches the cookie to every request to our domain automatically. The server looks the session up and knows who is asking. Logging out, or revoking a session, simply deletes the row.
 - **Anonymous users** are real users with a flag: they get a session and a workspace without email or password, until they register.
 - **As built in PH-16a:** Better Auth's **anonymous plugin** creates the user on a `POST /api/auth/sign-in/anonymous`. The session lasts 30 days with **sliding expiration**: a request after more than a day moves the expiry 30 days ahead again, and the API forwards the fresh cookie, so a guest who only reads keeps the session. Our `sessionHook` asks Better Auth who the cookie belongs to; a deleted or expired row means no user. See [Better Auth](../development/tools/better-auth.md).
+- **A signed token for the emailed link (PH-18b).** The verification link carries a **JSON Web Token (JWT)**: the address and the user's ID, signed with the server's secret and given an expiry (24 hours). The server stores nothing for it: it checks the signature and the expiry when the link is opened, so only the server could have made it and nobody can change the address inside it. A second use of the link finds the account verified and answers `verified: false` instead of an error.
 
 ## 11. The monorepo
 

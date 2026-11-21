@@ -8,6 +8,7 @@ import * as schema from "../db/schema.ts";
 import { sendInBackground } from "../email/background.ts";
 import type { EmailSender } from "../email/sender.ts";
 import { existingAccountEmail, verificationEmail } from "../email/templates.ts";
+import { beforeVerification, verifyAfter } from "./verify.ts";
 import { registeringGuest, signUpAfter, signUpBefore } from "./sign-up.ts";
 
 const day = 24 * 60 * 60;
@@ -98,6 +99,7 @@ export function createAuth(options: {
       expiresIn: day,
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
+      beforeEmailVerification: beforeVerification(options.db),
       sendVerificationEmail: ({ user, token }) => {
         sendInBackground(
           email,
@@ -163,7 +165,21 @@ export function createAuth(options: {
         log[level](message);
       },
     },
-    plugins: [anonymous({ disableDeleteAnonymousUser: true })],
+    plugins: [
+      anonymous({ disableDeleteAnonymousUser: true }),
+      // Its own plugin, since `hooks.after` above holds only one hook.
+      {
+        id: "verify-answer",
+        hooks: {
+          after: [
+            {
+              matcher: (ctx) => ctx.path === "/verify-email",
+              handler: verifyAfter,
+            },
+          ],
+        },
+      },
+    ],
   });
 }
 

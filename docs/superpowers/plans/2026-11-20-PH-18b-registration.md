@@ -168,7 +168,7 @@
 - Produces: `verifyAfter` (the `/verify-email` after hook) answering `{ verified: boolean }` with 200; errors unchanged (`{ code, message }`, 401). `beforeVerification(db): (user) => Promise<void>`, wired as `emailVerification.beforeEmailVerification`; in this task only its step 1 (re-read with `FOR UPDATE`, throw when gone); Task 4 adds the move.
 - Test helper, exported from `verify.test.ts`'s neighbor `apps/api/src/test/registration.ts`: `registerAndGetLink(app, fake, body, opts) => Promise<{ token: string }>`, reused by Tasks 4 and 5.
 
-- [ ] **Step 1: Tests:**
+- [x] **Step 1: Tests:**
   - `ACC-3.9: a verification answers { verified: true } and signs in` — `GET /api/auth/verify-email?token=…`, a session cookie; `email_verified` true.
   - `ACC-3.9: a second use answers { verified: false } with no cookie`.
   - `ACC-3.9: a link past 24 hours answers TOKEN_EXPIRED` — `vi.useFakeTimers({ toFake: ["Date"] })`, the clock moved by 24 h and 1 s.
@@ -177,8 +177,8 @@
   - `NFR-4.12: sign-up and verify-email answer; send-verification-email answers 404` in `routes.test.ts`.
   - The "token never in the log" test covers `verify-email` (OP-053).
   Run → FAIL.
-- [ ] **Step 2: Implement**: the allowlist gains `GET /api/auth/verify-email`; `verifyAfter` answers `{ verified: ctx.context.newSession !== null }` when the path is `/verify-email` and the answer is not an error. Run → PASS; `pnpm check` → PASS.
-- [ ] **Step 3:** the docs; commit `feat(api): verify the address through the emailed link`; push.
+- [x] **Step 2: Implement**: the allowlist gains `GET /api/auth/verify-email`; `verifyAfter` answers `{ verified: ctx.context.newSession !== null }` when the path is `/verify-email` and the answer is not an error. Run → PASS; `pnpm check` → PASS.
+- [x] **Step 3:** the docs; commit `feat(api): verify the address through the emailed link`; push.
 
 ### Task 4: Moving the workspace
 
