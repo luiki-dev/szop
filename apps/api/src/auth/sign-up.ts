@@ -8,7 +8,9 @@ import {
 import { buildSyntheticUserOutput, parseUserOutput } from "better-auth/db";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
+import type { FastifyBaseLogger } from "fastify";
 import type { Database } from "../db/database.ts";
+import { isBreached } from "./breach.ts";
 
 const signUpPath = "/sign-up/email";
 
@@ -42,8 +44,13 @@ export async function registeringGuest(
 
 // Before Better Auth's own checks: the body is checked first, so a sign-up
 // that will be refused never deletes someone's pending account, then an
-// unverified account with the address is replaced. Guests are never matched.
-export const signUpBefore = (db: Database) =>
+// password is checked against known leaks, then an unverified account with
+// the address is replaced. Guests are never matched.
+export const signUpBefore = (
+  db: Database,
+  log: FastifyBaseLogger,
+  breachFetch?: typeof fetch,
+) =>
   createAuthMiddleware(async (ctx) => {
     if (ctx.path !== signUpPath) return;
     const parsed = signUpBodySchema.safeParse(ctx.body);
@@ -51,6 +58,12 @@ export const signUpBefore = (db: Database) =>
       throw APIError.from("BAD_REQUEST", {
         code: "INVALID_BODY",
         message: parsed.error.issues[0]?.message ?? "Invalid request.",
+      });
+    }
+    if (await isBreached(parsed.data.password, log, breachFetch)) {
+      throw APIError.from("BAD_REQUEST", {
+        code: "password_breached",
+        message: "This password appears in known data leaks. Choose another.",
       });
     }
     const body = { ...(ctx.body as object), ...parsed.data };

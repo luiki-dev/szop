@@ -28,6 +28,8 @@ export function createAuth(options: {
   // Better Auth's own lines go here, with their message only (ADR 0078,
   // decision 5).
   log: FastifyBaseLogger;
+  // Asks the breach service; the global fetch when left out, a fake in tests.
+  breachFetch?: typeof fetch;
 }) {
   const { email, log } = options;
   const https = options.origin.startsWith("https:");
@@ -150,7 +152,7 @@ export function createAuth(options: {
       },
     },
     hooks: {
-      before: signUpBefore(options.db),
+      before: signUpBefore(options.db, log, options.breachFetch),
       after: signUpAfter,
     },
     // Message only: the arguments can hold an address or a database error

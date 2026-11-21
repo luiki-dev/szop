@@ -152,10 +152,10 @@
 **Interfaces:**
 - Produces: `isBreached(password: string, log: Pick<FastifyBaseLogger, "warn">, fetchFn = fetch): Promise<boolean>` — `false` on any failure, after one `warn` line.
 
-- [ ] **Step 1: Unit tests** with a stubbed `fetchFn`: `found` (a line `<suffix>:3` → true, the request to `https://api.pwnedpasswords.com/range/<first 5 of the upper-case SHA-1>` with `Add-Padding: true`); `not found` → false; `a padding line with a count of 0 is not a match` → false; `an error status`, `a timeout` (a fetch that never settles, the limit 3000 ms, fake timers), `an unreadable body` → false with exactly one `warn` line whose JSON holds neither the password, the hash nor its prefix. Run → FAIL; implement with `node:crypto` and `AbortSignal.timeout(3000)`; run → PASS.
-- [ ] **Step 2: Into the before hook**, after the name: found → 400 `APIError` with the code `password_breached` and `This password appears in known data leaks. Choose another.` `createAuth` takes an optional `breachFetch` for tests; `sign-up.test.ts`'s other cases pass one that answers "not found".
-- [ ] **Step 3: Tests** `ACC-2.3: a breached password answers 400 password_breached` and `ACC-2.4: the service failing accepts the password`. Run → PASS; `pnpm check` → PASS.
-- [ ] **Step 4:** the docs; commit `feat(api): refuse passwords found in data leaks`; push.
+- [x] **Step 1: Unit tests** with a stubbed `fetchFn`: `found` (a line `<suffix>:3` → true, the request to `https://api.pwnedpasswords.com/range/<first 5 of the upper-case SHA-1>` with `Add-Padding: true`); `not found` → false; `a padding line with a count of 0 is not a match` → false; `an error status`, `a timeout` (a fetch that never settles, the limit 3000 ms, fake timers), `an unreadable body` → false with exactly one `warn` line whose JSON holds neither the password, the hash nor its prefix. Run → FAIL; implement with `node:crypto` and `AbortSignal.timeout(3000)`; run → PASS.
+- [x] **Step 2: Into the before hook**, after the name: found → 400 `APIError` with the code `password_breached` and `This password appears in known data leaks. Choose another.` `createAuth` takes an optional `breachFetch` for tests; `sign-up.test.ts`'s other cases pass one that answers "not found".
+- [x] **Step 3: Tests** `ACC-2.3: a breached password answers 400 password_breached` and `ACC-2.4: the service failing accepts the password`. Run → PASS; `pnpm check` → PASS.
+- [x] **Step 4:** the docs; commit `feat(api): refuse passwords found in data leaks`; push.
 
 ### Task 3: The verification link
 

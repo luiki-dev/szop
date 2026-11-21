@@ -45,6 +45,9 @@ export interface AppDeps {
   // Built from the config when left out; tests pass a fake that records
   // emails (ADR 0079, "Settled while building").
   email?: EmailSender;
+  // The breach check's fetch; the global one when left out. Tests pass a fake
+  // so none reaches the network.
+  breachFetch?: typeof fetch;
 }
 
 export function buildApp({
@@ -53,6 +56,7 @@ export function buildApp({
   catalog,
   logStream,
   email = createEmailSender(config.email),
+  breachFetch,
 }: AppDeps): FastifyInstance {
   const app = Fastify({
     // By address, never a hop count or true (ADR 0025, decision 7).
@@ -105,6 +109,7 @@ export function buildApp({
     trustedProxies: config.trustedProxies,
     email,
     log: app.log,
+    breachFetch,
   });
   app.register(authRoutes, { prefix: "/api", auth });
 

@@ -1,4 +1,4 @@
-import { randomInt, randomUUID } from "node:crypto";
+import { createHash, randomInt, randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
@@ -20,7 +20,9 @@ describe("sign-up", () => {
     await app.close();
   });
 
-  function start() {
+  const notFound = () => Promise.resolve(new Response(""));
+
+  function start(breachFetch: typeof fetch = notFound) {
     sent = [];
     log = captureLog();
     const email: EmailSender = {
@@ -34,6 +36,7 @@ describe("sign-up", () => {
       db: database.db,
       catalog: testCatalog,
       email,
+      breachFetch,
       logStream: log.stream,
     });
   }
@@ -120,6 +123,43 @@ describe("sign-up", () => {
     for (const password of accepted) {
       expect((await signUp(body({ password }))).statusCode).toBe(200);
     }
+  });
+
+  it("ACC-2.3: a breached password answers 400 password_breached and deletes nothing", async () => {
+    start(() => Promise.resolve(new Response("")));
+    const pending = body();
+    await signUp(pending);
+    await app.close();
+    start((url) => {
+      const suffix = createHash("sha1")
+        .update(pending.password)
+        .digest("hex")
+        .toUpperCase()
+        .slice(5);
+      expect(url as string).toContain("/range/");
+      return Promise.resolve(new Response(`${suffix}:9`));
+    });
+    const [before] = await users(pending.email);
+    const response = await signUp(pending);
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toMatchObject({
+      code: "password_breached",
+      message: "This password appears in known data leaks. Choose another.",
+    });
+    const [after] = await users(pending.email);
+    expect(after?.id).toBe(before?.id);
+  });
+
+  it("ACC-2.4: the service failing accepts the password", async () => {
+    start(() => Promise.reject(new Error("down")));
+    expect((await signUp(body())).statusCode).toBe(200);
+    expect(
+      log
+        .lines()
+        .filter(
+          (l) => l.msg === "Breach check failed; the password was accepted",
+        ),
+    ).toHaveLength(1);
   });
 
   it("ACC-2.12: an empty, a 51-character and a control-character name answer 400", async () => {
