@@ -7,9 +7,24 @@ import {
 } from "better-auth/api";
 import { buildSyntheticUserOutput, parseUserOutput } from "better-auth/db";
 import { sql } from "drizzle-orm";
+import { z } from "zod";
 import type { Database } from "../db/database.ts";
 
 const signUpPath = "/sign-up/email";
+
+// What Better Auth itself refuses after this hook has run, checked here too so
+// a refused body never deletes a pending account: its body schema, and the
+// fields that only the server sets.
+const signUpBodySchema = registrationSchema
+  .extend({
+    image: z.string().optional(),
+    callbackURL: z.string().optional(),
+    rememberMe: z.boolean().optional(),
+  })
+  .loose()
+  .refine((body) => !("registeredByGuest" in body || "convertedAt" in body), {
+    message: "Invalid request.",
+  });
 
 // The anonymous, not yet converted user of the request's session: the guest
 // whose browser registers (PH-18b spec, "Better Auth's configuration").
@@ -31,7 +46,7 @@ export async function registeringGuest(
 export const signUpBefore = (db: Database) =>
   createAuthMiddleware(async (ctx) => {
     if (ctx.path !== signUpPath) return;
-    const parsed = registrationSchema.safeParse(ctx.body);
+    const parsed = signUpBodySchema.safeParse(ctx.body);
     if (!parsed.success) {
       throw APIError.from("BAD_REQUEST", {
         code: "INVALID_BODY",

@@ -234,6 +234,18 @@ describe("sign-up", () => {
       { cookie },
     );
 
+    // Better Auth refuses these only after the hook has run.
+    const extras = [
+      { image: 1 },
+      { convertedAt: "x" },
+      { registeredByGuest: "x" },
+      { rememberMe: "no" },
+      { callbackURL: 1 },
+    ];
+    for (const extra of extras) {
+      const refused = await signUp({ ...payload, ...extra }, { cookie });
+      expect(refused.statusCode).toBe(400);
+    }
     expect(short.statusCode).toBe(400);
     expect(placeholder.statusCode).toBe(400);
     expect(await users(payload.email)).toHaveLength(1);
