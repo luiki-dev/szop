@@ -3,9 +3,10 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
 import { createAuth } from "./auth.ts";
-import { sameOrigin, signIn } from "../test/auth.ts";
+import { noEmail, sameOrigin, signIn } from "../test/auth.ts";
 import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
+import { silentLog } from "../test/log.ts";
 import { useTestDatabase } from "../test/database.ts";
 import type { Config } from "../config.ts";
 
@@ -107,6 +108,8 @@ describe("/api/auth", () => {
     const config = testConfig({ trustedProxies: ["10.0.0.0/16"] });
     app = buildApp({ config, db: database.db, catalog: testCatalog });
     const auth = createAuth({
+      email: noEmail,
+      log: silentLog,
       db: database.db,
       secret: config.betterAuthSecret,
       origin: config.appOrigin,
@@ -223,6 +226,8 @@ describe("/api/auth", () => {
   it("trusts only its own origin and sets no default proxies or Secure on http", () => {
     const config = testConfig();
     const auth = createAuth({
+      email: noEmail,
+      log: silentLog,
       db: database.db,
       secret: config.betterAuthSecret,
       origin: config.appOrigin,
@@ -235,6 +240,8 @@ describe("/api/auth", () => {
   it("NFR-4.9: on an https origin every cookie is Secure", () => {
     const config = testConfig();
     const auth = createAuth({
+      email: noEmail,
+      log: silentLog,
       db: database.db,
       secret: config.betterAuthSecret,
       origin: "https://szop.test",

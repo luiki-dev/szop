@@ -41,8 +41,18 @@ export const users = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
     isAnonymous: boolean("is_anonymous").default(false),
+    registeredByGuest: uuid("registered_by_guest"),
+    keepGuestData: boolean("keep_guest_data").default(false).notNull(),
+    convertedAt: timestamptz("converted_at"),
   },
-  (table) => [unique("users_email_key").on(table.email)],
+  (table) => [
+    unique("users_email_key").on(table.email),
+    foreignKey({
+      name: "users_registered_by_guest_fkey",
+      columns: [table.registeredByGuest],
+      foreignColumns: [table.id],
+    }).onDelete("set null"),
+  ],
 );
 
 export const sessions = pgTable(

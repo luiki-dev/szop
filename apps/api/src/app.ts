@@ -5,6 +5,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import { createEmailSender, type EmailSender } from "./email/sender.ts";
 import { createAuth } from "./auth/auth.ts";
 import { authRoutes } from "./auth/routes.ts";
 import { catalogRoutes } from "./catalog/routes.ts";
@@ -41,6 +42,9 @@ export interface AppDeps {
   // Stdout when left out. Tests pass a stream they read back (ADR 0025,
   // decision 9).
   logStream?: LogStream;
+  // Built from the config when left out; tests pass a fake that records
+  // emails (ADR 0079, "Settled while building").
+  email?: EmailSender;
 }
 
 export function buildApp({
@@ -48,6 +52,7 @@ export function buildApp({
   db,
   catalog,
   logStream,
+  email = createEmailSender(config.email),
 }: AppDeps): FastifyInstance {
   const app = Fastify({
     // By address, never a hop count or true (ADR 0025, decision 7).
@@ -98,6 +103,8 @@ export function buildApp({
     secret: config.betterAuthSecret,
     origin: config.appOrigin,
     trustedProxies: config.trustedProxies,
+    email,
+    log: app.log,
   });
   app.register(authRoutes, { prefix: "/api", auth });
 

@@ -29,6 +29,13 @@
       "when": 1793996088300,
       "tag": "0003_lethal_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795265173565,
+      "tag": "0004_quick_trish_tilby",
+      "breakpoints": true
     }
   ]
 }

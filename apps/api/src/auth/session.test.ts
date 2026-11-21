@@ -2,7 +2,8 @@ import { sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
-import { signIn } from "../test/auth.ts";
+import { noEmail, signIn } from "../test/auth.ts";
+import { silentLog } from "../test/log.ts";
 import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
@@ -19,6 +20,8 @@ describe("sessionHook", () => {
     const config = testConfig();
     // The same secret and origin as the app's own, so the cookies verify.
     const auth = createAuth({
+      email: noEmail,
+      log: silentLog,
       db: database.db,
       secret: config.betterAuthSecret,
       origin: config.appOrigin,

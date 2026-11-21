@@ -1,3 +1,4 @@
+import Fastify from "fastify";
 import type { LogStream } from "../app.ts";
 
 export type LogLine = Record<string, unknown>;
@@ -17,3 +18,6 @@ export function captureLog(): { stream: LogStream; lines(): LogLine[] } {
     },
   };
 }
+
+// For code that wants a FastifyBaseLogger and whose lines nobody reads.
+export const silentLog = Fastify().log;

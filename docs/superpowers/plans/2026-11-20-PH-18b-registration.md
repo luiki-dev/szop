@@ -110,13 +110,13 @@
   AppDeps.email?: EmailSender
   ```
 
-- [ ] **Step 1: The columns.** In `auth-schema.ts`'s `users`: `registeredByGuest: uuid("registered_by_guest")` referencing `users.id` with `onDelete: "set null"` (a `foreignKey` in the table's extras, as the file does), `keepGuestData: boolean("keep_guest_data").default(false).notNull()`, `convertedAt: timestamptz("converted_at")`. Generate the migration; run `pnpm --filter @szop/api test src/db` → PASS (`schema.test.ts` and the migration checks).
+- [x] **Step 1: The columns.** In `auth-schema.ts`'s `users`: `registeredByGuest: uuid("registered_by_guest")` referencing `users.id` with `onDelete: "set null"` (a `foreignKey` in the table's extras, as the file does), `keepGuestData: boolean("keep_guest_data").default(false).notNull()`, `convertedAt: timestamptz("converted_at")`. Generate the migration; run `pnpm --filter @szop/api test src/db` → PASS (`schema.test.ts` and the migration checks).
 
-- [ ] **Step 2: The shared schemas, test first.** `accounts.test.ts`: `displayNameSchema` accepts `"  Ania  "` as `"Ania"`, 50 characters; refuses `""`, `"   "`, 51 characters, `"An\u0007ia"`, `"An\nia"`. `registrationSchema` refuses a password of 14 and 129 code units, accepts 15 and 128, and counts `"😀"` as 2. Run → FAIL; implement; run → PASS.
+- [x] **Step 2: The shared schemas, test first.** `accounts.test.ts`: `displayNameSchema` accepts `"  Ania  "` as `"Ania"`, 50 characters; refuses `""`, `"   "`, 51 characters, `"An\u0007ia"`, `"An\nia"`. `registrationSchema` refuses a password of 14 and 129 code units, accepts 15 and 128, and counts `"😀"` as 2. Run → FAIL; implement; run → PASS.
 
-- [ ] **Step 3: The emails, test first.** `templates.test.ts`: `verificationEmail("https://szop.test/verify?token=a<b")` has the subject `Confirm your email for Szop`, a text starting `Hi,`, the link in the text, the link HTML-escaped in the HTML (`a&lt;b`), the button `Confirm my address`, and the closing line of the spec. `existingAccountEmail(...)` has the subject `You already have a Szop account`, the button `Log in`, and no "Forgot your password" line. Neither contains a name. Implement with a small `escapeHtml`; run → PASS.
+- [x] **Step 3: The emails, test first.** `templates.test.ts`: `verificationEmail("https://szop.test/verify?token=a<b")` has the subject `Confirm your email for Szop`, a text starting `Hi,`, the link in the text, the link HTML-escaped in the HTML (`a&lt;b`), the button `Confirm my address`, and the closing line of the spec. `existingAccountEmail(...)` has the subject `You already have a Szop account`, the button `Log in`, and no "Forgot your password" line. Neither contains a name. Implement with a small `escapeHtml`; run → PASS.
 
-- [ ] **Step 4: The sign-up's tests.** `sign-up.test.ts`, with `buildApp({ ..., email: fake })` where `fake` records emails, and a helper `signUp(app, body, { cookie?, ip? })`:
+- [x] **Step 4: The sign-up's tests.** `sign-up.test.ts`, with `buildApp({ ..., email: fake })` where `fake` records emails, and a helper `signUp(app, body, { cookie?, ip? })`:
   - `ACC-2.1 ACC-2.2: a sign-up answers 200 with no session and one verification email` — no `set-cookie`; one email to the address, its text holding `<appOrigin>/verify?token=`; the user row has `email_verified = false`, the trimmed name.
   - `ACC-2.2: 14 and 129 code units are refused, 15 and 128 and "  😀  …" accepted` — 400 for the first two.
   - `ACC-2.12: an empty, a 51-character and a control-character name answer 400`.
@@ -131,16 +131,16 @@
 
   Run → FAIL.
 
-- [ ] **Step 5: Configure `createAuth`** as the spec's [Better Auth's configuration](../specs/2026-11-20-PH-18b-registration-design.md#better-auths-configuration) lists, with `email` and `log` from `buildApp` (`app.log`). `sendVerificationEmail({ user, token })` and `onExistingUserSignUp({ user })` call `sendInBackground(email, { to: user.email, ...template }, kind, log)` with the kinds `verification` and `existing-account`. `logger: { log: (level, message) => log[level === "debug" ? "debug" : level](message) }`, never the arguments. `AppDeps.email` defaults to `createEmailSender(config.email)`.
+- [x] **Step 5: Configure `createAuth`** as the spec's [Better Auth's configuration](../specs/2026-11-20-PH-18b-registration-design.md#better-auths-configuration) lists, with `email` and `log` from `buildApp` (`app.log`). `sendVerificationEmail({ user, token })` and `onExistingUserSignUp({ user })` call `sendInBackground(email, { to: user.email, ...template }, kind, log)` with the kinds `verification` and `existing-account`. `logger: { log: (level, message) => log[level === "debug" ? "debug" : level](message) }`, never the arguments. `AppDeps.email` defaults to `createEmailSender(config.email)`.
 
-- [ ] **Step 6: The hooks in `sign-up.ts`.** `signUpBefore(db)` and `signUpAfter`, wired through `hooks.before`/`hooks.after` with `createAuthMiddleware`, acting only when `ctx.path === "/sign-up/email"`:
+- [x] **Step 6: The hooks in `sign-up.ts`.** `signUpBefore(db)` and `signUpAfter`, wired through `hooks.before`/`hooks.after` with `createAuthMiddleware`, acting only when `ctx.path === "/sign-up/email"`:
   - before: `registrationSchema` on the body (400 `APIError` with the first message), then the body handed on with the trimmed name (`return { context: { body } }`), then, in a transaction, `SELECT id FROM users WHERE lower(email) = lower($1) AND is_anonymous = false AND email_verified = false FOR UPDATE` and its delete. The breach check slots between the name and the delete in Task 2.
   - after: when `ctx.context.returned` is an `APIError` with the code `FAILED_TO_CREATE_USER`, answer what an existing address gets (`{ token: null, user }`, the user built from the body as `sign-up.mjs` builds it).
   - `databaseHooks.user.create.before(user, ctx)`: when `ctx?.path === "/sign-up/email"`, read the session (`getSessionFromCtx(ctx)`); when its user is anonymous and its `convertedAt` is null (a query), return `{ data: { ...user, registeredByGuest: session.user.id } }`.
 
-- [ ] **Step 7: The allowlist** gains `POST /api/auth/sign-up/email`. Run `pnpm --filter @szop/api test src/auth src/email` → PASS; `pnpm check` → PASS.
+- [x] **Step 7: The allowlist** gains `POST /api/auth/sign-up/email`. Run `pnpm --filter @szop/api test src/auth src/email` → PASS; `pnpm check` → PASS.
 
-- [ ] **Step 8: The docs** named under Files; commit `feat(api): sign up with email and password`; push. 🛑 Stop: report to the owner which hook behaved as read and which did not.
+- [x] **Step 8: The docs** named under Files; commit `feat(api): sign up with email and password`; push. 🛑 Stop: report to the owner which hook behaved as read and which did not.
 
 ### Task 2: The breach check
 

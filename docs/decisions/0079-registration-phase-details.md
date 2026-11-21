@@ -43,6 +43,10 @@ The brainstorm drew every screen and transition of registration and login on one
 
 ## Settled while building
 
+- **`AppDeps.email` is optional** (Task 1). `buildApp` builds the sender from `config.email` when it is left out, so `server.ts` and the tests that send nothing stay as they are; the tests that read emails pass a fake that records them.
+- **Better Auth's logger is set to `warn`** (Task 1). Its sign-up line for an existing address, at `info`, holds the address in its message, so passing messages only is not enough; `info` is off.
+- **A UUIDv7 in every synthetic answer** (Task 1). A real user's ID is a UUIDv7 made by the database, Better Auth's synthetic one a v4, which told an existing address from a new one; `customSyntheticUser` and the after hook both use `uuidv7()`.
+
 ## Consequences
 
 - The `users` table gains the registering guest, the checkbox and the guest's conversion. A guest's session stops working once its registration is verified, in any browser.

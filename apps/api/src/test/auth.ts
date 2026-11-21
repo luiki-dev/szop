@@ -29,3 +29,6 @@ export async function signIn(app: FastifyInstance): Promise<string> {
   }
   return response.cookies.map((c) => `${c.name}=${c.value}`).join("; ");
 }
+
+// For a createAuth that sends no email.
+export const noEmail = { send: () => Promise.resolve() };
