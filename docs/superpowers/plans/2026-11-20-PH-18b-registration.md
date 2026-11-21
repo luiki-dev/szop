@@ -191,7 +191,7 @@
 **Interfaces:**
 - Produces: `listsResponseSchema = z.object({ lists: z.array(listSchema), hasWorkspace: z.boolean() })`. `sessionHook(auth: Auth, db: Database)`: a converted guest's session deleted, 401 `{ error: { code: "guest_converted", message } }`.
 
-- [ ] **Step 1: Tests** in `verify.test.ts`, each guest with a workspace made through the API (a list created, so its catalog and categories exist):
+- [x] **Step 1: Tests** in `verify.test.ts`, each guest with a workspace made through the API (a list created, so its catalog and categories exist):
   - `ACC-2.7: ticked, the guest's workspace with its lists, catalog and categories is the account's` — after verifying, the account's `GET /api/lists` holds the guest's list; `workspaces.user_id` is the account's.
   - `ACC-2.7: with no workspace at sign-up and a list added before verification, the list is the account's` (`keepGuestData: true`).
   - `ACC-2.10: unticked, the account starts with the default catalog and no lists, and the guest's workspace is untouched`.
@@ -200,8 +200,8 @@
   - `a verification with no registering guest moves nothing and converts nobody` (Review Focus 1).
   - In `lists` tests: `hasWorkspace` false for a new guest, true after a list.
   Run → FAIL.
-- [ ] **Step 2: Implement** the spec's [Moving the workspace](../specs/2026-11-20-PH-18b-registration-design.md#moving-the-workspace), steps 1 to 4, in one `db.transaction`, each step a no-op the second time (`WHERE converted_at IS NULL`, `WHERE user_id = <guest>`). `sessionHook`: when the session's user `isAnonymous`, read `converted_at`; when set, delete that session and `sendError(reply, 401, "guest_converted", "Your address was confirmed in another browser")`. Run → PASS; `pnpm check` → PASS.
-- [ ] **Step 3:** the docs and the ADR notes; commit `feat(api): move the guest's workspace into the account at verification`; push. 🛑 Stop.
+- [x] **Step 2: Implement** the spec's [Moving the workspace](../specs/2026-11-20-PH-18b-registration-design.md#moving-the-workspace), steps 1 to 4, in one `db.transaction`, each step a no-op the second time (`WHERE converted_at IS NULL`, `WHERE user_id = <guest>`). `sessionHook`: when the session's user `isAnonymous`, read `converted_at`; when set, delete that session and `sendError(reply, 401, "guest_converted", "Your address was confirmed in another browser")`. Run → PASS; `pnpm check` → PASS.
+- [x] **Step 3:** the docs and the ADR notes; commit `feat(api): move the guest's workspace into the account at verification`; push. 🛑 Stop.
 
 ### Task 5: Resending the link
 

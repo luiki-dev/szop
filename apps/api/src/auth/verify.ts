@@ -5,12 +5,18 @@ import type { Database } from "../db/database.ts";
 // Runs before Better Auth marks the address verified, so a failure here
 // leaves the account unverified and the link usable again. Re-reads the user
 // with a lock; a pending account replaced or deleted in the meantime is gone.
+// Then moves the registering guest's workspace and converts the guest; each
+// step does nothing a second time, so opening the link again finishes it.
 export const beforeVerification =
   (db: Database) =>
   async (user: { id: string }): Promise<void> => {
     await db.transaction(async (tx) => {
-      const { rows } = await tx.execute(
-        sql`SELECT id FROM users WHERE id = ${user.id} FOR UPDATE`,
+      const { rows } = await tx.execute<{
+        guest: string | null;
+        keep: boolean;
+      }>(
+        sql`SELECT registered_by_guest AS guest, keep_guest_data AS keep
+            FROM users WHERE id = ${user.id} FOR UPDATE`,
       );
       if (rows.length === 0) {
         throw APIError.from("UNAUTHORIZED", {
@@ -18,6 +24,17 @@ export const beforeVerification =
           message: "Invalid token",
         });
       }
+      const guest = rows[0]?.guest;
+      if (!guest) return;
+      if (rows[0]?.keep) {
+        await tx.execute(
+          sql`UPDATE workspaces SET user_id = ${user.id} WHERE user_id = ${guest}`,
+        );
+      }
+      await tx.execute(
+        sql`UPDATE users SET converted_at = now()
+            WHERE id = ${guest} AND converted_at IS NULL`,
+      );
     });
   };
 

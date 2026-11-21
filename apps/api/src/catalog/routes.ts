@@ -23,7 +23,7 @@ export function catalogRoutes(
   { db, auth, catalog }: CatalogRoutesOptions,
 ): void {
   // A stale cookie gives request.user = null, so it gets the seed, not a 401.
-  app.addHook("preHandler", sessionHook(auth));
+  app.addHook("preHandler", sessionHook(auth, db));
   app
     .withTypeProvider<ZodTypeProvider>()
     .get(

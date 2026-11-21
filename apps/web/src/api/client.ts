@@ -191,7 +191,7 @@ export async function getLists(): Promise<List[]> {
   const response = await fetch(path, { signal: deadline() });
   if (!response.ok) throw await failure("GET", path, response);
   const body: unknown = await response.json().catch(unreadable);
-  const lists = listsResponseSchema.safeParse(body);
+  const lists = listsResponseSchema.pick({ lists: true }).safeParse(body);
   if (!lists.success) {
     throw new Error("The lists came in a shape this page does not know");
   }

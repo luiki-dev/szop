@@ -33,7 +33,7 @@ describe("sessionHook", () => {
     });
     // A scope of its own, as the lists routes get theirs (Task 3).
     void app.register((scope) => {
-      scope.addHook("preHandler", sessionHook(auth));
+      scope.addHook("preHandler", sessionHook(auth, database.db));
       scope.get("/api/whoami", (request) => ({ user: request.user }));
     });
   });
@@ -107,5 +107,19 @@ describe("sessionHook", () => {
     const cookie = await signIn(app);
     await database.db.execute(sql`DELETE FROM sessions`);
     expect((await whoami(cookie)).json()).toEqual({ user: null });
+  });
+
+  it("a converted guest's session is deleted and answers 401 guest_converted", async () => {
+    const cookie = await signIn(app);
+    await database.db.execute(sql`UPDATE users SET converted_at = now()`);
+
+    const response = await whoami(cookie);
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toMatchObject({
+      error: { code: "guest_converted" },
+    });
+    const { rows } = await database.db.execute(sql`SELECT 1 FROM sessions`);
+    expect(rows).toHaveLength(0);
   });
 });
