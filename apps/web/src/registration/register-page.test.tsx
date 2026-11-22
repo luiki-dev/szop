@@ -122,6 +122,21 @@ describe("RegisterPage", () => {
     expect(registeredAddress()).toBe("ania@example.com");
   });
 
+  it("ACC-2.1: a sign-up refused by the rate limiter shows Better Auth's message, not the status line", async () => {
+    captureSignUp(429, {
+      message: "Too many requests. Please try again later.",
+    });
+    const user = userEvent.setup();
+    renderApp("/register");
+
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Too many requests. Please try again later.",
+    );
+  });
+
   it("ACC-2.3: shows password_breached under Password", async () => {
     captureSignUp(400, {
       code: "password_breached",

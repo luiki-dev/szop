@@ -1,12 +1,16 @@
 import { z } from "zod";
 import { listsResponseSchema, type Registration } from "@szop/shared";
-import { deadline, failure, send } from "./client.ts";
+import { deadline, failure, guestSignIn, send } from "./client.ts";
 
 // Plain fetch, not better-auth/client, to keep the JavaScript small. Better
 // Auth's errors ({ code, message }) become an ApiRequestError with its code.
 export async function signUp(body: Registration): Promise<void> {
   const path = "/api/auth/sign-up/email";
-  const response = await send("POST", path, body, deadline());
+  const signal = deadline();
+  // A browser with no session gets its guest first: a list added before the
+  // link is opened then has a guest to be moved with.
+  await guestSignIn(signal);
+  const response = await send("POST", path, body, signal);
   if (!response.ok) throw await failure("POST", path, response);
 }
 
@@ -48,13 +52,13 @@ export async function getWorkspace(): Promise<{
   const path = "/api/lists";
   const response = await fetch(path, { signal: deadline() });
   // `failure` sends a converted guest to /login; any other 401 is a new guest.
-  if (
-    response.status === 401 &&
-    (await failure("GET", path, response)).code !== "guest_converted"
-  ) {
-    return { lists: 0, hasWorkspace: false };
+  if (!response.ok) {
+    const error = await failure("GET", path, response);
+    if (response.status === 401 && error.code !== "guest_converted") {
+      return { lists: 0, hasWorkspace: false };
+    }
+    throw error;
   }
-  if (!response.ok) throw await failure("GET", path, response);
   const body = listsResponseSchema.safeParse(await response.json());
   if (!body.success) {
     throw new Error("The lists came in a shape this page does not know");

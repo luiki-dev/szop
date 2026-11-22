@@ -6,8 +6,10 @@ import { useSession } from "./use-session.ts";
 // The bottom of the menu, above the API status (ph-18b-journey-v5.html): a
 // guest's way in, or the account's name and email ("Log out" is PH-18c's).
 export function AccountBox({ onNavigate }: { onNavigate?: () => void }) {
-  const { user } = useSession();
+  const { user, loading } = useSession();
   const { pathname } = useLocation();
+  // Nothing while the session loads: an account holder never sees the guest box.
+  if (loading) return null;
   if (user) {
     return (
       <div className="flex flex-col gap-1 rounded-surface bg-muted p-3">
@@ -34,7 +36,7 @@ export function AccountBox({ onNavigate }: { onNavigate?: () => void }) {
       >
         Log in
       </Link>
-      <p className="flex min-h-12 flex-wrap items-center justify-center gap-1 text-center text-sm">
+      <p className="flex flex-wrap items-center justify-center gap-1 text-center text-sm">
         No account?
         <Link
           to="/register"

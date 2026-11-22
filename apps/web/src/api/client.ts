@@ -113,7 +113,7 @@ export function send(
 
 // The body of a response that is not the answer: the API's message and code
 // when it sent them, in the app's shape ({ error: { code, message } }) or in
-// Better Auth's ({ code, message }); else only the status.
+// Better Auth's ({ code?, message }); else only the status.
 export async function failure(
   method: string,
   path: string,
@@ -121,8 +121,9 @@ export async function failure(
 ): Promise<ApiRequestError> {
   const body: unknown = await response.json().catch(unreadable);
   const error = apiErrorSchema.safeParse(body);
+  // Better Auth's rate limiter answers a message with no code.
   const flat = z
-    .object({ code: z.string(), message: z.string() })
+    .object({ code: z.string().optional(), message: z.string() })
     .safeParse(body);
   const found = error.success
     ? error.data.error
@@ -157,7 +158,7 @@ async function signIn(signal: AbortSignal): Promise<void> {
 // lock shared by all tabs, so tabs that meet make one sign-in, not one each
 // (Better Auth answers `null`, or fails, when there is no session). jsdom has
 // no navigator.locks, so the callback runs alone there.
-function guestSignIn(signal: AbortSignal): Promise<void> {
+export function guestSignIn(signal: AbortSignal): Promise<void> {
   const signInUnlessSession = async () => {
     const session = await fetch("/api/auth/get-session", { signal })
       .then((response) =>

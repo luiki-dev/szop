@@ -64,7 +64,7 @@ export function Field({
           }}
           onBlur={onBlur}
           aria-invalid={error ? true : undefined}
-          aria-describedby={`${id}-note`}
+          aria-describedby={hint || error ? `${id}-note` : undefined}
           className={cn(
             "min-h-12 w-full rounded-control border-2 border-input bg-card px-3 text-base text-card-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring aria-invalid:border-destructive",
             secret && "pr-20",

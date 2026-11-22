@@ -32,6 +32,30 @@ describe("signUp", () => {
   });
 });
 
+describe("signUp with no guest session", () => {
+  it("ACC-2.7: signs in as a guest before the sign-up, so a list added later has a session to join", async () => {
+    const calls: string[] = [];
+    server.use(
+      http.get("/api/auth/get-session", () => {
+        calls.push("get-session");
+        return HttpResponse.json(null);
+      }),
+      http.post("/api/auth/sign-in/anonymous", () => {
+        calls.push("sign-in");
+        return HttpResponse.json({});
+      }),
+      http.post("/api/auth/sign-up/email", () => {
+        calls.push("sign-up");
+        return HttpResponse.json({ token: null });
+      }),
+    );
+
+    await signUp(body);
+
+    expect(calls).toEqual(["get-session", "sign-in", "sign-up"]);
+  });
+});
+
 describe("resendLink", () => {
   it("reads the code of the app's shape", async () => {
     server.use(
