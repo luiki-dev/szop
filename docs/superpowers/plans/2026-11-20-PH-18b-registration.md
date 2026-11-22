@@ -28,7 +28,7 @@
 ## Global Constraints
 
 - The branch is `feat/ph-18b-registration`. Scopes: `api` (Tasks 1 to 5), `web` (Tasks 6 to 8, 10), `e2e` (Task 9); subjects lowercase.
-- **Rhythm** ([ADR 0079](../../decisions/0079-registration-phase-details.md), decision 1): stop after Task 1 (Better Auth's configuration, proving its hooks), after Task 4 (the workspace takeover), and after Task 5, before the first screen task: there the owner supplies the illustrations (envelope, hourglass, broken link) as SVG. The other tasks go on without a stop.
+- **Rhythm** ([ADR 0079](../../decisions/0079-registration-phase-details.md), decision 1): stop after Task 1 (Better Auth's configuration, proving its hooks), after Task 4 (the workspace takeover), and after Task 5, before the first screen task: there the owner supplies the illustrations (a mailbox, an hourglass, a broken link) as SVG. The other tasks go on without a stop.
 - **Task 1 proves Better Auth's hooks against PostgreSQL** before anything is built on them: the before hook on `/sign-up/email` sees the guest's session, `databaseHooks.user.create.before` can set an `input: false` field, `onExistingUserSignUp` runs for a verified address. Task 3 proves `beforeEmailVerification` runs before the account is marked verified, and the `{ verified }` after hook. If one does not behave as the spec reads, stop and report; do not work around it.
 - **No log line holds an email address, a password, its hash, a token or a database error's detail** ([ADR 0078](../../decisions/0078-sending-email-phase-details.md), decision 5). Every email goes through `sendInBackground`.
 - **Better Auth's error bodies** are `{ code, message }`; the app's are `{ error: { code, message } }` (`sendError`). New app routes answer the app's shape.
@@ -220,7 +220,7 @@
 ### Task 6: The registration pages
 
 **Files:**
-- Add: `apps/web/src/brand/envelope.svg`, `hourglass.svg`, `broken-link.svg` (the owner's)
+- Add: `apps/web/src/brand/mailbox.svg`, `hourglass.svg`, `broken-link.svg` (the owner's)
 - Create: `apps/web/src/api/auth.ts`, `auth.test.ts`; Modify: `apps/web/src/api/client.ts`
 - Create: `apps/web/src/registration/register-page.tsx`, `sent-page.tsx`, `resend-page.tsx`, `registered-address.ts`, their tests; Modify: `apps/web/src/routes.tsx`
 - Modify: `docs/architecture/visual-design.md` (the form pages, with the mockup)

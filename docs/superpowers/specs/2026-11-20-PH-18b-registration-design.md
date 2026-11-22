@@ -43,14 +43,14 @@ Every screen is a page in the app shell, a card 400 px wide at most on a desktop
 | Page | What it shows | Built here |
 |---|---|---|
 | `/register` | "Your name", "Email", "Password" and "Repeat password" (each with Show), "Keep this browser's lists" when the guest has a workspace, "Create account", Cancel, "Already have an account? Log in". Errors under their field, checked when leaving the field and on submit; the breached-password message comes from the server on submit. The password's length is counted as the server counts it, in UTF-16 code units (`password.length`), so an emoji counts as 2. | ✅ |
-| `/register/sent` | "Check your inbox", the envelope, the address from this browser, "Back to my lists", "Wrong address? Start again" (back to `/register` with the name filled in), "Nothing arrived? Send the link again" (sends at once, a toast confirms). | ✅ |
+| `/register/sent` | "Check your inbox", the mailbox (the raccoon diving into it), the address from this browser, "Back to my lists", "Wrong address? Start again" (back to `/register` with the name filled in), "Nothing arrived? Send the link again" (sends at once, a toast confirms). | ✅ |
 | `/register/resend` | "Send a new link", Email, "Send link", Cancel; then `/register/sent` with that address, whatever happened. | ✅ |
 | `/verify?token=…` | The hourglass and "Confirming your address…" while the call runs; then Lists with the toast "Welcome! Your lists are in your account now." (or "Welcome!" when the lists were not kept), or "Link not valid". | ✅ |
 | "Link not valid" (on `/verify`) | The broken link, "This link no longer works. It may have expired, or you may have used it already.", "Send a new link" (to `/register/resend`), "Already confirmed your address? Log in". | ✅ |
 | `/login` | Here: the title, the notice "Your address was confirmed in another browser. Log in here to see your lists." when opened as `/login?confirmed`, the line "Logging in comes with the next update.", and Cancel. The form is PH-18c's. | in part |
 | The menu's account box | Guest: "Keep your lists on every device.", "Log in" as the main button, "No account? Create account" as a link below; the current page's entry in the current-page look with `aria-current="page"`. Account: the name and the email under it ("Log out" is PH-18c's). | ✅ |
 
-Cancel goes back to the page the user came from, or Lists. `/register` with an account's session goes to Lists. The owner supplies the illustrations (envelope, hourglass, broken link) as SVG before the screen tasks; the mockup's emoji are placeholders.
+Cancel goes back to the page the user came from, or Lists. `/register` with an account's session goes to Lists. The owner supplies the illustrations (a mailbox, an hourglass, a broken link) as SVG before the screen tasks; the mockup's emoji are placeholders.
 
 ### Better Auth's configuration
 
