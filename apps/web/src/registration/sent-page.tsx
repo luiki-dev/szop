@@ -61,7 +61,7 @@ export function SentPage() {
           onClick={() => {
             void again();
           }}
-          className="font-semibold text-link underline"
+          className="cursor-pointer font-semibold text-link underline"
         >
           Send the link again
         </button>
