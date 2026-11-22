@@ -86,7 +86,7 @@ test("NFR-4.8: the address bar holds no token after /verify", async ({
   await expect(page).toHaveURL("/");
   expect(page.url()).not.toContain("token");
   await page.goBack();
-  expect(page.url()).not.toContain("token");
+  await expect(page).not.toHaveURL(/token/);
 });
 
 test("NFR-2.1: the registration pages pass axe", async ({ page }) => {
@@ -106,6 +106,20 @@ test("NFR-2.1: the registration pages pass axe", async ({ page }) => {
   await page.goto("/register/resend");
   await expect(page.getByRole("textbox", { name: "Email" })).toBeVisible();
   await expectAccessible(page);
+
+  // The verify request held, so the page stays on the hourglass for the scan.
+  let release = () => {};
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/auth/verify-email*", async (route) => {
+    await held;
+    await route.fulfill({ status: 401, json: { code: "invalid_token" } });
+  });
+  await page.goto("/verify?token=held");
+  await expect(page.getByText("Confirming your address…")).toBeVisible();
+  await expectAccessible(page);
+  release();
 
   await page.goto("/verify");
   await expect(

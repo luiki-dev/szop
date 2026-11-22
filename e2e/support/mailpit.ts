@@ -9,9 +9,12 @@ export async function latestEmail(
 ): Promise<{ subject: string; text: string; verifyLink: string }> {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
-    const found = (await (
-      await fetch(`${mailpit}/search?query=${encodeURIComponent(`to:${to}`)}`)
-    ).json()) as { messages: { ID: string }[] };
+    const search = await fetch(
+      `${mailpit}/search?query=${encodeURIComponent(`to:${to}`)}`,
+    );
+    if (!search.ok)
+      throw new Error(`Mailpit search answered ${String(search.status)}`);
+    const found = (await search.json()) as { messages: { ID: string }[] };
     // The search lists the newest first.
     const id = found.messages[0]?.ID;
     if (id !== undefined) {
@@ -24,10 +27,14 @@ export async function latestEmail(
       const verifyLink = /https?:\/\/\S+\/verify\?token=\S+/.exec(
         message.Text,
       )?.[0];
+      if (verifyLink === undefined)
+        throw new Error(
+          `The email to ${to} holds no /verify?token= link:\n${message.Text}`,
+        );
       return {
         subject: message.Subject,
         text: message.Text,
-        verifyLink: verifyLink ?? "",
+        verifyLink,
       };
     }
     if (Date.now() > deadline)

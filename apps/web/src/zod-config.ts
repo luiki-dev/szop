@@ -5,6 +5,7 @@ import { z } from "zod";
 // for eval support with `new Function("")` when the shared schemas are built,
 // and the CSP (no 'unsafe-eval', ADR 0012, decision 8) blocks and reports
 // that probe on every page load, failing the E2E CSP guard (ADR 0026). zod
-// skips the probe under jitless. Imported first in main.tsx, so it runs
-// before @szop/shared's schemas are created.
+// skips the probe under jitless. Imported first in main.tsx, but the order of
+// the built chunks matters too: vite.config.ts puts this file and zod in one
+// chunk, so the config runs before any chunk that builds a schema.
 z.config({ jitless: true });

@@ -102,7 +102,14 @@ export default defineConfig({
     // probe broke the CSP guard.
     rolldownOptions: {
       output: {
-        advancedChunks: { groups: [{ name: "zod", test: /zod/ }] },
+        codeSplitting: {
+          groups: [
+            {
+              name: "zod",
+              test: /node_modules[\\/]\.pnpm[\\/]zod@|src[\\/]zod-config\.ts/,
+            },
+          ],
+        },
       },
     },
   },
