@@ -15,7 +15,9 @@ export function registrationRoutes(
   app: FastifyInstance,
   { auth }: { auth: Auth },
 ): void {
-  // shortcut: per task and lost on restart, until PH-20's quotas
+  // shortcut: per task and lost on restart, until PH-20's quotas; each request
+  // sweeps the IPs whose window is empty, so the map holds the last minute's IPs
+  // only, at a cost of one pass over them
   const requests = new Map<string, number[]>();
 
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -25,6 +27,9 @@ export function registrationRoutes(
     },
     async (request, reply) => {
       const now = Date.now();
+      for (const [ip, times] of requests) {
+        if (now - (times.at(-1) ?? 0) >= windowMs) requests.delete(ip);
+      }
       const recent = (requests.get(request.ip) ?? []).filter(
         (at) => now - at < windowMs,
       );

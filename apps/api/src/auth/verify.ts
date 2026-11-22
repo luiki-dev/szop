@@ -2,11 +2,14 @@ import { APIError, createAuthMiddleware, isAPIError } from "better-auth/api";
 import { sql } from "drizzle-orm";
 import type { Database } from "../db/database.ts";
 
-// Runs before Better Auth marks the address verified, so a failure here
-// leaves the account unverified and the link usable again. Re-reads the user
-// with a lock; a pending account replaced or deleted in the meantime is gone.
-// Then moves the registering guest's workspace and converts the guest; each
-// step does nothing a second time, so opening the link again finishes it.
+// Runs after Better Auth has checked the token and before it records the
+// result, so a failure here leaves the account unverified and the link usable
+// again. Re-reads the user with a lock; a pending account replaced or deleted
+// in the meantime is gone. Then marks the address verified, moves the
+// registering guest's workspace and converts the guest in one transaction: a
+// replacing sign-up (which only deletes unverified accounts) can never delete
+// an account whose workspace has moved. Each step does nothing a second time,
+// so opening the link again finishes it.
 export const beforeVerification =
   (db: Database) =>
   async (user: { id: string }): Promise<void> => {
@@ -24,6 +27,9 @@ export const beforeVerification =
           message: "Invalid token",
         });
       }
+      await tx.execute(
+        sql`UPDATE users SET email_verified = true WHERE id = ${user.id}`,
+      );
       const guest = rows[0]?.guest;
       if (!guest) return;
       if (rows[0]?.keep) {

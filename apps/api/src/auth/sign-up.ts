@@ -43,9 +43,11 @@ export async function registeringGuest(
 }
 
 // Before Better Auth's own checks: the body is checked first, so a sign-up
-// that will be refused never deletes someone's pending account, then an
+// that will be refused never deletes someone's pending account, then a
 // password is checked against known leaks, then an unverified account with
-// the address is replaced. Guests are never matched.
+// the address is replaced, and so is every other pending registration of the
+// same guest, so only the last link moves its workspace. Guests are never
+// matched.
 export const signUpBefore = (
   db: Database,
   log: FastifyBaseLogger,
@@ -67,9 +69,10 @@ export const signUpBefore = (
       });
     }
     const body = { ...(ctx.body as object), ...parsed.data };
+    const guest = await registeringGuest(db, ctx);
     await db.transaction(async (tx) => {
       const { rows } = await tx.execute<{ id: string }>(
-        sql`SELECT id FROM users WHERE lower(email) = lower(${parsed.data.email}) AND is_anonymous = false AND email_verified = false FOR UPDATE`,
+        sql`SELECT id FROM users WHERE is_anonymous = false AND email_verified = false AND (lower(email) = lower(${parsed.data.email}) OR registered_by_guest = ${guest}) FOR UPDATE`,
       );
       for (const { id } of rows) {
         await tx.execute(sql`DELETE FROM users WHERE id = ${id}`);
@@ -80,7 +83,10 @@ export const signUpBefore = (
 
 // Two sign-ups at once: the loser's insert breaks the unique address and
 // Better Auth answers 422 FAILED_TO_CREATE_USER. It gets the answer an
-// existing address gets, built as sign-up.mjs builds it.
+// existing address gets, built as sign-up.mjs builds it. Trade-off: Better
+// Auth gives the same code for any failed insert (a lost database connection,
+// a foreign key violation), so those answer 200 too; the code does not tell
+// the unique violation apart, and no account is created either way.
 export const signUpAfter = createAuthMiddleware(
   (ctx): Promise<Response | undefined> => {
     if (ctx.path !== signUpPath) return Promise.resolve(undefined);

@@ -121,7 +121,7 @@ describe("verify-email", () => {
     expect(await verified(body.email)).toBe(false);
   });
 
-  it("beforeEmailVerification runs before the account is verified", async () => {
+  it("beforeEmailVerification writes the verified flag in the move's transaction, so a failure leaves the account unverified", async () => {
     start();
     const body = register();
     const { token } = await registerAndGetLink(app, fake, body);
@@ -207,12 +207,13 @@ describe("verify-email", () => {
     const body = { ...register(), keepGuestData: true };
     const { token } = await registerAndGetLink(app, fake, body, { cookie });
     const listId = randomUUID();
-    await app.inject({
+    const added = await app.inject({
       method: "POST",
       url: "/api/lists",
       headers: { ...sameOrigin, cookie },
       payload: { id: listId, name: "Late" },
     });
+    expect(added.statusCode).toBe(201);
 
     await verify(token);
 
@@ -232,6 +233,16 @@ describe("verify-email", () => {
     expect(
       (await lists(cookieOf(response))).json<{ lists: unknown[] }>().lists,
     ).toEqual([]);
+    const catalog = await app.inject({
+      method: "GET",
+      url: "/api/catalog",
+      headers: { cookie: cookieOf(response) },
+    });
+    expect(
+      catalog
+        .json<{ products: { name: string }[] }>()
+        .products.map((p) => p.name),
+    ).toEqual(testCatalog.products.map((p) => p.name));
   });
 
   it("ACC-2.11: verified with a second guest's cookie, that browser is the account's, its own workspace untouched, and the registering guest's next read and write answer 401 guest_converted", async () => {
@@ -313,5 +324,46 @@ describe("verify-email", () => {
 
     expect(await workspaceOwner(listId)).toBe(guest);
     expect(await converted(guest ?? "")).toBeNull();
+  });
+
+  it("the hook verifies the account with the move, so a re-sign-up leaves the moved workspace in place", async () => {
+    start();
+    const { cookie, listId } = await guestWithList();
+    const body = { ...register(), keepGuestData: true };
+    await registerAndGetLink(app, fake, body, { cookie });
+    const account = await userId(body.email);
+
+    await beforeVerification(database.db)({ id: account });
+    expect(await verified(body.email)).toBe(true);
+    const again = await app.inject({
+      method: "POST",
+      url: "/api/auth/sign-up/email",
+      headers: sameOrigin,
+      payload: { ...body, name: "Other" },
+    });
+
+    expect(again.statusCode).toBe(200);
+    expect(await workspaceOwner(listId)).toBe(account);
+    expect(await userId(body.email)).toBe(account);
+  });
+
+  it("ACC-2.9: one guest signing up twice, the earlier link answers 401 and moves nothing, the later one moves the workspace", async () => {
+    start();
+    const { cookie, listId } = await guestWithList();
+    const guest = await workspaceOwner(listId);
+    const a = { ...register(), keepGuestData: true };
+    const b = { ...register(), keepGuestData: true };
+    const linkA = await registerAndGetLink(app, fake, a, { cookie });
+    const linkB = await registerAndGetLink(app, fake, b, { cookie });
+
+    const first = await verify(linkA.token);
+
+    expect(first.statusCode).toBe(401);
+    // Better Auth finds no user for the deleted account's token.
+    expect(first.json()).toMatchObject({ code: "USER_NOT_FOUND" });
+    expect(await workspaceOwner(listId)).toBe(guest);
+    expect(await converted(guest ?? "")).toBeNull();
+    await verify(linkB.token);
+    expect(await workspaceOwner(listId)).toBe(await userId(b.email));
   });
 });

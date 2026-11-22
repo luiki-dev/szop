@@ -47,6 +47,7 @@ export const users = pgTable(
   },
   (table) => [
     unique("users_email_key").on(table.email),
+    index("users_registered_by_guest_idx").on(table.registeredByGuest),
     foreignKey({
       name: "users_registered_by_guest_fkey",
       columns: [table.registeredByGuest],
