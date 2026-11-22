@@ -109,7 +109,7 @@ describe("sessionHook", () => {
     expect((await whoami(cookie)).json()).toEqual({ user: null });
   });
 
-  it("a converted guest's session is deleted and answers 401 guest_converted", async () => {
+  it("ACC-2.11: a converted guest's session answers 401 guest_converted on every request", async () => {
     const cookie = await signIn(app);
     await database.db.execute(sql`UPDATE users SET converted_at = now()`);
 
@@ -119,7 +119,8 @@ describe("sessionHook", () => {
     expect(response.json()).toMatchObject({
       error: { code: "guest_converted" },
     });
-    const { rows } = await database.db.execute(sql`SELECT 1 FROM sessions`);
-    expect(rows).toHaveLength(0);
+    const again = await whoami(cookie);
+    expect(again.statusCode).toBe(401);
+    expect(again.json()).toMatchObject({ error: { code: "guest_converted" } });
   });
 });

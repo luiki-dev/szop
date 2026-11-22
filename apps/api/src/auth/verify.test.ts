@@ -234,7 +234,7 @@ describe("verify-email", () => {
     ).toEqual([]);
   });
 
-  it("ACC-2.11: verified with a second guest's cookie, that browser is the account's, its own workspace untouched, and the registering guest's next request answers 401 guest_converted", async () => {
+  it("ACC-2.11: verified with a second guest's cookie, that browser is the account's, its own workspace untouched, and the registering guest's next read and write answer 401 guest_converted", async () => {
     start();
     const first = await guestWithList();
     const second = await guestWithList();
@@ -255,8 +255,6 @@ describe("verify-email", () => {
     );
     const guestId = await workspaceOwner(second.listId);
     expect(await converted(guestId ?? "")).toBeNull();
-    // The first request meets guest_converted and deletes the session, so the
-    // next read is a visitor's, with no lists.
     const write = await app.inject({
       method: "POST",
       url: "/api/lists",
@@ -265,10 +263,9 @@ describe("verify-email", () => {
     });
     expect(write.statusCode).toBe(401);
     expect(write.json()).toMatchObject({ error: { code: "guest_converted" } });
-    expect((await lists(first.cookie)).json()).toEqual({
-      lists: [],
-      hasWorkspace: false,
-    });
+    const read = await lists(first.cookie);
+    expect(read.statusCode).toBe(401);
+    expect(read.json()).toMatchObject({ error: { code: "guest_converted" } });
   });
 
   it("the move run twice leaves one workspace and one conversion", async () => {

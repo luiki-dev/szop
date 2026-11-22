@@ -18,9 +18,9 @@ declare module "fastify" {
 // Sets request.user from the session cookie, or null. Better Auth slides the
 // session on a read and answers a fresh Set-Cookie; forwarding it keeps the
 // browser's cookie as long-lived as the row (PH-16a plan, Review Focus 1).
-// A guest converted by a verification in another browser loses its session
-// and gets 401 guest_converted; `converted_at` is not returned by Better Auth,
-// so it is read with a query.
+// Every request with the session of a guest converted by a verification in
+// another browser answers 401 guest_converted; `converted_at` is not returned
+// by Better Auth, so it is read with a query.
 export function sessionHook(
   auth: Auth,
   db: Database,
@@ -35,9 +35,6 @@ export function sessionHook(
         sql`SELECT 1 FROM users WHERE id = ${response.user.id} AND converted_at IS NOT NULL`,
       );
       if (rows.length > 0) {
-        await db.execute(
-          sql`DELETE FROM sessions WHERE id = ${response.session.id}`,
-        );
         return sendError(
           reply,
           401,

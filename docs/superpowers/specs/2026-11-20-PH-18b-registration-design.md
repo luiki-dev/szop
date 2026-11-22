@@ -108,7 +108,7 @@ In `beforeEmailVerification(user)`, in one transaction:
 
 Each step does nothing a second time, so a failure that leaves the account unverified is finished by opening the link again. The opening browser's own guest is not touched.
 
-`sessionHook` (`apps/api/src/auth/session.ts`): a session whose user is an anonymous one with `convertedAt` set is deleted, and the request answers 401 with the code `guest_converted`, on every route. The browser that opened the link never meets it, since the sign-in replaced its cookie.
+`sessionHook` (`apps/api/src/auth/session.ts`): a session whose user is an anonymous one with `convertedAt` set is kept, and every request with it answers 401 with the code `guest_converted`, on every route. The browser that opened the link never meets it, since the sign-in replaced its cookie.
 
 ### Resending the link
 
