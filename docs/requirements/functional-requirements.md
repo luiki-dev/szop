@@ -102,8 +102,8 @@ A phase's brainstorm reviews with the owner the criteria it delivers of every re
 | Requirement | Release | Status | Criteria done | Criteria list |
 |---|---|---|---|---|
 | [ACC-1](ACC-accounts-and-guest-mode.md#acc-1) | 🎯 MVP | 🚧 In progress | 8 of 9 | ❔ Not finalized |
-| [ACC-2](ACC-accounts-and-guest-mode.md#acc-2) | 🎯 MVP | 🚧 In progress | 0 of 12 | ❔ Not finalized |
-| [ACC-3](ACC-accounts-and-guest-mode.md#acc-3) | 🎯 MVP | 🚧 In progress | 0 of 11 | ❔ Not finalized |
+| [ACC-2](ACC-accounts-and-guest-mode.md#acc-2) | 🎯 MVP | 🚧 In progress | 11 of 12 | ❔ Not finalized |
+| [ACC-3](ACC-accounts-and-guest-mode.md#acc-3) | 🎯 MVP | 🚧 In progress | 1 of 11 | ❔ Not finalized |
 | [ACC-4](ACC-accounts-and-guest-mode.md#acc-4) | 🎯 MVP | ❔ Draft | 0 of 5 | ❔ Not finalized |
 | [ACC-5](ACC-accounts-and-guest-mode.md#acc-5) | 🎯 MVP | ❔ Draft | 0 of 4 | ❔ Not finalized |
 | [ACC-6](ACC-accounts-and-guest-mode.md#acc-6) | 🎯 MVP | ❔ Draft | 0 of 3 | ❔ Not finalized |

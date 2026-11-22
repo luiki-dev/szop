@@ -34,28 +34,28 @@ A guest can use the app without registering. Until their first change, they see 
 
 ## ACC-2
 
-🎯 [MVP] · 🚧 In progress (0 of 12) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (11 of 12) · ❔ Criteria not finalized
 
 Register with a display name, an email address and a password, with email verification. On registration, the guest's anonymous workspace in that browser can become the account's workspace. Passwords are 15 to 128 characters, with no rules about which characters they must contain, and are refused if they appear in known data breaches. The app never reveals whether an email address already has an account: registration always asks the user to check their inbox, and an address that already has an account receives an email saying so, with a link to log in (and to reset the password, from [PH-29](../roadmap.md#ph-29-password-reset-and-change)).
 
 | ID | Criterion | Status |
 |---|---|---|
-| ACC-2.1 | A user registers with a display name, an email address and a password typed twice, and verifies the address through a link emailed to it. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
-| ACC-2.2 | A password of 15 to 128 characters is accepted, whatever characters it contains; pasting and password managers work. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
-| ACC-2.3 | A password that appears in known data breaches is refused, with a message saying why. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
-| ACC-2.4 | When the breached-password service cannot be reached, the password is accepted. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
-| ACC-2.5 | Registration always answers "check your inbox", whether or not the address already has an account. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
-| ACC-2.6 | An address that already has a verified account receives an email saying so, with a link to log in. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
-| ACC-2.7 | When this browser's guest has a workspace, registration shows "Keep this browser's lists", ticked by default; ticked, the guest workspace, with its lists, templates, catalog and categories, becomes the account's at verification. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) · [OP-038](https://github.com/luiki-dev/szop/issues/97) |
+| ACC-2.1 | A user registers with a display name, an email address and a password typed twice, and verifies the address through a link emailed to it. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.2 | A password of 15 to 128 characters is accepted, whatever characters it contains; pasting and password managers work. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.3 | A password that appears in known data breaches is refused, with a message saying why. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.4 | When the breached-password service cannot be reached, the password is accepted. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.5 | Registration always answers "check your inbox", whether or not the address already has an account. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.6 | An address that already has a verified account receives an email saying so, with a link to log in. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.7 | When this browser's guest has a workspace, registration shows "Keep this browser's lists", ticked by default; ticked, the guest workspace, with its lists, templates, catalog and categories, becomes the account's at verification. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) · [OP-038](https://github.com/luiki-dev/szop/issues/97) |
 | ACC-2.8 | Once verified, the account's data is available on every device the user logs in from. | ❔ Draft · [PH-18c](../roadmap.md#ph-18c-login-and-logout) |
-| ACC-2.9 | A sign-up for an address whose account is not verified replaces that account, and the verification link goes to the address. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
-| ACC-2.10 | Unticked, the account starts with the default data, and the guest's data is left to expire. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
-| ACC-2.11 | A link opened in another browser signs that browser in, and the registering browser's guest workspace becomes the account's; that other browser's own guest data is not touched, and the registering browser then says the address was confirmed elsewhere and offers to log in. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
-| ACC-2.12 | The display name is required, 1 to 50 characters after trimming, with no control characters; it need not be unique. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.9 | A sign-up for an address whose account is not verified replaces that account, and the verification link goes to the address. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.10 | Unticked, the account starts with the default data, and the guest's data is left to expire. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.11 | A link opened in another browser signs that browser in, and the registering browser's guest workspace becomes the account's; that other browser's own guest data is not touched, and the registering browser then says the address was confirmed elsewhere and offers to log in. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-2.12 | The display name is required, 1 to 50 characters after trimming, with no control characters; it need not be unique. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
 
 ## ACC-3
 
-🎯 [MVP] · 🚧 In progress (0 of 11) · ❔ Criteria not finalized
+🎯 [MVP] · 🚧 In progress (1 of 11) · ❔ Criteria not finalized
 
 Log in and log out. Reset a forgotten password via email. Change the password while logged in. A failed login, a reset request and a request to resend the verification email answer the same way whether or not the address has an account. Changing or resetting the password logs out every other session.
 
@@ -65,7 +65,7 @@ Log in and log out. Reset a forgotten password via email. Change the password wh
 | ACC-3.2 | A failed login answers the same, in about the same time, for an unknown address and for a wrong password. | ❔ Draft · [PH-18c](../roadmap.md#ph-18c-login-and-logout) |
 | ACC-3.3 | A user who forgot their password asks for a reset link by email, and sets a new password through it. | ❔ Draft |
 | ACC-3.4 | A reset request answers the same whether or not the address has an account. | ❔ Draft |
-| ACC-3.5 | A request to resend the verification email answers the same whether or not the address has an account. | 🚧 [PH-18b](../roadmap.md#ph-18b-registration) |
+| ACC-3.5 | A request to resend the verification email answers the same whether or not the address has an account. | ✅ [PH-18b](../roadmap.md#ph-18b-registration) |
 | ACC-3.6 | A logged-in user changes their password. | ❔ Draft |
 | ACC-3.7 | A new password, by change or by reset, follows the rules of registration: 15 to 128 characters, not found in known data breaches. | ❔ Draft |
 | ACC-3.8 | Changing or resetting the password logs out every other session of the account at once. | ❔ Draft · [OP-055](https://github.com/luiki-dev/szop/issues/109) |
