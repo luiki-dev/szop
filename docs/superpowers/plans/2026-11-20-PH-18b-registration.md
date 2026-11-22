@@ -277,6 +277,6 @@
 **Files:**
 - Modify: what the reproduction points to (`apps/web/src/index.css`, or the dialog components in `apps/web/src/components/ui/`)
 
-- [ ] **Step 1: Reproduce** [#424](https://github.com/luiki-dev/szop/issues/424) in a desktop browser (the delete-lists dialog on Lists): the strip at the right edge while the dialog is open.
-- [ ] **Step 2: Fix** by making the backdrop cover the gutter, or moving the scroll lock so the gutter stays, whichever is smaller; an E2E or component check that the backdrop spans the window's width with the dialog open. `pnpm check` → PASS.
+- [x] **Step 1: Reproduce** [#424](https://github.com/luiki-dev/szop/issues/424) in a desktop browser (the delete-lists dialog on Lists): the strip at the right edge while the dialog is open.
+- [x] **Step 2: Fix** by making the backdrop cover the gutter, or moving the scroll lock so the gutter stays, whichever is smaller; an E2E or component check that the backdrop spans the window's width with the dialog open. `pnpm check` → PASS.
 - [ ] **Step 3:** commit `fix(web): cover the scrollbar gutter behind a dialog`; push. Then `/finish-phase`.

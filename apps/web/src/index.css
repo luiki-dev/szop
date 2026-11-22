@@ -138,6 +138,16 @@
   html:has([data-bottom-block] :focus) {
     scroll-padding-bottom: 0px;
   }
+  /* A dialog's scroll lock removes the scrollbar, but its gutter stays, and
+     a fixed backdrop cannot paint there: only the page's own background
+     shows. So the background takes the backdrops' tint while one is open
+     (10% black for a dialog, 40% for the menu sheet) (#424). */
+  html:has([data-slot="alert-dialog-overlay"]) {
+    background-color: color-mix(in srgb, var(--background), black 10%);
+  }
+  html:has([data-slot="sheet-overlay"]) {
+    background-color: color-mix(in srgb, var(--background), black 40%);
+  }
   body {
     @apply bg-background font-sans text-foreground antialiased;
   }
