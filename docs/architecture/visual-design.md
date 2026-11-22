@@ -26,6 +26,7 @@ This page describes the design system, not the screens: each phase designs the s
   - [The selection bar](#the-selection-bar)
   - [The title field](#the-title-field)
   - [The registration pages](#the-registration-pages)
+  - [The account box](#the-account-box)
   - [The peeking raccoon](#the-peeking-raccoon)
   - [Writing](#writing)
 - [7. How a phase designs its screens](#7-how-a-phase-designs-its-screens)
@@ -264,6 +265,10 @@ A path that is not a page, and a list that cannot be opened, show one layout: th
 - **Buttons** are the usual 48 px ones: "Create account", "Send link" as the primary, "Cancel" as the outline button below it. A line under the card, centered and 14 px, holds the other way out ("Already have an account? Log in", "Nothing arrived? Send the link again"), its link in `link`, underlined.
 - **A failure that is not a field's** is one line in `destructive` above the buttons, announced as an alert.
 - **The mailbox** (`brand/mailbox.svg`, the raccoon diving into a mailbox, about 200 px wide, centered, decorative) heads `/register/sent`, as the trash can heads the not-found pages. The hourglass and the broken link of the verification pages follow the same rule.
+
+### The account box
+
+The menu's `AccountBox` (`shell/account-box.tsx`) sits at the bottom of the menu, above the API status, in the phone's drawer and the desktop's sidebar alike ([`ph-18b-journey-v5.html`](visual-design/ph-18b-journey-v5.html)). It is a `muted` box of the `rounded-surface` shape with 12 px of padding. **A guest** (no session, or an anonymous one) sees "Keep your lists on every device.", "Log in" as the main button, and "No account? Create account" below it, the link in `link`, underlined. On `/login` and on `/register` the page's own entry takes the current-page look of the menu (`accent` with `accent-foreground`) and `aria-current="page"`; the other entry stays as it was, since switching is useful. **An account** sees its name (bold) and its email under it (12 px, `muted-foreground`); "Log out" comes with [PH-18c](../roadmap.md). The session is `useSession` (`shell/use-session.ts`), the query `["session"]` the registration page reads too; the verify page's `resetQueries()` refreshes it, so the box shows the account with no reload.
 
 ### The peeking raccoon
 

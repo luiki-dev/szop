@@ -255,9 +255,9 @@
 **Interfaces:**
 - Consumes: `getSession()` (Task 6). Produces: `useSession(): { user: {...} | null; refresh(): void }`; the verify page calls `refresh()` after a verification.
 
-- [ ] **Step 1: Tests:** guest — "Keep your lists on every device.", "Log in" as the main button, "No account? Create account" below; on `/login` and `/register` the entry in the current-page look with `aria-current="page"`; account — the name and the email under it; after a verification the box shows the account without a reload. Run → FAIL.
-- [ ] **Step 2: Implement**, at the bottom of the menu above the API status, in the drawer and the sidebar alike. Run → PASS; `pnpm check` → PASS.
-- [ ] **Step 3:** the docs; commit `feat(web): the menu's account box`; push.
+- [x] **Step 1: Tests:** guest — "Keep your lists on every device.", "Log in" as the main button, "No account? Create account" below; on `/login` and `/register` the entry in the current-page look with `aria-current="page"`; account — the name and the email under it; after a verification the box shows the account without a reload. Run → FAIL.
+- [x] **Step 2: Implement**, at the bottom of the menu above the API status, in the drawer and the sidebar alike. Run → PASS; `pnpm check` → PASS.
+- [x] **Step 3:** the docs; commit `feat(web): the menu's account box`; push.
 
 ### Task 9: The E2E journeys
 
