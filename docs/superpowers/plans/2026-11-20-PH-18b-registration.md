@@ -253,7 +253,7 @@
 - Modify: `docs/architecture/visual-design.md` (the account box)
 
 **Interfaces:**
-- Consumes: `getSession()` (Task 6). Produces: `useSession(): { user: {...} | null; refresh(): void }`; the verify page calls `refresh()` after a verification.
+- Consumes: `getSession()` (Task 6). Produces: `useSession(): { user: {...} | null; loading: boolean }`; the verify page resets the `session` query after a verification.
 
 - [x] **Step 1: Tests:** guest — "Keep your lists on every device.", "Log in" as the main button, "No account? Create account" below; on `/login` and `/register` the entry in the current-page look with `aria-current="page"`; account — the name and the email under it; after a verification the box shows the account without a reload. Run → FAIL.
 - [x] **Step 2: Implement**, at the bottom of the menu above the API status, in the drawer and the sidebar alike. Run → PASS; `pnpm check` → PASS.
@@ -279,4 +279,4 @@
 
 - [x] **Step 1: Reproduce** [#424](https://github.com/luiki-dev/szop/issues/424) in a desktop browser (the delete-lists dialog on Lists): the strip at the right edge while the dialog is open.
 - [x] **Step 2: Fix** by making the backdrop cover the gutter, or moving the scroll lock so the gutter stays, whichever is smaller; an E2E or component check that the backdrop spans the window's width with the dialog open. `pnpm check` → PASS.
-- [ ] **Step 3:** commit `fix(web): cover the scrollbar gutter behind a dialog`; push. Then `/finish-phase`.
+- [x] **Step 3:** commit `fix(web): cover the scrollbar gutter behind a dialog`; push. Then `/finish-phase`.
