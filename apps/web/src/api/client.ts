@@ -56,15 +56,10 @@ export async function getHealth(): Promise<Health> {
 // different deploys) is an error too, not a crash further on.
 export async function getCatalog(): Promise<Catalog> {
   const response = await fetch("/api/catalog", { signal: deadline() });
-  const body: unknown = await response.json().catch(unreadable);
   if (response.status !== 200) {
-    const error = apiErrorSchema.safeParse(body);
-    throw new Error(
-      error.success
-        ? error.data.error.message
-        : `GET /api/catalog answered ${String(response.status)}`,
-    );
+    throw await failure("GET", "/api/catalog", response);
   }
+  const body: unknown = await response.json().catch(unreadable);
   const catalog = catalogSchema.safeParse(body);
   if (!catalog.success) {
     throw new Error("The catalog came in a shape this page does not know");
@@ -136,7 +131,11 @@ export async function failure(
       : null;
   // A converted guest's session is kept, so every request with it answers
   // this; the notice at /login is the only place to go, and no new guest.
-  if (response.status === 401 && found?.code === convertedCode) {
+  if (
+    response.status === 401 &&
+    found?.code === convertedCode &&
+    window.location.pathname !== "/login"
+  ) {
     window.location.assign("/login?confirmed");
   }
   return new ApiRequestError(

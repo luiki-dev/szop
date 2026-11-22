@@ -40,7 +40,8 @@ export function VerifyPage() {
           ? "Welcome! Your lists are in your account now."
           : "Welcome!",
       });
-      void queryClient.invalidateQueries();
+      // The cookie is the account's now: drop the guest's cached answers.
+      void queryClient.resetQueries();
       await navigate("/", { replace: true });
     })();
   }, [token, navigate, queryClient]);

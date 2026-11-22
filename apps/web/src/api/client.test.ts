@@ -727,6 +727,7 @@ describe("ACC-2.11: a converted guest", () => {
       http.post("/api/lists", converted),
       http.get("/api/lists", converted),
       http.get("/api/lists/:id", converted),
+      http.get("/api/catalog", converted),
       http.post("/api/auth/sign-in/anonymous", () => {
         signIns += 1;
         return HttpResponse.json({});
@@ -743,7 +744,27 @@ describe("ACC-2.11: a converted guest", () => {
     await expect(getList("x")).rejects.toMatchObject({
       code: "guest_converted",
     });
+    assign.mockClear();
+    await expect(getCatalog()).rejects.toMatchObject({
+      code: "guest_converted",
+    });
+    expect(assign).toHaveBeenCalledWith("/login?confirmed");
     expect(signIns).toBe(0);
+    vi.unstubAllGlobals();
+  });
+
+  it("does not go to /login again when it is there already", async () => {
+    const assign = vi.fn();
+    vi.stubGlobal("location", {
+      href: window.location.href,
+      pathname: "/login",
+      assign,
+    });
+    server.use(http.get("/api/lists", converted));
+
+    await expect(getLists()).rejects.toMatchObject({ code: "guest_converted" });
+
+    expect(assign).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
 });
