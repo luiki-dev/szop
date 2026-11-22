@@ -46,18 +46,20 @@ test("ACC-2.1 ACC-2.7: a guest with a list registers, opens the link and sees th
 test("ACC-2.11: the link opened in a second context signs that one in, and the first shows the confirmed notice", async ({
   page,
   browser,
-  baseURL,
-}) => {
+}, testInfo) => {
   const email = `${randomUUID()}@example.com`;
   await guestList(page);
   const link = await register(page, email);
 
-  const second = await browser.newContext({ baseURL: baseURL ?? "" });
-  const other = await second.newPage();
-  await other.goto(link);
-  await expect(other).toHaveURL("/");
-  await expect(other.getByText("Weekend groceries")).toBeVisible();
-  await second.close();
+  const second = await browser.newContext(testInfo.project.use);
+  try {
+    const other = await second.newPage();
+    await other.goto(link);
+    await expect(other).toHaveURL("/");
+    await expect(other.getByText("Weekend groceries")).toBeVisible();
+  } finally {
+    await second.close();
+  }
 
   await page.goto("/");
   await expect(page).toHaveURL(/\/login\?confirmed$/);
