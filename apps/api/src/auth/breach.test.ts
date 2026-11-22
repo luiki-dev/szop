@@ -17,6 +17,7 @@ const answer = (text: string, status = 200) =>
   vi.fn(() => Promise.resolve(new Response(text, { status })));
 
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.useRealTimers();
 });
 
@@ -80,10 +81,12 @@ describe("isBreached", () => {
           });
         }),
     ) as unknown as typeof fetch;
+    const timeout = vi.spyOn(AbortSignal, "timeout");
     const { run, lines } = setup(fetchFn);
     const result = run();
     await vi.advanceTimersByTimeAsync(3000);
     expect(await result).toBe(false);
     expect(lines).toHaveLength(1);
+    expect(timeout).toHaveBeenCalledWith(3000);
   });
 });

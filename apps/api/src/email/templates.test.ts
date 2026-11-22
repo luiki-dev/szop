@@ -15,6 +15,13 @@ describe("verificationEmail", () => {
     }
   });
 
+  it("holds no name: the text is the same for any link but the link", () => {
+    const other = verificationEmail("https://other.test/x");
+    expect(other.text.replace("https://other.test/x", "L")).toBe(
+      email.text.replace("https://szop.test/verify?token=a<b", "L"),
+    );
+  });
+
   it("escapes the link in the HTML and has the button", () => {
     expect(email.html).toContain("verify?token=a&lt;b");
     expect(email.html).not.toContain("token=a<b");
