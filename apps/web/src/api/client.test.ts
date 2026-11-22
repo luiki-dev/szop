@@ -711,3 +711,39 @@ describe("ApiRequestError.code", () => {
     await expect(getLists()).rejects.toMatchObject({ code: undefined });
   });
 });
+
+describe("ACC-2.11: a converted guest", () => {
+  const converted = () =>
+    HttpResponse.json(
+      { error: { code: "guest_converted", message: "Confirmed elsewhere" } },
+      { status: 401 },
+    );
+
+  it("from a write and from a read goes to /login?confirmed and signs in no guest", async () => {
+    const assign = vi.fn();
+    vi.stubGlobal("location", { href: window.location.href, assign });
+    let signIns = 0;
+    server.use(
+      http.post("/api/lists", converted),
+      http.get("/api/lists", converted),
+      http.get("/api/lists/:id", converted),
+      http.post("/api/auth/sign-in/anonymous", () => {
+        signIns += 1;
+        return HttpResponse.json({});
+      }),
+    );
+
+    await expect(createList({ id: listId, name: "X" })).rejects.toMatchObject({
+      code: "guest_converted",
+    });
+    expect(assign).toHaveBeenCalledWith("/login?confirmed");
+    assign.mockClear();
+    await expect(getLists()).rejects.toMatchObject({ code: "guest_converted" });
+    expect(assign).toHaveBeenCalledWith("/login?confirmed");
+    await expect(getList("x")).rejects.toMatchObject({
+      code: "guest_converted",
+    });
+    expect(signIns).toBe(0);
+    vi.unstubAllGlobals();
+  });
+});

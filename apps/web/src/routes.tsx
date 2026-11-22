@@ -28,6 +28,13 @@ const ResendPage = lazy(async () => ({
   default: (await registration()).ResendPage,
 }));
 
+const VerifyPage = lazy(async () => ({
+  default: (await registration()).VerifyPage,
+}));
+const LoginPage = lazy(async () => ({
+  default: (await registration()).LoginPage,
+}));
+
 function Loading({ children }: { children: ReactNode }) {
   return <Suspense fallback={null}>{children}</Suspense>;
 }
@@ -103,6 +110,24 @@ export const routes: RouteObject[] = [
           </Loading>
         ),
         handle: { title: "Send a new link" } satisfies RouteHandle,
+      },
+      {
+        path: "verify",
+        element: (
+          <Loading>
+            <VerifyPage />
+          </Loading>
+        ),
+        handle: { title: "Confirm your address" } satisfies RouteHandle,
+      },
+      {
+        path: "login",
+        element: (
+          <Loading>
+            <LoginPage />
+          </Loading>
+        ),
+        handle: { title: "Log in" } satisfies RouteHandle,
       },
       {
         path: "catalog",

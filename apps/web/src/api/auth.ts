@@ -47,7 +47,13 @@ export async function getWorkspace(): Promise<{
 }> {
   const path = "/api/lists";
   const response = await fetch(path, { signal: deadline() });
-  if (response.status === 401) return { lists: 0, hasWorkspace: false };
+  // `failure` sends a converted guest to /login; any other 401 is a new guest.
+  if (
+    response.status === 401 &&
+    (await failure("GET", path, response)).code !== "guest_converted"
+  ) {
+    return { lists: 0, hasWorkspace: false };
+  }
   if (!response.ok) throw await failure("GET", path, response);
   const body = listsResponseSchema.safeParse(await response.json());
   if (!body.success) {
@@ -57,4 +63,20 @@ export async function getWorkspace(): Promise<{
     lists: body.data.lists.length,
     hasWorkspace: body.data.hasWorkspace,
   };
+}
+
+// Better Auth's verify, with the token; plain fetch, so an error never signs
+// in a guest and retries. Only `{ verified: true }` is a success.
+export async function verifyEmail(token: string): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `/api/auth/verify-email?token=${encodeURIComponent(token)}`,
+      { signal: deadline() },
+    );
+    if (!response.ok) return false;
+    return z.object({ verified: z.boolean() }).parse(await response.json())
+      .verified;
+  } catch {
+    return false;
+  }
 }

@@ -134,12 +134,19 @@ export async function failure(
     : flat.success
       ? flat.data
       : null;
+  // A converted guest's session is kept, so every request with it answers
+  // this; the notice at /login is the only place to go, and no new guest.
+  if (response.status === 401 && found?.code === convertedCode) {
+    window.location.assign("/login?confirmed");
+  }
   return new ApiRequestError(
     found?.message ?? `${method} ${path} answered ${String(response.status)}`,
     response.status,
     found?.code,
   );
 }
+
+const convertedCode = "guest_converted";
 
 async function signIn(signal: AbortSignal): Promise<void> {
   const path = "/api/auth/sign-in/anonymous";
@@ -179,6 +186,11 @@ async function withSession(
   const signal = deadline();
   const response = await write(signal);
   if (response.status !== 401) return response;
+  // Not a stale cookie: the caller's `failure` sends the browser to /login.
+  const body: unknown = await response.clone().json().catch(unreadable);
+  if (apiErrorSchema.safeParse(body).data?.error.code === convertedCode) {
+    return response;
+  }
   await guestSignIn(signal);
   return write(signal);
 }

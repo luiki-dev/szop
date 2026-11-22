@@ -242,9 +242,9 @@
 **Interfaces:**
 - Produces: `verifyEmail(token: string): Promise<boolean>` — `true` for `{ verified: true }`; `false` for `{ verified: false }` or any error; a plain `fetch`, not `withSession`.
 
-- [ ] **Step 1: Tests:** `NFR-4.8: the token leaves the address before the call` (`history.replaceState` to `/verify` observed before `fetch`); the hourglass while waiting; verified → Lists with `Welcome! Your lists are in your account now.`, or `Welcome!` when not kept, and the registered address forgotten; `ACC-3.9: not verified or an error shows Link not valid`, with "Send a new link" and "Already confirmed your address? Log in"; `no token, or a reload after its removal, shows Link not valid with no call` (Review Focus 4); `an error from verify signs in no guest`. `/login` and `/login?confirmed` as the spec's table; Cancel. In `client.test.ts`: `ACC-2.11: guest_converted from a write and from a read sends to /login?confirmed and signs in no guest` (Review Focus 3). Run → FAIL.
-- [ ] **Step 2: Implement.** Run → PASS; `pnpm check` → PASS.
-- [ ] **Step 3:** commit `feat(web): the verify page and the login placeholder`; push.
+- [x] **Step 1: Tests:** `NFR-4.8: the token leaves the address before the call` (`history.replaceState` to `/verify` observed before `fetch`); the hourglass while waiting; verified → Lists with `Welcome! Your lists are in your account now.`, or `Welcome!` when not kept, and the registered address forgotten; `ACC-3.9: not verified or an error shows Link not valid`, with "Send a new link" and "Already confirmed your address? Log in"; `no token, or a reload after its removal, shows Link not valid with no call` (Review Focus 4); `an error from verify signs in no guest`. `/login` and `/login?confirmed` as the spec's table; Cancel. In `client.test.ts`: `ACC-2.11: guest_converted from a write and from a read sends to /login?confirmed and signs in no guest` (Review Focus 3). Run → FAIL.
+- [x] **Step 2: Implement.** Run → PASS; `pnpm check` → PASS.
+- [x] **Step 3:** commit `feat(web): the verify page and the login placeholder`; push.
 
 ### Task 8: The menu's account box
 
