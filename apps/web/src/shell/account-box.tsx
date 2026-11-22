@@ -34,14 +34,14 @@ export function AccountBox({ onNavigate }: { onNavigate?: () => void }) {
       >
         Log in
       </Link>
-      <p className="text-center text-sm">
-        No account?{" "}
+      <p className="flex min-h-12 flex-wrap items-center justify-center gap-1 text-center text-sm">
+        No account?
         <Link
           to="/register"
           onClick={onNavigate}
           aria-current={current("/register")}
           className={cn(
-            "font-semibold underline",
+            "inline-flex min-h-12 items-center font-semibold underline",
             current("/register") ? "text-accent-foreground" : "text-link",
           )}
         >

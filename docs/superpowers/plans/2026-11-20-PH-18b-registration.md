@@ -268,9 +268,9 @@
 **Interfaces:**
 - Produces: `latestEmail(to: string, options?: { timeoutMs?: number }): Promise<{ subject: string; text: string; verifyLink: string }>`, polling `http://localhost:8025/api/v1/search?query=to:<address>` for up to 10 s.
 
-- [ ] **Step 1: The journeys:** `ACC-2.1 ACC-2.7: a guest with a list registers, opens the link and sees that list as the account's`; `ACC-2.11: the link opened in a second context signs that one in, and the first shows the confirmed notice`; `ACC-3.9: a used link shows Link not valid`; `NFR-4.8: the address bar holds no token after /verify`; the axe check on `/register`, `/register/sent`, `/register/resend`, `/verify` (both states) and `/login`. Each registers `${randomUUID()}@example.com`.
-- [ ] **Step 2: Run** `pnpm test:e2e` → PASS; `pnpm check` → PASS.
-- [ ] **Step 3:** the docs; commit `test(e2e): registration journeys through Mailpit`; push.
+- [x] **Step 1: The journeys:** `ACC-2.1 ACC-2.7: a guest with a list registers, opens the link and sees that list as the account's`; `ACC-2.11: the link opened in a second context signs that one in, and the first shows the confirmed notice`; `ACC-3.9: a used link shows Link not valid`; `NFR-4.8: the address bar holds no token after /verify`; the axe check on `/register`, `/register/sent`, `/register/resend`, `/verify` (both states) and `/login`. Each registers `${randomUUID()}@example.com`.
+- [x] **Step 2: Run** `pnpm test:e2e` → PASS; `pnpm check` → PASS.
+- [x] **Step 3:** the docs; commit `test(e2e): registration journeys through Mailpit`; push.
 
 ### Task 10: The dialog strip
 
