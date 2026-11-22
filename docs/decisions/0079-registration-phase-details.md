@@ -48,6 +48,7 @@ The brainstorm drew every screen and transition of registration and login on one
 - **A UUIDv7 in every synthetic answer** (Task 1). A real user's ID is a UUIDv7 made by the database, Better Auth's synthetic one a v4, which told an existing address from a new one; `customSyntheticUser` and the after hook both use `uuidv7()`.
 - **`GET /api/lists` answers `{ lists, hasWorkspace }`** (Task 4). The registration form needs to know whether to show the checkbox and how many lists its hint names; `hasWorkspace` is false until the guest's first write. The web client's `getLists` reads only `lists`.
 - **`sessionHook(auth, db)` reads `users.converted_at` with a query** (Task 4), only for an anonymous session's user, since Better Auth does not return the column. A converted guest's session is kept, so every request with it, including a second tab's or a parallel write, answers 401 `guest_converted`; deleting it would give only the first request the code (the owner's ruling at the Task 4 stop).
+- **The resend's limit is a `Map` in the route** (Task 5, decision 4). `registrationRoutes` keeps a `Map<string, number[]>` of request times per `request.ip`, created per app, so per task and lost on restart. A request counts when it arrives, answered or refused; those older than 60 seconds drop out, and the fourth within 60 seconds answers 429.
 
 ## Consequences
 

@@ -213,9 +213,9 @@
 **Interfaces:**
 - Produces: `POST /api/registration/resend` with `{ email: string }`: 204, 400 (app error shape) for an invalid address, 429 past 3 in 60 s per `request.ip`.
 
-- [ ] **Step 1: Tests:** `ACC-3.5: the same answer for an unknown, an unverified and a verified address; only the unverified gets an email` (the fake sender); `answers 400 to an invalid address`; `ACC-3.5: the fourth request in 60 seconds from one IP answers 429, another IP 204` (`x-forwarded-for`); `a resent link verifies` (with Task 3's helper). Run → FAIL.
-- [ ] **Step 2: Implement** with `auth.api.sendVerificationEmail({ body: { email } })` and no headers; the limit a `Map<string, number[]>` of timestamps with a comment `// shortcut: per task and lost on restart, until PH-20's quotas`. Run → PASS; `pnpm check` → PASS.
-- [ ] **Step 3:** the docs; commit `feat(api): resend the verification link`; push. 🛑 Stop: ask the owner for the three SVG illustrations before Task 6.
+- [x] **Step 1: Tests:** `ACC-3.5: the same answer for an unknown, an unverified and a verified address; only the unverified gets an email` (the fake sender); `answers 400 to an invalid address`; `ACC-3.5: the fourth request in 60 seconds from one IP answers 429, another IP 204` (`x-forwarded-for`); `a resent link verifies` (with Task 3's helper). Run → FAIL.
+- [x] **Step 2: Implement** with `auth.api.sendVerificationEmail({ body: { email } })` and no headers; the limit a `Map<string, number[]>` of timestamps with a comment `// shortcut: per task and lost on restart, until PH-20's quotas`. Run → PASS; `pnpm check` → PASS.
+- [x] **Step 3:** the docs; commit `feat(api): resend the verification link`; push. 🛑 Stop: ask the owner for the three SVG illustrations before Task 6.
 
 ### Task 6: The registration pages
 

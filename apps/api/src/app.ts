@@ -17,6 +17,7 @@ import { healthRoutes } from "./health/routes.ts";
 import { instanceId } from "./instance.ts";
 import { itemsRoutes } from "./items/routes.ts";
 import { listsRoutes } from "./lists/routes.ts";
+import { registrationRoutes } from "./registration/routes.ts";
 import { crossSite } from "./security/cross-site.ts";
 import { headers } from "./security/headers.ts";
 import { jsonOnly } from "./security/json-only.ts";
@@ -123,6 +124,8 @@ export function buildApp({
     version,
     instance: instanceId,
   });
+
+  app.register(registrationRoutes, { prefix: "/api", auth });
 
   app.register(catalogRoutes, { prefix: "/api", db, auth, catalog });
 
