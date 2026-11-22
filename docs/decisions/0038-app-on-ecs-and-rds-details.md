@@ -55,7 +55,7 @@ Facts the plan did not have, found while building and kept here because they exp
 ## Consequences
 
 - [PH-12d](../roadmap.md#ph-12d-safe-redeploys) replaces this phase's defaults (decision 12): the health check's grace period, interval and thresholds, the 300-second deregistration delay that the redeploy and the destroy wait for, and the rolling settings with the circuit breaker; it adds the liveness route. Its brainstorm looks at the old task stopping before its deregistration in the redeploy's events.
-- [PH-18a](../roadmap.md#ph-18a-sending-email) adds SES's permission to the task role, and [PH-18b](../roadmap.md#ph-18b-registration-and-login) the Better Auth secret to the execution role and the app's task definition, when the app first sends mail and reads the secret.
+- [PH-18a](../roadmap.md#ph-18a-sending-email) adds SES's permission to the task role, and [PH-18b](../roadmap.md#ph-18b-registration) the Better Auth secret to the execution role and the app's task definition, when the app first sends mail and reads the secret.
 - [OP-033](https://github.com/luiki-dev/szop/issues/116) gains a step for an always-on Szop: separate migration and runtime roles (decision 4).
 - The deploy role can run any code with both database passwords in reach (the master secret and `szop_app`'s): it registers task definitions, pushes images and passes the execution role. This is accepted as part of trusting the deploy role, whose gate is the owner's approval of each `demo-up` run (the [threat model](../architecture/threat-model.md)).
 - The task's root filesystem is writable on ECS (decision 16); what protects the code there is that its files belong to root.

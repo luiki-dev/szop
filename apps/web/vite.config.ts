@@ -97,6 +97,21 @@ export default defineConfig({
     // Small assets become files, never data: URIs, which the CSP's
     // default-src 'self' blocks (ADR 0025, decision 4).
     assetsInlineLimit: 0,
+    // zod and zod-config.ts in one chunk, in import order: left apart, the
+    // chunk holding the shared schemas ran before the config and zod's eval
+    // probe broke the CSP guard.
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: "zod",
+              test: /node_modules[\\/]\.pnpm[\\/]zod@|src[\\/]zod-config\.ts/,
+            },
+          ],
+        },
+      },
+    },
   },
   server: {
     proxy: {

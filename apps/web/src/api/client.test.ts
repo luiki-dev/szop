@@ -678,3 +678,93 @@ describe("the item requests", () => {
     ).rejects.toThrow("The item came in a shape this page does not know");
   });
 });
+
+describe("ApiRequestError.code", () => {
+  it("is read from the app's error shape and from Better Auth's", async () => {
+    server.use(
+      http.get("/api/lists", () =>
+        HttpResponse.json(
+          { error: { code: "guest_converted", message: "Converted." } },
+          { status: 401 },
+        ),
+      ),
+    );
+    await expect(getLists()).rejects.toMatchObject({
+      status: 401,
+      code: "guest_converted",
+      message: "Converted.",
+    });
+
+    server.use(
+      http.get("/api/lists", () =>
+        HttpResponse.json(
+          { code: "INVALID_TOKEN", message: "Bad." },
+          { status: 400 },
+        ),
+      ),
+    );
+    await expect(getLists()).rejects.toMatchObject({ code: "INVALID_TOKEN" });
+
+    server.use(
+      http.get("/api/lists", () => new HttpResponse(null, { status: 500 })),
+    );
+    await expect(getLists()).rejects.toMatchObject({ code: undefined });
+  });
+});
+
+describe("ACC-2.11: a converted guest", () => {
+  const converted = () =>
+    HttpResponse.json(
+      { error: { code: "guest_converted", message: "Confirmed elsewhere" } },
+      { status: 401 },
+    );
+
+  it("from a write and from a read goes to /login?confirmed and signs in no guest", async () => {
+    const assign = vi.fn();
+    vi.stubGlobal("location", { href: window.location.href, assign });
+    let signIns = 0;
+    server.use(
+      http.post("/api/lists", converted),
+      http.get("/api/lists", converted),
+      http.get("/api/lists/:id", converted),
+      http.get("/api/catalog", converted),
+      http.post("/api/auth/sign-in/anonymous", () => {
+        signIns += 1;
+        return HttpResponse.json({});
+      }),
+    );
+
+    await expect(createList({ id: listId, name: "X" })).rejects.toMatchObject({
+      code: "guest_converted",
+    });
+    expect(assign).toHaveBeenCalledWith("/login?confirmed");
+    assign.mockClear();
+    await expect(getLists()).rejects.toMatchObject({ code: "guest_converted" });
+    expect(assign).toHaveBeenCalledWith("/login?confirmed");
+    await expect(getList("x")).rejects.toMatchObject({
+      code: "guest_converted",
+    });
+    assign.mockClear();
+    await expect(getCatalog()).rejects.toMatchObject({
+      code: "guest_converted",
+    });
+    expect(assign).toHaveBeenCalledWith("/login?confirmed");
+    expect(signIns).toBe(0);
+    vi.unstubAllGlobals();
+  });
+
+  it("does not go to /login again when it is there already", async () => {
+    const assign = vi.fn();
+    vi.stubGlobal("location", {
+      href: window.location.href,
+      pathname: "/login",
+      assign,
+    });
+    server.use(http.get("/api/lists", converted));
+
+    await expect(getLists()).rejects.toMatchObject({ code: "guest_converted" });
+
+    expect(assign).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+});

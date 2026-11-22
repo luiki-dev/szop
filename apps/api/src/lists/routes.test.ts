@@ -126,12 +126,16 @@ describe("the lists routes", () => {
     expect(
       listsResponseSchema.parse(response.json()).lists.map((l) => l.id),
     ).toEqual([...ids].reverse());
+    expect(listsResponseSchema.parse(response.json()).hasWorkspace).toBe(true);
 
     const anonymous = await get(undefined, "/api/lists");
-    expect(anonymous.json()).toEqual({ lists: [] });
+    expect(anonymous.json()).toEqual({ lists: [], hasWorkspace: false });
     expect(anonymous.headers["set-cookie"]).toBeUndefined();
 
-    expect((await get(b, "/api/lists")).json()).toEqual({ lists: [] });
+    expect((await get(b, "/api/lists")).json()).toEqual({
+      lists: [],
+      hasWorkspace: false,
+    });
   });
 
   it("NFR-4.10: a foreign, missing, malformed or sessionless list is one 404", async () => {

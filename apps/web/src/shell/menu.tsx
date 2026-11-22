@@ -2,6 +2,7 @@ import { List, ListTree, Palette, type LucideIcon } from "lucide-react";
 import { Link, NavLink } from "react-router";
 import logo from "@/brand/logo.svg";
 import { cn } from "@/lib/utils.ts";
+import { AccountBox } from "./account-box.tsx";
 import { ApiStatus } from "./api-status.tsx";
 import { CheckboxSideControl } from "./checkbox-side-control.tsx";
 import { ColorSchemeControl } from "./color-scheme-control.tsx";
@@ -87,6 +88,7 @@ export function Menu({ onNavigate }: { onNavigate?: () => void }) {
         </ul>
       </div>
       <div className="mt-auto flex flex-col gap-4 border-t border-border px-3 pt-4">
+        <AccountBox onNavigate={onNavigate} />
         <ApiStatus />
         <ColorSchemeControl />
         <CheckboxSideControl />

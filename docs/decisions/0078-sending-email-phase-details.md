@@ -10,7 +10,7 @@ PH-18 Registration and login was the next phase. Its brainstorm found two new co
 
 What exists: `infra/base` registers `dzwoniec.com` as SES's sender identity with Easy DKIM, publishes DMARC `p=reject`, SPF `-all` and a null MX on the apex ([ADR 0030](0030-domain-and-base-infrastructure-details.md), decisions 7 and 8). SES stays in its sandbox, which delivers only to verified addresses. The task role `szop-app-task` holds only ECS Exec's actions. The API has no `EmailSender` and sends nothing.
 
-[PH-18a](../roadmap.md#ph-18a-sending-email) gives the API a way to send email, locally, in CI and on the demo, and proves it, so [PH-18b](../roadmap.md#ph-18b-registration-and-login) can build registration on it.
+[PH-18a](../roadmap.md#ph-18a-sending-email) gives the API a way to send email, locally, in CI and on the demo, and proves it, so [PH-18b](../roadmap.md#ph-18b-registration) can build registration on it.
 
 ## Changes to the roadmap
 

@@ -15,7 +15,10 @@ export const listWithItemsSchema = listSchema.extend({
   items: z.array(listItemSchema),
 });
 
-export const listsResponseSchema = z.object({ lists: z.array(listSchema) });
+export const listsResponseSchema = z.object({
+  lists: z.array(listSchema),
+  hasWorkspace: z.boolean(),
+});
 
 export const createListSchema = z.object({
   id: z.uuid(),

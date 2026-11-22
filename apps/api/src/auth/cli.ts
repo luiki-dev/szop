@@ -1,4 +1,5 @@
 // Stryker disable all: only Better Auth's CLI loads it
+import Fastify from "fastify";
 import { createDatabase } from "../db/database.ts";
 import { createAuth } from "./auth.ts";
 
@@ -15,4 +16,6 @@ export const auth = createAuth({
   }),
   secret: "x".repeat(32),
   origin: "http://localhost",
+  email: { send: () => Promise.resolve() },
+  log: Fastify().log,
 });

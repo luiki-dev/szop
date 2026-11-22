@@ -5,6 +5,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import { createEmailSender, type EmailSender } from "./email/sender.ts";
 import { createAuth } from "./auth/auth.ts";
 import { authRoutes } from "./auth/routes.ts";
 import { catalogRoutes } from "./catalog/routes.ts";
@@ -16,6 +17,7 @@ import { healthRoutes } from "./health/routes.ts";
 import { instanceId } from "./instance.ts";
 import { itemsRoutes } from "./items/routes.ts";
 import { listsRoutes } from "./lists/routes.ts";
+import { registrationRoutes } from "./registration/routes.ts";
 import { crossSite } from "./security/cross-site.ts";
 import { headers } from "./security/headers.ts";
 import { jsonOnly } from "./security/json-only.ts";
@@ -41,6 +43,12 @@ export interface AppDeps {
   // Stdout when left out. Tests pass a stream they read back (ADR 0025,
   // decision 9).
   logStream?: LogStream;
+  // Built from the config when left out; tests pass a fake that records
+  // emails (ADR 0079, "Settled while building").
+  email?: EmailSender;
+  // The breach check's fetch; the global one when left out. Tests pass a fake
+  // so none reaches the network.
+  breachFetch?: typeof fetch;
 }
 
 export function buildApp({
@@ -48,6 +56,8 @@ export function buildApp({
   db,
   catalog,
   logStream,
+  email = createEmailSender(config.email),
+  breachFetch,
 }: AppDeps): FastifyInstance {
   const app = Fastify({
     // By address, never a hop count or true (ADR 0025, decision 7).
@@ -98,6 +108,9 @@ export function buildApp({
     secret: config.betterAuthSecret,
     origin: config.appOrigin,
     trustedProxies: config.trustedProxies,
+    email,
+    log: app.log,
+    breachFetch,
   });
   app.register(authRoutes, { prefix: "/api", auth });
 
@@ -111,6 +124,8 @@ export function buildApp({
     version,
     instance: instanceId,
   });
+
+  app.register(registrationRoutes, { prefix: "/api", auth });
 
   app.register(catalogRoutes, { prefix: "/api", db, auth, catalog });
 

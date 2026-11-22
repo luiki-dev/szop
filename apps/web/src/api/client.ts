@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   apiErrorSchema,
   catalogSchema,
@@ -29,7 +30,7 @@ export const timeoutMessage = "The server didn't answer in time.";
 // A signal that aborts with our own error after the limit, so fetch rejects
 // with it as it is. Not AbortSignal.timeout: Vitest's fake timers do not
 // drive it.
-function deadline(): AbortSignal {
+export function deadline(): AbortSignal {
   const controller = new AbortController();
   setTimeout(() => {
     controller.abort(new Error(timeoutMessage));
@@ -55,15 +56,10 @@ export async function getHealth(): Promise<Health> {
 // different deploys) is an error too, not a crash further on.
 export async function getCatalog(): Promise<Catalog> {
   const response = await fetch("/api/catalog", { signal: deadline() });
-  const body: unknown = await response.json().catch(unreadable);
   if (response.status !== 200) {
-    const error = apiErrorSchema.safeParse(body);
-    throw new Error(
-      error.success
-        ? error.data.error.message
-        : `GET /api/catalog answered ${String(response.status)}`,
-    );
+    throw await failure("GET", "/api/catalog", response);
   }
+  const body: unknown = await response.json().catch(unreadable);
   const catalog = catalogSchema.safeParse(body);
   if (!catalog.success) {
     throw new Error("The catalog came in a shape this page does not know");
@@ -72,13 +68,15 @@ export async function getCatalog(): Promise<Catalog> {
 }
 
 // A failed request to the lists API; the status lets a page tell "not found"
-// from "unreachable".
+// from "unreachable", and the code, when the body had one, tells a refusal.
 export class ApiRequestError extends Error {
   readonly status: number;
-  constructor(message: string, status: number) {
+  readonly code: string | undefined;
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.name = "ApiRequestError";
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -97,7 +95,7 @@ const json = { "content-type": "application/json" };
 // The API refuses writes that are not JSON, so every write with a body sends
 // the header. A DELETE has no body and must not claim one: Fastify answers 400
 // to JSON with nothing in it.
-function send(
+export function send(
   method: "POST" | "PATCH" | "DELETE",
   path: string,
   body: unknown,
@@ -113,22 +111,42 @@ function send(
       });
 }
 
-// The body of a response that is not the answer: the API's message when it
-// sent one, else only the status.
-async function failure(
+// The body of a response that is not the answer: the API's message and code
+// when it sent them, in the app's shape ({ error: { code, message } }) or in
+// Better Auth's ({ code?, message }); else only the status.
+export async function failure(
   method: string,
   path: string,
   response: Response,
 ): Promise<ApiRequestError> {
   const body: unknown = await response.json().catch(unreadable);
   const error = apiErrorSchema.safeParse(body);
+  // Better Auth's rate limiter answers a message with no code.
+  const flat = z
+    .object({ code: z.string().optional(), message: z.string() })
+    .safeParse(body);
+  const found = error.success
+    ? error.data.error
+    : flat.success
+      ? flat.data
+      : null;
+  // A converted guest's session is kept, so every request with it answers
+  // this; the notice at /login is the only place to go, and no new guest.
+  if (
+    response.status === 401 &&
+    found?.code === convertedCode &&
+    window.location.pathname !== "/login"
+  ) {
+    window.location.assign("/login?confirmed");
+  }
   return new ApiRequestError(
-    error.success
-      ? error.data.error.message
-      : `${method} ${path} answered ${String(response.status)}`,
+    found?.message ?? `${method} ${path} answered ${String(response.status)}`,
     response.status,
+    found?.code,
   );
 }
+
+const convertedCode = "guest_converted";
 
 async function signIn(signal: AbortSignal): Promise<void> {
   const path = "/api/auth/sign-in/anonymous";
@@ -140,7 +158,7 @@ async function signIn(signal: AbortSignal): Promise<void> {
 // lock shared by all tabs, so tabs that meet make one sign-in, not one each
 // (Better Auth answers `null`, or fails, when there is no session). jsdom has
 // no navigator.locks, so the callback runs alone there.
-function guestSignIn(signal: AbortSignal): Promise<void> {
+export function guestSignIn(signal: AbortSignal): Promise<void> {
   const signInUnlessSession = async () => {
     const session = await fetch("/api/auth/get-session", { signal })
       .then((response) =>
@@ -168,6 +186,11 @@ async function withSession(
   const signal = deadline();
   const response = await write(signal);
   if (response.status !== 401) return response;
+  // Not a stale cookie: the caller's `failure` sends the browser to /login.
+  const body: unknown = await response.clone().json().catch(unreadable);
+  if (apiErrorSchema.safeParse(body).data?.error.code === convertedCode) {
+    return response;
+  }
   await guestSignIn(signal);
   return write(signal);
 }
@@ -191,7 +214,7 @@ export async function getLists(): Promise<List[]> {
   const response = await fetch(path, { signal: deadline() });
   if (!response.ok) throw await failure("GET", path, response);
   const body: unknown = await response.json().catch(unreadable);
-  const lists = listsResponseSchema.safeParse(body);
+  const lists = listsResponseSchema.pick({ lists: true }).safeParse(body);
   if (!lists.success) {
     throw new Error("The lists came in a shape this page does not know");
   }

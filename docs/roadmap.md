@@ -48,7 +48,8 @@ What is built in which order, and how far along it is. Each **phase** is one sup
   - [PH-48 Docker Sandbox proof of concept](#ph-48-docker-sandbox-proof-of-concept)
   - [PH-49 Reproducible Docker Sandbox setup](#ph-49-reproducible-docker-sandbox-setup)
   - [PH-18a Sending email](#ph-18a-sending-email)
-  - [PH-18b Registration and login](#ph-18b-registration-and-login)
+  - [PH-18b Registration](#ph-18b-registration)
+  - [PH-18c Login and logout](#ph-18c-login-and-logout)
   - [PH-19 Guest data on login](#ph-19-guest-data-on-login)
   - [PH-39 Redis in the stack](#ph-39-redis-in-the-stack)
   - [PH-20 Quotas and rate limits](#ph-20-quotas-and-rate-limits)
@@ -348,8 +349,9 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 | [PH-47 Read-only AWS access for Claude Code](#ph-47-read-only-aws-access-for-claude-code) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#425](https://github.com/luiki-dev/szop/pull/425) | [#423](https://github.com/luiki-dev/szop/issues/423) |
 | [PH-48 Docker Sandbox proof of concept](#ph-48-docker-sandbox-proof-of-concept) | 🚧 In progress | ➖ N/A: bounded | ➖ N/A: bounded | [#436](https://github.com/luiki-dev/szop/pull/436) | [#427](https://github.com/luiki-dev/szop/issues/427) |
 | [PH-49 Reproducible Docker Sandbox setup](#ph-49-reproducible-docker-sandbox-setup) | 🚧 In progress | [Spec](superpowers/specs/2026-11-12-PH-49-docker-sandbox-setup-design.md) | [Plan](superpowers/plans/2026-11-12-PH-49-docker-sandbox-setup.md) | [#439](https://github.com/luiki-dev/szop/pull/439) | [#429](https://github.com/luiki-dev/szop/issues/429) |
-| [PH-18a Sending email](#ph-18a-sending-email) | 🚧 In progress | [Spec](superpowers/specs/2026-11-16-PH-18a-sending-email-design.md) | [Plan](superpowers/plans/2026-11-18-PH-18a-sending-email.md) | [#457](https://github.com/luiki-dev/szop/pull/457) | [#446](https://github.com/luiki-dev/szop/issues/446) |
-| [PH-18b Registration and login](#ph-18b-registration-and-login) | ⬜ Not started | — | — | — | [#447](https://github.com/luiki-dev/szop/issues/447) |
+| [PH-18a Sending email](#ph-18a-sending-email) | ✅ Done | [Spec](superpowers/specs/2026-11-16-PH-18a-sending-email-design.md) | [Plan](superpowers/plans/2026-11-18-PH-18a-sending-email.md) | [#457](https://github.com/luiki-dev/szop/pull/457) | [#446](https://github.com/luiki-dev/szop/issues/446) |
+| [PH-18b Registration](#ph-18b-registration) | 🚧 In progress | [Spec](superpowers/specs/2026-11-20-PH-18b-registration-design.md) | [Plan](superpowers/plans/2026-11-20-PH-18b-registration.md) | [#464](https://github.com/luiki-dev/szop/pull/464) | [#447](https://github.com/luiki-dev/szop/issues/447) |
+| [PH-18c Login and logout](#ph-18c-login-and-logout) | ⬜ Not started | — | — | — | [#458](https://github.com/luiki-dev/szop/issues/458) |
 | [PH-19 Guest data on login](#ph-19-guest-data-on-login) | ⬜ Not started | — | — | — | [#48](https://github.com/luiki-dev/szop/issues/48) |
 | [PH-39 Redis in the stack](#ph-39-redis-in-the-stack) | ⬜ Not started | — | — | — | [#235](https://github.com/luiki-dev/szop/issues/235) |
 | [PH-20 Quotas and rate limits](#ph-20-quotas-and-rate-limits) | ⬜ Not started | — | — | — | [#49](https://github.com/luiki-dev/szop/issues/49) |
@@ -455,7 +457,7 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 ### PH-43 Minor security fixes
 
 - **Goal:** the remaining minor findings of the security audit are fixed: the push hook catches the spellings it misses, a fork's branch can be reviewed safely, a vulnerability can be reported privately, no administrator bypasses an environment, the plan role reads no personal data, no wildcard certificate covers the app, and the threat model matches the code.
-- **Delivers:** the [security audit of 2026-11-01](audits/2026-11-01-security-audit.md)'s SEC-08 to SEC-11 and SEC-19 to SEC-21 ([#347](https://github.com/luiki-dev/szop/issues/347), [#348](https://github.com/luiki-dev/szop/issues/348), [#349](https://github.com/luiki-dev/szop/issues/349), [#350](https://github.com/luiki-dev/szop/issues/350), [#351](https://github.com/luiki-dev/szop/issues/351), [#352](https://github.com/luiki-dev/szop/issues/352), [#353](https://github.com/luiki-dev/szop/issues/353)), and the cheap observations (`.env.*` in `.gitignore`). The audit's other findings go with the phases that change their code: SEC-05 and the list name's control characters with [PH-16c](#ph-16c-managing-lists), SEC-04's code with [PH-18b](#ph-18b-registration-and-login), SEC-03 with [PH-20](#ph-20-quotas-and-rate-limits), SEC-17 and the rest of SEC-18 with [PH-39](#ph-39-redis-in-the-stack).
+- **Delivers:** the [security audit of 2026-11-01](audits/2026-11-01-security-audit.md)'s SEC-08 to SEC-11 and SEC-19 to SEC-21 ([#347](https://github.com/luiki-dev/szop/issues/347), [#348](https://github.com/luiki-dev/szop/issues/348), [#349](https://github.com/luiki-dev/szop/issues/349), [#350](https://github.com/luiki-dev/szop/issues/350), [#351](https://github.com/luiki-dev/szop/issues/351), [#352](https://github.com/luiki-dev/szop/issues/352), [#353](https://github.com/luiki-dev/szop/issues/353)), and the cheap observations (`.env.*` in `.gitignore`). The audit's other findings go with the phases that change their code: SEC-05 and the list name's control characters with [PH-16c](#ph-16c-managing-lists), SEC-04's code with [PH-18c](#ph-18c-login-and-logout), SEC-03 with [PH-20](#ph-20-quotas-and-rate-limits), SEC-17 and the rest of SEC-18 with [PH-39](#ph-39-redis-in-the-stack).
 - **Depends on:** —
 - **Owner steps:** turn on private vulnerability reporting ([#361](https://github.com/luiki-dev/szop/issues/361)); switch off the administrators' bypass on the four environments ([#362](https://github.com/luiki-dev/szop/issues/362)); apply `infra/base` from the branch, and again from `main` after the merge ([#363](https://github.com/luiki-dev/szop/issues/363)).
 - **Expected path:** bounded.
@@ -540,21 +542,31 @@ What is built in which order, and how far along it is. Each **phase** is one sup
 
 - **Goal:** the API can send email: through Mailpit locally and in CI, through Amazon SES on the demo, from `noreply@szop.dzwoniec.com`. A test script run through ECS Exec proves the demo's path.
 - **Delivers:** the `EmailSender` with nodemailer's SMTP and SES transports, its settings and its failure contract; Mailpit in `compose.yaml`; the task role's `ses:SendRawEmail`, limited to the sender address; the test script and its runbook steps; the brainstorm's decisions file in the process docs. The details are in [ADR 0078](decisions/0078-sending-email-phase-details.md).
-- **Split from:** PH-18 Registration and login, now retired: it held two new concepts, transactional email and email-and-password authentication with verification, and about 12 to 14 tasks ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0078](decisions/0078-sending-email-phase-details.md)). The authentication flows became [PH-18b](#ph-18b-registration-and-login).
+- **Split from:** PH-18 Registration and login, now retired: it held two new concepts, transactional email and email-and-password authentication with verification, and about 12 to 14 tasks ([ADR 0014](decisions/0014-roadmap.md), decision 6; [ADR 0078](decisions/0078-sending-email-phase-details.md)). The authentication flows became [PH-18b](#ph-18b-registration).
 - **Depends on:** —
 - **Owner steps:** apply `infra/base` from the branch, and again from `main` after the merge; verify the email addresses the demo will send to, while SES is in its sandbox; press `demo-up` on the branch, run the test script through ECS Exec and check that the email arrives with `dkim=pass`, then press `demo-down`.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#446](https://github.com/luiki-dev/szop/issues/446).
 
-### PH-18b Registration and login
+### PH-18b Registration
 
-- **Goal:** a guest registers with email and password, verifies the address and keeps their workspace as the account's. They log in and out, on any device.
-- **Delivers:** [ACC-2](requirements/ACC-accounts-and-guest-mode.md#acc-2), [ACC-3](requirements/ACC-accounts-and-guest-mode.md#acc-3) (part: logging in and out), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.8, tokens in the address bar); the email helper of the E2E tests; completes [UC-8](requirements/UC-use-cases.md#uc-8-guest-becomes-a-user).
-- **Split from:** PH-18 Registration and login, now retired (see [PH-18a](#ph-18a-sending-email)).
+- **Goal:** a guest creates an account with a display name, an email address and a password, confirms the address through an emailed link, and keeps this browser's lists as the account's.
+- **Delivers:** [ACC-2](requirements/ACC-accounts-and-guest-mode.md#acc-2) (all but ACC-2.8), [ACC-3](requirements/ACC-accounts-and-guest-mode.md#acc-3) (part: resending the link, ACC-3.5, and the verification link of ACC-3.9), [NFR-4](requirements/NFR-non-functional-requirements.md#nfr-4) (part: NFR-4.8 for the verification token); the screens of registration and the menu's account box; the E2E email helper; the dialog strip ([#424](https://github.com/luiki-dev/szop/issues/424)). The screens of registration and login are designed together on one mockup. The details are in [ADR 0079](decisions/0079-registration-phase-details.md).
+- **Split from:** PH-18b Registration and login: about 13 tasks, past the size [ADR 0072](decisions/0072-phase-approach-per-phase.md), decision 1, aims for ([ADR 0079](decisions/0079-registration-phase-details.md), decision 2). Logging in became [PH-18c](#ph-18c-login-and-logout).
 - **Depends on:** [PH-18a](#ph-18a-sending-email).
-- **Owner steps:** none known yet.
+- **Owner steps:** supply the illustrations (envelope, hourglass, broken link) as SVG before the screen tasks.
 - **Expected path:** full.
 - **Open points:** the sub-issues of [#447](https://github.com/luiki-dev/szop/issues/447).
+
+### PH-18c Login and logout
+
+- **Goal:** a registered user logs in and out, on any device, from the screens [PH-18b](#ph-18b-registration) designed.
+- **Delivers:** [ACC-2](requirements/ACC-accounts-and-guest-mode.md#acc-2) (part: ACC-2.8, which finalizes its list), [ACC-3](requirements/ACC-accounts-and-guest-mode.md#acc-3) (part: ACC-3.1, 3.2 and 3.11); the login form and Log out; SEC-04's code ([#344](https://github.com/luiki-dev/szop/issues/344)); completes [UC-8](requirements/UC-use-cases.md#uc-8-guest-becomes-a-user).
+- **Split from:** PH-18b Registration and login (see [PH-18b](#ph-18b-registration)).
+- **Depends on:** [PH-18b](#ph-18b-registration).
+- **Owner steps:** none known yet.
+- **Expected path:** full.
+- **Open points:** the sub-issues of [#458](https://github.com/luiki-dev/szop/issues/458).
 
 ### PH-19 Guest data on login
 

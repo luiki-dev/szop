@@ -96,7 +96,7 @@ The app container's environment in `infra/demo/service.tf` gains `EMAIL_TRANSPOR
 
 ## Acceptance criteria
 
-None. The phase delivers no criterion of the requirements: [ACC-2](../../requirements/ACC-accounts-and-guest-mode.md#acc-2) and [ACC-3](../../requirements/ACC-accounts-and-guest-mode.md#acc-3), which send the first emails, are reviewed and delivered in [PH-18b](../../roadmap.md#ph-18b-registration-and-login).
+None. The phase delivers no criterion of the requirements: [ACC-2](../../requirements/ACC-accounts-and-guest-mode.md#acc-2) and [ACC-3](../../requirements/ACC-accounts-and-guest-mode.md#acc-3), which send the first emails, are reviewed and delivered in [PH-18b](../../roadmap.md#ph-18b-registration).
 
 ## Tests
 
@@ -138,7 +138,7 @@ Checked by hand: none (the phase delivers no criterion).
 
 ## Out of scope
 
-- Every email the app sends to users, its templates and any route that sends: [PH-18b](../../roadmap.md#ph-18b-registration-and-login).
+- Every email the app sends to users, its templates and any route that sends: [PH-18b](../../roadmap.md#ph-18b-registration).
 - The E2E helper that reads Mailpit: PH-18b.
 - SES production access, bounce and complaint handling, a custom MAIL FROM domain.
 - The daily email cap and per-address limits: [PH-20](../../roadmap.md#ph-20-quotas-and-rate-limits).

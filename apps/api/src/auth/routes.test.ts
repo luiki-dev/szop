@@ -3,9 +3,10 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
 import { createAuth } from "./auth.ts";
-import { sameOrigin, signIn } from "../test/auth.ts";
+import { noEmail, sameOrigin, signIn } from "../test/auth.ts";
 import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
+import { silentLog } from "../test/log.ts";
 import { useTestDatabase } from "../test/database.ts";
 import type { Config } from "../config.ts";
 
@@ -107,6 +108,8 @@ describe("/api/auth", () => {
     const config = testConfig({ trustedProxies: ["10.0.0.0/16"] });
     app = buildApp({ config, db: database.db, catalog: testCatalog });
     const auth = createAuth({
+      email: noEmail,
+      log: silentLog,
       db: database.db,
       secret: config.betterAuthSecret,
       origin: config.appOrigin,
@@ -182,6 +185,24 @@ describe("/api/auth", () => {
     }
   });
 
+  it("NFR-4.12: sign-up and verify-email answer; send-verification-email answers 404", async () => {
+    app = start();
+    const verify = await app.inject({
+      method: "GET",
+      url: "/api/auth/verify-email?token=nope",
+    });
+    expect(verify.statusCode).toBe(401);
+    expect(verify.json()).toHaveProperty("code", "INVALID_TOKEN");
+    const send = await app.inject({
+      method: "POST",
+      url: "/api/auth/send-verification-email",
+      headers: sameOrigin,
+      payload: { email: "a@example.com" },
+    });
+    expect(send.statusCode).toBe(404);
+    expect(send.json()).toMatchObject({ error: { code: "not_found" } });
+  });
+
   it("NFR-4.13: a body larger than 16 KiB answers 413, on an auth route and on another", async () => {
     app = start();
     const cookie = await signIn(app);
@@ -223,6 +244,8 @@ describe("/api/auth", () => {
   it("trusts only its own origin and sets no default proxies or Secure on http", () => {
     const config = testConfig();
     const auth = createAuth({
+      email: noEmail,
+      log: silentLog,
       db: database.db,
       secret: config.betterAuthSecret,
       origin: config.appOrigin,
@@ -235,6 +258,8 @@ describe("/api/auth", () => {
   it("NFR-4.9: on an https origin every cookie is Secure", () => {
     const config = testConfig();
     const auth = createAuth({
+      email: noEmail,
+      log: silentLog,
       db: database.db,
       secret: config.betterAuthSecret,
       origin: "https://szop.test",

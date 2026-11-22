@@ -2,7 +2,8 @@ import { sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.ts";
-import { signIn } from "../test/auth.ts";
+import { noEmail, signIn } from "../test/auth.ts";
+import { silentLog } from "../test/log.ts";
 import { testCatalog } from "../test/catalog.ts";
 import { testConfig } from "../test/config.ts";
 import { useTestDatabase } from "../test/database.ts";
@@ -19,6 +20,8 @@ describe("sessionHook", () => {
     const config = testConfig();
     // The same secret and origin as the app's own, so the cookies verify.
     const auth = createAuth({
+      email: noEmail,
+      log: silentLog,
       db: database.db,
       secret: config.betterAuthSecret,
       origin: config.appOrigin,
@@ -30,7 +33,7 @@ describe("sessionHook", () => {
     });
     // A scope of its own, as the lists routes get theirs (Task 3).
     void app.register((scope) => {
-      scope.addHook("preHandler", sessionHook(auth));
+      scope.addHook("preHandler", sessionHook(auth, database.db));
       scope.get("/api/whoami", (request) => ({ user: request.user }));
     });
   });
@@ -104,5 +107,20 @@ describe("sessionHook", () => {
     const cookie = await signIn(app);
     await database.db.execute(sql`DELETE FROM sessions`);
     expect((await whoami(cookie)).json()).toEqual({ user: null });
+  });
+
+  it("ACC-2.11: a converted guest's session answers 401 guest_converted on every request", async () => {
+    const cookie = await signIn(app);
+    await database.db.execute(sql`UPDATE users SET converted_at = now()`);
+
+    const response = await whoami(cookie);
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toMatchObject({
+      error: { code: "guest_converted" },
+    });
+    const again = await whoami(cookie);
+    expect(again.statusCode).toBe(401);
+    expect(again.json()).toMatchObject({ error: { code: "guest_converted" } });
   });
 });

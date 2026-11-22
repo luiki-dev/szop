@@ -5,7 +5,7 @@ Mailpit is a small mail server for development and tests. It accepts every email
 ## Why Szop uses it
 
 - **Real email without sending any:** [ADR 0078](../../decisions/0078-sending-email-phase-details.md), decision 3. The API sends real SMTP locally and in CI, through the same nodemailer code it uses with SES on AWS ([nodemailer](nodemailer.md)), and no message leaves the machine. Considered and rejected: printing emails to the console or writing them to a file "outbox", which shows no real email and makes the API and the tests share a disk.
-- **Tests read the email:** the API tests, and from [PH-18b](../../roadmap.md#ph-18b-registration-and-login) the end-to-end journeys, find an email through Mailpit's API and read its sender, subject and body ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 15).
+- **Tests read the email:** the API tests, and from [PH-18b](../../roadmap.md#ph-18b-registration) the end-to-end journeys, find an email through Mailpit's API and read its sender, subject and body ([ADR 0007](../../decisions/0007-testing-strategy.md), decision 15).
 - **One small container,** started with PostgreSQL by the same `compose.yaml`, so CI needs no change to run it.
 
 ## Configuration

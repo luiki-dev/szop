@@ -15,6 +15,30 @@ const ListPage = lazy(async () => ({
   default: (await import("./lists/list-page.tsx")).ListPage,
 }));
 
+// The registration pages are one chunk too, so the entry chunk stays within
+// the budget. A bare page while it loads: the shell still draws the title.
+const registration = () => import("./registration/pages.ts");
+const RegisterPage = lazy(async () => ({
+  default: (await registration()).RegisterPage,
+}));
+const SentPage = lazy(async () => ({
+  default: (await registration()).SentPage,
+}));
+const ResendPage = lazy(async () => ({
+  default: (await registration()).ResendPage,
+}));
+
+const VerifyPage = lazy(async () => ({
+  default: (await registration()).VerifyPage,
+}));
+const LoginPage = lazy(async () => ({
+  default: (await registration()).LoginPage,
+}));
+
+function Loading({ children }: { children: ReactNode }) {
+  return <Suspense fallback={null}>{children}</Suspense>;
+}
+
 // What a route tells the shell: the title of its page, shown as the h1 and
 // in the tab; an action, shown beside the h1 on a desktop; and, for a page
 // with a header of its own (a list), "list": the shell then draws neither
@@ -59,6 +83,51 @@ export const routes: RouteObject[] = [
           </Suspense>
         ),
         handle: { header: "list" } satisfies RouteHandle,
+      },
+      {
+        path: "register",
+        element: (
+          <Loading>
+            <RegisterPage />
+          </Loading>
+        ),
+        handle: { title: "Create account" } satisfies RouteHandle,
+      },
+      {
+        path: "register/sent",
+        element: (
+          <Loading>
+            <SentPage />
+          </Loading>
+        ),
+        handle: { title: "Check your inbox" } satisfies RouteHandle,
+      },
+      {
+        path: "register/resend",
+        element: (
+          <Loading>
+            <ResendPage />
+          </Loading>
+        ),
+        handle: { title: "Send a new link" } satisfies RouteHandle,
+      },
+      {
+        path: "verify",
+        element: (
+          <Loading>
+            <VerifyPage />
+          </Loading>
+        ),
+        handle: { title: "Confirm your address" } satisfies RouteHandle,
+      },
+      {
+        path: "login",
+        element: (
+          <Loading>
+            <LoginPage />
+          </Loading>
+        ),
+        handle: { title: "Log in" } satisfies RouteHandle,
       },
       {
         path: "catalog",

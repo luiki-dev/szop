@@ -9,6 +9,8 @@ const allowed = new Set([
   "POST /api/auth/sign-in/anonymous",
   "GET /api/auth/get-session",
   "POST /api/auth/sign-out",
+  "POST /api/auth/sign-up/email",
+  "GET /api/auth/verify-email",
 ]);
 
 // Better Auth's own endpoints under /api/auth/*, handed the request as a

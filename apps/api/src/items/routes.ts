@@ -27,7 +27,7 @@ export function itemsRoutes(
   app: FastifyInstance,
   { db, auth }: ItemsRoutesOptions,
 ): void {
-  app.addHook("preHandler", sessionHook(auth));
+  app.addHook("preHandler", sessionHook(auth, db));
   const typed = app.withTypeProvider<ZodTypeProvider>();
 
   typed.post(

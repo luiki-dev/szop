@@ -25,6 +25,8 @@ This page describes the design system, not the screens: each phase designs the s
   - [Forms and focus](#forms-and-focus)
   - [The selection bar](#the-selection-bar)
   - [The title field](#the-title-field)
+  - [The registration pages](#the-registration-pages)
+  - [The account box](#the-account-box)
   - [The peeking raccoon](#the-peeking-raccoon)
   - [Writing](#writing)
 - [7. How a phase designs its screens](#7-how-a-phase-designs-its-screens)
@@ -129,7 +131,7 @@ Every screen puts its fixed parts at the same place, so moving between pages nev
 - **The title** is Gabarito 800, 20 px on a phone and 24 px from `lg`, cut with "…". A list's name field looks the same at rest and starts its text where the title does.
 - **The right end of the row** holds the screen's actions: from `lg`, the main action ("New list"); in a list, ⋮ and, on a phone only, the raccoon tile (48 px, the size of the sidebar's), 12 px apart. From `lg` the sidebar shows the tile, so a list's header does not repeat it.
 - **On a phone, the main action** fills a bar fixed to the bottom of the screen, 16 px from each side and 12 px from the bottom, as on the [navigation mockup](visual-design/navigation.png); the content leaves room below it so the bar never covers the last row.
-- **The content** starts 16 px below the row, in a column at most 720 px wide. The page always keeps the scrollbar's gutter (`scrollbar-gutter: stable`), so a long page does not shift the centered column sideways.
+- **The content** starts 16 px below the row, in a column at most 720 px wide. The page always keeps the scrollbar's gutter (`scrollbar-gutter: stable`), so a long page does not shift the centered column sideways. While a dialog or the menu is open, the page's background takes the backdrop's tint, since a backdrop cannot paint over the gutter ([#424](https://github.com/luiki-dev/szop/issues/424)).
 - **A page never draws its own title row.** It names its title and action in its route's `handle`, and the shell draws them; a list's screen asks for the list header (`header: "list"`). A new kind of header is added to the shell or beside the list header, never inside one page.
 
 ![Navigation: on a phone, the lists home with a ☰ menu and a "New list" button at the bottom; on a desktop, a permanent sidebar with the raccoon, Lists, Templates, Archive and the setup screens, next to the lists](visual-design/navigation.png)
@@ -252,6 +254,21 @@ The name of a list is one field, on the new list's screen and on the list's. **A
 ### The not-found pages
 
 A path that is not a page, and a list that cannot be opened, show one layout: the trash can (`brand/trash-can.svg`, about 200 px wide, centered, decorative), "Nothing here" as a bold heading, one line of what is wrong in `muted-foreground`, and an outline "Back to lists" button of the usual 48 px height. The trash can is a grey, old-style metal can lying on its side, its open end to the right and its lid leaning on its left, drawn in the raccoon's five colours in flat shapes, so it reads on the light and the dark page. It was traced from the owner's image ([ADR 0066](../decisions/0066-managing-lists-phase-details.md), "Settled while building"); the earlier sketch `visual-design/not-found-trash-can.svg` is superseded.
+
+### The registration pages
+
+`/register`, `/register/sent` and `/register/resend` are pages in the shell, each a `card` of the page's `rounded-surface` shape, 400 px wide at most and centered on a desktop, with 16 px of padding and 12 px between its parts. The approved mockup is [`ph-18b-journey-v5.html`](visual-design/ph-18b-journey-v5.html) ([PH-18b](../superpowers/specs/2026-11-20-PH-18b-registration-design.md#the-screens)); the text of each screen is there. What the form style adds to [Forms and focus](#forms-and-focus):
+
+- **A field** has its label above it (14 px, weight 600), a 48 px high input with a 2 px `input` border and the 12 px control radius, and the sage focus ring. Its hint (12 px, `muted-foreground`) sits under it; its error replaces the hint's place in the same spot, in `destructive`, weight 600, and turns the border `destructive` (`aria-invalid`). The error appears when the field is left and on submit, and goes when the field is valid again.
+- **A password field** has "Show" inside its right edge, in `link`, weight 600; it reads "Hide" while the password shows. Each has its own accessible name ("Show password", "Show repeat password").
+- **The checkbox "Keep this browser's lists"** is a 24 px square with the 8 px radius, `primary` with a check mark when ticked, and its hint beside it. It shows only when the guest has a workspace. It is not the round checkbox of the list's items: it states a choice in a form, as the mockup draws it.
+- **Buttons** are the usual 48 px ones: "Create account", "Send link" as the primary, "Cancel" as the outline button below it. A line under the card, centered and 14 px, holds the other way out ("Already have an account? Log in", "Nothing arrived? Send the link again"), its link in `link`, underlined.
+- **A failure that is not a field's** is one line in `destructive` above the buttons, announced as an alert.
+- **The mailbox** (`brand/mailbox.svg`, the raccoon diving into a mailbox, about 200 px wide, centered, decorative) heads `/register/sent`, as the trash can heads the not-found pages. The hourglass and the broken link of the verification pages follow the same rule.
+
+### The account box
+
+The menu's `AccountBox` (`shell/account-box.tsx`) sits at the bottom of the menu, above the API status, in the phone's drawer and the desktop's sidebar alike ([`ph-18b-journey-v5.html`](visual-design/ph-18b-journey-v5.html)). It is a `muted` box of the `rounded-surface` shape with 12 px of padding. **A guest** (no session, or an anonymous one) sees "Keep your lists on every device.", "Log in" as the main button, and "No account? Create account" below it, the link in `link`, underlined. On `/login` and on `/register` the page's own entry takes the current-page look of the menu (`accent` with `accent-foreground`) and `aria-current="page"`; the other entry stays as it was, since switching is useful. **An account** sees its name (bold) and its email under it (12 px, `muted-foreground`); "Log out" comes with [PH-18c](../roadmap.md). The session is `useSession` (`shell/use-session.ts`), the query `["session"]` the registration page reads too; the verify page's `resetQueries()` refreshes it, so the box shows the account with no reload.
 
 ### The peeking raccoon
 

@@ -1,8 +1,15 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { passwordLimits, uuidv7 } from "@szop/shared";
 import { anonymous } from "better-auth/plugins";
+import type { FastifyBaseLogger } from "fastify";
 import type { Database } from "../db/database.ts";
 import * as schema from "../db/schema.ts";
+import { sendInBackground } from "../email/background.ts";
+import type { EmailSender } from "../email/sender.ts";
+import { existingAccountEmail, verificationEmail } from "../email/templates.ts";
+import { beforeVerification, verifyAfter } from "./verify.ts";
+import { registeringGuest, signUpAfter, signUpBefore } from "./sign-up.ts";
 
 const day = 24 * 60 * 60;
 
@@ -18,7 +25,14 @@ export function createAuth(options: {
   // The API's TRUSTED_PROXIES, so the rate limiter resolves the client IP
   // from X-Forwarded-For as the API does (ADR 0057).
   trustedProxies?: string[];
+  email: EmailSender;
+  // Better Auth's own lines go here, with their message only (ADR 0078,
+  // decision 5).
+  log: FastifyBaseLogger;
+  // Asks the breach service; the global fetch when left out, a fake in tests.
+  breachFetch?: typeof fetch;
 }) {
+  const { email, log } = options;
   const https = options.origin.startsWith("https:");
   return betterAuth({
     secret: options.secret,
@@ -33,7 +47,6 @@ export function createAuth(options: {
         verifications: schema.verifications,
       },
     }),
-    user: { modelName: "users" },
     session: { modelName: "sessions", expiresIn: 30 * day, updateAge: day },
     account: { modelName: "accounts" },
     verification: { modelName: "verifications" },
@@ -56,7 +69,117 @@ export function createAuth(options: {
       enabled: true,
       customRules: { "/sign-in/anonymous": { window: 60 * 60, max: 30 } },
     },
-    plugins: [anonymous()],
+    emailAndPassword: {
+      enabled: true,
+      requireEmailVerification: true,
+      minPasswordLength: passwordLimits.min,
+      maxPasswordLength: passwordLimits.max,
+      autoSignIn: false,
+      // A real user's ID is a UUIDv7 from the database; Better Auth's own
+      // would be a v4 and tell an existing address from a new one (ACC-2.5).
+      customSyntheticUser: ({ coreFields, additionalFields }) => ({
+        ...coreFields,
+        ...additionalFields,
+        id: uuidv7(),
+      }),
+      onExistingUserSignUp: ({ user }) => {
+        sendInBackground(
+          email,
+          {
+            to: user.email,
+            ...existingAccountEmail(`${options.origin}/login`),
+          },
+          "existing-account",
+          log,
+        );
+        return Promise.resolve();
+      },
+    },
+    emailVerification: {
+      expiresIn: day,
+      sendOnSignUp: true,
+      autoSignInAfterVerification: true,
+      beforeEmailVerification: beforeVerification(options.db),
+      sendVerificationEmail: ({ user, token }) => {
+        sendInBackground(
+          email,
+          {
+            to: user.email,
+            ...verificationEmail(
+              `${options.origin}/verify?token=${encodeURIComponent(token)}`,
+            ),
+          },
+          "verification",
+          log,
+        );
+        return Promise.resolve();
+      },
+    },
+    user: {
+      modelName: "users",
+      // Never returned: an answer carrying the registering guest would tell a
+      // new address from an existing one (ACC-2.5).
+      additionalFields: {
+        registeredByGuest: {
+          type: "string",
+          required: false,
+          input: false,
+          returned: false,
+        },
+        keepGuestData: {
+          type: "boolean",
+          required: false,
+          input: true,
+          returned: false,
+        },
+        convertedAt: {
+          type: "date",
+          required: false,
+          input: false,
+          returned: false,
+        },
+      },
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user, ctx) => {
+            if (ctx?.path !== "/sign-up/email") return;
+            const guest = await registeringGuest(options.db, ctx);
+            return guest
+              ? { data: { ...user, registeredByGuest: guest } }
+              : undefined;
+          },
+        },
+      },
+    },
+    hooks: {
+      before: signUpBefore(options.db, log, options.breachFetch),
+      after: signUpAfter,
+    },
+    // Message only: the arguments can hold an address or a database error
+    // quoting one. "info" is off since its sign-up line holds the address.
+    logger: {
+      level: "warn",
+      log: (level, message) => {
+        log[level](message);
+      },
+    },
+    plugins: [
+      anonymous({ disableDeleteAnonymousUser: true }),
+      // Its own plugin, since `hooks.after` above holds only one hook.
+      {
+        id: "verify-answer",
+        hooks: {
+          after: [
+            {
+              matcher: (ctx) => ctx.path === "/verify-email",
+              handler: verifyAfter,
+            },
+          ],
+        },
+      },
+    ],
   });
 }
 

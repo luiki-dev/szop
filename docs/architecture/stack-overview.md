@@ -38,6 +38,7 @@ A learning-oriented tour of the technologies behind Szop: what each piece is, wh
 - [23. Releases: versions, release PRs and tags](#23-releases-versions-release-prs-and-tags)
 - [24. Claude Code in a Docker Sandbox](#24-claude-code-in-a-docker-sandbox)
 - [25. Sending email](#25-sending-email)
+- [26. Checking passwords against leaks](#26-checking-passwords-against-leaks)
 
 ## 1. The big picture
 
@@ -199,6 +200,7 @@ Since [PH-15a](../roadmap.md#ph-15a-seed-catalog-read-only) Zod does three more 
 - The browser attaches the cookie to every request to our domain automatically. The server looks the session up and knows who is asking. Logging out, or revoking a session, simply deletes the row.
 - **Anonymous users** are real users with a flag: they get a session and a workspace without email or password, until they register.
 - **As built in PH-16a:** Better Auth's **anonymous plugin** creates the user on a `POST /api/auth/sign-in/anonymous`. The session lasts 30 days with **sliding expiration**: a request after more than a day moves the expiry 30 days ahead again, and the API forwards the fresh cookie, so a guest who only reads keeps the session. Our `sessionHook` asks Better Auth who the cookie belongs to; a deleted or expired row means no user. See [Better Auth](../development/tools/better-auth.md).
+- **A signed token for the emailed link (PH-18b).** The verification link carries a **JSON Web Token (JWT)**: the address and the user's ID, signed with the server's secret and given an expiry (24 hours). The server stores nothing for it: it checks the signature and the expiry when the link is opened, so only the server could have made it and nobody can change the address inside it. A second use of the link finds the account verified and answers `verified: false` instead of an error.
 
 ## 11. The monorepo
 
@@ -498,7 +500,7 @@ Claude Code writes much of Szop, and on WSL it runs with the owner's rights, nex
 
 ## 25. Sending email
 
-Szop sends **transactional email**: messages one user's action triggers and only that user receives, such as a link to verify an address or reset a password, as opposed to newsletters or marketing. [PH-18a](../roadmap.md#ph-18a-sending-email) builds the way to send it, and [PH-18b](../roadmap.md#ph-18b-registration-and-login) its first real emails ([ADR 0078](../decisions/0078-sending-email-phase-details.md)).
+Szop sends **transactional email**: messages one user's action triggers and only that user receives, such as a link to verify an address or reset a password, as opposed to newsletters or marketing. [PH-18a](../roadmap.md#ph-18a-sending-email) builds the way to send it, and [PH-18b](../roadmap.md#ph-18b-registration) its first real emails ([ADR 0078](../decisions/0078-sending-email-phase-details.md)).
 
 - **SMTP** (Simple Mail Transfer Protocol) is the protocol mail servers hand messages to each other with: the client connects, names the sender and the recipients (the *envelope*), and sends the message. The message itself is **MIME** (Multipurpose Internet Mail Extensions): headers such as `From`, `To` and `Subject`, and a body that can hold several parts, here a plain-text one and an HTML one, so every mail program shows one of them.
 - **nodemailer** builds that MIME message from an object (`from`, `to`, `subject`, `text`, `html`) and hands it to a **transport**. Szop uses two: SMTP, to Mailpit, locally and in CI; and SES, which sends the same finished message through SES's HTTP API with the AWS SDK. The app's code is the same in both; only the settings (`EMAIL_TRANSPORT`) pick the transport.
@@ -506,3 +508,7 @@ Szop sends **transactional email**: messages one user's action triggers and only
 - **SES's sandbox.** Every new AWS account starts SES in a *sandbox*, in each region on its own: it delivers only to addresses and domains verified in the account, and at most 200 messages a day. Leaving it is a request to AWS (*Request production access* in SES's console) describing the use and how bounces and complaints are handled; AWS answers in about a day and may refuse. Szop's demo stays in the sandbox, so it sends only to addresses the owner verified, and a send to any other is refused with `MessageRejected`.
 - **No key in the app.** On AWS the SES transport signs its requests with the task role's temporary credentials, which ECS gives the container. The role may send raw email (`ses:SendRawEmail`) only with `noreply@szop.dzwoniec.com` as the sender, so even a compromised app cannot send as another address on the domain. SES signs every message with DKIM for `dzwoniec.com` ([Domains, DNS and email authentication](#domains-dns-and-email-authentication)), which aligns with the `szop.` subdomain under DMARC's relaxed alignment.
 - **Sending without waiting.** A send can take seconds or fail, and its timing would tell an attacker whether an address has an account. So the app never waits for it: it starts the send in the background and only logs a failure, without the address, and a lost email is sent again by the user's resend.
+
+## 26. Checking passwords against leaks
+
+At sign-up the API refuses a password that appears in known data leaks ([ACC-2](../requirements/ACC-accounts-and-guest-mode.md#acc-2)). It asks **Have I Been Pwned's** range API, which holds billions of leaked passwords, without telling it the password: the API hashes the password with SHA-1 and sends only the first 5 characters of the hash. The service answers with every hash suffix it holds that starts with those 5 characters, each with a count, and the API looks for its own suffix in that list. This is **k-anonymity**: the service sees a prefix shared by many passwords, so it cannot tell which one was meant. The request carries `Add-Padding: true`, so the list always has about the same size, and padding lines have a count of 0 and are no match. When the service is down or slower than 3 seconds, the password is accepted and one warning is logged, so a stranger's outage never stops anyone registering.

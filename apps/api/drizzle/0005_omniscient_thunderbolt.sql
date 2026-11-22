@@ -1,0 +1,1 @@
+CREATE INDEX "users_registered_by_guest_idx" ON "users" USING btree ("registered_by_guest");

@@ -44,7 +44,7 @@ export function listsRoutes(
 ): void {
   // The lists plugin adds the hook to its own routes only; the catalog plugin
   // does the same for its route (ACC-1.3).
-  app.addHook("preHandler", sessionHook(auth));
+  app.addHook("preHandler", sessionHook(auth, db));
   const typed = app.withTypeProvider<ZodTypeProvider>();
 
   typed.get(
@@ -53,7 +53,10 @@ export function listsRoutes(
     { schema: { response: { 200: listsResponseSchema } } },
     async (request) => {
       const context = await findOwnWorkspace(db, request.user);
-      return { lists: context ? await listLists(db, context) : [] };
+      return {
+        lists: context ? await listLists(db, context) : [],
+        hasWorkspace: context !== null,
+      };
     },
   );
 
