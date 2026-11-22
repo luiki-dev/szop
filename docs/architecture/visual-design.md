@@ -25,6 +25,7 @@ This page describes the design system, not the screens: each phase designs the s
   - [Forms and focus](#forms-and-focus)
   - [The selection bar](#the-selection-bar)
   - [The title field](#the-title-field)
+  - [The registration pages](#the-registration-pages)
   - [The peeking raccoon](#the-peeking-raccoon)
   - [Writing](#writing)
 - [7. How a phase designs its screens](#7-how-a-phase-designs-its-screens)
@@ -252,6 +253,17 @@ The name of a list is one field, on the new list's screen and on the list's. **A
 ### The not-found pages
 
 A path that is not a page, and a list that cannot be opened, show one layout: the trash can (`brand/trash-can.svg`, about 200 px wide, centered, decorative), "Nothing here" as a bold heading, one line of what is wrong in `muted-foreground`, and an outline "Back to lists" button of the usual 48 px height. The trash can is a grey, old-style metal can lying on its side, its open end to the right and its lid leaning on its left, drawn in the raccoon's five colours in flat shapes, so it reads on the light and the dark page. It was traced from the owner's image ([ADR 0066](../decisions/0066-managing-lists-phase-details.md), "Settled while building"); the earlier sketch `visual-design/not-found-trash-can.svg` is superseded.
+
+### The registration pages
+
+`/register`, `/register/sent` and `/register/resend` are pages in the shell, each a `card` of the page's `rounded-surface` shape, 400 px wide at most and centered on a desktop, with 16 px of padding and 12 px between its parts. The approved mockup is [`ph-18b-journey-v5.html`](visual-design/ph-18b-journey-v5.html) ([PH-18b](../superpowers/specs/2026-11-20-PH-18b-registration-design.md#the-screens)); the text of each screen is there. What the form style adds to [Forms and focus](#forms-and-focus):
+
+- **A field** has its label above it (14 px, weight 600), a 48 px high input with a 2 px `input` border and the 12 px control radius, and the sage focus ring. Its hint (12 px, `muted-foreground`) sits under it; its error replaces the hint's place in the same spot, in `destructive`, weight 600, and turns the border `destructive` (`aria-invalid`). The error appears when the field is left and on submit, and goes when the field is valid again.
+- **A password field** has "Show" inside its right edge, in `link`, weight 600; it reads "Hide" while the password shows. Each has its own accessible name ("Show password", "Show repeat password").
+- **The checkbox "Keep this browser's lists"** is a 24 px square with the 8 px radius, `primary` with a check mark when ticked, and its hint beside it. It shows only when the guest has a workspace. It is not the round checkbox of the list's items: it states a choice in a form, as the mockup draws it.
+- **Buttons** are the usual 48 px ones: "Create account", "Send link" as the primary, "Cancel" as the outline button below it. A line under the card, centered and 14 px, holds the other way out ("Already have an account? Log in", "Nothing arrived? Send the link again"), its link in `link`, underlined.
+- **A failure that is not a field's** is one line in `destructive` above the buttons, announced as an alert.
+- **The mailbox** (`brand/mailbox.svg`, the raccoon diving into a mailbox, about 200 px wide, centered, decorative) heads `/register/sent`, as the trash can heads the not-found pages. The hourglass and the broken link of the verification pages follow the same rule.
 
 ### The peeking raccoon
 

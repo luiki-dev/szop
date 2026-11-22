@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   apiErrorSchema,
   catalogSchema,
@@ -29,7 +30,7 @@ export const timeoutMessage = "The server didn't answer in time.";
 // A signal that aborts with our own error after the limit, so fetch rejects
 // with it as it is. Not AbortSignal.timeout: Vitest's fake timers do not
 // drive it.
-function deadline(): AbortSignal {
+export function deadline(): AbortSignal {
   const controller = new AbortController();
   setTimeout(() => {
     controller.abort(new Error(timeoutMessage));
@@ -72,13 +73,15 @@ export async function getCatalog(): Promise<Catalog> {
 }
 
 // A failed request to the lists API; the status lets a page tell "not found"
-// from "unreachable".
+// from "unreachable", and the code, when the body had one, tells a refusal.
 export class ApiRequestError extends Error {
   readonly status: number;
-  constructor(message: string, status: number) {
+  readonly code: string | undefined;
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.name = "ApiRequestError";
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -97,7 +100,7 @@ const json = { "content-type": "application/json" };
 // The API refuses writes that are not JSON, so every write with a body sends
 // the header. A DELETE has no body and must not claim one: Fastify answers 400
 // to JSON with nothing in it.
-function send(
+export function send(
   method: "POST" | "PATCH" | "DELETE",
   path: string,
   body: unknown,
@@ -113,20 +116,28 @@ function send(
       });
 }
 
-// The body of a response that is not the answer: the API's message when it
-// sent one, else only the status.
-async function failure(
+// The body of a response that is not the answer: the API's message and code
+// when it sent them, in the app's shape ({ error: { code, message } }) or in
+// Better Auth's ({ code, message }); else only the status.
+export async function failure(
   method: string,
   path: string,
   response: Response,
 ): Promise<ApiRequestError> {
   const body: unknown = await response.json().catch(unreadable);
   const error = apiErrorSchema.safeParse(body);
+  const flat = z
+    .object({ code: z.string(), message: z.string() })
+    .safeParse(body);
+  const found = error.success
+    ? error.data.error
+    : flat.success
+      ? flat.data
+      : null;
   return new ApiRequestError(
-    error.success
-      ? error.data.error.message
-      : `${method} ${path} answered ${String(response.status)}`,
+    found?.message ?? `${method} ${path} answered ${String(response.status)}`,
     response.status,
+    found?.code,
   );
 }
 

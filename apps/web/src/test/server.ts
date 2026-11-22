@@ -16,6 +16,8 @@ export const server = setupServer(
   http.get("/api/health", () => HttpResponse.json(healthyBody)),
   // The home screen asks for the lists; a test that cares overrides this.
   http.get("/api/lists", () => HttpResponse.json({ lists: [] })),
+  // The registration pages ask whether an account is signed in already.
+  http.get("/api/auth/get-session", () => HttpResponse.json(null)),
   // A list's screen asks for the catalog too.
   http.get("/api/catalog", () => HttpResponse.json(smallCatalog)),
 );

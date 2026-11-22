@@ -52,4 +52,5 @@ export {
   displayNameSchema,
   passwordLimits,
   registrationSchema,
+  type Registration,
 } from "./accounts.ts";

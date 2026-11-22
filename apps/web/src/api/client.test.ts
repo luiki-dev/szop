@@ -678,3 +678,36 @@ describe("the item requests", () => {
     ).rejects.toThrow("The item came in a shape this page does not know");
   });
 });
+
+describe("ApiRequestError.code", () => {
+  it("is read from the app's error shape and from Better Auth's", async () => {
+    server.use(
+      http.get("/api/lists", () =>
+        HttpResponse.json(
+          { error: { code: "guest_converted", message: "Converted." } },
+          { status: 401 },
+        ),
+      ),
+    );
+    await expect(getLists()).rejects.toMatchObject({
+      status: 401,
+      code: "guest_converted",
+      message: "Converted.",
+    });
+
+    server.use(
+      http.get("/api/lists", () =>
+        HttpResponse.json(
+          { code: "INVALID_TOKEN", message: "Bad." },
+          { status: 400 },
+        ),
+      ),
+    );
+    await expect(getLists()).rejects.toMatchObject({ code: "INVALID_TOKEN" });
+
+    server.use(
+      http.get("/api/lists", () => new HttpResponse(null, { status: 500 })),
+    );
+    await expect(getLists()).rejects.toMatchObject({ code: undefined });
+  });
+});

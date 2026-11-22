@@ -26,3 +26,5 @@ export const registrationSchema = z.object({
     }),
   keepGuestData: z.boolean().optional(),
 });
+
+export type Registration = z.infer<typeof registrationSchema>;

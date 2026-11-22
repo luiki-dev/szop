@@ -8,7 +8,7 @@ const notSaved = "Check your connection and try again.";
 
 // A failure: the destructive color and a warning icon, announced at once
 // (APP-3.4). Base UI reads a high-priority toast out in a role="alert" copy.
-function showError(description: string): void {
+export function showError(description: string): void {
   toastManager.add({ type: "error", priority: "high", description });
 }
 

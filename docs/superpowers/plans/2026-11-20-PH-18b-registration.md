@@ -230,9 +230,9 @@
 - `registered-address.ts`: `saveRegisteredAddress(email)`, `registeredAddress(): string | null`, `forgetRegisteredAddress()`, one `localStorage` key.
 - The pages are one lazy chunk, like `ListPage` in `routes.tsx`; Task 7 adds its pages to the same chunk.
 
-- [ ] **Step 1: Component tests**, one per state of the mockup: `/register` — the four fields with Show, errors on leaving a field and on submit, `password_breached` shown under Password; `ACC-2.7: the checkbox shows, ticked, with the list count when hasWorkspace` and `is hidden without a workspace and keepGuestData: true is sent`; Cancel back to the previous page, or Lists; `with an account's session, goes to Lists` (Review Focus 5). `/register/sent` — the saved address, "Back to my lists", "Wrong address? Start again" keeping the name, "Send the link again" sending at once with a toast. `/register/resend` — "Send link" then `/register/sent` with that address, whatever the answer. Run → FAIL.
-- [ ] **Step 2: Implement** with the design system's form style and `registrationSchema`. Run → PASS; check the entry chunk's size with `pnpm build` against NFR-3.1's budget; `pnpm check` → PASS.
-- [ ] **Step 3:** the docs; commit `feat(web): the registration pages`; push.
+- [x] **Step 1: Component tests**, one per state of the mockup: `/register` — the four fields with Show, errors on leaving a field and on submit, `password_breached` shown under Password; `ACC-2.7: the checkbox shows, ticked, with the list count when hasWorkspace` and `is hidden without a workspace and keepGuestData: true is sent`; Cancel back to the previous page, or Lists; `with an account's session, goes to Lists` (Review Focus 5). `/register/sent` — the saved address, "Back to my lists", "Wrong address? Start again" keeping the name, "Send the link again" sending at once with a toast. `/register/resend` — "Send link" then `/register/sent` with that address, whatever the answer. Run → FAIL.
+- [x] **Step 2: Implement** with the design system's form style and `registrationSchema`. Run → PASS; check the entry chunk's size with `pnpm build` against NFR-3.1's budget; `pnpm check` → PASS.
+- [x] **Step 3:** the docs; commit `feat(web): the registration pages`; push.
 
 ### Task 7: The verify page and the login placeholder
 
