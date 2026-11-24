@@ -49,16 +49,21 @@ jq -s '
   >"$claude/settings.json.new"
 mv "$claude/settings.json.new" "$claude/settings.json"
 
-step "the plugins"
-add_marketplace() {
-  claude plugin marketplace list 2>/dev/null | grep -q "$1" ||
-    claude plugin marketplace add "$2"
-}
-add_marketplace claude-plugins-official anthropics/claude-plugins-official
-add_marketplace ponytail DietrichGebert/ponytail
-for p in superpowers@claude-plugins-official typescript-lsp@claude-plugins-official ponytail@ponytail; do
-  claude plugin install "$p"
-done
+step "the plugins: the marketplaces and enabled plugins of the merged settings"
+# The owner's settings list them, kept by the backup, so a new sandbox gets
+# the plugins the last one ended with.
+jq -r '.extraKnownMarketplaces // {} | to_entries[]
+  | if .value.source.source == "github" then "\(.key) \(.value.source.repo)"
+    else "skip \(.key)" end' "$claude/settings.json" |
+  while read -r name repo; do
+    if [[ "$name" == skip ]]; then
+      step "skipping the marketplace $repo: only GitHub sources are added"
+    elif ! claude plugin marketplace list 2>/dev/null | grep -q "$name"; then
+      claude plugin marketplace add "$repo" </dev/null
+    fi
+  done
+jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$claude/settings.json" |
+  while read -r p; do claude plugin install "$p" </dev/null; done
 
 # A project's layer adds its own setup here (Szop's clones its repository):
 # run last, with the token, the network and Docker all there.
