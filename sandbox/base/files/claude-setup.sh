@@ -52,18 +52,19 @@ mv "$claude/settings.json.new" "$claude/settings.json"
 step "the plugins: the marketplaces and enabled plugins of the merged settings"
 # The owner's settings list them, kept by the backup, so a new sandbox gets
 # the plugins the last one ended with.
+# A failed entry is reported, not fatal, so the project's setup below still runs.
 jq -r '.extraKnownMarketplaces // {} | to_entries[]
-  | if .value.source.source == "github" then "\(.key) \(.value.source.repo)"
-    else "skip \(.key)" end' "$claude/settings.json" |
-  while read -r name repo; do
-    if [[ "$name" == skip ]]; then
-      step "skipping the marketplace $repo: only GitHub sources are added"
-    elif ! claude plugin marketplace list 2>/dev/null | grep -q "$name"; then
-      claude plugin marketplace add "$repo" </dev/null
+  | "\(.key) \(.value.source.source) \(.value.source.repo // "")"' "$claude/settings.json" |
+  while read -r name source repo; do
+    if [[ "$source" != github ]]; then
+      step "skipping the marketplace $name: only GitHub sources are added"
+    elif ! claude plugin marketplace list --json </dev/null |
+      jq -e --arg n "$name" 'any(.[]; .name == $n)' >/dev/null; then
+      claude plugin marketplace add "$repo" </dev/null || step "could not add the marketplace $name"
     fi
   done
 jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "$claude/settings.json" |
-  while read -r p; do claude plugin install "$p" </dev/null; done
+  while read -r p; do claude plugin install "$p" </dev/null || step "could not install $p"; done
 
 # A project's layer adds its own setup here (Szop's clones its repository):
 # run last, with the token, the network and Docker all there.

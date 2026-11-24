@@ -233,7 +233,7 @@ In ways 2 and 3, `claude -c` continues the last session.
 
 ### Ports
 
-`sbx env create` publishes the ports of the environment files on Windows' `localhost`: 61935 (superpowers' visual companion), 5173 (the dev server), 8443 and 8082 (the production-like environment), 8025 (Mailpit's web UI, [Mailpit](../development/tools/mailpit.md)). In the sandbox:
+`sbx env create` publishes the ports of the environment files on Windows' `localhost`: 61935 (superpowers' visual companion), 5173 (the dev server), 8443 and 8082 (the production-like environment), 8025 ([Mailpit](../development/tools/mailpit.md)'s web UI). In the sandbox:
 
 ```bash
 pnpm --filter @szop/api dev                         # terminal 1
@@ -274,7 +274,7 @@ Raise the layer's `version` in its descriptor with every change. The owner's own
 ### The procedure
 
 1. **The branch.** Make the change on a branch, push it, and open the PR. Its `kits` job builds the layers. Trying it by hand in `szop` first is fine; it is lost at the next rebuild.
-2. **Free the host for the test sandbox.** Both sandboxes publish the same ports on Windows' `localhost` (61935, 5173, 8443, 8082, 8025), and each takes 12 CPUs and `12g` of memory, so the host needs 24 CPUs and 24 GB free for both. In `szop`: push every branch, end Claude's session (`/exit`) so its backup is pushed, then stop it:
+2. **Free the host for the test sandbox.** Both sandboxes publish the same ports on Windows' `localhost` (61935, 5173, 8443, 8082, 8025), and each takes 12 CPUs and `12g` of memory, so `szop` is stopped first. In `szop`: push every branch, end Claude's session (`/exit`) so its backup is pushed, then stop it:
 
    WSL:
 
