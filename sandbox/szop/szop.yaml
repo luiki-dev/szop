@@ -8,7 +8,7 @@ kind: mixin
 displayName: Szop
 description: The tools and the repository for working on Szop
 sourceUrl: https://github.com/luiki-dev/szop/tree/main/sandbox/szop
-version: "0.2.0"
+version: "0.3.0"
 
 capabilities:
   - type: com.docker.sandbox/network-policy@1
@@ -17,6 +17,12 @@ capabilities:
         allow:
           # Playwright's browsers; its other CDNs are in balanced.
           - playwright.download.prss.microsoft.com:443
+          # terraform init: the registry, and the releases its providers download from.
+          - registry.terraform.io:443
+          - releases.hashicorp.com:443
+          # The demo's address, for checks against the demo.
+          - szop.dzwoniec.com:443
+          - szop.dzwoniec.com:80
 
   - type: com.docker.sandbox/lifecycle@1
     config:
