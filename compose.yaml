@@ -131,7 +131,7 @@ services:
   # turn (compose/nginx-scale.conf).
   nginx:
     profiles: [scale]
-    image: nginx:1.31.7-alpine
+    image: nginx:1.31.8-alpine
     depends_on:
       app-a:
         condition: service_healthy
@@ -247,7 +247,7 @@ services:
   # listeners (compose/nginx-prodlike.conf).
   nginx-prodlike:
     profiles: [prodlike]
-    image: nginx:1.31.7-alpine
+    image: nginx:1.31.8-alpine
     depends_on:
       app-prodlike:
         condition: service_healthy
