@@ -3,7 +3,7 @@
 
 # One pin for every stage. Dependabot bumps the digest; Node's major changes
 # on purpose, with .nvmrc and engines (audit m13).
-FROM node:24-trixie-slim@sha256:173f125896c3b47ddf056734c7ea789d04595a6a08769a8f78e0df642781fb66 AS base
+FROM node:24-trixie-slim@sha256:af02d57b57719b9657a45199a79264a9437940cd55b3c7b3fc99615654f124a0 AS base
 WORKDIR /app
 # pnpm through Corepack, at the version of packageManager in package.json.
 # Only the shims: pnpm itself is downloaded in the manifests stage.
