@@ -10,8 +10,7 @@ services:
     ports: !override
       - "0.0.0.0:8443:8443"
       - "0.0.0.0:8082:8080"
-  # Mailpit's UI, for `sbx ports szop --publish 8025:8025`. SMTP stays on
-  # 127.0.0.1.
+  # Mailpit's UI, published by szop.sbxenv.yaml. SMTP stays on 127.0.0.1.
   mailpit:
     ports: !override
       - "127.0.0.1:1025:1025"

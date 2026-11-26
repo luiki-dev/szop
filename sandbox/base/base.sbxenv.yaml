@@ -21,5 +21,6 @@ ports:
   - sandbox: 61935
     host: 61935
 sandboxOptions:
-  cpus: 8
-  memory: "8g"
+  # Raised from 8 and 8g: Stryker's mutation runs brought the sandbox down several times.
+  cpus: 12
+  memory: "12g"

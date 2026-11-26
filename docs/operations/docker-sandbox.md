@@ -233,16 +233,14 @@ In ways 2 and 3, `claude -c` continues the last session.
 
 ### Ports
 
-`sbx env create` publishes the ports of the environment files on Windows' `localhost`: 61935 (superpowers' visual companion), 5173 (the dev server), 8443 and 8082 (the production-like environment). In the sandbox:
+`sbx env create` publishes the ports of the environment files on Windows' `localhost`: 61935 (superpowers' visual companion), 5173 (the dev server), 8443 and 8082 (the production-like environment), 8025 ([Mailpit](../development/tools/mailpit.md)'s web UI). In the sandbox:
 
 ```bash
 pnpm --filter @szop/api dev                         # terminal 1
 pnpm --filter @szop/web dev --host 0.0.0.0          # terminal 2, then http://localhost:5173 on Windows
 COMPOSE_FILE=compose.yaml:compose.sandbox.yaml pnpm check:prodlike --keep    # then https://localhost:8443
-COMPOSE_FILE=compose.yaml:compose.sandbox.yaml pnpm db:up    # Mailpit's UI on 0.0.0.0:8025
+COMPOSE_FILE=compose.yaml:compose.sandbox.yaml pnpm db:up    # then http://localhost:8025 (Mailpit's UI)
 ```
-
-Mailpit's UI is not among the environment files' ports: publish it once with WSL `sbx.exe ports szop --publish 8025:8025`, PowerShell `sbx ports szop --publish 8025:8025`, then open <http://localhost:8025> on Windows ([Mailpit](../development/tools/mailpit.md)).
 
 Another port for a while, such as a report's server: WSL `sbx.exe ports szop --publish 9000:9000`, PowerShell `sbx ports szop --publish 9000:9000`; `--unpublish 9000:9000` takes it away, `sbx ports szop` lists them. A service in the sandbox must listen on `0.0.0.0` for its port to reach Windows.
 
@@ -276,7 +274,7 @@ Raise the layer's `version` in its descriptor with every change. The owner's own
 ### The procedure
 
 1. **The branch.** Make the change on a branch, push it, and open the PR. Its `kits` job builds the layers. Trying it by hand in `szop` first is fine; it is lost at the next rebuild.
-2. **Free the host for the test sandbox.** Both sandboxes publish the same ports on Windows' `localhost` (61935, 5173, 8443, 8082), and each takes 8 CPUs and `8g` of memory. In `szop`: push every branch, end Claude's session (`/exit`) so its backup is pushed, then stop it:
+2. **Free the host for the test sandbox.** Both sandboxes publish the same ports on Windows' `localhost` (61935, 5173, 8443, 8082, 8025), and each takes 12 CPUs and `12g` of memory, so `szop` is stopped first. In `szop`: push every branch, end Claude's session (`/exit`) so its backup is pushed, then stop it:
 
    WSL:
 

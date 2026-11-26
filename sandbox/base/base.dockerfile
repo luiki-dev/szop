@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # The base layer's overlay (ADR 0076, decision 4). A mixin lands on a workload
 # it has never seen, so every tool is staged under /out in a build stage and
-# copied into scratch. Node, the AWS CLI and jq are self-contained releases,
+# copied into scratch. Node, the AWS CLI, jq and lazydocker are self-contained releases,
 # so they travel; nothing here is an apt package. The zone files are data
 # copied from tzdata, not the package, so they travel too.
 FROM debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2 AS build
@@ -9,19 +9,22 @@ ARG TARGETARCH
 ARG NODE_VERSION=24.22.3
 ARG AWSCLI_VERSION=2.40.3
 ARG JQ_VERSION=1.8.2
+ARG LAZYDOCKER_VERSION=0.25.2
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl unzip xz-utils tzdata
 WORKDIR /tmp/dl
 RUN set -eux; \
     case "$TARGETARCH" in \
-      amd64) node=x64; aws=x86_64; \
+      amd64) node=x64; aws=x86_64; lazydocker=x86_64; \
              aws_sum=4770c06c4ecfc8ba94b60d89e6c7018ab7ea2cf5341b1ef05f6f93c5d6e8b705; \
              node_sum=4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb; \
-             jq_sum=b1c22172dd303f3be49e935aa56aa48a8b7a46e0bc838b4997d3bb451495870f ;; \
-      arm64) node=arm64; aws=aarch64; \
+             jq_sum=b1c22172dd303f3be49e935aa56aa48a8b7a46e0bc838b4997d3bb451495870f; \
+             lazydocker_sum=0d9dbfc26068b218e7ed84b104748cadc6e3cf733c0afd35465306fb39b9523c ;; \
+      arm64) node=arm64; aws=aarch64; lazydocker=arm64; \
              aws_sum=4c5f080c6c294eb0da77734c4520f5b5089cf45a4ee757ca34ddf7f9e512e66a; \
              node_sum=6e51a2ada00f0011cc266f65d98922b403d7ad88f809ca2aa615a5fe1ce6e86c; \
-             jq_sum=8b85c817833814ddca00a144c33705546355afccf0cf39b188f3cdb48b852309 ;; \
+             jq_sum=8b85c817833814ddca00a144c33705546355afccf0cf39b188f3cdb48b852309; \
+             lazydocker_sum=005c38b685aaa557e7d646d83a3dadb5024340eeed8c6a2e1949eee6f530de23 ;; \
       *) echo "unsupported TARGETARCH: $TARGETARCH" >&2; exit 1 ;; \
     esac; \
     mkdir -p /out/usr/local/bin; \
@@ -41,6 +44,10 @@ RUN set -eux; \
     curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-${TARGETARCH}" -o jq; \
     echo "${jq_sum}  jq" | sha256sum -c -; \
     install -m 0755 jq /out/usr/local/bin/jq; \
+    # lazydocker: a terminal UI for the sandbox's Docker.
+    curl -fsSL "https://github.com/jesseduffield/lazydocker/releases/download/v${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION}_Linux_${lazydocker}.tar.gz" -o lazydocker.tar.gz; \
+    echo "${lazydocker_sum}  lazydocker.tar.gz" | sha256sum -c -; \
+    tar -xzf lazydocker.tar.gz -C /out/usr/local/bin --no-same-owner lazydocker; \
     for s in claude-setup claude-start check-sandbox; do \
       ln -s "/usr/local/share/claude-base/$s.sh" "/out/usr/local/bin/$s"; \
     done; \

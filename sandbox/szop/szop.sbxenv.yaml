@@ -17,3 +17,6 @@ ports:
     host: 8443
   - sandbox: 8082
     host: 8082
+  # Mailpit's web UI, where the local email lands (compose.yaml).
+  - sandbox: 8025
+    host: 8025
